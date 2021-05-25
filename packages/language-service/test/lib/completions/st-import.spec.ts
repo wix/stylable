@@ -1,6 +1,12 @@
 import { expect } from 'chai';
-import { createRange, ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
-import { Completion, topLevelDirectives } from '@stylable/language-service/dist/lib/completion-types';
+import {
+    createRange,
+    ProviderRange,
+} from '@stylable/language-service/dist/lib/completion-providers';
+import {
+    Completion,
+    topLevelDirectives,
+} from '@stylable/language-service/dist/lib/completion-types';
 import * as asserters from '../../test-kit/completions-asserters';
 import { getFormattingEdits } from '../../../test/test-kit/asserters';
 
@@ -16,6 +22,37 @@ describe('@st-import Directive', () => {
                     asserters.stImportDirectiveCompletion(createRange(0, 0, 0, i)),
                 ]);
             });
+        });
+
+        it('should complete css vars', () => {
+            const asserter = asserters.getCompletions('css-vars/import.st.css', '--');
+
+            asserter.suggested([
+                asserters.namedCompletion(
+                    '--x',
+                    createRange(0, 12, 0, 14),
+                    './css-vars.st.css',
+                    '--x'
+                ),
+                asserters.namedCompletion(
+                    '--x2',
+                    createRange(0, 12, 0, 14),
+                    './css-vars.st.css',
+                    '--x2'
+                ),
+                asserters.namedCompletion(
+                    '--y2',
+                    createRange(0, 12, 0, 14),
+                    './css-vars.st.css',
+                    'Global --y2'
+                ),
+                asserters.namedCompletion(
+                    '--y',
+                    createRange(0, 12, 0, 14),
+                    './css-vars.st.css',
+                    'Global --y'
+                ),
+            ]);
         });
 
         describe('should complete named parts from .st.css files ', () => {
@@ -185,5 +222,15 @@ describe('@st-import Directive', () => {
                 range: { start: { line: 0, character: 0 }, end: { line: 3, character: 31 } },
             },
         ]);
+    });
+
+    it('should not break on format statements when @st-import is not the first import', () => {
+        const res = getFormattingEdits(`.x {}
+
+@st-import Comp from "./stylesheet.st.css";
+
+.y {}`);
+
+        expect(res).to.eql([]);
     });
 });

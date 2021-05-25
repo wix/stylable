@@ -190,19 +190,24 @@ export class StylableTransformer {
             rule.selector = this.scopeRule(meta, rule);
         });
 
-        ast.walkAtRules(/media$/, (atRule) => {
-            atRule.params = evalDeclarationValue(
-                this.resolver,
-                atRule.params,
-                meta,
-                atRule,
-                variableOverride,
-                this.replaceValueHook,
-                this.diagnostics,
-                path.slice(),
-                undefined,
-                undefined
-            );
+        ast.walkAtRules((atRule) => {
+            const { name } = atRule;
+            if (name === 'media') {
+                atRule.params = evalDeclarationValue(
+                    this.resolver,
+                    atRule.params,
+                    meta,
+                    atRule,
+                    variableOverride,
+                    this.replaceValueHook,
+                    this.diagnostics,
+                    path.slice(),
+                    undefined,
+                    undefined
+                );
+            } else if (name === 'property') {
+                atRule.params = cssVarsMapping[atRule.params] ?? atRule.params;
+            }
         });
 
         ast.walkDecls((decl) => {
@@ -488,13 +493,8 @@ export class StylableTransformer {
         return outputAst;
     }
     private handleChunkNode(context: ScopeContext) {
-        const {
-            currentAnchor,
-            metaParts,
-            node,
-            originMeta,
-            transformGlobals,
-        } = context as Required<ScopeContext>;
+        const { currentAnchor, metaParts, node, originMeta, transformGlobals } =
+            context as Required<ScopeContext>;
         const { type, name } = node;
         if (type === 'class') {
             const resolved = metaParts.class[name] || [
@@ -719,10 +719,8 @@ export class StylableTransformer {
     private resolveMetaParts(meta: StylableMeta): MetaParts {
         let metaParts = this.metaParts.get(meta);
         if (!metaParts) {
-            const resolvedClasses: Record<
-                string,
-                Array<CSSResolve<ClassSymbol | ElementSymbol>>
-            > = {};
+            const resolvedClasses: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> =
+                {};
             for (const className of Object.keys(meta.classes)) {
                 resolvedClasses[className] = this.resolver.resolveExtends(
                     meta,
@@ -769,10 +767,8 @@ export class StylableTransformer {
                 );
             }
 
-            const resolvedElements: Record<
-                string,
-                Array<CSSResolve<ClassSymbol | ElementSymbol>>
-            > = {};
+            const resolvedElements: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> =
+                {};
             for (const k of Object.keys(meta.elements)) {
                 resolvedElements[k] = this.resolver.resolveExtends(meta, k, true);
             }
@@ -787,7 +783,7 @@ export class StylableTransformer {
             if (resolved.length > 1) {
                 meta.outputAst!.walkRules('.' + this.scope(className, meta.namespace), (rule) => {
                     const a = resolved[0];
-                    const b = resolved[1];
+                    const b = resolved[resolved.length - 1];
                     rule.after(
                         createWarningRule(
                             b.symbol.name,
@@ -855,9 +851,11 @@ function trimLeftSelectorAst(n: SelectorAstNode, i = 0) {
     }
 }
 
-function anyElementAnchor(
-    meta: StylableMeta
-): { type: 'class' | 'element'; name: string; resolved: Array<CSSResolve<ElementSymbol>> } {
+function anyElementAnchor(meta: StylableMeta): {
+    type: 'class' | 'element';
+    name: string;
+    resolved: Array<CSSResolve<ElementSymbol>>;
+} {
     return {
         type: 'element',
         name: '*',

@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { applyStylableForceStateSelectors } from '@stylable/webpack-extensions';
-import { safeParse } from '@stylable/core';
+import { cssParse } from '@stylable/core';
 
 describe('stylable-forcestates plugins', () => {
     it('basic native plugin support', () => {
-        const ast = safeParse(`.x.my-state:hover {}`);
+        const ast = cssParse(`.x.my-state:hover {}`);
 
         applyStylableForceStateSelectors(ast, {}, 'dfs-', (ctx) => ({
             ...ctx,

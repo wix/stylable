@@ -667,6 +667,23 @@ describe('diagnostics: warnings and errors', () => {
                     [{ message: processorWarnings.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
                 );
             });
+
+            it('should warn on invalid custom property rename', () => {
+                expectWarnings(
+                    `
+                    |:import{
+                        -st-from: "./a.st.css";
+                        -st-named: --x as z;
+                    }|
+                `,
+                    [
+                        {
+                            message: processorWarnings.INVALID_CUSTOM_PROPERTY_AS_VALUE('--x', 'z'),
+                            file: 'main.st.css',
+                        },
+                    ]
+                );
+            });
         });
 
         describe('-st-extends', () => {
@@ -683,9 +700,8 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                '-st-extends'
-                            ),
+                            message:
+                                processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'),
                             file: 'main.css',
                         },
                     ]

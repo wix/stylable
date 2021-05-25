@@ -1,0 +1,26 @@
+.root {}
+
+:import {
+    -st-from: './header.st.css';
+    -st-default: Header;
+}
+
+:global(html) {
+    background-color: rgb(37, 37, 38);
+    color: white;
+}
+
+.header {
+    -st-extends: Header;
+    margin-top: 10em;
+    text-align: center;
+}
+
+.header::title {
+    margin: 0;
+    font-size: 4em;
+}
+
+.header::anchor {
+    text-decoration-color: green;
+}

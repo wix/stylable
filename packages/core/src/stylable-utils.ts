@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
-import replaceRuleSelector from 'postcss-selector-matches/dist/replaceRuleSelector';
+import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
 import type {
     DeclStylableProps,

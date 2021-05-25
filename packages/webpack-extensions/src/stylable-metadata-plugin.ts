@@ -1,14 +1,16 @@
 import { findFiles } from '@stylable/node';
 import { dirname, join } from 'path';
 import type { Compilation, Compiler } from 'webpack';
-import { sources } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
 
-import { getCSSViewModules, isStylableModule, uniqueFilterMap } from '@stylable/webpack-plugin';
+import {
+    getCSSViewModuleWebpack,
+    getStylableModules,
+    isStylableModule,
+    uniqueFilterMap,
+} from '@stylable/webpack-plugin';
 import { hashContent } from './hash-content-util';
-
-const RawSource = sources.RawSource;
 
 export interface MetadataOptions {
     name: string;
@@ -64,9 +66,11 @@ export class StylableMetadataPlugin {
             this.options.name,
             this.options.version
         );
-
+        const getViewModule = getCSSViewModuleWebpack(compilation.moduleGraph);
+        const stylableModulesWithData = getStylableModules(compilation);
         for (const module of stylableModules) {
-            const namespace = module.buildMeta.stylable.namespace;
+            const namespace =
+                stylableModulesWithData?.get(module)?.namespace ?? module.buildMeta.namespace;
             const depth = module.buildMeta.stylable.depth;
             const resource = this.options.normalizeModulePath
                 ? this.options.normalizeModulePath(module.resource, builder)
@@ -78,7 +82,7 @@ export class StylableMetadataPlugin {
                 { namespace, depth }
             );
 
-            const component = getCSSViewModules(module, compilation.moduleGraph);
+            const component = getViewModule(module);
             if (!component || !component.context) {
                 continue;
             }
@@ -141,7 +145,10 @@ export class StylableMetadataPlugin {
                     ? `.${hashContent(fileContent, this.options.contentHashLength)}`
                     : ''
             }.metadata.json${!jsonMode ? '.js' : ''}`;
-            compilation.emitAsset(fileName, new RawSource(fileContent, false));
+            compilation.emitAsset(
+                fileName,
+                new compilation.compiler.webpack.sources.RawSource(fileContent, false)
+            );
         }
     }
 

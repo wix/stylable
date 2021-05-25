@@ -6,6 +6,8 @@ import type ts from 'typescript';
 import {
     ClassSymbol,
     CSSResolve,
+    CSSVarSymbol,
+    ElementSymbol,
     evalDeclarationValue,
     MappedStates,
     nativePseudoClasses,
@@ -16,6 +18,7 @@ import {
     StylableMeta,
     systemValidators,
     valueMapping,
+    VarSymbol,
 } from '@stylable/core';
 
 import type { IFileSystem } from '@file-services/types';
@@ -185,6 +188,7 @@ const topLevelDeclarations: Array<keyof typeof topLevelDirectives> = [
     'customSelector',
     'stScope',
     'stImport',
+    'stGlobalCustomProperty',
 ];
 
 // Providers
@@ -311,7 +315,8 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
                 return topLevelDeclarations
                     .filter(
                         (d) =>
-                            !meta.ast.source!.input.css.includes('@namespace') || d !== 'namespace'
+                            !meta.ast.source!.input.css.includes(topLevelDirectives.namespace) ||
+                            d !== 'namespace'
                     )
                     .filter((d) => topLevelDirectives[d].startsWith(fullLineText.trim()))
                     .map((d) =>
@@ -348,8 +353,9 @@ export const ValueDirectiveProvider: CompletionProvider & {
             !this.isInsideValueDirective(fullLineText, position.character) &&
             fullLineText.includes(':')
         ) {
-            const parsed = postcssValueParser(fullLineText.slice(fullLineText.indexOf(':') + 1))
-                .nodes;
+            const parsed = postcssValueParser(
+                fullLineText.slice(fullLineText.indexOf(':') + 1)
+            ).nodes;
             const node = parsed[parsed.length - 1];
             if (
                 node &&
@@ -724,9 +730,11 @@ export const NamedCompletionProvider: CompletionProvider & {
                 (astAtCursor as postcss.Rule).nodes &&
                 (astAtCursor as postcss.Rule).nodes.length
             ) {
-                importName = ((astAtCursor as postcss.Rule).nodes.find(
-                    (n) => (n as postcss.Declaration).prop === valueMapping.from
-                ) as postcss.Declaration).value.replace(/'|"/g, '');
+                importName = (
+                    (astAtCursor as postcss.Rule).nodes.find(
+                        (n) => (n as postcss.Declaration).prop === valueMapping.from
+                    ) as postcss.Declaration
+                ).value.replace(/'|"/g, '');
             } else if (
                 astAtCursor.type === 'atrule' &&
                 astAtCursor.name === topLevelDirectives.stImport.slice(1)
@@ -751,7 +759,14 @@ export const NamedCompletionProvider: CompletionProvider & {
                 );
                 if (resolvedImport) {
                     const { lastName } = getExistingNames(fullLineText, position);
-                    getNamedCSSImports(comps, resolvedImport, lastName, namedValues, meta);
+                    getNamedCSSImports(
+                        stylable,
+                        comps,
+                        resolvedImport,
+                        lastName,
+                        namedValues,
+                        meta
+                    );
 
                     return comps
                         .slice(1)
@@ -862,7 +877,14 @@ export const StImportNamedCompletionProvider: CompletionProvider & {
                     if (resolvedImport) {
                         const { lastName } = getExistingNames(fullLineText, position);
 
-                        getNamedCSSImports(comps, resolvedImport, lastName, namedValues, meta);
+                        getNamedCSSImports(
+                            stylable,
+                            comps,
+                            resolvedImport,
+                            lastName,
+                            namedValues,
+                            meta
+                        );
 
                         return comps
                             .slice(1)
@@ -1075,31 +1097,61 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
 };
 
 function getNamedCSSImports(
+    stylable: Stylable,
     comps: string[][],
     resolvedImport: StylableMeta,
     lastName: string,
     namedValues: string[],
     meta: StylableMeta
 ) {
-    comps.push(
-        ...Object.keys(resolvedImport.mappedSymbols)
-            .filter(
-                (ms) =>
-                    (resolvedImport.mappedSymbols[ms]._kind === 'class' ||
-                        resolvedImport.mappedSymbols[ms]._kind === 'var') &&
-                    ms !== 'root'
-            )
-            .filter((ms) => ms.slice(0, -1).startsWith(lastName))
-            .filter((ms) => !~namedValues.indexOf(ms))
-            .map((ms) => {
-                const varSymbol = resolvedImport.mappedSymbols[ms];
-                return [
-                    ms,
-                    path.relative(meta.source, resolvedImport.source).slice(1).replace(/\\/g, '/'),
-                    varSymbol._kind === 'var' ? varSymbol.text : 'Stylable class',
-                ];
-            })
-    );
+    const namedSet = new Set(namedValues);
+    for (const [symbolName, symbol] of Object.entries(resolvedImport.mappedSymbols)) {
+        if (symbol._kind === 'keyframes') {
+            continue;
+        }
+        if (symbol._kind === 'import') {
+            if (symbol.name.startsWith('--')) {
+                const importedVar = stylable.createResolver({}).deepResolve(symbol);
+                if (
+                    importedVar &&
+                    importedVar._kind === 'css' &&
+                    importedVar.symbol &&
+                    importedVar.symbol._kind === 'cssVar'
+                ) {
+                    addCompletion(symbolName, importedVar.meta, importedVar.symbol);
+                }
+            }
+        } else {
+            addCompletion(symbolName, meta, symbol);
+        }
+    }
+
+    function addCompletion(
+        symbolName: string,
+        meta: StylableMeta,
+        symbol: VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol
+    ) {
+        if (symbolName.slice(0, -1).startsWith(lastName) && !namedSet.has(symbolName)) {
+            comps.push([
+                symbolName,
+                path.relative(meta.source, resolvedImport.source).slice(1).replace(/\\/g, '/'),
+                createCompletionDetail(symbol),
+            ]);
+        }
+    }
+}
+
+function createCompletionDetail(symbol: VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol) {
+    switch (symbol._kind) {
+        case 'class':
+            return 'Stylable class';
+        case 'cssVar':
+            return `${symbol.global ? 'Global ' : ''}${symbol.name}`;
+        case 'var':
+            return symbol.text;
+        case 'element':
+            return 'Stylable element';
+    }
 }
 
 function isNodeRule(node: any): node is postcss.Rule {
@@ -1358,9 +1410,8 @@ export const StateEnumCompletionProvider: CompletionProvider = {
                         return states && states[stateName] && states[stateName].type === 'enum';
                     });
                     if (resolvedStateNode) {
-                        const resolvedState = resolvedStateNode.symbol[valueMapping.states]![
-                            stateName
-                        ];
+                        const resolvedState =
+                            resolvedStateNode.symbol[valueMapping.states]![stateName];
                         let existingInput = fullLineText.slice(0, position.character);
                         existingInput = existingInput.slice(existingInput.lastIndexOf('(') + 1);
 

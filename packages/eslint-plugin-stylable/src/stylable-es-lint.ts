@@ -1,6 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import { Stylable, createDefaultResolver, StylableExports, StylableMeta } from '@stylable/core';
+import {
+    Stylable,
+    createDefaultResolver,
+    StylableExports,
+    StylableMeta,
+    safeParse,
+} from '@stylable/core';
 import {
     ESLintUtils,
     AST_NODE_TYPES,
@@ -28,6 +34,8 @@ export default createRule({
             projectRoot: process.cwd(),
             resolveModule: moduleResolver,
             requireModule: require,
+            resolverCache: new Map(),
+            cssParser: safeParse,
         });
 
         function reportDiagnostics(meta: StylableMeta, node: esTree.ImportDeclaration) {

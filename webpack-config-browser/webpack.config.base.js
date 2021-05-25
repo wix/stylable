@@ -7,9 +7,9 @@ module.exports.baseConfig = () => {
         resolve: {
             alias: {
                 jsdom: require.resolve('./jsdom-browser.js'),
-                path: require.resolve('@file-services/path'),
             },
             fallback: {
+                path: require.resolve('@file-services/path'),
                 os: false,
             },
         },

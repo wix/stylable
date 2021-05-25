@@ -1,13 +1,13 @@
-import { spawn } from 'child_process';
 import { join, normalize } from 'path';
 import playwright from 'playwright-core';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
-import { createTempDirectorySync } from 'create-temp-directory';
 import { nodeFs } from '@file-services/node';
-import { symlinkSync } from 'fs';
+import { mkdtempSync, rmdirSync, symlinkSync, existsSync } from 'fs';
 import { deferred } from 'promise-assist';
+import { runServer } from './run-server';
+import { tmpdir } from 'os';
 
 export interface Options {
     projectDir: string;
@@ -29,19 +29,23 @@ export class ProjectRunner {
         before: MochaHook,
         afterEach: MochaHook,
         after: MochaHook,
-        watch = false
+        watch = false,
+        watchedDir = ''
     ) {
         const disposeAfterEach: Set<() => void> = new Set();
         if (watch) {
             const projectToCopy = runnerOptions.projectDir;
-            const tempDir = createTempDirectorySync('local-test');
-            tempDir.path = nodeFs.realpathSync(tempDir.path);
-            const projectPath = join(tempDir.path, 'project');
-            disposeAfterEach.add(tempDir.remove);
+            if (watchedDir && existsSync(watchedDir)) {
+                rmdirSync(watchedDir, { recursive: true });
+            }
+            const tempPath = watchedDir || mkdtempSync(join(tmpdir(), 'local-test'));
+            const removeTemp = () => rmdirSync(tempPath, { recursive: true });
+            const projectPath = join(tempPath, 'project');
+            disposeAfterEach.add(removeTemp);
             nodeFs.copyDirectorySync(projectToCopy, projectPath);
             symlinkSync(
                 join(__dirname, '../../../node_modules'),
-                join(tempDir.path, 'node_modules'),
+                join(tempPath, 'node_modules'),
                 'junction'
             );
             runnerOptions.projectDir = projectPath;
@@ -154,34 +158,9 @@ export class ProjectRunner {
     }
 
     public async serve() {
-        this.log('Start Server');
-        return new Promise<void>((res) => {
-            const child = spawn(
-                'node',
-                [require.resolve('./isolated-server'), this.outputDir, this.port.toString()],
-                {
-                    cwd: __dirname,
-                    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-                }
-            );
-            child.once('message', (port) => {
-                this.log(`Server Running (port: ${port})`);
-                this.serverUrl = `http://localhost:${port}`;
-                this.server = {
-                    close: () => {
-                        try {
-                            child.kill();
-                        } catch (e) {
-                            this.log('Kill Server Error:' + e);
-                        }
-                    },
-                };
-                res();
-            });
-            child.once('error', (e) => {
-                this.log('Static Server Error: ' + e);
-            });
-        });
+        const { server, serverUrl } = await runServer(this.outputDir, this.port, this.log);
+        this.serverUrl = serverUrl;
+        this.server = server;
     }
     public waitForRecompile() {
         let done = false;
@@ -307,7 +286,7 @@ export class ProjectRunner {
         const chunkByName: Record<string, string[]> = {};
         compilation.chunks.forEach((chunk) => {
             const names = [];
-            const modules = compilation.chunkGraph!.getChunkModulesIterableBySourceType(
+            const modules = compilation.chunkGraph.getChunkModulesIterableBySourceType(
                 chunk,
                 'javascript'
             );

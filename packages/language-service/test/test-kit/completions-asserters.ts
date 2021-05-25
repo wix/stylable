@@ -3,9 +3,7 @@ import fs from 'fs';
 import { expect } from 'chai';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
-import {
-    ProviderRange,
-} from '@stylable/language-service/dist/lib/completion-providers';
+import type { ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
 import { Completion, Snippet } from '@stylable/language-service/dist/lib/completion-types';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
 import { getCaretPosition } from './asserters';
@@ -82,6 +80,7 @@ export function getCompletions(fileName: string, prefix = '') {
     );
 
     return {
+        completions,
         suggested: (expectedCompletions: Array<Partial<Completion>>) => {
             assertPresent(completions, expectedCompletions, prefix);
         },
@@ -108,6 +107,7 @@ export function getStylableAndCssCompletions(fileName: string) {
 }
 
 // syntactic
+// at-rules
 export const customSelectorDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (
     rng
 ) => {
@@ -128,17 +128,15 @@ export const stScopeDirectiveCompletion: (rng: ProviderRange) => Partial<Complet
         range: rng,
     };
 };
-export const extendsDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
+export const namespaceDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
     return {
-        label: '-st-extends:',
-        detail: 'Extend an external component',
+        label: '@namespace',
+        detail: 'Declare a namespace for the file',
         sortText: 'a',
-        insertText: '-st-extends: $1;',
-        additionalCompletions: true,
+        insertText: '@namespace "$1";\n',
         range: rng,
     };
 };
-
 export const stImportDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
     return {
         label: '@st-import',
@@ -148,15 +146,28 @@ export const stImportDirectiveCompletion: (rng: ProviderRange) => Partial<Comple
         range: rng,
     };
 };
-
-export const importDefaultDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (
+export const stGlobalCustomPropertyCompletion: (rng: ProviderRange) => Partial<Completion> = (
     rng
 ) => {
     return {
-        label: '-st-default:',
-        detail: 'Default export name',
+        label: '@st-global-custom-property',
+        detail: 'Define global custom properties using @st-global-custom-property',
         sortText: 'a',
-        insertText: '-st-default: $1;',
+        insertText: '@st-global-custom-property --$1;',
+        range: rng,
+    };
+};
+
+// rules
+export const globalCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
+    return new Completion(':global()', 'Target a global selector', 'a', ':global($1)', rng);
+};
+export const varsDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
+    return {
+        label: ':vars',
+        detail: 'Declare variables',
+        sortText: 'a',
+        insertText: ':vars {\n\t$1\n}',
         range: rng,
     };
 };
@@ -166,6 +177,28 @@ export const importDirectiveCompletion: (rng: ProviderRange) => Partial<Completi
         detail: 'Import an external library',
         sortText: 'a',
         insertText: ':import {\n\t-st-from: "$1";\n}',
+        range: rng,
+    };
+};
+export const rootClassCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
+    return {
+        label: '.root',
+        detail: 'The root class',
+        sortText: 'a',
+        insertText: '.root',
+        range: rng,
+    };
+};
+
+// declarations
+export const importDefaultDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (
+    rng
+) => {
+    return {
+        label: '-st-default:',
+        detail: 'Default export name',
+        sortText: 'a',
+        insertText: '-st-default: $1;',
         range: rng,
     };
 };
@@ -189,30 +222,13 @@ export const importNamedDirectiveCompletion: (rng: ProviderRange) => Partial<Com
         range: rng,
     };
 };
-export const mixinDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
+export const extendsDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
     return {
-        label: '-st-mixin:',
-        detail: 'Apply mixins on the class',
+        label: '-st-extends:',
+        detail: 'Extend an external component',
         sortText: 'a',
-        insertText: '-st-mixin: $1;',
-        range: rng,
-    };
-};
-export const namespaceDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
-    return {
-        label: '@namespace',
-        detail: 'Declare a namespace for the file',
-        sortText: 'a',
-        insertText: '@namespace "$1";\n',
-        range: rng,
-    };
-};
-export const rootClassCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
-    return {
-        label: '.root',
-        detail: 'The root class',
-        sortText: 'a',
-        insertText: '.root',
+        insertText: '-st-extends: $1;',
+        additionalCompletions: true,
         range: rng,
     };
 };
@@ -225,6 +241,15 @@ export const statesDirectiveCompletion: (rng: ProviderRange) => Partial<Completi
         range: rng,
     };
 };
+export const mixinDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
+    return {
+        label: '-st-mixin:',
+        detail: 'Apply mixins on the class',
+        sortText: 'a',
+        insertText: '-st-mixin: $1;',
+        range: rng,
+    };
+};
 export const valueDirective: (rng: ProviderRange) => Partial<Completion> = (rng) => {
     return {
         label: 'value()',
@@ -233,18 +258,6 @@ export const valueDirective: (rng: ProviderRange) => Partial<Completion> = (rng)
         insertText: ' value($1)',
         range: rng,
     };
-};
-export const varsDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
-    return {
-        label: ':vars',
-        detail: 'Declare variables',
-        sortText: 'a',
-        insertText: ':vars {\n\t$1\n}',
-        range: rng,
-    };
-};
-export const globalCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
-    return new Completion(':global()', 'Target a global selector', 'a', ':global($1)', rng);
 };
 
 // semantic

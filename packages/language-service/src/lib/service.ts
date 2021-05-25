@@ -1,6 +1,6 @@
 import type { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
-import { Root } from 'postcss';
+import type { Root } from 'postcss';
 import type { HoverSettings } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { Range, TextDocument } from 'vscode-languageserver-textdocument';
@@ -314,8 +314,8 @@ export class StylableLanguageService {
     }
 
     private restoreFormattingExceptions(ast: Root, changes: string[]) {
-        ast.walkAtRules(topLevelDirectives.stImport.slice(1), (atRule, index) => {
-            atRule.params = changes[index];
+        ast.walkAtRules(topLevelDirectives.stImport.slice(1), (atRule) => {
+            atRule.params = changes.shift()!;
         });
 
         return ast;

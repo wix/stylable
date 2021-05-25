@@ -1,7 +1,17 @@
-import { ChunkGraph, Compilation, Compiler, Module, ModuleGraph, NormalModule } from 'webpack';
-import { UnusedDependency } from './unused-dependency';
 import type {
+    Chunk,
+    ChunkGraph,
+    Compilation,
+    Compiler,
+    dependencies,
+    Module,
+    ModuleGraph,
+    NormalModule,
+} from 'webpack';
+import type {
+    BuildData,
     DependencyTemplates,
+    EntryPoint,
     RuntimeTemplate,
     StringSortableSet,
     StylableBuildMeta,
@@ -10,10 +20,12 @@ import type {
 } from './types';
 import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core';
 import decache from 'decache';
+import { CalcDepthContext, getCSSViewModule } from '@stylable/build-tools';
+import { join, parse } from 'path';
 
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
-    map = (item: T): O => (item as unknown) as O,
+    map = (item: T): O => item as unknown as O,
     filter = (item: O): item is NonNullable<O> => item !== undefined && item !== null
 ) {
     const s = new Set();
@@ -39,7 +51,7 @@ export function isStylableModule(module: any): module is NormalModule {
 }
 
 export function isAssetModule(module: Module): module is NormalModule {
-    return module.type.startsWith('asset/');
+    return module.type.startsWith('asset/') || module.type === 'asset';
 }
 
 export function getStaticPublicPath(compilation: Compilation) {
@@ -55,7 +67,7 @@ export function getStaticPublicPath(compilation: Compilation) {
 }
 
 export function replaceCSSAssetPlaceholders(
-    { css, urls }: Pick<StylableBuildMeta, 'css' | 'urls'>,
+    { css, urls }: BuildData,
     publicPath: string,
     getAssetOutputPath: (resourcePath: string, publicPath: string) => string
 ) {
@@ -65,7 +77,7 @@ export function replaceCSSAssetPlaceholders(
 }
 
 interface ReplaceMappedCSSAssetPlaceholdersOptions {
-    stylableBuildMeta: StylableBuildMeta;
+    stylableBuildData: BuildData;
     staticPublicPath: string;
     assetsModules: Map<string, NormalModule>;
     chunkGraph: ChunkGraph;
@@ -76,7 +88,7 @@ interface ReplaceMappedCSSAssetPlaceholdersOptions {
 }
 
 export function replaceMappedCSSAssetPlaceholders({
-    stylableBuildMeta,
+    stylableBuildData,
     staticPublicPath,
     assetsModules,
     chunkGraph,
@@ -86,7 +98,7 @@ export function replaceMappedCSSAssetPlaceholders({
     dependencyTemplates,
 }: ReplaceMappedCSSAssetPlaceholdersOptions) {
     return replaceCSSAssetPlaceholders(
-        stylableBuildMeta,
+        stylableBuildData,
         staticPublicPath,
         (resourcePath, publicPath) => {
             const assetModule = assetsModules.get(resourcePath);
@@ -150,8 +162,8 @@ export function extractDataUrlFromAssetModuleSource(source: string): string {
 type AssetNormalModule = NormalModule & { loaders: [{ loader: 'file-loader' | 'url-loader' }] };
 
 export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNormalModule {
-    if (module instanceof NormalModule) {
-        return module.loaders.some(({ loader }) =>
+    if ('loaders' in module) {
+        return (module as import('webpack').NormalModule).loaders.some(({ loader }) =>
             /[\\/](file-loader)|(url-loader)[\\/]/.test(loader)
         );
     }
@@ -207,30 +219,51 @@ export function createStylableResolverCacheMap(compiler: Compiler): StylableReso
     return cache;
 }
 
-export function createStaticCSS(
+export function staticCSSWith(
     staticPublicPath: string,
-    stylableModules: Set<Module>,
     assetsModules: Map<string, NormalModule>,
-
     chunkGraph: ChunkGraph,
     moduleGraph: ModuleGraph,
     runtime: string,
     runtimeTemplate: RuntimeTemplate,
     dependencyTemplates: DependencyTemplates
 ) {
-    const cssChunks = Array.from(stylableModules)
+    return (stylableModules: Map<Module, BuildData | null>) =>
+        createStaticCSS(
+            staticPublicPath,
+            stylableModules,
+            assetsModules,
+            chunkGraph,
+            moduleGraph,
+            runtime,
+            runtimeTemplate,
+            dependencyTemplates
+        );
+}
+
+export function createStaticCSS(
+    staticPublicPath: string,
+    stylableModules: Map<Module, BuildData | null>,
+    assetsModules: Map<string, NormalModule>,
+    chunkGraph: ChunkGraph,
+    moduleGraph: ModuleGraph,
+    runtime: string,
+    runtimeTemplate: RuntimeTemplate,
+    dependencyTemplates: DependencyTemplates
+) {
+    const cssChunks = Array.from(stylableModules.keys())
         .filter((m) => getStylableBuildMeta(m).isUsed !== false)
         .sort((m1, m2) => getStylableBuildMeta(m1).depth - getStylableBuildMeta(m2).depth)
         .map((m) => {
             return replaceMappedCSSAssetPlaceholders({
-                assetsModules: assetsModules,
+                assetsModules,
                 staticPublicPath,
                 chunkGraph,
                 moduleGraph,
                 dependencyTemplates,
                 runtime,
                 runtimeTemplate,
-                stylableBuildMeta: getStylableBuildMeta(m),
+                stylableBuildData: getStylableBuildData(stylableModules, m),
             });
         });
 
@@ -245,9 +278,24 @@ export function getStylableBuildMeta(module: Module): StylableBuildMeta {
     return meta;
 }
 
-export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
+export function getStylableBuildData(
+    stylableModules: Map<Module, BuildData | null>,
+    module: Module
+): BuildData {
+    const data = stylableModules.get(module);
+    if (!data) {
+        throw new Error(`Stylable module ${module.identifier()} does not contains build data`);
+    }
+    return data;
+}
+
+export function findIfStylableModuleUsed(
+    m: Module,
+    compilation: Compilation,
+    UnusedDependency: typeof dependencies.ModuleDependency
+) {
     const moduleGraph = compilation.moduleGraph;
-    const chunkGraph = compilation.chunkGraph!;
+    const chunkGraph = compilation.chunkGraph;
     const inConnections = uniqueFilterMap(
         moduleGraph.getIncomingConnections(m),
         ({ resolvedOriginModule, dependency }) =>
@@ -260,7 +308,9 @@ export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
     for (const connectionModule of inConnections) {
         if (connectionModule.buildMeta.sideEffectFree) {
             const info = moduleGraph.getExportsInfo(connectionModule);
-            const usedExports = (info.getUsedExports as any)(/*if passed undefined it finds usages in all chunks*/);
+            const usedExports = (
+                info.getUsedExports as any
+            )(/*if passed undefined it finds usages in all chunks*/);
             if (usedExports === false) {
                 continue;
             } else if (usedExports === true || usedExports === null) {
@@ -279,7 +329,7 @@ export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
     return isInUse;
 }
 
-export function getFileName(filename: string, data: Record<string, string>) {
+export function getFileName(filename: string, data: Record<string, string | undefined>) {
     return filename.replace(/\[(.*?)]/g, (fullMatch, inner) => {
         const [type, len] = inner.split(':');
         const value = data[type];
@@ -295,8 +345,8 @@ export function getFileName(filename: string, data: Record<string, string>) {
 /**
  * sorts by depth, falling back to alpha numeric
  */
-export function getSortedModules(stylableModules: Set<NormalModule>) {
-    return Array.from(stylableModules).sort((m1, m2) => {
+export function getSortedModules(stylableModules: Map<NormalModule, BuildData | null>) {
+    return Array.from(stylableModules.keys()).sort((m1, m2) => {
         const depthDiff = getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth;
         if (depthDiff === 0) {
             if (m1.resource > m2.resource) {
@@ -371,4 +421,101 @@ export function getTopLevelInputFilesystem(compiler: Compiler) {
         fileSystem = fileSystem.fileSystem;
     }
     return fileSystem;
+}
+
+export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthContext<Module> {
+    return {
+        getDependencies: (module) =>
+            uniqueFilterMap(moduleGraph.getOutgoingConnections(module), ({ module }) => module),
+        getImporters: (module) =>
+            uniqueFilterMap(
+                moduleGraph.getIncomingConnections(module),
+                ({ originModule }) => originModule
+            ),
+        getModulePathNoExt: (module) => {
+            if (isStylableModule(module)) {
+                return module.resource.replace(/\.st\.css/g, '');
+            }
+            const { dir, name } = parse((module as NormalModule)?.resource || '');
+            return join(dir, name);
+        },
+        isStylableModule: (module) => isStylableModule(module),
+    };
+}
+
+export function getCSSViewModuleWebpack(moduleGraph: ModuleGraph) {
+    const context = createCalcDepthContext(moduleGraph);
+    return (module: Module) => getCSSViewModule(module, context) as NormalModule | undefined;
+}
+/**
+ * Provide a simple way to share build meta with other plugins without using module state like WeakMap<Compilation, DATA>
+ */
+export function provideStylableModules(
+    compilation: Compilation,
+    stylableModules: Map<NormalModule, BuildData | null>
+) {
+    (compilation as any)[Symbol.for('stylableModules')] = stylableModules;
+}
+
+export function getStylableModules(
+    compilation: Compilation
+): Map<NormalModule, BuildData | null> | undefined {
+    return (compilation as any)[Symbol.for('stylableModules')];
+}
+
+export function getOnlyChunk(compilation: Compilation) {
+    return compilation.entrypoints.size === 1
+        ? Array.from(compilation.entrypoints.values())[0].getEntrypointChunk()
+        : undefined;
+}
+
+export function emitCSSFile(
+    compilation: Compilation,
+    cssSource: string,
+    filenameTemplate: string,
+    createHash: WebpackCreateHash,
+    chunk?: Chunk
+) {
+    const contentHash = outputOptionsAwareHashContent(
+        createHash,
+        compilation.runtimeTemplate.outputOptions,
+        cssSource
+    );
+
+    const filename = getFileName(filenameTemplate, {
+        contenthash: contentHash,
+        hash: compilation.hash,
+        name: chunk?.name,
+    });
+
+    compilation.emitAsset(
+        filename,
+        new compilation.compiler.webpack.sources.RawSource(cssSource, false)
+    );
+
+    return filename;
+}
+
+export function getEntryPointModules(
+    entryPoint: EntryPoint,
+    chunkGraph: ChunkGraph,
+    onModule: (module: Module) => void
+) {
+    for (const chunk of entryPoint.getEntrypointChunk().getAllReferencedChunks()) {
+        for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
+            onModule(module);
+        }
+    }
+}
+
+export function isDependencyOf(entryPoint: EntryPoint, entrypoints: Iterable<EntryPoint>) {
+    // entryPoint.options.dependsOn is not in webpack types;
+    for (const parent of entryPoint.getParents()) {
+        for (const entry of entrypoints) {
+            if (parent.id === entry.id) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

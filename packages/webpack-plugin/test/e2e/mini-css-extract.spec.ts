@@ -7,7 +7,7 @@ const projectDir = dirname(
     require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
 );
 
-describe.skip(`(${project})`, () => {
+describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir,

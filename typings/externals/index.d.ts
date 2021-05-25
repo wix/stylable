@@ -1,11 +1,17 @@
-declare module 'deindent' {
-    function deindent(parts: string | TemplateStringsArray): string;
-    export = deindent;
-}
-
 declare module 'mini-css-extract-plugin' {
+    interface CssModule {
+        new (options: {
+            context: string | null;
+            identifier: string;
+            identifierIndex: number;
+            content: string;
+            media: string;
+            sourceMap: null;
+        }): import('webpack').Module;
+    }
     class MiniCssExtractPlugin {
         static loader: string;
+        static getCssModule(webpack: typeof import('webpack')): CssModule;
         apply(compiler: typeof import('webpack').Compiler): void;
     }
     export = MiniCssExtractPlugin;
@@ -24,22 +30,6 @@ declare module 'is-vendor-prefixed' {
 declare module 'postcss-js' {
     const postcssJs: import('postcss').Parser;
     export = postcssJs;
-}
-
-declare module 'postcss-safe-parser' {
-    function postcssSafeParser(
-        css: string,
-        options: import('postcss').ProcessOptions
-    ): import('postcss').Root;
-    export = postcssSafeParser;
-}
-
-declare module 'postcss-selector-matches/dist/replaceRuleSelector' {
-    // library is esm transpiled to cjs! has an actual default export.
-    export default function replaceRuleSelector(
-        rule: import('postcss').Rule,
-        options: { lineBreak: boolean }
-    ): string;
 }
 
 declare module 'node-eval' {

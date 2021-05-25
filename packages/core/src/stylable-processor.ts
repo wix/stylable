@@ -146,7 +146,13 @@ export const processorWarnings = {
         return `a custom css property must begin with "--" (double-dash), but received "${name}"`;
     },
     ILLEGAL_CSS_VAR_ARGS(name: string) {
-        return `css variable "${name}" usage (var()) must receive comma separated values`;
+        return `custom property "${name}" usage (var()) must receive comma separated values`;
+    },
+    INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
+        return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
+    },
+    INVALID_NAMESPACE_REFERENCE() {
+        return 'st-namespace-reference dose not have any value';
     },
 };
 
@@ -166,6 +172,14 @@ export class StylableProcessor {
 
         const stubs = this.insertCustomSelectorsStubs();
 
+        for (const node of root.nodes) {
+            if (node.type === 'rule' && node.selector === rootValueMapping.import) {
+                const imported = this.handleImport(node);
+                this.meta.imports.push(imported);
+                this.addImportSymbols(imported);
+            }
+        }
+
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
                 this.handleCustomSelectors(rule);
@@ -177,7 +191,7 @@ export class StylableProcessor {
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             } else if (isCSSVarProp(decl.prop)) {
-                this.addCSSVarFromProp(decl);
+                this.addCSSVarDefinition(decl);
             }
 
             if (decl.value.includes('var(')) {
@@ -266,11 +280,14 @@ export class StylableProcessor {
                         );
                         atRule.remove();
                     } else {
-                        const _import = this.handleStImport(atRule);
-                        this.meta.imports.push(_import);
-                        this.addImportSymbols(_import);
+                        const stImport = this.handleStImport(atRule);
+                        this.meta.imports.push(stImport);
+                        this.addImportSymbols(stImport);
                     }
 
+                    break;
+                case 'property':
+                    this.addCSSVarDefinition(atRule);
                     break;
                 case 'st-global-custom-property': {
                     const cssVarsByComma = atRule.params.split(',');
@@ -318,26 +335,21 @@ export class StylableProcessor {
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     private collectUrls(decl: postcss.Declaration) {
-        processDeclarationUrls(
-            decl,
-            (node) => {
-                this.meta.urls.push(node.url!);
-            },
-            false
-        );
+        processDeclarationUrls(decl, (node) => this.meta.urls.push(node.url), false);
     }
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
-        this.meta.ast.walkComments((comment) => {
-            if (comment.text.includes('st-namespace-reference')) {
-                const namespaceReferenceParts = comment.text.split('=');
-                pathToSource = stripQuotation(
-                    namespaceReferenceParts[namespaceReferenceParts.length - 1]
-                );
-                return false;
+        for (const node of this.meta.ast.nodes) {
+            if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
+                const i = node.text.indexOf('=');
+                if (i === -1) {
+                    this.diagnostics.error(node, processorWarnings.INVALID_NAMESPACE_REFERENCE());
+                } else {
+                    pathToSource = stripQuotation(node.text.slice(i + 1));
+                }
+                break;
             }
-            return undefined;
-        });
+        }
 
         return this.resolveNamespace(
             namespace,
@@ -370,10 +382,7 @@ export class StylableProcessor {
                             rule.remove();
                             return false;
                         }
-
-                        const imported = this.handleImport(rule);
-                        this.meta.imports.push(imported);
-                        this.addImportSymbols(imported);
+                        rule.remove();
                         return false;
                     } else {
                         this.diagnostics.warn(
@@ -541,6 +550,7 @@ export class StylableProcessor {
     }
 
     protected addImportSymbols(importDef: Imported) {
+        this.checkForInvalidAsUsage(importDef);
         if (importDef.defaultExport) {
             this.checkRedeclareSymbol(importDef.defaultExport, importDef.rule);
             this.meta.mappedSymbols[importDef.defaultExport] = {
@@ -618,12 +628,12 @@ export class StylableProcessor {
         });
     }
 
-    protected addCSSVarFromProp(decl: postcss.Declaration) {
-        const varName = decl.prop.trim();
-        this.addCSSVar(varName, decl);
+    protected addCSSVarDefinition(node: postcss.Declaration | postcss.AtRule) {
+        const varName = node.type === 'atrule' ? node.params : node.prop;
+        this.addCSSVar(varName.trim(), node);
     }
 
-    protected addCSSVar(varName: string, decl: postcss.Declaration) {
+    protected addCSSVar(varName: string, node: postcss.Declaration | postcss.AtRule) {
         if (isCSSVarProp(varName)) {
             if (!this.meta.cssVars[varName]) {
                 const cssVarSymbol: CSSVarSymbol = {
@@ -636,7 +646,7 @@ export class StylableProcessor {
                 }
             }
         } else {
-            this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_USE(varName), {
+            this.diagnostics.warn(node, processorWarnings.ILLEGAL_CSS_VAR_USE(varName), {
                 word: varName,
             });
         }
@@ -833,9 +843,7 @@ export class StylableProcessor {
     }
 
     protected handleImport(rule: postcss.Rule) {
-        const importObj = parsePseudoImport(rule, this.dirContext, this.diagnostics);
-        rule.remove();
-        return importObj;
+        return parsePseudoImport(rule, this.dirContext, this.diagnostics);
     }
     private handleScope(atRule: postcss.AtRule) {
         const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
@@ -853,6 +861,16 @@ export class StylableProcessor {
         }
 
         atRule.replaceWith(atRule.nodes || []);
+    }
+    private checkForInvalidAsUsage(importDef: Imported) {
+        for (const [local, imported] of Object.entries(importDef.named)) {
+            if (isCSSVarProp(imported) && !isCSSVarProp(local)) {
+                this.diagnostics.warn(
+                    importDef.rule,
+                    processorWarnings.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local)
+                );
+            }
+        }
     }
 }
 

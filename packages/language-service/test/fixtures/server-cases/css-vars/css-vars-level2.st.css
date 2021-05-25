@@ -1,0 +1,6 @@
+@st-global-custom-property --y2;
+
+.root {
+    --x2: red;
+    --y2: red;
+}
