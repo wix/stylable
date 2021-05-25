@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync, writeFileSync, existsSync } from 'fs';
+import { readdirSync, readFileSync, statSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { spawn, ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
 import { on } from 'events';
 import { join, relative } from 'path';
@@ -64,6 +64,10 @@ export interface Files {
     [filepath: string]: string;
 }
 
+export interface FilesStructure {
+    [filepath: string]: string | Files;
+}
+
 export function loadDirSync(rootPath: string, dirPath: string = rootPath): Files {
     return readdirSync(dirPath).reduce<Files>((acc, entry) => {
         const fullPath = join(dirPath, entry);
@@ -83,8 +87,14 @@ export function loadDirSync(rootPath: string, dirPath: string = rootPath): Files
     }, {});
 }
 
-export function populateDirectorySync(rootDir: string, files: Files) {
-    for (const filePath in files) {
-        writeFileSync(join(rootDir, filePath), files[filePath]);
+export function populateDirectorySync(rootDir: string, files: FilesStructure) {
+    for (const [filePath, content] of Object.entries(files)) {
+        if (typeof content === 'object') {
+            const dirPath = join(rootDir, filePath);
+            mkdirSync(dirPath);
+            populateDirectorySync(dirPath, content);
+        } else {
+            writeFileSync(join(rootDir, filePath), content);
+        }
     }
 }

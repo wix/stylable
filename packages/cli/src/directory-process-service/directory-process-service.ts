@@ -5,6 +5,7 @@ export interface DirectoryProcessServiceOptions {
     processFiles?(
         watcher: DirectoryProcessService,
         affectedFiles: Set<string>,
+        deletedFiles: Set<string>,
         changeOrigin?: IWatchEvent
     ): Promise<void> | void;
     directoryFilter?(directoryPath: string): boolean;
@@ -16,6 +17,7 @@ export interface DirectoryProcessServiceOptions {
 
 export class DirectoryProcessService {
     public invalidationMap = new Map<string, Set<string>>();
+    public watchedDirectoryFiles = new Map<string, Set<string>>();
     constructor(private fs: IFileSystem, private options: DirectoryProcessServiceOptions = {}) {
         if (this.options.watchMode) {
             this.fs.watchService.addGlobalListener(this.watchHandler);
@@ -33,6 +35,7 @@ export class DirectoryProcessService {
             if (item.type === 'directory') {
                 await this.watchPath(item.path);
             } else if (item.type === 'file') {
+                this.addFileToWatchedDirectory(item.path);
                 affectedFiles.add(item.path);
                 this.registerInvalidateOnChange(item.path);
             }
@@ -41,11 +44,28 @@ export class DirectoryProcessService {
             return;
         }
         try {
-            return this.options.processFiles?.(this, affectedFiles);
+            return this.options.processFiles?.(this, affectedFiles, new Set());
         } catch (error) {
             this.options.onError?.(error);
         }
     }
+    private addFileToWatchedDirectory(filePath: string) {
+        const dirName = this.fs.dirname(filePath);
+        let fileSet = this.watchedDirectoryFiles.get(dirName);
+        if (!fileSet) {
+            fileSet = new Set();
+            this.watchedDirectoryFiles.set(dirName, fileSet);
+        }
+        fileSet.add(filePath);
+    }
+    private removeFileFromWatchedDirectory(filePath: string) {
+        const dirName = this.fs.dirname(filePath);
+        const fileSet = this.watchedDirectoryFiles.get(dirName);
+        if (fileSet) {
+            fileSet.delete(filePath);
+        }
+    }
+
     public registerInvalidateOnChange(watchedFilePath: string, filePathToInvalidate?: string) {
         let fileSet = this.invalidationMap.get(watchedFilePath);
         if (!fileSet) {
@@ -60,6 +80,7 @@ export class DirectoryProcessService {
         if (!this.options.watchMode) {
             return;
         }
+        this.watchedDirectoryFiles.set(directoryPath, new Set());
         return this.fs.watchService.watchPath(directoryPath);
     }
     private async handleWatchChange(event: IWatchEvent) {
@@ -77,8 +98,11 @@ export class DirectoryProcessService {
         }
         if (this.invalidationMap.has(event.path)) {
             const affectedFiles = this.getAffectedFiles(event.path);
+            const deletedFiles = new Set<string>();
             if (!event.stats) {
                 this.invalidationMap.delete(event.path);
+                this.removeFileFromWatchedDirectory(event.path);
+                deletedFiles.add(event.path);
                 affectedFiles.delete(event.path);
             }
             if (this.options.autoResetInvalidations) {
@@ -87,7 +111,24 @@ export class DirectoryProcessService {
                     invalidationSet?.clear();
                 }
             }
-            return this.options.processFiles?.(this, affectedFiles, event);
+            return this.options.processFiles?.(this, affectedFiles, deletedFiles, event);
+        } else if (!event.stats) {
+            const fileSet = this.watchedDirectoryFiles.get(event.path);
+
+            if (fileSet) {
+                const affectedFiles = new Set<string>();
+                const deletedFiles = new Set<string>();
+                for (const filePath of fileSet) {
+                    this.getAffectedFiles(filePath, affectedFiles);
+                }
+                for (const filePath of fileSet) {
+                    this.invalidationMap.delete(filePath);
+                    this.removeFileFromWatchedDirectory(filePath);
+                    deletedFiles.add(filePath);
+                    affectedFiles.delete(filePath);
+                }
+                return this.options.processFiles?.(this, affectedFiles, deletedFiles, event);
+            }
         }
     }
     private getAffectedFiles(filePath: string, visited = new Set<string>()): Set<string> {

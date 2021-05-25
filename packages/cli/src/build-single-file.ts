@@ -172,7 +172,7 @@ export function removeBuildProducts({
     // st.css
     if (outputSources) {
         if (outSrcPath === filePath) {
-            throw new Error(`Attempt to override source file ${outSrcPath}`);
+            throw new Error(`Attempt to remove source file ${outSrcPath}`);
         }
         generated.delete(outSrcPath);
         outputLogs.push(`.st.css source`);

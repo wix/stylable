@@ -93,7 +93,7 @@ describe('DirectoryWatchService', () => {
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
-                processFiles(watcher, affectedFiles, changeOrigin) {
+                processFiles(watcher, affectedFiles, _, changeOrigin) {
                     for (const filePath of affectedFiles) {
                         const { deps, value } = evalTemplate(fs, filePath);
                         writeTemplateOutputToDist(fs, filePath, value);
@@ -201,7 +201,7 @@ describe('DirectoryWatchService', () => {
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
-                processFiles(_watcher, affectedFiles, changeOrigin) {
+                processFiles(_watcher, affectedFiles, _, changeOrigin) {
                     changeSpy({
                         affectedFiles: Array.from(affectedFiles),
                         changeOriginPath: changeOrigin?.path,
@@ -253,7 +253,7 @@ describe('DirectoryWatchService', () => {
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
-                processFiles(watcher, affectedFiles, changeOrigin) {
+                processFiles(watcher, affectedFiles, _, changeOrigin) {
                     for (const filePath of affectedFiles) {
                         const { deps } = evalTemplate(fs, filePath);
                         for (const dep of deps) {

@@ -95,24 +95,30 @@ export async function build({
         onError(error) {
             console.error(error);
         },
-        processFiles(service, affectedFiles, changeOrigin) {
+        processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
                 stylable.initCache();
-                if (!changeOrigin.stats) {
-                    diagnosticsMessages.delete(changeOrigin.path);
-                    generator.removeEntryFromIndex(changeOrigin.path, fullOutDir);
-                    removeBuildProducts({
-                        fullOutDir,
-                        fullSrcDir,
-                        filePath: changeOrigin.path,
-                        log,
-                        fs,
-                        moduleFormats: moduleFormats || [],
-                        outputCSS,
-                        outputCSSNameTemplate,
-                        outputSources,
-                        generated,
-                    });
+                if (deletedFiles.size) {
+                    for (const deletedFile of deletedFiles) {
+                        if (!sourceFiles.has(deletedFile)) {
+                            continue;
+                        }
+                        diagnosticsMessages.delete(deletedFile);
+                        sourceFiles.delete(deletedFile);
+                        generator.removeEntryFromIndex(deletedFile, fullOutDir);
+                        removeBuildProducts({
+                            fullOutDir,
+                            fullSrcDir,
+                            filePath: deletedFile,
+                            log,
+                            fs,
+                            moduleFormats: moduleFormats || [],
+                            outputCSS,
+                            outputCSSNameTemplate,
+                            outputSources,
+                            generated,
+                        });
+                    }
                 }
             }
 
@@ -129,11 +135,12 @@ export async function build({
                 reportDiagnostics(diagnosticsMessages);
             }
 
+            const count = deletedFiles.size + affectedFiles.size;
             log(
                 mode,
-                `${messages.FINISHED_PROCESSING} ${affectedFiles.size} ${
-                    affectedFiles.size === 1 ? 'file' : 'files'
-                }${changeOrigin ? ', watching...' : ''}`,
+                `${messages.FINISHED_PROCESSING} ${count} ${count === 1 ? 'file' : 'files'}${
+                    changeOrigin ? ', watching...' : ''
+                }`,
                 levels.info
             );
         },
