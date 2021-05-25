@@ -174,7 +174,7 @@ export class StylableProcessor {
 
         for (const node of root.nodes) {
             if (node.type === 'rule' && node.selector === rootValueMapping.import) {
-                const imported = this.handleImport(node);
+                const imported = parsePseudoImport(node, this.dirContext, this.diagnostics);
                 this.meta.imports.push(imported);
                 this.addImportSymbols(imported);
             }
@@ -842,9 +842,6 @@ export class StylableProcessor {
         return importObj;
     }
 
-    protected handleImport(rule: postcss.Rule) {
-        return parsePseudoImport(rule, this.dirContext, this.diagnostics);
-    }
     private handleScope(atRule: postcss.AtRule) {
         const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
         this.handleRule(scopingRule, true);
