@@ -28,7 +28,16 @@ export type Visitor = (
 type nodeWithPseudo = Partial<SelectorAstNode> & { pseudo: Array<Partial<SelectorAstNode>> };
 
 export function parseSelector(selector: string): SelectorAstNode {
-    return cssSelectorTokenizer.parse(selector) as SelectorAstNode;
+    const ast = cssSelectorTokenizer.parse(selector) as SelectorAstNode;
+    // FIX Broken parsing of css-selector-tokenizer: https://github.com/css-modules/css-selector-tokenizer/pull/25
+    traverseNode(ast, (node) => {
+        if (node.type === 'pseudo-class' && (node.name === 'is' || node.name === 'where')) {
+            node.type = 'nested-pseudo-class';
+            node.nodes = parseSelector(node.content!).nodes;
+            delete node.content;
+        }
+    });
+    return ast;
 }
 
 export function stringifySelector(ast: SelectorAstNode): string {
