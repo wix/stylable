@@ -1,7 +1,6 @@
 import {
     ClassSymbol,
     ElementSymbol,
-    getCssDocsForSymbol,
     ImportSymbol,
     MappedStates,
     cssParse,
@@ -11,6 +10,7 @@ import {
     valueMapping,
     VarSymbol,
 } from '@stylable/core';
+import { getCssDocsForSymbol } from './cssdocs';
 import {
     MinimalPath,
     SchemaStates,

@@ -19,13 +19,8 @@
       "args": ["--timeout", "999999", "packages/*/dist/**/${fileBasenameNoExtension}.js"],
       "preLaunchTask": "npm: build",
       "internalConsoleOptions": "openOnSessionStart",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ],
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
     },
     {
       "type": "node",

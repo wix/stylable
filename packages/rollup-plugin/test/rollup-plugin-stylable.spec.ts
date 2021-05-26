@@ -9,12 +9,14 @@ const getElementsStyles = () => {
     const { backgroundImage, backgroundColor, fontSize, fontFamily } = getComputedStyle(
         document.body
     );
-    const { backgroundImage: partBackgroundImage, color: partColor } = getComputedStyle(
-        document.body.firstElementChild!
-    );
+    const {
+        backgroundImage: partBackgroundImage,
+        color: partColor,
+        border: partBorder,
+    } = getComputedStyle(document.body.firstElementChild!);
     return {
         body: { backgroundImage, backgroundColor, fontSize, fontFamily },
-        part: { backgroundImage: partBackgroundImage, color: partColor },
+        part: { backgroundImage: partBackgroundImage, color: partColor, partBorder },
     };
 };
 
@@ -48,6 +50,7 @@ describe('StylableRollupPlugin', function () {
 
         expect(part.backgroundImage).to.match(/2e13bcd92bf005d9bf9046f9206e5652ed34fc7b_dog.png/);
         expect(part.color).to.equal('rgb(0, 128, 0)');
+        expect(part.partBorder).to.equal('5px solid rgb(255, 255, 0)');
 
         await act(async (done) => {
             nodeFs.writeFileSync(nodeFs.join(projectDir, 'index.st.css'), '');

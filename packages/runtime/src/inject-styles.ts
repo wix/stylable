@@ -14,7 +14,7 @@ export function injectStyles(host: Host) {
         var d = document;
         var head = d.head;
         var style = d.createElement('style');
-        style.setAttribute('st-depth', (depth as unknown) as string);
+        style.setAttribute('st-depth', depth as unknown as string);
         style.setAttribute('st-id', namespace);
         style.setAttribute('st-runtime', runtimeId);
         style.textContent = css;

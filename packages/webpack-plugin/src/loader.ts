@@ -9,6 +9,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         this.stylable,
         meta,
         this.stylable.projectRoot,
+        this.assetFilter,
         this.assetsMode
     );
 

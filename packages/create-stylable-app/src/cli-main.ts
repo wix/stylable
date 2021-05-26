@@ -2,7 +2,7 @@ import path from 'path';
 import yargs from 'yargs';
 import { createProjectFromTemplate } from './create-project';
 
-const { argv } = yargs
+const argv = yargs
     .usage('npm init stylable-app <project-name>')
     .option('template', {
         alias: 't',
@@ -19,7 +19,8 @@ const { argv } = yargs
     .alias('h', 'help')
     .alias('v', 'version')
     .help()
-    .strict();
+    .strict()
+    .parseSync();
 
 const targetPath = argv._[0].toString();
 

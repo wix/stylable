@@ -29,5 +29,4 @@ describe(`(${project})`, () => {
 
         expect(styleElements).to.eql([{ id: './src/index.st.css', depth: '1' }]);
     });
-
 });

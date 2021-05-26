@@ -4,4 +4,3 @@ const btn = button.render('I am a button!!!!!');
 btn.id = 'btn';
 document.body.appendChild(btn);
 /* UNCOMMENT_LINE document.body.appendChild(box.render()); */
-

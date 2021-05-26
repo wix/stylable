@@ -32,14 +32,6 @@ declare module 'postcss-js' {
     export = postcssJs;
 }
 
-declare module 'postcss-selector-matches/dist/replaceRuleSelector' {
-    // library is esm transpiled to cjs! has an actual default export.
-    export default function replaceRuleSelector(
-        rule: import('postcss').Rule,
-        options: { lineBreak: boolean }
-    ): string;
-}
-
 declare module 'node-eval' {
     function nodeEval(content: string, filename: string, context?: object): any;
     export = nodeEval;

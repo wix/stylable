@@ -9,9 +9,10 @@ export function getImports(
     stylable: Stylable,
     meta: StylableMeta,
     projectRoot: string,
+    assetFilter: (url: string, context: string) => boolean,
     assetsMode: 'url' | 'loader'
 ) {
-    const urls = processUrlDependencies(meta, projectRoot);
+    const urls = processUrlDependencies(meta, projectRoot, assetFilter);
     const imports: string[] = [];
     const unusedImports: string[] = [];
     for (const imported of meta.imports) {

@@ -15,6 +15,7 @@ import {
 } from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
+import decache from 'decache';
 import {
     emitAssets,
     generateCssString,
@@ -32,6 +33,18 @@ export interface StylableRollupPluginOptions {
     diagnosticsMode?: DiagnosticsMode;
     resolveNamespace?: typeof resolveNamespaceNode;
 }
+
+const requireModuleCache = new Set<string>();
+const requireModule = (id: string) => {
+    requireModuleCache.add(id);
+    return require(id);
+};
+const clearRequireCache = () => {
+    for (const id of requireModuleCache) {
+        decache(id);
+    }
+    requireModuleCache.clear();
+};
 
 const ST_CSS = '.st.css';
 
@@ -55,6 +68,7 @@ export function stylableRollupPlugin({
             extracted = extracted || new Map();
             emittedAssets = emittedAssets || new Map();
             if (stylable) {
+                clearRequireCache();
                 stylable.initCache();
             } else {
                 stylable = Stylable.create({
@@ -64,6 +78,7 @@ export function stylableRollupPlugin({
                     resolveNamespace,
                     optimizer: new StylableOptimizer(),
                     resolverCache: new Map(),
+                    requireModule,
                 });
             }
         },
