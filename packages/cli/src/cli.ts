@@ -52,7 +52,9 @@ const argv = yargs
         type: 'boolean',
         description:
             'output source maps for stylable definition files for sources (.st.css.d.ts.map)',
-        default: false,
+        default: true,
+        defaultDescription: 'true if "--dts" option is enabled, otherwise false',
+        implies: 'dts',
     })
     .option('useNamespaceReference', {
         type: 'boolean',
@@ -145,6 +147,7 @@ const argv = yargs
     .alias('v', 'version')
     .help()
     .strict()
+    .wrap(yargs.terminalWidth())
     .parseSync();
 
 const log = createLogger('[Stylable]', argv.log);

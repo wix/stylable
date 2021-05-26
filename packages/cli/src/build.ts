@@ -216,11 +216,13 @@ function buildSingleFile(
             `Write File Error: ${outPath}`
         );
 
+        // .d.ts.map
         if (dtsSourceMap) {
-            const dtsContent = createModuleSource(res, 'dts.map', false);
+            const dtsMappingContent = createModuleSource(res, 'dts.map', false);
 
+            log('[Build]', 'output .d.ts.map');
             tryRun(
-                () => fs.writeFileSync(outSrcPath + '.d.ts.map', dtsContent),
+                () => fs.writeFileSync(outSrcPath + '.d.ts.map', dtsMappingContent),
                 `Write File Error: ${outPath}`
             );
         }
