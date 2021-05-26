@@ -128,7 +128,7 @@ function buildSingleFile(
     optimize = false,
     minify = false,
     dts = false,
-    dtsSourceMap = false
+    dtsSourceMap?: boolean
 ) {
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
     const outPath = outSrcPath + '.js';
@@ -217,7 +217,8 @@ function buildSingleFile(
         );
 
         // .d.ts.map
-        if (dtsSourceMap) {
+        // if not explicitly defined, assumed true with "--dts" parent scope
+        if (dtsSourceMap === undefined || dtsSourceMap === true) {
             const dtsMappingContent = createModuleSource(res, 'dts.map', false);
 
             log('[Build]', 'output .d.ts.map');

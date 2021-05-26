@@ -52,7 +52,6 @@ const argv = yargs
         type: 'boolean',
         description:
             'output source maps for stylable definition files for sources (.st.css.d.ts.map)',
-        default: true,
         defaultDescription: 'true if "--dts" option is enabled, otherwise false',
         implies: 'dts',
     })
