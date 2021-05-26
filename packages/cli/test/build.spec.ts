@@ -261,12 +261,11 @@ describe('build stand alone', () => {
         expect(fs.existsSync(resolve('/dist/comp.global.css'))).to.equal(true);
     });
 
-    // Todo: fix d.ts test expectations
     it('DTS only parts', () => {
         const fs = createFS({
             '/main.st.css': `
                 .root   {}
-                .string {}`,
+                .part {}`,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
@@ -281,19 +280,26 @@ describe('build stand alone', () => {
             moduleFormats: [],
             log,
             dts: true,
+            dtsSourceMap: false,
         });
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
             expect(fs.existsSync(resolve(p)), p).to.equal(true);
         });
+
+        const dtsContent = fs.readFileSync(resolve('/main.st.css.d.ts'), 'utf8');
+
+        expect(dtsContent).contains('declare const classes');
+        expect(dtsContent).contains('"root":');
+        expect(dtsContent).contains('"part":');
     });
 
     it('DTS with states', () => {
         const fs = createFS({
             '/main.st.css': `
-                .root   { -st-states: x; }
-                .string { -st-states: y(string); }
-                .number { -st-states: z(number); }
+                .root   { -st-states: w; }
+                .string { -st-states: x(string); }
+                .number { -st-states: y(number); }
                 .enum   { -st-states: z(enum(on, off, default)); }`,
         });
 
@@ -309,14 +315,23 @@ describe('build stand alone', () => {
             moduleFormats: [],
             log,
             dts: true,
+            dtsSourceMap: false,
         });
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
             expect(fs.existsSync(resolve(p)), p).to.equal(true);
         });
+
+        const dtsContent = fs.readFileSync(resolve('/main.st.css.d.ts'), 'utf8');
+
+        expect(dtsContent).to.contain('type states = {');
+        expect(dtsContent).to.contain('"w"?:');
+        expect(dtsContent).to.contain('"x"?: string');
+        expect(dtsContent).to.contain('"y"?: number');
+        expect(dtsContent).to.contain('"z"?: "on" | "off" | "default";');
     });
 
-    it.only('DTS with mapping', () => {
+    it('DTS with mapping', () => {
         const fs = createFS({
             '/main.st.css': `
                 @keyframes blah {
@@ -352,8 +367,13 @@ describe('build stand alone', () => {
             dtsSourceMap: true,
         });
 
-        ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
+        ['/main.st.css', '/main.st.css.d.ts', '/main.st.css.d.ts.map'].forEach((p) => {
             expect(fs.existsSync(resolve(p)), p).to.equal(true);
         });
+
+        const dtsSourceMapContent = fs.readFileSync(resolve('/main.st.css.d.ts.map'), 'utf8');
+        expect(dtsSourceMapContent).to.contain(`"file": "main.st.css.d.ts",`);
+        expect(dtsSourceMapContent).to.contain(`"sources": [`);
+        expect(dtsSourceMapContent).to.contain(`"main.st.css"`);
     });
 });
