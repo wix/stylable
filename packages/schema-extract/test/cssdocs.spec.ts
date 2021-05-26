@@ -1,117 +1,185 @@
 import { expect } from 'chai';
-import path from 'path';
-import {
-    extractSchema,
-    stylableClass,
-    stylableElement,
-    stylableModule,
-    StylableModuleSchema,
-    stylableVar,
-} from '@stylable/schema-extract';
-import { mockNamespace } from './mock-namespace';
+import { generateStylableResult } from '@stylable/core-test-kit';
+import { getCssDocsForSymbol } from '@stylable/schema-extract';
 
-describe('cssDocs extraction', () => {
-    it('should extract cssDocs description and tags for a simple class', () => {
-        const res = extractSchema(
-            `
-            /**
-             * this is a description text
-             * @description this is a description tag
-             */
-            .root {}
-            `,
-            '/entry.st.css',
-            '/',
-            path,
-            mockNamespace
-        );
-
-        const expected: StylableModuleSchema = {
-            $id: '/entry.st.css',
-            $ref: stylableModule,
-            namespace: 'entry',
-            properties: {
-                root: {
-                    $ref: stylableClass,
-                    description: 'this is a description text',
-                    docTags: {
-                        description: 'this is a description tag',
-                    },
+describe('cssDocs comments metadata', () => {
+    it('should return null when extracting cssDocs from a simple selector without a definition', () => {
+        const { meta } = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        .root {}
+                        `,
                 },
             },
-        };
-        expect(res).to.eql(expected);
+        });
+
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
+
+        expect(cssDoc).to.eql(null);
     });
 
-    it('should extract cssDocs description and tags for a simple element', () => {
-        const res = extractSchema(
-            `
-            /**
-             * this is a description text
-             * @description this is a description tag
-             */
-            Comp {}
-            `,
-            '/entry.st.css',
-            '/',
-            path,
-            mockNamespace
-        );
-
-        const expected: StylableModuleSchema = {
-            $id: '/entry.st.css',
-            $ref: stylableModule,
-            namespace: 'entry',
-            properties: {
-                root: {
-                    $ref: stylableClass,
-                },
-                Comp: {
-                    $ref: stylableElement,
-                    description: 'this is a description text',
-                    docTags: {
-                        description: 'this is a description tag',
-                    },
+    it('should parse a simple class description', () => {
+        const { meta } = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        /**
+                         * this is my description
+                         */
+                        .root {}
+                        `,
                 },
             },
-        };
-        expect(res).to.eql(expected);
+        });
+
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
+
+        expect(cssDoc).to.eql({ description: 'this is my description', tags: {} });
     });
 
-    it('should extract cssDocs description and tags for a variable', () => {
-        const res = extractSchema(
-            `
-            :vars {
-                /**
-                 * this is a var description text
-                 * @description this is a var description tag
-                 */
-                myVar: some value;
-            }
-            `,
-            '/entry.st.css',
-            '/',
-            path,
-            mockNamespace
-        );
-
-        const expected: StylableModuleSchema = {
-            $id: '/entry.st.css',
-            $ref: stylableModule,
-            namespace: 'entry',
-            properties: {
-                root: {
-                    $ref: stylableClass,
-                },
-                myVar: {
-                    $ref: stylableVar,
-                    description: 'this is a var description text',
-                    docTags: {
-                        description: 'this is a var description tag',
-                    },
+    it('should parse a multiple tags, including multi-line for a simple class', () => {
+        const { meta } = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        /**
+                         * @description this is a description tag
+                         * @field1 data field 1
+                         * @field2 data field 2 is a multi
+                         * line input
+                         * @field3 data field 3
+                         */
+                        .root {}
+                        `,
                 },
             },
-        };
-        expect(res).to.eql(expected);
+        });
+
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
+
+        expect(cssDoc).to.eql({
+            description: '',
+            tags: {
+                description: 'this is a description tag',
+                field1: 'data field 1',
+                field2: 'data field 2 is a multi line input',
+                field3: 'data field 3',
+            },
+        });
+    });
+
+    it('should parse a simple description and tag for a simple class', () => {
+        const { meta } = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        /**
+                         * this is a description text
+                         * @description this is a description tag
+                         */
+                        .root {}
+                        `,
+                },
+            },
+        });
+
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
+
+        expect(cssDoc).to.eql({
+            description: 'this is a description text',
+            tags: { description: 'this is a description tag' },
+        });
+    });
+
+    it('should parse a simple description and tag for a simple element', () => {
+        const { meta } = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        /**
+                         * this is a description text
+                         * @description this is a description tag
+                         */
+                        Part {}
+                        `,
+                },
+            },
+        });
+
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.Part);
+
+        expect(cssDoc).to.eql({
+            description: 'this is a description text',
+            tags: { description: 'this is a description tag' },
+        });
+    });
+
+    it('should parse a simple var description', () => {
+        const { meta } = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :vars {
+                            /**
+                             * this is a var description text
+                             */
+                            myVar: some value;
+                        }
+                        `,
+                },
+            },
+        });
+
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.myVar);
+
+        expect(cssDoc).to.eql({
+            description: 'this is a var description text',
+            tags: {},
+        });
+    });
+
+    it('should parse a simple var description and tags', () => {
+        const { meta } = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :vars {
+                            /**
+                             * this is a var description text
+                             * @field1 data field 1
+                             * @field2 data field 2 is a multi
+                             * line input
+                             */
+                            myVar: some value;
+                        }
+                        `,
+                },
+            },
+        });
+
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.myVar);
+
+        expect(cssDoc).to.eql({
+            description: 'this is a var description text',
+            tags: {
+                field1: 'data field 1',
+                field2: 'data field 2 is a multi line input',
+            },
+        });
     });
 });

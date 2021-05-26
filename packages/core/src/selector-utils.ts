@@ -361,7 +361,7 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return (
-        !!rule.parent &&
+        rule.parent &&
         rule.parent.type === 'atrule' &&
         (rule.parent as postcss.AtRule).name === atRuleName
     );

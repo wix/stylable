@@ -334,6 +334,51 @@ describe('Javascript Mixins', () => {
         );
     });
 
+    it('mixin with nested at-rule', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                    :import {
+                        -st-from: "./mixin";
+                        -st-default: mixin;
+                    }
+                    .containerA {
+                        -st-mixin: mixin;
+                    }
+                `,
+                },
+                '/mixin.js': {
+                    content: `
+                    module.exports = function() {
+                        return {
+                            "@supports not (appearance: auto)": {
+                                "&": {
+                                    color: "red"
+                                }    
+                            },
+                            "&": {
+                                color: "green"
+                            }
+                        }
+                    }
+                `,
+                },
+            },
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry__containerA', '');
+        matchRuleAndDeclaration(
+            result.nodes[1] as postcss.Container,
+            0,
+            '.entry__containerA',
+            'color: red'
+        );
+        matchRuleAndDeclaration(result, 2, '.entry__containerA', 'color: green');
+    });
+
     it('mixin with multiple selectors', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,

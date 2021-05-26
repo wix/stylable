@@ -14,6 +14,7 @@ import type {
 
 import {
     fixChunkOrdering,
+    isChildOfAtRule,
     isNodeMatch,
     parseSelector,
     SelectorAstNode,
@@ -122,22 +123,20 @@ export function scopeSelector(
 }
 
 export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
-    let mixinRoot: postcss.Rule | null = null;
+    let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
+        if (isChildOfAtRule(mixinRule, 'keyframes')) {
+            return;
+        }
         if (mixinRule.selector === '&' && !mixinRoot) {
-            mixinRoot = mixinRule;
-        } else {
-            const parentRule = mixinRule.parent;
-            if (
-                parentRule &&
-                parentRule.type === 'atrule' &&
-                (parentRule as postcss.AtRule).name === 'keyframes'
-            ) {
-                return;
+            if (mixinRule.parent === mixinAst) {
+                mixinRoot = mixinRule;
+            } else {
+                mixinRoot = 'NoRoot';
+                mixinRule.selector = scopeSelector(rule.selector, mixinRule.selector).selector;
             }
-            const out = scopeSelector(rule.selector, mixinRule.selector);
-            mixinRule.selector = out.selector;
-            // mixinRule.selectorAst = out.selectorAst;
+        } else {
+            mixinRule.selector = scopeSelector(rule.selector, mixinRule.selector).selector;
         }
     });
 
@@ -213,8 +212,8 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 mixinRoot.append(node.clone({ selector }));
             }
         } else if (node.type === 'atrule') {
-            if (node.name === 'media') {
-                const mediaSubset = createSubsetAst(
+            if (node.name === 'media' || node.name === 'supports') {
+                const atRuleSubset = createSubsetAst(
                     node,
                     selectorPrefix,
                     postcss.atRule({
@@ -223,8 +222,8 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                     }),
                     isRoot
                 );
-                if (mediaSubset.nodes) {
-                    mixinRoot.append(mediaSubset);
+                if (atRuleSubset.nodes) {
+                    mixinRoot.append(atRuleSubset);
                 }
             } else if (isRoot) {
                 mixinRoot.append(node.clone());
