@@ -1,4 +1,4 @@
-import { writeFileSync, unlinkSync, rmdirSync } from 'fs';
+import { writeFileSync, unlinkSync, rmdirSync, renameSync } from 'fs';
 import { join } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
@@ -227,6 +227,92 @@ describe('Stylable Cli Watch', () => {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
         });
     });
+
+    it('should handle renames of files', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{ color: red }`,
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--outDir', './dist', '-w', '--cjs', '--css'],
+            steps: [
+                {
+                    msg: messages.START_WATCHING,
+                    action() {
+                        renameSync(
+                            join(tempDir.path, 'style.st.css'),
+                            join(tempDir.path, 'style-renamed.st.css')
+                        );
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        return false;
+                    },
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files['dist/style-renamed.css']).to.include(`color: red`);
+        expect(files).to.include({
+            'package.json': '{"name": "test", "version": "0.0.0"}',
+            'style-renamed.st.css': '.root{ color: red }',
+        });
+    });
+
+    // it.only('should handle renames of folders', async () => {
+    //     populateDirectorySync(tempDir.path, {
+    //         'package.json': `{"name": "test", "version": "0.0.0"}`,
+    //         styles: {
+    //             deep: { 'style.st.css': `.root{ color: red }` },
+    //         },
+    //     });
+
+    //     await run({
+    //         dirPath: tempDir.path,
+    //         args: ['--outDir', './dist', '-w', '--cjs', '--css'],
+    //         steps: [
+    //             {
+    //                 msg: messages.START_WATCHING,
+    //                 action() {
+    //                     renameSync(
+    //                         join(tempDir.path, 'styles'),
+    //                         join(tempDir.path, 'styles-renamed')
+    //                     );
+    //                     return true;
+    //                 },
+    //             },
+    //             {
+    //                 msg: messages.FINISHED_PROCESSING,
+    //                 action() {
+    //                     return true;
+    //                 },
+    //             },
+    //             {
+    //                 msg: messages.FINISHED_PROCESSING,
+    //                 action() {
+    //                     return false;
+    //                 },
+    //             },
+    //         ],
+    //     });
+    //     const files = loadDirSync(tempDir.path);
+    //     expect(files['dist/style-renamed.css']).to.include(`color: red`);
+    //     expect(files).to.include({
+    //         'package.json': '{"name": "test", "version": "0.0.0"}',
+    //         'style-renamed.st.css': '.root{ color: red }',
+    //     });
+    // });
 
     it('should re-build indexes', async () => {
         populateDirectorySync(tempDir.path, {
