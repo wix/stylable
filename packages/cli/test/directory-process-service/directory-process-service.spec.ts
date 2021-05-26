@@ -1,12 +1,23 @@
 import { createMemoryFs } from '@file-services/memory';
 import type { IFileSystem } from '@file-services/types';
-import { expect, use } from 'chai';
-import { spy } from 'sinon';
-import sinonChai from 'sinon-chai';
+import { expect } from 'chai';
 import { waitFor } from 'promise-assist';
 import { DirectoryProcessService } from '@stylable/cli';
 
-use(sinonChai);
+function createSpy<T extends (...args: any[]) => any>(fn?: T) {
+    const spy = (...args: any[]) => {
+        spy.calls.push(args);
+        spy.callCount++;
+        return fn?.(...args);
+    };
+    spy.calls = [] as unknown[][];
+    spy.callCount = 0;
+    spy.resetHistory = () => {
+        spy.calls.length = 0;
+        spy.callCount = 0;
+    };
+    return spy;
+}
 
 const project1 = {
     '0.template.js': `
@@ -88,7 +99,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should handle directory added after watch started', async () => {
-            const changeSpy = spy();
+            const changeSpy = createSpy();
 
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
@@ -111,7 +122,7 @@ describe('DirectoryWatchService', () => {
             await watcher.init('/');
 
             // Nothing happened
-            expect(changeSpy).to.not.been.called;
+            expect(changeSpy.callCount, 'not been called').to.equal(0);
 
             fs.ensureDirectorySync('test');
 
@@ -119,7 +130,7 @@ describe('DirectoryWatchService', () => {
             fs.writeFileSync('/test/0.template.js', 'output(`0()`)');
 
             await waitFor(() => {
-                expect(changeSpy).to.have.been.calledOnce;
+                expect(changeSpy.callCount, 'called once').to.equal(1);
                 expect(fs.readFileSync('/dist/test/0.txt', 'utf8')).to.equal('0()');
                 expectInvalidationMap(watcher, {
                     '/test/0.template.js': [],
@@ -196,7 +207,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should report affectedFiles and no changeOrigin when watch started', async () => {
-            const changeSpy = spy();
+            const changeSpy = createSpy();
 
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
@@ -211,17 +222,19 @@ describe('DirectoryWatchService', () => {
 
             await watcher.init('/');
 
-            expect(changeSpy).to.have.callCount(1);
+            expect(changeSpy.callCount, 'called once').to.equal(1);
 
-            expect(changeSpy).to.have.been.calledWith({
-                affectedFiles: [
-                    '/0.template.js',
-                    '/a.template.js',
-                    '/b.template.js',
-                    '/c.template.js',
-                ],
-                changeOriginPath: undefined,
-            });
+            expect(changeSpy.calls[0], 'called with').to.eql([
+                {
+                    affectedFiles: [
+                        '/0.template.js',
+                        '/a.template.js',
+                        '/b.template.js',
+                        '/c.template.js',
+                    ],
+                    changeOriginPath: undefined,
+                },
+            ]);
         });
 
         it('should allow hooks to fill in the invalidationMap', async () => {
@@ -249,7 +262,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should report change for all files affected by the changeOrigin', async () => {
-            const changeSpy = spy();
+            const changeSpy = createSpy();
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
@@ -274,16 +287,18 @@ describe('DirectoryWatchService', () => {
             await fs.promises.writeFile('/c.template.js', `output('C($)');`);
 
             await waitFor(() => {
-                expect(changeSpy).to.have.callCount(1);
-                expect(changeSpy).to.have.calledWith({
-                    changeOriginPath: '/c.template.js',
-                    affectedFiles: [
-                        '/c.template.js',
-                        '/0.template.js',
-                        '/a.template.js',
-                        '/b.template.js',
-                    ],
-                });
+                expect(changeSpy.callCount, 'called once').to.equal(1);
+                expect(changeSpy.calls[0], 'called with').to.eql([
+                    {
+                        changeOriginPath: '/c.template.js',
+                        affectedFiles: [
+                            '/c.template.js',
+                            '/0.template.js',
+                            '/a.template.js',
+                            '/b.template.js',
+                        ],
+                    },
+                ]);
             });
 
             changeSpy.resetHistory();
@@ -298,11 +313,13 @@ describe('DirectoryWatchService', () => {
             );
 
             await waitFor(() => {
-                expect(changeSpy).to.have.callCount(1);
-                expect(changeSpy).to.have.calledWith({
-                    changeOriginPath: '/b.template.js',
-                    affectedFiles: ['/b.template.js', '/0.template.js', '/a.template.js'],
-                });
+                expect(changeSpy.callCount, 'called once').to.equal(1);
+                expect(changeSpy.calls[0], 'called with').to.eql([
+                    {
+                        changeOriginPath: '/b.template.js',
+                        affectedFiles: ['/b.template.js', '/0.template.js', '/a.template.js'],
+                    },
+                ]);
             });
 
             changeSpy.resetHistory();
@@ -317,11 +334,13 @@ describe('DirectoryWatchService', () => {
             );
 
             await waitFor(() => {
-                expect(changeSpy).to.have.callCount(1);
-                expect(changeSpy).to.have.calledWith({
-                    changeOriginPath: '/0.template.js',
-                    affectedFiles: ['/0.template.js'],
-                });
+                expect(changeSpy.callCount, 'called once').to.equal(1);
+                expect(changeSpy.calls[0], 'called with').to.eql([
+                    {
+                        changeOriginPath: '/0.template.js',
+                        affectedFiles: ['/0.template.js'],
+                    },
+                ]);
             });
         });
     });
