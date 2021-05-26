@@ -35,8 +35,8 @@ export class DirectoryProcessService {
             if (item.type === 'directory') {
                 await this.watchPath(item.path);
             } else if (item.type === 'file') {
-                this.addFileToWatchedDirectory(item.path);
                 affectedFiles.add(item.path);
+                this.addFileToWatchedDirectory(item.path);
                 this.registerInvalidateOnChange(item.path);
             }
         }
@@ -113,9 +113,16 @@ export class DirectoryProcessService {
             }
             return this.options.processFiles?.(this, affectedFiles, deletedFiles, event);
         } else if (!event.stats) {
-            const fileSet = this.watchedDirectoryFiles.get(event.path);
+            const fileSet = new Set<string>();
+            for (const [dirPath, files] of this.watchedDirectoryFiles) {
+                if (dirPath.startsWith(event.path)) {
+                    for (const filePath of files) {
+                        fileSet.add(filePath);
+                    }
+                }
+            }
 
-            if (fileSet) {
+            if (fileSet.size) {
                 const affectedFiles = new Set<string>();
                 const deletedFiles = new Set<string>();
                 for (const filePath of fileSet) {

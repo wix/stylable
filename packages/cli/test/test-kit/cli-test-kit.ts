@@ -65,7 +65,7 @@ export interface Files {
 }
 
 export interface FilesStructure {
-    [filepath: string]: string | Files;
+    [filepath: string]: string | FilesStructure;
 }
 
 export function loadDirSync(rootPath: string, dirPath: string = rootPath): Files {

@@ -164,10 +164,43 @@ describe('Stylable Cli Watch', () => {
         });
     });
 
-    it.only('should handle deleted folders', async () => {
+    it('should handle deleted folders', async () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             styles: { 'style.st.css': `.root{ color: red }` },
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--outDir', './dist', '-w', '--cjs', '--css'],
+            steps: [
+                {
+                    msg: messages.START_WATCHING,
+                    action() {
+                        rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        return false;
+                    },
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files).to.eql({
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+        });
+    });
+
+    it('should handle deleted folders with deep watched files', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            styles: {
+                deep: { 'style.st.css': `.root{ color: red }` },
+            },
         });
 
         await run({
