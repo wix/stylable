@@ -1,12 +1,18 @@
 import { expect } from 'chai';
-import sinon from 'sinon';
 import { timedCache } from '@stylable/core';
 
 const sleep = (time: number) => new Promise((res) => setTimeout(res, time));
-
+function createSpy(fn: (...args: any[]) => any) {
+    const sp = (...args: any[]) => {
+        sp.callCount += 1;
+        return fn(...args);
+    };
+    sp.callCount = 0;
+    return sp;
+}
 describe('timed-cache', () => {
     it('should cache for specific time', async () => {
-        const spy = sinon.spy((...args: string[]) => args.join(';'));
+        const spy = createSpy((...args: string[]) => args.join(';'));
         const cached = timedCache(spy, {
             createKey: (args: string[]) => args.join(';'),
             timeout: 100,
@@ -34,7 +40,7 @@ describe('timed-cache', () => {
     });
 
     it('should cache for specific time with timer auto clean', async () => {
-        const spy = sinon.spy((...args: string[]) => args.join(';'));
+        const spy = createSpy((...args: string[]) => args.join(';'));
         const cached = timedCache(spy, {
             createKey: (args: string[]) => args.join(';'),
             timeout: 100,
@@ -61,7 +67,7 @@ describe('timed-cache', () => {
     });
 
     it('should cache for specific time with timer auto clean (everytime)', async () => {
-        const spy = sinon.spy((...args: string[]) => args.join(';'));
+        const spy = createSpy((...args: string[]) => args.join(';'));
         const cached = timedCache(spy, {
             createKey: (args: string[]) => args.join(';'),
             timeout: 100,

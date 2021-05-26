@@ -18,8 +18,7 @@
     "@stylable/runtime": "^4.2.4",
     "decache": "^4.6.0",
     "find-config": "^1.0.0",
-    "lodash.clonedeep": "^4.5.0",
-    "webpack-sources": "^2.2.0"
+    "lodash.clonedeep": "^4.5.0"
   },
   "files": [
     "dist",
