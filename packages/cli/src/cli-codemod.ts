@@ -6,7 +6,7 @@ import { registeredMods } from './code-mods/apply-code-mods';
 import { codeMods } from './code-mods/code-mods';
 import { createLogger } from './create-logger';
 
-const { argv } = yargs
+const argv = yargs
     .option('rootDir', {
         type: 'string',
         description: 'root directory of project',
@@ -20,7 +20,8 @@ const { argv } = yargs
     })
     .alias('h', 'help')
     .help()
-    .strict();
+    .strict()
+    .parseSync();
 
 const { mods, rootDir } = argv;
 
