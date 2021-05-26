@@ -25,7 +25,8 @@ function getClassSrcPosition(className: string, meta: StylableMeta): Position | 
         });
     }
 
-    return res;
+    // root is auto defined by styable in each stylesheet even if not explicitly written by the user
+    return className === 'root' && !res ? { line: 0, column: 0 } : res;
 }
 
 function getVarsSrcPosition(varName: string, meta: StylableMeta): Position | undefined {
@@ -180,7 +181,7 @@ function getClassSourceName(targetName: string, classTokens: ClassesToken): stri
     return;
 }
 
-export function generateDTSSourceMap(_srcFilename: string, dtsContent: string, meta: StylableMeta) {
+export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
     const tokens = tokenizeDTS(dtsContent);
     const mapping: Record<number, LineMapping> = {};
     const lines = dtsContent.split('\n');

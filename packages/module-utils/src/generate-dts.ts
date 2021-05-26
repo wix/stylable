@@ -1,4 +1,4 @@
-import { StateParsedValue, StylableMeta, StylableResults } from '@stylable/core';
+import type { StateParsedValue, StylableMeta, StylableResults } from '@stylable/core';
 
 const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);

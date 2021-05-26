@@ -60,11 +60,7 @@ export function createModuleSource(
         case 'dts':
             return generateDTSContent(stylableResult);
         case 'dts.map':
-            return generateDTSSourceMap(
-                stylableResult.meta.source,
-                generateDTSContent(stylableResult),
-                stylableResult.meta
-            );
+            return generateDTSSourceMap(generateDTSContent(stylableResult), stylableResult.meta);
         case 'esm': {
             const importKey = renderableOnly ? 'createRenderable' : 'create';
             return generateModuleSource(
