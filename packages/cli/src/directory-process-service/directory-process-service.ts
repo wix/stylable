@@ -63,6 +63,9 @@ export class DirectoryProcessService {
         const fileSet = this.watchedDirectoryFiles.get(dirName);
         if (fileSet) {
             fileSet.delete(filePath);
+            if (fileSet.size === 0) {
+                this.watchedDirectoryFiles.delete(dirName);
+            }
         }
     }
 
