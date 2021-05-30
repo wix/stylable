@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@stylable/core": "^4.2.4",
-    "jest-docblock": "^26.0.0"
+    "jest-docblock": "^27.0.1"
   },
   "files": [
     "dist",
