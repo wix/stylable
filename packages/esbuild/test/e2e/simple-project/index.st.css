@@ -1,4 +1,8 @@
+@st-import Color from "./theme-color";
+
 .root {
-  color: blue;
+  color: Color();
+  color: Color(color1);
+  color: Color(color2);
   background: url('./asset.png');
 }

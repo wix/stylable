@@ -1,5 +1,6 @@
 import type { Plugin, PluginBuild } from 'esbuild';
 import { Stylable } from '@stylable/core';
+import decache from 'decache';
 import fs from 'fs';
 
 const namespaces = {
@@ -10,9 +11,11 @@ const namespaces = {
 export const stylablePlugin = (): Plugin => ({
     name: 'esbuild-stylable-plugin',
     setup(build: PluginBuild) {
+        const requireModule = createDecacheRequire(build);
         const stylable = Stylable.create({
             fileSystem: fs,
-            projectRoot: '',
+            projectRoot: build.initialOptions.absWorkingDir || process.cwd(),
+            requireModule,
         });
 
         build.onStart(() => {
@@ -67,3 +70,17 @@ export const stylablePlugin = (): Plugin => ({
         });
     },
 });
+
+export function createDecacheRequire(build: PluginBuild) {
+    const cacheIds = new Set<string>();
+    build.onStart(() => {
+        for (const id of cacheIds) {
+            decache(id);
+        }
+        cacheIds.clear();
+    });
+    return (id: string) => {
+        cacheIds.add(id);
+        return require(id);
+    };
+}
