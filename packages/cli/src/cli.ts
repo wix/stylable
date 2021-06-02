@@ -208,7 +208,7 @@ build({
     optimize,
     minify,
     manifest: manifest ? join(rootDir, outDir, manifestFilepath) : undefined,
-    useSourceNamespace: useNamespaceReference,
+    useNamespaceReference,
     watch,
     diagnostics,
 })

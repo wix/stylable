@@ -15,26 +15,47 @@ export const messages = {
 };
 
 export interface BuildOptions {
+    /** Specify the extension of stylable files */
     extension: string;
+    /** provide a custom file-system for the build */
     fs: IFileSystem;
+    /** provide Stylable instance */
     stylable: Stylable;
+    /** project root directory */
     rootDir: string;
+    /** specify where to find source files */
     srcDir: string;
+    /** specify where to build the target files */
     outDir: string;
+    /** should the build need to output manifest file */
     manifest?: string;
+    /** log function */
     log: Log;
+    /** opt into build index file and specify the filepath for the generated index file */
     indexFile?: string;
+    /** path to a custom cli index generator */
     generatorPath?: string;
+    /** specify emitted module formats */
     moduleFormats?: Array<'cjs' | 'esm'>;
+    /** template of the css file emitted when using outputCSS */
     outputCSSNameTemplate?: string;
+    /** should include the css in the generated JS module */
     includeCSSInJS?: boolean;
+    /** should output build css for each source file */
     outputCSS?: boolean;
+    /** should output source .st.css file to dist */
     outputSources?: boolean;
-    useSourceNamespace?: boolean;
+    /** should add namespace reference to the .st.css copy  */
+    useNamespaceReference?: boolean;
+    /** should inject css import in the JS module for the generated css from outputCSS */
     injectCSSRequest?: boolean;
+    /** should apply css optimizations */
     optimize?: boolean;
+    /** should minify css */
     minify?: boolean;
+    /** enable watch mode */
     watch?: boolean;
+    /** should emit diagnostics */
     diagnostics?: boolean;
 }
 
@@ -53,7 +74,7 @@ export async function build({
     outputCSS,
     outputCSSNameTemplate,
     outputSources,
-    useSourceNamespace,
+    useNamespaceReference,
     injectCSSRequest,
     optimize,
     minify,
@@ -61,9 +82,11 @@ export async function build({
     watch,
     diagnostics,
 }: BuildOptions) {
-    const { join } = fs;
+    const { join, resolve } = fs;
+    rootDir = resolve(rootDir);
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);
+    const nodeModules = join(rootDir, 'node_modules');
 
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
@@ -77,17 +100,19 @@ export async function build({
         watchMode: watch,
         autoResetInvalidations: true,
         directoryFilter(dirPath) {
-            if (
-                // TODO: (watch && dirPath.startsWith(fullOutDir)) ||
-                dirPath.includes('node_modules') ||
-                dirPath.includes('.git')
-            ) {
+            if (!dirPath.startsWith(rootDir)) {
+                return false;
+            }
+            if (dirPath.startsWith(nodeModules) || dirPath.includes('.git')) {
                 return false;
             }
             return true;
         },
         fileFilter(filePath) {
             if (generated.has(filePath)) {
+                return false;
+            }
+            if (!indexFile && outputSources && filePath.startsWith(fullOutDir)) {
                 return false;
             }
             return filePath.endsWith(extension);
@@ -175,7 +200,7 @@ export async function build({
                     outputCSS,
                     outputCSSNameTemplate,
                     outputSources,
-                    useSourceNamespace,
+                    useNamespaceReference,
                     injectCSSRequest,
                     optimize,
                     minify,

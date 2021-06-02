@@ -101,7 +101,7 @@ describe('build stand alone', () => {
             log,
             moduleFormats: ['cjs'],
             outputSources: true,
-            useSourceNamespace: true,
+            useNamespaceReference: true,
         });
 
         [

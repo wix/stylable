@@ -314,6 +314,8 @@ describe('Stylable Cli Watch', () => {
     //     });
     // });
 
+    it('should ignore source files in dist');
+
     it('should re-build indexes', async () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,

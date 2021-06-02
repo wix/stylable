@@ -24,7 +24,7 @@ export interface BuildFileOptions extends BuildCommonOptions {
     diagnosticsMessages: Map<string, string[]>;
     projectAssets: Set<string>;
     includeCSSInJS?: boolean;
-    useSourceNamespace?: boolean;
+    useNamespaceReference?: boolean;
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
@@ -47,7 +47,7 @@ export function buildSingleFile({
     includeCSSInJS = false,
     diagnosticsMessages,
     projectAssets,
-    useSourceNamespace = false,
+    useNamespaceReference = false,
     injectCSSRequest = false,
     optimize = false,
     minify = false,
@@ -90,7 +90,7 @@ export function buildSingleFile({
         if (outSrcPath === filePath) {
             throw new Error(`Attempt to override source file ${outSrcPath}`);
         }
-        if (useSourceNamespace && !content.includes('st-namespace-reference')) {
+        if (useNamespaceReference && !content.includes('st-namespace-reference')) {
             const relativePathToSource = relative(dirname(outSrcPath), filePath).replace(
                 /\\/gm,
                 '/'
