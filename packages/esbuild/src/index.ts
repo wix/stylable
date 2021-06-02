@@ -1,5 +1,6 @@
 import type { Plugin, PluginBuild } from 'esbuild';
 import { Stylable } from '@stylable/core';
+import { resolveNamespace } from '@stylable/node';
 import decache from 'decache';
 import fs from 'fs';
 
@@ -8,7 +9,11 @@ const namespaces = {
     css: 'stylable-css',
 };
 
-export const stylablePlugin = (): Plugin => ({
+interface ESBuildOptions {
+    resolveNamespace?: typeof resolveNamespace;
+}
+
+export const stylablePlugin = (options: ESBuildOptions = {}): Plugin => ({
     name: 'esbuild-stylable-plugin',
     setup(build: PluginBuild) {
         const requireModule = createDecacheRequire(build);
@@ -16,6 +21,7 @@ export const stylablePlugin = (): Plugin => ({
             fileSystem: fs,
             projectRoot: build.initialOptions.absWorkingDir || process.cwd(),
             requireModule,
+            resolveNamespace: options.resolveNamespace || resolveNamespace,
         });
 
         build.onStart(() => {
