@@ -7,18 +7,15 @@ const namespaces = {
     css: 'stylable-css',
 };
 
-const runtime = require.resolve('@stylable/esbuild/runtime');
-
 export const stylablePlugin = (): Plugin => ({
     name: 'esbuild-stylable-plugin',
     setup(build: PluginBuild) {
         const stylable = Stylable.create({
             fileSystem: fs,
             projectRoot: '',
-            resolverCache: new Map(),
         });
 
-        build.onEnd(() => {
+        build.onStart(() => {
             stylable.initCache();
         });
 
@@ -45,7 +42,7 @@ export const stylablePlugin = (): Plugin => ({
             return {
                 resolveDir: '.',
                 contents: `
-                import { sts, stc } from ${JSON.stringify(runtime)}; 
+                import { sts, stc } from "@stylable/esbuild/runtime"; 
                 import ${JSON.stringify(args.path)};
                 export const namespace = ${JSON.stringify(res.meta.namespace)};
                 export const classes = ${JSON.stringify(res.exports.classes)};
