@@ -1,5 +1,5 @@
-import './depend.css';
+import { classes } from './depend.st.css';
 
 export function log() {
-    console.log('depend!');
+    console.log('depend!', classes);
 }

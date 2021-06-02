@@ -37,6 +37,13 @@ declare module 'node-eval' {
     export = nodeEval;
 }
 
+declare module '*.st.css' {
+    export * from '@stylable/runtime/stylesheet';
+
+    const defaultExport: never;
+    export default defaultExport;
+}
+
 // declare module '!!stylable-metadata?exposeNamespaceMapping=true!*.st.css' {
 //     const stylesheetMetadata: {
 //         entry: string;
