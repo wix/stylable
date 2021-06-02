@@ -29,7 +29,7 @@ export interface StylableLoaderContext extends LoaderContext {
     assetsMode: 'loader' | 'url';
     diagnosticsMode: DiagnosticsMode;
     target: 'oldie' | 'modern';
-
+    assetFilter: (url: string, context: string) => boolean;
     flagStylableModule: (loaderData: LoaderData) => void;
 }
 

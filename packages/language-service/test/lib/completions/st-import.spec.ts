@@ -223,4 +223,14 @@ describe('@st-import Directive', () => {
             },
         ]);
     });
+
+    it('should not break on format statements when @st-import is not the first import', () => {
+        const res = getFormattingEdits(`.x {}
+
+@st-import Comp from "./stylesheet.st.css";
+
+.y {}`);
+
+        expect(res).to.eql([]);
+    });
 });

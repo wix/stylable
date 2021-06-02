@@ -1,4 +1,3 @@
-import { spawn } from 'child_process';
 import { join, normalize } from 'path';
 import playwright from 'playwright-core';
 import rimrafCallback from 'rimraf';
@@ -7,6 +6,7 @@ import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
 import { mkdtempSync, rmdirSync, symlinkSync, existsSync } from 'fs';
 import { deferred } from 'promise-assist';
+import { runServer } from './run-server';
 import { tmpdir } from 'os';
 
 export interface Options {
@@ -158,34 +158,9 @@ export class ProjectRunner {
     }
 
     public async serve() {
-        this.log('Start Server');
-        return new Promise<void>((res) => {
-            const child = spawn(
-                'node',
-                [require.resolve('./isolated-server'), this.outputDir, this.port.toString()],
-                {
-                    cwd: __dirname,
-                    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-                }
-            );
-            child.once('message', (port) => {
-                this.log(`Server Running (port: ${port})`);
-                this.serverUrl = `http://localhost:${port}`;
-                this.server = {
-                    close: () => {
-                        try {
-                            child.kill();
-                        } catch (e) {
-                            this.log('Kill Server Error:' + e);
-                        }
-                    },
-                };
-                res();
-            });
-            child.once('error', (e) => {
-                this.log('Static Server Error: ' + e);
-            });
-        });
+        const { server, serverUrl } = await runServer(this.outputDir, this.port, this.log);
+        this.serverUrl = serverUrl;
+        this.server = server;
     }
     public waitForRecompile() {
         let done = false;

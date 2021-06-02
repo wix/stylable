@@ -263,7 +263,9 @@ export class Provider {
                 new ProviderLocation(
                     meta.source,
                     this.findWord(
-                        (temp as any) /* This is here because typescript does not recognize size effects during the if statement */
+                        (
+                            temp as any
+                        ) /* This is here because typescript does not recognize size effects during the if statement */
                             .name,
                         fs.readFileSync(stateMeta!.source, 'utf8'),
                         position
@@ -475,8 +477,9 @@ export class Provider {
             return (
                 p.name +
                 ':' +
-                ((p.valueDeclaration as ts.ParameterDeclaration)
-                    .type as ts.TypeReferenceNode).getFullText()
+                (
+                    (p.valueDeclaration as ts.ParameterDeclaration).type as ts.TypeReferenceNode
+                ).getFullText()
             );
         });
 
@@ -488,8 +491,9 @@ export class Provider {
             const label =
                 pt.name +
                 ':' +
-                ((pt.valueDeclaration as ts.ParameterDeclaration)
-                    .type as ts.TypeReferenceNode).getFullText();
+                (
+                    (pt.valueDeclaration as ts.ParameterDeclaration).type as ts.TypeReferenceNode
+                ).getFullText();
             return paramInfo.create(label);
         });
 
@@ -900,8 +904,8 @@ function findRefs(
                         callingMeta,
                         selector.slice(0, selector.indexOf(word) + word.length)
                     )[0];
-                    const resolvedSelectorElement = selectorElement[selectorElement.length - 1]!
-                        .resolved;
+                    const resolvedSelectorElement =
+                        selectorElement[selectorElement.length - 1]!.resolved;
                     const lastResolvedSelector =
                         resolvedSelectorElement[resolvedSelectorElement.length - 1];
                     if (
@@ -1537,7 +1541,7 @@ export function extractTsSignature(
             return (f as any).exportSymbol && (f as any).exportSymbol.escapedName === mixin;
         }
     });
-    if (!mix) {
+    if (!mix || !mix.declarations) {
         return;
     }
     return tc.getSignatureFromDeclaration(mix.declarations[0] as ts.SignatureDeclaration);

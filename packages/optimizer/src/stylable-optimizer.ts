@@ -10,7 +10,7 @@ import {
     pseudoStates,
 } from '@stylable/core';
 import csso from 'csso';
-import postcss, { Declaration, Root, Rule, Node, Comment } from 'postcss';
+import postcss, { Declaration, Root, Rule, Node, Comment, Container } from 'postcss';
 import { NameMapper } from './name-mapper';
 
 const { booleanStateDelimiter } = pseudoStates;
@@ -340,8 +340,9 @@ export function replaceRecursiveUpIfEmpty(label: string, node: Node) {
     );
     if (
         parent &&
+        parent.type !== 'document' &&
         parent.nodes &&
-        parent.nodes.filter((node) => node.type !== 'comment').length === 0
+        (parent as Container).nodes.filter((node) => node.type !== 'comment').length === 0
     ) {
         replaceRecursiveUpIfEmpty('EMPTY_NODE', parent);
     }

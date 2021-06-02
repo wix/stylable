@@ -5,6 +5,7 @@ import {
     OptimizeConfig,
     DiagnosticsMode,
 } from '@stylable/core';
+import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
 import { dirname, relative } from 'path';
@@ -21,21 +22,20 @@ import {
     findIfStylableModuleUsed,
     staticCSSWith,
     getStylableBuildMeta,
-    getSortedModules,
     reportNamespaceCollision,
     createOptimizationMapping,
     getTopLevelInputFilesystem,
     createDecacheRequire,
     createStylableResolverCacheMap,
+    createCalcDepthContext,
     provideStylableModules,
     emitCSSFile,
     getEntryPointModules,
     getOnlyChunk,
     getStylableBuildData,
+    isDependencyOf,
 } from './plugin-utils';
-import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
-import { loadStylableConfig } from './load-stylable-config';
 import type {
     BuildData,
     EntryPoint,
@@ -54,7 +54,9 @@ type OptimizeOptions = OptimizeConfig & {
 export interface StylableWebpackPluginOptions {
     /**
      * Filename of the output bundle when emitting css bundle
-     * Only supports [contenthash] replacer - "stylable.[contenthash].css"
+     * supports
+     * - [contenthash] replacer - "stylable.[contenthash].css" - based on file content hash
+     * - [name] replacer - "[name].css" - based on entry name - is not supported in "extractMode: 'single'" with multiple entries
      */
     filename?: string;
     /**
@@ -108,8 +110,15 @@ export interface StylableWebpackPluginOptions {
     /**
      * Set the strategy of how to spit the extracted css
      * This option is only used when cssInjection is set to 'css'
+     * single - extract all css to a single file
+     * entries - extract file per entry which does not depend on another entry
      */
     extractMode?: 'single' | 'entries';
+    /**
+     * Allow filter for url asset processing.
+     * Filtered asset will not be processed and remain untouched.
+     */
+    assetFilter?: (url: string, context: string) => boolean;
     /**
      * @deprecated webpack 5 recommendation is to use AssetsModules for loading assets
      */
@@ -143,6 +152,7 @@ const defaultOptions = (
         : defaultOptimizations(isProd),
     optimizer: userOptions.optimizer ?? new StylableOptimizer(),
     target: userOptions.target ?? 'modern',
+    assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
 });
 
@@ -227,12 +237,15 @@ export class StylableWebpackPlugin {
         );
     }
     private processOptions(compiler: Compiler) {
-        let options = defaultOptions(this.userOptions, compiler.options.mode === 'production');
+        const defaults = defaultOptions(this.userOptions, compiler.options.mode === 'production');
 
-        const config = loadStylableConfig(compiler.context);
-        if (typeof config?.webpackPlugin === 'function') {
-            options = config.webpackPlugin(options, compiler);
-        }
+        const options =
+            loadStylableConfig(compiler.context, (config) => {
+                return isWebpackConfigProcessor(config)
+                    ? config.webpackPlugin(defaults, compiler)
+                    : undefined;
+            }) || defaults;
+
         this.options = options;
     }
     private createStylable(compiler: Compiler) {
@@ -285,6 +298,7 @@ export class StylableWebpackPlugin {
                     loaderContext.assetsMode = this.options.assetsMode;
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.target = this.options.target;
+                    loaderContext.assetFilter = this.options.assetFilter;
                     /**
                      * Every Stylable file that our loader handles will be call this function to add additional build data
                      */
@@ -371,13 +385,14 @@ export class StylableWebpackPlugin {
          */
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             const cache = new Map();
+            const context = createCalcDepthContext(moduleGraph);
             for (const [module] of stylableModules) {
                 module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(
                     module,
                     compilation,
                     this.entities.UnusedDependency
                 );
-                module.buildMeta.stylable.depth = calcDepth(module, moduleGraph, [], cache);
+                module.buildMeta.stylable.depth = calcDepth(module, context, [], cache);
 
                 const { css, urls, exports, namespace } = getStylableBuildMeta(module);
                 stylableModules.set(module, {
@@ -394,13 +409,14 @@ export class StylableWebpackPlugin {
         compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
             const optimizer = this.stylable.optimizer!;
             const optimizeOptions = this.options.optimize;
-            const sortedModules = getSortedModules(stylableModules);
+            const sortedModules = sortModulesByDepth(
+                Array.from(stylableModules.keys()),
+                (m) => getStylableBuildMeta(m).depth,
+                (m) => m.resource
+            );
 
-            const {
-                usageMapping,
-                namespaceMapping,
-                namespaceToFileMapping,
-            } = createOptimizationMapping(sortedModules, optimizer);
+            const { usageMapping, namespaceMapping, namespaceToFileMapping } =
+                createOptimizationMapping(sortedModules, optimizer);
 
             if (!this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE) {
                 reportNamespaceCollision(namespaceToFileMapping, compilation.errors);
@@ -572,14 +588,11 @@ export class StylableWebpackPlugin {
     }
 }
 
-function isDependencyOf(entryPoint: EntryPoint, entrypoints: Iterable<EntryPoint>) {
-    // entryPoint.options.dependsOn is not in webpack types;
-    for (const parent of entryPoint.getParents()) {
-        for (const entry of entrypoints) {
-            if (parent.id === entry.id) {
-                return true;
-            }
-        }
-    }
-    return false;
+function isWebpackConfigProcessor(config: any): config is {
+    webpackPlugin: (
+        options: Required<StylableWebpackPluginOptions>,
+        compiler: Compiler
+    ) => Required<StylableWebpackPluginOptions>;
+} {
+    return typeof config === 'object' && typeof config.webpackPlugin === 'function';
 }

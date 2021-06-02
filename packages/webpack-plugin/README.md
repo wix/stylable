@@ -34,7 +34,9 @@ Below you can see the various possible configuration parameters.
 interface StylableWebpackPluginOptions {
     /**
      * Filename of the output bundle when emitting css bundle
-     * Only supports [contenthash] replacer - "stylable.[contenthash].css"
+     * supports 
+     * - [contenthash] replacer - "stylable.[contenthash].css" - based on file content hash
+     * - [name] replacer - "[name].css" - based on entry name - is not supported in "extractMode: 'single'" with multiple entries
      */
     filename?: string;
     /**
@@ -100,6 +102,18 @@ interface StylableWebpackPluginOptions {
     unsafeMuteDiagnostics?: {
         DUPLICATE_MODULE_NAMESPACE?: boolean;
     };
+    /**
+     * Set the strategy of how to spit the extracted css
+     * This option is only used when cssInjection is set to 'css'
+     * single - extract all css to a single file
+     * entries - extract file per entry which does not depend on another entry
+     */
+    extractMode?: 'single' | 'entries';
+    /**
+     * Allow filter for url asset processing.
+     * Filtered asset will not be processed and remain untouched.
+     */
+    assetFilter?: (url: string, context: string) => boolean;
 }
 
 ```

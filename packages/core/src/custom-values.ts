@@ -133,9 +133,7 @@ interface ExtensionApi<Value, Args> {
     processArgs: (fnNode: ParsedValue, customTypes: CustomTypes) => Args;
     createValue: (args: Args) => Value;
     getValue: (v: Value, key: string) => string | Box<string, unknown>;
-    flattenValue?: (
-        v: Box<string, Value>
-    ) => {
+    flattenValue?: (v: Box<string, Value>) => {
         parts: Array<string | Box<string, unknown>>;
         delimiter: ',' | ' ';
     };

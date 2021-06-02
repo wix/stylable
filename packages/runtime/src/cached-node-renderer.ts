@@ -6,7 +6,8 @@ export interface CachedNodeRendererOptions {
 }
 
 export class CacheStyleNodeRenderer
-    implements NodeRenderer<RenderableStylesheet, HTMLStyleElement> {
+    implements NodeRenderer<RenderableStylesheet, HTMLStyleElement>
+{
     constructor(private options: CachedNodeRendererOptions) {}
     public create = (stylesheet: RenderableStylesheet, key: string) => {
         const node = this.options.createElement('style');

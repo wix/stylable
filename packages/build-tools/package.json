@@ -1,0 +1,28 @@
+{
+  "name": "@stylable/build-tools",
+  "version": "4.2.4",
+  "description": "Collection of helper functions for Stylable based tooling.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
+  },
+  "dependencies": {
+    "@stylable/core": "^4.2.4",
+    "find-config": "^1.0.0"
+  },
+  "files": [
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/build-tools",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

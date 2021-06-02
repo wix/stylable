@@ -5,7 +5,7 @@ import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
 
 import {
-    getCSSViewModules,
+    getCSSViewModuleWebpack,
     getStylableModules,
     isStylableModule,
     uniqueFilterMap,
@@ -66,6 +66,7 @@ export class StylableMetadataPlugin {
             this.options.name,
             this.options.version
         );
+        const getViewModule = getCSSViewModuleWebpack(compilation.moduleGraph);
         const stylableModulesWithData = getStylableModules(compilation);
         for (const module of stylableModules) {
             const namespace =
@@ -81,7 +82,7 @@ export class StylableMetadataPlugin {
                 { namespace, depth }
             );
 
-            const component = getCSSViewModules(module, compilation.moduleGraph);
+            const component = getViewModule(module);
             if (!component || !component.context) {
                 continue;
             }

@@ -314,8 +314,8 @@ export class StylableLanguageService {
     }
 
     private restoreFormattingExceptions(ast: Root, changes: string[]) {
-        ast.walkAtRules(topLevelDirectives.stImport.slice(1), (atRule, index) => {
-            atRule.params = changes[index];
+        ast.walkAtRules(topLevelDirectives.stImport.slice(1), (atRule) => {
+            atRule.params = changes.shift()!;
         });
 
         return ast;

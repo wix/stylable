@@ -23,7 +23,6 @@ module.exports = {
         'webpack-dev-server',
     ],
     packageJson: {
-        main: 'dist/index.js',
         description: 'Stylable App',
         private: true,
         license: 'UNLICENSED',

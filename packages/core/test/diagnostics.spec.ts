@@ -667,7 +667,7 @@ describe('diagnostics: warnings and errors', () => {
                     [{ message: processorWarnings.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
                 );
             });
-            
+
             it('should warn on invalid custom property rename', () => {
                 expectWarnings(
                     `
@@ -700,9 +700,8 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                '-st-extends'
-                            ),
+                            message:
+                                processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'),
                             file: 'main.css',
                         },
                     ]
