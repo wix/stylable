@@ -24,7 +24,7 @@ export default {
 
 ```
 
-> If you use any other CSS plugin you should exclude Stylable files (`*.st.css`) from them.
+> ### If you use any other rollup CSS plugins you should exclude Stylable files (`*.st.css`) from them.
 
 
 ### Plugin Options
