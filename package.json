@@ -41,7 +41,7 @@
     "@types/node": "12",
     "@types/postcss-safe-parser": "^5.0.0",
     "@types/react": "^17.0.9",
-    "@types/react-dom": "^17.0.5",
+    "@types/react-dom": "^17.0.6",
     "@types/rimraf": "^3.0.0",
     "@types/validate-npm-package-name": "^3.0.2",
     "@types/yargs": "^17.0.0",
