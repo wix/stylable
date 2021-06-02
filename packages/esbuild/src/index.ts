@@ -31,10 +31,8 @@ export const stylablePlugin = (): Plugin => ({
                 };
             }
 
-            const path = stylable.resolvePath(args.resolveDir, args.path);
-
             return {
-                path,
+                path: stylable.resolvePath(args.resolveDir, args.path),
                 namespace: namespaces.exports,
             };
         });
