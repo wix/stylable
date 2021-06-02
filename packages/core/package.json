@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "balanced-match": "^2.0.0",
-    "css-selector-tokenizer": "^0.7.3",
+    "css-selector-tokenizer": "^0.8.0",
     "deindent": "^0.1.0",
     "enhanced-resolve": "^5.8.2",
     "is-vendor-prefixed": "^4.0.0",
