@@ -60,6 +60,7 @@ export const stylablePlugin = (): Plugin => ({
         build.onLoad({ filter: /.*/, namespace: namespaces.css }, (args) => {
             const { meta } = args.pluginData.stylable;
             return {
+                resolveDir: '.',
                 contents: meta.outputAst!.toString(),
                 loader: 'css',
             };

@@ -23,6 +23,9 @@ class ESBuildTestKit {
             ...options,
             plugins: [...(options.plugins ?? [])],
             absWorkingDir: dirname(this.buildFile),
+            loader: {
+                '.png': 'file',
+            },
             metafile: true,
             outdir: './dist',
             platform: 'browser',
