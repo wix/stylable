@@ -43,12 +43,12 @@ class ESBuildTestKit {
     }
 }
 
-describe('', () => {
+describe('Stylable ESBuild plugin', () => {
     let tk!: ESBuildTestKit;
     beforeEach(() => (tk = new ESBuildTestKit('simple-project')));
     afterEach(() => tk.dispose());
 
-    it('', async () => {
+    it('should build a simple project without errors', async () => {
         await tk.build();
         console.log(inspect(tk.buildResult.metafile, false, 10));
         expect(1);
