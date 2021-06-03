@@ -299,10 +299,9 @@ describe('Generate DTS', function () {
             tk.populate({
                 'test.st.css': '.root {}',
                 'test.ts': `
-                    import { StylableDOMUtil } from "${join(
-                        __dirname,
-                        '../../../dom-test-kit/dist'
-                    )}";
+                    import { StylableDOMUtil } from ${JSON.stringify(
+                        join(__dirname, '../../../dom-test-kit/dist')
+                    )};
                     import * as stylesheet from "./test.st.css";
 
                     const tk = new StylableDOMUtil(stylesheet);
