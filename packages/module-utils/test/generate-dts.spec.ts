@@ -305,7 +305,6 @@ describe('Generate DTS', function () {
                     import * as stylesheet from "./test.st.css";
 
                     const tk = new StylableDOMUtil(stylesheet);
-
                 `,
             });
 
