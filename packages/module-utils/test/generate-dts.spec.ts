@@ -1,4 +1,3 @@
-import { join } from 'path';
 import { expect } from 'chai';
 import { DTSKit } from './test-kit/dts-kit';
 
@@ -300,7 +299,7 @@ describe('Generate DTS', function () {
                 'test.st.css': '.root {}',
                 'test.ts': `
                     import { StylableDOMUtil } from ${JSON.stringify(
-                        join(__dirname, '../../../dom-test-kit/dist')
+                        require.resolve('@stylable/dom-test-kit')
                     )};
                     import * as stylesheet from "./test.st.css";
 
