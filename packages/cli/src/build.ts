@@ -218,8 +218,19 @@ function buildSingleFile(
 
         // .d.ts.map
         // if not explicitly defined, assumed true with "--dts" parent scope
-        if (dtsSourceMap === undefined || dtsSourceMap === true) {
-            const dtsMappingContent = createModuleSource(res, 'dts.map', false);
+        if (dtsSourceMap !== false) {
+            const dtsMappingContent = createModuleSource(
+                res,
+                'dts.map',
+                false,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                dtsContent
+            );
 
             log('[Build]', 'output .d.ts.map');
             tryRun(

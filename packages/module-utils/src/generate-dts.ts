@@ -10,6 +10,7 @@ function stringifyStringRecord(record: Record<string, string>, indent = SPACING)
 }
 
 function stringifyClasses(classes: Record<string, string>, namespace: string, indent = SPACING) {
+    // this uses the scoped names from the exported stylesheet, but they may change in a future build
     return Object.keys(classes)
         .map((name) => `${indent}${asString(name)}: ${asString(scope(name, namespace))};`)
         .join('\n');
@@ -46,7 +47,7 @@ function getStateTSType(stateDef: StateParsedValue | null) {
         ? stateDef.arguments
               .map((v) => (typeof v === 'string' ? asString(v) : 'unknown'))
               .join(' | ')
-        : stateDef.type /* what are the rest of the states */;
+        : stateDef.type /* string | number */;
 }
 
 function wrapNL(code: string) {

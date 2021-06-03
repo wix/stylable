@@ -187,6 +187,8 @@ export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
     const lines = dtsContent.split('\n');
     let lastSrcLocation: Position = { line: 0, column: 0 };
 
+    // each line represents one item (classes, vars, etc..)
+    // to be mapped to one location in the source
     for (const dtsLine of lines.keys()) {
         const resToken = findTokenForLine(dtsLine, tokens);
 
@@ -211,7 +213,7 @@ export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
 
                 if (currentSrcPosition) {
                     mapping[dtsLine] = createLineMapping(
-                        5,
+                        4, // top-level object property offset
                         currentSrcPosition.line - lastSrcLocation.line,
                         currentSrcPosition.column - lastSrcLocation.column
                     );

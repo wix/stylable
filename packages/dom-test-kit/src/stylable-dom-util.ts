@@ -5,7 +5,7 @@ import {
     stringifySelector,
     traverseNode,
 } from '@stylable/core';
-import type { StateValue } from '@stylable/runtime';
+import type { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
 export interface PartialElement {
     querySelector: Element['querySelector'];
@@ -20,7 +20,10 @@ export type StylesheetHost = {
 };
 
 export class StylableDOMUtil {
-    constructor(private stylesheet: StylesheetHost, private root?: Element) {}
+    constructor(
+        private stylesheet: Pick<RuntimeStylesheet, 'classes' | 'namespace'>,
+        private root?: Element
+    ) {}
     public select(selector?: string, element?: PartialElement): Element | null {
         const el = element || this.root;
         return el ? el.querySelector(this.scopeSelector(selector)) : null;
@@ -32,6 +35,7 @@ export class StylableDOMUtil {
             : [];
     }
     public scopeSelector(selector?: string): string {
+        const namespace = this.stylesheet.namespace;
         if (!selector) {
             return this.scopeSelector('.root');
         }
@@ -44,15 +48,22 @@ export class StylableDOMUtil {
                 const param = node.content;
                 if (!param) {
                     node.type = 'class';
-                    node.name = this.stylesheet.cssStates({ [node.name]: true });
+                    node.name = pseudoStates.createBooleanStateClassName(node.name, namespace);
                 } else {
-                    const state = this.stylesheet.cssStates({ [node.name]: param });
                     if (isValidClassName(param)) {
                         node.type = 'class';
-                        node.name = state;
+                        node.name = pseudoStates.createStateWithParamClassName(
+                            node.name,
+                            namespace,
+                            param
+                        );
                     } else {
                         node.type = 'attribute';
-                        node.content = state;
+                        node.content = pseudoStates.createAttributeState(
+                            node.name,
+                            namespace,
+                            param
+                        );
                     }
                 }
             } else if (
@@ -71,8 +82,17 @@ export class StylableDOMUtil {
         stateName: string,
         param: StateValue = true
     ): boolean {
-        const stateClass = this.stylesheet.cssStates({ [stateName]: param });
-        return element.classList.contains(stateClass);
+        const namespace = this.stylesheet.namespace;
+
+        if (typeof param === 'boolean') {
+            return element.classList.contains(
+                pseudoStates.createBooleanStateClassName(stateName, namespace)
+            );
+        }
+
+        return element.classList.contains(
+            pseudoStates.createStateWithParamClassName(stateName, namespace, String(param))
+        );
     }
 
     public getStyleState(element: PartialElement, stateName: string): string | boolean | null {
@@ -80,7 +100,10 @@ export class StylableDOMUtil {
             return null;
         }
 
-        const booleanState = this.stylesheet.cssStates({ [stateName]: true });
+        const booleanState = pseudoStates.createBooleanStateClassName(
+            stateName,
+            this.stylesheet.namespace
+        );
         if (element.classList.contains(booleanState)) {
             return true;
         }
@@ -112,6 +135,8 @@ export class StylableDOMUtil {
 
     public getBaseStateWithParam(stateName: string) {
         const singleCharState = 'x';
-        return this.stylesheet.cssStates({ [stateName]: singleCharState }).slice(0, -3);
+        return pseudoStates
+            .createStateWithParamClassName(stateName, this.stylesheet.namespace, singleCharState)
+            .slice(0, -3);
     }
 }

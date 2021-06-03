@@ -1,16 +1,16 @@
 import { expect } from 'chai';
-import { getLocalClassStates, tokenizeDTS } from '@stylable/module-utils';
+import { getLocalClassStates, tokenizeDTS } from '@stylable/module-utils/dist/dts-rough-tokenizer';
 import { DTSKit } from './test-kit/dts-kit';
 
 describe('tokenizeDTS (e2e)', () => {
     let tk: DTSKit;
 
-    beforeEach(async () => {
-        tk = await new DTSKit().init();
+    beforeEach(() => {
+        tk = new DTSKit();
     });
 
-    afterEach(async () => {
-        await tk.dispose();
+    afterEach(() => {
+        tk.dispose();
     });
 
     it('should tokenize simple states', () => {

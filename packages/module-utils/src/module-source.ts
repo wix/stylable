@@ -43,7 +43,8 @@ export function createModuleSource(
     depth: string | number = '-1',
     staticRequests: string[] = [],
     runtimeRequest = '@stylable/runtime',
-    afterModule: string[] = []
+    afterModule: string[] = [],
+    dtsContent?: string
 ) {
     // TODO: calc depth for node as well
     depth = typeof depth === 'number' ? depth.toString() : depth;
@@ -60,7 +61,11 @@ export function createModuleSource(
         case 'dts':
             return generateDTSContent(stylableResult);
         case 'dts.map':
-            return generateDTSSourceMap(generateDTSContent(stylableResult), stylableResult.meta);
+            if (!dtsContent) {
+                throw new Error('Missing .d.ts content ');
+            }
+
+            return generateDTSSourceMap(dtsContent, stylableResult.meta);
         case 'esm': {
             const importKey = renderableOnly ? 'createRenderable' : 'create';
             return generateModuleSource(

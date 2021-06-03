@@ -1,17 +1,19 @@
+import { join } from 'path';
 import { expect } from 'chai';
 import { DTSKit } from './test-kit/dts-kit';
 
 const propUnknownNotOnType = "Property 'unknown' does not exist on type";
 
-describe('Generate DTS', () => {
+describe('Generate DTS', function () {
+    this.timeout(5000);
     let tk: DTSKit;
 
-    beforeEach(async () => {
-        tk = await new DTSKit().init();
+    beforeEach(() => {
+        tk = new DTSKit();
     });
 
-    afterEach(async () => {
-        await tk.dispose();
+    afterEach(() => {
+        tk.dispose();
     });
 
     it('should generate classes .d.ts', () => {
@@ -77,11 +79,11 @@ describe('Generate DTS', () => {
                 import { eq } from "./test-kit";
                 import { stVars } from "./test.st.css";
                 
-                eq<string>(stVars.unknown);
+                eq<string>(stVars.c1);
             `,
         });
 
-        expect(tk.typecheck('test.ts')).to.include(propUnknownNotOnType);
+        expect(tk.typecheck('test.ts')).to.equal('');
     });
 
     it('should warn about non-existing Stylable var', () => {
@@ -161,7 +163,7 @@ describe('Generate DTS', () => {
                     import { eq } from "./test-kit";
                     import { st } from "./test.st.css";
                     
-                    eq<string>(st('str1', 'str2));
+                    eq<string>(st('str1', 'str2'));
                 `,
             });
 
@@ -213,7 +215,7 @@ describe('Generate DTS', () => {
 
         it('should warn on type mis-match in state', () => {
             tk.populate({
-                'test.st.css': '.root {}',
+                'test.st.css': '.root { -st-states: state1; }',
                 'test.ts': `
                     import { st, classes } from "./test.st.css";
                     
@@ -222,7 +224,28 @@ describe('Generate DTS', () => {
             });
 
             expect(tk.typecheck('test.ts')).to.include(
-                "Argument of type '{ state1: string; }' is not assignable to parameter of type"
+                "Type 'string' is not assignable to type 'boolean | undefined'"
+            );
+        });
+
+        it('should warn on type mis-match in multiple states', () => {
+            tk.populate({
+                'test.st.css': `.root { -st-states: state1; }
+                .part { -st-states: state1(string) }`,
+                'test.ts': `
+                    import { st, classes } from "./test.st.css";
+                    
+                    st(classes.root, { state1: 'str' });
+                    st(classes.part, { state1: true });
+                `,
+            });
+
+            const diagnostics = tk.typecheck('test.ts');
+            expect(diagnostics).to.include(
+                "Type 'string' is not assignable to type 'boolean | undefined'"
+            );
+            expect(diagnostics).to.include(
+                "Type 'true' is not assignable to type 'string | undefined'"
             );
         });
     });
@@ -268,6 +291,26 @@ describe('Generate DTS', () => {
             });
 
             expect(tk.typecheck('test.ts')).to.include("Type 'string' is not assignable to type");
+        });
+    });
+
+    describe('dom-test-kit compliance', () => {
+        it('should accept generated .d.ts typings for dom-test-kit creation', () => {
+            tk.populate({
+                'test.st.css': '.root {}',
+                'test.ts': `
+                    import { StylableDOMUtil } from "${join(
+                        __dirname,
+                        '../../../dom-test-kit/dist'
+                    )}";
+                    import * as stylesheet from "./test.st.css";
+
+                    const tk = new StylableDOMUtil(stylesheet);
+
+                `,
+            });
+
+            expect(tk.typecheck('test.ts')).to.equal('');
         });
     });
 });
