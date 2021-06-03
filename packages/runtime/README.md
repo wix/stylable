@@ -89,7 +89,7 @@ Add the following file to your `/src` directory.
 declare module '*.st.css' {
     export * from '@stylable/runtime/stylesheet';
 
-    const defaultExport: never;
+    const defaultExport: unknown;
     export default defaultExport;
 }
 ```
