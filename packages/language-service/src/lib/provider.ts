@@ -1541,7 +1541,7 @@ export function extractTsSignature(
             return (f as any).exportSymbol && (f as any).exportSymbol.escapedName === mixin;
         }
     });
-    if (!mix) {
+    if (!mix || !mix.declarations) {
         return;
     }
     return tc.getSignatureFromDeclaration(mix.declarations[0] as ts.SignatureDeclaration);
