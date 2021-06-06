@@ -154,6 +154,9 @@ export const processorWarnings = {
     INVALID_NAMESPACE_REFERENCE() {
         return 'st-namespace-reference dose not have any value';
     },
+    INVALID_NESTING(child: string, parent: string) {
+        return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
+    },
 };
 
 export class StylableProcessor {
@@ -184,6 +187,16 @@ export class StylableProcessor {
             if (!isChildOfAtRule(rule, 'keyframes')) {
                 this.handleCustomSelectors(rule);
                 this.handleRule(rule as SRule, isChildOfAtRule(rule, rootValueMapping.stScope));
+            }
+            const parent = rule.parent;
+            if (parent?.type === 'rule') {
+                this.diagnostics.error(
+                    rule,
+                    processorWarnings.INVALID_NESTING(
+                        rule.selector,
+                        (parent as postcss.Rule).selector
+                    )
+                );
             }
         });
 
