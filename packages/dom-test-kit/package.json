@@ -1,6 +1,6 @@
 {
   "name": "@stylable/dom-test-kit",
-  "version": "4.2.4",
+  "version": "4.2.5",
   "description": "Stylable DOM testing utilities",
   "main": "dist/index.js",
   "scripts": {
@@ -8,8 +8,8 @@
     "start": "mocha-play ./dist/test/**/*.spec.js -c ./webpack.config.js -w"
   },
   "dependencies": {
-    "@stylable/core": "^4.2.4",
-    "@stylable/runtime": "^4.2.4"
+    "@stylable/core": "^4.2.5",
+    "@stylable/runtime": "^4.2.5"
   },
   "files": [
     "dist",
