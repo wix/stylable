@@ -6,8 +6,11 @@ export function applyWebpackConfigStylableExcludes(webpackConfig: Configuration)
 
 function insertStCssExclude(stRegex: RegExp) {
     return (_: string, value: RuleSetRule) => {
-        if (typeof value !== 'string' && value && value.test) {
-            if (value.test.toString().includes('css')) {
+        if (typeof value !== 'string' && value && (value.test || value.issuer)) {
+            if (
+                value.test?.toString().includes('css') ||
+                value.issuer?.toString().includes('css')
+            ) {
                 if (value.exclude && Array.isArray(value.exclude)) {
                     value.exclude.push(stRegex);
                     return false;
