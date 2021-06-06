@@ -155,7 +155,7 @@ export const processorWarnings = {
         return 'st-namespace-reference dose not have any value';
     },
     INVALID_NESTING(child: string, parent: string) {
-        return `Stylable does not support nesting of rules within rules, found: "${child}" inside "${parent}"`;
+        return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
     },
 };
 
