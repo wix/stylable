@@ -91,7 +91,7 @@ export class DTSKit {
         this.tmp.remove();
     }
 
-    public linkcNodeModules() {
+    public linkNodeModules() {
         symlinkSync(
             join(__dirname, '../../../node_modules'),
             join(this.tmp.path, 'node_modules'),

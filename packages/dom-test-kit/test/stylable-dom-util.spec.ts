@@ -38,7 +38,7 @@ describe('stylable-dom-utils type compliance', function () {
             },
             false
         );
-        tk.linkcNodeModules();
+        tk.linkNodeModules();
 
         expect(tk.typecheck('test.ts')).to.include(
             "Argument of type 'unknown' is not assignable to parameter of type 'StylesheetHost'"
@@ -55,7 +55,7 @@ describe('stylable-dom-utils type compliance', function () {
                 const tk = new StylableDOMUtil(stylesheet);
                 `,
         });
-        tk.linkcNodeModules();
+        tk.linkNodeModules();
 
         expect(tk.typecheck('test.ts')).to.equal('');
     });
