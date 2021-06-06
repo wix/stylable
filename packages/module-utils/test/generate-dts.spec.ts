@@ -1,5 +1,5 @@
+import { DTSKit } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { DTSKit } from './test-kit/dts-kit';
 
 const propUnknownNotOnType = "Property 'unknown' does not exist on type";
 
@@ -290,24 +290,6 @@ describe('Generate DTS', function () {
             });
 
             expect(tk.typecheck('test.ts')).to.include("Type 'string' is not assignable to type");
-        });
-    });
-
-    describe('dom-test-kit compliance', () => {
-        it('should accept generated .d.ts typings for dom-test-kit creation', () => {
-            tk.populate({
-                'test.st.css': '.root {}',
-                'test.ts': `
-                    import { StylableDOMUtil } from ${JSON.stringify(
-                        require.resolve('@stylable/dom-test-kit')
-                    )};
-                    import * as stylesheet from "./test.st.css";
-
-                    const tk = new StylableDOMUtil(stylesheet);
-                `,
-            });
-
-            expect(tk.typecheck('test.ts')).to.equal('');
         });
     });
 });

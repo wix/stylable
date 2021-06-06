@@ -1,6 +1,6 @@
-import { expect } from 'chai';
+import { DTSKit } from '@stylable/e2e-test-kit';
 import { getLocalClassStates, tokenizeDTS } from '@stylable/module-utils/dist/dts-rough-tokenizer';
-import { DTSKit } from './test-kit/dts-kit';
+import { expect } from 'chai';
 
 describe('tokenizeDTS (e2e)', () => {
     let tk: DTSKit;

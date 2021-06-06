@@ -1,5 +1,9 @@
 import { isAsset, Stylable } from '@stylable/core';
-import { createModuleSource } from '@stylable/module-utils';
+import {
+    createModuleSource,
+    generateDTSContent,
+    generateDTSSourceMap,
+} from '@stylable/module-utils';
 import { FileSystem, findFiles } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { basename, dirname, join, relative, resolve } from 'path';
@@ -208,7 +212,7 @@ function buildSingleFile(
     }
     // .d.ts
     if (dts) {
-        const dtsContent = createModuleSource(res, 'dts', false);
+        const dtsContent = generateDTSContent(res);
 
         log('[Build]', 'output .d.ts');
         tryRun(
@@ -219,18 +223,7 @@ function buildSingleFile(
         // .d.ts.map
         // if not explicitly defined, assumed true with "--dts" parent scope
         if (dtsSourceMap !== false) {
-            const dtsMappingContent = createModuleSource(
-                res,
-                'dts.map',
-                false,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                dtsContent
-            );
+            const dtsMappingContent = generateDTSSourceMap(dtsContent, res.meta);
 
             log('[Build]', 'output .d.ts.map');
             tryRun(

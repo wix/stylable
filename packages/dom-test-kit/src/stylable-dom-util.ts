@@ -15,15 +15,12 @@ export interface PartialElement {
 }
 
 export type StylesheetHost = {
-    cssStates(o: Record<string, StateValue>): string;
-    classes: Record<string, string>;
+    classes: RuntimeStylesheet['classes'];
+    namespace: RuntimeStylesheet['namespace'];
 };
 
 export class StylableDOMUtil {
-    constructor(
-        private stylesheet: Pick<RuntimeStylesheet, 'classes' | 'namespace'>,
-        private root?: Element
-    ) {}
+    constructor(private stylesheet: StylesheetHost, private root?: Element) {}
     public select(selector?: string, element?: PartialElement): Element | null {
         const el = element || this.root;
         return el ? el.querySelector(this.scopeSelector(selector)) : null;
@@ -40,7 +37,7 @@ export class StylableDOMUtil {
             return this.scopeSelector('.root');
         }
         const ast = parseSelector(selector);
-        traverseNode(ast, (node: any) => {
+        traverseNode(ast, (node) => {
             if (node.type === 'class') {
                 const className: string = this.stylesheet.classes[node.name] || node.name;
                 node.name = className.includes(' ') ? className.split(' ')[0] : className;

@@ -1,4 +1,4 @@
-import fs, { readFileSync, writeFileSync } from 'fs';
+import fs, { readFileSync, symlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { Stylable } from '@stylable/core';
 import { generateDTSContent } from '@stylable/module-utils';
@@ -20,6 +20,7 @@ export class DTSKit {
             'test-kit.ts': `export function eq<T>(t:T){return t}`,
         };
         this.tmp = createTempDirectorySync('dts-gen');
+
         this.stylable = Stylable.create({
             projectRoot: this.tmp.path,
             fileSystem: fs,
@@ -29,10 +30,10 @@ export class DTSKit {
         });
     }
 
-    public populate(files: Record<string, string>) {
+    public populate(files: Record<string, string>, generateDts = true) {
         for (const filePath in files) {
             writeFileSync(this.sourcePath(filePath), files[filePath]);
-            if (filePath.endsWith('.st.css')) {
+            if (generateDts && filePath.endsWith('.st.css')) {
                 this.genDTS(filePath);
             }
         }
@@ -49,7 +50,6 @@ export class DTSKit {
                 moduleResolution: ModuleResolutionKind.NodeJs,
                 target: ScriptTarget.ES2020,
                 strict: true,
-                allowSyntheticDefaultImports: true,
                 types: [],
                 lib: ['lib.dom.d.ts', 'lib.es2020.d.ts'],
             },
@@ -89,6 +89,14 @@ export class DTSKit {
 
     public dispose() {
         this.tmp.remove();
+    }
+
+    public linkcNodeModules() {
+        symlinkSync(
+            join(__dirname, '../../../node_modules'),
+            join(this.tmp.path, 'node_modules'),
+            'junction'
+        );
     }
 
     private genDTS(internalPath: string) {
