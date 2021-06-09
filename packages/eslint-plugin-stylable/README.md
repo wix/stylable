@@ -45,4 +45,4 @@ or
 
 ESLint is not intended for multi-file operations, such as validating your TS when an `.st.css` files changes. This means that the plugin might lose track of stylesheet changes and work with stale data.
 
-This behavior will show out-of-date errors in your TS files, and only manually triggering a change in that file will remove the error.
+This behavior will show out-of-date errors or will miss new errors in your TS files. Manually triggering a change in the stylesheet file will sync ESlint and update the diagnostics.
