@@ -1107,10 +1107,10 @@
   resolved "https://registry.yarnpkg.com/@types/js-beautify/-/js-beautify-1.13.1.tgz#d4739266c5dcad561226cd1ec5407fa0542d863d"
   integrity sha512-F3YCoZS//n74Wu+hxoVrxX1H8qaWo+WAgQ+ObmFH4ZFwI0fIwiJTW7pvkCRShw8ST7+ej7sB68K+ZHAZgK4S4Q==
 
-"@types/jsdom@^16.2.10":
-  version "16.2.10"
-  resolved "https://registry.yarnpkg.com/@types/jsdom/-/jsdom-16.2.10.tgz#c05ea94682d035943ae2453b79d56178496b6653"
-  integrity sha512-q3aIjp3ehhVSXSbvNyuireAfvU2umRiZ2aLumyeZewCnoNaokrRDdTu5IvaeE9pzNtWHXrUnM9lb22Vl3W08EA==
+"@types/jsdom@^16.2.11":
+  version "16.2.11"
+  resolved "https://registry.yarnpkg.com/@types/jsdom/-/jsdom-16.2.11.tgz#e18bd29e0678bb9a16ee74d3c0fb9788e8a4286b"
+  integrity sha512-Dvtx0zFQOJqn06VgjRur7P5CeSNUOaQ5ivSSvdAdA3sBWzL3kl9OWApQRExKnS3XN39OaZdeCHpoYxVmX6FwCQ==
   dependencies:
     "@types/node" "*"
     "@types/parse5" "*"

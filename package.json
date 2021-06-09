@@ -28,7 +28,7 @@
     "@types/find-config": "^1.0.0",
     "@types/flat": "^5.0.1",
     "@types/js-beautify": "^1.13.1",
-    "@types/jsdom": "^16.2.10",
+    "@types/jsdom": "^16.2.11",
     "@types/json-schema": "^7.0.7",
     "@types/lodash.camelcase": "^4.3.6",
     "@types/lodash.clonedeep": "^4.5.6",
