@@ -43,6 +43,6 @@ or
 
 ## Known issue
 
-ESLint is not intended for multi-file operations, such as validating your TS when an `.st.css` files changes. This means that the plugin can slip out of sync and show stale data.
+ESLint is not intended for multi-file operations, such as validating your TS when an `.st.css` files changes. This means that the plugin might lose track of stylesheet changes and work with stale data.
 
 This behavior will show out-of-date errors in your TS files, and only manually triggering a change in that file will remove the error.
