@@ -5914,10 +5914,10 @@ playwright-chromium@^1.11.1:
     ws "^7.3.1"
     yazl "^2.5.1"
 
-playwright-core@^1.11.1, playwright-core@^1.8.0:
-  version "1.11.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.11.1.tgz#2a9ca6118ce94eccfc29dd4996cdc87bbac68eae"
-  integrity sha512-EQ/K7WucNHiL5AkFBLWNyIGWqPcD/m/k5LmYn5fgAf7mbInGTFkiZgQHibz+ZwEPb+NvcaEO7WVVZr3MrIzUpA==
+playwright-core@^1.12.0, playwright-core@^1.8.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.12.0.tgz#cd91af88d8db1dc3e2fbcd705f6668a91e114158"
+  integrity sha512-yPJqYwXMvc/Ptx6Z/aYnwx6oxa6ic3yqK0xyokr2BIVQoWdIHvzLIAGA4TjQ6Ykq/QebUW4mIN1ZXX/KiB1QyQ==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -5931,7 +5931,7 @@ playwright-core@^1.11.1, playwright-core@^1.8.0:
     proxy-from-env "^1.1.0"
     rimraf "^3.0.2"
     stack-utils "^2.0.3"
-    ws "^7.3.1"
+    ws "^7.4.6"
     yazl "^2.5.1"
 
 pngjs@^5.0.0:
@@ -7846,7 +7846,7 @@ write-pkg@^4.0.0:
     type-fest "^0.4.1"
     write-json-file "^3.2.0"
 
-ws@^7.3.1, ws@^7.4.5:
+ws@^7.3.1, ws@^7.4.5, ws@^7.4.6:
   version "7.4.6"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.6.tgz#5654ca8ecdeee47c33a9a4bf6d28e2be2980377c"
   integrity sha512-YmhHDO4MzaDLB+M9ym/mDA5z0naX8j7SIlT8f8z+I0VtzsRbekxEutHSme7NPS2qE8StCYQNUnfWdXta/Yu85A==
