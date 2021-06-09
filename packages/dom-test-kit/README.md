@@ -18,12 +18,14 @@
 ```ts
 /* test.ts */
 import { StylableDOMUtil } from '@stylable/dom-test-kit';
-import style from './my-component.st.css';
+import * as stylesheet from './my-component.st.css';
 
-const domUtil = new StylableDOMUtil(style, document.body);
+const domUtil = new StylableDOMUtil(stylesheet, document.body);
 const partElement = domUtil.select('.part');
 
-domUtil.hasStyleState(partElement, 'loading');
+if (partElement) {
+    domUtil.hasStyleState(partElement, 'loading');
+}
 ```
 
 ## What does it do?
