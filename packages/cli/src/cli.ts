@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-
-import fs from 'fs';
-import path from 'path';
 import yargs from 'yargs';
+import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
+import { createLogger } from './logger';
+import { reportDiagnostics } from './report-diagnostics';
+
+const { join, resolve } = nodeFs;
 
 const argv = yargs
     .option('rootDir', {
@@ -130,6 +132,12 @@ const argv = yargs
         default: 'strict',
         choices: ['strict', 'loose'],
     })
+    .option('watch', {
+        alias: 'w',
+        type: 'boolean',
+        description: 'enable watch mode',
+        default: false,
+    })
     .alias('h', 'help')
     .alias('v', 'version')
     .help()
@@ -144,7 +152,7 @@ const {
     rootDir,
     ext,
     indexFile,
-    customGenerator: generatorPath,
+    customGenerator,
     esm,
     cjs,
     css,
@@ -161,6 +169,7 @@ const {
     useNamespaceReference,
     diagnosticsMode,
     diagnostics,
+    watch,
 } = argv;
 
 log('[Arguments]', argv);
@@ -173,23 +182,23 @@ for (const request of requires) {
 }
 
 const stylable = Stylable.create({
-    fileSystem: fs,
+    fileSystem: nodeFs,
     requireModule: require,
     projectRoot: rootDir,
     resolveNamespace: require(namespaceResolver).resolveNamespace,
     resolverCache: new Map(),
 });
 
-const { diagnosticsMessages } = build({
+build({
     extension: ext,
-    fs,
+    fs: nodeFs,
     stylable,
     outDir,
     srcDir,
     rootDir,
     log,
     indexFile,
-    generatorPath,
+    generatorPath: customGenerator !== undefined ? resolve(customGenerator) : customGenerator,
     moduleFormats: getModuleFormats({ esm, cjs }),
     outputCSS: css,
     includeCSSInJS: cssInJs,
@@ -198,18 +207,25 @@ const { diagnosticsMessages } = build({
     outputCSSNameTemplate: cssFilename,
     optimize,
     minify,
-    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
-    useSourceNamespace: useNamespaceReference,
-});
-
-if (diagnosticsMessages.length) {
-    if (diagnostics) {
-        console.log('[Stylable Diagnostics]\n', diagnosticsMessages.join('\n\n'));
-    }
-    if (diagnosticsMode === 'strict') {
+    manifest: manifest ? join(rootDir, outDir, manifestFilepath) : undefined,
+    useNamespaceReference,
+    watch,
+    diagnostics,
+})
+    .then(({ diagnosticsMessages }) => {
+        if (!watch && diagnosticsMessages.size) {
+            if (diagnostics) {
+                reportDiagnostics(diagnosticsMessages);
+            }
+            if (diagnosticsMode === 'strict') {
+                process.exitCode = 1;
+            }
+        }
+    })
+    .catch((e) => {
         process.exitCode = 1;
-    }
-}
+        console.error(e);
+    });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
     const formats: Array<'esm' | 'cjs'> = [];
@@ -220,12 +236,4 @@ function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
         formats.push('cjs');
     }
     return formats;
-}
-
-function createLogger(prefix: string, shouldLog: boolean) {
-    return function log(...messages: any[]) {
-        if (shouldLog) {
-            console.log(prefix, ...messages);
-        }
-    };
 }

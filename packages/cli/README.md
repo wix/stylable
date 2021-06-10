@@ -17,7 +17,7 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 
 | Option                    | Alias  | Description                                                                        | Default Value    |
 | ------------------------- | ------ | ---------------------------------------------------------------------------------- | ---------------- |
-| `--version`               | `-v`   | show CLI version number                                                            | `boolean`        |
+| `--version`               |  `v`   | show CLI version number                                                            | `boolean`        |
 | `--rootDir`               |        | root directory of project                                                          | `cwd`            |
 | `--srcDir`                |        | source directory relative to root                                                  | `./`             |
 | `--outDir`                |        | target directory relative to root                                                  | `./`             |
@@ -26,6 +26,7 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 | `--esm`                   |        | output esm modules (`.mjs`)                                                        | `false`          |
 | `--css`                   |        | output transpiled css files (`.css`)                                               | `false`          |
 | `--stcss`                 |        | output stylable source files (`.st.css`)                                           | `false`          |
+| `--watch`                 |  `w`   | enable watch mode                                                                  | `false`          |
 | `--useNamespaceReference` | `unsr` | mark output stylable source files with relative path for namespacing purposes (\*) | `false`          |
 | `--customGenerator`       |        | path of a custom index file generator                                              | -                |
 | `--ext`                   |        | extension of stylable css files                                                    | `.st.css`        |

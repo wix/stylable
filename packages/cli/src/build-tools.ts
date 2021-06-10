@@ -4,18 +4,20 @@ import { dirname } from 'path';
 
 export function handleDiagnostics(
     res: StylableResults,
-    diagnosticsMsg: string[],
+    diagnosticsMessages: Map<string, string[]>,
     filePath: string
 ) {
     const reports = res.meta.transformDiagnostics
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
     if (reports.length) {
-        diagnosticsMsg.push(`Errors in file: ${filePath}`);
-        reports.forEach((report) => {
-            const err = report.node.error(report.message, report.options);
-            diagnosticsMsg.push(`${report.message}\n${err.showSourceCode()}`);
-        });
+        diagnosticsMessages.set(
+            filePath,
+            reports.map((report) => {
+                const err = report.node.error(report.message, report.options);
+                return `${report.message}\n${err.showSourceCode()}`;
+            })
+        );
     }
 }
 
@@ -27,7 +29,7 @@ export function tryRun<T>(fn: () => T, errorMessage: string): T {
     }
 }
 
-export function addDotSlash(p: string) {
+export function normalizeRelative(p: string) {
     p = p.replace(/\\/g, '/');
     return p.startsWith('.') ? p : './' + p;
 }
@@ -45,21 +47,4 @@ export function ensureDirectory(dir: string, fs: FileSystem) {
             fs.mkdirSync(dir);
         }
     }
-}
-
-export function ensureAssets(
-    projectAssetsMap: {
-        [key: string]: string;
-    },
-    fs: FileSystem
-) {
-    Object.keys(projectAssetsMap).map((assetOriginalPath) => {
-        if (fs.existsSync(assetOriginalPath)) {
-            const content = fs.readFileSync(assetOriginalPath);
-            const targetPath = projectAssetsMap[assetOriginalPath];
-            const targetDir = dirname(targetPath);
-            ensureDirectory(targetDir, fs);
-            fs.writeFileSync(targetPath, content);
-        }
-    });
 }
