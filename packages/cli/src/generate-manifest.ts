@@ -1,19 +1,22 @@
 import type { Stylable } from '@stylable/core';
 import { dirname, relative } from 'path';
 import { ensureDirectory, tryRun } from './build-tools';
+import type { Log } from './logger';
+
 export function generateManifest(
     rootDir: string,
-    filesToBuild: string[],
+    filesToBuild: Set<string>,
     manifestOutputPath = '',
     stylable: Stylable,
-    log: (...args: string[]) => void,
+    mode: string,
+    log: Log,
     fs: any
 ) {
     function getBuildNamespace(stylable: Stylable, filePath: string): string {
         return stylable.fileProcessor.process(filePath).namespace;
     }
     if (manifestOutputPath) {
-        const manifest = filesToBuild.reduce<{
+        const manifest = [...filesToBuild].reduce<{
             namespaceMapping: {
                 [key: string]: string;
             };
@@ -29,7 +32,7 @@ export function generateManifest(
                 namespaceMapping: {},
             }
         );
-        log('[Build]', 'creating manifest file: ');
+        log(mode, 'creating manifest file: ');
         tryRun(
             () => ensureDirectory(dirname(manifestOutputPath), fs),
             `Ensure directory for manifest: ${manifestOutputPath}`

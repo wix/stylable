@@ -1,16 +1,15 @@
-import { resolve } from 'path';
 import { expect } from 'chai';
 import { Stylable } from '@stylable/core';
-import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-kit';
 import { build } from '@stylable/cli';
+import { createMemoryFs } from '@file-services/memory';
 
 const log = () => {
     /**/
 };
 
 describe('build index', () => {
-    it('should create index file importing all matched stylesheets in srcDir', () => {
-        const fs = createFS({
+    it('should create index file importing all matched stylesheets in srcDir', async () => {
+        const fs = createMemoryFs({
             '/compA.st.css': `
                .a{}
             `,
@@ -21,18 +20,18 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
             outDir: '.',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: resolve('/'),
+            rootDir: '/',
             log,
         });
 
-        const res = fs.readFileSync(resolve('/index.st.css')).toString();
+        const res = fs.readFileSync('/index.st.css').toString();
 
         expect(res.trim()).to.equal(
             [
@@ -43,8 +42,8 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-    it('should create index file using a the default generator', () => {
-        const fs = createFS({
+    it('should create index file using a the default generator', async () => {
+        const fs = createMemoryFs({
             '/comp-A.st.css': `
                .a{}
             `,
@@ -55,18 +54,18 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
             outDir: '.',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: resolve('/'),
+            rootDir: '/',
             log,
         });
 
-        const res = fs.readFileSync(resolve('/index.st.css')).toString();
+        const res = fs.readFileSync('/index.st.css').toString();
 
         expect(res.trim()).to.equal(
             [
@@ -77,8 +76,8 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-    it('should create index file using a custom generator', () => {
-        const fs = createFS({
+    it('should create index file using a custom generator', async () => {
+        const fs = createMemoryFs({
             '/comp-A.st.css': `
                .a{}
             `,
@@ -89,19 +88,19 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
             outDir: '.',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: resolve('/'),
+            rootDir: '/',
             log,
             generatorPath: require.resolve('./fixtures/test-generator'),
         });
 
-        const res = fs.readFileSync(resolve('/index.st.css')).toString();
+        const res = fs.readFileSync('/index.st.css').toString();
 
         expect(res.trim()).to.equal(
             [
@@ -113,8 +112,8 @@ describe('build index', () => {
         );
     });
 
-    it('should create index file using a custom generator with named exports generation and @namespace', () => {
-        const fs = createFS({
+    it('should create index file using a custom generator with named exports generation and @namespace', async () => {
+        const fs = createMemoryFs({
             '/comp-A.st.css': `
                 :vars {
                     color1: red;
@@ -131,19 +130,19 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
             outDir: '.',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: resolve('/'),
+            rootDir: '/',
             log,
             generatorPath: require.resolve('./fixtures/named-exports-generator'),
         });
 
-        const res = fs.readFileSync(resolve('/index.st.css')).toString();
+        const res = fs.readFileSync('/index.st.css').toString();
 
         expect(res.trim()).to.equal(
             [
@@ -158,33 +157,33 @@ describe('build index', () => {
         );
     });
 
-    it('should create non-existing folders in path to the generated indexFile', () => {
-        const fs = createFS({
+    it('should create non-existing folders in path to the generated indexFile', async () => {
+        const fs = createMemoryFs({
             '/comp.st.css': `
                .a{}
             `,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
             outDir: './some-dir/other-dir/',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: resolve('/'),
+            rootDir: '/',
             log,
         });
 
-        const res = fs.readFileSync(resolve('/some-dir/other-dir/index.st.css')).toString();
+        const res = fs.readFileSync('/some-dir/other-dir/index.st.css').toString();
 
         expect(res.trim()).to.equal(
             [':import {-st-from: "../../comp.st.css";-st-default:Comp;}', '.root Comp{}'].join('\n')
         );
     });
-    it('should handle name collisions by failing', () => {
-        const fs = createFS({
+    it('should handle name collisions by failing', async () => {
+        const fs = createMemoryFs({
             '/comp.st.css': `
                .a{}
             `,
@@ -195,21 +194,19 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
         try {
-            build({
+            await build({
                 extension: '.st.css',
                 fs,
                 stylable,
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
-                rootDir: resolve('/'),
+                rootDir: '/',
                 log,
             });
         } catch (error) {
             expect(error.message).to.equal(
-                `Name Collision Error:\nexport symbol Comp from ${resolve(
-                    '/a/comp.st.css'
-                )} is already used by ${resolve('/comp.st.css')}`
+                `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`
             );
         }
     });
