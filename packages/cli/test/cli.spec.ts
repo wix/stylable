@@ -149,9 +149,9 @@ describe('Stylable Cli', function () {
         runCliSync(['--rootDir', tempDir.path, '--outDir', 'dist', '--stcss', '--dts']);
 
         const dirContent = loadDirSync(tempDir.path);
-        const stylesheetContent = dirContent[join('dist', 'style.st.css')];
-        const dtsContent = dirContent[join('dist', 'style.st.css.d.ts')];
-        const dtsSourceMapContent = dirContent[join('dist', 'style.st.css.d.ts.map')];
+        const stylesheetContent = dirContent['dist/style.st.css'];
+        const dtsContent = dirContent['dist/style.st.css.d.ts'];
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
 
         expect(stylesheetContent).to.equal(srcContent);
         expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
@@ -181,9 +181,9 @@ describe('Stylable Cli', function () {
         ]);
 
         const dirContent = loadDirSync(tempDir.path);
-        const stylesheetContent = dirContent[join('dist', 'style.st.css')];
-        const dtsContent = dirContent[join('dist', 'style.st.css.d.ts')];
-        const dtsSourceMapContent = dirContent[join('dist', 'style.st.css.d.ts.map')];
+        const stylesheetContent = dirContent['dist/style.st.css'];
+        const dtsContent = dirContent['dist/style.st.css.d.ts'];
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
 
         expect(stylesheetContent).to.equal(srcContent);
         expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
