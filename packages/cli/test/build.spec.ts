@@ -8,7 +8,6 @@ import {
 } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
-import { resolve } from 'path';
 
 const log = () => {
     /**/
@@ -289,7 +288,7 @@ describe('build stand alone', () => {
             stylable,
             outDir: '.',
             srcDir: '.',
-            rootDir: resolve('/'),
+            rootDir: '/',
             moduleFormats: [],
             log,
             dts: true,
@@ -297,10 +296,10 @@ describe('build stand alone', () => {
         });
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
-            expect(fs.existsSync(resolve(p)), p).to.equal(true);
+            expect(fs.existsSync(p), p).to.equal(true);
         });
 
-        const dtsContent = fs.readFileSync(resolve('/main.st.css.d.ts'), 'utf8');
+        const dtsContent = fs.readFileSync('/main.st.css.d.ts', 'utf8');
 
         expect(dtsContent).contains('declare const classes');
         expect(dtsContent).contains('"root":');
@@ -324,7 +323,7 @@ describe('build stand alone', () => {
             stylable,
             outDir: '.',
             srcDir: '.',
-            rootDir: resolve('/'),
+            rootDir: '/',
             moduleFormats: [],
             log,
             dts: true,
@@ -332,10 +331,10 @@ describe('build stand alone', () => {
         });
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
-            expect(fs.existsSync(resolve(p)), p).to.equal(true);
+            expect(fs.existsSync(p), p).to.equal(true);
         });
 
-        const dtsContent = fs.readFileSync(resolve('/main.st.css.d.ts'), 'utf8');
+        const dtsContent = fs.readFileSync('/main.st.css.d.ts', 'utf8');
 
         expect(dtsContent).to.contain('type states = {');
         expect(dtsContent).to.contain('"w"?:');
@@ -373,7 +372,7 @@ describe('build stand alone', () => {
             stylable,
             outDir: '.',
             srcDir: '.',
-            rootDir: resolve('/'),
+            rootDir: '/',
             moduleFormats: [],
             log,
             dts: true,
@@ -381,10 +380,10 @@ describe('build stand alone', () => {
         });
 
         ['/main.st.css', '/main.st.css.d.ts', '/main.st.css.d.ts.map'].forEach((p) => {
-            expect(fs.existsSync(resolve(p)), p).to.equal(true);
+            expect(fs.existsSync(p), p).to.equal(true);
         });
 
-        const dtsSourceMapContent = fs.readFileSync(resolve('/main.st.css.d.ts.map'), 'utf8');
+        const dtsSourceMapContent = fs.readFileSync('/main.st.css.d.ts.map', 'utf8');
         expect(dtsSourceMapContent).to.contain(`"file": "main.st.css.d.ts",`);
         expect(dtsSourceMapContent).to.contain(`"sources": [`);
         expect(dtsSourceMapContent).to.contain(`"main.st.css"`);
