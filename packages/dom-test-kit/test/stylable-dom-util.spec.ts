@@ -6,7 +6,7 @@ import { contractTest } from './contract-test';
 describe('stylable-dom-utils', contractTest(StylableDOMUtil));
 
 describe('stylable-dom-utils type compliance', function () {
-    this.timeout(5000);
+    this.timeout(25000);
     let tk: DTSKit;
 
     beforeEach(() => {

@@ -4,7 +4,7 @@ import { expect } from 'chai';
 const propUnknownNotOnType = "Property 'unknown' does not exist on type";
 
 describe('Generate DTS', function () {
-    this.timeout(5000);
+    this.timeout(25000);
     let tk: DTSKit;
 
     beforeEach(() => {

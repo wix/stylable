@@ -5,7 +5,8 @@ import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
 
-describe('Stylable Cli', () => {
+describe('Stylable Cli', function () {
+    this.timeout(25000);
     let tempDir: ITempDirectory;
     const testNsrPath = require.resolve('./fixtures/test-ns-resolver');
 
