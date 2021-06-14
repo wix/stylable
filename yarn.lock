@@ -5885,10 +5885,10 @@ pkg-dir@^4.1.0, pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-playwright-chromium@^1.12.1:
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.12.1.tgz#cab8f6804d3af5a5a84bde372dffda59a3d1d4f4"
-  integrity sha512-a6AXk2Sd7NjXk6tQYf5BW53a9YlBU5+AITpQ8L3MYhMqtMHRFk7X0z2EavtklbmahbbDdxYLUeOL3NDFtPq88w==
+playwright-chromium@^1.12.2:
+  version "1.12.2"
+  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.12.2.tgz#8865a4462f96fe8e2b35f6148889d872547f4406"
+  integrity sha512-+N4M6F9+tBLrP4w6jfQAfucIaHdAl/o2FkBkPJtbbygHC88Ul5h5mOAQXRT4yeIrkd1+dyyq8J9GYN2a1RzUjg==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
