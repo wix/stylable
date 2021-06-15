@@ -144,7 +144,6 @@ export function buildSingleFile({
             `Write File Error: ${cssAssetOutPath}`
         );
     }
-    // .d.ts?
     // .d.ts
     if (dts) {
         const dtsContent = generateDTSContent(res);
