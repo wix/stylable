@@ -45,14 +45,10 @@ describe('Stylable Cli Watch', () => {
                             join(tempDir.path, 'depend.st.css'),
                             '.root{ color:yellow; }'
                         );
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return false;
-                    },
                 },
             ],
         });
@@ -90,14 +86,10 @@ describe('Stylable Cli Watch', () => {
                             join(tempDir.path, 'deep.st.css'),
                             ':vars { color: green; }'
                         );
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return false;
-                    },
                 },
             ],
         });
@@ -118,14 +110,10 @@ describe('Stylable Cli Watch', () => {
                     msg: messages.START_WATCHING,
                     action() {
                         writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return false;
-                    },
                 },
             ],
         });
@@ -147,14 +135,10 @@ describe('Stylable Cli Watch', () => {
                     msg: messages.START_WATCHING,
                     action() {
                         unlinkSync(join(tempDir.path, 'style.st.css'));
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return false;
-                    },
                 },
             ],
         });
@@ -178,14 +162,10 @@ describe('Stylable Cli Watch', () => {
                     msg: messages.START_WATCHING,
                     action() {
                         rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return false;
-                    },
                 },
             ],
         });
@@ -211,14 +191,10 @@ describe('Stylable Cli Watch', () => {
                     msg: messages.START_WATCHING,
                     action() {
                         rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return false;
-                    },
                 },
             ],
         });
@@ -245,20 +221,13 @@ describe('Stylable Cli Watch', () => {
                             join(tempDir.path, 'style.st.css'),
                             join(tempDir.path, 'style-renamed.st.css')
                         );
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return true;
-                    },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return false;
-                    },
                 },
             ],
         });
@@ -329,21 +298,16 @@ describe('Stylable Cli Watch', () => {
                     msg: messages.START_WATCHING,
                     action() {
                         writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
                     action() {
                         writeFileSync(join(tempDir.path, 'comp.st.css'), `.root{ color:green }`);
-                        return true;
                     },
                 },
                 {
                     msg: messages.FINISHED_PROCESSING,
-                    action() {
-                        return false;
-                    },
                 },
             ],
         });

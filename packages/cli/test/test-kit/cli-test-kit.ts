@@ -13,19 +13,28 @@ export function createCliTester() {
     }: {
         dirPath: string;
         args: string[];
-        steps: Array<{ msg: string; action: () => boolean }>;
-        errors?: Array<{ msg: string; action: () => boolean }>;
+        steps: Array<{ msg: string; action?: () => void }>;
     }) {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess as any);
-        let index = 0;
+        const found = [];
 
         for await (const e of on(cliProcess.stdout as any, 'data')) {
-            const { msg, action } = steps[index];
-            if (e.toString().includes(msg)) {
-                index++;
-                if (action() === false) {
-                    break;
+            const lines = e.toString().split('\n');
+
+            for (const line of lines) {
+                const step = steps[found.length];
+
+                if (line.includes(step.msg)) {
+                    found.push(true);
+
+                    if (step.action) {
+                        step.action();
+                    }
+
+                    if (steps.length === found.length) {
+                        return;
+                    }
                 }
             }
         }
