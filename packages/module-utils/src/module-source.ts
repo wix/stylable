@@ -55,8 +55,6 @@ export function createModuleSource(
         : '""';
 
     switch (moduleFormat) {
-        case 'dts':
-            return generateTypescriptDefinition();
         case 'esm': {
             const importKey = renderableOnly ? 'createRenderable' : 'create';
             return generateModuleSource(
@@ -98,8 +96,4 @@ export function createModuleSource(
             );
     }
     throw new Error('Unknown module format ' + moduleFormat);
-}
-
-function generateTypescriptDefinition(): string {
-    throw new Error('Not implemented');
 }

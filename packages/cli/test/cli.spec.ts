@@ -5,7 +5,8 @@ import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
 
-describe('Stylable Cli', () => {
+describe('Stylable Cli', function () {
+    this.timeout(25000);
     let tempDir: ITempDirectory;
     const testNsrPath = require.resolve('./fixtures/test-ns-resolver');
 
@@ -138,6 +139,59 @@ describe('Stylable Cli', () => {
         ).equal(true);
     });
 
+    it('build .st.css.d.ts alongside source files with source-maps on by default', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': srcContent,
+        });
+
+        runCliSync(['--rootDir', tempDir.path, '--outDir', 'dist', '--stcss', '--dts']);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const stylesheetContent = dirContent['dist/style.st.css'];
+        const dtsContent = dirContent['dist/style.st.css.d.ts'];
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(stylesheetContent).to.equal(srcContent);
+        expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
+            true
+        );
+        expect(
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+        ).to.equal(true);
+    });
+
+    it('build .st.css.d.ts alongside source files with source-maps explicitly off', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': srcContent,
+        });
+
+        runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            'dist',
+            '--stcss',
+            '--dts',
+            '--dtsSourceMap',
+            'false',
+        ]);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const stylesheetContent = dirContent['dist/style.st.css'];
+        const dtsContent = dirContent['dist/style.st.css.d.ts'];
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(stylesheetContent).to.equal(srcContent);
+        expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
+            true
+        );
+        expect(dtsSourceMapContent).to.equal(undefined);
+    });
+
     it('manifest', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -213,7 +267,8 @@ describe('Stylable Cli', () => {
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
-        it('(diagnosticsMode) should report diagnostics and ignore process process exit', () => {
+
+        it('(diagnosticsMode) should report diagnostics and ignore process exit', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{color:value(xxx)}`,
@@ -229,6 +284,30 @@ describe('Stylable Cli', () => {
             expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
+        });
+
+        it('should fail to build when "--dtsSourceMap" is on but "--dts" is off', () => {
+            const srcContent = '.root{color:red}';
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': srcContent,
+            });
+
+            const { stdout, stderr, status } = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--outDir',
+                'dist',
+                '--stcss',
+                '--dts',
+                'false',
+                '--dtsSourceMap',
+                'true',
+            ]);
+
+            expect(status).to.equal(1);
+            expect(stdout).to.equal('');
+            expect(stderr).to.include('dtsSourceMap -> dts');
         });
     });
 });

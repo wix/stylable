@@ -1,5 +1,9 @@
 import { isAsset, Stylable } from '@stylable/core';
-import { createModuleSource } from '@stylable/module-utils';
+import {
+    createModuleSource,
+    generateDTSContent,
+    generateDTSSourceMap,
+} from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
@@ -17,6 +21,8 @@ export interface BuildCommonOptions {
     outputSources?: boolean;
     generated?: Set<string>;
     mode?: string;
+    dts?: boolean;
+    dtsSourceMap?: boolean;
 }
 
 export interface BuildFileOptions extends BuildCommonOptions {
@@ -51,6 +57,8 @@ export function buildSingleFile({
     injectCSSRequest = false,
     optimize = false,
     minify = false,
+    dts = false,
+    dtsSourceMap,
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
@@ -137,6 +145,31 @@ export function buildSingleFile({
         );
     }
     // .d.ts?
+    // .d.ts
+    if (dts) {
+        const dtsContent = generateDTSContent(res);
+        const dtsPath = outSrcPath + '.d.ts';
+
+        generated.add(dtsPath);
+        outputLogs.push('output .d.ts');
+
+        tryRun(() => fs.writeFileSync(dtsPath, dtsContent), `Write File Error: ${dtsPath}`);
+
+        // .d.ts.map
+        // if not explicitly defined, assumed true with "--dts" parent scope
+        if (dtsSourceMap !== false) {
+            const dtsMappingContent = generateDTSSourceMap(dtsContent, res.meta);
+            const dtsMapPath = outSrcPath + '.d.ts.map';
+
+            generated.add(dtsMapPath);
+            outputLogs.push('output .d.ts.mp');
+
+            tryRun(
+                () => fs.writeFileSync(dtsMapPath, dtsMappingContent),
+                `Write File Error: ${dtsMapPath}`
+            );
+        }
+    }
 
     log(mode, `output: [${outputLogs.join(', ')}]`);
     // copy assets
@@ -159,6 +192,8 @@ export function removeBuildProducts({
     outputSources = false,
     generated = new Set<string>(),
     mode = '[Build]',
+    dts = false,
+    dtsSourceMap,
 }: BuildCommonOptions) {
     const { basename, dirname, join } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
@@ -191,7 +226,20 @@ export function removeBuildProducts({
         outputLogs.push('transpiled css');
         tryRun(() => fs.unlinkSync(cssAssetOutPath), `Unlink File Error: ${cssAssetOutPath}`);
     }
-    // .d.ts?
+    // .d.ts
+    if (dts) {
+        const dtsPath = `${outSrcPath}.d.ts`;
+        generated.delete(dtsPath);
+        outputLogs.push('generated .d.ts');
+        tryRun(() => fs.unlinkSync(dtsPath), `Unlink File Error: ${dtsPath}`);
+    }
+    // .d.ts.map
+    if (dtsSourceMap) {
+        const dtsMapPath = `${outSrcPath}.d.ts.map`;
+        generated.delete(dtsMapPath);
+        outputLogs.push('generated .d.ts.map');
+        tryRun(() => fs.unlinkSync(dtsMapPath), `Unlink File Error: ${dtsMapPath}`);
+    }
 
     log(mode, `removed: [${outputLogs.join(', ')}]`);
 }

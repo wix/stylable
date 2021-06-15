@@ -53,6 +53,10 @@ export interface BuildOptions {
     optimize?: boolean;
     /** should minify css */
     minify?: boolean;
+    /** should generate .d.ts definitions for every stylesheet */
+    dts?: boolean;
+    /** should generate .d.ts.map files for every .d.ts mapping back to the source .st.css */
+    dtsSourceMap?: boolean;
     /** enable watch mode */
     watch?: boolean;
     /** should emit diagnostics */
@@ -79,6 +83,8 @@ export async function build({
     optimize,
     minify,
     manifest,
+    dts,
+    dtsSourceMap,
     watch,
     diagnostics,
 }: BuildOptions) {
@@ -142,6 +148,8 @@ export async function build({
                             outputCSSNameTemplate,
                             outputSources,
                             generated,
+                            dts,
+                            dtsSourceMap,
                         });
                     }
                 }
@@ -203,6 +211,8 @@ export async function build({
                     useNamespaceReference,
                     injectCSSRequest,
                     optimize,
+                    dts,
+                    dtsSourceMap,
                     minify,
                     generated,
                 });

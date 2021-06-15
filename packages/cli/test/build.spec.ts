@@ -272,4 +272,120 @@ describe('build stand alone', () => {
         );
         expect(fs.existsSync('/dist/comp.global.css')).to.equal(true);
     });
+
+    it('DTS only parts', async () => {
+        const fs = createMemoryFs({
+            '/main.st.css': `
+                .root   {}
+                .part {}`,
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        await build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            rootDir: '/',
+            moduleFormats: [],
+            log,
+            dts: true,
+            dtsSourceMap: false,
+        });
+
+        ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
+            expect(fs.existsSync(p), p).to.equal(true);
+        });
+
+        const dtsContent = fs.readFileSync('/main.st.css.d.ts', 'utf8');
+
+        expect(dtsContent).contains('declare const classes');
+        expect(dtsContent).contains('"root":');
+        expect(dtsContent).contains('"part":');
+    });
+
+    it('DTS with states', async () => {
+        const fs = createMemoryFs({
+            '/main.st.css': `
+                .root   { -st-states: w; }
+                .string { -st-states: x(string); }
+                .number { -st-states: y(number); }
+                .enum   { -st-states: z(enum(on, off, default)); }`,
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        await build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            rootDir: '/',
+            moduleFormats: [],
+            log,
+            dts: true,
+            dtsSourceMap: false,
+        });
+
+        ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
+            expect(fs.existsSync(p), p).to.equal(true);
+        });
+
+        const dtsContent = fs.readFileSync('/main.st.css.d.ts', 'utf8');
+
+        expect(dtsContent).to.contain('type states = {');
+        expect(dtsContent).to.contain('"w"?:');
+        expect(dtsContent).to.contain('"x"?: string');
+        expect(dtsContent).to.contain('"y"?: number');
+        expect(dtsContent).to.contain('"z"?: "on" | "off" | "default";');
+    });
+
+    it('DTS with mapping', async () => {
+        const fs = createMemoryFs({
+            '/main.st.css': `
+                @keyframes blah {
+                    0% {}
+                    100% {}
+                }
+                :vars {
+                    v1: red;
+                    v2: green;
+                }
+                .root   { 
+                    -st-states: a, b, w;
+                    --c1: red;
+                    --c2: green;
+                 }
+                .string { -st-states: x(string); }
+                .number { -st-states: y(number); }
+                .enum   { -st-states: z(enum(on, off, default)); }`,
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        await build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            rootDir: '/',
+            moduleFormats: [],
+            log,
+            dts: true,
+            dtsSourceMap: true,
+        });
+
+        ['/main.st.css', '/main.st.css.d.ts', '/main.st.css.d.ts.map'].forEach((p) => {
+            expect(fs.existsSync(p), p).to.equal(true);
+        });
+
+        const dtsSourceMapContent = fs.readFileSync('/main.st.css.d.ts.map', 'utf8');
+        expect(dtsSourceMapContent).to.contain(`"file": "main.st.css.d.ts",`);
+        expect(dtsSourceMapContent).to.contain(`"sources": [`);
+        expect(dtsSourceMapContent).to.contain(`"main.st.css"`);
+    });
 });

@@ -45,6 +45,18 @@ const argv = yargs
         description: 'output stylable sources (.st.css)',
         default: false,
     })
+    .option('dts', {
+        type: 'boolean',
+        description: 'output stylable definition files for sources (.st.css.d.ts)',
+        default: false,
+    })
+    .option('dtsSourceMap', {
+        type: 'boolean',
+        description:
+            'output source maps for stylable definition files for sources (.st.css.d.ts.map)',
+        defaultDescription: 'true if "--dts" option is enabled, otherwise false',
+        implies: 'dts',
+    })
     .option('useNamespaceReference', {
         type: 'boolean',
         description:
@@ -142,6 +154,7 @@ const argv = yargs
     .alias('v', 'version')
     .help()
     .strict()
+    .wrap(yargs.terminalWidth())
     .parseSync();
 
 const log = createLogger('[Stylable]', argv.log);
@@ -157,6 +170,8 @@ const {
     cjs,
     css,
     stcss,
+    dts,
+    dtsSourceMap,
     cssInJs,
     namespaceResolver,
     injectCSSRequest,
@@ -209,6 +224,8 @@ build({
     minify,
     manifest: manifest ? join(rootDir, outDir, manifestFilepath) : undefined,
     useNamespaceReference,
+    dts,
+    dtsSourceMap,
     watch,
     diagnostics,
 })
