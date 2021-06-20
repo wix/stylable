@@ -158,7 +158,7 @@ describe('stylable-forcestates-plugin', () => {
         );
     });
 
-    it('should mark an class state woth param as forced using a data-attribute selector', () => {
+    it('should mark an class state with param as forced using a data-attribute selector', () => {
         const res = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
@@ -214,7 +214,7 @@ describe('stylable-forcestates-plugin', () => {
         });
 
         expect((res.meta.outputAst!.nodes[1] as postcss.Rule).selector).to.equal(
-            `.entry__root[class~="entry---myState-10-some_value"],.entry__root[${createDataAttr(
+            `.entry__root.entry---myState-10-some_value,.entry__root[${createDataAttr(
                 OVERRIDE_STATE_PREFIX,
                 'myState',
                 'some value'
