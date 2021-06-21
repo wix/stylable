@@ -9,9 +9,7 @@
     "build": "tsc --build",
     "watch": "yarn build -w",
     "lint": "eslint . -f codeframe",
-    "pretest": "yarn build && yarn lint",
     "test": "mocha \"./packages/*/dist/test/**/*.spec.js\" --parallel --timeout 10000",
-    "test2": "mocha \"./packages/*/dist/test/**/*.spec.js\" --parallel --timeout 10000",
     "prettify": "npx prettier . --write"
   },
   "devDependencies": {
