@@ -7,7 +7,8 @@ const projectDir = dirname(
     require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
 );
 
-describe(`(${project}) (production)`, () => {
+// -== PARALLEL TESTS ==-
+xdescribe(`(${project}) (production)`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir,
