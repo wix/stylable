@@ -17,6 +17,9 @@ describe(`${project} - manifest`, () => {
             launchOptions: {
                 // headless: false
             },
+            webpackOptions: {
+                output: { path: join(projectDir, 'dist-', project) },
+            },
         },
         before,
         afterEach,

@@ -93,7 +93,7 @@ export class ProjectRunner {
         log = false,
     }: Options) {
         this.projectDir = projectDir;
-        this.outputDir = join(this.projectDir, 'dist');
+        this.outputDir = join(this.projectDir, webpackOptions?.output?.path || 'dist');
         this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
@@ -338,14 +338,10 @@ export class ProjectRunner {
 
     private getWebpackConfig() {
         const webpackConfig = this.webpackConfig;
-        if (webpackConfig.output && webpackConfig.output.path) {
-            throw new Error('Test project should not specify output.path option');
-        } else {
-            webpackConfig.output = {
-                ...webpackConfig.output,
-                path: this.outputDir,
-            };
-        }
+        webpackConfig.output = {
+            ...webpackConfig.output,
+            path: this.outputDir,
+        };
         return webpackConfig;
     }
 }

@@ -1,19 +1,21 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 
 const project = 'simplest-project';
 const projectDir = dirname(
     require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
 );
 
-// -== PARALLEL TESTS ==-
-xdescribe(`(${project})`, () => {
+describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir,
             launchOptions: {
                 // headless: false
+            },
+            webpackOptions: {
+                output: { path: join(projectDir, 'dist-', project) },
             },
         },
         before,

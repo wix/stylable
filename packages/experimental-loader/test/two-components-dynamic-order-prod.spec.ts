@@ -1,14 +1,13 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 
 const project = 'two-components-dynamic-order';
 const projectDir = dirname(
     require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
 );
 
-// -== PARALLEL TESTS ==-
-xdescribe(`(${project}) (production)`, () => {
+describe(`(${project}) (production)`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir,
@@ -17,6 +16,7 @@ xdescribe(`(${project}) (production)`, () => {
             },
             webpackOptions: {
                 mode: 'production',
+                output: { path: join(projectDir, 'dist-prod', project) },
             },
         },
         before,
