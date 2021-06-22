@@ -93,7 +93,7 @@ export class ProjectRunner {
         log = false,
     }: Options) {
         this.projectDir = projectDir;
-        this.outputDir = join(this.projectDir, webpackOptions?.output?.path || 'dist');
+        this.outputDir = webpackOptions?.output?.path ?? join(this.projectDir, 'dist');
         this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
