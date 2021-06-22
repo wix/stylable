@@ -9,8 +9,8 @@
     "build": "tsc --build",
     "watch": "yarn build -w",
     "lint": "eslint . -f codeframe",
-    "pretest": "yarn build && yarn lint",
-    "test": "lerna run test --stream",
+    "pretest": "yarn build",
+    "test": "mocha \"./packages/*/dist/test/**/*.spec.js\" --parallel --timeout 10000",
     "prettify": "npx prettier . --write"
   },
   "devDependencies": {
