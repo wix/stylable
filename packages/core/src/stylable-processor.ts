@@ -8,7 +8,6 @@ import {
     isChildOfAtRule,
     isCompRoot,
     parseSelector as deprecatedParseSelector,
-    SelectorAstNode,
 } from './selector-utils';
 import { processDeclarationUrls } from './stylable-assets';
 import {
@@ -29,13 +28,9 @@ import {
     isCSSVarProp,
     scopeSelector,
 } from './stylable-utils';
-import {
-    parseSelector,
-    walkSelector,
-    isNested,
-    isRootValid,
-    SelectorNode,
-} from './helpers/selector';
+import { walkSelector, isNested, isRootValid, SelectorNode } from './helpers/selector';
+import type { SRule } from './deprecated/postcss-ast-extension';
+import { getStylableAstData } from './helpers/stylable-ast-data';
 import {
     rootValueMapping,
     SBTypesParsers,
@@ -379,94 +374,73 @@ export class StylableProcessor {
         // ToDo wrap with a deprecated get/set (also other SRule fields)
         rule.selectorAst = deprecatedParseSelector(rule.selector);
 
-        const selectorAst = parseSelector(rule.selector);
+        const astData = getStylableAstData(rule);
 
         let locallyScoped = false;
 
-        walkSelector(
-            selectorAst,
-            (node, index, nodes, parents) => {
-                const type = node.type;
-                if (type === 'selector' && !isNested(parents)) {
-                    locallyScoped = false;
-                }
-                if (type !== `selector` && type !== `class` && type !== `element`) {
-                    rule.isSimpleSelector = false;
-                }
+        walkSelector(astData.selectorAst, (node, index, nodes, parents) => {
+            const type = node.type;
+            if (type === 'selector' && !isNested(parents)) {
+                locallyScoped = false;
+            }
+            if (type !== `selector` && type !== `class` && type !== `element`) {
+                astData.isSimpleSelector = false;
+                rule.isSimpleSelector = false;
+            }
 
-                if (node.type === 'pseudo_class') {
-                    if (node.value === 'import') {
-                        if (rule.selector === rootValueMapping.import) {
-                            if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
-                                this.diagnostics.warn(
-                                    rule,
-                                    processorWarnings.NO_IMPORT_IN_ST_SCOPE()
-                                );
-                                rule.remove();
-                                return walkSelector.stopAll; //return false;
-                            }
+            if (node.type === 'pseudo_class') {
+                if (node.value === 'import') {
+                    if (rule.selector === rootValueMapping.import) {
+                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
+                            this.diagnostics.warn(rule, processorWarnings.NO_IMPORT_IN_ST_SCOPE());
                             rule.remove();
                             return walkSelector.stopAll; //return false;
-                        } else {
+                        }
+                        rule.remove();
+                        return walkSelector.stopAll; //return false;
+                    } else {
+                        this.diagnostics.warn(
+                            rule,
+                            processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                rootValueMapping.import
+                            )
+                        );
+                    }
+                } else if (node.value === 'vars') {
+                    if (rule.selector === rootValueMapping.vars) {
+                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
                             this.diagnostics.warn(
                                 rule,
-                                processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                    rootValueMapping.import
-                                )
+                                processorWarnings.NO_VARS_DEF_IN_ST_SCOPE()
                             );
-                        }
-                    } else if (node.value === 'vars') {
-                        if (rule.selector === rootValueMapping.vars) {
-                            if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
-                                this.diagnostics.warn(
-                                    rule,
-                                    processorWarnings.NO_VARS_DEF_IN_ST_SCOPE()
-                                );
-                                rule.remove();
-                                return walkSelector.stopAll; //return false;
-                            }
-
-                            this.addVarSymbols(rule);
+                            rule.remove();
                             return walkSelector.stopAll; //return false;
-                        } else {
-                            this.diagnostics.warn(
-                                rule,
-                                processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                    rootValueMapping.vars
-                                )
-                            );
                         }
-                    } else if (node.value === `global`) {
-                        return walkSelector.skipNested;
-                    }
-                } else if (node.type === 'class') {
-                    this.addClassSymbolOnce(node.value, rule);
 
-                    if (this.meta.classes[node.value]) {
-                        if (!this.meta.classes[node.value].alias) {
-                            locallyScoped = true;
-                        } else if (locallyScoped === false && !inStScope) {
-                            if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
-                                this.diagnostics.warn(
-                                    rule,
-                                    processorWarnings.UNSCOPED_CLASS(node.value),
-                                    {
-                                        word: node.value,
-                                    }
-                                );
-                            } else {
-                                locallyScoped = true;
-                            }
-                        }
+                        this.addVarSymbols(rule);
+                        return walkSelector.stopAll; //return false;
+                    } else {
+                        this.diagnostics.warn(
+                            rule,
+                            processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                rootValueMapping.vars
+                            )
+                        );
                     }
-                } else if (node.type === 'element') {
-                    this.addElementSymbolOnce(node.value, rule);
+                } else if (node.value === `global`) {
+                    return walkSelector.skipNested;
+                }
+            } else if (node.type === 'class') {
+                this.addClassSymbolOnce(node.value, rule);
 
-                    if (locallyScoped === false && !inStScope) {
+                if (this.meta.classes[node.value]) {
+                    if (!this.meta.classes[node.value].alias) {
+                        locallyScoped = true;
+                    } else if (locallyScoped === false && !inStScope) {
                         if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
                             this.diagnostics.warn(
                                 rule,
-                                processorWarnings.UNSCOPED_ELEMENT(node.value),
+                                processorWarnings.UNSCOPED_CLASS(node.value),
                                 {
                                     word: node.value,
                                 }
@@ -476,19 +450,38 @@ export class StylableProcessor {
                         }
                     }
                 }
-                return;
-            },
-        );
+            } else if (node.type === 'element') {
+                this.addElementSymbolOnce(node.value, rule);
 
-        if (rule.isSimpleSelector !== false) {
+                if (locallyScoped === false && !inStScope) {
+                    if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
+                        this.diagnostics.warn(
+                            rule,
+                            processorWarnings.UNSCOPED_ELEMENT(node.value),
+                            {
+                                word: node.value,
+                            }
+                        );
+                    } else {
+                        locallyScoped = true;
+                    }
+                }
+            }
+            return;
+        });
+
+        if (astData.isSimpleSelector !== false) {
+            astData.isSimpleSelector = true;
+            astData.selectorType = rule.selector.match(/^\./) ? 'class' : 'element';
             rule.isSimpleSelector = true;
-            rule.selectorType = rule.selector.match(/^\./) ? 'class' : 'element';
+            rule.selectorType = astData.selectorType;
         } else {
+            astData.selectorType = 'complex';
             rule.selectorType = 'complex';
         }
 
         // ToDo: check cases of root in nested selectors?
-        if (!isRootValid(selectorAst)) {
+        if (!isRootValid(astData.selectorAst)) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
     }
@@ -1011,22 +1004,4 @@ export function process(
     resolveNamespace?: typeof processNamespace
 ) {
     return new StylableProcessor(diagnostics, resolveNamespace).process(root);
-}
-
-// TODO: maybe put under stylable namespace object in v2
-export interface SRule extends postcss.Rule {
-    selectorAst: SelectorAstNode;
-    isSimpleSelector: boolean;
-    selectorType: 'class' | 'element' | 'complex';
-    mixins?: RefedMixin[];
-    stScopeSelector?: string;
-}
-
-// TODO: maybe put under stylable namespace object in v2
-export interface DeclStylableProps {
-    sourceValue: string;
-}
-
-export interface SDecl extends postcss.Declaration {
-    stylable: DeclStylableProps;
 }

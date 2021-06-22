@@ -23,6 +23,14 @@ export * from './report-diagnostic';
 export * from './visit-meta-css-dependencies';
 export * from './murmurhash';
 export * from './timed-cache';
+export { getStylableAstData, setStylableAstData } from './helpers/stylable-ast-data';
+
+export {
+    SRule,
+    SDecl,
+    DeclStylableProps,
+    getDeclStylable,
+} from './deprecated/postcss-ast-extension';
 
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };

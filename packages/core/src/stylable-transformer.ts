@@ -30,13 +30,12 @@ import { appendMixins } from './stylable-mixins';
 import type {
     ClassSymbol,
     ElementSymbol,
-    SDecl,
-    SRule,
     StylableMeta,
     StylableSymbol,
 } from './stylable-processor';
+import { SRule, SDecl, getDeclStylable } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
-import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
+import { findRule, generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
 const { hasOwnProperty } = Object.prototype;

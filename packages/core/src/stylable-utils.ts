@@ -4,14 +4,11 @@ import * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
 import type {
-    DeclStylableProps,
     Imported,
-    SDecl,
-    SRule,
     StylableMeta,
     StylableSymbol,
 } from './stylable-processor';
-
+import type { SRule } from './deprecated/postcss-ast-extension';
 import {
     fixChunkOrdering,
     isChildOfAtRule,
@@ -296,15 +293,6 @@ export function findRule(
         }
     });
     return found;
-}
-
-export function getDeclStylable(decl: SDecl): DeclStylableProps {
-    if (decl.stylable) {
-        return decl.stylable;
-    } else {
-        decl.stylable = decl.stylable ? decl.stylable : { sourceValue: '' };
-        return decl.stylable;
-    }
 }
 
 function destructiveReplaceNode(
