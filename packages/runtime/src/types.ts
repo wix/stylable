@@ -1,4 +1,4 @@
-export type StateValue = boolean | number | string | null | undefined;
+export type StateValue = boolean | number | string | undefined;
 
 export interface StateMap {
     [stateName: string]: StateValue;
@@ -51,7 +51,7 @@ export interface Host {
     sts?: (
         namespace: string,
         context: string | undefined,
-        stateOrClass?: string | StateMap | null | undefined,
+        stateOrClass?: string | StateMap | undefined,
         ...classes: Array<string | undefined>
     ) => string;
     stc?: (namespace: string, stateMapping?: StateMap | null | undefined) => string;
