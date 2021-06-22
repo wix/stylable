@@ -1,4 +1,4 @@
-export type StateValue = boolean | number | string;
+export type StateValue = boolean | number | string | undefined;
 
 export interface StateMap {
     [stateName: string]: StateValue;
@@ -6,7 +6,7 @@ export interface StateMap {
 
 export interface AttributeMap {
     className?: string;
-    [attributeName: string]: StateValue | undefined;
+    [attributeName: string]: StateValue;
 }
 
 export interface InheritedAttributes {
