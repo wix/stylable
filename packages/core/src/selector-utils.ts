@@ -124,7 +124,7 @@ export function isRootValid(ast: SelectorAstNode, rootName: string) {
     return isValid;
 }
 
-export const createSimpleSelectorChecker = createChecker([
+const createSimpleSelectorChecker = createChecker([
     'selectors',
     'selector',
     ['element', 'class'],
@@ -359,6 +359,7 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
     });
 }
 
+// ToDo: move to helpers/rule
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return (
         rule.parent &&
@@ -367,6 +368,7 @@ export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     );
 }
 
+// ToDo: move to helpers/component
 export function isCompRoot(name: string) {
     return name.charAt(0).match(/[A-Z]/);
 }

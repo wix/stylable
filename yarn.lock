@@ -970,6 +970,18 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
+"@tokey/core@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@tokey/core/-/core-1.0.0.tgz#7af81a4742cfbdbf4ca8a67c6e0ee2716945003a"
+  integrity sha512-QO726Xu3I81aINYH+/pE8qh/5TuY0ByZpIg8Pdx8K6wp74+dn4tb7No6TpoFbW7AFt69o65VgaIUqHoW/qaZlA==
+
+"@tokey/css-selector-parser@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@tokey/css-selector-parser/-/css-selector-parser-0.1.0.tgz#2f1895d67364c5564bfd23204a3c3e1f7b5a1c1e"
+  integrity sha512-wU7MayDGS+D3RNiWgPSAabh8hEjQ60AvuuaIgZh0omDxW3sS4tYCA2N/BSRwD9oLvWUxJ6D1RbJyhLu0L+0ZOQ==
+  dependencies:
+    "@tokey/core" "^1.0.0"
+
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"

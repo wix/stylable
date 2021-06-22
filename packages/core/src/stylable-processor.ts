@@ -5,14 +5,10 @@ import postcssValueParser from 'postcss-value-parser';
 import { tokenizeImports } from 'toky';
 import { Diagnostics } from './diagnostics';
 import {
-    createSimpleSelectorChecker,
     isChildOfAtRule,
     isCompRoot,
-    isNested,
-    isRootValid,
-    parseSelector,
+    parseSelector as deprecatedParseSelector,
     SelectorAstNode,
-    traverseNode,
 } from './selector-utils';
 import { processDeclarationUrls } from './stylable-assets';
 import {
@@ -33,6 +29,13 @@ import {
     isCSSVarProp,
     scopeSelector,
 } from './stylable-utils';
+import {
+    parseSelector,
+    walkSelector,
+    isNested,
+    isRootValid,
+    SelectorNode,
+} from './helpers/selector';
 import {
     rootValueMapping,
     SBTypesParsers,
@@ -373,93 +376,109 @@ export class StylableProcessor {
     }
 
     protected handleRule(rule: SRule, inStScope = false) {
-        rule.selectorAst = parseSelector(rule.selector);
+        // ToDo wrap with a deprecated get/set (also other SRule fields)
+        rule.selectorAst = deprecatedParseSelector(rule.selector);
 
-        const checker = createSimpleSelectorChecker();
+        const selectorAst = parseSelector(rule.selector);
 
         let locallyScoped = false;
 
-        traverseNode(rule.selectorAst, (node, index, nodes, parents) => {
-            if (node.type === 'selector' && !isNested(parents)) {
-                locallyScoped = false;
-            }
-            if (!checker(node)) {
-                rule.isSimpleSelector = false;
-            }
-            const { name, type } = node;
-            if (type === 'pseudo-class') {
-                if (name === 'import') {
-                    if (rule.selector === rootValueMapping.import) {
-                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
-                            this.diagnostics.warn(rule, processorWarnings.NO_IMPORT_IN_ST_SCOPE());
+        walkSelector(
+            selectorAst,
+            (node, index, nodes, parents) => {
+                const type = node.type;
+                if (type === 'selector' && !isNested(parents)) {
+                    locallyScoped = false;
+                }
+                if (type !== `selector` && type !== `class` && type !== `element`) {
+                    rule.isSimpleSelector = false;
+                }
+
+                if (node.type === 'pseudo_class') {
+                    if (node.value === 'import') {
+                        if (rule.selector === rootValueMapping.import) {
+                            if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
+                                this.diagnostics.warn(
+                                    rule,
+                                    processorWarnings.NO_IMPORT_IN_ST_SCOPE()
+                                );
+                                rule.remove();
+                                return walkSelector.stopAll; //return false;
+                            }
                             rule.remove();
-                            return false;
-                        }
-                        rule.remove();
-                        return false;
-                    } else {
-                        this.diagnostics.warn(
-                            rule,
-                            processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                rootValueMapping.import
-                            )
-                        );
-                    }
-                } else if (name === 'vars') {
-                    if (rule.selector === rootValueMapping.vars) {
-                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
+                            return walkSelector.stopAll; //return false;
+                        } else {
                             this.diagnostics.warn(
                                 rule,
-                                processorWarnings.NO_VARS_DEF_IN_ST_SCOPE()
+                                processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                    rootValueMapping.import
+                                )
                             );
-                            rule.remove();
-                            return false;
                         }
+                    } else if (node.value === 'vars') {
+                        if (rule.selector === rootValueMapping.vars) {
+                            if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
+                                this.diagnostics.warn(
+                                    rule,
+                                    processorWarnings.NO_VARS_DEF_IN_ST_SCOPE()
+                                );
+                                rule.remove();
+                                return walkSelector.stopAll; //return false;
+                            }
 
-                        this.addVarSymbols(rule);
-                        return false;
-                    } else {
-                        this.diagnostics.warn(
-                            rule,
-                            processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                rootValueMapping.vars
-                            )
-                        );
+                            this.addVarSymbols(rule);
+                            return walkSelector.stopAll; //return false;
+                        } else {
+                            this.diagnostics.warn(
+                                rule,
+                                processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                    rootValueMapping.vars
+                                )
+                            );
+                        }
+                    } else if (node.value === `global`) {
+                        return walkSelector.skipNested;
                     }
-                }
-            } else if (type === 'class') {
-                this.addClassSymbolOnce(name, rule);
+                } else if (node.type === 'class') {
+                    this.addClassSymbolOnce(node.value, rule);
 
-                if (this.meta.classes[name]) {
-                    if (!this.meta.classes[name].alias) {
-                        locallyScoped = true;
-                    } else if (locallyScoped === false && !inStScope) {
+                    if (this.meta.classes[node.value]) {
+                        if (!this.meta.classes[node.value].alias) {
+                            locallyScoped = true;
+                        } else if (locallyScoped === false && !inStScope) {
+                            if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
+                                this.diagnostics.warn(
+                                    rule,
+                                    processorWarnings.UNSCOPED_CLASS(node.value),
+                                    {
+                                        word: node.value,
+                                    }
+                                );
+                            } else {
+                                locallyScoped = true;
+                            }
+                        }
+                    }
+                } else if (node.type === 'element') {
+                    this.addElementSymbolOnce(node.value, rule);
+
+                    if (locallyScoped === false && !inStScope) {
                         if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
-                            this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
-                                word: name,
-                            });
+                            this.diagnostics.warn(
+                                rule,
+                                processorWarnings.UNSCOPED_ELEMENT(node.value),
+                                {
+                                    word: node.value,
+                                }
+                            );
                         } else {
                             locallyScoped = true;
                         }
                     }
                 }
-            } else if (type === 'element') {
-                this.addElementSymbolOnce(name, rule);
-
-                if (locallyScoped === false && !inStScope) {
-                    if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
-                        this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), {
-                            word: name,
-                        });
-                    } else {
-                        locallyScoped = true;
-                    }
-                }
-            } else if (type === 'nested-pseudo-class' && name === 'global') {
-                return true;
-            }
-            return void 0;
-        });
+                return;
+            },
+        );
 
         if (rule.isSimpleSelector !== false) {
             rule.isSimpleSelector = true;
@@ -468,7 +487,8 @@ export class StylableProcessor {
             rule.selectorType = 'complex';
         }
 
-        if (!isRootValid(rule.selectorAst, 'root')) {
+        // ToDo: check cases of root in nested selectors?
+        if (!isRootValid(selectorAst)) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
     }
@@ -492,20 +512,21 @@ export class StylableProcessor {
         return symbol;
     }
 
-    protected checkForScopedNodeAfter(rule: postcss.Rule, nodes: SelectorAstNode[], index: number) {
+    protected checkForScopedNodeAfter(rule: postcss.Rule, nodes: SelectorNode[], index: number) {
         for (let i = index + 1; i < nodes.length; i++) {
             const element = nodes[i];
             if (!element) {
+                // ToDo: can this get here???
                 break;
             }
-            if (element.type === 'spacing' || element.type === 'operator') {
+            if (element.type === 'combinator') {
                 break;
             }
             if (element.type === 'class') {
-                this.addClassSymbolOnce(element.name, rule);
+                this.addClassSymbolOnce(element.value, rule);
 
-                if (this.meta.classes[element.name]) {
-                    if (!this.meta.classes[element.name].alias) {
+                if (this.meta.classes[element.value]) {
+                    if (!this.meta.classes[element.value].alias) {
                         return true;
                     }
                 }
