@@ -16,7 +16,7 @@ describe(`(${project}) (production)`, () => {
             },
             webpackOptions: {
                 mode: 'production',
-                output: { path: join(projectDir, 'dist-prod', project) },
+                output: { path: join(projectDir, 'dist-prod') },
             },
         },
         before,
