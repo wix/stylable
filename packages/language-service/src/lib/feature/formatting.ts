@@ -1,30 +1,10 @@
-import { css } from 'js-beautify';
+import { css, CSSBeautifyOptions } from 'js-beautify';
+export { CSSBeautifyOptions } from 'js-beautify';
 import type { FormattingOptions } from 'vscode-languageserver';
-
-export interface JSBeautifyFormatCSSOptions {
-    indent_size?: number;
-    indent_with_tabs?: boolean;
-
-    selector_separator_newline?: boolean;
-    newline_between_rules?: boolean;
-    space_around_selector_separator?: boolean;
-    space_around_combinator?: boolean;
-
-    disabled?: boolean;
-    eol?: string;
-    end_with_newline?: boolean;
-    indent_char?: string;
-    indent_level?: number;
-    preserve_newlines?: boolean;
-    max_preserve_newlines?: number;
-    wrap_line_length?: number;
-    indent_empty_lines?: boolean;
-    templating?: string[];
-}
 
 export function lspFormattingOptionsToJsBeautifyOptions(
     options: FormattingOptions
-): JSBeautifyFormatCSSOptions {
+): CSSBeautifyOptions {
     return {
         indent_size: options.tabSize,
         indent_with_tabs: !options.insertSpaces,
@@ -33,8 +13,8 @@ export function lspFormattingOptionsToJsBeautifyOptions(
     };
 }
 
-export function format(text: string, options?: JSBeautifyFormatCSSOptions): string {
-    const normalizedOptions: JSBeautifyFormatCSSOptions = {
+export function format(text: string, options?: CSSBeautifyOptions): string {
+    const normalizedOptions: CSSBeautifyOptions = {
         ...options,
         // hard-coded to prevent custom selector values starting with combinators from breaking
         space_around_combinator: true,

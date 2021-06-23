@@ -69,6 +69,11 @@ export function runCliSync(cliArgs: string[] = []) {
     return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
 }
 
+export function runFormatCliSync(cliArgs: string[] = []) {
+    const cliPath = require.resolve('@stylable/cli/bin/stc-format.js');
+    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
+}
+
 export interface Files {
     [filepath: string]: string;
 }

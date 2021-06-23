@@ -16,6 +16,7 @@ import { ProviderPosition } from '@stylable/language-service/dist/lib/completion
 import { createMeta, ProviderLocation } from '@stylable/language-service/dist/lib/provider';
 import { pathFromPosition } from '@stylable/language-service/dist/lib/utils/postcss-ast-utils';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
+import type { CSSBeautifyOptions } from '@stylable/language-service/dist/lib/feature/formatting';
 
 export function getCaretPosition(src: string) {
     const caretPos = src.indexOf('|');
@@ -73,17 +74,18 @@ export function getDocumentColors(fileName: string): ColorInformation[] {
 
 export function getFormattingEdits(
     content: string,
-    offsetRange?: { start: number; end: number }
+    offsetRange?: { start: number; end: number },
+    options: CSSBeautifyOptions = {
+        indent_with_tabs: false,
+        indent_size: 4,
+    }
 ): TextEdit[] {
     const doc = TextDocument.create('', 'stylable', 1, content);
 
     return stylableLSP.getDocumentFormatting(
         doc,
         offsetRange || { start: 0, end: doc.getText().length },
-        {
-            indent_with_tabs: false,
-            indent_size: 4,
-        }
+        options
     );
 }
 

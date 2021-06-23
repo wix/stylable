@@ -31,7 +31,7 @@ import { getColorPresentation, resolveDocumentColors } from './feature/color-pro
 import {
     format,
     lspFormattingOptionsToJsBeautifyOptions,
-    JSBeautifyFormatCSSOptions,
+    CSSBeautifyOptions,
 } from './feature/formatting';
 import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
@@ -272,10 +272,21 @@ export class StylableLanguageService {
         );
     }
 
+    public formatDocument(
+        filePath: string,
+        offset: { start: number; end: number },
+        options?: CSSBeautifyOptions
+    ) {
+        const content = this.fs.readFileSync(filePath, 'utf8');
+        const doc = TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, content);
+
+        return this.getDocumentFormatting(doc, offset, options);
+    }
+
     public getDocumentFormatting(
         doc: TextDocument,
         offset: { start: number; end: number },
-        options?: JSBeautifyFormatCSSOptions
+        options?: CSSBeautifyOptions
     ): TextEdit[] {
         const range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
         const srcText = doc.getText(range);
