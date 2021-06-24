@@ -98,4 +98,40 @@ describe('Stylable Code Format Cli', function () {
         expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
         expect(stdout).to.include('[Stylable code formatter] All code formatting complete');
     });
+
+    describe('exceptions', () => {
+        it('should throw an exception when no stylable stylesheets are found to format', () => {
+            const filePath = 'file.txt';
+
+            const fileContent = 'NOT STYLABLE CONTENT';
+            populateDirectorySync(tempDir.path, {
+                [filePath]: fileContent,
+            });
+
+            const { stderr, stdout } = runFormatCliSync(['--target', tempDir.path]);
+
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent[filePath]).to.equal(fileContent);
+            expect(stdout).to.include('');
+            expect(stderr).to.include(
+                'cannot find any Stylable stylesheets (.st.css) in directory'
+            );
+        });
+
+        it('should throw an exception when a specific file to format is not a stylable stylesheet', () => {
+            const filePath = 'file.txt';
+
+            const fileContent = 'NOT STYLABLE CONTENT';
+            populateDirectorySync(tempDir.path, {
+                [filePath]: fileContent,
+            });
+
+            const { stderr, stdout } = runFormatCliSync(['--target', join(tempDir.path, filePath)]);
+
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent[filePath]).to.equal(fileContent);
+            expect(stdout).to.include('');
+            expect(stderr).to.include('cannot format file, not a Stylable stylesheet (.st.css)');
+        });
+    });
 });
