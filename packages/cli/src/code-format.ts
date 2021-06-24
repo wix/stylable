@@ -56,7 +56,7 @@ const argv = yargs
     .option('perserveNewlines', {
         type: 'boolean',
         description: 'Preserve existing line-breaks',
-        alias: 'N',
+        alias: 'p',
         default: true,
     })
     .option('selectorSeparatorNewline', {
