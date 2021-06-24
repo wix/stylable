@@ -93,6 +93,28 @@ To transform your project stylesheets to target JavaScript modules containing th
 $ stc --srcDir="./src" --outDir="./dist"
 ```
 
+## Usage `stc-format`
+
+After installing `@stylable/cli`, a new `stc-format` command will be available, running `stc-format --help` will provide a brief description for the options available.
+
+The `stc-format` utility provides code formatting capabilities based on `@stylable/language-service`.
+
+| Option                        | Alias | Description                                                   | value type    | Default Value                 |
+| ----------------------------- | ----- | ------------------------------------------------------------- | --------------| ----------------------------- |
+| `--target`                    | `T`   | file or directory to format                                   | `string`      | `current working directory`   |
+| `--endWithNewline`            | `n`   | End output with newline                                       | `boolean`     | `false`                       |
+| `--indentEmptyLines`          | `E`   | Keep indentation on empty lines                               | `boolean`     | `false`                       |
+| `--indentSize`                | `s`   | Indentation size                                              | `number`      | `4`                           |
+| `--indentWithTabs`            | `t`   | Indent with tabs, overrides -s and -c                         | `boolean`     | `false`                       |
+| `--maxPerserveNewlines`       | `m`   | Maximum number of line-breaks to be preserved in one chunk    | `number`      | `1`                           |
+| `--newlineBetweenRules`       | `N`   | Add a newline between CSS rules                               | `boolean`     | `true`                        |
+| `--perserveNewlines`          | `p`   | Preserve existing line-breaks                                 | `boolean`     | `true`                        |
+| `--selectorSeparatorNewline`  | `L`   | Add a newline between multiple selectors                      | `boolean`     | `true`                        |
+| `--debug`                     | `D`   | Enable explicit debug log                                     | `boolean`     | `false`                       |
+| `--require`                   | `r`   | require hooks                                                 | `array`       | `[]`                          |
+| `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
+| `--version`                   | `v`   | Show version number                                           | `boolean`     |                               |
+
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
