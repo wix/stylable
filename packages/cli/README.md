@@ -107,7 +107,7 @@ After installing `@stylable/cli`, a new `stc-format` command will be available, 
 
 The `stc-format` utility provides code formatting capabilities based on `@stylable/language-service`.
 
-| Option                        | Alias | Description                                                   | value type    | Default Value                 |
+| Option                        | Alias | Description                                                   | Value Type    | Default Value                 |
 | ----------------------------- | ----- | ------------------------------------------------------------- | --------------| ----------------------------- |
 | `--target`                    | `T`   | file or directory to format                                   | `string`      | `current working directory`   |
 | `--endWithNewline`            | `n`   | End output with newline                                       | `boolean`     | `false`                       |
