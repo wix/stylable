@@ -25,12 +25,17 @@ export * from './murmurhash';
 export * from './timed-cache';
 export { getStylableAstData, setStylableAstData } from './helpers/stylable-ast-data';
 
+import { wrapFunctionForDeprecation } from './helpers/deprecation';
 export {
     SRule,
     SDecl,
     DeclStylableProps,
     getDeclStylable,
 } from './deprecated/postcss-ast-extension';
+import { scopeSelector as deprecatedScopeSelector } from './deprecated/deprecated-stylable-utils';
+export const scopeSelector = wrapFunctionForDeprecation(deprecatedScopeSelector, {
+    name: `scopeSelector`,
+});
 
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };

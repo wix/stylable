@@ -508,16 +508,6 @@ export class StylableTransformer {
             const { symbol, meta } = getOriginDefinition(resolved);
             this.scopeClassNode(symbol, meta, node, originMeta);
         } else if (node.type === 'element') {
-            // ToDo: move to a dedicated ast type once tokey selector parser support it
-            if (node.value === `&`) {
-                const origin = originMeta.mappedSymbols[originMeta.root] as ClassSymbol;
-                context.setCurrentAnchor({
-                    name: origin.name,
-                    type: 'class',
-                    resolved: metaParts.class[origin.name],
-                });
-                return;
-            }
             const resolved = metaParts.element[node.value] || [
                 // provides resolution for native elements
                 { _kind: 'css', meta: originMeta, symbol: { _kind: 'element', name: node.value } },
@@ -659,6 +649,13 @@ export class StylableTransformer {
                     word: node.value,
                 });
             }
+        } else if (node.type === `nesting`) {
+            const origin = originMeta.mappedSymbols[originMeta.root] as ClassSymbol;
+            context.setCurrentAnchor({
+                name: origin.name,
+                type: 'class',
+                resolved: metaParts.class[origin.name],
+            });
         }
     }
     private isDuplicateStScopeDiagnostic(context: ScopeContext) {

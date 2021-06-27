@@ -37,6 +37,21 @@ export function setFieldForDeprecation(
     });
 }
 
+export function wrapFunctionForDeprecation<FUNC extends (this: any, ...args: any[]) => any>(
+    func: FUNC,
+    options: {
+        name: string;
+        pleaseUse?: string;
+    }
+): FUNC {
+    const alternative = options.pleaseUse ? `, please use ${options.pleaseUse}` : ``;
+    const warning = `"${options.name || func.name}" is deprecated${alternative}`;
+    return function (this: any, ...args: any[]) {
+        warnOnce(warning);
+        return func.apply(this, args);
+    } as FUNC;
+}
+
 /**
  * console warn once per message
  */

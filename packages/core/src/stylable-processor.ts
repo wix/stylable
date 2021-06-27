@@ -22,9 +22,15 @@ import {
     expandCustomSelectors,
     getAlias,
     isCSSVarProp,
-    scopeSelector,
 } from './stylable-utils';
-import { walkSelector, isNested, isRootValid, SelectorNode, isCompRoot } from './helpers/selector';
+import {
+    walkSelector,
+    isNested,
+    isRootValid,
+    SelectorNode,
+    isCompRoot,
+    scopeNestedSelector,
+} from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import { getStylableAstData } from './helpers/stylable-ast-data';
@@ -940,7 +946,10 @@ export class StylableProcessor {
         if (scopingRule.selector) {
             atRule.walkRules((rule) => {
                 const scopedRule = rule.clone({
-                    selector: scopeSelector(scopingRule.selector, rule.selector, false).selector,
+                    selector: scopeNestedSelector(
+                        getStylableAstData(scopingRule).selectorAst,
+                        getStylableAstData(rule).selectorAst
+                    ),
                 });
                 (scopedRule as SRule).stScopeSelector = atRule.params;
                 rule.replaceWith(scopedRule);

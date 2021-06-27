@@ -11,6 +11,7 @@ import {
     PseudoClass,
     Invalid,
 } from '@tokey/css-selector-parser';
+import cloneDeep from 'lodash.clonedeep';
 
 export const parseSelector = parseCssSelector;
 export const stringifySelector = stringifySelectorAst;
@@ -20,7 +21,7 @@ export type { SelectorNode, SelectorList, Selector, PseudoClass };
 
 /**
  * take an ast node with nested nodes "XXX(nest1,  nest2)"
- * and convert it to a flat selector as node: "nest1, nest2" 
+ * and convert it to a flat selector as node: "nest1, nest2"
  */
 export function flattenContainerSelector(node: Containers): Selector {
     node.value = ``;
@@ -96,9 +97,9 @@ function isGlobal(node: SelectorNode) {
 }
 
 export type Chunk = SelectorNode[];
-export type ChunkedSelector = {before: string, after: string, chunks: Chunk[]};
+export type ChunkedSelector = { before: string; after: string; chunks: Chunk[] };
 // ToDo: check why "2" ? what does this do differently then "1"?
-export function separateChunks2(input: SelectorList|SelectorNode) {
+export function separateChunks2(input: SelectorList | SelectorNode) {
     // ToDo: check SelectorNode input case
     const output: ChunkedSelector[] = [];
     let lastChunkedSelector: ChunkedSelector;
@@ -146,7 +147,7 @@ export function mergeChunks(input: ChunkedSelector[]): SelectorList {
             nodes: chunkedSelector.chunks.reduce((nodes, chunk) => {
                 nodes.push(...chunk);
                 return nodes;
-            }, [])
+            }, []),
         });
     }
     return output;
@@ -154,4 +155,58 @@ export function mergeChunks(input: ChunkedSelector[]): SelectorList {
 
 export function isCompRoot(name: string) {
     return name.charAt(0).match(/[A-Z]/);
+}
+
+/**
+ * combine 2 selector lists.
+ * - add each scoping selector at the begging of each nested selector
+ * - replace any nesting `&` nodes in the nested selector with the scoping selector nodes
+ */
+export function scopeNestedSelector(
+    scopeSelectorAst: SelectorList,
+    nestedSelectorAst: SelectorList
+): string {
+    const resultSelectors: SelectorList = [];
+    nestedSelectorAst.forEach((targetAst) => {
+        scopeSelectorAst.forEach((scopeAst) => {
+            const clonedScopeNodes = cloneDeep(scopeAst.nodes);
+            const outputAst = cloneDeep(targetAst);
+
+            outputAst.before = scopeAst.before || outputAst.before;
+
+            const first = outputAst.nodes[0];
+            const parentRef = first.type === `nesting`;
+            const globalSelector = first.type === `pseudo_class` && first.value === `global`;
+
+            if (first && !parentRef && !globalSelector) {
+                outputAst.nodes.unshift(...clonedScopeNodes, {
+                    type: `combinator`,
+                    combinator: `space`,
+                    value: ` `,
+                    before: ``,
+                    after: ``,
+                    start: first.start,
+                    end: first.start,
+                    invalid: false,
+                });
+            }
+            walkSelector(outputAst, (node, i, nodes) => {
+                if (node.type === 'nesting') {
+                    const scopeNodes = clonedScopeNodes;
+                    nodes.splice(i, 1, {
+                        type: `selector`,
+                        nodes: scopeNodes,
+                        start: node.start,
+                        end: node.end,
+                        after: ``,
+                        before: ``,
+                    });
+                }
+            });
+
+            resultSelectors.push(outputAst);
+        });
+    });
+
+    return stringifySelector(resultSelectors);
 }
