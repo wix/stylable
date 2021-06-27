@@ -152,6 +152,19 @@ describe('Formatting', () => {
             ]);
         });
 
+        it('selector_separator_newline: true', () => {
+            const res = getFormattingEdits('.root,.part {}', undefined, {
+                selector_separator_newline: true,
+            });
+
+            expect(res).to.eql([
+                {
+                    range: createRange(0, 0, 0, 14),
+                    newText: '.root,\n.part {}',
+                },
+            ]);
+        });
+
         xit('wrap_line_length: 10', () => {
             // does not appear to work for CSS :(
             const res = getFormattingEdits(

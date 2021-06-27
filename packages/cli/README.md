@@ -21,7 +21,7 @@ yarn add @stylable/cli -D
 
 ## Usage
 
-After installing `@stylable/cli`, a new `stc` command will be available, running `stc --help` will provide a brief description for the options available.
+After installing `@stylable/cli`, the `stc` command will be available, running `stc --help` will provide a brief description for the options available.
 
 | Option                    | Alias  | Description                                                                            | Default Value    |
 | ------------------------- | ------ | ----------------------------------------------------------------------------------     | ---------------- |
@@ -103,7 +103,7 @@ $ stc --srcDir="./src" --outDir="./dist"
 
 ## Usage `stc-format`
 
-After installing `@stylable/cli`, a new `stc-format` command will be available, running `stc-format --help` will provide a brief description for the options available.
+After installing `@stylable/cli`, the `stc-format` command will be available, running `stc-format --help` will provide a brief description for the options available.
 
 The `stc-format` utility provides code formatting capabilities based on `@stylable/language-service`.
 
@@ -118,7 +118,8 @@ The `stc-format` utility provides code formatting capabilities based on `@stylab
 | `--newlineBetweenRules`       | `N`   | Add a newline between CSS rules                               | `boolean`     | `true`                        |
 | `--perserveNewlines`          | `p`   | Preserve existing line-breaks                                 | `boolean`     | `true`                        |
 | `--selectorSeparatorNewline`  | `L`   | Add a newline between multiple selectors                      | `boolean`     | `true`                        |
-| `--debug`                     | `D`   | Enable explicit debug log                                     | `boolean`     | `false`                       |
+| `--debug`                     | `D`   | Enable explicit debug log (overrides --silent)                | `boolean`     | `false`                       |
+| `--silent`                    | `S`   | Will not print any messages to the log                        | `boolean`     | `false`                       |
 | `--require`                   | `r`   | require hooks                                                 | `array`       | `[]`                          |
 | `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
 | `--version`                   | `v`   | Show version number                                           | `boolean`     |                               |

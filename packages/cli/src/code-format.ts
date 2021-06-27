@@ -67,8 +67,14 @@ const argv = yargs
     })
     .option('debug', {
         type: 'boolean',
-        description: 'Enable explicit debug log',
+        description: 'Enable explicit debug log (overrides --silent)',
         alias: 'D',
+        default: false,
+    })
+    .option('silent', {
+        type: 'boolean',
+        description: 'Will not print any messages to the log',
+        alias: 'S',
         default: false,
     })
     .option('require', {
@@ -97,11 +103,14 @@ const {
     require: requires,
     selectorSeparatorNewline,
     target,
+    silent,
 } = argv;
 
-const log = createLogger('[Stylable code formatter]', debug);
+const log = createLogger('[Stylable code formatter]', true);
 
-log('[Arguments]', argv);
+if (debug) {
+    log('[Arguments]', argv);
+}
 
 // execute all require hooks before running the CLI build
 for (const request of requires) {
@@ -137,7 +146,6 @@ function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css') {
 }
 
 function formatStylesheet(filePath: string) {
-    log('Formatting: ' + filePath);
     const fileContent = nodeFs.readFileSync(filePath, 'utf-8');
 
     const formatting = lsp.formatDocument(
@@ -157,13 +165,19 @@ function formatStylesheet(filePath: string) {
 
     if (formatting.length) {
         writeFileSync(filePath, formatting[0].newText);
-        log('File formatted successfully');
-    } else {
-        log('No formatting required');
+
+        if (!silent || debug) {
+            log(`Formatted: ${filePath}`);
+        }
+    } else if (debug) {
+        log(`No formatting required for: ${filePath}`);
     }
 }
 
-log('Starting code formatting process');
+if (debug) {
+    log('Starting code formatting');
+}
+
 const formatPathStats = nodeFs.statSync(target);
 
 if (formatPathStats.isFile()) {
@@ -184,4 +198,6 @@ if (formatPathStats.isFile()) {
     }
 }
 
-log('All code formatting complete');
+if (debug) {
+    log('All code formatting complete');
+}

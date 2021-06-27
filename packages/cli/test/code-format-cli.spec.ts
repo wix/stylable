@@ -56,47 +56,79 @@ describe('Stylable Code Format Cli', function () {
     });
 
     it('should format a specific stylesheet', () => {
-        const stylesheetPath = 'style.st.css';
+        const stylesheetPath1 = 'style.st.css';
+        const stylesheetPath2 = 'other.st.css';
 
         populateDirectorySync(tempDir.path, {
-            [stylesheetPath]: `.root{color:red}`,
+            [stylesheetPath1]: `.root{color:red}`,
+            [stylesheetPath2]: `.root{color:red}`,
         });
 
-        runFormatCliSync(['--target', join(tempDir.path, stylesheetPath)]);
+        runFormatCliSync(['--target', join(tempDir.path, stylesheetPath1)]);
 
         const dirContent = loadDirSync(tempDir.path);
-        expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
+        expect(dirContent[stylesheetPath1]).to.equal('.root {\n    color: red\n}');
+        expect(dirContent[stylesheetPath2]).to.equal(`.root{color:red}`);
     });
 
-    it('should output process log in debug mode', () => {
-        const stylesheetPath = 'style.st.css';
+    describe('logging', () => {
+        it('should output files formatted to log by default', () => {
+            const stylesheetPath = 'style.st.css';
 
-        populateDirectorySync(tempDir.path, {
-            [stylesheetPath]: `.root{color:red}`,
+            populateDirectorySync(tempDir.path, {
+                [stylesheetPath]: `.root{color:red}`,
+            });
+
+            const { stdout } = runFormatCliSync(['--target', tempDir.path]);
+
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
+            expect(stdout).to.include('[Stylable code formatter] Formatted:');
         });
 
-        const { stdout } = runFormatCliSync(['--target', tempDir.path, '--debug']);
+        it('should output process log in debug mode', () => {
+            const stylesheetPath = 'style.st.css';
 
-        const dirContent = loadDirSync(tempDir.path);
-        expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
-        expect(stdout).to.include('[Stylable code formatter] Starting code formatting process');
-        expect(stdout).to.include('[Stylable code formatter] Formatting:');
-        expect(stdout).to.include('[Stylable code formatter] File formatted successfully');
-        expect(stdout).to.include('[Stylable code formatter] All code formatting complete');
-    });
+            populateDirectorySync(tempDir.path, {
+                [stylesheetPath]: `.root{color:red}`,
+            });
 
-    it('should log output when no formatting is needed.', () => {
-        const stylesheetPath = 'style.st.css';
+            const { stdout } = runFormatCliSync(['--target', tempDir.path, '--debug']);
 
-        populateDirectorySync(tempDir.path, {
-            [stylesheetPath]: '.root {\n    color: red\n}',
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
+            expect(stdout).to.include('[Stylable code formatter] Starting code formatting');
+            expect(stdout).to.include('[Stylable code formatter] Formatted:');
+            expect(stdout).to.include('[Stylable code formatter] All code formatting complete');
         });
 
-        const { stdout } = runFormatCliSync(['--target', tempDir.path, '--debug']);
+        it('should output no log in silent mode', () => {
+            const stylesheetPath = 'style.st.css';
 
-        const dirContent = loadDirSync(tempDir.path);
-        expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
-        expect(stdout).to.include('[Stylable code formatter] All code formatting complete');
+            populateDirectorySync(tempDir.path, {
+                [stylesheetPath]: `.root{color:red}`,
+            });
+
+            const { stdout } = runFormatCliSync(['--target', tempDir.path, '--silent']);
+
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
+            expect(stdout).to.equal('');
+        });
+
+        it('should log output when no formatting is needed.', () => {
+            const stylesheetPath = 'style.st.css';
+
+            populateDirectorySync(tempDir.path, {
+                [stylesheetPath]: '.root {\n    color: red\n}',
+            });
+
+            const { stdout } = runFormatCliSync(['--target', tempDir.path, '--debug']);
+
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
+            expect(stdout).to.include('[Stylable code formatter] All code formatting complete');
+        });
     });
 
     describe('exceptions', () => {
