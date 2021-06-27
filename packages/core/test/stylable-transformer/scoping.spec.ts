@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { generateStylableRoot, testInlineExpects } from '@stylable/core-test-kit';
-import { createWarningRule } from '@stylable/core';
+import { createWarningRule } from '@stylable/core/dist/helpers/rule';
 
 describe('Stylable postcss transform (Scoping)', () => {
     describe('scoped pseudo-elements', () => {

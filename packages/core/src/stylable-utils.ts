@@ -3,21 +3,17 @@ import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
-import type {
-    Imported,
-    StylableMeta,
-    StylableSymbol,
-} from './stylable-processor';
+import type { Imported, StylableMeta, StylableSymbol } from './stylable-processor';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import {
     fixChunkOrdering,
-    isChildOfAtRule,
     isNodeMatch,
     parseSelector,
     SelectorAstNode,
     stringifySelector,
     traverseNode,
 } from './selector-utils';
+import { isChildOfAtRule } from './helpers/rule';
 import type { ImportSymbol } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 import type { StylableResolver } from './stylable-resolver';

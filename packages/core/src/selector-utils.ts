@@ -1,8 +1,4 @@
-import * as postcss from 'postcss';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
-import type { ClassSymbol, ElementSymbol } from './stylable-meta';
-import type { CSSResolve } from './stylable-resolver';
-import { valueMapping } from './stylable-value-parsers';
 
 export interface SelectorAstNode {
     type: string;
@@ -64,6 +60,7 @@ export function traverseNode(
     }
 }
 
+// ToDo: mark for deprecation
 export function isNested(parentChain: SelectorAstNode[]) {
     let i = parentChain.length;
     while (i--) {
@@ -74,6 +71,7 @@ export function isNested(parentChain: SelectorAstNode[]) {
     return false;
 }
 
+// ToDo: mark for deprecation
 export function createChecker(types: Array<string | string[]>) {
     return () => {
         let index = 0;
@@ -93,10 +91,12 @@ export function createChecker(types: Array<string | string[]>) {
     };
 }
 
+// ToDo: mark for deprecation
 export function isGlobal(node: SelectorAstNode) {
     return node.type === 'nested-pseudo-class' && node.name === 'global';
 }
 
+// ToDo: mark for deprecation
 export function isRootValid(ast: SelectorAstNode, rootName: string) {
     let isValid = true;
 
@@ -124,12 +124,9 @@ export function isRootValid(ast: SelectorAstNode, rootName: string) {
     return isValid;
 }
 
-const createSimpleSelectorChecker = createChecker([
-    'selectors',
-    'selector',
-    ['element', 'class'],
-]);
+const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
 
+// ToDo: mark for deprecation
 export function isSimpleSelector(selectorAst: SelectorAstNode) {
     const isSimpleSelectorASTNode = createSimpleSelectorChecker();
     const isSimple = traverseNode(
@@ -140,16 +137,19 @@ export function isSimpleSelector(selectorAst: SelectorAstNode) {
     return isSimple;
 }
 
+// ToDo: mark for deprecation
 export function isImport(ast: SelectorAstNode): boolean {
     const selectors = ast.nodes[0];
     const selector = selectors && selectors.nodes[0];
     return selector && selector.type === 'pseudo-class' && selector.name === 'import';
 }
 
+// ToDo: mark for deprecation
 export function matchAtKeyframes(selector: string) {
     return selector.match(/^@keyframes\s*(.*)/);
 }
 
+// ToDo: mark for deprecation
 export function matchAtMedia(selector: string) {
     return selector.match(/^@media\s*(.*)/);
 }
@@ -173,6 +173,7 @@ export interface SelectorChunk2 {
     before?: string;
 }
 
+// ToDo: mark for deprecation
 export function mergeChunks(chunks: SelectorChunk2[][]) {
     const ast: any = { type: 'selectors', nodes: [] };
     let i = 0;
@@ -194,6 +195,7 @@ export function mergeChunks(chunks: SelectorChunk2[][]) {
     return ast;
 }
 
+// ToDo: mark for deprecation
 export function separateChunks2(selectorNode: SelectorAstNode) {
     const selectors: SelectorChunk2[][] = [];
     selectorNode.nodes.map(({ nodes, before }) => {
@@ -212,20 +214,6 @@ export function separateChunks2(selectorNode: SelectorAstNode) {
         });
     });
     return selectors;
-}
-
-export function getOriginDefinition(resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>) {
-    for (const r of resolved) {
-        const { symbol } = r;
-        if (symbol._kind === 'class' || symbol._kind === 'element') {
-            if (symbol.alias && !symbol[valueMapping.extends]) {
-                continue;
-            } else {
-                return r;
-            }
-        }
-    }
-    return resolved[0];
 }
 
 export function separateChunks(selectorNode: SelectorAstNode) {
@@ -356,58 +344,5 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
             // return false;
         }
         return undefined;
-    });
-}
-
-// ToDo: move to helpers/rule
-export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
-    return (
-        rule.parent &&
-        rule.parent.type === 'atrule' &&
-        (rule.parent as postcss.AtRule).name === atRuleName
-    );
-}
-
-// ToDo: move to helpers/component
-export function isCompRoot(name: string) {
-    return name.charAt(0).match(/[A-Z]/);
-}
-
-export function createWarningRule(
-    extendedNode: string,
-    scopedExtendedNode: string,
-    extendedFile: string,
-    extendingNode: string,
-    scopedExtendingNode: string,
-    extendingFile: string,
-    useScoped = false
-) {
-    const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
-    return postcss.rule({
-        selector: `.${useScoped ? scopedExtendingNode : extendingNode}:not(.${
-            useScoped ? scopedExtendedNode : extendedNode
-        })::before`,
-        nodes: [
-            postcss.decl({
-                prop: 'content',
-                value: message,
-            }),
-            postcss.decl({
-                prop: 'display',
-                value: `block !important`,
-            }),
-            postcss.decl({
-                prop: 'font-family',
-                value: `monospace !important`,
-            }),
-            postcss.decl({
-                prop: 'background-color',
-                value: `red !important`,
-            }),
-            postcss.decl({
-                prop: 'color',
-                value: `white !important`,
-            }),
-        ],
     });
 }

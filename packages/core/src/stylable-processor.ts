@@ -4,11 +4,7 @@ import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { tokenizeImports } from 'toky';
 import { Diagnostics } from './diagnostics';
-import {
-    isChildOfAtRule,
-    isCompRoot,
-    parseSelector as deprecatedParseSelector,
-} from './selector-utils';
+import { parseSelector as deprecatedParseSelector } from './selector-utils';
 import { processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
@@ -28,7 +24,8 @@ import {
     isCSSVarProp,
     scopeSelector,
 } from './stylable-utils';
-import { walkSelector, isNested, isRootValid, SelectorNode } from './helpers/selector';
+import { walkSelector, isNested, isRootValid, SelectorNode, isCompRoot } from './helpers/selector';
+import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import { getStylableAstData } from './helpers/stylable-ast-data';
 import {

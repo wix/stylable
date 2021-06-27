@@ -2,7 +2,13 @@ import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
-import type { SelectorAstNode } from './selector-utils';
+import {
+    convertToAttribute,
+    convertToClass,
+    stringifySelector,
+    PseudoClass,
+    convertToInvalid,
+} from './helpers/selector';
 import { StateResult, systemValidators } from './state-validators';
 import type { StylableMeta } from './stylable-processor';
 import type { SRule } from './deprecated/postcss-ast-extension';
@@ -260,7 +266,7 @@ export function setStateToNode(
     states: MappedStates,
     meta: StylableMeta,
     name: string,
-    node: SelectorAstNode,
+    node: PseudoClass,
     namespace: string,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -269,14 +275,14 @@ export function setStateToNode(
     const stateDef = states[name];
 
     if (stateDef === null) {
-        node.type = 'class';
-        node.name = createBooleanStateClassName(name, namespace);
+        convertToClass(node).value = createBooleanStateClassName(name, namespace);
     } else if (typeof stateDef === 'string') {
-        node.type = 'invalid'; // simply concat global mapped selector - ToDo: maybe change to 'selector'
-        node.value = stateDef;
+        // simply concat global mapped selector - ToDo: maybe change to 'selector'
+        convertToInvalid(node).value = stateDef;
     } else if (typeof stateDef === 'object') {
         resolveStateValue(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
     }
+    delete node.nodes;
 }
 
 function resolveStateValue(
@@ -284,7 +290,7 @@ function resolveStateValue(
     resolver: StylableResolver,
     diagnostics: Diagnostics,
     rule: postcss.Rule | undefined,
-    node: SelectorAstNode,
+    node: PseudoClass,
     stateDef: StateParsedValue,
     name: string,
     namespace: string
@@ -294,7 +300,7 @@ function resolveStateValue(
         resolver,
         diagnostics,
         rule,
-        node.content || stateDef.defaultValue
+        node.nodes ? stringifySelector(node.nodes) : stateDef.defaultValue
     );
 
     const validator = systemValidators[stateDef.type];
@@ -328,11 +334,9 @@ function resolveStateValue(
 
     const strippedParam = stripQuotation(actualParam);
     if (isValidClassName(strippedParam)) {
-        node.type = 'class';
-        node.name = createStateWithParamClassName(name, namespace, strippedParam);
+        convertToClass(node).value = createStateWithParamClassName(name, namespace, strippedParam);
     } else {
-        node.type = 'attribute';
-        node.content = createAttributeState(name, namespace, strippedParam);
+        convertToAttribute(node).value = createAttributeState(name, namespace, strippedParam);
     }
 }
 
