@@ -1,6 +1,6 @@
 import { setFieldForDeprecation, warnOnce } from '../helpers/deprecation';
 import type { RefedMixin } from '../stylable-meta';
-import type { SelectorAstNode } from '../selector-utils';
+import type { SelectorAstNode } from './deprecated-selector-utils';
 import { Rule, Declaration } from 'postcss';
 
 /**
@@ -65,7 +65,6 @@ export interface SDecl extends Declaration {
  */
 
 export function getDeclStylable(decl: SDecl): DeclStylableProps {
-    warnOnce(`stylable "getDeclStylable" is deprecated and will be removed in next major version`);
     if (decl.stylable) {
         return decl.stylable;
     } else {

@@ -1,4 +1,9 @@
-import { SelectorAstNode, parseSelector, traverseNode, stringifySelector } from '../selector-utils';
+import {
+    SelectorAstNode,
+    parseSelector,
+    traverseNode,
+    stringifySelector,
+} from './deprecated-selector-utils';
 import cloneDeep from 'lodash.clonedeep';
 
 export function scopeSelector(

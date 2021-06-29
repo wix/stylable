@@ -15,7 +15,6 @@ export * from './stylable-assets';
 export * from './functions';
 export * from './custom-values';
 export * from './state-validators';
-export * from './selector-utils';
 export * from './native-reserved-lists';
 export * from './resolve-namespace-factories';
 export * from './module-resolver';
@@ -28,20 +27,103 @@ export { getStylableAstData, setStylableAstData } from './helpers/stylable-ast-d
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };
 
-// deprecated
+// *** deprecated ***
 
 import { wrapFunctionForDeprecation } from './helpers/deprecation';
-export {
-    SRule,
-    SDecl,
-    DeclStylableProps,
-    getDeclStylable,
-} from './deprecated/postcss-ast-extension';
+
+export type { SRule, SDecl, DeclStylableProps } from './deprecated/postcss-ast-extension';
+import { getDeclStylable as deprecatedGetDeclStylable } from './deprecated/postcss-ast-extension';
+export const getDeclStylable = wrapFunctionForDeprecation(deprecatedGetDeclStylable, {
+    name: `getDeclStylable`,
+});
+
 import { scopeSelector as deprecatedScopeSelector } from './deprecated/deprecated-stylable-utils';
-import { matchSelectorTarget as deprecatedMatchSelectorTarget } from './deprecated/deprecated-selector-utils';
 export const scopeSelector = wrapFunctionForDeprecation(deprecatedScopeSelector, {
     name: `scopeSelector`,
 });
+
+export type {
+    SelectorChunk,
+    SelectorChunk2,
+    Visitor,
+    SelectorAstNode,
+    PseudoSelectorAstNode,
+} from './deprecated/deprecated-selector-utils';
+import {
+    matchSelectorTarget as deprecatedMatchSelectorTarget,
+    fixChunkOrdering as deprecatedFixChunkOrdering,
+    filterChunkNodesByType as deprecatedFilterChunkNodesByType,
+    separateChunks as deprecatedSeparateChunks,
+    separateChunks2 as deprecatedSeparateChunks2,
+    mergeChunks as deprecatedMergeChunks,
+    matchAtMedia as deprecatedMatchAtMedia,
+    matchAtKeyframes as deprecatedMatchAtKeyframes,
+    isImport as deprecatedIsImport,
+    isSimpleSelector as deprecatedIsSimpleSelector,
+    isRootValid as deprecatedIsRootValid,
+    isGlobal as deprecatedIsGlobal,
+    createChecker as deprecatedCreateChecker,
+    isNested as deprecatedIsNested,
+    traverseNode as deprecatedTraverseNode,
+    parseSelector as deprecatedParseSelector,
+    stringifySelector as deprecatedStringifySelector,
+    isNodeMatch as deprecatedIsNodeMatch,
+} from './deprecated/deprecated-selector-utils';
 export const matchSelectorTarget = wrapFunctionForDeprecation(deprecatedMatchSelectorTarget, {
     name: `matchSelectorTarget`,
+});
+matchSelectorTarget({} as any, {} as any);
+export const fixChunkOrdering = wrapFunctionForDeprecation(deprecatedFixChunkOrdering, {
+    name: `fixChunkOrdering`,
+});
+export const filterChunkNodesByType = wrapFunctionForDeprecation(deprecatedFilterChunkNodesByType, {
+    name: `filterChunkNodesByType`,
+});
+export const separateChunks = wrapFunctionForDeprecation(deprecatedSeparateChunks, {
+    name: `separateChunks`,
+});
+export const separateChunks2 = wrapFunctionForDeprecation(deprecatedSeparateChunks2, {
+    name: `separateChunks2`,
+});
+export const mergeChunks = wrapFunctionForDeprecation(deprecatedMergeChunks, {
+    name: `mergeChunks`,
+});
+export const matchAtMedia = wrapFunctionForDeprecation(deprecatedMatchAtMedia, {
+    name: `matchAtMedia`,
+});
+export const matchAtKeyframes = wrapFunctionForDeprecation(deprecatedMatchAtKeyframes, {
+    name: `matchAtKeyframes`,
+});
+export const isImport = wrapFunctionForDeprecation(deprecatedIsImport, {
+    name: `isImport`,
+});
+export const isSimpleSelector = wrapFunctionForDeprecation(deprecatedIsSimpleSelector, {
+    name: `isSimpleSelector`,
+});
+export const isRootValid = wrapFunctionForDeprecation(deprecatedIsRootValid, {
+    name: `isRootValid`,
+});
+export const isGlobal = wrapFunctionForDeprecation(deprecatedIsGlobal, {
+    name: `isGlobal`,
+});
+export const createChecker = wrapFunctionForDeprecation(deprecatedCreateChecker, {
+    name: `createChecker`,
+});
+export const isNested = wrapFunctionForDeprecation(deprecatedIsNested, {
+    name: `isNested`,
+});
+export const isNodeMatch = wrapFunctionForDeprecation(deprecatedIsNodeMatch, {
+    name: `isNodeMatch`,
+});
+export const traverseNode = wrapFunctionForDeprecation(deprecatedTraverseNode, {
+    name: `traverseNode`,
+    pleaseUse: `"import { walk } from '@tokey/css-selector-parser'"`,
+});
+export const parseSelector = wrapFunctionForDeprecation(deprecatedParseSelector, {
+    name: `parseSelector`,
+    pleaseUse: `"import { parseCssSelector } from '@tokey/css-selector-parser'"`,
+});
+export const stringifySelector = wrapFunctionForDeprecation(deprecatedStringifySelector, {
+    name: `stringifySelector`,
+    pleaseUse: `"import { stringifySelector } from '@tokey/css-selector-parser'"`,
 });

@@ -6,12 +6,12 @@ import type { Imported, StylableMeta, StylableSymbol } from './stylable-processo
 import type { SRule } from './deprecated/postcss-ast-extension';
 import {
     fixChunkOrdering,
-    isNodeMatch,
-    parseSelector,
-    SelectorAstNode,
-    stringifySelector,
     traverseNode,
-} from './selector-utils';
+    parseSelector,
+    stringifySelector,
+    isNodeMatch,
+    SelectorAstNode,
+} from './deprecated/deprecated-selector-utils';
 import { isChildOfAtRule } from './helpers/rule';
 import type { ImportSymbol } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';

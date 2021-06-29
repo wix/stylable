@@ -4,7 +4,7 @@ import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { tokenizeImports } from 'toky';
 import { Diagnostics } from './diagnostics';
-import { parseSelector as deprecatedParseSelector } from './selector-utils';
+import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
@@ -374,7 +374,6 @@ export class StylableProcessor {
     }
 
     protected handleRule(rule: SRule, inStScope = false) {
-        // ToDo wrap with a deprecated get/set (also other SRule fields)
         rule.selectorAst = deprecatedParseSelector(rule.selector);
 
         const astData = getStylableAstData(rule);

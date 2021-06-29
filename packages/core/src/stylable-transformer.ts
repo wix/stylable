@@ -932,8 +932,8 @@ class ScopeContext {
     public elements: any[] = [];
     public transformGlobals = false;
     public metaParts?: MetaParts;
-    public chunkedSelector?: ChunkedSelector; // ToDo: rename to topSelector
-    public chunk?: Chunk; // ToDo: rename to chunkSelector
+    public chunkedSelector?: ChunkedSelector;
+    public chunk?: Chunk;
     public node?: SelectorNode;
     public currentAnchor?: ScopeAnchor;
     constructor(
