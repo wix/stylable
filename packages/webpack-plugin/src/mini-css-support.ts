@@ -63,7 +63,9 @@ export function injectCssModules(
                     throw new Error('Expect CssModule build to be sync');
                 }
             } catch (e) {
-                throw new Error('CssModule build error inside Stylable integration');
+                throw new Error(
+                    'CssModule build failed inside Stylable integration with Error: ' + e.message
+                );
             }
 
             compilation.modules.add(cssModule);
