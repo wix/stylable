@@ -1,4 +1,4 @@
-import { setFieldForDeprecation, warnOnce } from '../helpers/deprecation';
+import { setFieldForDeprecation } from '../helpers/deprecation';
 import type { RefedMixin } from '../stylable-meta';
 import type { SelectorAstNode } from './deprecated-selector-utils';
 import { Rule, Declaration } from 'postcss';
