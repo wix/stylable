@@ -1,7 +1,8 @@
 /* eslint-disable no-var */
 import type { Host, StateMap, StateValue } from './types';
 
-export function stylesheet(host: Host = {}) {
+export function stylesheet(host?: Host) {
+    host = host || {};
     var stateMiddleDelimiter = '-';
     var booleanStateDelimiter = '--';
     var stateWithParamDelimiter = '---';
