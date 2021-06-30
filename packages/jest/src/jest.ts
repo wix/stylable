@@ -32,12 +32,12 @@ export function getCacheKey(
     fileData: string,
     filename: string,
     configString: string,
-    { instrument }: { instrument: boolean }
+    options?: { instrument: boolean }
 ) {
     return (
         fileData +
         configString +
-        (instrument ? 'instrument' : '') +
+        (options && options.instrument ? 'instrument' : '') +
         filename +
         stylableRuntimePath +
         runtimeVersion +
