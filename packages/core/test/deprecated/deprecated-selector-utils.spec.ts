@@ -5,7 +5,7 @@ import {
     separateChunks,
     parseSelector,
     SelectorChunk,
-} from '@stylable/core';
+} from '@stylable/core/dist/deprecated/deprecated-selector-utils';
 
 describe('deprecated/selector-utils', () => {
     describe('matchSelectorTarget', () => {

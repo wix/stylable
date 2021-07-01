@@ -37,9 +37,23 @@ export const getDeclStylable = wrapFunctionForDeprecation(deprecatedGetDeclStyla
     name: `getDeclStylable`,
 });
 
-import { scopeSelector as deprecatedScopeSelector } from './deprecated/deprecated-stylable-utils';
+import {
+    scopeSelector as deprecatedScopeSelector,
+    createSubsetAst as deprecatedCreateSubsetAst,
+    removeUnusedRules as deprecatedRemoveUnusedRules,
+    findRule as deprecatedFindRule,
+} from './deprecated/deprecated-stylable-utils';
 export const scopeSelector = wrapFunctionForDeprecation(deprecatedScopeSelector, {
     name: `scopeSelector`,
+});
+export const createSubsetAst = wrapFunctionForDeprecation(deprecatedCreateSubsetAst, {
+    name: `createSubsetAst`,
+});
+export const removeUnusedRules = wrapFunctionForDeprecation(deprecatedRemoveUnusedRules, {
+    name: `removeUnusedRules`,
+});
+export const findRule = wrapFunctionForDeprecation(deprecatedFindRule, {
+    name: `findRule`,
 });
 
 export type {

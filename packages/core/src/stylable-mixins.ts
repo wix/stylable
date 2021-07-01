@@ -9,7 +9,8 @@ import type { RefedMixin, StylableMeta } from './stylable-processor';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import type { CSSResolve } from './stylable-resolver';
 import type { StylableTransformer } from './stylable-transformer';
-import { createSubsetAst, isValidDeclaration, mergeRules } from './stylable-utils';
+import { createSubsetAst } from './helpers/rule';
+import { isValidDeclaration, mergeRules } from './stylable-utils';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 
 export const mixinWarnings = {

@@ -1,22 +1,14 @@
 import { isAbsolute } from 'path';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
 import type { Imported, StylableMeta, StylableSymbol } from './stylable-processor';
-import type { SRule } from './deprecated/postcss-ast-extension';
-import {
-    fixChunkOrdering,
-    traverseNode,
-    parseSelector,
-    stringifySelector,
-    isNodeMatch,
-    SelectorAstNode,
-} from './deprecated/deprecated-selector-utils';
 import { isChildOfAtRule } from './helpers/rule';
+import { scopeNestedSelector } from './helpers/selector';
+import { getStylableAstData } from './helpers/stylable-ast-data';
 import type { ImportSymbol } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 import type { StylableResolver } from './stylable-resolver';
-import { scopeSelector } from './deprecated/deprecated-stylable-utils';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -53,22 +45,32 @@ export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
-// ToDo: remove internal usage and mark for depreciation
 export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
     let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
         if (isChildOfAtRule(mixinRule, 'keyframes')) {
             return;
         }
+        const astData = getStylableAstData(mixinRule);
         if (mixinRule.selector === '&' && !mixinRoot) {
             if (mixinRule.parent === mixinAst) {
                 mixinRoot = mixinRule;
             } else {
+                const { ast, selector } = scopeNestedSelector(
+                    getStylableAstData(rule).selectorAst,
+                    getStylableAstData(mixinRule).selectorAst
+                );
                 mixinRoot = 'NoRoot';
-                mixinRule.selector = scopeSelector(rule.selector, mixinRule.selector).selector;
+                mixinRule.selector = selector;
+                astData.selectorAst = ast;
             }
         } else {
-            mixinRule.selector = scopeSelector(rule.selector, mixinRule.selector).selector;
+            const { ast, selector } = scopeNestedSelector(
+                getStylableAstData(rule).selectorAst,
+                getStylableAstData(mixinRule).selectorAst
+            );
+            mixinRule.selector = selector;
+            astData.selectorAst = ast;
         }
     });
 
@@ -104,161 +106,9 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
     return rule;
 }
 
-// ToDo: remove internal usage and mark for depreciation
-export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
-    root: postcss.Root | postcss.AtRule,
-    selectorPrefix: string,
-    mixinTarget?: T,
-    isRoot = false
-): T {
-    // keyframes on class mixin?
-
-    const prefixType = parseSelector(selectorPrefix).nodes[0].nodes[0];
-    const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
-    const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
-
-    root.nodes.forEach((node) => {
-        if (node.type === 'rule') {
-            const ast = isRoot
-                ? scopeSelector(selectorPrefix, node.selector, true).selectorAst
-                : parseSelector(node.selector);
-
-            const matchesSelectors = isRoot
-                ? ast.nodes
-                : ast.nodes.filter((node) => containsPrefix(node));
-
-            if (matchesSelectors.length) {
-                const selector = stringifySelector({
-                    ...ast,
-                    nodes: matchesSelectors.map((selectorNode) => {
-                        if (!isRoot) {
-                            fixChunkOrdering(selectorNode, prefixType);
-                        }
-
-                        return destructiveReplaceNode(selectorNode, prefixType, {
-                            type: 'invalid',
-                            value: '&',
-                        } as SelectorAstNode);
-                    }),
-                });
-
-                mixinRoot.append(node.clone({ selector }));
-            }
-        } else if (node.type === 'atrule') {
-            if (node.name === 'media' || node.name === 'supports') {
-                const atRuleSubset = createSubsetAst(
-                    node,
-                    selectorPrefix,
-                    postcss.atRule({
-                        params: node.params,
-                        name: node.name,
-                    }),
-                    isRoot
-                );
-                if (atRuleSubset.nodes) {
-                    mixinRoot.append(atRuleSubset);
-                }
-            } else if (isRoot) {
-                mixinRoot.append(node.clone());
-            }
-        } else {
-            // TODO: add warn?
-        }
-    });
-
-    return mixinRoot as T;
-}
-
-export function removeUnusedRules(
-    ast: postcss.Root,
-    meta: StylableMeta,
-    _import: Imported,
-    usedFiles: string[],
-    resolvePath: (ctx: string, path: string) => string
-): void {
-    const isUnusedImport = !usedFiles.includes(_import.from);
-
-    if (isUnusedImport) {
-        const symbols = Object.keys(_import.named).concat(_import.defaultExport); // .filter(Boolean);
-        ast.walkRules((rule) => {
-            let shouldOutput = true;
-            traverseNode((rule as SRule).selectorAst, (node) => {
-                // TODO: remove.
-                if (symbols.includes(node.name)) {
-                    return (shouldOutput = false);
-                }
-                const symbol = meta.mappedSymbols[node.name];
-                if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
-                    let extend = symbol[valueMapping.extends] || symbol.alias;
-                    extend = extend && extend._kind !== 'import' ? extend.alias || extend : extend;
-
-                    if (
-                        extend &&
-                        extend._kind === 'import' &&
-                        !usedFiles.includes(resolvePath(meta.source, extend.import.from))
-                    ) {
-                        return (shouldOutput = false);
-                    }
-                }
-                return undefined;
-            });
-            // TODO: optimize the multiple selectors
-            if (!shouldOutput && (rule as SRule).selectorAst.nodes.length <= 1) {
-                rule.remove();
-            }
-        });
-    }
-}
-
 export function findDeclaration(importNode: Imported, test: any) {
     const fromIndex = importNode.rule.nodes.findIndex(test);
     return importNode.rule.nodes[fromIndex] as postcss.Declaration;
-}
-
-// TODO: What is this?
-export function findRule(
-    root: postcss.Root,
-    selector: string,
-    test: any = (statement: any) => statement.prop === valueMapping.extends
-): null | postcss.Declaration {
-    let found: any = null;
-    root.walkRules(selector, (rule) => {
-        const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
-        if ((rule as SRule).isSimpleSelector && !!~declarationIndex) {
-            found = rule.nodes[declarationIndex];
-        }
-    });
-    return found;
-}
-
-function destructiveReplaceNode(
-    ast: SelectorAstNode,
-    matchNode: SelectorAstNode,
-    replacementNode: SelectorAstNode
-) {
-    traverseNode(ast, (node) => {
-        if (isNodeMatch(node, matchNode)) {
-            node.type = 'selector';
-            node.nodes = [replacementNode];
-        }
-    });
-    return ast;
-}
-
-function containsMatchInFirstChunk(prefixType: SelectorAstNode, selectorNode: SelectorAstNode) {
-    let isMatch = false;
-    traverseNode(selectorNode, (node) => {
-        if (node.type === 'operator' || node.type === 'spacing') {
-            return false;
-        } else if (node.type === 'nested-pseudo-class') {
-            return true;
-        } else if (isNodeMatch(node, prefixType)) {
-            isMatch = true;
-            return false;
-        }
-        return undefined;
-    });
-    return isMatch;
 }
 
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {

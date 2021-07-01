@@ -25,12 +25,7 @@ export type { SelectorNode, SelectorList, Selector, PseudoClass };
  */
 export function flattenContainerSelector(node: Containers): Selector {
     node.value = ``;
-    const castedNode = node as SelectorNode as Selector;
-    castedNode.type = `selector`;
-    castedNode.before ||= ``;
-    castedNode.after ||= ``;
-    // ToDo: should this fix castedNode.end?
-    return castedNode;
+    return convertToSelector(node);
 }
 
 /**
@@ -52,6 +47,14 @@ export function convertToInvalid(node: SelectorNode): Invalid {
     castedNode.type = `invalid`;
     return castedNode;
 }
+export function convertToSelector(node: SelectorNode): Selector {
+    const castedNode = node as Selector;
+    castedNode.type = `selector`;
+    castedNode.before ||= ``;
+    castedNode.after ||= ``;
+    // ToDo: should this fix castedNode.end?
+    return castedNode;
+}
 
 // ToDo: make the name more specific to what this means to say
 export function isNested(parents: SelectorNode[]) {
@@ -63,6 +66,10 @@ export function isNested(parents: SelectorNode[]) {
         }
     }
     return false;
+}
+
+export function isNodeMatch(a: Partial<SelectorNode>, b: Partial<SelectorNode>) {
+    return a.type === b.type && (a as any).value === (b as any).value;
 }
 
 export function isRootValid(ast: SelectorList) {
@@ -164,22 +171,36 @@ export function isCompRoot(name: string) {
  */
 export function scopeNestedSelector(
     scopeSelectorAst: SelectorList,
-    nestedSelectorAst: SelectorList
-): string {
+    nestedSelectorAst: SelectorList,
+    rootScopeLevel = false
+): { selector: string; ast: SelectorList } {
     const resultSelectors: SelectorList = [];
     nestedSelectorAst.forEach((targetAst) => {
         scopeSelectorAst.forEach((scopeAst) => {
-            const clonedScopeNodes = cloneDeep(scopeAst.nodes);
             const outputAst = cloneDeep(targetAst);
 
             outputAst.before = scopeAst.before || outputAst.before;
 
-            const first = outputAst.nodes[0];
+            let first = outputAst.nodes[0];
+            // search first actual first selector part
+            walkSelector(
+                outputAst,
+                (node) => {
+                    first = node;
+                    return walkSelector.stopAll;
+                },
+                { ignoreList: [`selector`] }
+            );
             const parentRef = first.type === `nesting`;
             const globalSelector = first.type === `pseudo_class` && first.value === `global`;
-
-            if (first && !parentRef && !globalSelector) {
-                outputAst.nodes.unshift(...clonedScopeNodes, {
+            const startWithScoping = rootScopeLevel
+                ? scopeAst.nodes.every((node: SelectorNode, i) => {
+                      return isNodeMatch(node, outputAst.nodes[i]);
+                  })
+                : false;
+            // const startWithCombinator = first && first.type === `combinator` && fist
+            if (first && !parentRef && !startWithScoping && !globalSelector) {
+                outputAst.nodes.unshift(...cloneDeep(scopeAst.nodes), {
                     type: `combinator`,
                     combinator: `space`,
                     value: ` `,
@@ -192,10 +213,9 @@ export function scopeNestedSelector(
             }
             walkSelector(outputAst, (node, i, nodes) => {
                 if (node.type === 'nesting') {
-                    const scopeNodes = clonedScopeNodes;
                     nodes.splice(i, 1, {
                         type: `selector`,
-                        nodes: scopeNodes,
+                        nodes: cloneDeep(scopeAst.nodes),
                         start: node.start,
                         end: node.end,
                         after: ``,
@@ -208,5 +228,8 @@ export function scopeNestedSelector(
         });
     });
 
-    return stringifySelector(resultSelectors);
+    return {
+        selector: stringifySelector(resultSelectors),
+        ast: resultSelectors,
+    };
 }

@@ -84,7 +84,10 @@ describe(`helpers/selector`, () => {
         for (const { only, scope, expected, nested } of tests) {
             const test = only ? it.only : it;
             test(`apply "${scope}" on "${nested}" should output "${expected}"`, () => {
-                const selector = scopeNestedSelector(parseSelector(scope), parseSelector(nested));
+                const { selector } = scopeNestedSelector(
+                    parseSelector(scope),
+                    parseSelector(nested)
+                );
                 expect(selector).to.equal(expected);
             });
         }

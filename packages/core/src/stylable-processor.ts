@@ -948,7 +948,7 @@ export class StylableProcessor {
                     selector: scopeNestedSelector(
                         getStylableAstData(scopingRule).selectorAst,
                         getStylableAstData(rule).selectorAst
-                    ),
+                    ).selector,
                 });
                 (scopedRule as SRule).stScopeSelector = atRule.params;
                 rule.replaceWith(scopedRule);

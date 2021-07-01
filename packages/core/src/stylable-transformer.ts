@@ -28,14 +28,14 @@ import {
     Chunk,
     convertToClass,
 } from './helpers/selector';
-import { createWarningRule, isChildOfAtRule } from './helpers/rule';
+import { createWarningRule, isChildOfAtRule, findRule } from './helpers/rule';
 import { getStylableAstData } from './helpers/stylable-ast-data';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol, StylableMeta } from './stylable-processor';
 import { SRule, SDecl, getDeclStylable } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
-import { findRule, generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
+import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
 const { hasOwnProperty } = Object.prototype;
