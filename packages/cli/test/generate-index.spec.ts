@@ -132,15 +132,17 @@ describe('build index', () => {
             outDir: '.',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: '/',
+            rootDir: resolve('/'),
             log,
             generatorPath: require.resolve('./fixtures/test-generator'),
         });
 
-        const res = fs.readFileSync('/index.st.css').toString();
+        const res = fs.readFileSync(resolve('/index.st.css')).toString();
 
         expect(res.trim()).to.equal(
-            ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}\n.root Style0{}'
+            [':import {-st-from: "./comp-A.st.css";-st-default:Style0;}', '.root Style0{}'].join(
+                '\n'
+            )
         );
     });
 
