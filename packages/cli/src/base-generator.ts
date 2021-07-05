@@ -20,7 +20,7 @@ export class Generator {
 
     constructor(public stylable: Stylable, private log: Log) {}
 
-    public generateReExports(filePath: string): ReExports {
+    public generateReExports(filePath: string): ReExports | undefined {
         return {
             root: this.filename2varname(filePath),
             classes: {},
@@ -32,9 +32,11 @@ export class Generator {
 
     public generateFileIndexEntry(filePath: string, fullOutDir: string) {
         const reExports = this.generateReExports(filePath);
-        this.checkForCollisions(reExports, filePath);
-        this.log('[Generator Index]', `Add file: ${filePath}`);
-        this.indexFileOutput.set(normalizeRelative(relative(fullOutDir, filePath)), reExports);
+        if (reExports) {
+            this.checkForCollisions(reExports, filePath);
+            this.log('[Generator Index]', `Add file: ${filePath}`);
+            this.indexFileOutput.set(normalizeRelative(relative(fullOutDir, filePath)), reExports);
+        }
     }
 
     public removeEntryFromIndex(filePath: string, fullOutDir: string) {
