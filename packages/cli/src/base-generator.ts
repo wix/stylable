@@ -22,7 +22,7 @@ export class Generator {
 
     constructor(public stylable: Stylable, private log: (...args: string[]) => void) {}
 
-    public generateReExports(filePath: string): ReExports {
+    public generateReExports(filePath: string): ReExports | undefined {
         return {
             root: this.filename2varname(filePath),
             classes: {},
@@ -34,12 +34,14 @@ export class Generator {
 
     public generateFileIndexEntry(filePath: string, fullOutDir: string) {
         const reExports = this.generateReExports(filePath);
-        this.checkForCollisions(reExports, filePath);
-        this.log('[Generator Index]', `Add file: ${filePath}`);
-        this.indexFileOutput.push({
-            reExports,
-            from: addDotSlash(relative(fullOutDir, filePath)),
-        });
+        if(reExports) {       
+            this.checkForCollisions(reExports, filePath);
+            this.log('[Generator Index]', `Add file: ${filePath}`);
+            this.indexFileOutput.push({
+                reExports,
+                from: addDotSlash(relative(fullOutDir, filePath)),
+            });
+        }
     }
 
     public generateIndexFile(fs: FileSystem, fullOutDir: string, indexFile: string) {

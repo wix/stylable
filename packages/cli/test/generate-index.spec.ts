@@ -113,6 +113,37 @@ describe('build index', () => {
         );
     });
 
+    it('custom generator is able to filter files from the index', async () => {
+        const fs = createFS({
+            '/comp-A.st.css': `
+               .a{}
+            `,
+            '/b/FILTER-ME.st.css': `
+               .b{}
+            `,
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        await build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            indexFile: 'index.st.css',
+            rootDir: '/',
+            log,
+            generatorPath: require.resolve('./fixtures/test-generator'),
+        });
+
+        const res = fs.readFileSync('/index.st.css').toString();
+
+        expect(res.trim()).to.equal(
+            ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}\n.root Style0{}'
+        );
+    });
+
     it('should create index file using a custom generator with named exports generation and @namespace', () => {
         const fs = createFS({
             '/comp-A.st.css': `
