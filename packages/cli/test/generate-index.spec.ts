@@ -113,7 +113,7 @@ describe('build index', () => {
         );
     });
 
-    it('custom generator is able to filter files from the index', async () => {
+    it('custom generator is able to filter files from the index', () => {
         const fs = createFS({
             '/comp-A.st.css': `
                .a{}
