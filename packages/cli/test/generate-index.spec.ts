@@ -125,7 +125,7 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,
