@@ -9,7 +9,15 @@
 
 ## Installation
 
-This package is currently a work-in-progress and is set to `private`. Once it matures, it will be published externally to NPM.
+Using NPM:
+```
+npm install @stylable/cli --save-dev
+```
+
+Using Yarn:
+```
+yarn add @stylable/cli -D
+```
 
 ## Usage
 

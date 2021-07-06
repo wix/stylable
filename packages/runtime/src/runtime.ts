@@ -1,13 +1,8 @@
 /* eslint-disable no-var */
-import type { Host } from './types';
+import type { Host, StateMap, StateValue } from './types';
 
-export type StateValue = boolean | number | string;
-
-export interface StateMap {
-    [stateName: string]: StateValue;
-}
-
-export function stylesheet(host: Host = {}) {
+export function stylesheet(host?: Host) {
+    host = host || {};
     var stateMiddleDelimiter = '-';
     var booleanStateDelimiter = '--';
     var stateWithParamDelimiter = '---';

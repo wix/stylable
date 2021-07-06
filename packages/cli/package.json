@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "4.3.0",
+  "version": "4.3.3",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "dist/index.js",
   "bin": {
@@ -12,9 +12,9 @@
   "dependencies": {
     "@file-services/node": "^5.3.1",
     "@file-services/types": "^5.3.1",
-    "@stylable/core": "^4.3.0",
-    "@stylable/node": "^4.3.0",
-    "@stylable/optimizer": "^4.3.0",
+    "@stylable/core": "^4.3.3",
+    "@stylable/node": "^4.3.3",
+    "@stylable/optimizer": "^4.3.3",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
     "yargs": "^17.0.1"
