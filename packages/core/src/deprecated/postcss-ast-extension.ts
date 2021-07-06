@@ -11,17 +11,14 @@ const pleaseUse = `getStylableAstData(rule) instead`;
 setFieldForDeprecation(Rule.prototype, `selectorAst`, {
     objectType: `SRule`,
     valueOnThis: true,
-    pleaseUse,
 });
 setFieldForDeprecation(Rule.prototype, `isSimpleSelector`, {
     objectType: `SRule`,
     valueOnThis: true,
-    pleaseUse,
 });
 setFieldForDeprecation(Rule.prototype, `selectorType`, {
     objectType: `SRule`,
     valueOnThis: true,
-    pleaseUse,
 });
 setFieldForDeprecation(Rule.prototype, `mixins`, {
     objectType: `SRule`,

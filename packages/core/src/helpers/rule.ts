@@ -1,13 +1,15 @@
 import {
-    parseSelector,
+    parseSelectorWithCache,
     stringifySelector,
     scopeNestedSelector,
     SelectorNode,
     walkSelector,
+    walkSelectorReadonly,
     convertToSelector,
     isNodeMatch,
+    isSimpleSelector,
 } from './selector';
-import { getStylableAstData } from './stylable-ast-data';
+import type { DeepReadonlyObject } from './readonly';
 import { valueMapping } from '../stylable-value-parsers';
 import * as postcss from 'postcss';
 import cloneDeep from 'lodash.clonedeep';
@@ -66,14 +68,14 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     isRoot = false
 ): T {
     // keyframes on class mixin?
-    const prefixSelectorList = parseSelector(selectorPrefix);
+    const prefixSelectorList = parseSelectorWithCache(selectorPrefix);
     const prefixType = prefixSelectorList[0].nodes[0];
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
 
     root.nodes.forEach((node) => {
         if (node.type === `rule`) {
-            const { selectorAst } = getStylableAstData(node);
+            const selectorAst = parseSelectorWithCache(node.selector, { clone: true });
             const ast = isRoot
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
                 : cloneDeep(selectorAst);
@@ -145,9 +147,12 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     return mixinRoot as T;
 }
 
-function containsMatchInFirstChunk(prefixType: SelectorNode, selectorNode: SelectorNode) {
+function containsMatchInFirstChunk(
+    prefixType: DeepReadonlyObject<SelectorNode>,
+    selectorNode: DeepReadonlyObject<SelectorNode>
+) {
     let isMatch = false;
-    walkSelector(selectorNode, (node) => {
+    walkSelectorReadonly(selectorNode, (node) => {
         if (node.type === `combinator`) {
             // || node.type === 'spacing') {
             return walkSelector.stopAll;
@@ -170,8 +175,11 @@ export function findRule(
     let found: any = null;
     root.walkRules(selector, (rule) => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
-        const { isSimpleSelector } = getStylableAstData(rule);
-        if (isSimpleSelector && !!~declarationIndex) {
+        const isSimplePerSelector = isSimpleSelector(rule.selector);
+        const isSimple = isSimplePerSelector.reduce((acc, { isSimple }) => {
+            return !isSimple ? false : acc;
+        }, true);
+        if (isSimple && !!~declarationIndex) {
             found = rule.nodes[declarationIndex];
         }
     });

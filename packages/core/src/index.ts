@@ -86,7 +86,6 @@ import {
 export const matchSelectorTarget = wrapFunctionForDeprecation(deprecatedMatchSelectorTarget, {
     name: `matchSelectorTarget`,
 });
-matchSelectorTarget({} as any, {} as any);
 export const fixChunkOrdering = wrapFunctionForDeprecation(deprecatedFixChunkOrdering, {
     name: `fixChunkOrdering`,
 });

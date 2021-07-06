@@ -4,8 +4,7 @@ import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
 import type { Imported, StylableMeta, StylableSymbol } from './stylable-processor';
 import { isChildOfAtRule } from './helpers/rule';
-import { scopeNestedSelector } from './helpers/selector';
-import { getStylableAstData } from './helpers/stylable-ast-data';
+import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
 import type { ImportSymbol } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 import type { StylableResolver } from './stylable-resolver';
@@ -51,26 +50,23 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
         if (isChildOfAtRule(mixinRule, 'keyframes')) {
             return;
         }
-        const astData = getStylableAstData(mixinRule);
         if (mixinRule.selector === '&' && !mixinRoot) {
             if (mixinRule.parent === mixinAst) {
                 mixinRoot = mixinRule;
             } else {
-                const { ast, selector } = scopeNestedSelector(
-                    getStylableAstData(rule).selectorAst,
-                    getStylableAstData(mixinRule).selectorAst
+                const { selector } = scopeNestedSelector(
+                    parseSelectorWithCache(rule.selector),
+                    parseSelectorWithCache(mixinRule.selector)
                 );
                 mixinRoot = 'NoRoot';
                 mixinRule.selector = selector;
-                astData.selectorAst = ast;
             }
         } else {
-            const { ast, selector } = scopeNestedSelector(
-                getStylableAstData(rule).selectorAst,
-                getStylableAstData(mixinRule).selectorAst
+            const { selector } = scopeNestedSelector(
+                parseSelectorWithCache(rule.selector),
+                parseSelectorWithCache(mixinRule.selector)
             );
             mixinRule.selector = selector;
-            astData.selectorAst = ast;
         }
     });
 

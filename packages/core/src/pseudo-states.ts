@@ -3,6 +3,7 @@ import postcssValueParser from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import {
+    parseSelectorWithCache,
     convertToAttribute,
     convertToClass,
     stringifySelector,
@@ -11,7 +12,6 @@ import {
 } from './helpers/selector';
 import { StateResult, systemValidators } from './state-validators';
 import type { StylableMeta } from './stylable-processor';
-import type { SRule } from './deprecated/postcss-ast-extension';
 import type { StylableResolver } from './stylable-resolver';
 import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
@@ -181,14 +181,15 @@ export function validateStateDefinition(
     if (decl.parent && decl.parent.type !== 'root') {
         const container = decl.parent;
         if (container.type !== 'atrule') {
-            const sRule: SRule = container as SRule;
-            if (sRule.selectorAst.nodes && sRule.selectorAst.nodes.length === 1) {
-                const singleSelectorAst = sRule.selectorAst.nodes[0];
+            const parentRule = container as postcss.Rule;
+            const selectorAst = parseSelectorWithCache(parentRule.selector)
+            if (selectorAst.length && selectorAst.length === 1) {
+                const singleSelectorAst = selectorAst[0];
                 const selectorChunk = singleSelectorAst.nodes;
 
                 if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
-                    const className = selectorChunk[0].name;
-                    const classMeta = meta.classes[className];
+                    const className = selectorChunk[0].value;
+                    const classMeta = meta.classes[meta.classesScopeMap[className]];
                     const states = classMeta[valueMapping.states];
 
                     if (classMeta && classMeta._kind === 'class' && states) {
@@ -202,7 +203,7 @@ export function validateStateDefinition(
                                     state.defaultValue || '',
                                     resolver,
                                     diagnostics,
-                                    sRule,
+                                    parentRule,
                                     true,
                                     !!state.defaultValue
                                 );

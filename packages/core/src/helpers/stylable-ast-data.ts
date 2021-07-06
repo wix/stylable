@@ -1,5 +1,4 @@
 import type { RefedMixin } from '../stylable-meta';
-import { SelectorList, parseCssSelector } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
 /**
@@ -8,13 +7,6 @@ import type * as postcss from 'postcss';
 
 type NodeData = RuleAstData | DeclAstData;
 const astMap = new WeakMap<postcss.Node, NodeData>();
-
-const defaultRuleData: RuleAstData = {
-    selectorAst: [],
-    isSimpleSelector: true,
-    selectorType: `complex`,
-};
-const defaultDeclData: DeclAstData = {};
 
 /**
  * retrieves cached ast data.
@@ -25,17 +17,11 @@ export function getStylableAstData<T extends postcss.Node>(
 ): T extends postcss.Rule ? RuleAstData : T extends postcss.Declaration ? DeclAstData : null {
     if (isRule(node)) {
         if (!astMap.has(node)) {
-            astMap.set(node, {
-                ...defaultRuleData,
-                // ToDo: start position
-                selectorAst: parseCssSelector(node.selector),
-            });
+            astMap.set(node, {});
         }
     } else if (isDeclaration(node)) {
         if (!astMap.has(node)) {
-            astMap.set(node, {
-                ...defaultDeclData,
-            });
+            astMap.set(node, {});
         }
     }
     return astMap.get(node) || (null as any);
@@ -54,16 +40,13 @@ export function setStylableAstData<N extends postcss.Node, D extends NodeData>(
     data: D
 ): void {
     if (isRule(node) && isRuleAstData(data)) {
-        astMap.set(node, { ...defaultRuleData, ...data });
+        astMap.set(node, { ...data });
     } else if (isDeclaration(node) && isDeclAstData(data)) {
-        astMap.set(node, { ...defaultDeclData, ...data });
+        astMap.set(node, { ...data });
     }
 }
 
 export interface RuleAstData {
-    selectorAst: SelectorList;
-    isSimpleSelector: boolean;
-    selectorType: 'class' | 'element' | 'complex';
     mixins?: RefedMixin[];
     stScopeSelector?: string;
 }

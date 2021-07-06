@@ -25,15 +25,18 @@ import {
 } from './stylable-utils';
 import {
     walkSelector,
+    walkSelectorReadonly,
+    isSimpleSelector,
     isNested,
     isRootValid,
     SelectorNode,
     isCompRoot,
     scopeNestedSelector,
+    parseSelectorWithCache,
 } from './helpers/selector';
+import type { DeepReadonlyObject } from './helpers/readonly';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
-import { getStylableAstData } from './helpers/stylable-ast-data';
 import {
     rootValueMapping,
     SBTypesParsers,
@@ -376,18 +379,17 @@ export class StylableProcessor {
     protected handleRule(rule: SRule, inStScope = false) {
         rule.selectorAst = deprecatedParseSelector(rule.selector);
 
-        const astData = getStylableAstData(rule);
+        const selectorAst = parseSelectorWithCache(rule.selector);
 
         let locallyScoped = false;
-
-        walkSelector(astData.selectorAst, (node, index, nodes, parents) => {
+        let simpleSelector: boolean;
+        walkSelectorReadonly(selectorAst, (node, index, nodes, parents) => {
             const type = node.type;
             if (type === 'selector' && !isNested(parents)) {
                 locallyScoped = false;
             }
             if (type !== `selector` && type !== `class` && type !== `element`) {
-                astData.isSimpleSelector = false;
-                rule.isSimpleSelector = false;
+                simpleSelector = false;
             }
 
             if (node.type === 'pseudo_class') {
@@ -472,18 +474,15 @@ export class StylableProcessor {
             return;
         });
 
-        if (astData.isSimpleSelector !== false) {
-            astData.isSimpleSelector = true;
-            astData.selectorType = rule.selector.match(/^\./) ? 'class' : 'element';
+        if (simpleSelector! !== false) {
             rule.isSimpleSelector = true;
-            rule.selectorType = astData.selectorType;
+            rule.selectorType = rule.selector.match(/^\./) ? 'class' : 'element';
         } else {
-            astData.selectorType = 'complex';
             rule.selectorType = 'complex';
         }
 
         // ToDo: check cases of root in nested selectors?
-        if (!isRootValid(astData.selectorAst)) {
+        if (!isRootValid(selectorAst)) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
     }
@@ -507,7 +506,11 @@ export class StylableProcessor {
         return symbol;
     }
 
-    protected checkForScopedNodeAfter(rule: postcss.Rule, nodes: SelectorNode[], index: number) {
+    protected checkForScopedNodeAfter(
+        rule: postcss.Rule,
+        nodes: DeepReadonlyObject<SelectorNode[]>,
+        index: number
+    ) {
         for (let i = index + 1; i < nodes.length; i++) {
             const element = nodes[i];
             if (!element) {
@@ -682,8 +685,13 @@ export class StylableProcessor {
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
+        const isSimplePerSelector = isSimpleSelector(rule.selector);
+        const type = isSimplePerSelector.reduce((accType, { type }) => {
+            return !accType ? type : accType !== type ? `complex` : type;
+        }, ``);
+        const isSimple = type !== `complex`;
         if (decl.prop === valueMapping.states) {
-            if (rule.isSimpleSelector && rule.selectorType !== 'element') {
+            if (isSimple && type !== 'element') {
                 this.extendTypedRule(
                     decl,
                     rule.selector,
@@ -691,14 +699,14 @@ export class StylableProcessor {
                     parseStates(decl.value, decl, this.diagnostics)
                 );
             } else {
-                if (rule.selectorType === 'element') {
+                if (type === 'element') {
                     this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_ELEMENT());
                 } else {
                     this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_COMPLEX());
                 }
             }
         } else if (decl.prop === valueMapping.extends) {
-            if (rule.isSimpleSelector) {
+            if (isSimple) {
                 const parsed = parseExtends(decl.value);
                 const symbolName = parsed.types[0] && parsed.types[0].symbolName;
 
@@ -793,7 +801,7 @@ export class StylableProcessor {
                 rule.mixins = mixins;
             }
         } else if (decl.prop === valueMapping.global) {
-            if (rule.isSimpleSelector && rule.selectorType !== 'element') {
+            if (isSimple && type !== 'element') {
                 this.setClassGlobalMapping(decl, rule);
             } else {
                 // TODO: diagnostics - scoped on none class
@@ -946,8 +954,8 @@ export class StylableProcessor {
             atRule.walkRules((rule) => {
                 const scopedRule = rule.clone({
                     selector: scopeNestedSelector(
-                        getStylableAstData(scopingRule).selectorAst,
-                        getStylableAstData(rule).selectorAst
+                        parseSelectorWithCache(scopingRule.selector),
+                        parseSelectorWithCache(rule.selector)
                     ).selector,
                 });
                 (scopedRule as SRule).stScopeSelector = atRule.params;

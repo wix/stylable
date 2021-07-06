@@ -1,5 +1,9 @@
 import { expect } from 'chai';
-import { scopeNestedSelector, parseSelector } from '@stylable/core/dist/helpers/selector';
+import {
+    scopeNestedSelector,
+    parseSelector,
+    isSimpleSelector,
+} from '@stylable/core/dist/helpers/selector';
 
 describe(`helpers/selector`, () => {
     describe(`scopeNestedSelector`, () => {
@@ -91,5 +95,102 @@ describe(`helpers/selector`, () => {
                 expect(selector).to.equal(expected);
             });
         }
+    });
+    describe(`isSimpleSelector`, () => {
+        it(`should return simple for class selector`, () => {
+            const result = isSimpleSelector(`.a`);
+
+            expect(result).to.eql([
+                {
+                    isSimple: true,
+                    type: `class`,
+                },
+            ]);
+        });
+        it(`should return simple for element selector`, () => {
+            const result = isSimpleSelector(`e`);
+
+            expect(result).to.eql([
+                {
+                    isSimple: true,
+                    type: `element`,
+                },
+            ]);
+        });
+        it(`should return result for multiple selectors`, () => {
+            const result = isSimpleSelector(`.a, e`);
+
+            expect(result).to.eql([
+                {
+                    isSimple: true,
+                    type: `class`,
+                },
+                {
+                    isSimple: true,
+                    type: `element`,
+                },
+            ]);
+        });
+        it(`should return complex for multiple classes `, () => {
+            const result = isSimpleSelector(`.a.b`);
+
+            expect(result).to.eql([
+                {
+                    isSimple: false,
+                    type: `complex`,
+                },
+            ]);
+        });
+        it(`should return complex for class and element combination`, () => {
+            const result = isSimpleSelector(`e.b`);
+
+            expect(result).to.eql([
+                {
+                    isSimple: false,
+                    type: `complex`,
+                },
+            ]);
+        });
+        it(`should return complex for class or element with function`, () => {
+            const result = isSimpleSelector(`e(), .b()`);
+
+            expect(result).to.eql([
+                {
+                    isSimple: false,
+                    type: `complex`,
+                },
+                {
+                    isSimple: false,
+                    type: `complex`,
+                },
+            ]);
+        });
+        it(`should return complex for any other selector`, () => {
+            const result = isSimpleSelector(`[], #id, :state, ::element`);
+
+            expect(result).to.eql([
+                {
+                    isSimple: false,
+                    type: `complex`,
+                },
+                {
+                    isSimple: false,
+                    type: `complex`,
+                },
+                {
+                    isSimple: false,
+                    type: `complex`,
+                },
+                {
+                    isSimple: false,
+                    type: `complex`,
+                },
+            ]);
+        });
+        it(`should return no value for empty selector`, () => {
+            const result = isSimpleSelector(``);
+
+            expect(result).to.eql([]);
+        });
     });
 });

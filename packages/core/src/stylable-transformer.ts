@@ -19,7 +19,7 @@ import {
     SelectorNode,
     Selector,
     SelectorList,
-    parseSelector,
+    parseSelectorWithCache,
     stringifySelector,
     flattenContainerSelector,
     separateChunks2,
@@ -29,11 +29,11 @@ import {
     convertToClass,
 } from './helpers/selector';
 import { createWarningRule, isChildOfAtRule, findRule } from './helpers/rule';
-import { getStylableAstData } from './helpers/stylable-ast-data';
+import type { DeepReadonlyObject } from './helpers/readonly';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol, StylableMeta } from './stylable-processor';
-import { SRule, SDecl, getDeclStylable } from './deprecated/postcss-ast-extension';
+import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
@@ -211,7 +211,7 @@ export class StylableTransformer {
         });
 
         ast.walkDecls((decl) => {
-            getDeclStylable(decl as SDecl).sourceValue = decl.value;
+            (decl as SDecl).stylable = { sourceValue: decl.value };
 
             if (isCSSVarProp(decl.prop)) {
                 decl.prop = this.getScopedCSSVar(decl, meta, cssVarsMapping);
@@ -385,7 +385,7 @@ export class StylableTransformer {
     }
     public transformGlobals(ast: postcss.Root, meta: StylableMeta) {
         ast.walkRules((r) => {
-            const { selectorAst } = getStylableAstData(r);
+            const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
             walkSelector(selectorAst, (node) => {
                 if (node.type === 'pseudo_class' && node.value === 'global') {
                     this.addGlobalsToMeta([node], meta);
@@ -440,7 +440,7 @@ export class StylableTransformer {
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
         const context = new ScopeContext(
             originMeta,
-            parseSelector(selector),
+            parseSelectorWithCache(selector, { clone: true }),
             rule || postcss.rule({ selector })
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
@@ -700,7 +700,9 @@ export class StylableTransformer {
         name: string,
         node: SelectorNode
     ) {
-        const selectorListChunks = separateChunks2(parseSelector(customSelector));
+        const selectorListChunks = separateChunks2(
+            parseSelectorWithCache(customSelector, { clone: true })
+        );
         const hasSingleSelector = selectorListChunks.length === 1;
         removeFirstRootInEachSelectorChunk(selectorListChunks, meta);
         const internalContext = new ScopeContext(
@@ -734,7 +736,7 @@ export class StylableTransformer {
             );
         }
     }
-    private scopeClassNode(symbol: any, meta: any, node: any, originMeta: any) {
+    private scopeClassNode(symbol: any, meta: StylableMeta, node: any, originMeta: any) {
         if (symbol[valueMapping.global]) {
             const globalMappedNodes = symbol[valueMapping.global];
             flattenContainerSelector(node);
@@ -742,8 +744,10 @@ export class StylableTransformer {
             // ToDo: check if this is causes an issue with globals from an imported alias
             this.addGlobalsToMeta(globalMappedNodes, originMeta);
         } else {
+            const sourceValue = node.value;
             convertToClass(node);
             node.value = this.scope(symbol.name, meta.namespace);
+            meta.classesScopeMap[node.value] = sourceValue;
         }
     }
     private resolveMetaParts(meta: StylableMeta): MetaParts {
@@ -846,7 +850,11 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         const len = transformer.diagnostics.reports.length;
         const rule = postcss.rule({ selector: scope.params });
 
-        const context = new ScopeContext(meta, parseSelector(rule.selector), rule);
+        const context = new ScopeContext(
+            meta,
+            parseSelectorWithCache(rule.selector, { clone: true }),
+            rule
+        );
         transformedScopes[rule.selector] = separateChunks2(transformer.scopeSelectorAst(context));
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
@@ -906,14 +914,14 @@ function anyElementAnchor(meta: StylableMeta): {
 
 function lazyCreateSelector(
     customElementChunk: Selector,
-    selectorNode: Selector,
+    selectorNode: DeepReadonlyObject<Selector>,
     nodeIndex: number
 ): () => Selector {
     if (nodeIndex === -1) {
         throw new Error('not supported inside nested classes');
     }
     return (): Selector => {
-        const clone = cloneDeep(selectorNode);
+        const clone = cloneDeep(selectorNode) as Selector;
         // ToDo: figure out intent and improve types
         (clone.nodes[nodeIndex] as any).nodes = customElementChunk.nodes;
         return clone;
