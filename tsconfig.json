@@ -9,6 +9,8 @@
     { "path": "./packages/core/test" },
     { "path": "./packages/core-test-kit/src" },
     { "path": "./packages/core-test-kit/test" },
+    { "path": "./packages/code-formatter/src" },
+    { "path": "./packages/code-formatter/test" },
     { "path": "./packages/create-stylable-app/src" },
     { "path": "./packages/custom-value/src" },
     { "path": "./packages/custom-value/test" },

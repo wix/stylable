@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
 import { nodeFs } from '@file-services/node';
-import { Stylable } from '@stylable/core';
-import { StylableLanguageService } from '@stylable/language-service';
+import { getDocumentFormatting } from '@stylable/code-formatter';
 import { createLogger } from './logger';
 import { writeFileSync } from 'fs';
 
@@ -119,14 +118,6 @@ for (const request of requires) {
     }
 }
 
-const stylable = Stylable.create({
-    fileSystem: nodeFs,
-    requireModule: require,
-    projectRoot: target,
-    resolverCache: new Map(),
-});
-const lsp = new StylableLanguageService({ fs: nodeFs, stylable });
-
 function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css') {
     const files = nodeFs.readdirSync(dirPath, 'utf-8');
     let res: string[] = [];
@@ -148,8 +139,8 @@ function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css') {
 function formatStylesheet(filePath: string) {
     const fileContent = nodeFs.readFileSync(filePath, 'utf-8');
 
-    const formatting = lsp.formatDocument(
-        filePath,
+    const newText = getDocumentFormatting(
+        fileContent,
         { start: 0, end: fileContent.length },
         {
             end_with_newline: endWithNewline,
@@ -163,8 +154,8 @@ function formatStylesheet(filePath: string) {
         }
     );
 
-    if (formatting.length) {
-        writeFileSync(filePath, formatting[0].newText);
+    if (newText.length) {
+        writeFileSync(filePath, newText);
 
         if (!silent || debug) {
             log(`Formatted: ${filePath}`);

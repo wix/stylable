@@ -5,6 +5,7 @@ import type { ColorInformation } from 'vscode-css-languageservice';
 import {
     Color,
     ColorPresentation,
+    FormattingOptions,
     Location,
     ParameterInformation,
     SignatureHelp,
@@ -12,11 +13,11 @@ import {
 import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument';
 import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
+import { format } from '@stylable/language-service';
 import { ProviderPosition } from '@stylable/language-service/dist/lib/completion-providers';
 import { createMeta, ProviderLocation } from '@stylable/language-service/dist/lib/provider';
 import { pathFromPosition } from '@stylable/language-service/dist/lib/utils/postcss-ast-utils';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
-import type { CSSBeautifyOptions } from '@stylable/language-service/dist/lib/feature/formatting';
 
 export function getCaretPosition(src: string) {
     const caretPos = src.indexOf('|');
@@ -75,18 +76,12 @@ export function getDocumentColors(fileName: string): ColorInformation[] {
 export function getFormattingEdits(
     content: string,
     offsetRange?: { start: number; end: number },
-    options: CSSBeautifyOptions = {
-        indent_with_tabs: false,
-        indent_size: 4,
+    options: FormattingOptions = {
+        insertSpaces: true,
+        tabSize: 4,
     }
 ): TextEdit[] {
-    const doc = TextDocument.create('', 'stylable', 1, content);
-
-    return stylableLSP.getDocumentFormatting(
-        doc,
-        offsetRange || { start: 0, end: doc.getText().length },
-        options
-    );
+    return format(content, offsetRange || { start: 0, end: content.length }, options);
 }
 
 export function getDocColorPresentation(

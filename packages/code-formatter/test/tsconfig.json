@@ -4,9 +4,5 @@
     "outDir": "../dist/test",
     "types": ["node", "externals", "mocha"]
   },
-  "references": [
-    { "path": "../src" },
-    { "path": "../../core/src" },
-    { "path": "../../code-formatter/src" }
-  ]
+  "references": [{ "path": "../src" }]
 }

@@ -7,7 +7,7 @@
     { "path": "../../core/src" },
     { "path": "../../node/src" },
     { "path": "../../module-utils/src" },
-    { "path": "../../language-service/src" },
+    { "path": "../../code-formatter/src" },
     { "path": "../../optimizer/src" }
   ]
 }

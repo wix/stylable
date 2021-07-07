@@ -1,6 +1,7 @@
-import { css, CSSBeautifyOptions } from 'js-beautify';
-export { CSSBeautifyOptions } from 'js-beautify';
-import type { FormattingOptions } from 'vscode-languageserver';
+import { getDocumentFormatting } from '@stylable/code-formatter';
+import type { CSSBeautifyOptions } from 'js-beautify';
+import type { FormattingOptions, TextEdit } from 'vscode-languageserver';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 
 export function lspFormattingOptionsToJsBeautifyOptions(
     options: FormattingOptions
@@ -13,12 +14,26 @@ export function lspFormattingOptionsToJsBeautifyOptions(
     };
 }
 
-export function format(text: string, options?: CSSBeautifyOptions): string {
-    const normalizedOptions: CSSBeautifyOptions = {
-        ...options,
-        // hard-coded to prevent custom selector values starting with combinators from breaking
-        space_around_combinator: true,
-    };
+export function format(
+    srcText: string,
+    offset: { start: number; end: number },
+    options: FormattingOptions
+): TextEdit[] {
+    const doc = TextDocument.create('', 'stylable', 1, srcText);
+    const range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
 
-    return css(text, normalizedOptions);
+    const newText = getDocumentFormatting(
+        srcText,
+        offset,
+        lspFormattingOptionsToJsBeautifyOptions(options)
+    );
+
+    return srcText === newText
+        ? []
+        : [
+              {
+                  newText,
+                  range,
+              },
+          ];
 }
