@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "../dist"
   },
-  "references": []
+  "references": [{ "path": "../../core/src" }]
 }
