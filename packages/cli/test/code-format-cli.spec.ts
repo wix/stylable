@@ -143,7 +143,7 @@ describe('Stylable Code Format Cli', function () {
 
             const dirContent = loadDirSync(tempDir.path);
             expect(dirContent[filePath]).to.equal(fileContent);
-            expect(stdout).to.include('');
+            expect(stdout).to.equal('');
             expect(stderr).to.include(
                 'cannot find any Stylable stylesheets (.st.css) in directory'
             );
@@ -161,7 +161,7 @@ describe('Stylable Code Format Cli', function () {
 
             const dirContent = loadDirSync(tempDir.path);
             expect(dirContent[filePath]).to.equal(fileContent);
-            expect(stdout).to.include('');
+            expect(stdout).to.equal('');
             expect(stderr).to.include('cannot format file, not a Stylable stylesheet (.st.css)');
         });
     });
