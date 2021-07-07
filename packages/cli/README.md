@@ -105,8 +105,6 @@ $ stc --srcDir="./src" --outDir="./dist"
 
 After installing `@stylable/cli`, the `stc-format` command will be available, running `stc-format --help` will provide a brief description for the options available.
 
-The `stc-format` utility provides code formatting capabilities based on `@stylable/language-service`.
-
 | Option                        | Alias | Description                                                   | Value Type    | Default Value                 |
 | ----------------------------- | ----- | ------------------------------------------------------------- | --------------| ----------------------------- |
 | `--target`                    | `T`   | file or directory to format                                   | `string`      | `current working directory`   |
@@ -123,6 +121,12 @@ The `stc-format` utility provides code formatting capabilities based on `@stylab
 | `--require`                   | `r`   | require hooks                                                 | `array`       | `[]`                          |
 | `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
 | `--version`                   | `v`   | Show version number                                           | `boolean`     |                               |
+
+### Formatting the source directory
+
+```sh
+$ stc-format --target ./src
+```
 
 ## License
 
