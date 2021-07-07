@@ -350,7 +350,7 @@ export class StylableResolver {
                         (decl) => decl.type === 'decl' && decl.prop === valueMapping.from
                     );
 
-                diagnostics.error(
+                diagnostics.warn(
                     fromDecl || importObj.rule,
                     resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.request),
                     { word: importObj.request }
