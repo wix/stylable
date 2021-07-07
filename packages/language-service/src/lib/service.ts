@@ -1,6 +1,5 @@
 import type { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
-import type { Root } from 'postcss';
 import type { HoverSettings } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { Range, TextDocument } from 'vscode-languageserver-textdocument';
@@ -22,21 +21,17 @@ import {
 import { URI } from 'vscode-uri';
 
 import { ProviderPosition, ProviderRange } from './completion-providers';
-import { topLevelDirectives } from './completion-types';
 import type { Completion } from './completion-types';
 import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
 import { createDiagnosis } from './diagnosis';
 import { getColorPresentation, resolveDocumentColors } from './feature/color-provider';
-import {
-    format,
-    lspFormattingOptionsToJsBeautifyOptions,
-    JSBeautifyFormatCSSOptions,
-} from './feature/formatting';
+import { format } from './feature/formatting';
 import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
-import type { ExtendedTsLanguageService } from './types';
 import { typescriptSupport } from './typescript-support';
+import type { ExtendedTsLanguageService } from './types';
+import type { FormattingOptions } from 'vscode-languageserver';
 
 export interface StylableLanguageServiceOptions {
     fs: IFileSystem;
@@ -243,82 +238,20 @@ export class StylableLanguageService {
         return null;
     }
 
-    public onDocumentFormatting(
-        filePath: string,
-        options: { tabSize: number; insertSpaces: boolean }
-    ): TextEdit[] {
-        const content = this.fs.readFileSync(filePath, 'utf8');
-        const doc = TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, content);
+    public onDocumentFormatting(filePath: string, options: FormattingOptions): TextEdit[] {
+        const srcText = this.fs.readFileSync(filePath, 'utf8');
 
-        return this.getDocumentFormatting(
-            doc,
-            { start: 0, end: doc.getText().length },
-            lspFormattingOptionsToJsBeautifyOptions(options)
-        );
+        return format(srcText, { start: 0, end: srcText.length }, options);
     }
 
     public onDocumentRangeFormatting(
         filePath: string,
         offset: { start: number; end: number },
-        options: { tabSize: number; insertSpaces: boolean }
-    ) {
-        const content = this.fs.readFileSync(filePath, 'utf8');
-        const doc = TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, content);
-
-        return this.getDocumentFormatting(
-            doc,
-            offset,
-            lspFormattingOptionsToJsBeautifyOptions(options)
-        );
-    }
-
-    public getDocumentFormatting(
-        doc: TextDocument,
-        offset: { start: number; end: number },
-        options?: JSBeautifyFormatCSSOptions
+        options: FormattingOptions
     ): TextEdit[] {
-        const range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
-        const srcText = doc.getText(range);
-        const fsPath = URI.parse(doc.uri).fsPath;
+        const srcText = this.fs.readFileSync(filePath, 'utf8');
 
-        const ast = safeParse(srcText, { from: fsPath });
-        const changes = this.removeFormattingExceptions(ast);
-
-        const formattedText = format(ast.toString(), options);
-
-        const newText = this.restoreFormattingExceptions(
-            safeParse(formattedText, { from: fsPath }),
-            changes
-        ).toString();
-
-        return srcText === newText
-            ? []
-            : [
-                  {
-                      newText,
-                      range,
-                  },
-              ];
-    }
-
-    private removeFormattingExceptions(ast: Root) {
-        const changes: string[] = [];
-
-        // sanitizing @st-imports due to resulting broken formatting
-        ast.walkAtRules(topLevelDirectives.stImport.slice(1), (atRule) => {
-            changes.push(atRule.params);
-            atRule.params = 'temp';
-        });
-
-        return changes;
-    }
-
-    private restoreFormattingExceptions(ast: Root, changes: string[]) {
-        ast.walkAtRules(topLevelDirectives.stImport.slice(1), (atRule) => {
-            atRule.params = changes.shift()!;
-        });
-
-        return ast;
+        return format(srcText, offset, options);
     }
 
     public provideCompletionItemsFromSrc(src: string, pos: Position, fileName: string) {

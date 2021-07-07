@@ -9,6 +9,7 @@ import { reportDiagnostics } from './report-diagnostics';
 const { join, resolve } = nodeFs;
 
 const argv = yargs
+    .usage('$0 [options]')
     .option('rootDir', {
         type: 'string',
         description: 'root directory of project',

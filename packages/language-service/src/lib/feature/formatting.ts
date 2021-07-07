@@ -1,30 +1,11 @@
-import { css } from 'js-beautify';
-import type { FormattingOptions } from 'vscode-languageserver';
-
-export interface JSBeautifyFormatCSSOptions {
-    indent_size?: number;
-    indent_with_tabs?: boolean;
-
-    selector_separator_newline?: boolean;
-    newline_between_rules?: boolean;
-    space_around_selector_separator?: boolean;
-    space_around_combinator?: boolean;
-
-    disabled?: boolean;
-    eol?: string;
-    end_with_newline?: boolean;
-    indent_char?: string;
-    indent_level?: number;
-    preserve_newlines?: boolean;
-    max_preserve_newlines?: number;
-    wrap_line_length?: number;
-    indent_empty_lines?: boolean;
-    templating?: string[];
-}
+import { getDocumentFormatting } from '@stylable/code-formatter';
+import type { CSSBeautifyOptions } from 'js-beautify';
+import type { FormattingOptions, TextEdit } from 'vscode-languageserver';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 
 export function lspFormattingOptionsToJsBeautifyOptions(
     options: FormattingOptions
-): JSBeautifyFormatCSSOptions {
+): CSSBeautifyOptions {
     return {
         indent_size: options.tabSize,
         indent_with_tabs: !options.insertSpaces,
@@ -33,12 +14,26 @@ export function lspFormattingOptionsToJsBeautifyOptions(
     };
 }
 
-export function format(text: string, options?: JSBeautifyFormatCSSOptions): string {
-    const normalizedOptions: JSBeautifyFormatCSSOptions = {
-        ...options,
-        // hard-coded to prevent custom selector values starting with combinators from breaking
-        space_around_combinator: true,
-    };
+export function format(
+    srcText: string,
+    offset: { start: number; end: number },
+    options: FormattingOptions
+): TextEdit[] {
+    const doc = TextDocument.create('', 'stylable', 1, srcText);
+    const range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
 
-    return css(text, normalizedOptions);
+    const newText = getDocumentFormatting(
+        srcText,
+        offset,
+        lspFormattingOptionsToJsBeautifyOptions(options)
+    );
+
+    return srcText === newText
+        ? []
+        : [
+              {
+                  newText,
+                  range,
+              },
+          ];
 }
