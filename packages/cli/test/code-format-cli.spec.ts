@@ -4,7 +4,6 @@ import { join } from 'path';
 import { loadDirSync, populateDirectorySync, runFormatCliSync } from './test-kit/cli-test-kit';
 
 describe('Stylable Code Format Cli', function () {
-    this.timeout(25000);
     let tempDir: ITempDirectory;
 
     beforeEach(async () => {
