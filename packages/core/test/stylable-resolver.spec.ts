@@ -9,6 +9,7 @@ import {
     cachedProcessFile,
     MinimalFS,
     StylableMeta,
+    createDefaultResolver,
 } from '@stylable/core';
 
 function createResolveExtendsResults(
@@ -17,12 +18,13 @@ function createResolveExtendsResults(
     classNameToLookup: string,
     isElement = false
 ) {
+    const moduleResolver = createDefaultResolver(fs, {});
     const processFile = cachedProcessFile<StylableMeta>(
         (fullpath, content) => {
             return process(cssParse(content, { from: fullpath }));
         },
         fs,
-        (x) => x
+        (request, context = '/') => moduleResolver(context, request)
     );
 
     const resolver = new StylableResolver(processFile, (module: string) => module && '');

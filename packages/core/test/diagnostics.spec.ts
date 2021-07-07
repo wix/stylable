@@ -1345,5 +1345,113 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
         });
+
+        describe('@st-import', () => {
+            it('should error on unresolved file', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                |@st-import "$./missing.st.css$";|
+                            `,
+                        },
+                    },
+                };
+                expectWarningsFromTransform(config, [
+                    {
+                        message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
+                        file: '/main.st.css',
+                    }
+                ]);
+            });
+
+            it('should error on unresolved file from third party', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                |@st-import "$missing-package/index.st.css$";|
+                            `,
+                        },
+                    },
+                };
+                expectWarningsFromTransform(
+                    config,
+
+                    [
+                        {
+                            message: resolverWarnings.UNKNOWN_IMPORTED_FILE(
+                                'missing-package/index.st.css'
+                            ),
+                            file: '/main.st.css',
+                        },
+                    ]
+                );
+            });
+
+            it('should error on unresolved named symbol', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                |@st-import [$Missing$] from "./imported.st.css";|
+                            `,
+                        },
+                        '/imported.st.css': {
+                            content: `.root{}`,
+                        },
+                    },
+                };
+                expectWarningsFromTransform(
+                    config,
+
+                    [
+                        {
+                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                                'Missing',
+                                './imported.st.css'
+                            ),
+                            file: '/main.st.css',
+                        },
+                    ]
+                );
+            });
+
+            it('should error on unresolved named symbol with alias', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                |@st-import [$Missing$ as LocalMissing] from "./imported.st.css"|;
+                            `,
+                        },
+                        '/imported.st.css': {
+                            content: `.root{}`,
+                        },
+                    },
+                };
+                expectWarningsFromTransform(
+                    config,
+
+                    [
+                        {
+                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                                'Missing',
+                                './imported.st.css'
+                            ),
+                            file: '/main.st.css',
+                        },
+                    ]
+                );
+            });
+        });
     });
 });

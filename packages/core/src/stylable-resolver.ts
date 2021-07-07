@@ -350,27 +350,26 @@ export class StylableResolver {
                         (decl) => decl.type === 'decl' && decl.prop === valueMapping.from
                     );
 
-                if (fromDecl) {
-                    diagnostics.warn(
-                        fromDecl,
-                        resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.request),
-                        { word: importObj.request }
-                    );
-                }
+                diagnostics.error(
+                    fromDecl || importObj.rule,
+                    resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.request),
+                    { word: importObj.request }
+                );
             } else if (resolvedImport._kind === 'css') {
                 // warn about unknown named imported symbols
                 for (const name in importObj.named) {
                     const origName = importObj.named[name];
                     const resolvedSymbol = this.resolveImported(importObj, origName);
-                    const namedDecl =
-                        importObj.rule.nodes &&
-                        importObj.rule.nodes.find(
-                            (decl) => decl.type === 'decl' && decl.prop === valueMapping.named
-                        );
 
-                    if (!resolvedSymbol!.symbol && namedDecl) {
+                    if (resolvedSymbol === null || !resolvedSymbol.symbol) {
+                        const namedDecl =
+                            importObj.rule.nodes &&
+                            importObj.rule.nodes.find(
+                                (decl) => decl.type === 'decl' && decl.prop === valueMapping.named
+                            );
+
                         diagnostics.warn(
-                            namedDecl,
+                            namedDecl || importObj.rule,
                             resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
                             { word: origName }
                         );
