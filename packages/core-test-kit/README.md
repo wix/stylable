@@ -21,32 +21,71 @@ A collection of tools aimed at testing Stylable diagnostics messages (warnings a
 
 Used for easily setting up Stylable instances (processor/transformer) and its infrastructure.
 
-Exposes `expectTransformOutput` utility for creating transformation tests. These are the most common core tests and the recommended way to test the core transform functionality.
+`generateInfra` - create Stylable basic in memory infrastructure (resolver, requireModule, fileProcessor)
 
-Currently only supports testing target selector but when needed the functionality can be expended here to support: 
+`generateStylableResult` - genetare transform result from in memory configuration
 
-* JavaScript exports output
-* Declaration values
-* Mixins output  
+`generateStylableRoot` - helper over `generateStylableResult` that returns the outputAst
 
+`generateStylableExports` - helper over `generateStylableResult` that returns the exports mapping
+
+### testInlineExpects
+
+Exposes `testInlineExpects` for Test transformed stylesheets with inline expectation comments. These are the most common core tests and the recommended way to test the core transform functionality. 
+
+#### `Supported checks:` 
+
+Rule checking (place just before rule) support multi line declarations and multiple @checks
+
+##### Terminilogy
+LABEL <string> - label for the test expectation 
+OFFEST <number> - offest for the tested rule after the @check   
+SELECTOR <string> - the output selector
+DECL <string> - name of the declaration
+VALUE <string> - value of the declaration 
+
+full options:
+```css
+/* @check(LABEL)[OFFEST] SELECTOR {DECL: VALUE} */
+```
+
+basic:
+```css 
+/* @check SELECTOR */
+```
+
+with declarations (will check full match and order):
+```css
+/* @check SELECTOR {DECL1: VALUE1; DECL2: VALUE2} */
+```
+
+target generated rules (mixin):
+```css
+/* @check[OFFEST] SELECTOR */
+```
+
+support atrule params (anything between the @atrule and body or semicolon):
+```css
+/* @check screen and (min-width: 900px) */
+```
 #### Example 
-Using the `/* @expect selector */` comment to test the root class selector target 
+Using the `/* @check SELECTOR */` comment to test the root class selector target 
 
-```js
-expectTransformOutput(
-    {
+```ts
+it('...', ()=>{
+    const root = generateStylableRoot({
         entry: `/style.st.css`,
         files: {
             '/style.st.css': {
                 namespace: 'ns',
                 content: `
-                /* @expect .ns__root */
+                /* @check .ns__root */
                 .root {}
             `
         },
-    },
-    1
-);
+    });
+    testInlineExpects(root, 1);
+})
 ```
 
 ### Match rules
