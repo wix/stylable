@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { createStylableInstance, generateInfra } from '@stylable/core-test-kit';
+import { generateInfra, generateStylableResult } from '@stylable/core-test-kit';
 import {
     createMinimalFS,
     process,
@@ -453,20 +453,9 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve 4th party according to context', () => {
-        const stylable = createStylableInstance({
+        const { meta } = generateStylableResult({
+            entry: '/node_modules/a/index.st.css',
             files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "a/index.st.css";
-                            -st-default: A;
-                        }
-                        .root {
-                            -st-extends: A;
-                        }
-                    `,
-                },
                 '/node_modules/a/index.st.css': {
                     namespace: 'A',
                     content: `
@@ -485,8 +474,6 @@ describe('stylable-resolver', () => {
                 },
             },
         });
-
-        const { meta } = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
 
         const rule = meta.outputAst!.nodes[0] as postcss.Rule;
         expect(rule.selector).to.equal('.A__root');
