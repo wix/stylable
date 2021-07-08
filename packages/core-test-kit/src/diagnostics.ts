@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import deindent from 'deindent';
 import type { Position } from 'postcss';
 import { Diagnostics, process, safeParse, StylableMeta, StylableResults } from '@stylable/core';
-import { Config, generateFromMock } from './generate-test-util';
+import { Config, generateStylableResult } from './generate-test-util';
 
 export interface Diagnostic {
     severity?: 'warning' | 'error';
@@ -93,7 +93,7 @@ export function expectWarningsFromTransform(
         locations[path] = source;
     }
     const diagnostics = new Diagnostics();
-    const result = generateFromMock(config, diagnostics);
+    const result = generateStylableResult(config, diagnostics);
     const warningMessages = diagnostics.reports.map((d) => d.message);
 
     if (expectedWarnings.length === 0 && diagnostics.reports.length !== 0) {
