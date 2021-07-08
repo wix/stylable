@@ -1098,10 +1098,10 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
-"@types/find-config@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/find-config/-/find-config-1.0.0.tgz#6e211985148a166cdaf31f9ad6b6bacdae198c4e"
-  integrity sha512-wyNkArpclTc8XHMiAApJ3z3Ix3ERq8Qh6TrTcwIwAEwN4AgNbdhmf2jb+yIncsQwKjIV9S5qAkaiYxne7JpqKQ==
+"@types/find-config@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/find-config/-/find-config-1.0.1.tgz#b0e72f7b6375b6747e0884f7367a5cd64c796403"
+  integrity sha512-H4DFIQMwxCKRgVWMSqALg6aowTOgZi5D4pSPBBuOQFJLRwfNZaByhC9+s870CZgTRJoyVg5J+iesdF5uvnJ0mA==
 
 "@types/flat@^5.0.2":
   version "5.0.2"
