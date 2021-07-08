@@ -1,7 +1,7 @@
 import { getDocumentFormatting } from '@stylable/code-formatter';
 import type { CSSBeautifyOptions } from 'js-beautify';
 import type { FormattingOptions, TextEdit } from 'vscode-languageserver';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+import type { TextDocument } from 'vscode-languageserver-textdocument';
 
 export function lspFormattingOptionsToJsBeautifyOptions(
     options: FormattingOptions
@@ -15,18 +15,14 @@ export function lspFormattingOptionsToJsBeautifyOptions(
 }
 
 export function format(
-    srcText: string,
+    doc: TextDocument,
     offset: { start: number; end: number },
-    options: FormattingOptions
+    options: CSSBeautifyOptions
 ): TextEdit[] {
-    const doc = TextDocument.create('', 'stylable', 1, srcText);
+    const srcText = doc.getText();
     const range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
 
-    const newText = getDocumentFormatting(
-        srcText,
-        offset,
-        lspFormattingOptionsToJsBeautifyOptions(options)
-    );
+    const newText = getDocumentFormatting(srcText, offset, options);
 
     return srcText === newText
         ? []

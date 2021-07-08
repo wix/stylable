@@ -13,7 +13,7 @@ import {
 import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument';
 import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
-import { format } from '@stylable/language-service';
+import { format, lspFormattingOptionsToJsBeautifyOptions } from '@stylable/language-service';
 import { ProviderPosition } from '@stylable/language-service/dist/lib/completion-providers';
 import { createMeta, ProviderLocation } from '@stylable/language-service/dist/lib/provider';
 import { pathFromPosition } from '@stylable/language-service/dist/lib/utils/postcss-ast-utils';
@@ -81,7 +81,11 @@ export function getFormattingEdits(
         tabSize: 4,
     }
 ): TextEdit[] {
-    return format(content, offsetRange || { start: 0, end: content.length }, options);
+    return format(
+        TextDocument.create('test.st.css', 'stylable', 1, content),
+        offsetRange || { start: 0, end: content.length },
+        lspFormattingOptionsToJsBeautifyOptions(options)
+    );
 }
 
 export function getDocColorPresentation(
