@@ -38,7 +38,7 @@ setFieldForDeprecation(Declaration.prototype, `stylable`, {
 /**
  * extended types
  */
-
+/**@deprecated*/
 export interface SRule extends Rule {
     selectorAst: SelectorAstNode;
     isSimpleSelector: boolean;
@@ -46,11 +46,11 @@ export interface SRule extends Rule {
     mixins?: RefedMixin[];
     stScopeSelector?: string;
 }
-
+/**@deprecated*/
 export interface DeclStylableProps {
     sourceValue: string;
 }
-
+/**@deprecated*/
 export interface SDecl extends Declaration {
     stylable: DeclStylableProps;
 }

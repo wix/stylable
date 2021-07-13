@@ -1,5 +1,6 @@
 import cssSelectorTokenizer from 'css-selector-tokenizer';
 
+/**@deprecated*/
 export interface SelectorAstNode {
     type: string;
     name: string;
@@ -10,6 +11,7 @@ export interface SelectorAstNode {
     operator?: string;
 }
 
+/**@deprecated*/
 export interface PseudoSelectorAstNode extends SelectorAstNode {
     type: 'pseudo-class';
     content: string;
@@ -57,6 +59,7 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
     });
 }
 
+/**@deprecated*/
 export interface SelectorChunk {
     type: string;
     operator?: string;
@@ -85,6 +88,7 @@ export function separateChunks(selectorNode: SelectorAstNode) {
     return selectors;
 }
 
+/**@deprecated*/
 export interface SelectorChunk2 {
     type: string;
     operator?: string;
@@ -142,6 +146,7 @@ export function isNested(parentChain: SelectorAstNode[]) {
     return false;
 }
 
+/**@deprecated*/
 export type Visitor = (
     node: SelectorAstNode,
     index: number,
