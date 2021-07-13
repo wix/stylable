@@ -59,6 +59,7 @@ describe('stylable-resolver', () => {
                 },
             },
         });
+
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'myClass');
         expect(results[0].symbol.name).to.equal('myClass');
         expect(results[1].symbol.name).to.equal('root');
