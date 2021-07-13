@@ -158,7 +158,7 @@ describe('stylable-forcestates-plugin', () => {
         );
     });
 
-    it('should mark an class state woth param as forced using a data-attribute selector', () => {
+    it('should mark an class state with param as forced using a data-attribute selector', () => {
         const res = generateStylableResult({
             entry: `/entry.st.css`,
             files: {

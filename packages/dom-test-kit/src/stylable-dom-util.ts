@@ -1,10 +1,12 @@
+import { isValidClassName, pseudoStates } from '@stylable/core';
 import {
-    isValidClassName,
-    parseSelector,
-    pseudoStates,
-    stringifySelector,
-    traverseNode,
-} from '@stylable/core';
+    parseCssSelector,
+    walk,
+    stringifySelectorAst,
+    SelectorNode,
+    Class,
+    Attribute,
+} from '@tokey/css-selector-parser';
 import type { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
 export interface PartialElement {
@@ -18,6 +20,19 @@ export type StylesheetHost = {
     classes: RuntimeStylesheet['classes'];
     namespace: RuntimeStylesheet['namespace'];
 };
+
+function convertToClass(node: SelectorNode) {
+    const castNode = node as Class;
+    castNode.type = `class`;
+    delete castNode.nodes;
+    castNode.dotComments = [];
+    return castNode;
+}
+function convertToAttribute(node: SelectorNode): Attribute {
+    const castNode = node as Attribute;
+    castNode.type = `attribute`;
+    return castNode;
+}
 
 export class StylableDOMUtil {
     constructor(private stylesheet: StylesheetHost, private root?: Element) {}
@@ -36,42 +51,41 @@ export class StylableDOMUtil {
         if (!selector) {
             return this.scopeSelector('.root');
         }
-        const ast = parseSelector(selector);
-        traverseNode(ast, (node) => {
+        const ast = parseCssSelector(selector);
+        walk(ast, (node) => {
             if (node.type === 'class') {
-                const className: string = this.stylesheet.classes[node.name] || node.name;
-                node.name = className.includes(' ') ? className.split(' ')[0] : className;
-            } else if (node.type === 'pseudo-class') {
-                const param = node.content;
-                if (!param) {
-                    node.type = 'class';
-                    node.name = pseudoStates.createBooleanStateClassName(node.name, namespace);
+                const className: string = this.stylesheet.classes[node.value] || node.value;
+                node.value = className.includes(' ') ? className.split(' ')[0] : className;
+            } else if (node.type === 'pseudo_class') {
+                const args = node.nodes;
+                if (!args) {
+                    convertToClass(node).value = pseudoStates.createBooleanStateClassName(
+                        node.value,
+                        namespace
+                    );
                 } else {
-                    if (isValidClassName(param)) {
-                        node.type = 'class';
-                        node.name = pseudoStates.createStateWithParamClassName(
-                            node.name,
+                    const nestedContent = stringifySelectorAst(args);
+                    if (isValidClassName(nestedContent)) {
+                        convertToClass(node).value = pseudoStates.createStateWithParamClassName(
+                            node.value,
                             namespace,
-                            param
+                            nestedContent
                         );
                     } else {
-                        node.type = 'attribute';
-                        node.content = pseudoStates.createAttributeState(
-                            node.name,
+                        convertToAttribute(node).value = pseudoStates.createAttributeState(
+                            node.value,
                             namespace,
-                            param
+                            nestedContent
                         );
                     }
                 }
-            } else if (
-                node.type === 'pseudo-element' ||
-                node.type === 'element' ||
-                node.type === 'nested-pseudo-class'
-            ) {
-                throw new Error(`selector with ${node.type} is not supported yet.`);
+            } else if (node.type === 'pseudo_element' || node.type === 'element') {
+                throw new Error(
+                    `selector with ${node.type.replace(/_/, `-`)} is not supported yet.`
+                );
             }
         });
-        return stringifySelector(ast);
+        return stringifySelectorAst(ast);
     }
 
     public hasStyleState(

@@ -1,14 +1,16 @@
 import {
     IStylableOptimizer,
     OptimizeConfig,
-    parseSelector,
-    SelectorAstNode,
-    stringifySelector,
     StylableExports,
     StylableResults,
-    traverseNode,
     pseudoStates,
 } from '@stylable/core';
+import {
+    parseCssSelector,
+    stringifySelectorAst,
+    SelectorList,
+    walk,
+} from '@tokey/css-selector-parser';
 import csso from 'csso';
 import postcss, { Declaration, Root, Rule, Node, Comment, Container } from 'postcss';
 import { NameMapper } from './name-mapper';
@@ -88,18 +90,18 @@ export class StylableOptimizer implements IStylableOptimizer {
         classNamespaceOptimizations: boolean,
         delimiter: string
     ) {
-        const ast = parseSelector(selector);
+        const ast = parseCssSelector(selector);
 
         const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
-        traverseNode(ast, (node) => {
-            if (node.type === 'class' && !globals[node.name]) {
-                const possibleStateNamespace = node.name.match(stateRegexp);
+        walk(ast, (node) => {
+            if (node.type === 'class' && !globals[node.value]) {
+                const possibleStateNamespace = node.value.match(stateRegexp);
                 let isState;
                 if (possibleStateNamespace) {
                     if (possibleStateNamespace[1] in usageMapping) {
                         isState = true;
                         if (shortNamespaces) {
-                            node.name = node.name.replace(
+                            node.value = node.value.replace(
                                 stateRegexp,
                                 `${this.getNamespace(
                                     possibleStateNamespace[1]
@@ -111,15 +113,15 @@ export class StylableOptimizer implements IStylableOptimizer {
 
                 if (!isState) {
                     if (classNamespaceOptimizations) {
-                        node.name = this.getClassName(node.name);
+                        node.value = this.getClassName(node.value);
                     } else if (shortNamespaces) {
-                        const namespaceMatch = node.name.match(namespaceRegexp);
+                        const namespaceMatch = node.value.match(namespaceRegexp);
                         if (!namespaceMatch) {
                             throw new Error(
-                                `Stylable class dose not have proper namespace ${node.name}`
+                                `Stylable class dose not have proper namespace ${node.value}`
                             );
                         }
-                        node.name = node.name.replace(
+                        node.value = node.value.replace(
                             namespaceRegexp,
                             `${this.getNamespace(namespaceMatch[1])}${delimiter}`
                         );
@@ -127,7 +129,7 @@ export class StylableOptimizer implements IStylableOptimizer {
                 }
             }
         });
-        return stringifySelector(ast);
+        return stringifySelectorAst(ast);
     }
 
     public optimizeAstAndExports(
@@ -222,7 +224,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         const matchNamespace = new RegExp(`(.+)${delimiter}(.+)`);
         outputAst.walkRules((rule) => {
             const outputSelectors = rule.selectors.filter((selector) => {
-                const selectorAst = parseSelector(selector);
+                const selectorAst = parseCssSelector(selector);
                 return !this.isContainsUnusedParts(selectorAst, usageMapping, matchNamespace);
             });
             if (outputSelectors.length) {
@@ -238,27 +240,33 @@ export class StylableOptimizer implements IStylableOptimizer {
     }
 
     private isContainsUnusedParts(
-        selectorAst: SelectorAstNode,
+        selectorAst: SelectorList,
         usageMapping: Record<string, boolean>,
         matchNamespace: RegExp
     ) {
         // TODO: !!-!-!! last working point
         let isContainsUnusedParts = false;
-        traverseNode(selectorAst, (node) => {
+        walk(selectorAst, (node) => {
             if (isContainsUnusedParts) {
-                return false;
+                return walk.stopAll;
             }
             if (node.type === 'class') {
-                const parts = matchNamespace.exec(node.name);
+                const parts = matchNamespace.exec(node.value);
                 if (parts) {
                     if (usageMapping[parts[1]] === false) {
                         isContainsUnusedParts = true;
                     }
                 }
-            } else if (node.type === 'nested-pseudo-element') {
-                return false;
+            } else if (node.type === 'pseudo_element' && !!node.nodes) {
+                /* ToDo: (barak can you take a look) - this used to match `nested-pseudo-element`
+                *  in the old parser (css-selector-tokenizer) and there is no such definition,
+                *  so it never matched anything. 
+                *  canceling this behavior as the new parser can parse functional pseudo elements 
+                *  and when enabled it misses unused selectors after: `::part(name) Unused`.
+                */
+                // return walk.stopAll;
             }
-            return undefined;
+            return;
         });
         return isContainsUnusedParts;
     }
