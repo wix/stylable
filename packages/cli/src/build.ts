@@ -166,7 +166,7 @@ export async function build({
                 }
             }
 
-            // add files that contains error for retry
+            // add files that contains errors for retry
             for (const filePath of diagnosticsMessages.keys()) {
                 affectedFiles.add(filePath);
             }
