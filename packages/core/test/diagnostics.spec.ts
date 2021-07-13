@@ -93,6 +93,59 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
         });
+        describe(`non spec functional selectors`, () => {
+            it(`should return error for element`, () => {
+                expectWarnings(`|.root $div()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`div`, `element`),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+            it(`should not return an error for value() under pseudo-class`, () => {
+                expectWarnings(`|.root :cls($value(abc)$)| {}`, []);
+            });
+            it(`should return error for class`, () => {
+                expectWarnings(`|.root $.abc()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`.abc`, `class`),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+            it(`should return error for id`, () => {
+                expectWarnings(`|.root $#abc()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+            it(`should return error for attribute`, () => {
+                expectWarnings(`|.root $[attr]()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(
+                            `[attr]`,
+                            `attribute`
+                        ),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+            it(`should return error for nesting`, () => {
+                expectWarnings(`|.root $&()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+        });
         xdescribe('ruleset', () => {
             it('should return warning for unterminated ruleset', () => {
                 expectWarnings(

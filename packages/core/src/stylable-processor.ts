@@ -33,6 +33,7 @@ import {
     isCompRoot,
     scopeNestedSelector,
     parseSelectorWithCache,
+    stringifySelector,
 } from './helpers/selector';
 import type { DeepReadonlyObject } from './helpers/readonly';
 import { isChildOfAtRule } from './helpers/rule';
@@ -160,6 +161,9 @@ export const processorWarnings = {
     },
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
+    },
+    INVALID_FUNCTIONAL_SELECTOR(selector: string, type: string) {
+        return `"${selector}" ${type} is not functional`;
     },
 };
 
@@ -436,7 +440,15 @@ export class StylableProcessor {
                 }
             } else if (node.type === 'class') {
                 this.addClassSymbolOnce(node.value, rule);
-
+                if (node.nodes) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `class`),
+                        {
+                            word: stringifySelector(node as SelectorNode),
+                        }
+                    );
+                }
                 if (this.meta.classes[node.value]) {
                     if (!this.meta.classes[node.value].alias) {
                         locallyScoped = true;
@@ -456,7 +468,25 @@ export class StylableProcessor {
                 }
             } else if (node.type === 'element') {
                 this.addElementSymbolOnce(node.value, rule);
-
+                /**
+                 * intent to deprecate: currently `value(param)` can be used
+                 * as a custom selector state value. Unless there is a reasonable 
+                 * use case, this should be removed.
+                 */
+                if (
+                    node.nodes &&
+                    (parents.length < 2 ||
+                        parents[parents.length - 2].type !== `pseudo_class` ||
+                        node.value !== `value`)
+                ) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `element`),
+                        {
+                            word: stringifySelector(node as SelectorNode),
+                        }
+                    );
+                }
                 if (locallyScoped === false && !inStScope) {
                     if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
                         this.diagnostics.warn(
@@ -469,6 +499,39 @@ export class StylableProcessor {
                     } else {
                         locallyScoped = true;
                     }
+                }
+            } else if (node.type === `id`) {
+                if (node.nodes) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
+                        {
+                            word: stringifySelector(node as SelectorNode),
+                        }
+                    );
+                }
+            } else if (node.type === `attribute`) {
+                if (node.nodes) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(
+                            `[${node.value}]`,
+                            `attribute`
+                        ),
+                        {
+                            word: stringifySelector(node as SelectorNode),
+                        }
+                    );
+                }
+            } else if (node.type === `nesting`) {
+                if (node.nodes) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
+                        {
+                            word: stringifySelector(node as SelectorNode),
+                        }
+                    );
                 }
             }
             return;
