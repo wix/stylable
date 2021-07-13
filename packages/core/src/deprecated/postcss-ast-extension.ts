@@ -22,7 +22,6 @@ setFieldForDeprecation(Rule.prototype, `selectorType`, {
 setFieldForDeprecation(Rule.prototype, `mixins`, {
     objectType: `SRule`,
     valueOnThis: true,
-    pleaseUse: `getStylableAstData(rule) instead`,
 });
 setFieldForDeprecation(Rule.prototype, `stScopeSelector`, {
     objectType: `SRule`,

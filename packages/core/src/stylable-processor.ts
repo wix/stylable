@@ -46,6 +46,7 @@ import {
     valueMapping,
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
+import { ignoreDeprecationWarn } from './helpers/deprecation';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -470,7 +471,7 @@ export class StylableProcessor {
                 this.addElementSymbolOnce(node.value, rule);
                 /**
                  * intent to deprecate: currently `value(param)` can be used
-                 * as a custom selector state value. Unless there is a reasonable 
+                 * as a custom selector state value. Unless there is a reasonable
                  * use case, this should be removed.
                  */
                 if (
@@ -833,7 +834,7 @@ export class StylableProcessor {
                         ref: mixinRefSymbol,
                     };
                     mixins.push(refedMixin);
-                    this.meta.mixins.push(refedMixin);
+                    ignoreDeprecationWarn(() => this.meta.mixins).push(refedMixin);
                 } else {
                     this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), {
                         word: mixin.type,
@@ -841,9 +842,10 @@ export class StylableProcessor {
                 }
             });
 
-            if (rule.mixins) {
-                const partials = rule.mixins.filter((r) => r.mixin.partial);
-                const nonPartials = rule.mixins.filter((r) => !r.mixin.partial);
+            const previousMixins = ignoreDeprecationWarn(() => rule.mixins);
+            if (previousMixins) {
+                const partials = previousMixins.filter((r) => r.mixin.partial);
+                const nonPartials = previousMixins.filter((r) => !r.mixin.partial);
                 const isInPartial = decl.prop === valueMapping.partialMixin;
                 if (
                     (partials.length && decl.prop === valueMapping.partialMixin) ||

@@ -69,7 +69,7 @@ export function warnOnce(warning: string) {
  * @param action to be called with no deprecation warnings
  * @returns return value of action
  */
-export function ignoreWarn<T extends () => any>(action: T): ReturnType<T> {
+export function ignoreDeprecationWarn<T extends () => any>(action: T): ReturnType<T> {
     isWarnOn = false;
     try {
         return action();

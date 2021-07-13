@@ -2,6 +2,7 @@ import type * as postcss from 'postcss';
 import type { Diagnostics } from './diagnostics';
 import { getSourcePath } from './stylable-utils';
 import type { ChunkedSelector, SelectorNode } from './helpers/selector';
+import { setFieldForDeprecation } from './helpers/deprecation';
 import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
 export const RESERVED_ROOT_NAME = 'root';
 
@@ -58,6 +59,7 @@ export class StylableMeta {
         this.urls = [];
         this.scopes = [];
         this.simpleSelectors = {};
+        setFieldForDeprecation(this, `mixins`, { objectType: `stylableMeta` });
         this.mixins = [];
         this.transformDiagnostics = null;
         this.transformedScopes = null;

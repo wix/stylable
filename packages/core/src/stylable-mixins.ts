@@ -12,6 +12,7 @@ import type { StylableTransformer } from './stylable-transformer';
 import { createSubsetAst } from './helpers/rule';
 import { isValidDeclaration, mergeRules } from './stylable-utils';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
+import { ignoreDeprecationWarn } from './helpers/deprecation';
 
 export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) {
@@ -36,13 +37,14 @@ export function appendMixins(
     cssVarsMapping: Record<string, string>,
     path: string[] = []
 ) {
-    if (!rule.mixins || rule.mixins.length === 0) {
+    const mixins = ignoreDeprecationWarn(() => rule.mixins);
+    if (!mixins || mixins.length === 0) {
         return;
     }
-    rule.mixins.forEach((mix) => {
+    mixins.forEach((mix) => {
         appendMixin(mix, transformer, rule, meta, variableOverride, cssVarsMapping, path);
     });
-    rule.mixins.length = 0;
+    mixins.length = 0;
     rule.walkDecls(mixinDeclRegExp, (node) => {
         node.remove();
     });
