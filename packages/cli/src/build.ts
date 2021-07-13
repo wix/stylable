@@ -133,7 +133,7 @@ export async function build({
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
-                // watched file changed invalidate cache
+                // watched file changed, invalidate cache
                 stylable.initCache();
                 // handle deleted files by removeing thier generated content
                 if (deletedFiles.size) {
