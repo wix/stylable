@@ -121,7 +121,7 @@ export async function build({
             if (!indexFile && outputSources && filePath.startsWith(fullOutDir)) {
                 return false;
             }
-            // assets changes that tracked by stylable file should retrigger processFiles
+            // assets used in stylable files should re-trigger "processFiles" when changed
             if (assets.has(filePath)) {
                 return true;
             }
