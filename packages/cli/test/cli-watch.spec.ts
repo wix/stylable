@@ -121,6 +121,44 @@ describe('Stylable Cli Watch', () => {
         expect(files['dist/style.css']).to.include('color:green');
     });
 
+    it('should handle assets changes', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{ background: url('./asset.svg'); }`,
+            'asset.svg': `<svg height="100" width="100">
+                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+            </svg> 
+            `,
+        });
+
+        const NEW_SIZE = 150;
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
+            steps: [
+                {
+                    msg: messages.START_WATCHING,
+                    action() {
+                        writeFileSync(
+                            join(tempDir.path, 'asset.svg'),
+                            `<svg height="100" width="100">
+                                <circle cx="${NEW_SIZE}" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+                             </svg> 
+                            `
+                        );
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files['dist/style.css']).to.include('background:');
+        expect(files['dist/asset.svg']).to.include(`<circle cx="${NEW_SIZE}"`);
+    });
+
     it('should handle deleted files', async () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,

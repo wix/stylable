@@ -121,6 +121,11 @@ export async function build({
             if (!indexFile && outputSources && filePath.startsWith(fullOutDir)) {
                 return false;
             }
+            // assets changes that tracked by stylable file should retrigger processFiles
+            if (assets.has(filePath)) {
+                return true;
+            }
+            // stylable files
             return filePath.endsWith(extension);
         },
         onError(error) {
@@ -128,9 +133,15 @@ export async function build({
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
+                // watched file changed invalidate cache
                 stylable.initCache();
+                // handle deleted files by removeing thier generated content
                 if (deletedFiles.size) {
                     for (const deletedFile of deletedFiles) {
+                        if (assets.has(deletedFile)) {
+                            assets.delete(deletedFile);
+                            continue;
+                        }
                         if (!sourceFiles.has(deletedFile)) {
                             continue;
                         }
@@ -155,15 +166,27 @@ export async function build({
                 }
             }
 
+            // add files that contains error for retry
             for (const filePath of diagnosticsMessages.keys()) {
                 affectedFiles.add(filePath);
             }
             diagnosticsMessages.clear();
 
+            // remove assets from the affected files (handled in buildAggregatedEntities)
+            for (const filePath of affectedFiles) {
+                if (assets.has(filePath)) {
+                    affectedFiles.delete(filePath);
+                }
+            }
+
+            // rebuild
             buildFiles(affectedFiles);
+            // rewaire invalidations
             updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
+            // rebuild assets from agregated content: index files and assets
             buildAggregatedEntities();
 
+            // report build diagnostics
             if (diagnostics && diagnosticsMessages.size) {
                 reportDiagnostics(diagnosticsMessages);
             }
