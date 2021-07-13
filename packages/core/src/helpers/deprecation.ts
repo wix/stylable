@@ -56,9 +56,24 @@ export function wrapFunctionForDeprecation<FUNC extends (this: any, ...args: any
  * console warn once per message
  */
 const warnsFlag: Record<string, boolean> = {};
+let isWarnOn = true;
 export function warnOnce(warning: string) {
-    if (!warnsFlag[warning]) {
+    if (isWarnOn && !warnsFlag[warning]) {
         warnsFlag[warning] = true;
         console.warn(warning);
+    }
+}
+
+/**
+ * prevent deprecation warn calls during action
+ * @param action to be called with no deprecation warnings
+ * @returns return value of action
+ */
+export function ignoreWarn<T extends () => any>(action: T): ReturnType<T> {
+    isWarnOn = false;
+    try {
+        return action();
+    } finally {
+        isWarnOn = true;
     }
 }

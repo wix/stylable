@@ -7,7 +7,6 @@ import { Rule, Declaration } from 'postcss';
  * mark extended fields as deprecated.
  * `valueOnThis` is used because postcss.clone copies own properties.
  */
-const pleaseUse = `getStylableAstData(rule) instead`;
 setFieldForDeprecation(Rule.prototype, `selectorAst`, {
     objectType: `SRule`,
     valueOnThis: true,
@@ -23,12 +22,12 @@ setFieldForDeprecation(Rule.prototype, `selectorType`, {
 setFieldForDeprecation(Rule.prototype, `mixins`, {
     objectType: `SRule`,
     valueOnThis: true,
-    pleaseUse,
+    pleaseUse: `getStylableAstData(rule) instead`,
 });
 setFieldForDeprecation(Rule.prototype, `stScopeSelector`, {
     objectType: `SRule`,
     valueOnThis: true,
-    pleaseUse,
+    pleaseUse: `getRuleScopeSelector(rule)`,
 });
 
 setFieldForDeprecation(Declaration.prototype, `stylable`, {

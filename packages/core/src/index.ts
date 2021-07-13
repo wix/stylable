@@ -23,6 +23,7 @@ export * from './visit-meta-css-dependencies';
 export * from './murmurhash';
 export * from './timed-cache';
 export { getStylableAstData, setStylableAstData } from './helpers/stylable-ast-data';
+export { getRuleScopeSelector } from './helpers/rule';
 
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };

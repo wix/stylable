@@ -13,6 +13,8 @@ import type { DeepReadonlyObject } from './readonly';
 import { valueMapping } from '../stylable-value-parsers';
 import * as postcss from 'postcss';
 import cloneDeep from 'lodash.clonedeep';
+import { ignoreWarn } from './deprecation';
+import type { SRule } from '../deprecated/postcss-ast-extension';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return (
@@ -184,4 +186,8 @@ export function findRule(
         }
     });
     return found;
+}
+
+export function getRuleScopeSelector(rule: postcss.Rule) {
+    return ignoreWarn(() => (rule as SRule).stScopeSelector);
 }

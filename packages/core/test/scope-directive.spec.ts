@@ -7,7 +7,7 @@ import {
     processSource,
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
-import { processorWarnings, SRule, transformerWarnings } from '@stylable/core';
+import { processorWarnings, SRule, transformerWarnings, getRuleScopeSelector } from '@stylable/core';
 
 use(flatMatch);
 
@@ -44,8 +44,8 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
             const rule = meta.ast.nodes[0] as SRule;
-            expect(rule.stScopeSelector).to.equal('.root');
-            expect(rule.clone().stScopeSelector, 'clone rules preserve stScope').to.equal('.root');
+            expect(getRuleScopeSelector(rule)).to.equal('.root');
+            expect(getRuleScopeSelector(rule.clone()), 'clone rules preserve stScope').to.equal('.root');
         });
 
         it('should parse "@st-scope" directives with a new class', () => {

@@ -28,7 +28,7 @@ import {
     Chunk,
     convertToClass,
 } from './helpers/selector';
-import { createWarningRule, isChildOfAtRule, findRule } from './helpers/rule';
+import { createWarningRule, isChildOfAtRule, findRule, getRuleScopeSelector } from './helpers/rule';
 import type { DeepReadonlyObject } from './helpers/readonly';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
@@ -659,8 +659,8 @@ export class StylableTransformer {
         }
     }
     private isDuplicateStScopeDiagnostic(context: ScopeContext) {
-        const transformedScope =
-            context.originMeta.transformedScopes?.[(context.rule as any).stScopeSelector];
+        const stScopeSelector = getRuleScopeSelector(context.rule);
+        const transformedScope = context.originMeta.transformedScopes?.[stScopeSelector || ``];
         if (transformedScope && context.chunkedSelector && context.chunk) {
             const currentChunkSelector = stringifySelector({
                 type: `selector`,
