@@ -141,8 +141,7 @@ export async function build({
                         if (assets.has(deletedFile)) {
                             assets.delete(deletedFile);
                             continue;
-                        }
-                        if (!sourceFiles.has(deletedFile)) {
+                        } else if (!sourceFiles.has(deletedFile)) {
                             continue;
                         }
                         diagnosticsMessages.delete(deletedFile);
