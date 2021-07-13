@@ -181,7 +181,7 @@ export async function build({
 
             // rebuild
             buildFiles(affectedFiles);
-            // rewaire invalidations
+            // rewire invalidations
             updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
             // rebuild assets from agregated content: index files and assets
             buildAggregatedEntities();
