@@ -15,61 +15,80 @@ An assortment of `Chai` matchers used by Stylable.
 
 ### Diagnostics tooling
 
-A collection of tools aimed at testing Stylable diagnostics messages (warnings and errors).
+A collection of tools used for testing Stylable diagnostics messages (warnings and errors).
+
+- `expectWarnings` - processes a Stylable input and checks for diagnostics during processing
+- `expectWarningsFromTransform` - checks for diagnostics after a full transformation
+- `shouldReportNoDiagnostics` - helper to check no diagnostics were reported
 
 ### Testing infrastructure
 
-Used for easily setting up Stylable instances (processor/transformer) and its infrastructure.
+Used for setting up Stylable instances (`processor`/`transformer`) and their infrastructure:
 
-`generateInfra` - create Stylable basic in memory infrastructure (resolver, requireModule, fileProcessor)
+- `generateInfra` - create Stylable basic in memory infrastructure (`resolver`, `requireModule`, `fileProcessor`)
+- `generateStylableResult` - genetare transformation results from in memory configuration
+- `generateStylableRoot` - helper over `generateStylableResult` that returns the `outputAst`
+- `generateStylableExports` - helper over `generateStylableResult` that returns the `exports` mapping
 
-`generateStylableResult` - genetare transform result from in memory configuration
+### `testInlineExpects` utility
 
-`generateStylableRoot` - helper over `generateStylableResult` that returns the outputAst
+Exposes `testInlineExpects` for testing transformed stylesheets that include inline expectation comments. These are the most common type of core tests and the recommended way of testing the core functionality.
 
-`generateStylableExports` - helper over `generateStylableResult` that returns the exports mapping
+#### Supported checks:
 
-### testInlineExpects
-
-Exposes `testInlineExpects` for Test transformed stylesheets with inline expectation comments. These are the most common core tests and the recommended way to test the core transform functionality. 
-
-#### `Supported checks:` 
-
-Rule checking (place just before rule) support multi line declarations and multiple @checks
+Rule checking (place just before rule) supporting multi-line declarations and multiple `@checks` statements
 
 ##### Terminilogy
-LABEL <string> - label for the test expectation 
-OFFEST <number> - offest for the tested rule after the @check   
-SELECTOR <string> - the output selector
-DECL <string> - name of the declaration
-VALUE <string> - value of the declaration 
+- `LABEL: <string>` - label for the test expectation 
+- `OFFEST: <number>` - offest for the tested rule after the `@check`   
+- `SELECTOR: <string>` - output selector
+- `DECL: <string>` - declaration name
+- `VALUE: <string>` - declaration value 
 
-full options:
+Full options:
 ```css
 /* @check(LABEL)[OFFEST] SELECTOR {DECL: VALUE} */
 ```
 
-basic:
+Basic - `@check SELECTOR`
 ```css 
-/* @check SELECTOR */
+/* @check header::before */
+header::before {}
 ```
 
-with declarations (will check full match and order):
+With declarations - ` @check SELECTOR {DECL1: VALUE1; DECL2: VALUE2;}`
+
+This will check full match and order.
+```css 
+.my-mixin {
+    color: red;
+}
+
+/* @check .entry__container {color: red;} */
+.container {
+    -st-mixin: my-mixin;
+}
+```
+
+Target generated rules (mixin) - ` @check[OFFEST] SELECTOR`
 ```css
-/* @check SELECTOR {DECL1: VALUE1; DECL2: VALUE2} */
+/* 
+    @check[1] .entry__container:hover {color: blue;} 
+*/
+.container {
+    -st-mixin: my-mixin;
+}
 ```
 
-target generated rules (mixin):
-```css
-/* @check[OFFEST] SELECTOR */
-```
-
-support atrule params (anything between the @atrule and body or semicolon):
+Support atrule params (anything between the @atrule and body or semicolon):
 ```css
 /* @check screen and (min-width: 900px) */
+@media value(smallScreen) {}
 ```
 #### Example 
-Using the `/* @check SELECTOR */` comment to test the root class selector target 
+Here we are generating a Stylable AST which lncludes the `/* @check SELECTOR */` comment to test the root class selector target.
+
+The `testInlineExpects` function performs that actual assertions to perform the test.
 
 ```ts
 it('...', ()=>{
