@@ -135,7 +135,7 @@ export async function build({
             if (changeOrigin) {
                 // watched file changed, invalidate cache
                 stylable.initCache();
-                // handle deleted files by removeing thier generated content
+                // handle deleted files by removing their generated content
                 if (deletedFiles.size) {
                     for (const deletedFile of deletedFiles) {
                         if (assets.has(deletedFile)) {
