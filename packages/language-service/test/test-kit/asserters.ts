@@ -5,6 +5,7 @@ import type { ColorInformation } from 'vscode-css-languageservice';
 import {
     Color,
     ColorPresentation,
+    FormattingOptions,
     Location,
     ParameterInformation,
     SignatureHelp,
@@ -12,6 +13,7 @@ import {
 import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument';
 import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
+import { format, lspFormattingOptionsToJsBeautifyOptions } from '@stylable/language-service';
 import { ProviderPosition } from '@stylable/language-service/dist/lib/completion-providers';
 import { createMeta, ProviderLocation } from '@stylable/language-service/dist/lib/provider';
 import { pathFromPosition } from '@stylable/language-service/dist/lib/utils/postcss-ast-utils';
@@ -73,17 +75,16 @@ export function getDocumentColors(fileName: string): ColorInformation[] {
 
 export function getFormattingEdits(
     content: string,
-    offsetRange?: { start: number; end: number }
+    offsetRange?: { start: number; end: number },
+    options: FormattingOptions = {
+        insertSpaces: true,
+        tabSize: 4,
+    }
 ): TextEdit[] {
-    const doc = TextDocument.create('', 'stylable', 1, content);
-
-    return stylableLSP.getDocumentFormatting(
-        doc,
-        offsetRange || { start: 0, end: doc.getText().length },
-        {
-            indent_with_tabs: false,
-            indent_size: 4,
-        }
+    return format(
+        TextDocument.create('test.st.css', 'stylable', 1, content),
+        offsetRange || { start: 0, end: content.length },
+        lspFormattingOptionsToJsBeautifyOptions(options)
     );
 }
 
