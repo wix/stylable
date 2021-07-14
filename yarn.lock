@@ -1036,10 +1036,10 @@
   resolved "https://registry.yarnpkg.com/@types/css-tree/-/css-tree-1.0.6.tgz#1eeb4838bb7ae2db2c223206f9ca4814610944b8"
   integrity sha512-zjSMDm4C7J1azi9SdT1XwNaVCzeHZx+Y5AVebcg/mrtUULNxZjeamc8oQpUDKpaudM5R+Sy7RFvm2xphfwN64w==
 
-"@types/csso@^3.5.2":
-  version "3.5.2"
-  resolved "https://registry.yarnpkg.com/@types/csso/-/csso-3.5.2.tgz#1e2bdeb54c69c38198754829e72769c44e1ee91c"
-  integrity sha512-Ou6PegjBPB4Jdz4w1NkrBAximhK9MJE4k3ii8qbtW/ypvzF4RrMIYgac8naLLp+opCgOgZ8LDx3NmdYLNhWhFA==
+"@types/csso@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@types/csso/-/csso-4.2.0.tgz#519d65057f16d78f357540b28a2d95ca72593f91"
+  integrity sha512-tGMZcJGgeIA67qbbm/ZKUi7ZyiTETEL0X4opRpFzULbIE1Kyt6EfOVSctw4N/WrEJZwmKw0J+1i/OApm6/CAOQ==
   dependencies:
     "@types/css-tree" "*"
 
