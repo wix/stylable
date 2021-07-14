@@ -8,11 +8,11 @@ import {
     convertToSelector,
     isNodeMatch,
     isSimpleSelector,
+    Selector,
 } from './selector';
 import type { DeepReadonlyObject } from './readonly';
 import { valueMapping } from '../stylable-value-parsers';
 import * as postcss from 'postcss';
-import cloneDeep from 'lodash.clonedeep';
 import { ignoreDeprecationWarn } from './deprecation';
 import type { SRule } from '../deprecated/postcss-ast-extension';
 
@@ -80,44 +80,17 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
             const selectorAst = parseSelectorWithCache(node.selector, { clone: true });
             const ast = isRoot
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
-                : cloneDeep(selectorAst);
+                : selectorAst;
 
             const matchesSelectors = isRoot ? ast : ast.filter((node) => containsPrefix(node));
 
             if (matchesSelectors.length) {
                 const selector = stringifySelector(
                     matchesSelectors.map((selectorNode) => {
-                        // fix chunk ordering
                         if (!isRoot) {
-                            let startChunkIndex = 0;
-                            let moved = false;
-                            walkSelector(selectorNode, (node, index, nodes) => {
-                                if (node.type === `combinator`) {
-                                    startChunkIndex = index + 1;
-                                    moved = false;
-                                } else if (isNodeMatch(node, prefixType)) {
-                                    if (index > 0 && !moved) {
-                                        moved = true;
-                                        nodes.splice(index, 1);
-                                        nodes.splice(startChunkIndex, 0, node);
-                                    }
-                                }
-                                return undefined;
-                            });
+                            fixChunkOrdering(selectorNode, prefixType);
                         }
-                        // replace prefix
-                        walkSelector(selectorNode, (node) => {
-                            if (isNodeMatch(node, prefixType)) {
-                                convertToSelector(node).nodes = [
-                                    {
-                                        type: `nesting`,
-                                        value: `&`,
-                                        start: node.start,
-                                        end: node.end,
-                                    },
-                                ];
-                            }
-                        });
+                        replaceTargetWithNesting(selectorNode, prefixType);
                         return selectorNode;
                     })
                 );
@@ -149,6 +122,42 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     return mixinRoot as T;
 }
 
+function replaceTargetWithNesting(
+    selectorNode: Selector,
+    prefixType: DeepReadonlyObject<SelectorNode>
+) {
+    walkSelector(selectorNode, (node) => {
+        if (isNodeMatch(node, prefixType)) {
+            convertToSelector(node).nodes = [
+                {
+                    type: `nesting`,
+                    value: `&`,
+                    start: node.start,
+                    end: node.end,
+                },
+            ];
+        }
+    });
+}
+
+function fixChunkOrdering(selectorNode: Selector, prefixType: DeepReadonlyObject<SelectorNode>) {
+    let startChunkIndex = 0;
+    let moved = false;
+    walkSelector(selectorNode, (node, index, nodes) => {
+        if (node.type === `combinator`) {
+            startChunkIndex = index + 1;
+            moved = false;
+        } else if (isNodeMatch(node, prefixType)) {
+            if (index > 0 && !moved) {
+                moved = true;
+                nodes.splice(index, 1);
+                nodes.splice(startChunkIndex, 0, node);
+            }
+        }
+        return undefined;
+    });
+}
+
 function containsMatchInFirstChunk(
     prefixType: DeepReadonlyObject<SelectorNode>,
     selectorNode: DeepReadonlyObject<SelectorNode>
@@ -156,7 +165,6 @@ function containsMatchInFirstChunk(
     let isMatch = false;
     walkSelectorReadonly(selectorNode, (node) => {
         if (node.type === `combinator`) {
-            // || node.type === 'spacing') {
             return walkSelector.stopAll;
         } else if (node.type === 'pseudo_class') {
             return walkSelector.skipNested;
@@ -169,6 +177,7 @@ function containsMatchInFirstChunk(
     return isMatch;
 }
 
+/** @deprecated internal for transformer  */
 export function findRule(
     root: postcss.Root,
     selector: string,
@@ -178,6 +187,7 @@ export function findRule(
     root.walkRules(selector, (rule) => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
         const isSimplePerSelector = isSimpleSelector(rule.selector);
+        // This will assume that a selector that contains .a, .b:hover is simple! (for backward comptibility)
         const isSimple = isSimplePerSelector.reduce((acc, { isSimple }) => {
             return !isSimple ? false : acc;
         }, true);
