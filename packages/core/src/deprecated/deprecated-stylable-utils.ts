@@ -6,12 +6,13 @@ import {
     fixChunkOrdering,
     isNodeMatch,
 } from './deprecated-selector-utils';
-import type { SRule } from './postcss-ast-extension'
+import type { SRule } from './postcss-ast-extension';
 import type { Imported, StylableMeta } from '../stylable-processor';
-import { valueMapping } from '../stylable-value-parsers'
+import { valueMapping } from '../stylable-value-parsers';
 import cloneDeep from 'lodash.clonedeep';
 import * as postcss from 'postcss';
 
+/** new version scopeNestedSelector at selector.ts */
 export function scopeSelector(
     scopeSelectorRule: string,
     targetSelectorRule: string,
@@ -74,6 +75,7 @@ export function scopeSelector(
     };
 }
 
+/** new version createSubsetAst at rule.ts */
 export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     root: postcss.Root | postcss.AtRule,
     selectorPrefix: string,
