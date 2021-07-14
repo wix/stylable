@@ -6,7 +6,6 @@ import type { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
 import type { SRule, StylableMeta } from './stylable-processor';
 import type { StylableResolver } from './stylable-resolver';
-import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
@@ -29,7 +28,7 @@ export const stateErrors = {
             ', '
         )}"`,
     STATE_STARTS_WITH_HYPHEN: (name: string) =>
-        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`,
+        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`,
 };
 
 // PROCESS
@@ -326,13 +325,8 @@ function resolveStateValue(
     }
 
     const strippedParam = stripQuotation(actualParam);
-    if (isValidClassName(strippedParam)) {
-        node.type = 'class';
-        node.name = createStateWithParamClassName(name, namespace, strippedParam);
-    } else {
-        node.type = 'attribute';
-        node.content = createAttributeState(name, namespace, strippedParam);
-    }
+    node.type = 'class';
+    node.name = createStateWithParamClassName(name, namespace, strippedParam);
 }
 
 function resolveParam(
@@ -355,16 +349,9 @@ export function createStateWithParamClassName(stateName: string, namespace: stri
     return `${namespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(param)}`;
 }
 
-export function createAttributeState(stateName: string, namespace: string, param: string) {
-    return `class~="${createStateWithParamClassName(stateName, namespace, param)}"`;
-}
-
 export function resolveStateParam(param: string) {
-    if (isValidClassName(param)) {
-        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
-    } else {
-        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(
-            JSON.stringify(param).replace(/\s/gm, '_')
-        )}`;
-    }
+    return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(
+        /\s/gm,
+        '_'
+    )}`;
 }

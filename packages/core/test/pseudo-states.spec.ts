@@ -72,7 +72,7 @@ describe('pseudo-states', () => {
         });
 
         describe('advanced type', () => {
-            it('should warn when a state receieves more than a single state type', () => {
+            it('should warn when a state receives more than a single state type', () => {
                 expectWarnings(
                     `
                     .root{
@@ -651,7 +651,7 @@ describe('pseudo-states', () => {
                 });
             });
 
-            it('should use an attribute selector for illegal param syntax (and replaces spaces with underscoes)', () => {
+            it('should use an attribute selector for illegal param syntax (and replaces spaces with underscores)', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -672,7 +672,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__root[class~="entry---state-9-user_name"] {}',
+                    1: '.entry__root.entry---state-9-user_name {}',
                 });
             });
 
@@ -723,11 +723,11 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---stateWithDefault-16-myDefault_String"] {}',
+                        1: '.entry__my-class.entry---stateWithDefault-16-myDefault_String {}',
                     });
                 });
 
-                it('should supprt default values through a variable', () => {
+                it('should support default values through a variable', () => {
                     const res = generateStylableResult({
                         entry: `/entry.st.css`,
                         files: {
@@ -866,7 +866,7 @@ describe('pseudo-states', () => {
                         });
                     });
 
-                    it('should transform string using an invalid contains validator (mainintaing passed values)', () => {
+                    it('should transform string using an invalid contains validator (maintains passed values)', () => {
                         const config = {
                             entry: `/entry.st.css`,
                             files: {
@@ -969,7 +969,7 @@ describe('pseudo-states', () => {
 
                         const res = expectWarningsFromTransform(config, []);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-7-hello!!"] {}',
+                            1: '.entry__my-class.entry---state1-7-hello\\!\\! {}',
                         });
                     });
 
@@ -1106,7 +1106,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---state1-2-42"] {}',
+                        1: '.entry__my-class.entry---state1-2-42 {}',
                     });
                 });
 
@@ -1219,7 +1219,7 @@ describe('pseudo-states', () => {
                             },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-1-1"] {}',
+                            1: '.entry__my-class.entry---state1-1-1 {}',
                         });
                     });
 
@@ -1249,7 +1249,7 @@ describe('pseudo-states', () => {
                             },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-2-42"] {}',
+                            1: '.entry__my-class.entry---state1-2-42 {}',
                         });
                     });
 
@@ -1279,7 +1279,7 @@ describe('pseudo-states', () => {
                             },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-2-42"] {}',
+                            1: '.entry__my-class.entry---state1-2-42 {}',
                         });
                     });
 
@@ -1301,7 +1301,7 @@ describe('pseudo-states', () => {
 
                         const res = expectWarningsFromTransform(config, []);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-2-40"] {}',
+                            1: '.entry__my-class.entry---state1-2-40 {}',
                         });
                     });
 
@@ -1323,7 +1323,7 @@ describe('pseudo-states', () => {
 
                         const res = expectWarningsFromTransform(config, []);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-1-3"] {}',
+                            1: '.entry__my-class.entry---state1-1-3 {}',
                         });
                     });
 
@@ -1345,7 +1345,7 @@ describe('pseudo-states', () => {
 
                         const res = expectWarningsFromTransform(config, []);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-1-3"] {}',
+                            1: '.entry__my-class.entry---state1-1-3 {}',
                         });
                     });
                 });
@@ -1571,7 +1571,7 @@ describe('pseudo-states', () => {
                         },
                     ]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---category-7-one_two"] {}',
+                        1: '.entry__my-class.entry---category-7-one_two {}',
                     });
                 });
             });

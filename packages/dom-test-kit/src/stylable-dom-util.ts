@@ -1,10 +1,4 @@
-import {
-    isValidClassName,
-    parseSelector,
-    pseudoStates,
-    stringifySelector,
-    traverseNode,
-} from '@stylable/core';
+import { parseSelector, pseudoStates, stringifySelector, traverseNode } from '@stylable/core';
 import type { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
 export interface PartialElement {
@@ -47,21 +41,12 @@ export class StylableDOMUtil {
                     node.type = 'class';
                     node.name = pseudoStates.createBooleanStateClassName(node.name, namespace);
                 } else {
-                    if (isValidClassName(param)) {
-                        node.type = 'class';
-                        node.name = pseudoStates.createStateWithParamClassName(
-                            node.name,
-                            namespace,
-                            param
-                        );
-                    } else {
-                        node.type = 'attribute';
-                        node.content = pseudoStates.createAttributeState(
-                            node.name,
-                            namespace,
-                            param
-                        );
-                    }
+                    node.type = 'class';
+                    node.name = pseudoStates.createStateWithParamClassName(
+                        node.name,
+                        namespace,
+                        param
+                    );
                 }
             } else if (
                 node.type === 'pseudo-element' ||
