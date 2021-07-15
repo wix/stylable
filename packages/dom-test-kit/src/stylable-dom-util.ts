@@ -1,11 +1,10 @@
-import { isValidClassName, pseudoStates } from '@stylable/core';
+import { pseudoStates } from '@stylable/core';
 import {
     parseCssSelector,
     walk,
     stringifySelectorAst,
     SelectorNode,
     Class,
-    Attribute,
 } from '@tokey/css-selector-parser';
 import type { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
@@ -26,11 +25,6 @@ function convertToClass(node: SelectorNode) {
     castNode.type = `class`;
     delete castNode.nodes;
     castNode.dotComments = [];
-    return castNode;
-}
-function convertToAttribute(node: SelectorNode): Attribute {
-    const castNode = node as Attribute;
-    castNode.type = `attribute`;
     return castNode;
 }
 
@@ -65,19 +59,11 @@ export class StylableDOMUtil {
                     );
                 } else {
                     const nestedContent = stringifySelectorAst(args);
-                    if (isValidClassName(nestedContent)) {
-                        convertToClass(node).value = pseudoStates.createStateWithParamClassName(
-                            node.value,
-                            namespace,
-                            nestedContent
-                        );
-                    } else {
-                        convertToAttribute(node).value = pseudoStates.createAttributeState(
-                            node.value,
-                            namespace,
-                            nestedContent
-                        );
-                    }
+                    convertToClass(node).value = pseudoStates.createStateWithParamClassName(
+                        node.value,
+                        namespace,
+                        nestedContent
+                    );
                 }
             } else if (node.type === 'pseudo_element' || node.type === 'element') {
                 throw new Error(

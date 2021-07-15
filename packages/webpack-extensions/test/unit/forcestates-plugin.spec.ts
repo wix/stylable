@@ -214,7 +214,7 @@ describe('stylable-forcestates-plugin', () => {
         });
 
         expect((res.meta.outputAst!.nodes[1] as postcss.Rule).selector).to.equal(
-            `.entry__root[class~="entry---myState-10-some_value"],.entry__root[${createDataAttr(
+            `.entry__root.entry---myState-10-some_value,.entry__root[${createDataAttr(
                 OVERRIDE_STATE_PREFIX,
                 'myState',
                 'some value'

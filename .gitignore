@@ -8,6 +8,10 @@ cjs
 .vcode/settings.json
 **/test/**/temp-dist
 
+# alternative test project dists
+**/test/**/dist2
+**/test/**/dist-prod
+
 # Dependency directories
 node_modules/
 jspm_packages/

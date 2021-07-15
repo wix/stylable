@@ -4,7 +4,6 @@ import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import {
     parseSelectorWithCache,
-    convertToAttribute,
     convertToClass,
     stringifySelector,
     convertToInvalid,
@@ -13,7 +12,6 @@ import type { PseudoClass } from '@tokey/css-selector-parser';
 import { StateResult, systemValidators } from './state-validators';
 import type { StylableMeta } from './stylable-processor';
 import type { StylableResolver } from './stylable-resolver';
-import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
@@ -36,7 +34,7 @@ export const stateErrors = {
             ', '
         )}"`,
     STATE_STARTS_WITH_HYPHEN: (name: string) =>
-        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`,
+        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`,
 };
 
 // PROCESS
@@ -182,7 +180,7 @@ export function validateStateDefinition(
         const container = decl.parent;
         if (container.type !== 'atrule') {
             const parentRule = container as postcss.Rule;
-            const selectorAst = parseSelectorWithCache(parentRule.selector)
+            const selectorAst = parseSelectorWithCache(parentRule.selector);
             if (selectorAst.length && selectorAst.length === 1) {
                 const singleSelectorAst = selectorAst[0];
                 const selectorChunk = singleSelectorAst.nodes;
@@ -334,11 +332,7 @@ function resolveStateValue(
     }
 
     const strippedParam = stripQuotation(actualParam);
-    if (isValidClassName(strippedParam)) {
-        convertToClass(node).value = createStateWithParamClassName(name, namespace, strippedParam);
-    } else {
-        convertToAttribute(node).value = createAttributeState(name, namespace, strippedParam);
-    }
+    convertToClass(node).value = createStateWithParamClassName(name, namespace, strippedParam);
 }
 
 function resolveParam(
@@ -354,23 +348,18 @@ function resolveParam(
 }
 
 export function createBooleanStateClassName(stateName: string, namespace: string) {
+    // ToDo: escape
     return `${namespace}${booleanStateDelimiter}${stateName}`;
 }
 
 export function createStateWithParamClassName(stateName: string, namespace: string, param: string) {
+    // ToDo: escape
     return `${namespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(param)}`;
 }
 
-export function createAttributeState(stateName: string, namespace: string, param: string) {
-    return `class~="${createStateWithParamClassName(stateName, namespace, param)}"`;
-}
-
 export function resolveStateParam(param: string) {
-    if (isValidClassName(param)) {
-        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
-    } else {
-        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(
-            JSON.stringify(param).replace(/\s/gm, '_')
-        )}`;
-    }
+    return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(
+        /\s/gm,
+        '_'
+    )}`;
 }

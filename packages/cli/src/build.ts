@@ -121,6 +121,11 @@ export async function build({
             if (!indexFile && outputSources && filePath.startsWith(fullOutDir)) {
                 return false;
             }
+            // assets used in stylable files should re-trigger "processFiles" when changed
+            if (assets.has(filePath)) {
+                return true;
+            }
+            // stylable files
             return filePath.endsWith(extension);
         },
         onError(error) {
@@ -128,10 +133,15 @@ export async function build({
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
+                // watched file changed, invalidate cache
                 stylable.initCache();
+                // handle deleted files by removing their generated content
                 if (deletedFiles.size) {
                     for (const deletedFile of deletedFiles) {
-                        if (!sourceFiles.has(deletedFile)) {
+                        if (assets.has(deletedFile)) {
+                            assets.delete(deletedFile);
+                            continue;
+                        } else if (!sourceFiles.has(deletedFile)) {
                             continue;
                         }
                         diagnosticsMessages.delete(deletedFile);
@@ -155,15 +165,27 @@ export async function build({
                 }
             }
 
+            // add files that contains errors for retry
             for (const filePath of diagnosticsMessages.keys()) {
                 affectedFiles.add(filePath);
             }
             diagnosticsMessages.clear();
 
+            // remove assets from the affected files (handled in buildAggregatedEntities)
+            for (const filePath of affectedFiles) {
+                if (assets.has(filePath)) {
+                    affectedFiles.delete(filePath);
+                }
+            }
+
+            // rebuild
             buildFiles(affectedFiles);
+            // rewire invalidations
             updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
+            // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
 
+            // report build diagnostics
             if (diagnostics && diagnosticsMessages.size) {
                 reportDiagnostics(diagnosticsMessages);
             }
