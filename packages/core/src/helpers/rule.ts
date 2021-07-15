@@ -5,7 +5,7 @@ import {
     walkSelector,
     walkSelectorReadonly,
     convertToSelector,
-    isNodeMatch,
+    matchTypeAndValue,
     isSimpleSelector,
 } from './selector';
 import type { SelectorNode, Selector } from '@tokey/css-selector-parser';
@@ -126,7 +126,7 @@ function replaceTargetWithNesting(
     prefixType: DeepReadonlyObject<SelectorNode>
 ) {
     walkSelector(selectorNode, (node) => {
-        if (isNodeMatch(node, prefixType)) {
+        if (matchTypeAndValue(node, prefixType)) {
             convertToSelector(node).nodes = [
                 {
                     type: `nesting`,
@@ -146,7 +146,7 @@ function fixChunkOrdering(selectorNode: Selector, prefixType: DeepReadonlyObject
         if (node.type === `combinator`) {
             startChunkIndex = index + 1;
             moved = false;
-        } else if (isNodeMatch(node, prefixType)) {
+        } else if (matchTypeAndValue(node, prefixType)) {
             if (index > 0 && !moved) {
                 moved = true;
                 nodes.splice(index, 1);
@@ -167,7 +167,7 @@ function containsMatchInFirstChunk(
             return walkSelector.stopAll;
         } else if (node.type === 'pseudo_class') {
             return walkSelector.skipNested;
-        } else if (isNodeMatch(node, prefixType)) {
+        } else if (matchTypeAndValue(node, prefixType)) {
             isMatch = true;
             return walkSelector.stopAll;
         }

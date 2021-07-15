@@ -27,7 +27,7 @@ import {
     walkSelector,
     walkSelectorReadonly,
     isSimpleSelector,
-    isNested,
+    isInPseudoClassContext,
     isRootValid,
     isCompRoot,
     scopeNestedSelector,
@@ -390,7 +390,7 @@ export class StylableProcessor {
         let simpleSelector: boolean;
         walkSelectorReadonly(selectorAst, (node, index, nodes, parents) => {
             const type = node.type;
-            if (type === 'selector' && !isNested(parents)) {
+            if (type === 'selector' && !isInPseudoClassContext(parents)) {
                 locallyScoped = false;
             }
             if (type !== `selector` && type !== `class` && type !== `element`) {

@@ -48,8 +48,8 @@ export function isSimpleSelector(selector: string): {
     isSimple: boolean;
     type: 'class' | 'element' | 'complex';
 }[] {
-    const ast = parseSelectorWithCache(selector);
-    return ast.map((selector) => {
+    const selectorList = parseSelectorWithCache(selector);
+    return selectorList.map((selector) => {
         let foundType = ``;
         walkSelectorReadonly(
             selector,
@@ -108,10 +108,7 @@ export function convertToSelector(node: SelectorNode): Selector {
     return castedNode;
 }
 
-// ToDo: make the name more specific to what this means to say
-export function isNested(parents: ReadonlyArray<DeepReadonlyObject<SelectorNode>>) {
-    // ToDo: Should this account for other nesting? pseudo_element or others?
-    // what about ::part(partName)?
+export function isInPseudoClassContext(parents: ReadonlyArray<DeepReadonlyObject<SelectorNode>>) {
     for (const parent of parents) {
         if (parent.type === `pseudo_class`) {
             return true;
@@ -120,7 +117,7 @@ export function isNested(parents: ReadonlyArray<DeepReadonlyObject<SelectorNode>
     return false;
 }
 
-export function isNodeMatch(
+export function matchTypeAndValue(
     a: Partial<DeepReadonlyObject<SelectorNode>>,
     b: Partial<DeepReadonlyObject<SelectorNode>>
 ) {
@@ -258,10 +255,9 @@ export function scopeNestedSelector(
             const globalSelector = first.type === `pseudo_class` && first.value === `global`;
             const startWithScoping = rootScopeLevel
                 ? scopeAst.nodes.every((node, i) => {
-                      return isNodeMatch(node, outputAst.nodes[i]);
+                      return matchTypeAndValue(node, outputAst.nodes[i]);
                   })
                 : false;
-            // const startWithCombinator = first && first.type === `combinator` && fist
             if (first && !parentRef && !startWithScoping && !globalSelector) {
                 outputAst.nodes.unshift(...cloneDeep(scopeAst.nodes as SelectorNode[]), {
                     type: `combinator`,
