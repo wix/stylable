@@ -1,7 +1,8 @@
 import type * as postcss from 'postcss';
 import type { Diagnostics } from './diagnostics';
 import { getSourcePath } from './stylable-utils';
-import type { ChunkedSelector, SelectorNode } from './helpers/selector';
+import type { ChunkedSelector } from './helpers/selector';
+import type { SelectorNode } from '@tokey/css-selector-parser';
 import { setFieldForDeprecation } from './helpers/deprecation';
 import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
 export const RESERVED_ROOT_NAME = 'root';

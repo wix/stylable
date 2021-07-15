@@ -7,9 +7,9 @@ import {
     convertToAttribute,
     convertToClass,
     stringifySelector,
-    PseudoClass,
     convertToInvalid,
 } from './helpers/selector';
+import type { PseudoClass } from '@tokey/css-selector-parser';
 import { StateResult, systemValidators } from './state-validators';
 import type { StylableMeta } from './stylable-processor';
 import type { StylableResolver } from './stylable-resolver';

@@ -8,7 +8,6 @@ import {
     Containers,
     Class,
     Attribute,
-    PseudoClass,
     Invalid,
 } from '@tokey/css-selector-parser';
 import type { DeepReadOnlyAll, DeepReadonlyObject } from './readonly';
@@ -18,8 +17,6 @@ export const parseSelector = parseCssSelector;
 export const stringifySelector = stringifySelectorAst;
 export const walkSelector = walk;
 export const walkSelectorReadonly = walk as DeepReadOnlyAll<typeof walk>;
-
-export type { SelectorNode, SelectorList, Selector, PseudoClass };
 
 /**
  * parse selectors and cache them

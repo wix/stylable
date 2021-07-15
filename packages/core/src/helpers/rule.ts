@@ -2,14 +2,13 @@ import {
     parseSelectorWithCache,
     stringifySelector,
     scopeNestedSelector,
-    SelectorNode,
     walkSelector,
     walkSelectorReadonly,
     convertToSelector,
     isNodeMatch,
     isSimpleSelector,
-    Selector,
 } from './selector';
+import type { SelectorNode, Selector } from '@tokey/css-selector-parser';
 import type { DeepReadonlyObject } from './readonly';
 import { valueMapping } from '../stylable-value-parsers';
 import * as postcss from 'postcss';

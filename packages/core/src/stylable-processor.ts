@@ -29,12 +29,12 @@ import {
     isSimpleSelector,
     isNested,
     isRootValid,
-    SelectorNode,
     isCompRoot,
     scopeNestedSelector,
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
+import type { SelectorNode } from '@tokey/css-selector-parser';
 import type { DeepReadonlyObject } from './helpers/readonly';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';

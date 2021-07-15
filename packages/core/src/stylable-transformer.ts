@@ -16,9 +16,6 @@ import {
 import { setStateToNode, stateErrors, validateStateDefinition } from './pseudo-states';
 import {
     walkSelector,
-    SelectorNode,
-    Selector,
-    SelectorList,
     parseSelectorWithCache,
     stringifySelector,
     flattenContainerSelector,
@@ -28,6 +25,7 @@ import {
     Chunk,
     convertToClass,
 } from './helpers/selector';
+import type { SelectorNode, Selector, SelectorList } from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule, findRule, getRuleScopeSelector } from './helpers/rule';
 import type { DeepReadonlyObject } from './helpers/readonly';
 import { getOriginDefinition } from './helpers/resolve';
