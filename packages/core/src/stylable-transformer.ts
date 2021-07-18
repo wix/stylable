@@ -35,6 +35,8 @@ import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
+import cssesc from 'cssesc';
+import { unescapeCSS } from './helpers/escape';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -406,12 +408,15 @@ export class StylableTransformer {
     public scope(name: string, namespace: string, delimiter: string = this.delimiter) {
         return namespace ? namespace + delimiter + name : name;
     }
+    public scopeEscape(name: string, namespace: string, delimiter: string = this.delimiter) {
+        return namespace ? cssesc(namespace, { isIdentifier: true }) + delimiter + name : name;
+    }
     public exportClasses(meta: StylableMeta) {
         const locals: Record<string, string> = {};
         const metaParts = this.resolveMetaParts(meta);
         for (const [localName, resolved] of Object.entries(metaParts.class)) {
             const exportedClasses = this.getPartExports(resolved);
-            locals[localName] = exportedClasses.join(' ');
+            locals[localName] = unescapeCSS(exportedClasses.join(' '));
         }
         return locals;
     }
@@ -744,7 +749,7 @@ export class StylableTransformer {
         } else {
             const sourceValue = node.value;
             convertToClass(node);
-            node.value = this.scope(symbol.name, meta.namespace);
+            node.value = this.scopeEscape(symbol.name, meta.namespace);
             meta.classesScopeMap[node.value] = sourceValue;
         }
     }
@@ -817,16 +822,16 @@ export class StylableTransformer {
         const metaParts = this.resolveMetaParts(meta);
         for (const [className, resolved] of Object.entries(metaParts.class)) {
             if (resolved.length > 1) {
-                meta.outputAst!.walkRules('.' + this.scope(className, meta.namespace), (rule) => {
+                meta.outputAst!.walkRules('.' + this.scopeEscape(className, meta.namespace), (rule) => {
                     const a = resolved[0];
                     const b = resolved[resolved.length - 1];
                     rule.after(
                         createWarningRule(
                             b.symbol.name,
-                            this.scope(b.symbol.name, b.meta.namespace),
+                            this.scopeEscape(b.symbol.name, b.meta.namespace),
                             basename(b.meta.source),
                             a.symbol.name,
-                            this.scope(a.symbol.name, a.meta.namespace),
+                            this.scopeEscape(a.symbol.name, a.meta.namespace),
                             basename(a.meta.source),
                             true
                         )

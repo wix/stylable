@@ -8,9 +8,10 @@
     "start": "mocha-play ./dist/test/**/*.spec.js -c ./webpack.config.js -w"
   },
   "dependencies": {
+    "@tokey/css-selector-parser": "^0.2.0",
     "balanced-match": "^2.0.0",
     "css-selector-tokenizer": "^0.8.0",
-    "@tokey/css-selector-parser": "^0.2.0",
+    "cssesc": "^3.0.0",
     "deindent": "^0.1.0",
     "enhanced-resolve": "^5.8.2",
     "is-vendor-prefixed": "^4.0.0",

@@ -823,6 +823,23 @@ describe('Stylable postcss transform (Scoping)', () => {
             testInlineExpects(result);
         });
 
+        it('scope escape namespace and preserve local class', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry.1',
+                        content: `
+                            /* @check .entry\\.1__a\\. */
+                            .a\\. {}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
+
         it('scope local root class', () => {
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,

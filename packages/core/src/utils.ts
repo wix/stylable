@@ -1,7 +1,3 @@
-// export function scope(name: string, namespace: string, separator: string = '-') {
-//     return namespace ? namespace + separator + name : name;
-// }
-
 export function stripQuotation(str: string) {
     return str.replace(/^['"](.*?)['"]$/g, '$1');
 }

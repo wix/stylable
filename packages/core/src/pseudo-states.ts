@@ -16,6 +16,7 @@ import { groupValues, listOptions, MappedStates } from './stylable-value-parsers
 import { valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
+import cssesc from 'cssesc';
 
 export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
@@ -348,18 +349,23 @@ function resolveParam(
 }
 
 export function createBooleanStateClassName(stateName: string, namespace: string) {
-    // ToDo: escape
-    return `${namespace}${booleanStateDelimiter}${stateName}`;
+    const escapedNamespace = cssesc(namespace, { isIdentifier: true });
+    return `${escapedNamespace}${booleanStateDelimiter}${stateName}`;
 }
 
 export function createStateWithParamClassName(stateName: string, namespace: string, param: string) {
-    // ToDo: escape
-    return `${namespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(param)}`;
+    const escapedNamespace = cssesc(namespace, { isIdentifier: true });
+    return `${escapedNamespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(
+        param,
+        true
+    )}`;
 }
 
-export function resolveStateParam(param: string) {
-    return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(
+export function resolveStateParam(param: string, escape = false) {
+    const result = `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(
         /\s/gm,
         '_'
     )}`;
+    // adding/removing initial `s` to indicate that it's not the first param of the identifier
+    return escape ? cssesc(`s` + result, { isIdentifier: true }).slice(1) : result;
 }
