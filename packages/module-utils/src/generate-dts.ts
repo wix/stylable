@@ -1,4 +1,10 @@
-import type { StateParsedValue, StylableMeta, StylableResults } from '@stylable/core';
+import type {
+    ClassSymbol,
+    MappedStates,
+    StateParsedValue,
+    StylableMeta,
+    StylableResults,
+} from '@stylable/core';
 
 const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
@@ -16,23 +22,45 @@ function stringifyClasses(classes: Record<string, string>, namespace: string, in
         .join('\n');
 }
 
+function createStateEntries(stStates: MappedStates) {
+    let statesEntries = '';
+
+    for (const [stateName, stateDef] of Object.entries(stStates)) {
+        if (typeof stateDef === 'string') {
+            continue;
+        }
+        statesEntries += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
+    }
+
+    return statesEntries;
+}
+
+function collectLocalStates(cls: ClassSymbol) {
+    let statesEntries = '';
+
+    // collect states on this class
+    const stStates = cls['-st-states'];
+    if (stStates) {
+        statesEntries += createStateEntries(stStates);
+    }
+
+    // collect states from locally extended classes
+    const stExtends = cls['-st-extends'];
+    if (stExtends && stExtends._kind === 'class') {
+        statesEntries += collectLocalStates(stExtends);
+    }
+
+    return statesEntries;
+}
+
 function stringifyStates({ classes, namespace }: StylableMeta) {
     let out = '';
     for (const [name, symbol] of Object.entries(classes)) {
-        const stStates = symbol['-st-states'];
-        if (!stStates) {
-            continue;
-        }
-        let statesEntries = ' ';
-        for (const [stateName, stateDef] of Object.entries(stStates)) {
-            if (typeof stateDef === 'string') {
-                continue;
-            }
-            statesEntries += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
-        }
-        out += `${SPACING}${asString(scope(name, namespace))}: {${statesEntries}};\n`;
+        const states = collectLocalStates(symbol);
+        out += states ? `${SPACING}${asString(scope(name, namespace))}: { ${states}};\n` : '';
     }
-    return out.slice(0, -1);
+
+    return out;
 }
 
 /**

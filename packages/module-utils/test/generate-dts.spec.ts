@@ -197,6 +197,35 @@ describe('Generate DTS', function () {
             expect(tk.typecheck('test.ts')).to.equal('');
         });
 
+        it('should support states through local extend', () => {
+            tk.populate({
+                'test.st.css': '.local { -st-states: state1; } .test { -st-extends: local; }',
+                'test.ts': `
+                    import { eq } from "./test-kit";
+                    import { st, classes } from "./test.st.css";
+                    
+                    eq<string>(st(classes.test, { state1: true }));
+                `,
+            });
+
+            expect(tk.typecheck('test.ts')).to.equal('');
+        });
+
+        it('should support states through local extend (deep)', () => {
+            tk.populate({
+                'test.st.css':
+                    '.deepest { -st-states: state2; } .deep { -st-states: state1; -st-extends: deepest; } .test { -st-extends: deep; }',
+                'test.ts': `
+                    import { eq } from "./test-kit";
+                    import { st, classes } from "./test.st.css";
+                    
+                    eq<string>(st(classes.test, { state1: true, state2: true }));
+                `,
+            });
+
+            expect(tk.typecheck('test.ts')).to.equal('');
+        });
+
         it('should warn on non-existing state', () => {
             tk.populate({
                 'test.st.css': '.root {}',
