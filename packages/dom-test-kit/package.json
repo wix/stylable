@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@stylable/core": "^4.5.0",
-    "@stylable/runtime": "^4.5.0"
+    "@stylable/runtime": "^4.5.0",
+    "@tokey/css-selector-parser": "^0.2.0"
   },
   "files": [
     "dist",
