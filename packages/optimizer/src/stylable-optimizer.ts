@@ -8,7 +8,7 @@ import {
 import {
     parseCssSelector,
     stringifySelectorAst,
-    SelectorList,
+    Selector,
     walk,
 } from '@tokey/css-selector-parser';
 import csso from 'csso';
@@ -225,7 +225,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         outputAst.walkRules((rule) => {
             const outputSelectors = rule.selectors.filter((selector) => {
                 const selectorAst = parseCssSelector(selector);
-                return !this.isContainsUnusedParts(selectorAst, usageMapping, matchNamespace);
+                return !this.isContainsUnusedParts(selectorAst[0], usageMapping, matchNamespace);
             });
             if (outputSelectors.length) {
                 rule.selector = outputSelectors.join();
@@ -240,7 +240,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     }
 
     private isContainsUnusedParts(
-        selectorAst: SelectorList,
+        selectorAst: Selector,
         usageMapping: Record<string, boolean>,
         matchNamespace: RegExp
     ) {
@@ -257,14 +257,6 @@ export class StylableOptimizer implements IStylableOptimizer {
                         isContainsUnusedParts = true;
                     }
                 }
-            } else if (node.type === 'pseudo_element' && !!node.nodes) {
-                /* ToDo: (barak can you take a look) - this used to match `nested-pseudo-element`
-                *  in the old parser (css-selector-tokenizer) and there is no such definition,
-                *  so it never matched anything. 
-                *  canceling this behavior as the new parser can parse functional pseudo elements 
-                *  and when enabled it misses unused selectors after: `::part(name) Unused`.
-                */
-                // return walk.stopAll;
             }
             return;
         });

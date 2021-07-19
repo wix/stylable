@@ -403,10 +403,10 @@ export class StylableProcessor {
                         if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
                             this.diagnostics.warn(rule, processorWarnings.NO_IMPORT_IN_ST_SCOPE());
                             rule.remove();
-                            return walkSelector.stopAll; //return false;
+                            return walkSelector.stopAll;
                         }
                         rule.remove();
-                        return walkSelector.stopAll; //return false;
+                        return walkSelector.stopAll;
                     } else {
                         this.diagnostics.warn(
                             rule,
@@ -423,11 +423,11 @@ export class StylableProcessor {
                                 processorWarnings.NO_VARS_DEF_IN_ST_SCOPE()
                             );
                             rule.remove();
-                            return walkSelector.stopAll; //return false;
+                            return walkSelector.stopAll;
                         }
 
                         this.addVarSymbols(rule);
-                        return walkSelector.stopAll; //return false;
+                        return walkSelector.stopAll;
                     } else {
                         this.diagnostics.warn(
                             rule,
@@ -471,7 +471,7 @@ export class StylableProcessor {
                 this.addElementSymbolOnce(node.value, rule);
                 /**
                  * intent to deprecate: currently `value(param)` can be used
-                 * as a custom selector state value. Unless there is a reasonable
+                 * as a custom state value. Unless there is a reasonable
                  * use case, this should be removed.
                  */
                 if (

@@ -27,7 +27,6 @@ import {
 } from './helpers/selector';
 import type { SelectorNode, Selector, SelectorList } from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule, findRule, getRuleScopeSelector } from './helpers/rule';
-import type { DeepReadonlyObject } from './helpers/readonly';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol, StylableMeta } from './stylable-processor';
@@ -63,14 +62,6 @@ export interface StylableResults {
     exports: StylableExports;
 }
 
-// export interface ScopedSelectorResults {
-//     current: StylableMeta;
-//     symbol: StylableSymbol | null;
-//     selectorAst: SelectorAstNode;
-//     selector: string;
-//     elements: ResolvedElement[][];
-// }
-
 export type replaceValueHook = (
     value: string,
     name: string | { name: string; args: string[] },
@@ -101,13 +92,6 @@ export interface TransformerOptions {
     mode?: EnvMode;
     resolverCache?: StylableResolverCache;
 }
-
-//
-// export interface AdditionalSelector {
-//     selectorNode: SelectorAstNode;
-//     node: SelectorAstNode;
-//     customElementChunk: string;
-// }
 
 export const transformerWarnings = {
     UNKNOWN_PSEUDO_ELEMENT(name: string) {
@@ -822,21 +806,24 @@ export class StylableTransformer {
         const metaParts = this.resolveMetaParts(meta);
         for (const [className, resolved] of Object.entries(metaParts.class)) {
             if (resolved.length > 1) {
-                meta.outputAst!.walkRules('.' + this.scopeEscape(className, meta.namespace), (rule) => {
-                    const a = resolved[0];
-                    const b = resolved[resolved.length - 1];
-                    rule.after(
-                        createWarningRule(
-                            b.symbol.name,
-                            this.scopeEscape(b.symbol.name, b.meta.namespace),
-                            basename(b.meta.source),
-                            a.symbol.name,
-                            this.scopeEscape(a.symbol.name, a.meta.namespace),
-                            basename(a.meta.source),
-                            true
-                        )
-                    );
-                });
+                meta.outputAst!.walkRules(
+                    '.' + this.scopeEscape(className, meta.namespace),
+                    (rule) => {
+                        const a = resolved[0];
+                        const b = resolved[resolved.length - 1];
+                        rule.after(
+                            createWarningRule(
+                                b.symbol.name,
+                                this.scopeEscape(b.symbol.name, b.meta.namespace),
+                                basename(b.meta.source),
+                                a.symbol.name,
+                                this.scopeEscape(a.symbol.name, a.meta.namespace),
+                                basename(a.meta.source),
+                                true
+                            )
+                        );
+                    }
+                );
             }
         }
     }
@@ -917,15 +904,14 @@ function anyElementAnchor(meta: StylableMeta): {
 
 function lazyCreateSelector(
     customElementChunk: Selector,
-    selectorNode: DeepReadonlyObject<Selector>,
+    selectorNode: Selector,
     nodeIndex: number
 ): () => Selector {
     if (nodeIndex === -1) {
         throw new Error('not supported inside nested classes');
     }
     return (): Selector => {
-        const clone = cloneDeep(selectorNode) as Selector;
-        // ToDo: figure out intent and improve types
+        const clone = cloneDeep(selectorNode);
         (clone.nodes[nodeIndex] as any).nodes = customElementChunk.nodes;
         return clone;
     };
