@@ -989,17 +989,17 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
-"@tokey/core@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@tokey/core/-/core-1.1.0.tgz#0d47c9ef8f48e4ce94365ad56c4ce2b317fc1d96"
-  integrity sha512-i/5Tmr2OFL1kqtooF0060pkQmVVOw6PqOlfbCqKpSq3dMyTGj/qPPu5YzAJWGZa9pH6qmyb4ZZCfbQYLrXLRyA==
+"@tokey/core@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@tokey/core/-/core-1.2.0.tgz#333ebaf0b1fec7567910a2a568c209a7741e6176"
+  integrity sha512-H9xHJkNHvVtWFK3FK8Fz9XWgan0UrY2iEY9oNLWvMiy6zSZ56iAr+4XCPsM9FGY2BfVFxaxREHji3293hJN/xw==
 
-"@tokey/css-selector-parser@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@tokey/css-selector-parser/-/css-selector-parser-0.2.0.tgz#c530501cb37b8bcc5d9333447b021b1ec131275e"
-  integrity sha512-Mt8hdNVsjxZy8cDWAs3dapGGOJYW9gFU7RMbGtq74bzU4KZ2qSheepcR1fImLwSrBjNLKWGHFMZcw5t/P0iuAQ==
+"@tokey/css-selector-parser@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@tokey/css-selector-parser/-/css-selector-parser-0.3.0.tgz#df7e8e6adb1354ae868502a33a4d303916fffa31"
+  integrity sha512-DCXFR74XyfLJQkTkFRtE/9cy3sVrh2f+bn1bXqUwxuLVsxLfcQC6biDyo4TpTK1qzDivlosdLClhxgJfFUjpxg==
   dependencies:
-    "@tokey/core" "^1.1.0"
+    "@tokey/core" "^1.2.0"
 
 "@tootallnate/once@1":
   version "1.1.2"

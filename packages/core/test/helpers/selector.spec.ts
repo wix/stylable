@@ -113,7 +113,7 @@ describe(`helpers/selector`, () => {
             expect(result).to.eql([
                 {
                     isSimple: true,
-                    type: `element`,
+                    type: `type`,
                 },
             ]);
         });
@@ -127,7 +127,7 @@ describe(`helpers/selector`, () => {
                 },
                 {
                     isSimple: true,
-                    type: `element`,
+                    type: `type`,
                 },
             ]);
         });

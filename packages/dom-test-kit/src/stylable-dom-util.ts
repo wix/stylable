@@ -65,7 +65,7 @@ export class StylableDOMUtil {
                         nestedContent
                     );
                 }
-            } else if (node.type === 'pseudo_element' || node.type === 'element') {
+            } else if (node.type === 'pseudo_element' || node.type === 'type') {
                 throw new Error(
                     `selector with ${node.type.replace(/_/, `-`)} is not supported yet.`
                 );

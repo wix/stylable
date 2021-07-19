@@ -58,8 +58,8 @@ export const processorWarnings = {
     UNSCOPED_CLASS(name: string) {
         return `unscoped class "${name}" will affect all elements of the same type in the document`;
     },
-    UNSCOPED_ELEMENT(name: string) {
-        return `unscoped element "${name}" will affect all elements of the same type in the document`;
+    UNSCOPED_TYPE_SELECTOR(name: string) {
+        return `unscoped type selector "${name}" will affect all elements of the same type in the document`;
     },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) {
         return `cannot define "${name}" inside a complex selector`;
@@ -74,7 +74,7 @@ export const processorWarnings = {
         return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`;
     },
     STATE_DEFINITION_IN_ELEMENT() {
-        return 'cannot define pseudo states inside element selectors';
+        return 'cannot define pseudo states inside a type selector';
     },
     STATE_DEFINITION_IN_COMPLEX() {
         return 'cannot define pseudo states inside complex selectors';
@@ -393,7 +393,7 @@ export class StylableProcessor {
             if (type === 'selector' && !isInPseudoClassContext(parents)) {
                 locallyScoped = false;
             }
-            if (type !== `selector` && type !== `class` && type !== `element`) {
+            if (type !== `selector` && type !== `class` && type !== `type`) {
                 simpleSelector = false;
             }
 
@@ -446,7 +446,7 @@ export class StylableProcessor {
                         rule,
                         processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `class`),
                         {
-                            word: stringifySelector(node as SelectorNode),
+                            word: stringifySelector(node),
                         }
                     );
                 }
@@ -467,7 +467,7 @@ export class StylableProcessor {
                         }
                     }
                 }
-            } else if (node.type === 'element') {
+            } else if (node.type === 'type') {
                 this.addElementSymbolOnce(node.value, rule);
                 /**
                  * intent to deprecate: currently `value(param)` can be used
@@ -482,9 +482,9 @@ export class StylableProcessor {
                 ) {
                     this.diagnostics.error(
                         rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `element`),
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
                         {
-                            word: stringifySelector(node as SelectorNode),
+                            word: stringifySelector(node),
                         }
                     );
                 }
@@ -492,7 +492,7 @@ export class StylableProcessor {
                     if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
                         this.diagnostics.warn(
                             rule,
-                            processorWarnings.UNSCOPED_ELEMENT(node.value),
+                            processorWarnings.UNSCOPED_TYPE_SELECTOR(node.value),
                             {
                                 word: node.value,
                             }
@@ -507,7 +507,7 @@ export class StylableProcessor {
                         rule,
                         processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
                         {
-                            word: stringifySelector(node as SelectorNode),
+                            word: stringifySelector(node),
                         }
                     );
                 }
@@ -520,7 +520,7 @@ export class StylableProcessor {
                             `attribute`
                         ),
                         {
-                            word: stringifySelector(node as SelectorNode),
+                            word: stringifySelector(node),
                         }
                     );
                 }
@@ -530,7 +530,7 @@ export class StylableProcessor {
                         rule,
                         processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
                         {
-                            word: stringifySelector(node as SelectorNode),
+                            word: stringifySelector(node),
                         }
                     );
                 }
@@ -752,10 +752,10 @@ export class StylableProcessor {
         const isSimplePerSelector = isSimpleSelector(rule.selector);
         const type = isSimplePerSelector.reduce((accType, { type }) => {
             return !accType ? type : accType !== type ? `complex` : type;
-        }, ``);
+        }, `` as typeof isSimplePerSelector[number]['type']);
         const isSimple = type !== `complex`;
         if (decl.prop === valueMapping.states) {
-            if (isSimple && type !== 'element') {
+            if (isSimple && type !== 'type') {
                 this.extendTypedRule(
                     decl,
                     rule.selector,
@@ -763,7 +763,7 @@ export class StylableProcessor {
                     parseStates(decl.value, decl, this.diagnostics)
                 );
             } else {
-                if (type === 'element') {
+                if (type === 'type') {
                     this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_ELEMENT());
                 } else {
                     this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_COMPLEX());
@@ -866,7 +866,7 @@ export class StylableProcessor {
                 rule.mixins = mixins;
             }
         } else if (decl.prop === valueMapping.global) {
-            if (isSimple && type !== 'element') {
+            if (isSimple && type !== 'type') {
                 this.setClassGlobalMapping(decl, rule);
             } else {
                 // TODO: diagnostics - scoped on none class

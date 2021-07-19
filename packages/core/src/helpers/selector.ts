@@ -5,7 +5,7 @@ import {
     SelectorNode,
     Selector,
     SelectorList,
-    Containers,
+    FunctionalSelector,
     Class,
     Attribute,
     Invalid,
@@ -46,7 +46,7 @@ export function parseSelectorWithCache(
  */
 export function isSimpleSelector(selector: string): {
     isSimple: boolean;
-    type: 'class' | 'element' | 'complex';
+    type: 'class' | 'type' | 'complex';
 }[] {
     const selectorList = parseSelectorWithCache(selector);
     return selectorList.map((selector) => {
@@ -54,7 +54,7 @@ export function isSimpleSelector(selector: string): {
         walkSelectorReadonly(
             selector,
             (node) => {
-                if ((node.type !== `class` && node.type !== `element`) || foundType || node.nodes) {
+                if ((node.type !== `class` && node.type !== `type`) || foundType || node.nodes) {
                     foundType = `complex`;
                     return walk.stopAll;
                 }
@@ -63,7 +63,7 @@ export function isSimpleSelector(selector: string): {
             },
             { ignoreList: [`selector`, `comment`] }
         );
-        if (foundType === `class` || foundType === `element`) {
+        if (foundType === `class` || foundType === `type`) {
             return { type: foundType, isSimple: true };
         } else {
             return { type: `complex`, isSimple: false };
@@ -75,7 +75,7 @@ export function isSimpleSelector(selector: string): {
  * take an ast node with nested nodes "XXX(nest1,  nest2)"
  * and convert it to a flat selector as node: "nest1, nest2"
  */
-export function flattenContainerSelector(node: Containers): Selector {
+export function flattenFunctionalSelector(node: FunctionalSelector): Selector {
     node.value = ``;
     return convertToSelector(node);
 }
@@ -141,7 +141,7 @@ export function isRootValid(ast: DeepReadonlyObject<SelectorList>) {
                     isValid = false;
                     return walk.skipCurrentSelector;
                 }
-                if (part.type === 'element' || (part.type === 'class' && part.value !== 'root')) {
+                if (part.type === 'type' || (part.type === 'class' && part.value !== 'root')) {
                     isLastScopeGlobal = false;
                 }
             }

@@ -2135,7 +2135,7 @@ describe('pseudo-states', () => {
             );
         });
 
-        it('should warn when defining a state inside an element selector', () => {
+        it('should warn when defining a state inside a type selector', () => {
             expectWarnings(
                 `
                 MyElement {
@@ -2145,12 +2145,12 @@ describe('pseudo-states', () => {
                 [
                     // skipping root scoping warning
                     {
-                        message: processorWarnings.UNSCOPED_ELEMENT('MyElement'),
+                        message: processorWarnings.UNSCOPED_TYPE_SELECTOR('MyElement'),
                         file: 'main.css',
                         skip: true,
                     },
                     {
-                        message: 'cannot define pseudo states inside element selectors',
+                        message: processorWarnings.STATE_DEFINITION_IN_ELEMENT(),
                         file: 'main.css',
                     },
                 ]

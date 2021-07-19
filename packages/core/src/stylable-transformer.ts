@@ -18,7 +18,7 @@ import {
     walkSelector,
     parseSelectorWithCache,
     stringifySelector,
-    flattenContainerSelector,
+    flattenFunctionalSelector,
     separateChunks2,
     mergeChunks,
     ChunkedSelector,
@@ -372,7 +372,7 @@ export class StylableTransformer {
             walkSelector(selectorAst, (node) => {
                 if (node.type === 'pseudo_class' && node.value === 'global') {
                     this.addGlobalsToMeta([node], meta);
-                    flattenContainerSelector(node);
+                    flattenFunctionalSelector(node);
                     return walkSelector.skipNested;
                 }
                 return;
@@ -496,7 +496,7 @@ export class StylableTransformer {
                 validateRuleStateDefinition(context.rule, meta, this.resolver, this.diagnostics);
             }
             this.scopeClassNode(symbol, meta, node, originMeta);
-        } else if (node.type === 'element') {
+        } else if (node.type === 'type') {
             const resolved = metaParts.element[node.value] || [
                 // provides resolution for native elements
                 { _kind: 'css', meta: originMeta, symbol: { _kind: 'element', name: node.value } },
@@ -585,7 +585,7 @@ export class StylableTransformer {
                 if (node.value === 'global') {
                     // :global(.a) -> .a
                     if (transformGlobals) {
-                        flattenContainerSelector(node);
+                        flattenFunctionalSelector(node);
                     }
                     return;
                 } else {
@@ -728,7 +728,7 @@ export class StylableTransformer {
     private scopeClassNode(symbol: any, meta: StylableMeta, node: any, originMeta: any) {
         if (symbol[valueMapping.global]) {
             const globalMappedNodes = symbol[valueMapping.global];
-            flattenContainerSelector(node);
+            flattenFunctionalSelector(node);
             node.nodes = globalMappedNodes;
             // ToDo: check if this is causes an issue with globals from an imported alias
             this.addGlobalsToMeta(globalMappedNodes, originMeta);
