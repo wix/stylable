@@ -8,6 +8,7 @@ import {
     stringifySelector,
     convertToInvalid,
 } from './helpers/selector';
+import { wrapFunctionForDeprecation } from './helpers/deprecation';
 import type { PseudoClass } from '@tokey/css-selector-parser';
 import { StateResult, systemValidators } from './state-validators';
 import type { StylableMeta } from './stylable-processor';
@@ -171,7 +172,8 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
 
 // TRANSFORM
 
-export function validateStateDefinition(
+/* @deprecated */
+export const validateStateDefinition = wrapFunctionForDeprecation(function(
     decl: postcss.Declaration,
     meta: StylableMeta,
     resolver: StylableResolver,
@@ -188,7 +190,7 @@ export function validateStateDefinition(
 
                 if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
                     const className = selectorChunk[0].value;
-                    const classMeta = meta.classes[meta.classesScopeMap[className]];
+                    const classMeta = meta.classes[className];
                     const states = classMeta[valueMapping.states];
 
                     if (classMeta && classMeta._kind === 'class' && states) {
@@ -224,7 +226,7 @@ export function validateStateDefinition(
             }
         }
     }
-}
+}, {name: `validateStateDefinition`});
 
 export function validateStateArgument(
     stateAst: StateParsedValue,

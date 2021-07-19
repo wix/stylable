@@ -17,7 +17,6 @@ export class StylableMeta {
     public cssVars: Record<string, CSSVarSymbol>;
     public keyframes: postcss.AtRule[];
     public classes: Record<string, ClassSymbol>;
-    public classesScopeMap: Record<string, string>;
     public elements: Record<string, ElementSymbol>;
     public mappedSymbols: Record<string, StylableSymbol>;
     public mappedKeyframes: Record<string, KeyframesSymbol>;
@@ -51,7 +50,6 @@ export class StylableMeta {
         this.classes = {
             [RESERVED_ROOT_NAME]: rootSymbol,
         };
-        this.classesScopeMap = {};
         this.mappedSymbols = {
             [RESERVED_ROOT_NAME]: rootSymbol,
         };

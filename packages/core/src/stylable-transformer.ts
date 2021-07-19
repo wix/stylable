@@ -13,7 +13,7 @@ import {
     nativePseudoElements,
     reservedKeyFrames,
 } from './native-reserved-lists';
-import { setStateToNode, stateErrors, validateStateDefinition } from './pseudo-states';
+import { setStateToNode, stateErrors } from './pseudo-states';
 import {
     walkSelector,
     parseSelectorWithCache,
@@ -25,6 +25,7 @@ import {
     Chunk,
     convertToClass,
 } from './helpers/selector';
+import { validateRuleStateDefinition } from './helpers/custom-state';
 import type { SelectorNode, Selector, SelectorList } from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule, findRule, getRuleScopeSelector } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
@@ -204,9 +205,7 @@ export class StylableTransformer {
             switch (decl.prop) {
                 case valueMapping.partialMixin:
                 case valueMapping.mixin:
-                    break;
                 case valueMapping.states:
-                    validateStateDefinition(decl, meta, this.resolver, this.diagnostics);
                     break;
                 default:
                     decl.value = evalDeclarationValue(
@@ -493,6 +492,9 @@ export class StylableTransformer {
             ];
             context.setCurrentAnchor({ name: node.value, type: 'class', resolved });
             const { symbol, meta } = getOriginDefinition(resolved);
+            if (context.originMeta === meta && symbol[valueMapping.states]) {
+                validateRuleStateDefinition(context.rule, meta, this.resolver, this.diagnostics);
+            }
             this.scopeClassNode(symbol, meta, node, originMeta);
         } else if (node.type === 'element') {
             const resolved = metaParts.element[node.value] || [
@@ -731,10 +733,8 @@ export class StylableTransformer {
             // ToDo: check if this is causes an issue with globals from an imported alias
             this.addGlobalsToMeta(globalMappedNodes, originMeta);
         } else {
-            const sourceValue = node.value;
             convertToClass(node);
             node.value = this.scopeEscape(symbol.name, meta.namespace);
-            meta.classesScopeMap[node.value] = sourceValue;
         }
     }
     private resolveMetaParts(meta: StylableMeta): MetaParts {
