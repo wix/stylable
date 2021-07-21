@@ -22,7 +22,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "repository": "https://github.com/wix/stylable/tree/master/packages/schema-extract",
   "sideEffects": false,
   "author": "Wix.com"

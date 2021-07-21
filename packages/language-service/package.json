@@ -38,5 +38,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/language-service",
   "homepage": "https://github.com/wix/stylable/tree/master/packages/language-service",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }

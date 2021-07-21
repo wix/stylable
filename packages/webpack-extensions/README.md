@@ -121,4 +121,4 @@ Read our [contributing guidelines](../../CONTRIBUTING.md) for details on our cod
 
 ## License
 
-Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).
+Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [MIT license](./LICENSE).

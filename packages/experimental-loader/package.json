@@ -23,5 +23,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/experimental-loader",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }

@@ -164,4 +164,4 @@ CSS assets are handled by webpack native AssetsModules support.
 If you're using css_loader/extract make sure to exclude `.st.css` files from the process. You cannot use loaders with Stylable `.st.css` files
 
 ## License
-Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).
+Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [MIT license](./LICENSE).
