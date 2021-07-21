@@ -25,5 +25,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/jest",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }

@@ -35,5 +35,5 @@
   "repository": "https://github.com/wix/stylable/tree/master/packages/create-stylable-app",
   "homepage": "https://stylable.io",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }
