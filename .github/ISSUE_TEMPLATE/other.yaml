@@ -1,4 +1,4 @@
-name: Bug Report
+name: Other
 description: Anything that is not a bug report or a feature request
 labels: [triage]
 body:
