@@ -1,0 +1,20 @@
+name: Bug Report
+description: Anything that is not a bug report or a feature request
+labels: [triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill this out!
+  - type: textarea
+    id: general-description
+    attributes:
+      label: Describe your issue
+      description: General description about the issue you would like to raise
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Describe any additional context you think is related
