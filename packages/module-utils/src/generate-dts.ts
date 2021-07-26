@@ -9,6 +9,63 @@ import type {
 const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
 
+function addStatesEntries(
+    stateEntries: Map<string, StateParsedValue | string | null>,
+    stStates: MappedStates | undefined
+) {
+    if (stStates) {
+        for (const [stateName, stateDef] of Object.entries(stStates)) {
+            if (typeof stateDef === 'string') {
+                continue;
+            }
+
+            if (!stateEntries.has(stateName)) {
+                stateEntries.set(stateName, stateDef);
+            }
+        }
+    }
+}
+
+function collectLocalStates(cls: ClassSymbol) {
+    const stateEntries = new Map<string, StateParsedValue | null>();
+
+    // collect states on this class
+    const stStates = cls['-st-states'];
+    addStatesEntries(stateEntries, stStates);
+
+    // collect states from locally extended classes
+    let stExtends = cls['-st-extends'];
+
+    while (stExtends && stExtends._kind === 'class') {
+        const stExtendsStates = stExtends['-st-states'];
+
+        if (stExtendsStates) {
+            addStatesEntries(stateEntries, stExtendsStates);
+        }
+
+        stExtends = stExtends['-st-extends'];
+    }
+
+    let stateEntriesString = '';
+
+    // stringify states for current class
+    for (const [stateName, stateDef] of stateEntries.entries()) {
+        stateEntriesString += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
+    }
+
+    return stateEntriesString;
+}
+
+function stringifyStates({ classes, namespace }: StylableMeta) {
+    let out = '';
+    for (const [name, symbol] of Object.entries(classes)) {
+        const states = collectLocalStates(symbol);
+        out += states ? `${SPACING}${asString(scope(name, namespace))}: { ${states}};\n` : '';
+    }
+
+    return out;
+}
+
 function stringifyStringRecord(record: Record<string, string>, indent = SPACING) {
     return Object.keys(record)
         .map((k) => `${indent}${asString(k)}: string;`)
@@ -20,47 +77,6 @@ function stringifyClasses(classes: Record<string, string>, namespace: string, in
     return Object.keys(classes)
         .map((name) => `${indent}${asString(name)}: ${asString(scope(name, namespace))};`)
         .join('\n');
-}
-
-function createStateEntries(stStates: MappedStates) {
-    let statesEntries = '';
-
-    for (const [stateName, stateDef] of Object.entries(stStates)) {
-        if (typeof stateDef === 'string') {
-            continue;
-        }
-        statesEntries += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
-    }
-
-    return statesEntries;
-}
-
-function collectLocalStates(cls: ClassSymbol) {
-    let statesEntries = '';
-
-    // collect states on this class
-    const stStates = cls['-st-states'];
-    if (stStates) {
-        statesEntries += createStateEntries(stStates);
-    }
-
-    // collect states from locally extended classes
-    const stExtends = cls['-st-extends'];
-    if (stExtends && stExtends._kind === 'class') {
-        statesEntries += collectLocalStates(stExtends);
-    }
-
-    return statesEntries;
-}
-
-function stringifyStates({ classes, namespace }: StylableMeta) {
-    let out = '';
-    for (const [name, symbol] of Object.entries(classes)) {
-        const states = collectLocalStates(symbol);
-        out += states ? `${SPACING}${asString(scope(name, namespace))}: { ${states}};\n` : '';
-    }
-
-    return out;
 }
 
 /**

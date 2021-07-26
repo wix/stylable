@@ -276,6 +276,74 @@ describe('Generate DTS', function () {
                 "Type 'true' is not assignable to type 'string | undefined'"
             );
         });
+
+        describe('state overrides', () => {
+            it('should support states overridden through a local extend', () => {
+                tk.populate({
+                    'test.st.css':
+                        '.base { -st-states: state1; } .test { -st-states: state1(string); -st-extends: base; }',
+                    'test.ts': `
+                        import { eq } from "./test-kit";
+                        import { st, classes } from "./test.st.css";
+                        
+                        eq<string>(st(classes.test, { state1: 'hello' }));
+                    `,
+                });
+
+                expect(tk.typecheck('test.ts')).to.equal('');
+            });
+
+            it('should warn about incorrect state that is overridden through a local extend', () => {
+                tk.populate({
+                    'test.st.css':
+                        '.base { -st-states: state1; } .test { -st-states: state1(string); -st-extends: base; }',
+                    'test.ts': `
+                        import { eq } from "./test-kit";
+                        import { st, classes } from "./test.st.css";
+                        
+                        eq<string>(st(classes.test, { state1: true }));
+                    `,
+                });
+
+                expect(tk.typecheck('test.ts')).to.include(
+                    `Type 'true' is not assignable to type 'string | undefined'`
+                );
+            });
+
+            it('should not warn about the same state that being overridden through a local extend to the same type', () => {
+                tk.populate({
+                    'test.st.css':
+                        '.base { -st-states: state1(string); } .test { -st-states: state1(string); -st-extends: base; }',
+                    'test.ts': `
+                        import { eq } from "./test-kit";
+                        import { st, classes } from "./test.st.css";
+                        
+                        eq<string>(st(classes.test, { state1: 'hello' }));
+                    `,
+                });
+
+                expect(tk.typecheck('test.ts')).to.equal('');
+            });
+
+            it('should warn about state override from imported extend', () => {
+                tk.populate({
+                    'base.st.css': '.part {stStates: state1}',
+                    'test.st.css': `
+                        @st-import [part] from './base.st.css';
+                        .test { -st-extends: part; }`,
+                    'test.ts': `
+                        import { eq } from "./test-kit";
+                        import { st, classes } from "./test.st.css";
+                        
+                        eq<string>(st(classes.test, { state1: true }));
+                    `,
+                });
+
+                expect(tk.typecheck('test.ts')).to.include(
+                    `Argument of type '{ state1: boolean; }' is not assignable to parameter of type 'NullableString'`
+                );
+            });
+        });
     });
 
     describe('cssStates', () => {
