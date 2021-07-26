@@ -38,5 +38,5 @@
   ],
   "repository": "https://github.com/wix/stylable/tree/master/packages/rollup-plugin",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }

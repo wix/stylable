@@ -22,7 +22,7 @@ export function getDocumentFormatting(
 
 const stImport = 'st-import';
 
-export function removeFormattingExceptions(ast: Root) {
+function removeFormattingExceptions(ast: Root) {
     const changes: string[] = [];
 
     // sanitizing @st-imports due to resulting broken formatting
@@ -42,7 +42,7 @@ function restoreFormattingExceptions(ast: Root, changes: string[]) {
     return ast;
 }
 
-export function format(text: string, options?: CSSBeautifyOptions): string {
+function format(text: string, options?: CSSBeautifyOptions): string {
     const normalizedOptions: CSSBeautifyOptions = {
         ...options,
         // hard-coded to prevent custom selector values starting with combinators from breaking

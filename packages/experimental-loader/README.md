@@ -85,3 +85,7 @@ As opposed to the current webpack-plugin integration, some behaviors are still m
 - The loader does not perform Stylable specific optimizations such as: minimizing namespaces and classNames, removing unused rules, and so on
 - May encounter issues with CSS loading order (order being determined by JS imports) - [webpack open issue](https://github.com/webpack-contrib/mini-css-extract-plugin/issues/530)
 - May have issues with updating CSS when JS imports change order in dev time watch mode
+
+## License
+
+Copyright (c) 2021 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

@@ -13,3 +13,7 @@ All CSS language support functionality is also supported (hover hints, inline co
 * CSS Language Service: https://github.com/Microsoft/vscode-css-languageservice
 * Color Icon and Color Picker: https://github.com/Microsoft/vscode/issues/38959
 * Allow disabling Color Picker: https://github.com/Microsoft/vscode/issues/42344
+
+## License
+
+Copyright (c) 2021 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

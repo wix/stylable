@@ -9,7 +9,7 @@
     "@stylable/core": "^4.5.0",
     "@stylable/optimizer": "^4.5.0",
     "@stylable/runtime": "^4.5.0",
-    "css-loader": "^6.0.0",
+    "css-loader": "^6.2.0",
     "decache": "^4.6.0"
   },
   "files": [
@@ -23,5 +23,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/experimental-loader",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }
