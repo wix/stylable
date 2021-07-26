@@ -1,5 +1,7 @@
 import type {
     ClassSymbol,
+    ElementSymbol,
+    ImportSymbol,
     MappedStates,
     StateParsedValue,
     StylableMeta,
@@ -28,22 +30,20 @@ function addStatesEntries(
 
 function collectLocalStates(cls: ClassSymbol) {
     const stateEntries = new Map<string, StateParsedValue | null>();
+    let currentClass: ClassSymbol | undefined = cls;
 
-    // collect states on this class
-    const stStates = cls['-st-states'];
-    addStatesEntries(stateEntries, stStates);
+    while (currentClass) {
+        const stStates = currentClass['-st-states'];
 
-    // collect states from locally extended classes
-    let stExtends = cls['-st-extends'];
-
-    while (stExtends && stExtends._kind === 'class') {
-        const stExtendsStates = stExtends['-st-states'];
-
-        if (stExtendsStates) {
-            addStatesEntries(stateEntries, stExtendsStates);
+        if (stStates) {
+            addStatesEntries(stateEntries, stStates);
         }
 
-        stExtends = stExtends['-st-extends'];
+        const extendedClass = currentClass['-st-extends'] as
+            | ImportSymbol
+            | ClassSymbol
+            | ElementSymbol;
+        currentClass = extendedClass && extendedClass._kind === 'class' ? extendedClass : undefined;
     }
 
     let stateEntriesString = '';

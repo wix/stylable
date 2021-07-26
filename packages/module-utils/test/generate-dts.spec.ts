@@ -293,7 +293,7 @@ describe('Generate DTS', function () {
                 expect(tk.typecheck('test.ts')).to.equal('');
             });
 
-            it('should warn about incorrect state that is overridden through a local extend', () => {
+            it('should warn about incorrect state value that is overridden through a local extend', () => {
                 tk.populate({
                     'test.st.css':
                         '.base { -st-states: state1; } .test { -st-states: state1(string); -st-extends: base; }',
@@ -310,7 +310,7 @@ describe('Generate DTS', function () {
                 );
             });
 
-            it('should not warn about the same state that being overridden through a local extend to the same type', () => {
+            it('should not warn about the same state that is being overridden through a local extend to the same type', () => {
                 tk.populate({
                     'test.st.css':
                         '.base { -st-states: state1(string); } .test { -st-states: state1(string); -st-extends: base; }',
@@ -326,6 +326,7 @@ describe('Generate DTS', function () {
             });
 
             it('should warn about state override from imported extend', () => {
+                // inherited state overrides only work in the same stylesheet
                 tk.populate({
                     'base.st.css': '.part {stStates: state1}',
                     'test.st.css': `

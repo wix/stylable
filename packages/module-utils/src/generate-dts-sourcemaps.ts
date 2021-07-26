@@ -1,5 +1,5 @@
 import { basename } from 'path';
-import { StylableMeta, valueMapping } from '@stylable/core';
+import { ClassSymbol, StylableMeta, valueMapping } from '@stylable/core';
 import { encode } from 'vlq';
 import {
     ClassesToken,
@@ -25,7 +25,7 @@ function getClassSrcPosition(className: string, meta: StylableMeta): Position | 
         });
     }
 
-    // root is auto defined by styable in each stylesheet even if not explicitly written by the user
+    // root is auto defined by stylable in each stylesheet even if not explicitly written by the user
     return className === 'root' && !res ? { line: 0, column: 0 } : res;
 }
 
@@ -106,19 +106,37 @@ type Position = {
     column: number;
 };
 
+function findDefiningClassName(stateToken: ClassStateToken, entryClassName: ClassSymbol) {
+    let currentClass = entryClassName;
+
+    while (currentClass['-st-states']) {
+        if (currentClass['-st-states']?.[stripQuotes(stateToken.stateName.value)] !== undefined) {
+            return currentClass.name;
+        }
+
+        if (currentClass['-st-extends']?._kind === 'class') {
+            currentClass = currentClass['-st-extends'];
+        }
+    }
+
+    return entryClassName.name;
+}
+
 function createStateLineMapping(
     stateTokens: ClassStateToken[],
-    srcClassName: string,
-    lastSrcLocation: Position,
+    entryClassName: string,
+    lastSrcPosition: Position,
     meta: StylableMeta
 ) {
     const res: { mapping: LinePartMapping[]; lastSrcPosition: Position } = {
         mapping: [],
-        lastSrcPosition: lastSrcLocation,
+        lastSrcPosition,
     };
     let prevDtsColumn = 0;
     for (const stateToken of stateTokens) {
         let stateSourcePosition: Position | undefined;
+
+        const srcClassName = findDefiningClassName(stateToken, meta.classes[entryClassName]);
 
         meta.rawAst.walkRules(`.${srcClassName}`, (rule) => {
             return rule.walkDecls(valueMapping.states, (decl) => {
@@ -185,10 +203,10 @@ export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
     const tokens = tokenizeDTS(dtsContent);
     const mapping: Record<number, LineMapping> = {};
     const lines = dtsContent.split('\n');
-    let lastSrcLocation: Position = { line: 0, column: 0 };
+    let lastSrcPosition: Position = { line: 0, column: 0 };
 
     // each line represents one item (classes, vars, etc..)
-    // to be mapped to one location in the source
+    // to be mapped to one position in the source
     for (const dtsLine of lines.keys()) {
         const resToken = findTokenForLine(dtsLine, tokens);
 
@@ -214,10 +232,10 @@ export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
                 if (currentSrcPosition) {
                     mapping[dtsLine] = createLineMapping(
                         4, // top-level object property offset
-                        currentSrcPosition.line - lastSrcLocation.line,
-                        currentSrcPosition.column - lastSrcLocation.column
+                        currentSrcPosition.line - lastSrcPosition.line,
+                        currentSrcPosition.column - lastSrcPosition.column
                     );
-                    lastSrcLocation = { ...currentSrcPosition };
+                    lastSrcPosition = { ...currentSrcPosition };
                 }
             } else if (resToken.type === 'states') {
                 const classSourceName = getClassSourceName(
@@ -229,10 +247,10 @@ export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
                     const stateRes = createStateLineMapping(
                         resToken.token.classStates,
                         stripQuotes(classSourceName),
-                        lastSrcLocation,
+                        lastSrcPosition,
                         meta
                     );
-                    lastSrcLocation = stateRes.lastSrcPosition;
+                    lastSrcPosition = stateRes.lastSrcPosition;
                     mapping[dtsLine] = stateRes.mapping;
                 }
             }

@@ -179,6 +179,85 @@ describe('.d.ts source-maps', () => {
         });
     });
 
+    it('maps locally extended states in the ".d.ts" to their positions in the original ".st.css" file', async () => {
+        const res = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: deindent(`
+                    .test { -st-states: state; -st-extends: testBase1; }
+                    .testBase1 { -st-states: state2; -st-extends: testBase2; }
+                    .testBase2 { -st-states: state3; }
+                    `),
+                },
+            },
+        });
+
+        const dtsText = generateDTSContent(res);
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta);
+
+        sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
+        const state1OriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'state"?:') // source mapping starts after the first double quote
+        );
+        const state2OriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'state2"?:')
+        );
+        const state3OriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'state3"?:')
+        );
+
+        expect(state1OriginalPosition).to.eql({
+            line: 2,
+            column: 8,
+            source: 'entry.st.css',
+            name: null,
+        });
+        expect(state2OriginalPosition).to.eql({
+            line: 3,
+            column: 13,
+            source: 'entry.st.css',
+            name: null,
+        });
+        expect(state3OriginalPosition).to.eql({
+            line: 4,
+            column: 13,
+            source: 'entry.st.css',
+            name: null,
+        });
+    });
+
+    it('maps locally overridden states in the ".d.ts" to their "top-most" definition in the original ".st.css" file', async () => {
+        const res = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: deindent(`
+                    .test { -st-states: sameState(string); -st-extends: testBase1; }
+                    .testBase1 { -st-states: sameState(number); }
+                    `),
+                },
+            },
+        });
+
+        const dtsText = generateDTSContent(res);
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta);
+
+        sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
+        const state1OriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'sameState"?:') // source mapping starts after the first double quote
+        );
+
+        expect(state1OriginalPosition).to.eql({
+            line: 2,
+            column: 8,
+            source: 'entry.st.css',
+            name: null,
+        });
+    });
+
     it('maps a complex example to its positions in the original ".st.css" file', async () => {
         const res = generateStylableResult({
             entry: `/entry.st.css`,
