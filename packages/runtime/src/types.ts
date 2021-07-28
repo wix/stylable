@@ -1,8 +1,8 @@
 export type StateValue = boolean | number | string | undefined;
 
 export interface ClassesMap {
-    root: string,
-    [className: string]: string
+    root: string;
+    [className: string]: string;
 }
 
 export interface StateMap {
