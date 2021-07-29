@@ -204,7 +204,7 @@ export class Provider {
                         /**/
                     }
 
-                    let filePath;
+                    let filePath: string | undefined;
 
                     if (resolved && resolved._kind !== 'js') {
                         filePath = resolved.meta.source;
