@@ -246,12 +246,12 @@ describe('.d.ts source-maps', () => {
         const sourcemapText = generateDTSSourceMap(dtsText, res.meta);
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
-        const state1OriginalPosition = sourceMapConsumer.originalPositionFor(
+        const sameStateOriginalPosition = sourceMapConsumer.originalPositionFor(
             getPosition(dtsText, 'sameState"?:') // source mapping starts after the first double quote
         );
 
-        expect(state1OriginalPosition).to.eql({
-            line: 2,
+        expect(sameStateOriginalPosition).to.eql({
+            line: 2, // expect .test class (1 based index)
             column: 8,
             source: 'entry.st.css',
             name: null,
