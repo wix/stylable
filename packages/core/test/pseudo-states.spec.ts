@@ -626,6 +626,58 @@ describe('pseudo-states', () => {
                 });
             });
 
+            it('should warn when pseudo-class expects params but none was given', () => {
+                const config = {
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: state1(string);
+                            }
+                            |.my-class:state1 {}
+                            `,
+                        },
+                    },
+                }
+
+                const res = expectWarningsFromTransform(config, [
+                    {
+                        message: 'pseudo-state "state1" expects a parameter of type string but none was given',
+                        file: '/entry.st.css',
+                        severity: 'warning',
+                    }
+                ])
+
+                expect(res).to.have.styleRules({
+                    1: '.entry__my-class.entry---state1-0- {}',
+                });
+            })
+
+            it('should not warn when pseudo-class does not expect a params', () => {
+                const config = {
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: state1;
+                            }
+                            .my-class:state1 {}
+                            `,
+                        },
+                    },
+                }
+
+                const res = expectWarningsFromTransform(config, [])
+
+                expect(res).to.have.styleRules({
+                    1: '.entry__my-class.entry--state1 {}',
+                });
+            })
+
             it('should strip quotation marks when transform any state parameter', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,

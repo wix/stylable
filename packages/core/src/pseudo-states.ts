@@ -295,6 +295,14 @@ function resolveStateValue(
         node.content || stateDef.defaultValue
     );
 
+    if (!actualParam && rule) {
+        diagnostics.warn(
+            rule,
+            `pseudo-state "${name}" expects a parameter of type ${stateDef.type} but none was given`,
+            { word: actualParam }
+        );
+    }
+
     const validator = systemValidators[stateDef.type];
 
     let stateParamOutput;
