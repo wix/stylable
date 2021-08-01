@@ -544,6 +544,29 @@ describe('pseudo-states', () => {
         });
 
         describe('boolean', () => {
+            it('should resolve boolean pseudo-state', () => {
+                const config = {
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: state1;
+                            }
+                            .my-class:state1 {}
+                            `,
+                        },
+                    },
+                }
+
+                const res = expectWarningsFromTransform(config, [])
+
+                expect(res).to.have.styleRules({
+                    1: '.entry__my-class.entry--state1 {}',
+                });
+            })
+
             it('should resolve nested pseudo-states', () => {
                 const res = generateStylableResult({
                     entry: '/entry.st.css',
@@ -652,29 +675,6 @@ describe('pseudo-states', () => {
 
                 expect(res).to.have.styleRules({
                     1: '.entry__my-class.entry---state1-0- {}',
-                });
-            })
-
-            it('should not warn when pseudo-class does not expect a params', () => {
-                const config = {
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                            .my-class {
-                                -st-states: state1;
-                            }
-                            .my-class:state1 {}
-                            `,
-                        },
-                    },
-                }
-
-                const res = expectWarningsFromTransform(config, [])
-
-                expect(res).to.have.styleRules({
-                    1: '.entry__my-class.entry--state1 {}',
                 });
             })
 
