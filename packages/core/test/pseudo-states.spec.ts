@@ -667,9 +667,38 @@ describe('pseudo-states', () => {
 
                 const res = expectWarningsFromTransform(config, [
                     {
-                        message: 'pseudo-state "state1" defined with unknown type: "string"',
+                        message: 'pseudo-state "state1" expected argument of type string but got none',
                         file: '/entry.st.css',
-                        severity: 'error',
+                        severity: 'warning',
+                    }
+                ])
+
+                expect(res).to.have.styleRules({
+                    1: '.entry__my-class.entry---state1-0- {}',
+                });
+            })
+
+            it('should warn when pseudo-class invoked and expects params but none was given', () => {
+                const config = {
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: state1(string);
+                            }
+                            |.my-class:state1() {}
+                            `,
+                        },
+                    },
+                }
+
+                const res = expectWarningsFromTransform(config, [
+                    {
+                        message: 'pseudo-state "state1" expected argument of type string but got none',
+                        file: '/entry.st.css',
+                        severity: 'warning',
                     }
                 ])
 

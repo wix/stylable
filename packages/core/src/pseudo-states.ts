@@ -21,6 +21,8 @@ export const stateErrors = {
         `pseudo-state "${name}" defined with unknown type: "${type}"`,
     TOO_MANY_STATE_TYPES: (name: string, types: string[]) =>
         `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
+    NO_STATE_ARGUMENT_GIVEN: (name: string, type: string) =>
+        `pseudo-state "${name}" expected argument of type ${type} but got none`,
     NO_STATE_TYPE_GIVEN: (name: string) =>
         `pseudo-state "${name}" expected a definition of a single type, but received none`,
     TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) =>
@@ -295,10 +297,10 @@ function resolveStateValue(
         node.content || stateDef.defaultValue
     );
 
-    if (!actualParam && rule) {
-        diagnostics.error(
+    if (rule && !node.content && !stateDef.defaultValue) {
+        diagnostics.warn(
             rule,
-            stateErrors.UNKNOWN_STATE_TYPE(name, stateDef.type),
+            stateErrors.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type),
             { word: actualParam }
         );
     }
