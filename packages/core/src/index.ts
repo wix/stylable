@@ -15,7 +15,14 @@ export * from './stylable-assets';
 export * from './functions';
 export * from './custom-values';
 export * from './state-validators';
-export * from './native-reserved-lists';
+export {
+    isCssNativeFunction,
+    nativeFunctions,
+    nativeFunctionsDic,
+    nativePseudoClasses,
+    nativePseudoElements,
+    reservedKeyFrames,
+} from './native-reserved-lists';
 export * from './resolve-namespace-factories';
 export * from './module-resolver';
 export * from './report-diagnostic';

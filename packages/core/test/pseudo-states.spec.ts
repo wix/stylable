@@ -8,8 +8,10 @@ import {
     expectWarningsFromTransform,
     generateStylableResult,
     processSource,
+    testInlineExpects,
 } from '@stylable/core-test-kit';
 import { processorWarnings, valueMapping, nativePseudoClasses, pseudoStates } from '@stylable/core';
+import { reservedPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -26,7 +28,37 @@ describe('pseudo-states', () => {
     describe('process', () => {
         // What does it do?
         // Works in the scope of a single file, collecting state definitions for later usage
-
+        describe(`reserved pseudo classes`, () => {
+            reservedPseudoClasses.forEach((name) => {
+                it(`should NOT collect "${name}"`, () => {
+                    const { classes } = processSource(
+                        `
+                        .root {
+                            -st-states: custom-only, ${name};
+                        }`,
+                        { from: 'path/to/style.css' }
+                    );
+                    expect(classes).to.flatMatch({
+                        root: {
+                            [valueMapping.states]: {
+                                'custom-only': null,
+                            },
+                        },
+                    });
+                    expectWarnings(
+                        `.root{
+                            |-st-states: $${name}$|;
+                        }`,
+                        [
+                            {
+                                message: stateErrors.RESERVED_NATIVE_STATE(name),
+                                file: 'main.css',
+                            },
+                        ]
+                    );
+                });
+            });
+        });
         describe('boolean', () => {
             it('should collect state definitions as null (for boolean)', () => {
                 const { classes, diagnostics } = processSource(
@@ -1292,6 +1324,31 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css',
                         },
                     ]);
+                });
+
+                it('should transform state param ignoring possible selector symbols', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .abc {}
+                                .my-class {
+                                    -st-states: state1(string);
+                                }
+                                /* @check .entry__my-class.entry---state1-4-\\.abc */
+                                .my-class:state1(.abc) {}
+                                `,
+                            },
+                        },
+                    });
+
+                    testInlineExpects(res.meta.outputAst!);
+                    expect(
+                        res.meta.diagnostics.reports,
+                        'no diagnostics reported for native states'
+                    ).to.eql([]);
                 });
 
                 describe('specific validators', () => {

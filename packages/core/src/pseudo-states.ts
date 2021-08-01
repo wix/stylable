@@ -17,6 +17,7 @@ import { groupValues, listOptions, MappedStates } from './stylable-value-parsers
 import { valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
+import { reservedPseudoClasses } from './native-reserved-lists';
 import cssesc from 'cssesc';
 
 export const stateMiddleDelimiter = '-';
@@ -37,6 +38,7 @@ export const stateErrors = {
         )}"`,
     STATE_STARTS_WITH_HYPHEN: (name: string) =>
         `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`,
+    RESERVED_NATIVE_STATE: (name: string) => `state "${name}" is reserved for native pseudo-class`,
 };
 
 // PROCESS
@@ -57,6 +59,11 @@ export function processPseudoStates(
             diagnostics.error(decl, stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
                 word: stateDefinition.value,
             });
+        } else if (reservedPseudoClasses.includes(stateDefinition.value)) {
+            diagnostics.warn(decl, stateErrors.RESERVED_NATIVE_STATE(stateDefinition.value), {
+                word: stateDefinition.value,
+            });
+            return;
         }
 
         if (stateDefinition.type === 'function') {

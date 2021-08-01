@@ -580,8 +580,28 @@ export class StylableTransformer {
                 }
             }
         } else if (node.type === 'pseudo_class') {
+            // find matching custom state
+            let foundCustomState = false;
+            for (const { symbol, meta } of currentAnchor.resolved) {
+                const states = symbol[valueMapping.states];
+                if (states && hasOwnProperty.call(states, node.value)) {
+                    foundCustomState = true;
+                    // transform custom state
+                    setStateToNode(
+                        states,
+                        meta,
+                        node.value,
+                        node,
+                        meta.namespace,
+                        this.resolver,
+                        this.diagnostics,
+                        context.rule
+                    );
+                    break;
+                }
+            }
             // handle nested pseudo classes
-            if (node.nodes) {
+            if (node.nodes && !foundCustomState) {
                 if (node.value === 'global') {
                     // :global(.a) -> .a
                     if (transformGlobals) {
@@ -608,28 +628,9 @@ export class StylableTransformer {
                     }
                 }
             }
-            //
-            let found = false;
-            for (const { symbol, meta } of currentAnchor.resolved) {
-                const states = symbol[valueMapping.states];
-                if (states && hasOwnProperty.call(states, node.value)) {
-                    found = true;
-
-                    setStateToNode(
-                        states,
-                        meta,
-                        node.value,
-                        node,
-                        meta.namespace,
-                        this.resolver,
-                        this.diagnostics,
-                        context.rule
-                    );
-                    break;
-                }
-            }
+            // warn unknown state
             if (
-                !found &&
+                !foundCustomState &&
                 !nativePseudoClasses.includes(node.value) &&
                 !isVendorPrefixed(node.value) &&
                 !this.isDuplicateStScopeDiagnostic(context)
