@@ -757,6 +757,31 @@ describe('pseudo-states', () => {
                 });
             });
 
+            it('should support default values when invoked', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: stateWithDefault(string) aDefaultValue;
+                            }
+                            .my-class:stateWithDefault() {}
+                            `,
+                        },
+                    },
+                });
+
+                expect(
+                    res.meta.diagnostics.reports,
+                    'no diagnostics reported for native states'
+                ).to.eql([]);
+                expect(res).to.have.styleRules({
+                    1: '.entry__my-class.entry---stateWithDefault-13-aDefaultValue',
+                });
+            });
+
             describe('string', () => {
                 it('should transform string type', () => {
                     const res = generateStylableResult({
