@@ -644,7 +644,7 @@ describe('pseudo-states', () => {
 
                 const res = expectWarningsFromTransform(config, [
                     {
-                        message: 'pseudo-state "state1" expects a parameter of type string but none was given',
+                        message: 'pseudo-state "state1" defined with unknown type: "string"',
                         file: '/entry.st.css',
                         severity: 'error',
                     }
