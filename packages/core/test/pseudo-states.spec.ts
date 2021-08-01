@@ -646,7 +646,7 @@ describe('pseudo-states', () => {
                     {
                         message: 'pseudo-state "state1" expects a parameter of type string but none was given',
                         file: '/entry.st.css',
-                        severity: 'warning',
+                        severity: 'error',
                     }
                 ])
 

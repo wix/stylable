@@ -296,9 +296,9 @@ function resolveStateValue(
     );
 
     if (!actualParam && rule) {
-        diagnostics.warn(
+        diagnostics.error(
             rule,
-            `pseudo-state "${name}" expects a parameter of type ${stateDef.type} but none was given`,
+            stateErrors.UNKNOWN_STATE_TYPE(name, stateDef.type),
             { word: actualParam }
         );
     }
