@@ -16,7 +16,7 @@
     "@stylable/code-formatter": "^4.5.0",
     "@stylable/core": "^4.5.0",
     "css-selector-tokenizer": "^0.8.0",
-    "postcss": "^8.3.5",
+    "postcss": "^8.3.6",
     "postcss-value-parser": "^4.1.0",
     "vscode-css-languageservice": "^5.1.4",
     "vscode-languageserver": "^7.0.0",
@@ -38,5 +38,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/language-service",
   "homepage": "https://github.com/wix/stylable/tree/master/packages/language-service",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }

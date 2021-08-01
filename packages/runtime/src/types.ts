@@ -1,5 +1,10 @@
 export type StateValue = boolean | number | string | undefined;
 
+export interface ClassesMap {
+    root: string;
+    [className: string]: string;
+}
+
 export interface StateMap {
     [stateName: string]: StateValue;
 }
@@ -15,7 +20,7 @@ export interface InheritedAttributes {
 }
 
 export interface StylableExports {
-    classes: Record<string, string>;
+    classes: ClassesMap;
     keyframes: Record<string, string>;
     vars: Record<string, string>;
     stVars: Record<string, string>;

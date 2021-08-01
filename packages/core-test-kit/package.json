@@ -10,7 +10,7 @@
     "@stylable/core": "^4.5.0",
     "chai": "^4.3.4",
     "flat": "^5.0.2",
-    "postcss": "^8.3.5"
+    "postcss": "^8.3.6"
   },
   "files": [
     "dist",
@@ -27,5 +27,5 @@
   "repository": "https://github.com/wix/stylable/tree/master/packages/optimizer",
   "homepage": "https://stylable.io",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }

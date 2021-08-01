@@ -11,7 +11,7 @@
     "express": "^4.17.1",
     "memory-fs": "^0.5.0",
     "node-eval": "^2.0.0",
-    "playwright-core": "^1.12.3",
+    "playwright-core": "^1.13.1",
     "rimraf": "^3.0.2"
   },
   "files": [
@@ -28,5 +28,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/e2e-test-kit",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }

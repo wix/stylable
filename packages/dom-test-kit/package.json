@@ -26,5 +26,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/dom-test-kit",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }
