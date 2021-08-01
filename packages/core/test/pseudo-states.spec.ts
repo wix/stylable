@@ -778,7 +778,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__my-class.entry---stateWithDefault-13-aDefaultValue',
+                    1: '.entry__my-class.entry---stateWithDefault-13-aDefaultValue {}',
                 });
             });
 
