@@ -558,14 +558,14 @@ describe('pseudo-states', () => {
                             `,
                         },
                     },
-                }
+                };
 
-                const res = expectWarningsFromTransform(config, [])
+                const res = expectWarningsFromTransform(config, []);
 
                 expect(res).to.have.styleRules({
                     1: '.entry__my-class.entry--state1 {}',
                 });
-            })
+            });
 
             it('should resolve nested pseudo-states', () => {
                 const res = generateStylableResult({
@@ -2061,20 +2061,20 @@ describe('pseudo-states', () => {
                         `,
                     },
                 },
-            }
+            };
 
             const res = expectWarningsFromTransform(config, [
                 {
-                    message: 'pseudo-state "state1" expected argument of type string but got none',
+                    message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
                     severity: 'warning',
-                }
-            ])
+                },
+            ]);
 
             expect(res).to.have.styleRules({
                 1: '.entry__my-class.entry---state1-0- {}',
             });
-        })
+        });
 
         it('should warn when pseudo-class invoked and expects params but none was given', () => {
             const config = {
@@ -2090,20 +2090,20 @@ describe('pseudo-states', () => {
                         `,
                     },
                 },
-            }
+            };
 
             const res = expectWarningsFromTransform(config, [
                 {
-                    message: 'pseudo-state "state1" expected argument of type string but got none',
+                    message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
                     severity: 'warning',
-                }
-            ])
+                },
+            ]);
 
             expect(res).to.have.styleRules({
                 1: '.entry__my-class.entry---state1-0- {}',
             });
-        })
+        });
 
         it('should trigger a warning when trying to target an unknown state and keep the state', () => {
             const config = {
