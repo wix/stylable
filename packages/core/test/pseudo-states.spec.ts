@@ -649,7 +649,7 @@ describe('pseudo-states', () => {
                 });
             });
 
-            it('should warn when pseudo-class expects params but none was given', () => {
+            it('should warn when pseudo-class expects params but none was given (no default)', () => {
                 const config = {
                     entry: `/entry.st.css`,
                     files: {
@@ -2104,6 +2104,8 @@ describe('pseudo-states', () => {
                 ]
             );
         });
+
+        
 
         it('should trigger a warning when trying to target an unknown state and keep the state', () => {
             const config = {
