@@ -2057,7 +2057,7 @@ describe('pseudo-states', () => {
                         .my-class {
                             -st-states: state1(string);
                         }
-                        |.my-class:state1 {}
+                        |.my-class:$state1$ {}
                         `,
                     },
                 },
@@ -2086,7 +2086,7 @@ describe('pseudo-states', () => {
                         .my-class {
                             -st-states: state1(string);
                         }
-                        |.my-class:state1() {}
+                        |.my-class:$state1$() {}
                         `,
                     },
                 },

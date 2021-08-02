@@ -299,7 +299,7 @@ function resolveStateValue(
 
     if (rule && !node.content && !stateDef.defaultValue) {
         diagnostics.warn(rule, stateErrors.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
-            word: actualParam,
+            word: name,
         });
     }
 
