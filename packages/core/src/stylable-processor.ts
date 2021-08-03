@@ -300,6 +300,7 @@ export class StylableProcessor {
 
                     break;
                 case 'property':
+                    this.checkRedeclareSymbol(atRule.params, atRule);
                     this.addCSSVarDefinition(atRule);
                     break;
                 case 'st-global-custom-property': {
@@ -643,7 +644,6 @@ export class StylableProcessor {
 
     protected addCSSVarDefinition(node: postcss.Declaration | postcss.AtRule) {
         const varName = node.type === 'atrule' ? node.params : node.prop;
-        this.checkRedeclareSymbol(varName, node);
         this.addCSSVar(varName.trim(), node);
     }
 
