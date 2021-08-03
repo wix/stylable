@@ -643,6 +643,7 @@ export class StylableProcessor {
 
     protected addCSSVarDefinition(node: postcss.Declaration | postcss.AtRule) {
         const varName = node.type === 'atrule' ? node.params : node.prop;
+        this.checkRedeclareSymbol(varName, node);
         this.addCSSVar(varName.trim(), node);
     }
 

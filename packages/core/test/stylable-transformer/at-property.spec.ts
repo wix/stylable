@@ -1,6 +1,13 @@
-import { expect } from 'chai';
+import { processorWarnings } from '@stylable/core';
+import {
+    expectWarningsFromTransform,
+    generateStylableResult,
+    styleRules,
+} from '@stylable/core-test-kit';
+import chai, { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { generateStylableResult } from '@stylable/core-test-kit';
+
+chai.use(styleRules);
 
 describe('@property support', () => {
     it('should transform @property definition', () => {
@@ -66,5 +73,37 @@ describe('@property support', () => {
         expect(exports.vars).to.eql({
             'my-var': '--entry-my-var',
         });
+    });
+    it('should detect existing css variable and show warning', () => {
+        const config = {
+            entry: `/entry.st.css`,
+            files: {
+                '/a.st.css': {
+                    namespace: 'a',
+                    content: `
+                        .root {
+                            --my-var: red;
+                        }
+                    `,
+                },
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        @st-import [--my-var] from "./a.st.css";
+
+                        |@property $--my-var$|;
+                        `,
+                },
+            },
+        };
+
+        const res = expectWarningsFromTransform(config, [
+            {
+                file: '/entry.st.css',
+                message: processorWarnings.REDECLARE_SYMBOL('--my-var'),
+            },
+        ]);
+
+        expect(res).to.have.styleRules(['-a--my-var']);
     });
 });
