@@ -1,13 +1,7 @@
 import { processorWarnings } from '@stylable/core';
-import {
-    expectWarningsFromTransform,
-    generateStylableResult,
-    styleRules,
-} from '@stylable/core-test-kit';
-import chai, { expect } from 'chai';
+import { expectWarningsFromTransform, generateStylableResult } from '@stylable/core-test-kit';
+import { expect } from 'chai';
 import type * as postcss from 'postcss';
-
-chai.use(styleRules);
 
 describe('@property support', () => {
     it('should transform @property definition', () => {
@@ -97,13 +91,11 @@ describe('@property support', () => {
             },
         };
 
-        const res = expectWarningsFromTransform(config, [
+        expectWarningsFromTransform(config, [
             {
                 file: '/entry.st.css',
                 message: processorWarnings.REDECLARE_SYMBOL('--my-var'),
             },
         ]);
-
-        expect(res).to.have.styleRules(['-a--my-var']);
     });
 });
