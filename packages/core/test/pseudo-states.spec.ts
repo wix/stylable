@@ -2027,34 +2027,6 @@ describe('pseudo-states', () => {
                 });
             });
         });
-
-        describe('state inside selector list', () => {
-            it('should scope multiple states from none root anchor', () => {
-                const result = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                .a {
-                                    -st-states: b, c;
-                                }
-
-                                .a:is(:b, :c) {}
-                            `,
-                        },
-                    },
-                });
-
-                expect(
-                    result.meta.diagnostics.reports,
-                    'no diagnostics reported for imported states'
-                ).to.eql([]);
-                expect(result).to.have.styleRules({
-                    1: '.entry__a:is(.entry--b, .entry--c) {}',
-                });
-            });
-        });
     });
 
     describe('diagnostics', () => {
