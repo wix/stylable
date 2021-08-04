@@ -18,7 +18,7 @@ export function mediaQuery(chai: Chai.ChaiStatic, util: Chai.ChaiUtils) {
 
         const { outputAst } = actual.meta;
         if (!outputAst) {
-            throw new Error(`expected result to be transfromed - missing outputAst on meta`);
+            throw new Error(`expected result to be transformed - missing outputAst on meta`);
         }
 
         const nodes = outputAst.nodes;
