@@ -465,6 +465,7 @@ export class StylableTransformer {
                 resolved: context.metaParts.class[originMeta.root],
             });
         }
+        const startedAnchor = context.currentAnchor!;
         // loop over selectors
         for (const selectorChunks of selectorListChunks) {
             context.elements.push([]);
@@ -481,11 +482,8 @@ export class StylableTransformer {
                 }
             }
             if (selectorListChunks.length - 1 > context.selectorIndex) {
-                context.initRootAnchor({
-                    name: originMeta.root,
-                    type: 'class',
-                    resolved: context.metaParts.class[originMeta.root],
-                });
+                // reset current anchor
+                context.initRootAnchor(startedAnchor);
             }
         }
         const outputAst = mergeChunks(selectorListChunks);
@@ -719,8 +717,10 @@ export class StylableTransformer {
     private resolveMetaParts(meta: StylableMeta): MetaParts {
         let metaParts = this.metaParts.get(meta);
         if (!metaParts) {
-            const resolvedClasses: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> =
-                {};
+            const resolvedClasses: Record<
+                string,
+                Array<CSSResolve<ClassSymbol | ElementSymbol>>
+            > = {};
             for (const className of Object.keys(meta.classes)) {
                 resolvedClasses[className] = this.resolver.resolveExtends(
                     meta,
@@ -767,8 +767,10 @@ export class StylableTransformer {
                 );
             }
 
-            const resolvedElements: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> =
-                {};
+            const resolvedElements: Record<
+                string,
+                Array<CSSResolve<ClassSymbol | ElementSymbol>>
+            > = {};
             for (const k of Object.keys(meta.elements)) {
                 resolvedElements[k] = this.resolver.resolveExtends(meta, k, true);
             }

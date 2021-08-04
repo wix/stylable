@@ -799,6 +799,36 @@ describe('Stylable postcss transform (Scoping)', () => {
 
             testInlineExpects(result);
         });
+
+        it('should scope multiple pseudo-elements that extended none root anchor', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @st-import Btn from "./button.st.css";
+
+                        .a {
+                            -st-extends: Btn;
+                        } 
+
+                        /* @check .style__a:is( .button__label,  .button__icon) */
+                        .a:is(::label, ::icon) {}
+                        `,
+                    },
+                    '/button.st.css': {
+                        namespace: 'button',
+                        content: `
+                        .label {}
+                        .icon {}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
     });
 
     describe('scoped classes', () => {
