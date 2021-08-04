@@ -1,11 +1,11 @@
-import type {
+import {
     ClassSymbol,
-    ElementSymbol,
-    ImportSymbol,
     MappedStates,
     StateParsedValue,
     StylableMeta,
     StylableResults,
+    StylableSymbol,
+    valueMapping,
 } from '@stylable/core';
 
 const SPACING = ' '.repeat(4);
@@ -33,16 +33,13 @@ function collectLocalStates(cls: ClassSymbol) {
     let currentClass: ClassSymbol | undefined = cls;
 
     while (currentClass) {
-        const stStates = currentClass['-st-states'];
+        const stStates = currentClass[valueMapping.states];
 
         if (stStates) {
             addStatesEntries(stateEntries, stStates);
         }
 
-        const extendedClass = currentClass['-st-extends'] as
-            | ImportSymbol
-            | ClassSymbol
-            | ElementSymbol;
+        const extendedClass = currentClass[valueMapping.extends] as StylableSymbol;
         currentClass = extendedClass && extendedClass._kind === 'class' ? extendedClass : undefined;
     }
 

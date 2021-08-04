@@ -109,13 +109,16 @@ type Position = {
 function findDefiningClassName(stateToken: ClassStateToken, entryClassName: ClassSymbol) {
     let currentClass = entryClassName;
 
-    while (currentClass['-st-states']) {
-        if (currentClass['-st-states']?.[stripQuotes(stateToken.stateName.value)] !== undefined) {
+    while (currentClass[valueMapping.states]) {
+        if (
+            currentClass[valueMapping.states]?.[stripQuotes(stateToken.stateName.value)] !==
+            undefined
+        ) {
             return currentClass.name;
         }
 
-        if (currentClass['-st-extends']?._kind === 'class') {
-            currentClass = currentClass['-st-extends'];
+        if (currentClass[valueMapping.extends]?._kind === 'class') {
+            currentClass = currentClass[valueMapping.extends] as ClassSymbol;
         }
     }
 

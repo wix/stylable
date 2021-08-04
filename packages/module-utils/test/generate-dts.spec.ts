@@ -293,7 +293,7 @@ describe('Generate DTS', function () {
                 expect(tk.typecheck('test.ts')).to.equal('');
             });
 
-            it('should warn about incorrect state value that is overridden through a local extend', () => {
+            it('should warn about when an extended, overridden state value is of an incorrect type', () => {
                 tk.populate({
                     'test.st.css':
                         '.base { -st-states: state1; } .test { -st-states: state1(string); -st-extends: base; }',
@@ -310,7 +310,7 @@ describe('Generate DTS', function () {
                 );
             });
 
-            it('should not warn about the same state that is being overridden through a local extend to the same type', () => {
+            it('should not warn when an extended, overridden state value is of a correct type', () => {
                 tk.populate({
                     'test.st.css':
                         '.base { -st-states: state1(string); } .test { -st-states: state1(string); -st-extends: base; }',
