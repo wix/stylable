@@ -4,6 +4,39 @@ import { generateStylableRoot, testInlineExpects } from '@stylable/core-test-kit
 import { createWarningRule } from '@stylable/core';
 
 describe('Stylable postcss transform (Scoping)', () => {
+    describe('scoped pseudo-classes', () => {
+        it('should scope selector list when the anchor is not root', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @st-import Btn from "./button.st.css";
+
+                        .a {
+                            -st-extends: Btn;
+                            -st-states: b, c;
+                        } 
+
+                        /* @check .style__a:is( .button__label,  .button__icon, .style--b, .style--c) */
+                        .a:is(::label, ::icon, :b, :c) {}
+                        `,
+                    },
+                    '/button.st.css': {
+                        namespace: 'button',
+                        content: `
+                        .label {}
+                        .icon {}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
+    });
+
     describe('scoped pseudo-elements', () => {
         it('should perserve native elements and its native pseudo element', () => {
             const result = generateStylableRoot({
@@ -792,36 +825,6 @@ describe('Stylable postcss transform (Scoping)', () => {
                         content: `
                             .partA {}
                             .partB {}
-                        `,
-                    },
-                },
-            });
-
-            testInlineExpects(result);
-        });
-
-        it('should scope multiple pseudo-elements that extended none root anchor', () => {
-            const result = generateStylableRoot({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        namespace: 'style',
-                        content: `
-                        @st-import Btn from "./button.st.css";
-
-                        .a {
-                            -st-extends: Btn;
-                        } 
-
-                        /* @check .style__a:is( .button__label,  .button__icon) */
-                        .a:is(::label, ::icon) {}
-                        `,
-                    },
-                    '/button.st.css': {
-                        namespace: 'button',
-                        content: `
-                        .label {}
-                        .icon {}
                         `,
                     },
                 },
