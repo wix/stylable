@@ -300,6 +300,7 @@ export class StylableProcessor {
 
                     break;
                 case 'property':
+                    this.checkRedeclareSymbol(atRule.params, atRule);
                     this.addCSSVarDefinition(atRule);
                     break;
                 case 'st-global-custom-property': {
