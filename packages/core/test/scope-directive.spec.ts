@@ -112,6 +112,28 @@ describe('@st-scope', () => {
             );
         });
 
+        it('should support no scope param', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-scope {
+                            html,body {}
+                            .part1 {}
+                        }
+                        `,
+                    },
+                },
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal('html,body');
+            expect((meta.outputAst!.nodes[1] as Rule).selector).to.equal('.entry__part1');
+        });
+
         it('should support multiple selectors', () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
@@ -544,30 +566,6 @@ describe('@st-scope', () => {
             expect((meta.outputAst!.first as Rule).selector).to.equal(
                 '.entry__root::unknownPart .entry__part::unknownPart'
             );
-        });
-        it('should warn about a missing scoping parameter', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        |@st-scope {
-                            .part {}
-                        }|
-                        `,
-                    },
-                },
-            };
-
-            const { meta } = expectWarningsFromTransform(config, [
-                {
-                    message: processorWarnings.MISSING_SCOPING_PARAM(),
-                    file: '/entry.st.css',
-                    severity: 'warning',
-                },
-            ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');
         });
 
         it('should warn about vars definition inside a scope', () => {

@@ -133,9 +133,6 @@ export const processorWarnings = {
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
     },
-    MISSING_SCOPING_PARAM() {
-        return '"@st-scope" missing scoping selector parameter';
-    },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
     },
@@ -925,7 +922,6 @@ export class StylableProcessor {
     private handleScope(atRule: postcss.AtRule) {
         const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
         this.handleRule(scopingRule, true);
-        validateScopingSelector(atRule, scopingRule, this.diagnostics);
 
         if (scopingRule.selector) {
             atRule.walkRules((rule) => {
@@ -961,16 +957,6 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
             path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
                 ? path.posix.resolve(dirPath, importPath)
                 : path.resolve(dirPath, importPath);
-    }
-}
-
-export function validateScopingSelector(
-    atRule: postcss.AtRule,
-    { selector: scopingSelector }: SRule,
-    diagnostics: Diagnostics
-) {
-    if (!scopingSelector) {
-        diagnostics.warn(atRule, processorWarnings.MISSING_SCOPING_PARAM());
     }
 }
 
