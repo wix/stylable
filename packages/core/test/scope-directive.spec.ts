@@ -112,7 +112,7 @@ describe('@st-scope', () => {
             );
         });
 
-        it('should support un scope (no param)', () => {
+        it('should support unscoped rules (no param)', () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
