@@ -17,8 +17,10 @@ export interface StylableConfig {
     projectRoot: string;
     fileSystem: MinimalFS;
     requireModule?: (path: string) => any;
+    /** @deprecated */
     delimiter?: string;
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
+    /** @deprecated */
     diagnostics?: Diagnostics;
     hooks?: TransformHooks;
     resolveOptions?: {
@@ -26,6 +28,7 @@ export interface StylableConfig {
         symlinks: boolean;
         [key: string]: any;
     };
+    /** @deprecated - check if statement is valid */
     optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
