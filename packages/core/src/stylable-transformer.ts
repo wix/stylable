@@ -26,7 +26,12 @@ import {
     convertToClass,
 } from './helpers/selector';
 import { validateRuleStateDefinition } from './helpers/custom-state';
-import type { SelectorNode, Selector, SelectorList } from '@tokey/css-selector-parser';
+import type {
+    SelectorNode,
+    Selector,
+    SelectorList,
+    FunctionalSelector,
+} from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule, findRule, getRuleScopeSelector } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
@@ -466,6 +471,7 @@ export class StylableTransformer {
                     this.handleChunkNode(context);
                 }
             }
+            // reset the anchor before the next selector
             if (selectorListChunks.length - 1 > context.selectorIndex) {
                 context.initRootAnchor({
                     name: originMeta.root,
@@ -492,6 +498,7 @@ export class StylableTransformer {
             ];
             context.setCurrentAnchor({ name: node.value, type: 'class', resolved });
             const { symbol, meta } = getOriginDefinition(resolved);
+            // TODO: move this to resolve meta parts
             if (context.originMeta === meta && symbol[valueMapping.states]) {
                 validateRuleStateDefinition(context.rule, meta, this.resolver, this.diagnostics);
             }
@@ -509,7 +516,7 @@ export class StylableTransformer {
             }
         } else if (node.type === 'pseudo_element') {
             if (node.value === ``) {
-                // partial psuedo elemennt: `.x::`
+                // partial pseudo element: `.x::`
                 // ToDo: currently the transformer corrects the css without warning,
                 // should stylable warn?
                 return;
@@ -725,16 +732,19 @@ export class StylableTransformer {
             );
         }
     }
-    private scopeClassNode(symbol: any, meta: StylableMeta, node: any, originMeta: any) {
-        if (symbol[valueMapping.global]) {
-            const globalMappedNodes = symbol[valueMapping.global];
-            flattenFunctionalSelector(node);
-            node.nodes = globalMappedNodes;
+    private scopeClassNode(
+        symbol: ElementSymbol | ClassSymbol,
+        meta: StylableMeta,
+        node: FunctionalSelector,
+        originMeta: StylableMeta
+    ) {
+        const stGlobal = symbol[valueMapping.global];
+        if (stGlobal) {
+            flattenFunctionalSelector(node).nodes = stGlobal;
             // ToDo: check if this is causes an issue with globals from an imported alias
-            this.addGlobalsToMeta(globalMappedNodes, originMeta);
+            this.addGlobalsToMeta(stGlobal, originMeta);
         } else {
-            convertToClass(node);
-            node.value = this.scopeEscape(symbol.name, meta.namespace);
+            convertToClass(node).value = this.scopeEscape(symbol.name, meta.namespace);
         }
     }
     private resolveMetaParts(meta: StylableMeta): MetaParts {
