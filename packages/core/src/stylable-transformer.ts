@@ -8,11 +8,7 @@ import type { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue, processDeclarationValue } from './functions';
-import {
-    nativePseudoClasses,
-    nativePseudoElements,
-    reservedKeyFrames,
-} from './native-reserved-lists';
+import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
 import { setStateToNode, stateErrors, validateStateDefinition } from './pseudo-states';
 import {
     createWarningRule,
@@ -38,6 +34,7 @@ import type {
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
+import { globalValue } from './utils';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -121,9 +118,6 @@ export const transformerWarnings = {
     },
     CANNOT_EXTEND_JS() {
         return 'JS import is not extendable';
-    },
-    KEYFRAME_NAME_RESERVED(name: string) {
-        return `keyframes "${name}" is reserved`;
     },
     UNKNOWN_IMPORT_ALIAS(name: string) {
         return `cannot use alias for unknown import "${name}"`;
@@ -288,18 +282,17 @@ export class StylableTransformer {
     public scopeKeyframes(ast: postcss.Root, meta: StylableMeta) {
         ast.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
-            if (~reservedKeyFrames.indexOf(name)) {
-                this.diagnostics.error(atRule, transformerWarnings.KEYFRAME_NAME_RESERVED(name), {
-                    word: name,
-                });
+
+            if (globalValue(name) === undefined) {
+                atRule.params = this.scope(name, meta.namespace);
             }
-            atRule.params = this.scope(name, meta.namespace);
         });
 
         const keyframesExports: Record<string, string> = {};
 
         Object.keys(meta.mappedKeyframes).forEach((key) => {
             const res = this.resolver.resolveKeyframes(meta, key);
+
             if (res) {
                 keyframesExports[key] = this.scope(res.symbol.alias, res.meta.namespace);
             }

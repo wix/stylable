@@ -42,6 +42,7 @@ import {
     valueMapping,
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
+import { reservedKeyFrames } from './native-reserved-lists';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -79,6 +80,9 @@ export const processorWarnings = {
     },
     REDECLARE_SYMBOL_KEYFRAMES(name: string) {
         return `redeclare keyframes symbol "${name}"`;
+    },
+    KEYFRAME_NAME_RESERVED(name: string) {
+        return `keyframes "${name}" is reserved`;
     },
     CANNOT_RESOLVE_EXTEND(name: string) {
         return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
@@ -278,11 +282,33 @@ export class StylableProcessor {
                                 );
                             }
 
+                            if (
+                                globalName !== undefined &&
+                                reservedKeyFrames.includes(globalName)
+                            ) {
+                                this.diagnostics.error(
+                                    atRule,
+                                    processorWarnings.KEYFRAME_NAME_RESERVED(globalName),
+                                    {
+                                        word: globalName,
+                                    }
+                                );
+                            } else if (reservedKeyFrames.includes(name)) {
+                                this.diagnostics.error(
+                                    atRule,
+                                    processorWarnings.KEYFRAME_NAME_RESERVED(name),
+                                    {
+                                        word: name,
+                                    }
+                                );
+                            }
+
                             this.checkRedeclareKeyframes(name, atRule);
                             this.meta.mappedKeyframes[name] = {
                                 _kind: 'keyframes',
                                 alias: name,
                                 name,
+                                globalName,
                             };
                         } else {
                             this.diagnostics.warn(

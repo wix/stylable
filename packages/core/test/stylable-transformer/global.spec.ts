@@ -1,6 +1,12 @@
+import {
+    Diagnostic,
+    expectWarningsFromTransform,
+    generateStylableResult,
+    generateStylableRoot,
+    testInlineExpects,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 
 describe('Stylable postcss transform (Global)', () => {
     it('should support :global()', () => {
@@ -140,5 +146,60 @@ describe('Stylable postcss transform (Global)', () => {
         expect((meta.outputAst!.nodes[6] as postcss.Rule).selector).to.equal(
             '.style__mixIntoMe .global-test2'
         );
+    });
+
+    describe('@keyframes', () => {
+        it('should not transform global keyframes', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+
+                        /* @check :global(global-name) */
+                        @keyframes :global(global-name) {
+                            from {}
+                            to {}
+                        }
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
+
+        it('should export global keyframe', () => {
+            const config = {
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @st-import [keyframes(globalName)] from "./a.st.css";
+
+                        /* @check .style__foo {animation-name: globalName;} */
+                        .foo {
+                            animation-name: globalName;
+                        }
+                        `,
+                    },
+                    '/a.st.css': {
+                        namespace: 'a',
+                        content: `
+                        @keyframes :global(globalName) {
+                            from {}
+                            to {}
+                        }
+                        
+                        `,
+                    },
+                },
+            };
+
+            testInlineExpects(generateStylableRoot(config));
+            expectWarningsFromTransform(config, []);
+        });
     });
 });
