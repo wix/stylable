@@ -46,8 +46,56 @@ describe('Definitions', () => {
         });
     });
 
-    describe('Imported elements', () => {
-        describe('Classes', () => {
+    describe('Imported', () => {
+        describe('Classes and Elements', () => {
+            it('should return definition of the path in an @st-import', () => {
+                const defs = asserters.getDefinition('definitions/st-imported-path.st.css');
+                expect(defs.length).to.equal(1);
+                const def = defs[0];
+                expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
+                expect(def.range).to.eql(createRange(0, 0, 0, 0));
+            });
+
+            it('should return definition of the default part in an @st-import', () => {
+                const defs = asserters.getDefinition('definitions/st-imported-default.st.css');
+                expect(defs.length).to.equal(1);
+                const def = defs[0];
+                expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
+                expect(def.range).to.eql(createRange(0, 0, 0, 0));
+            });
+
+            it('should return definition of the named in an @st-import (start)', () => {
+                const defs = asserters.getDefinition('definitions/st-imported-named-start.st.css');
+                expect(defs.length).to.equal(1);
+                const def = defs[0];
+                expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
+                expect(def.range).to.eql(createRange(4, 1, 4, 5));
+            });
+
+            it('should return definition of the named in an @st-import (end)', () => {
+                const defs = asserters.getDefinition('definitions/st-imported-named-end.st.css');
+                expect(defs.length).to.equal(1);
+                const def = defs[0];
+                expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
+                expect(def.range).to.eql(createRange(0, 1, 0, 7));
+            });
+
+            it('should return definition of the path in an -st-import', () => {
+                const defs = asserters.getDefinition('definitions/imported-path.st.css');
+                expect(defs.length).to.equal(1);
+                const def = defs[0];
+                expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
+                expect(def.range).to.eql(createRange(0, 0, 0, 0));
+            });
+
+            it('should return definition of the default part in an -st-import', () => {
+                const defs = asserters.getDefinition('definitions/imported-default.st.css');
+                expect(defs.length).to.equal(1);
+                const def = defs[0];
+                expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
+                expect(def.range).to.eql(createRange(8, 1, 8, 5));
+            });
+
             it('should return definition of imported class in -st-named', () => {
                 const defs = asserters.getDefinition('definitions/imported-class-named.st.css');
                 expect(defs.length).to.equal(1);
