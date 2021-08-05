@@ -33,7 +33,7 @@ describe('Stylable postcss process', () => {
         });
     });
 
-    it.only('warn on missing keyframes parameter', () => {
+    it('warn on missing keyframes parameter', () => {
         const { diagnostics } = processSource(`@keyframes {}`, { from: '/path/to/source' });
 
         expect(diagnostics.reports[0]).to.include({
