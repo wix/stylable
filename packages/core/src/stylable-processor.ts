@@ -8,6 +8,7 @@ import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
     isCompRoot,
+    isGlobal,
     isNested,
     isRootValid,
     parseSelector,
@@ -136,6 +137,9 @@ export const processorWarnings = {
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" missing scoping selector parameter';
     },
+    MISSING_KEYFRAMES_PARAM() {
+        return '"@keyframes" missing parameter';
+    },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
     },
@@ -259,12 +263,20 @@ export class StylableProcessor {
                     if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
                         this.meta.keyframes.push(atRule);
                         const { params: name } = atRule;
-                        this.checkRedeclareKeyframes(name, atRule);
-                        this.meta.mappedKeyframes[name] = {
-                            _kind: 'keyframes',
-                            alias: name,
-                            name: name,
-                        };
+
+                        if (name) {
+                            this.checkRedeclareKeyframes(name, atRule);
+                            this.meta.mappedKeyframes[name] = {
+                                _kind: 'keyframes',
+                                alias: name,
+                                name: name,
+                            };
+                        } else {
+                            this.diagnostics.warn(
+                                atRule,
+                                processorWarnings.MISSING_KEYFRAMES_PARAM()
+                            );
+                        }
                     } else {
                         this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
                     }
@@ -456,7 +468,7 @@ export class StylableProcessor {
                         locallyScoped = true;
                     }
                 }
-            } else if (type === 'nested-pseudo-class' && name === 'global') {
+            } else if (isGlobal(node)) {
                 return true;
             }
             return void 0;
