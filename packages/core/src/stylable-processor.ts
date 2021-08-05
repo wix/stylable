@@ -41,7 +41,7 @@ import {
     validateAllowedNodesUntil,
     valueMapping,
 } from './stylable-value-parsers';
-import { deprecated, filename2varname, stripQuotation } from './utils';
+import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -139,6 +139,9 @@ export const processorWarnings = {
     },
     MISSING_KEYFRAMES_PARAM() {
         return '"@keyframes" missing parameter';
+    },
+    MISSING_KEYFRAMES_PARAM_INSIDE_GLOBAL() {
+        return '"@keyframes" missing parameter inside ":global()"';
     },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
@@ -265,11 +268,21 @@ export class StylableProcessor {
                         const { params: name } = atRule;
 
                         if (name) {
+                            const globalName = globalValue(name);
+
+                            // No name inside :global (:global())
+                            if (globalName === '') {
+                                this.diagnostics.warn(
+                                    atRule,
+                                    processorWarnings.MISSING_KEYFRAMES_PARAM_INSIDE_GLOBAL()
+                                );
+                            }
+
                             this.checkRedeclareKeyframes(name, atRule);
                             this.meta.mappedKeyframes[name] = {
                                 _kind: 'keyframes',
                                 alias: name,
-                                name: name,
+                                name,
                             };
                         } else {
                             this.diagnostics.warn(

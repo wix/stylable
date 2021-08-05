@@ -2,6 +2,12 @@
 //     return namespace ? namespace + separator + name : name;
 // }
 
+export function globalValue(str: string) {
+    const match = str.match(/^:global\((.*?)\)$/);
+
+    return match?.[1];
+}
+
 export function stripQuotation(str: string) {
     return str.replace(/^['"](.*?)['"]$/g, '$1');
 }

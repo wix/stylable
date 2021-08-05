@@ -42,6 +42,17 @@ describe('Stylable postcss process', () => {
         });
     });
 
+    it('warn on missing keyframes parameter (global)', () => {
+        const { diagnostics } = processSource(`@keyframes :global() {}`, {
+            from: '/path/to/source',
+        });
+
+        expect(diagnostics.reports[0]).to.include({
+            type: 'warning',
+            message: processorWarnings.MISSING_KEYFRAMES_PARAM_INSIDE_GLOBAL(),
+        });
+    });
+
     it('error on invalid rule nesting', () => {
         const { diagnostics } = processSource(
             `
@@ -353,11 +364,15 @@ describe('Stylable postcss process', () => {
                 from{}
                 to{}
             }
+            @keyframes :global(global-name) {
+                from{}
+                to{}
+            }
         `,
             { from: 'path/to/style.css' }
         );
 
-        expect(result.keyframes.length).to.eql(2);
+        expect(result.keyframes.length).to.eql(3);
     });
 
     it('should collect mixins on rules', () => {
