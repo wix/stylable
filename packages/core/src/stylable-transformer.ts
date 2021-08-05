@@ -719,8 +719,10 @@ export class StylableTransformer {
     private resolveMetaParts(meta: StylableMeta): MetaParts {
         let metaParts = this.metaParts.get(meta);
         if (!metaParts) {
-            const resolvedClasses: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> =
-                {};
+            const resolvedClasses: Record<
+                string,
+                Array<CSSResolve<ClassSymbol | ElementSymbol>>
+            > = {};
             for (const className of Object.keys(meta.classes)) {
                 resolvedClasses[className] = this.resolver.resolveExtends(
                     meta,
@@ -767,8 +769,10 @@ export class StylableTransformer {
                 );
             }
 
-            const resolvedElements: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> =
-                {};
+            const resolvedElements: Record<
+                string,
+                Array<CSSResolve<ClassSymbol | ElementSymbol>>
+            > = {};
             for (const k of Object.keys(meta.elements)) {
                 resolvedElements[k] = this.resolver.resolveExtends(meta, k, true);
             }
@@ -809,6 +813,10 @@ export class StylableTransformer {
 function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
     const transformedScopes: Record<string, SelectorChunk2[][]> = {};
     for (const scope of meta.scopes) {
+        if (!scope.params) {
+            continue;
+        }
+
         const len = transformer.diagnostics.reports.length;
         const rule = postcss.rule({ selector: scope.params });
 
