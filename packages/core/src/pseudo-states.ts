@@ -98,7 +98,7 @@ function resolveStateType(
 
     const paramType = stateDefinition.nodes[0];
     const stateType: StateParsedValue = {
-        type: stateDefinition.nodes[0].value,
+        type: paramType.value,
         arguments: [],
         defaultValue: postcssValueParser
             .stringify(stateDefault as postcssValueParser.Node[])
