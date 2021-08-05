@@ -294,7 +294,9 @@ export class StylableTransformer {
             const res = this.resolver.resolveKeyframes(meta, key);
 
             if (res) {
-                keyframesExports[key] = this.scope(res.symbol.alias, res.meta.namespace);
+                keyframesExports[key] = res.symbol.global
+                    ? res.symbol.alias
+                    : this.scope(res.symbol.alias, res.meta.namespace);
             }
         });
 

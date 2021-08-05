@@ -269,31 +269,26 @@ export class StylableProcessor {
                 case 'keyframes':
                     if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
                         this.meta.keyframes.push(atRule);
-                        const { params: name } = atRule;
+                        let { params: name } = atRule;
 
                         if (name) {
+                            let global: boolean | undefined;
                             const globalName = globalValue(name);
 
+                            if (globalName !== undefined) {
+                                name = globalName;
+                                global = true;
+                            }
+
                             // No name inside :global (:global())
-                            if (globalName === '') {
+                            if (name === '') {
                                 this.diagnostics.warn(
                                     atRule,
                                     processorWarnings.MISSING_KEYFRAMES_PARAM_INSIDE_GLOBAL()
                                 );
                             }
 
-                            if (
-                                globalName !== undefined &&
-                                reservedKeyFrames.includes(globalName)
-                            ) {
-                                this.diagnostics.error(
-                                    atRule,
-                                    processorWarnings.KEYFRAME_NAME_RESERVED(globalName),
-                                    {
-                                        word: globalName,
-                                    }
-                                );
-                            } else if (reservedKeyFrames.includes(name)) {
+                            if (reservedKeyFrames.includes(name)) {
                                 this.diagnostics.error(
                                     atRule,
                                     processorWarnings.KEYFRAME_NAME_RESERVED(name),
@@ -308,7 +303,7 @@ export class StylableProcessor {
                                 _kind: 'keyframes',
                                 alias: name,
                                 name,
-                                globalName,
+                                global,
                             };
                         } else {
                             this.diagnostics.warn(

@@ -364,7 +364,17 @@ describe('Stylable postcss process', () => {
                 from{}
                 to{}
             }
-            @keyframes :global(global-name) {
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        expect(result.keyframes.length).to.eql(2);
+    });
+
+    it('collect global @keyframes', () => {
+        const result = processSource(
+            `
+            @keyframes :global(name) {
                 from{}
                 to{}
             }
@@ -372,7 +382,14 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(result.keyframes.length).to.eql(3);
+        expect(result.mappedKeyframes).to.eql({
+            name: {
+                _kind: 'keyframes',
+                alias: 'name',
+                name: 'name',
+                global: true,
+            },
+        });
     });
 
     it('should collect mixins on rules', () => {

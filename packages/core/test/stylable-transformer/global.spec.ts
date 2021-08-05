@@ -1,5 +1,4 @@
 import {
-    Diagnostic,
     expectWarningsFromTransform,
     generateStylableResult,
     generateStylableRoot,
@@ -182,6 +181,38 @@ describe('Stylable postcss transform (Global)', () => {
                         /* @check .style__foo {animation-name: globalName;} */
                         .foo {
                             animation-name: globalName;
+                        }
+                        `,
+                    },
+                    '/a.st.css': {
+                        namespace: 'a',
+                        content: `
+                        @keyframes :global(globalName) {
+                            from {}
+                            to {}
+                        }
+                        
+                        `,
+                    },
+                },
+            };
+
+            testInlineExpects(generateStylableRoot(config));
+            expectWarningsFromTransform(config, []);
+        });
+
+        it('should export global keyframe (alias)', () => {
+            const config = {
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @st-import [keyframes(globalName as bar)] from "./a.st.css";
+
+                        /* @check .style__foo {animation-name: globalName;} */
+                        .foo {
+                            animation-name: bar;
                         }
                         `,
                     },
