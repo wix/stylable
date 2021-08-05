@@ -181,7 +181,7 @@ export class StylableProcessor {
         this.dirContext = path.dirname(this.meta.source);
 
         this.handleAtRules(root);
-
+        
         const stubs = this.insertCustomSelectorsStubs();
 
         for (const node of root.nodes) {
@@ -275,7 +275,7 @@ export class StylableProcessor {
                             name: name,
                         };
                     } else {
-                        this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
+                        this.diagnostics.error(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
                     }
                     break;
                 case 'custom-selector': {
@@ -395,7 +395,7 @@ export class StylableProcessor {
             }
             if (type !== `selector` && type !== `class` && type !== `type`) {
                 simpleSelector = false;
-            }
+            }  
 
             if (node.type === 'pseudo_class') {
                 if (node.value === 'import') {
