@@ -1,9 +1,7 @@
-// export function scope(name: string, namespace: string, separator: string = '-') {
-//     return namespace ? namespace + separator + name : name;
-// }
+import { globalValueRegExp } from './stylable-value-parsers';
 
 export function globalValue(str: string) {
-    const match = str.match(/^:global\((.*?)\)$/);
+    const match = str.match(globalValueRegExp);
 
     return match?.[1];
 }

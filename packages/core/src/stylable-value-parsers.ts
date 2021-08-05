@@ -77,6 +77,9 @@ export type stKeys = keyof typeof valueMapping;
 export const stValues: string[] = Object.keys(valueMapping).map(
     (key) => valueMapping[key as stKeys]
 );
+
+export const globalValueRegExp = /^:global\((.*?)\)$/;
+
 export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce((acc, key) => {
     acc[valueMapping[key as stKeys]] = true;
     return acc;
