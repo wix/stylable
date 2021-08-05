@@ -6,6 +6,7 @@ import {
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
+import { transformerWarnings } from '@stylable/core';
 
 describe('Stylable postcss transform (Global)', () => {
     it('should support :global()', () => {
@@ -231,6 +232,31 @@ describe('Stylable postcss transform (Global)', () => {
 
             testInlineExpects(generateStylableRoot(config));
             expectWarningsFromTransform(config, []);
+        });
+
+        describe('diagnostics', () => {
+            it('should show diagnostic when used animation/animation-name without known keyframe symbol', () => {
+                const config = {
+                    entry: `/style.st.css`,
+                    files: {
+                        '/style.st.css': {
+                            namespace: 'style',
+                            content: `
+                            .foo {
+                                |animation-name: $globalName$|;
+                            }
+                            `,
+                        },
+                    },
+                };
+
+                expectWarningsFromTransform(config, [
+                    {
+                        file: '/style.st.css',
+                        message: transformerWarnings.CANNOT_FIND_SYMBOL('globalName'),
+                    },
+                ]);
+            });
         });
     });
 });

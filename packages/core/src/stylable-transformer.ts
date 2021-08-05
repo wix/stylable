@@ -33,7 +33,7 @@ import type {
 } from './stylable-processor';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
-import { valueMapping } from './stylable-value-parsers';
+import { animationPropRegExp, paramMapping, valueMapping } from './stylable-value-parsers';
 import { globalValue } from './utils';
 
 const { hasOwnProperty } = Object.prototype;
@@ -121,6 +121,9 @@ export const transformerWarnings = {
     },
     UNKNOWN_IMPORT_ALIAS(name: string) {
         return `cannot use alias for unknown import "${name}"`;
+    },
+    CANNOT_FIND_SYMBOL(name: string) {
+        return `Cannot find symbol named "${name}".\nDid you mean to target a global symbol? (use "${paramMapping.global}(${name})")`;
     },
 };
 
@@ -300,12 +303,18 @@ export class StylableTransformer {
             }
         });
 
-        ast.walkDecls(/animation$|animation-name$/, (decl: postcss.Declaration) => {
+        ast.walkDecls(animationPropRegExp, (decl: postcss.Declaration) => {
             const parsed = postcssValueParser(decl.value);
             parsed.nodes.forEach((node) => {
                 const scoped = keyframesExports[node.value];
                 if (scoped) {
                     node.value = scoped;
+                } else {
+                    this.diagnostics.warn(
+                        decl,
+                        transformerWarnings.CANNOT_FIND_SYMBOL(node.value),
+                        { word: node.value }
+                    );
                 }
             });
             decl.value = parsed.toString();
