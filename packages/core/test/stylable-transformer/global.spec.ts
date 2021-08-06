@@ -157,7 +157,7 @@ describe('Stylable postcss transform (Global)', () => {
                         namespace: 'style',
                         content: `
 
-                        /* @check st-global(global-name) */
+                        /* @check global-name */
                         @keyframes st-global(global-name) {
                             from {}
                             to {}

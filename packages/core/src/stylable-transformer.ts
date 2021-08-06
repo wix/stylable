@@ -285,9 +285,12 @@ export class StylableTransformer {
     public scopeKeyframes(ast: postcss.Root, meta: StylableMeta) {
         ast.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
+            const globalName = globalValue(name);
 
-            if (globalValue(name) === undefined) {
+            if (globalName === undefined) {
                 atRule.params = this.scope(name, meta.namespace);
+            } else {
+                atRule.params = globalName;
             }
         });
 
