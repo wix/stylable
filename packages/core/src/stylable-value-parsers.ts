@@ -71,7 +71,7 @@ export const valueMapping = {
 };
 
 export const paramMapping = {
-    global: ':global' as const,
+    global: 'st-global' as const,
 };
 
 export const mixinDeclRegExp = new RegExp(`(${valueMapping.mixin})|(${valueMapping.partialMixin})`);

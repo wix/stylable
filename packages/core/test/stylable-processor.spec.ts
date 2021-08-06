@@ -43,7 +43,7 @@ describe('Stylable postcss process', () => {
     });
 
     it('warn on missing keyframes parameter (global)', () => {
-        const { diagnostics } = processSource(`@keyframes :global() {}`, {
+        const { diagnostics } = processSource(`@keyframes st-global() {}`, {
             from: '/path/to/source',
         });
 
@@ -374,7 +374,7 @@ describe('Stylable postcss process', () => {
     it('collect global @keyframes', () => {
         const result = processSource(
             `
-            @keyframes :global(name) {
+            @keyframes st-global(name) {
                 from{}
                 to{}
             }
