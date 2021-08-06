@@ -123,7 +123,7 @@ export const transformerWarnings = {
         return `cannot use alias for unknown import "${name}"`;
     },
     CANNOT_FIND_SYMBOL(name: string) {
-        return `Cannot find symbol named "${name}".\nDid you mean to target a global symbol? (use "${paramMapping.global}(${name})")`;
+        return `Cannot find a symbol named "${name}".\nDid you mean to target a global symbol? (use "${paramMapping.global}(${name})")`;
     },
 };
 
