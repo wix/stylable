@@ -1,7 +1,67 @@
-import type { StateParsedValue, StylableMeta, StylableResults } from '@stylable/core';
+import {
+    ClassSymbol,
+    MappedStates,
+    StateParsedValue,
+    StylableMeta,
+    StylableResults,
+    StylableSymbol,
+    valueMapping,
+} from '@stylable/core';
 
 const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
+
+function addStatesEntries(
+    stateEntries: Map<string, StateParsedValue | string | null>,
+    stStates: MappedStates | undefined
+) {
+    if (stStates) {
+        for (const [stateName, stateDef] of Object.entries(stStates)) {
+            if (typeof stateDef === 'string') {
+                continue;
+            }
+
+            if (!stateEntries.has(stateName)) {
+                stateEntries.set(stateName, stateDef);
+            }
+        }
+    }
+}
+
+function collectLocalStates(cls: ClassSymbol) {
+    const stateEntries = new Map<string, StateParsedValue | null>();
+    let currentClass: ClassSymbol | undefined = cls;
+
+    while (currentClass) {
+        const stStates = currentClass[valueMapping.states];
+
+        if (stStates) {
+            addStatesEntries(stateEntries, stStates);
+        }
+
+        const extendedClass = currentClass[valueMapping.extends] as StylableSymbol;
+        currentClass = extendedClass && extendedClass._kind === 'class' ? extendedClass : undefined;
+    }
+
+    let stateEntriesString = '';
+
+    // stringify states for current class
+    for (const [stateName, stateDef] of stateEntries.entries()) {
+        stateEntriesString += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
+    }
+
+    return stateEntriesString;
+}
+
+function stringifyStates({ classes, namespace }: StylableMeta) {
+    let out = '';
+    for (const [name, symbol] of Object.entries(classes)) {
+        const states = collectLocalStates(symbol);
+        out += states ? `${SPACING}${asString(scope(name, namespace))}: { ${states}};\n` : '';
+    }
+
+    return out;
+}
 
 function stringifyStringRecord(record: Record<string, string>, indent = SPACING) {
     return Object.keys(record)
@@ -14,25 +74,6 @@ function stringifyClasses(classes: Record<string, string>, namespace: string, in
     return Object.keys(classes)
         .map((name) => `${indent}${asString(name)}: ${asString(scope(name, namespace))};`)
         .join('\n');
-}
-
-function stringifyStates({ classes, namespace }: StylableMeta) {
-    let out = '';
-    for (const [name, symbol] of Object.entries(classes)) {
-        const stStates = symbol['-st-states'];
-        if (!stStates) {
-            continue;
-        }
-        let statesEntries = ' ';
-        for (const [stateName, stateDef] of Object.entries(stStates)) {
-            if (typeof stateDef === 'string') {
-                continue;
-            }
-            statesEntries += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
-        }
-        out += `${SPACING}${asString(scope(name, namespace))}: {${statesEntries}};\n`;
-    }
-    return out.slice(0, -1);
 }
 
 /**
