@@ -1,14 +1,14 @@
-import { murmurhash3_32_gc } from './murmurhash';
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { tokenizeImports } from 'toky';
 import { Diagnostics } from './diagnostics';
+import { murmurhash3_32_gc } from './murmurhash';
+import { reservedKeyFrames } from './native-reserved-lists';
 import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
     isCompRoot,
-    isGlobal,
     isNested,
     isRootValid,
     parseSelector,
@@ -43,7 +43,6 @@ import {
     valueMapping,
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
-import { reservedKeyFrames } from './native-reserved-lists';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];

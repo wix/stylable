@@ -6,7 +6,6 @@ import {
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { transformerWarnings } from '@stylable/core';
 
 describe('Stylable postcss transform (Global)', () => {
     it('should support :global()', () => {

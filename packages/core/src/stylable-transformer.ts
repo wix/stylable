@@ -1,9 +1,8 @@
+import isVendorPrefixed from 'is-vendor-prefixed';
+import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import isVendorPrefixed from 'is-vendor-prefixed';
-import cloneDeep from 'lodash.clonedeep';
-
 import type { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import type { Diagnostics } from './diagnostics';
@@ -31,9 +30,9 @@ import type {
     StylableMeta,
     StylableSymbol,
 } from './stylable-processor';
-import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
+import { CSSResolve, StylableResolver, StylableResolverCache } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
-import { animationPropRegExp, paramMapping, valueMapping } from './stylable-value-parsers';
+import { animationPropRegExp, valueMapping } from './stylable-value-parsers';
 import { globalValue } from './utils';
 
 const { hasOwnProperty } = Object.prototype;
