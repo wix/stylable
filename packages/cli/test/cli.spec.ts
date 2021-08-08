@@ -307,7 +307,7 @@ describe('Stylable Cli', function () {
 
             expect(status).to.equal(1);
             expect(stdout).to.equal('');
-            expect(stderr).to.include('dtsSourceMap -> dts');
+            expect(stderr).to.include('--dtsSourceMap requires turning on --dts');
         });
     });
 });

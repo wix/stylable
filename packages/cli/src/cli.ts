@@ -56,7 +56,6 @@ const argv = yargs
         description:
             'output source maps for stylable definition files for sources (.st.css.d.ts.map)',
         defaultDescription: 'true if "--dts" option is enabled, otherwise false',
-        implies: 'dts',
     })
     .option('useNamespaceReference', {
         type: 'boolean',
@@ -190,60 +189,60 @@ const {
 
 log('[Arguments]', argv);
 
-// execute all require hooks before running the CLI build
-for (const request of requires) {
-    if (request) {
-        require(request);
+async function main() {
+    if (!dts && dtsSourceMap) {
+        throw new Error(`--dtsSourceMap requires turning on --dts`);
+    }
+    // execute all require hooks before running the CLI build
+    for (const request of requires) {
+        if (request) {
+            require(request);
+        }
+    }
+
+    const stylable = Stylable.create({
+        fileSystem: nodeFs,
+        requireModule: require,
+        projectRoot: rootDir,
+        resolveNamespace: require(namespaceResolver).resolveNamespace,
+        resolverCache: new Map(),
+    });
+
+    const { diagnosticsMessages } = await build({
+        extension: ext,
+        fs: nodeFs,
+        stylable,
+        outDir,
+        srcDir,
+        rootDir,
+        log,
+        indexFile,
+        generatorPath: customGenerator !== undefined ? resolve(customGenerator) : customGenerator,
+        moduleFormats: getModuleFormats({ esm, cjs }),
+        outputCSS: css,
+        includeCSSInJS: cssInJs,
+        outputSources: stcss,
+        injectCSSRequest,
+        outputCSSNameTemplate: cssFilename,
+        optimize,
+        minify,
+        manifest: manifest ? join(rootDir, outDir, manifestFilepath) : undefined,
+        useNamespaceReference,
+        dts,
+        dtsSourceMap,
+        watch,
+        diagnostics,
+    });
+
+    if (!watch && diagnosticsMessages.size) {
+        if (diagnostics) {
+            reportDiagnostics(diagnosticsMessages);
+        }
+        if (diagnosticsMode === 'strict') {
+            process.exitCode = 1;
+        }
     }
 }
-
-const stylable = Stylable.create({
-    fileSystem: nodeFs,
-    requireModule: require,
-    projectRoot: rootDir,
-    resolveNamespace: require(namespaceResolver).resolveNamespace,
-    resolverCache: new Map(),
-});
-
-build({
-    extension: ext,
-    fs: nodeFs,
-    stylable,
-    outDir,
-    srcDir,
-    rootDir,
-    log,
-    indexFile,
-    generatorPath: customGenerator !== undefined ? resolve(customGenerator) : customGenerator,
-    moduleFormats: getModuleFormats({ esm, cjs }),
-    outputCSS: css,
-    includeCSSInJS: cssInJs,
-    outputSources: stcss,
-    injectCSSRequest,
-    outputCSSNameTemplate: cssFilename,
-    optimize,
-    minify,
-    manifest: manifest ? join(rootDir, outDir, manifestFilepath) : undefined,
-    useNamespaceReference,
-    dts,
-    dtsSourceMap,
-    watch,
-    diagnostics,
-})
-    .then(({ diagnosticsMessages }) => {
-        if (!watch && diagnosticsMessages.size) {
-            if (diagnostics) {
-                reportDiagnostics(diagnosticsMessages);
-            }
-            if (diagnosticsMode === 'strict') {
-                process.exitCode = 1;
-            }
-        }
-    })
-    .catch((e) => {
-        process.exitCode = 1;
-        console.error(e);
-    });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
     const formats: Array<'esm' | 'cjs'> = [];
@@ -255,3 +254,8 @@ function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
     }
     return formats;
 }
+
+main().catch((e) => {
+    process.exitCode = 1;
+    console.error(e);
+});
