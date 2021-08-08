@@ -122,9 +122,6 @@ export const transformerWarnings = {
     UNKNOWN_IMPORT_ALIAS(name: string) {
         return `cannot use alias for unknown import "${name}"`;
     },
-    CANNOT_FIND_SYMBOL(name: string) {
-        return `Cannot find a symbol named "${name}".\nDid you mean to target a global symbol? (use "${paramMapping.global}(${name})")`;
-    },
 };
 
 export class StylableTransformer {
@@ -312,12 +309,6 @@ export class StylableTransformer {
                 const scoped = keyframesExports[node.value];
                 if (scoped) {
                     node.value = scoped;
-                } else {
-                    this.diagnostics.warn(
-                        decl,
-                        transformerWarnings.CANNOT_FIND_SYMBOL(node.value),
-                        { word: node.value }
-                    );
                 }
             });
             decl.value = parsed.toString();

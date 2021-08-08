@@ -35,6 +35,7 @@ import {
     scopeSelector,
 } from './stylable-utils';
 import {
+    paramMapping,
     rootValueMapping,
     SBTypesParsers,
     stValuesMap,
@@ -145,7 +146,7 @@ export const processorWarnings = {
         return '"@keyframes" missing parameter';
     },
     MISSING_KEYFRAMES_PARAM_INSIDE_GLOBAL() {
-        return '"@keyframes" missing parameter inside ":global()"';
+        return `"@keyframes" missing parameter inside "${paramMapping.global}()"`;
     },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
@@ -501,7 +502,7 @@ export class StylableProcessor {
                         locallyScoped = true;
                     }
                 }
-            } else if (isGlobal(node)) {
+            } else if (node.type === 'nested-pseudo-class' && node.name === 'global') {
                 return true;
             }
             return void 0;
