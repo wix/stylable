@@ -280,7 +280,6 @@ export class StylableProcessor {
                                 global = true;
                             }
 
-                            // No name inside :global (:global())
                             if (name === '') {
                                 this.diagnostics.warn(
                                     atRule,
