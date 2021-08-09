@@ -43,7 +43,7 @@ interface StylableWebpackPluginOptions {
      * Determine the way css is injected to the document
      * js - every js module contains the css and inject it independently
      * css - emit bundled css asset to injected via link
-     * mini-css - inject css modules via webpack mini-css-extract-plugin (can support dynamic splitting but order is not deterministic)
+     * mini-css - inject css modules via webpack mini-css-extract-plugin (can support dynamic splitting but order is not deterministic, requires minimum version 1.3.9)
      * none - will not generate any output css (usually good for ssr bundles)
      */
     cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
