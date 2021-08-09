@@ -1,5 +1,6 @@
 import {
     expectWarningsFromTransform,
+    generateStylableExports,
     generateStylableResult,
     generateStylableRoot,
     testInlineExpects,
@@ -169,7 +170,7 @@ describe('Stylable postcss transform (Global)', () => {
             testInlineExpects(result);
         });
 
-        it('should export global keyframe', () => {
+        it('should import global keyframe', () => {
             const config = {
                 entry: `/style.st.css`,
                 files: {
@@ -201,7 +202,7 @@ describe('Stylable postcss transform (Global)', () => {
             expectWarningsFromTransform(config, []);
         });
 
-        it('should export global keyframe (alias)', () => {
+        it('should import global keyframe (alias)', () => {
             const config = {
                 entry: `/style.st.css`,
                 files: {
@@ -231,6 +232,29 @@ describe('Stylable postcss transform (Global)', () => {
 
             testInlineExpects(generateStylableRoot(config));
             expectWarningsFromTransform(config, []);
+        });
+
+        it('should export global keyframe', () => {
+            const config = {
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @keyframes stGlobal(globalName) {
+                            from {}
+                            to {}
+                        }
+                        `,
+                    },
+                },
+            };
+
+            const cssExports = generateStylableExports(config);
+
+            expect(cssExports.keyframes).to.eql({
+                globalName: 'globalName',
+            });
         });
     });
 });

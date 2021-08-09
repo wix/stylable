@@ -2,7 +2,6 @@ import { globalValueRegExp } from './stylable-value-parsers';
 
 export function globalValue(str: string) {
     const match = str.match(globalValueRegExp);
-
     return match?.[1];
 }
 
