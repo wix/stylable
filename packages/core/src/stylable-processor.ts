@@ -501,7 +501,7 @@ export class StylableProcessor {
                         locallyScoped = true;
                     }
                 }
-            } else if (node.type === 'nested-pseudo-class' && node.name === 'global') {
+            } else if (type === 'nested-pseudo-class' && name === 'global') {
                 return true;
             }
             return void 0;
