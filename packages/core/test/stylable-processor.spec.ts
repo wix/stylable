@@ -38,7 +38,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'warning',
-            message: processorWarnings.MISSING_KEYFRAMES_PARAM(),
+            message: processorWarnings.MISSING_KEYFRAMES_NAME(),
         });
     });
 
@@ -49,7 +49,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'warning',
-            message: processorWarnings.MISSING_KEYFRAMES_PARAM_INSIDE_GLOBAL(),
+            message: processorWarnings.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(),
         });
     });
 

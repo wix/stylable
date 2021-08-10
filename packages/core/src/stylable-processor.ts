@@ -141,10 +141,10 @@ export const processorWarnings = {
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" missing scoping selector parameter';
     },
-    MISSING_KEYFRAMES_PARAM() {
+    MISSING_KEYFRAMES_NAME() {
         return '"@keyframes" missing parameter';
     },
-    MISSING_KEYFRAMES_PARAM_INSIDE_GLOBAL() {
+    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL() {
         return `"@keyframes" missing parameter inside "${paramMapping.global}()"`;
     },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
@@ -283,7 +283,7 @@ export class StylableProcessor {
                             if (name === '') {
                                 this.diagnostics.warn(
                                     atRule,
-                                    processorWarnings.MISSING_KEYFRAMES_PARAM_INSIDE_GLOBAL()
+                                    processorWarnings.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL()
                                 );
                             }
 
@@ -307,7 +307,7 @@ export class StylableProcessor {
                         } else {
                             this.diagnostics.warn(
                                 atRule,
-                                processorWarnings.MISSING_KEYFRAMES_PARAM()
+                                processorWarnings.MISSING_KEYFRAMES_NAME()
                             );
                         }
                     } else {
