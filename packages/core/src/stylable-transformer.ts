@@ -451,6 +451,7 @@ export class StylableTransformer {
                 resolved: context.metaParts.class[originMeta.root],
             });
         }
+        const startedAnchor = context.currentAnchor!;
         // loop over selectors
         for (const chunkedSelector of selectorListChunks) {
             context.elements.push([]);
@@ -467,11 +468,8 @@ export class StylableTransformer {
                 }
             }
             if (selectorListChunks.length - 1 > context.selectorIndex) {
-                context.initRootAnchor({
-                    name: originMeta.root,
-                    type: 'class',
-                    resolved: context.metaParts.class[originMeta.root],
-                });
+                // reset current anchor
+                context.initRootAnchor(startedAnchor);
             }
         }
         // backwards compatibility for elements - empty selector still have an empty first target
