@@ -19,7 +19,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             -st-states: b, c;
                         } 
 
-                        /* @check .style__a:is( .button__label,  .button__icon, .style--b, .style--c) */
+                        /* @check .style__a:is(.button__label, .button__icon, .style--b, .style--c) */
                         .a:is(::label, ::icon, :b, :c) {}
                         `,
                     },

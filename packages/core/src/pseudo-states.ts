@@ -306,15 +306,16 @@ function resolveStateValue(
     name: string,
     namespace: string
 ) {
+    const inputValue = node.nodes && node.nodes.length ? stringifySelector(node.nodes) : ``;
     let actualParam = resolveParam(
         meta,
         resolver,
         diagnostics,
         rule,
-        node.nodes ? stringifySelector(node.nodes) : stateDef.defaultValue
+        inputValue ? inputValue : stateDef.defaultValue
     );
 
-    if (rule && !node.content && !stateDef.defaultValue) {
+    if (rule && !inputValue && !stateDef.defaultValue) {
         diagnostics.warn(rule, stateErrors.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
             word: name,
         });
