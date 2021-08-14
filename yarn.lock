@@ -2809,9 +2809,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.793:
-  version "1.3.805"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.805.tgz#a0873393a3b027ec60bdaf22a19c4946688cf941"
-  integrity sha512-uUJF59M6pNSRHQaXwdkaNB4BhSQ9lldRdG1qCjlrAFkynPGDc5wPoUcYEQQeQGmKyAWJPvGkYAWmtVrxWmDAkg==
+  version "1.3.806"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.806.tgz#21502100f11aead6c501d1cd7f2504f16c936642"
+  integrity sha512-AH/otJLAAecgyrYp0XK1DPiGVWcOgwPeJBOLeuFQ5l//vhQhwC9u6d+GijClqJAmsHG4XDue81ndSQPohUu0xA==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -5689,10 +5689,10 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-playwright-chromium@^1.13.1:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.13.1.tgz#cd4c6427602239be689e7fee8cf59003818cb24c"
-  integrity sha512-aJnhWAbDHoI3rTTeeJJJa/PjrysSLKfURiiVM+3EauVxsouK/XCbNdere+1q/a64OlipXWIZeqzoCDlVZiaL0g==
+playwright-chromium@^1.14.0:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.14.0.tgz#b153eb96412fd6a4fa8d9233a4fdf694fc9f3139"
+  integrity sha512-qWQN9VTPhvEZdRpn1564EOtiNU+hRHhogKg1heBX9VsfGy6WHytR9XPFJjD4M6fhNAV1WKM2McVPYIbi1EOYww==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -5709,10 +5709,10 @@ playwright-chromium@^1.13.1:
     ws "^7.4.6"
     yazl "^2.5.1"
 
-playwright-core@^1.12.3, playwright-core@^1.13.1:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.13.1.tgz#d2b5677f7f274126c9ec0efa388f12cc31c71873"
-  integrity sha512-z5MR16KXvcSULfQ+UubbAQpwzoCo+pPmhsHehLT2nduJyx32jkV/78zN0Vhy0wSISoEwcoC0WBdPW7B/aF98PQ==
+playwright-core@^1.12.3, playwright-core@^1.14.0:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.14.0.tgz#af51da7b201c11eeda780e2db3f05c8bca74c8be"
+  integrity sha512-n6NdknezSfRgB6LkLwcrbm5orRQZSpbd8LZmlc4YrIXV0VEvJr5tzP3xlHXpiFBfTr3yoFuagldI3T7bD/8H3w==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -7619,10 +7619,10 @@ yargs@16.2.0, yargs@^16.2.0:
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
 
-yargs@^17.1.0:
-  version "17.1.0"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.1.0.tgz#0cd9827a0572c9a1795361c4d1530e53ada168cf"
-  integrity sha512-SQr7qqmQ2sNijjJGHL4u7t8vyDZdZ3Ahkmo4sc1w5xI9TBX0QDdG/g4SFnxtWOsGLjwHQue57eFALfwFCnixgg==
+yargs@^17.1.1:
+  version "17.1.1"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.1.1.tgz#c2a8091564bdb196f7c0a67c1d12e5b85b8067ba"
+  integrity sha512-c2k48R0PwKIqKhPMWjeiF6y2xY/gPMUlro0sgxqXpbOIohWiLNXWslsootttv7E1e73QPAMQSg5FeySbVcpsPQ==
   dependencies:
     cliui "^7.0.2"
     escalade "^3.1.1"
