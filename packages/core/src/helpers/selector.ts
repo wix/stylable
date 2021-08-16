@@ -12,7 +12,6 @@ import {
     ImmutableSelectorList,
     ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
-import type { DeepReadonlyObject } from './readonly';
 import cloneDeep from 'lodash.clonedeep';
 
 export const parseSelector = parseCssSelector;
@@ -154,71 +153,6 @@ export function isRootValid(ast: ImmutableSelectorList) {
 
 function isGlobal(node: ImmutableSelectorNode) {
     return node.type === 'pseudo_class' && node.value === 'global';
-}
-
-export type Chunk = SelectorNode[];
-export type ChunkedSelector = { before: string; after: string; chunks: Chunk[] };
-// ToDo: check why "2" ? what does this do differently then "1"?
-export function separateChunks2<
-    I extends SelectorList | SelectorNode | ImmutableSelectorList | ImmutableSelectorNode
->(
-    input: I
-): I extends Readonly<SelectorList | SelectorNode>
-    ? ChunkedSelector[]
-    : DeepReadonlyObject<ChunkedSelector[]> {
-    // ToDo: check SelectorNode input case
-    const output: ChunkedSelector[] = [];
-    let lastChunkedSelector: ChunkedSelector;
-    let lastChunkSelector: Chunk;
-    walk(input, (node, index, _nodes, parents) => {
-        if (parents.length === 0) {
-            // first level: create top level selector and initial chunks selector
-            if (!output[index]) {
-                // add top selector
-                lastChunkedSelector = {
-                    before: `before` in node ? node.before : ``,
-                    after: `after` in node ? node.after : ``,
-                    chunks: [],
-                };
-                output[index] = lastChunkedSelector;
-                // add chunk selector
-                lastChunkSelector = [];
-                lastChunkedSelector.chunks.push(lastChunkSelector);
-            }
-        } else {
-            // second level: (parents.length === 1)
-            if (node.type === `combinator`) {
-                // add next chunk selector
-                lastChunkSelector = [];
-                lastChunkedSelector.chunks.push(lastChunkSelector);
-            }
-            // add node to chunk
-            lastChunkSelector.push(node as any as SelectorNode);
-            // don't go deeper
-            return walk.skipNested;
-        }
-        return;
-    });
-    return output;
-}
-export function mergeChunks<I extends ChunkedSelector[] | DeepReadonlyObject<ChunkedSelector[]>>(
-    input: I
-): I extends Readonly<ChunkedSelector[]> ? SelectorList : ImmutableSelectorList {
-    const output: SelectorList = [];
-    for (const chunkedSelector of input) {
-        output.push({
-            type: `selector`,
-            start: 0,
-            end: 0,
-            before: chunkedSelector.before,
-            after: chunkedSelector.after,
-            nodes: chunkedSelector.chunks.reduce<SelectorNode[]>((nodes, chunk) => {
-                nodes.push(...(chunk as Chunk));
-                return nodes;
-            }, []),
-        });
-    }
-    return output;
 }
 
 export function isCompRoot(name: string) {
