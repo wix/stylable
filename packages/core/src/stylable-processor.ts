@@ -349,6 +349,10 @@ export class StylableProcessor {
                     this.addCSSVarDefinition(atRule);
                     break;
                 case 'st-global-custom-property': {
+                    deprecated(
+                        '"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with "stGlobal"'
+                    );
+
                     const cssVarsByComma = atRule.params.split(',');
                     const cssVarsBySpacing = atRule.params
                         .trim()
