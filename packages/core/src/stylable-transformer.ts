@@ -467,7 +467,7 @@ export class StylableTransformer {
                 }
                 context.compoundSelector = node;
                 // loop over each node in a compound selector
-                for (const compoundNode of [...node.nodes]) {
+                for (const compoundNode of node.nodes) {
                     context.node = compoundNode;
                     // transform node
                     this.handleCompoundNode(context);
