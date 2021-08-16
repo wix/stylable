@@ -10,7 +10,7 @@ import {
     isStringDelimiter,
     isWhitespace,
     tokenize,
-} from 'toky';
+} from '@tokey/core';
 
 type Delimiters =
     | ':'

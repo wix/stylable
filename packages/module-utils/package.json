@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@stylable/core": "^4.5.1",
-    "toky": "^0.1.0",
+    "@tokey/core": "^1.2.1",
     "vlq": "^1.0.1"
   },
   "files": [

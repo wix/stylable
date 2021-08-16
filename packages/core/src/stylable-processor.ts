@@ -2,7 +2,7 @@ import { murmurhash3_32_gc } from './murmurhash';
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import { tokenizeImports } from 'toky';
+import { parseImports } from '@tokey/imports-parser';
 import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { processDeclarationUrls } from './stylable-assets';
@@ -908,7 +908,7 @@ export class StylableProcessor {
             context: this.dirContext,
             keyframes: {},
         };
-        const imports = tokenizeImports(`import ${atRule.params}`, '[', ']', true)[0];
+        const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
 
         if (imports && imports.star) {
             this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
