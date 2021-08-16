@@ -25,7 +25,6 @@ import {
 } from './stylable-utils';
 import {
     walkSelector,
-    walkSelectorReadonly,
     isSimpleSelector,
     isInPseudoClassContext,
     isRootValid,
@@ -34,8 +33,7 @@ import {
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
-import type { SelectorNode } from '@tokey/css-selector-parser';
-import type { DeepReadonlyObject } from './helpers/readonly';
+import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import {
@@ -389,7 +387,7 @@ export class StylableProcessor {
 
         let locallyScoped = false;
         let simpleSelector: boolean;
-        walkSelectorReadonly(selectorAst, (node, index, nodes, parents) => {
+        walkSelector(selectorAst, (node, index, nodes, parents) => {
             const type = node.type;
             if (type === 'selector' && !isInPseudoClassContext(parents)) {
                 locallyScoped = false;
@@ -573,7 +571,7 @@ export class StylableProcessor {
 
     protected checkForScopedNodeAfter(
         rule: postcss.Rule,
-        nodes: DeepReadonlyObject<SelectorNode[]>,
+        nodes: ImmutableSelectorNode[],
         index: number
     ) {
         for (let i = index + 1; i < nodes.length; i++) {

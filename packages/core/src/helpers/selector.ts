@@ -9,35 +9,36 @@ import {
     Class,
     Attribute,
     Invalid,
+    ImmutableSelectorList,
+    ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
-import type { DeepReadOnlyAll, DeepReadonlyObject } from './readonly';
+import type { DeepReadonlyObject } from './readonly';
 import cloneDeep from 'lodash.clonedeep';
 
 export const parseSelector = parseCssSelector;
 export const stringifySelector = stringifySelectorAst;
 export const walkSelector = walk;
-export const walkSelectorReadonly = walk as DeepReadOnlyAll<typeof walk>;
 
 /**
  * parse selectors and cache them
  */
-const selectorAstCache = new Map<string, DeepReadonlyObject<SelectorList>>();
+const selectorAstCache = new Map<string, ImmutableSelectorList>();
 export function parseSelectorWithCache(selector: string, options: { clone: true }): SelectorList;
 export function parseSelectorWithCache(
     selector: string,
     options?: { clone?: false }
-): DeepReadonlyObject<SelectorList>;
+): ImmutableSelectorList;
 export function parseSelectorWithCache(
     selector: string,
     options: { clone?: boolean } = {}
-): DeepReadonlyObject<SelectorList> {
+): ImmutableSelectorList {
     if (!selectorAstCache.has(selector)) {
         selectorAstCache.set(selector, parseCssSelector(selector));
     }
     const cachedValue = selectorAstCache.get(selector);
     return options.clone
         ? (cloneDeep(cachedValue) as SelectorList)
-        : (cachedValue as DeepReadonlyObject<SelectorList>);
+        : (cachedValue as ImmutableSelectorList);
 }
 
 /**
@@ -51,7 +52,7 @@ export function isSimpleSelector(selector: string): {
     const selectorList = parseSelectorWithCache(selector);
     return selectorList.map((selector) => {
         let foundType = ``;
-        walkSelectorReadonly(
+        walk(
             selector,
             (node) => {
                 if ((node.type !== `class` && node.type !== `type`) || foundType || node.nodes) {
@@ -108,7 +109,7 @@ export function convertToSelector(node: SelectorNode): Selector {
     return castedNode;
 }
 
-export function isInPseudoClassContext(parents: ReadonlyArray<DeepReadonlyObject<SelectorNode>>) {
+export function isInPseudoClassContext(parents: ReadonlyArray<ImmutableSelectorNode>) {
     for (const parent of parents) {
         if (parent.type === `pseudo_class`) {
             return true;
@@ -118,15 +119,15 @@ export function isInPseudoClassContext(parents: ReadonlyArray<DeepReadonlyObject
 }
 
 export function matchTypeAndValue(
-    a: Partial<DeepReadonlyObject<SelectorNode>>,
-    b: Partial<DeepReadonlyObject<SelectorNode>>
+    a: Partial<ImmutableSelectorNode>,
+    b: Partial<ImmutableSelectorNode>
 ) {
     return a.type === b.type && (a as any).value === (b as any).value;
 }
 
-export function isRootValid(ast: DeepReadonlyObject<SelectorList>) {
+export function isRootValid(ast: ImmutableSelectorList) {
     let isValid = true;
-    walkSelectorReadonly(ast, (node, index, nodes) => {
+    walk(ast, (node, index, nodes) => {
         if (node.type === 'pseudo_class') {
             return walk.skipNested;
         }
@@ -151,7 +152,7 @@ export function isRootValid(ast: DeepReadonlyObject<SelectorList>) {
     return isValid;
 }
 
-function isGlobal(node: DeepReadonlyObject<SelectorNode>) {
+function isGlobal(node: ImmutableSelectorNode) {
     return node.type === 'pseudo_class' && node.value === 'global';
 }
 
@@ -159,7 +160,7 @@ export type Chunk = SelectorNode[];
 export type ChunkedSelector = { before: string; after: string; chunks: Chunk[] };
 // ToDo: check why "2" ? what does this do differently then "1"?
 export function separateChunks2<
-    I extends SelectorList | SelectorNode | DeepReadonlyObject<SelectorList | SelectorNode>
+    I extends SelectorList | SelectorNode | ImmutableSelectorList | ImmutableSelectorNode
 >(
     input: I
 ): I extends Readonly<SelectorList | SelectorNode>
@@ -169,7 +170,7 @@ export function separateChunks2<
     const output: ChunkedSelector[] = [];
     let lastChunkedSelector: ChunkedSelector;
     let lastChunkSelector: Chunk;
-    walkSelectorReadonly(input, (node, index, _nodes, parents) => {
+    walk(input, (node, index, _nodes, parents) => {
         if (parents.length === 0) {
             // first level: create top level selector and initial chunks selector
             if (!output[index]) {
@@ -192,7 +193,7 @@ export function separateChunks2<
                 lastChunkedSelector.chunks.push(lastChunkSelector);
             }
             // add node to chunk
-            lastChunkSelector.push(node as SelectorNode);
+            lastChunkSelector.push(node as any as SelectorNode);
             // don't go deeper
             return walk.skipNested;
         }
@@ -202,7 +203,7 @@ export function separateChunks2<
 }
 export function mergeChunks<I extends ChunkedSelector[] | DeepReadonlyObject<ChunkedSelector[]>>(
     input: I
-): I extends Readonly<ChunkedSelector[]> ? SelectorList : DeepReadonlyObject<SelectorList> {
+): I extends Readonly<ChunkedSelector[]> ? SelectorList : ImmutableSelectorList {
     const output: SelectorList = [];
     for (const chunkedSelector of input) {
         output.push({
@@ -230,8 +231,8 @@ export function isCompRoot(name: string) {
  * - replace any nesting `&` nodes in the nested selector with the scoping selector nodes
  */
 export function scopeNestedSelector(
-    scopeSelectorAst: DeepReadonlyObject<SelectorList>,
-    nestedSelectorAst: DeepReadonlyObject<SelectorList>,
+    scopeSelectorAst: ImmutableSelectorList,
+    nestedSelectorAst: ImmutableSelectorList,
     rootScopeLevel = false
 ): { selector: string; ast: SelectorList } {
     const resultSelectors: SelectorList = [];
