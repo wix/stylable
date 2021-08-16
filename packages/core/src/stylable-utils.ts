@@ -24,6 +24,7 @@ import {
 import type { ImportSymbol } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 import type { StylableResolver } from './stylable-resolver';
+import { globalValue } from './utils';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -362,6 +363,12 @@ export function generateScopedCSSVar(namespace: string, varName: string) {
 }
 
 export function isCSSVarProp(value: string) {
+    const globalName = globalValue(value);
+
+    if (globalName !== undefined) {
+        value = globalName.trim();
+    }
+
     return value.startsWith('--');
 }
 

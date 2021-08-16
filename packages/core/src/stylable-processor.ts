@@ -345,12 +345,11 @@ export class StylableProcessor {
 
                     break;
                 case 'property':
-                    this.checkRedeclareSymbol(atRule.params, atRule);
                     this.addCSSVarDefinition(atRule);
                     break;
                 case 'st-global-custom-property': {
                     deprecated(
-                        '"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with "stGlobal"'
+                        `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`
                     );
 
                     const cssVarsByComma = atRule.params.split(',');
@@ -678,7 +677,15 @@ export class StylableProcessor {
         const parsed = postcssValueParser(decl.value);
         parsed.walk((node) => {
             if (node.type === 'function' && node.value === 'var' && node.nodes) {
-                const varName = node.nodes[0];
+                let varName = postcssValueParser.stringify(node.nodes[0]).trim();
+                let isGlobal = false;
+                const globalVarName = globalValue(varName);
+
+                if (globalVarName !== undefined) {
+                    varName = globalVarName;
+                    isGlobal = true;
+                }
+
                 if (!validateAllowedNodesUntil(node, 1)) {
                     const args = postcssValueParser.stringify(node.nodes);
                     this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_ARGS(args), {
@@ -686,22 +693,40 @@ export class StylableProcessor {
                     });
                 }
 
-                this.addCSSVar(postcssValueParser.stringify(varName).trim(), decl);
+                this.addCSSVar(varName, decl, isGlobal);
             }
         });
     }
 
     protected addCSSVarDefinition(node: postcss.Declaration | postcss.AtRule) {
-        const varName = node.type === 'atrule' ? node.params : node.prop;
-        this.addCSSVar(varName.trim(), node);
+        let varName = node.type === 'atrule' ? node.params.trim() : node.prop.trim();
+        let isGlobal = false;
+
+        const globalVarName = globalValue(varName);
+
+        if (globalVarName !== undefined) {
+            varName = globalVarName.trim();
+            isGlobal = true;
+        }
+
+        if (node.type === 'atrule') {
+            this.checkRedeclareSymbol(varName, node);
+        }
+
+        this.addCSSVar(varName, node, isGlobal);
     }
 
-    protected addCSSVar(varName: string, node: postcss.Declaration | postcss.AtRule) {
+    protected addCSSVar(
+        varName: string,
+        node: postcss.Declaration | postcss.AtRule,
+        global: boolean
+    ) {
         if (isCSSVarProp(varName)) {
             if (!this.meta.cssVars[varName]) {
                 const cssVarSymbol: CSSVarSymbol = {
                     _kind: 'cssVar',
                     name: varName,
+                    global,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
                 if (!this.meta.mappedSymbols[varName]) {
