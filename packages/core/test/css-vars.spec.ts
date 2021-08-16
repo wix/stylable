@@ -29,10 +29,12 @@ describe('css custom-properties (vars)', () => {
                 '--myVar': {
                     _kind: 'cssVar',
                     name: '--myVar',
+                    global: false,
                 },
                 '--myOtherVar': {
                     _kind: 'cssVar',
                     name: '--myOtherVar',
+                    global: false,
                 },
             });
         });
@@ -41,8 +43,11 @@ describe('css custom-properties (vars)', () => {
             const { cssVars, diagnostics } = processSource(
                 `
                 @st-global-custom-property --myVar;
+                @property stGlobal(--myGlobalVar);
+
                 .root {
                     --myVar: blue;
+                    --myGlobalVar: red;
                 }
             `,
                 { from: 'path/to/style.css' }
@@ -50,10 +55,48 @@ describe('css custom-properties (vars)', () => {
 
             expect(diagnostics.reports.length, 'no reports').to.eql(0);
             expect(cssVars).to.eql({
+                '--myGlobalVar': {
+                    _kind: 'cssVar',
+                    name: '--myGlobalVar',
+                    global: true,
+                },
                 '--myVar': {
                     _kind: 'cssVar',
                     name: '--myVar',
                     global: true,
+                },
+            });
+        });
+
+        it('global (unscoped) declarations inside rules', () => {
+            const { cssVars, diagnostics } = processSource(
+                `
+                .root {
+                    --a: blue;
+                    stGlobal(--b): red;
+
+                    color: var(stGlobal(--c), red);
+                }
+            `,
+                { from: 'path/to/style.css' }
+            );
+
+            expect(diagnostics.reports.length, 'no reports').to.eql(0);
+            expect(cssVars).to.eql({
+                '--a': {
+                    _kind: 'cssVar',
+                    name: '--a',
+                    global: false,
+                },
+                '--b': {
+                    _kind: 'cssVar',
+                    name: '--b',
+                    global: true,
+                },
+                '--c': {
+                    _kind: 'cssVar',
+                    global: true,
+                    name: '--c',
                 },
             });
         });
@@ -76,6 +119,7 @@ describe('css custom-properties (vars)', () => {
                 '--myVar': {
                     _kind: 'cssVar',
                     name: '--myVar',
+                    global: false,
                 },
             });
         });
