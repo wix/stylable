@@ -1,5 +1,5 @@
 import type { UrlNode } from 'css-selector-tokenizer';
-import { isAsset, makeAbsolute, processDeclarationUrls, StylableMeta } from '@stylable/core';
+import { isAsset, makeAbsolute, processDeclarationFunctions, StylableMeta } from '@stylable/core';
 import { dirname } from 'path';
 
 function defaultFilter() {
@@ -23,6 +23,17 @@ export function processUrlDependencies(
             urls.push(makeAbsolute(url, rootContext, importerDir));
         }
     };
-    meta.outputAst!.walkDecls((node) => processDeclarationUrls(node, onUrl, true));
+
+    meta.outputAst!.walkDecls((node) => {
+        processDeclarationFunctions(
+            node,
+            (urlNode) => {
+                if (urlNode.type === 'url') {
+                    onUrl(urlNode);
+                }
+            },
+            true
+        );
+    });
     return urls;
 }

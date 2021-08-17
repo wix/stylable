@@ -17,7 +17,6 @@ import {
     SelectorAstNode,
     traverseNode,
 } from './selector-utils';
-import { processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
     CSSVarSymbol,
@@ -399,7 +398,15 @@ export class StylableProcessor {
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     private collectUrls(decl: postcss.Declaration) {
-        processDeclarationUrls(decl, (node) => this.meta.urls.push(node.url), false);
+        processDeclarationFunctions(
+            decl,
+            (node) => {
+                if (node.type === 'url') {
+                    this.meta.urls.push(node.url);
+                }
+            },
+            false
+        );
     }
 
     private handleStFunctions(decl: postcss.Declaration) {
