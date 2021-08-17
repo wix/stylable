@@ -1,6 +1,7 @@
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
+import { AnyValueNode, stringifyValues, parseValues } from 'css-selector-tokenizer';
 import { tokenizeImports } from 'toky';
 import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
@@ -16,7 +17,7 @@ import {
     SelectorAstNode,
     traverseNode,
 } from './selector-utils';
-import { processDeclarationFunctions, processDeclarationUrls } from './stylable-assets';
+import { processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
     CSSVarSymbol,
@@ -1079,4 +1080,34 @@ export interface DeclStylableProps {
 
 export interface SDecl extends postcss.Declaration {
     stylable: DeclStylableProps;
+}
+
+export function processDeclarationFunctions(
+    decl: postcss.Declaration,
+    onFunction: (node: AnyValueNode) => void,
+    transform = false
+) {
+    const ast = parseValues(decl.value);
+
+    ast.nodes.forEach((node) => findFunction(node, onFunction));
+
+    if (transform) {
+        decl.value = stringifyValues(ast);
+    }
+}
+
+function findFunction(node: AnyValueNode, onFunctionNode: (node: AnyValueNode) => void) {
+    switch (node.type) {
+        case 'value':
+        case 'values':
+            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
+            break;
+        case 'url':
+            onFunctionNode(node);
+            break;
+        case 'nested-item':
+            onFunctionNode(node);
+            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
+            break;
+    }
 }

@@ -61,39 +61,6 @@ export function makeAbsolute(resourcePath: string, rootContext: string, moduleCo
     return abs;
 }
 
-export function processDeclarationFunctions(
-    decl: postcss.Declaration,
-    onFunction: (node: cssSelectorTokenizer.AnyValueNode) => void,
-    transform = false
-) {
-    const ast = parseValues(decl.value);
-
-    ast.nodes.forEach((node) => findFunction(node, onFunction));
-
-    if (transform) {
-        decl.value = stringifyValues(ast);
-    }
-}
-
-function findFunction(
-    node: cssSelectorTokenizer.AnyValueNode,
-    onFunctionNode: (node: cssSelectorTokenizer.AnyValueNode) => void
-) {
-    switch (node.type) {
-        case 'value':
-        case 'values':
-            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
-            break;
-        case 'url':
-            onFunctionNode(node);
-            break;
-        case 'nested-item':
-            onFunctionNode(node);
-            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
-            break;
-    }
-}
-
 /**
  * @deprecated use processDeclarationFunctions
  */
