@@ -34,6 +34,26 @@ describe('Stylable postcss process', () => {
         });
     });
 
+    it('warn on missing keyframes parameter', () => {
+        const { diagnostics } = processSource(`@keyframes {}`, { from: '/path/to/source' });
+
+        expect(diagnostics.reports[0]).to.include({
+            type: 'warning',
+            message: processorWarnings.MISSING_KEYFRAMES_NAME(),
+        });
+    });
+
+    it('warn on missing keyframes parameter (global)', () => {
+        const { diagnostics } = processSource(`@keyframes stGlobal() {}`, {
+            from: '/path/to/source',
+        });
+
+        expect(diagnostics.reports[0]).to.include({
+            type: 'warning',
+            message: processorWarnings.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(),
+        });
+    });
+
     it('error on invalid rule nesting', () => {
         const { diagnostics } = processSource(
             `
@@ -350,6 +370,27 @@ describe('Stylable postcss process', () => {
         );
 
         expect(result.keyframes.length).to.eql(2);
+    });
+
+    it('collect global @keyframes', () => {
+        const result = processSource(
+            `
+            @keyframes stGlobal(name) {
+                from{}
+                to{}
+            }
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        expect(result.mappedKeyframes).to.eql({
+            name: {
+                _kind: 'keyframes',
+                alias: 'name',
+                name: 'name',
+                global: true,
+            },
+        });
     });
 
     it('should collect mixins on rules', () => {

@@ -1,10 +1,11 @@
-import { murmurhash3_32_gc } from './murmurhash';
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { parseImports } from '@tokey/imports-parser';
 import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
+import { murmurhash3_32_gc } from './murmurhash';
+import { reservedKeyFrames } from './native-reserved-lists';
 import { processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
@@ -37,13 +38,14 @@ import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import {
+    paramMapping,
     rootValueMapping,
     SBTypesParsers,
     stValuesMap,
     validateAllowedNodesUntil,
     valueMapping,
 } from './stylable-value-parsers';
-import { deprecated, filename2varname, stripQuotation } from './utils';
+import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
@@ -82,6 +84,9 @@ export const processorWarnings = {
     },
     REDECLARE_SYMBOL_KEYFRAMES(name: string) {
         return `redeclare keyframes symbol "${name}"`;
+    },
+    KEYFRAME_NAME_RESERVED(name: string) {
+        return `keyframes "${name}" is reserved`;
     },
     CANNOT_RESOLVE_EXTEND(name: string) {
         return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
@@ -139,6 +144,12 @@ export const processorWarnings = {
     },
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" missing scoping selector parameter';
+    },
+    MISSING_KEYFRAMES_NAME() {
+        return '"@keyframes" missing parameter';
+    },
+    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL() {
+        return `"@keyframes" missing parameter inside "${paramMapping.global}()"`;
     },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
@@ -265,13 +276,47 @@ export class StylableProcessor {
                 case 'keyframes':
                     if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
                         this.meta.keyframes.push(atRule);
-                        const { params: name } = atRule;
-                        this.checkRedeclareKeyframes(name, atRule);
-                        this.meta.mappedKeyframes[name] = {
-                            _kind: 'keyframes',
-                            alias: name,
-                            name: name,
-                        };
+                        let { params: name } = atRule;
+
+                        if (name) {
+                            let global: boolean | undefined;
+                            const globalName = globalValue(name);
+
+                            if (globalName !== undefined) {
+                                name = globalName;
+                                global = true;
+                            }
+
+                            if (name === '') {
+                                this.diagnostics.warn(
+                                    atRule,
+                                    processorWarnings.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL()
+                                );
+                            }
+
+                            if (reservedKeyFrames.includes(name)) {
+                                this.diagnostics.error(
+                                    atRule,
+                                    processorWarnings.KEYFRAME_NAME_RESERVED(name),
+                                    {
+                                        word: name,
+                                    }
+                                );
+                            }
+
+                            this.checkRedeclareKeyframes(name, atRule);
+                            this.meta.mappedKeyframes[name] = {
+                                _kind: 'keyframes',
+                                alias: name,
+                                name,
+                                global,
+                            };
+                        } else {
+                            this.diagnostics.warn(
+                                atRule,
+                                processorWarnings.MISSING_KEYFRAMES_NAME()
+                            );
+                        }
                     } else {
                         this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
                     }

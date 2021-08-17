@@ -116,6 +116,7 @@ export interface KeyframesSymbol {
     alias: string;
     name: string;
     import?: Imported;
+    global?: boolean;
 }
 
 export interface CSSVarSymbol {

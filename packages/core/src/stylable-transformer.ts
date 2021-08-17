@@ -1,9 +1,8 @@
+import isVendorPrefixed from 'is-vendor-prefixed';
+import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import isVendorPrefixed from 'is-vendor-prefixed';
-import cloneDeep from 'lodash.clonedeep';
-
 import type { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import type { Diagnostics } from './diagnostics';
@@ -11,7 +10,6 @@ import { evalDeclarationValue, processDeclarationValue } from './functions';
 import {
     nativePseudoClasses,
     nativePseudoElements,
-    reservedKeyFrames,
 } from './native-reserved-lists';
 import { setStateToNode, stateErrors } from './pseudo-states';
 import {
@@ -37,9 +35,10 @@ import type { ClassSymbol, ElementSymbol, StylableMeta } from './stylable-proces
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
-import { valueMapping } from './stylable-value-parsers';
+import { animationPropRegExp, valueMapping } from './stylable-value-parsers';
 import cssesc from 'cssesc';
 import { unescapeCSS } from './helpers/escape';
+import { globalValue } from './utils';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -109,9 +108,6 @@ export const transformerWarnings = {
     },
     CANNOT_EXTEND_JS() {
         return 'JS import is not extendable';
-    },
-    KEYFRAME_NAME_RESERVED(name: string) {
-        return `keyframes "${name}" is reserved`;
     },
     UNKNOWN_IMPORT_ALIAS(name: string) {
         return `cannot use alias for unknown import "${name}"`;
@@ -274,24 +270,28 @@ export class StylableTransformer {
     public scopeKeyframes(ast: postcss.Root, meta: StylableMeta) {
         ast.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
-            if (~reservedKeyFrames.indexOf(name)) {
-                this.diagnostics.error(atRule, transformerWarnings.KEYFRAME_NAME_RESERVED(name), {
-                    word: name,
-                });
+            const globalName = globalValue(name);
+
+            if (globalName === undefined) {
+                atRule.params = this.scope(name, meta.namespace);
+            } else {
+                atRule.params = globalName;
             }
-            atRule.params = this.scope(name, meta.namespace);
         });
 
         const keyframesExports: Record<string, string> = {};
 
         Object.keys(meta.mappedKeyframes).forEach((key) => {
             const res = this.resolver.resolveKeyframes(meta, key);
+
             if (res) {
-                keyframesExports[key] = this.scope(res.symbol.alias, res.meta.namespace);
+                keyframesExports[key] = res.symbol.global
+                    ? res.symbol.alias
+                    : this.scope(res.symbol.alias, res.meta.namespace);
             }
         });
 
-        ast.walkDecls(/animation$|animation-name$/, (decl: postcss.Declaration) => {
+        ast.walkDecls(animationPropRegExp, (decl: postcss.Declaration) => {
             const parsed = postcssValueParser(decl.value);
             parsed.nodes.forEach((node) => {
                 const scoped = keyframesExports[node.value];

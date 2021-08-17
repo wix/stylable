@@ -1236,7 +1236,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
                 expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
+                    { message: processorWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
                 ]);
             });
         });
@@ -1416,7 +1416,7 @@ describe('diagnostics: warnings and errors', () => {
                     {
                         message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
                         file: '/main.st.css',
-                    }
+                    },
                 ]);
             });
 

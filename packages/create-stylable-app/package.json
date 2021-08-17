@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "validate-npm-package-name": "^3.0.0",
-    "yargs": "^17.1.0"
+    "yargs": "^17.1.1"
   },
   "files": [
     "bin",
