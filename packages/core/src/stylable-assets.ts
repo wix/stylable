@@ -1,6 +1,7 @@
 import path from 'path';
 import type * as postcss from 'postcss';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
+import { deprecated } from './utils';
 
 const { parseValues, stringifyValues } = cssSelectorTokenizer;
 
@@ -60,11 +61,51 @@ export function makeAbsolute(resourcePath: string, rootContext: string, moduleCo
     return abs;
 }
 
+export function processDeclarationFunctions(
+    decl: postcss.Declaration,
+    onFunction: (node: cssSelectorTokenizer.AnyValueNode) => void,
+    transform = false
+) {
+    const ast = parseValues(decl.value);
+
+    ast.nodes.forEach((node) => findFunction(node, onFunction));
+
+    if (transform) {
+        decl.value = stringifyValues(ast);
+    }
+}
+
+function findFunction(
+    node: cssSelectorTokenizer.AnyValueNode,
+    onFunctionNode: (node: cssSelectorTokenizer.AnyValueNode) => void
+) {
+    switch (node.type) {
+        case 'value':
+        case 'values':
+            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
+            break;
+        case 'url':
+            onFunctionNode(node);
+            break;
+        case 'nested-item':
+            onFunctionNode(node);
+            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
+            break;
+    }
+}
+
+/**
+ * @deprecated use processDeclarationFunctions
+ */
 export function processDeclarationUrls(
     decl: postcss.Declaration,
     onUrl: OnUrlCallback,
     transform: boolean
 ) {
+    deprecated(
+        'processDeclarationUrls is deprecated and will be removed in the next version. Use "processDeclarationFunctions()"'
+    );
+
     const ast = parseValues(decl.value);
     ast.nodes.forEach((node) => {
         node.nodes.forEach((node) => findUrls(node, onUrl));
