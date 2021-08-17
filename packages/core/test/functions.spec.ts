@@ -1,7 +1,7 @@
+import { functionWarnings, nativeFunctionsDic, processorWarnings } from '@stylable/core';
+import { expectWarningsFromTransform, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { generateStylableRoot, expectWarningsFromTransform } from '@stylable/core-test-kit';
-import { functionWarnings, nativeFunctionsDic } from '@stylable/core';
 
 // var receives special handling and standalone testing
 const testedNativeFunctions = Object.keys(nativeFunctionsDic).filter((func) => func !== 'var');
@@ -678,6 +678,99 @@ describe('Stylable functions (native, formatter and variable)', () => {
     });
 
     describe('diagnostics', () => {
+        describe('deprecation', () => {
+            it('should return a warning when used deprecated stMap', () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                                :vars {
+                                    |color1: $stMap$(key1 red)|;
+                                }
+
+                            `,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                                'stMap',
+                                'st-map'
+                            ),
+                            file: '/style.st.css',
+                        },
+                    ]
+                );
+            });
+
+            it('should return a warning when used deprecated stArray', () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                                :vars {
+                                    |color1: $stArray$(red, blue)|;
+                                }
+                            `,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                                'stArray',
+                                'st-array'
+                            ),
+                            file: '/style.st.css',
+                        },
+                    ]
+                );
+            });
+
+            it('should return a warning when used deprecated nested stArray or stMap', () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                                :vars {
+                                    |color1: $stArray$(|
+                                        red, 
+                                        |$stMap$(key1 blue)|
+                                    );
+                                }
+                            `,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                                'stArray',
+                                'st-array'
+                            ),
+                            file: '/style.st.css',
+                            skipLocationCheck: true,
+                        },
+                        {
+                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                                'stMap',
+                                'st-map'
+                            ),
+                            file: '/style.st.css',
+                            skipLocationCheck: true,
+                        },
+                    ]
+                );
+            });
+        });
+
         describe('value()', () => {
             it('should return a warning when passing more than one argument to a value() function', () => {
                 expectWarningsFromTransform(
@@ -714,9 +807,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             '/style.st.css': {
                                 content: `
                             :vars {
-                                myVar: stMap(
+                                myVar: st-map(
                                     key1 red,
-                                    key2 stMap(
+                                    key2 st-map(
                                         key3 green
                                     )
                                 );   
@@ -749,9 +842,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             :vars {
                                 v1: red;
                                 v2: green;
-                                myVar: stMap(
+                                myVar: st-map(
                                     key1 red,
-                                    key2 stMap(
+                                    key2 st-map(
                                         key3 green
                                     )
                                 );
@@ -786,9 +879,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             :vars {
                                 v1: key3;
                                 v2: key4;
-                                myVar: stMap(
+                                myVar: st-map(
                                     key1 red,
-                                    key2 stMap(
+                                    key2 st-map(
                                         key3 green
                                     )
                                 );

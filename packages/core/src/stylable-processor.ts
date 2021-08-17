@@ -2,6 +2,7 @@ import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { tokenizeImports } from 'toky';
+import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { murmurhash3_32_gc } from './murmurhash';
 import { reservedKeyFrames } from './native-reserved-lists';
@@ -15,7 +16,7 @@ import {
     SelectorAstNode,
     traverseNode,
 } from './selector-utils';
-import { processDeclarationUrls } from './stylable-assets';
+import { processDeclarationFunctions, processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
     CSSVarSymbol,
@@ -167,6 +168,9 @@ export const processorWarnings = {
     },
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
+    },
+    DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
+        return `"${name}" is deprecated, use "${alternativeName}`;
     },
 };
 
@@ -396,6 +400,26 @@ export class StylableProcessor {
     private collectUrls(decl: postcss.Declaration) {
         processDeclarationUrls(decl, (node) => this.meta.urls.push(node.url), false);
     }
+
+    private handleStFunctions(decl: postcss.Declaration) {
+        processDeclarationFunctions(
+            decl,
+            (node) => {
+                if (node.type === 'nested-item' && deprecatedStFunctions[node.name]) {
+                    const { alternativeName } = deprecatedStFunctions[node.name];
+                    this.diagnostics.warn(
+                        decl,
+                        processorWarnings.DEPRECATED_ST_FUNCTION_NAME(node.name, alternativeName),
+                        {
+                            word: node.name,
+                        }
+                    );
+                }
+            },
+            false
+        );
+    }
+
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
         for (const node of this.meta.ast.nodes) {
@@ -645,6 +669,7 @@ export class StylableProcessor {
     protected addVarSymbols(rule: postcss.Rule) {
         rule.walkDecls((decl) => {
             this.collectUrls(decl);
+            this.handleStFunctions(decl);
             this.checkRedeclareSymbol(decl.prop, decl);
             let type = null;
 

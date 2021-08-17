@@ -54,6 +54,7 @@ export interface CustomValueExtension<T> {
 }
 
 export const stTypes: CustomTypes = {
+    /** @deprecated - use `st-array` */
     stArray: createCustomValue<BoxedValueArray, BoxedValueArray>({
         processArgs: (node, customTypes) => {
             return CustomValueStrategy.args(node, customTypes);
@@ -63,6 +64,7 @@ export const stTypes: CustomTypes = {
         },
         getValue: (value, index) => value[parseInt(index, 10)],
     }).register('stArray'),
+    /** @deprecated - use `st-map` */
     stMap: createCustomValue<BoxedValueMap, BoxedValueMap>({
         processArgs: (node, customTypes) => {
             return CustomValueStrategy.named(node, customTypes);
@@ -72,6 +74,33 @@ export const stTypes: CustomTypes = {
         },
         getValue: (value, index) => value[index],
     }).register('stMap'),
+    'st-array': createCustomValue<BoxedValueArray, BoxedValueArray>({
+        processArgs: (node, customTypes) => {
+            return CustomValueStrategy.args(node, customTypes);
+        },
+        createValue: (args) => {
+            return args;
+        },
+        getValue: (value, index) => value[parseInt(index, 10)],
+    }).register('st-array'),
+    'st-map': createCustomValue<BoxedValueMap, BoxedValueMap>({
+        processArgs: (node, customTypes) => {
+            return CustomValueStrategy.named(node, customTypes);
+        },
+        createValue: (args) => {
+            return args;
+        },
+        getValue: (value, index) => value[index],
+    }).register('st-map'),
+} as const;
+
+export const deprecatedStFunctions: Record<string, { alternativeName: string }> = {
+    stArray: {
+        alternativeName: 'st-array',
+    },
+    stMap: {
+        alternativeName: 'st-map',
+    },
 };
 
 export const CustomValueStrategy = {
