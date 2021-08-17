@@ -14,18 +14,18 @@ export function injectStyles(host: Host) {
         var d = document;
         var head = d.head;
         var style = d.createElement('style');
-        style.setAttribute('st-depth', depth as unknown as string);
-        style.setAttribute('st-id', namespace);
-        style.setAttribute('st-runtime', runtimeId);
+        style.setAttribute('st_depth', depth as unknown as string);
+        style.setAttribute('st_id', namespace);
+        style.setAttribute('st_runtime', runtimeId);
         style.textContent = css;
         var loadedStyleElements = head.querySelectorAll<HTMLStyleElement>(
-            'style[st-runtime="' + runtimeId + '"]'
+            'style[st_runtime="' + runtimeId + '"]'
         );
         var inserted = false;
         for (var i = 0; i < loadedStyleElements.length; i++) {
             var styleElement = loadedStyleElements[i];
-            var stId = styleElement.getAttribute('st-id');
-            var stDepth = Number(styleElement.getAttribute('st-depth'));
+            var stId = styleElement.getAttribute('st_id');
+            var stDepth = Number(styleElement.getAttribute('st_depth'));
             if (stId === namespace) {
                 if (stDepth === depth) {
                     head.replaceChild(style, styleElement);
