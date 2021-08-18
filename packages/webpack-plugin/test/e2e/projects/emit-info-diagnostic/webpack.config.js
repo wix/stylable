@@ -13,7 +13,7 @@ module.exports = {
                 ...config,
                 hooks: {
                     postProcessor: (result) => {
-                        result.meta.diagnostics.info(result.meta.ast.root(), 'Test info waring!');
+                        result.meta.diagnostics.info(result.meta.ast.root(), 'test info warning!');
                         return result;
                     },
                 },
