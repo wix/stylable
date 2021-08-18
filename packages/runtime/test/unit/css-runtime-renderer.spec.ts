@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom';
 import { RuntimeRenderer } from '@stylable/runtime';
 
 function assertStyle(node: Element, { $css, key }: { $css: string; key: string }) {
-    expect(node.getAttribute('st-id')).to.equal(key);
+    expect(node.getAttribute('st_id')).to.equal(key);
     expect(node.textContent).to.equal($css);
 }
 

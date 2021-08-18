@@ -27,7 +27,7 @@ export class RuntimeRenderer {
         this.window = _window;
         this.renderer = createDOMListRenderer(
             new CacheStyleNodeRenderer({
-                attrKey: 'st-id' + (this.id ? '-' + this.id : ''),
+                attrKey: 'st_id' + (this.id ? '_' + this.id : ''),
                 createElement: _window.document.createElement.bind(_window.document),
             })
         );
