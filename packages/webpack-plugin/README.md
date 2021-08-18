@@ -65,7 +65,7 @@ interface StylableWebpackPluginOptions {
      */
     target?: 'oldie' | 'modern';
     /**
-     * Set the <style> tag st-id attribute to allow multiple Stylable build to be separated in the head
+     * Set the <style> tag st_id attribute to allow multiple Stylable build to be separated in the head
      * This only apply to cssInjection js mode
      */
     runtimeId?: string;
