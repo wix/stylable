@@ -733,41 +733,36 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should return a warning when used deprecated nested stArray or stMap', () => {
-                expectWarningsFromTransform(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                                :vars {
-                                    |color1: $stArray$(|
-                                        red, 
-                                        |$stMap$(key1 blue)|
-                                    );
-                                }
-                            `,
-                            },
+                const config = {
+                    entry: '/style.st.css',
+                    files: {
+                        '/style.st.css': {
+                            content: `
+                            :vars {
+                                |color1: stArray(
+                                    red, 
+                                    stMap(key1 blue)|
+                                );
+                            }
+                        `,
                         },
                     },
-                    [
-                        {
-                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
-                                'stArray',
-                                'st-array'
-                            ),
-                            file: '/style.st.css',
-                            skipLocationCheck: true,
-                        },
-                        {
-                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
-                                'stMap',
-                                'st-map'
-                            ),
-                            file: '/style.st.css',
-                            skipLocationCheck: true,
-                        },
-                    ]
-                );
+                };
+
+                expectWarningsFromTransform(config, [
+                    {
+                        message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                            'stArray',
+                            'st-array'
+                        ),
+                        file: '/style.st.css',
+                    },
+                    {
+                        message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME('stMap', 'st-map'),
+                        skip: true,
+                        file: '/style.st.css',
+                    },
+                ]);
             });
         });
 
