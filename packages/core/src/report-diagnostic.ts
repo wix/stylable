@@ -1,3 +1,4 @@
+import type { Diagnostic } from './diagnostics';
 import type { StylableMeta } from './stylable-processor';
 
 export interface EmitDiagnosticsContext {
@@ -32,10 +33,12 @@ export function emitDiagnostics(
     meta: StylableMeta,
     diagnosticsMode: DiagnosticsMode
 ) {
-    meta.diagnostics?.reports.forEach((diagnostic) =>
-        reportDiagnostic(ctx, diagnosticsMode, diagnostic)
-    );
-    meta.transformDiagnostics?.reports.forEach((diagnostic) =>
-        reportDiagnostic(ctx, diagnosticsMode, diagnostic)
-    );
+    meta.diagnostics?.reports.forEach(handleReport);
+    meta.transformDiagnostics?.reports.forEach(handleReport);
+
+    function handleReport(diagnostic: Diagnostic) {
+        if (diagnostic.type !== 'info') {
+            reportDiagnostic(ctx, diagnosticsMode, diagnostic);
+        }
+    }
 }
