@@ -1,4 +1,4 @@
-import type { Diagnostic } from './diagnostics';
+import type { Diagnostic, DiagnosticType } from './diagnostics';
 import type { StylableMeta } from './stylable-processor';
 
 export interface EmitDiagnosticsContext {
@@ -13,9 +13,16 @@ export type DiagnosticsMode = 'auto' | 'strict' | 'loose';
 function reportDiagnostic(
     ctx: EmitDiagnosticsContext,
     diagnosticsMode: DiagnosticsMode,
-    { message, type }: { message: string; type: 'warning' | 'error' }
+    { message, type }: { message: string; type: DiagnosticType }
 ) {
     const error = new Error(message);
+
+    if (type === 'info') {
+        ctx.emitWarning(error);
+
+        return;
+    }
+
     if (diagnosticsMode === 'auto') {
         if (type === 'warning') {
             ctx.emitWarning(error);
@@ -37,8 +44,6 @@ export function emitDiagnostics(
     meta.transformDiagnostics?.reports.forEach(handleReport);
 
     function handleReport(diagnostic: Diagnostic) {
-        if (diagnostic.type !== 'info') {
-            reportDiagnostic(ctx, diagnosticsMode, diagnostic);
-        }
+        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
     }
 }
