@@ -167,7 +167,7 @@ describe('diagnostics: warnings and errors', () => {
             });
         });
 
-        describe.only('comments', () => {
+        describe('comments', () => {
             it('should emit info diagnostic in info comment', () => {
                 const config = {
                     entry: '/main.st.css',
