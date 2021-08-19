@@ -168,25 +168,82 @@ describe('diagnostics: warnings and errors', () => {
         });
 
         describe('comments', () => {
-            it('should emit info diagnostic in info comment', () => {
+            it('should emit diagnostic from st-diagnostic comment', () => {
                 const config = {
                     entry: '/main.st.css',
                     files: {
                         '/main.st.css': {
                             namespace: 'main',
                             content: `
-                            /* @st-diagnostic [info] "test-comment!" */
-                            |.root {}|
+                            |/* @st-diagnostic "test default info comment!" */|
+                            /* @st-diagnostic [info] "test info comment!" */
+                            /* @st-diagnostic [warn] "test warn comment!" */
+                            /* @st-diagnostic [error] "test error comment!" */
                             `,
                         },
                     },
                 };
                 expectWarningsFromTransform(config, [
                     {
-                        message: 'test-comment!',
+                        message: 'test default info comment!',
                         file: '/main.st.css',
+                        severity: 'info',
+                    },
+                    {
+                        message: 'test info comment!',
+                        file: '/main.st.css',
+                        severity: 'info',
+                        skipLocationCheck: true,
+                    },
+                    {
+                        message: 'test warn comment!',
+                        file: '/main.st.css',
+                        severity: 'warning',
+                        skipLocationCheck: true,
+                    },
+                    {
+                        message: 'test error comment!',
+                        file: '/main.st.css',
+                        severity: 'error',
+                        skipLocationCheck: true,
                     },
                 ]);
+            });
+            it('should emit info diagnostic from unknown st-diagnostic type', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'main',
+                            content: `
+                            |/* @st-diagnostic [unknown] "test unknown comment!" */|
+                            `,
+                        },
+                    },
+                };
+                expectWarningsFromTransform(config, [
+                    {
+                        message: 'test unknown comment!',
+                        file: '/main.st.css',
+                        severity: 'info',
+                    },
+                ]);
+            });
+            it('should not emit diagnostic st-diagnostic message', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'main',
+                            content: `
+                            /* @st-diagnostic [info] */
+                            /* @st-diagnostic */
+                            /* @st-diagnostic aaa */
+                            `,
+                        },
+                    },
+                };
+                expectWarningsFromTransform(config, []);
             });
         });
 

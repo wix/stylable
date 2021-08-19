@@ -225,33 +225,7 @@ export class StylableProcessor {
             this.collectUrls(decl);
         });
 
-        root.walkComments((comment) => {
-            const diagnosticRegex = new RegExp('^@st-diagnostic\\s*(\\[(.*)\\])?\\s*?\\"(.*)"$');
-
-            if (diagnosticRegex.test(comment.text)) {
-                const match = diagnosticRegex.exec(comment.text);
-                const diagnosticMessage = match?.[3];
-                const diagnosticTypes = ['error', 'warn', 'info'] as const;
-                const nextNode = comment.next();
-                let diagnosticType = match?.[2] || 'info';
-
-                if (nextNode && match && diagnosticMessage) {
-                    diagnosticType = diagnosticTypes.includes(diagnosticType as any)
-                        ? diagnosticType
-                        : 'info';
-
-                    const emitDiagnostic =
-                        this.diagnostics[
-                            diagnosticType as keyof Pick<
-                                Diagnostics,
-                                typeof diagnosticTypes[number]
-                            >
-                        ];
-
-                    emitDiagnostic.call(this.diagnostics, nextNode, diagnosticMessage);
-                }
-            }
-        });
+        this.handleStylableComments(root);
 
         stubs.forEach((s) => s && s.remove());
 
@@ -273,6 +247,26 @@ export class StylableProcessor {
 
     public handleCustomSelectors(rule: postcss.Rule) {
         expandCustomSelectors(rule, this.meta.customSelectors, this.meta.diagnostics);
+    }
+
+    protected handleStylableComments(root: postcss.Root) {
+        root.walkComments((comment) => {
+            const diagnosticRegex = new RegExp('^@st-diagnostic\\s*(\\[(.*)\\])?\\s*?\\"(.*)"$');
+            if (diagnosticRegex.test(comment.text)) {
+                const diagnosticTypes = ['error', 'warn', 'info'] as const;
+
+                const match = diagnosticRegex.exec(comment.text);
+
+                const diagnosticMessage = match?.[3];
+                const diagnosticType = (
+                    diagnosticTypes.includes(match?.[2] as any) ? match?.[2] : 'info'
+                ) as typeof diagnosticTypes[number];
+
+                if (match && diagnosticMessage) {
+                    this.diagnostics[diagnosticType](comment, diagnosticMessage);
+                }
+            }
+        });
     }
 
     protected handleAtRules(root: postcss.Root) {
