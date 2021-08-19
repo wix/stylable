@@ -355,6 +355,10 @@ export class StylableProcessor {
                     break;
                 case 'property':
                     this.addCSSVarDefinition(atRule);
+
+                    if (!atRule.nodes?.length) {
+                        this.nodesToRemove.push(atRule);
+                    }
                     break;
             }
         });
