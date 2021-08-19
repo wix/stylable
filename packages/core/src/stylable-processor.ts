@@ -376,6 +376,7 @@ export class StylableProcessor {
                                     _kind: 'cssVar',
                                     name: cssVar,
                                     global: true,
+                                    exportVar: true,
                                 };
                                 this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
                             }
@@ -693,7 +694,7 @@ export class StylableProcessor {
                     });
                 }
 
-                this.addCSSVar(varName, decl, isGlobal);
+                this.addCSSVar(varName, decl, isGlobal, false);
             }
         });
     }
@@ -713,13 +714,14 @@ export class StylableProcessor {
             this.checkRedeclareSymbol(varName, node);
         }
 
-        this.addCSSVar(varName, node, isGlobal);
+        this.addCSSVar(varName, node, isGlobal, true);
     }
 
     protected addCSSVar(
         varName: string,
         node: postcss.Declaration | postcss.AtRule,
-        global: boolean
+        global: boolean,
+        exportVar: boolean
     ) {
         if (isCSSVarProp(varName)) {
             if (!this.meta.cssVars[varName]) {
@@ -727,6 +729,7 @@ export class StylableProcessor {
                     _kind: 'cssVar',
                     name: varName,
                     global,
+                    exportVar,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
                 if (!this.meta.mappedSymbols[varName]) {

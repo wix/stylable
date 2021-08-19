@@ -30,11 +30,13 @@ describe('css custom-properties (vars)', () => {
                     _kind: 'cssVar',
                     name: '--myVar',
                     global: false,
+                    exportVar: true,
                 },
                 '--myOtherVar': {
                     _kind: 'cssVar',
                     name: '--myOtherVar',
                     global: false,
+                    exportVar: true,
                 },
             });
         });
@@ -59,11 +61,13 @@ describe('css custom-properties (vars)', () => {
                     _kind: 'cssVar',
                     name: '--myGlobalVar',
                     global: true,
+                    exportVar: true,
                 },
                 '--myVar': {
                     _kind: 'cssVar',
                     name: '--myVar',
                     global: true,
+                    exportVar: true,
                 },
             });
         });
@@ -73,9 +77,8 @@ describe('css custom-properties (vars)', () => {
                 `
                 .root {
                     --a: blue;
-                    stGlobal(--b): red;
 
-                    color: var(stGlobal(--c), red);
+                    color: var(stGlobal(--b), red);
                 }
             `,
                 { from: 'path/to/style.css' }
@@ -87,16 +90,13 @@ describe('css custom-properties (vars)', () => {
                     _kind: 'cssVar',
                     name: '--a',
                     global: false,
+                    exportVar: true,
                 },
                 '--b': {
                     _kind: 'cssVar',
                     name: '--b',
                     global: true,
-                },
-                '--c': {
-                    _kind: 'cssVar',
-                    global: true,
-                    name: '--c',
+                    exportVar: false,
                 },
             });
         });
@@ -120,6 +120,7 @@ describe('css custom-properties (vars)', () => {
                     _kind: 'cssVar',
                     name: '--myVar',
                     global: false,
+                    exportVar: true,
                 },
             });
         });
