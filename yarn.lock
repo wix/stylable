@@ -2808,9 +2808,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.811:
-  version "1.3.812"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.812.tgz#4c4fb407e0e1335056097f172e9f2c0a09efe77d"
-  integrity sha512-7KiUHsKAWtSrjVoTSzxQ0nPLr/a+qoxNZwkwd9LkylTOgOXSVXkQbpIVT0WAUQcI5gXq3SwOTCrK+WfINHOXQg==
+  version "1.3.813"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.813.tgz#751a007d71c00faed8b5e9edaf3634c14b9c5a1f"
+  integrity sha512-YcSRImHt6JZZ2sSuQ4Bzajtk98igQ0iKkksqlzZLzbh4p0OIyJRSvUbsgqfcR8txdfsoYCc4ym306t4p2kP/aw==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -4592,9 +4592,9 @@ make-fetch-happen@^8.0.9:
     ssri "^8.0.0"
 
 make-fetch-happen@^9.0.1:
-  version "9.0.4"
-  resolved "https://registry.yarnpkg.com/make-fetch-happen/-/make-fetch-happen-9.0.4.tgz#ceaa100e60e0ef9e8d1ede94614bb2ba83c8bb24"
-  integrity sha512-sQWNKMYqSmbAGXqJg2jZ+PmHh5JAybvwu0xM8mZR/bsTjGiTASj3ldXJV7KFHy1k/IJIBkjxQFoWIVsv9+PQMg==
+  version "9.0.5"
+  resolved "https://registry.yarnpkg.com/make-fetch-happen/-/make-fetch-happen-9.0.5.tgz#e7819afd9c8605f1452df4c1c6dc5c502ca18459"
+  integrity sha512-XN0i/VqHsql30Oq7179spk6vu3IuaPL1jaivNYhBrJtK7tkOuJwMK2IlROiOnJ40b9SvmOo2G86FZyI6LD2EsQ==
   dependencies:
     agentkeepalive "^4.1.3"
     cacache "^15.2.0"
@@ -4610,7 +4610,7 @@ make-fetch-happen@^9.0.1:
     minipass-pipeline "^1.2.4"
     negotiator "^0.6.2"
     promise-retry "^2.0.1"
-    socks-proxy-agent "^5.0.0"
+    socks-proxy-agent "^6.0.0"
     ssri "^8.0.0"
 
 map-age-cleaner@^0.1.3:
@@ -6507,7 +6507,16 @@ socks-proxy-agent@^5.0.0:
     debug "4"
     socks "^2.3.3"
 
-socks@^2.3.3:
+socks-proxy-agent@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/socks-proxy-agent/-/socks-proxy-agent-6.0.0.tgz#9f8749cdc05976505fa9f9a958b1818d0e60573b"
+  integrity sha512-FIgZbQWlnjVEQvMkylz64/rUggGtrKstPnx8OZyYFG0tAFR8CSBtpXxSwbFLHyeXFn/cunFL7MpuSOvDSOPo9g==
+  dependencies:
+    agent-base "^6.0.2"
+    debug "^4.3.1"
+    socks "^2.6.1"
+
+socks@^2.3.3, socks@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/socks/-/socks-2.6.1.tgz#989e6534a07cf337deb1b1c94aaa44296520d30e"
   integrity sha512-kLQ9N5ucj8uIcxrDwjm0Jsqk06xdpBjGNQtpXy4Q8/QY2k+fY7nZH8CARy+hkbG+SGAovmzzuauCpBlb8FrnBA==
@@ -7365,10 +7374,10 @@ webpack-sources@^3.2.0:
   resolved "https://registry.yarnpkg.com/webpack-sources/-/webpack-sources-3.2.0.tgz#b16973bcf844ebcdb3afde32eda1c04d0b90f89d"
   integrity sha512-fahN08Et7P9trej8xz/Z7eRu8ltyiygEo/hnRi9KqBUs80KeDcnf96ZJo++ewWd84fEf3xSX9bp4ZS9hbw0OBw==
 
-webpack@^5.51.0:
-  version "5.51.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.51.0.tgz#b6683d92e4bd84db588bacb6ade6441d9c5fd2f3"
-  integrity sha512-oySQoKUuf5r0JaPIYi8q90c/GmU9fGdSbZ0cAjFq3OWx57wniRTWvta1T9t+e5WZ6H6mHrxksNatkqfIEuTWGg==
+webpack@^5.51.1:
+  version "5.51.1"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.51.1.tgz#41bebf38dccab9a89487b16dbe95c22e147aac57"
+  integrity sha512-xsn3lwqEKoFvqn4JQggPSRxE4dhsRcysWTqYABAZlmavcoTmwlOb9b1N36Inbt/eIispSkuHa80/FJkDTPos1A==
   dependencies:
     "@types/eslint-scope" "^3.7.0"
     "@types/estree" "^0.0.50"
