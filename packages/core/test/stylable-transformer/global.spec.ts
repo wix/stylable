@@ -158,7 +158,7 @@ describe('Stylable postcss transform (Global)', () => {
                         content: `
 
                         /* @check global-name */
-                        @keyframes stGlobal(global-name) {
+                        @keyframes st-global(global-name) {
                             from {}
                             to {}
                         }
@@ -188,7 +188,7 @@ describe('Stylable postcss transform (Global)', () => {
                     '/a.st.css': {
                         namespace: 'a',
                         content: `
-                        @keyframes stGlobal(globalName) {
+                        @keyframes st-global(globalName) {
                             from {}
                             to {}
                         }
@@ -220,7 +220,7 @@ describe('Stylable postcss transform (Global)', () => {
                     '/a.st.css': {
                         namespace: 'a',
                         content: `
-                        @keyframes stGlobal(globalName) {
+                        @keyframes st-global(globalName) {
                             from {}
                             to {}
                         }
@@ -241,7 +241,7 @@ describe('Stylable postcss transform (Global)', () => {
                     '/style.st.css': {
                         namespace: 'style',
                         content: `
-                        @keyframes stGlobal(globalName) {
+                        @keyframes st-global(globalName) {
                             from {}
                             to {}
                         }

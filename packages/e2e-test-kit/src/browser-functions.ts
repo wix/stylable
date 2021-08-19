@@ -13,11 +13,11 @@ function getStyleElementsMetadata({
     const styleElements = Array.from(document.head.getElementsByTagName('style'));
     return styleElements.map((styleEl) => {
         const data: { id?: string; depth?: string; css?: string; runtime?: string } = {
-            id: styleEl.getAttribute('st-id')!,
-            depth: styleEl.getAttribute('st-depth')!,
+            id: styleEl.getAttribute('st_id')!,
+            depth: styleEl.getAttribute('st_depth')!,
         };
         if (includeRuntimeId) {
-            data.runtime = styleEl.getAttribute('st-runtime')!;
+            data.runtime = styleEl.getAttribute('st_runtime')!;
         }
         if (includeCSSContent) {
             data.css = styleEl.textContent!.replace(/\r?\n/g, '\n');
