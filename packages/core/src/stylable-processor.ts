@@ -694,7 +694,7 @@ export class StylableProcessor {
                     });
                 }
 
-                this.addCSSVar(varName, decl, isGlobal, false);
+                this.addCSSVar(varName, decl, isGlobal, !isGlobal);
             }
         });
     }

@@ -72,13 +72,14 @@ describe('css custom-properties (vars)', () => {
             });
         });
 
-        it('global (unscoped) declarations inside rules', () => {
+        it('global (unscoped) declarations inside rules and indicate if should be exported', () => {
             const { cssVars, diagnostics } = processSource(
                 `
                 .root {
                     --a: blue;
 
                     color: var(stGlobal(--b), red);
+                    color: var(--c, red);
                 }
             `,
                 { from: 'path/to/style.css' }
@@ -97,6 +98,12 @@ describe('css custom-properties (vars)', () => {
                     name: '--b',
                     global: true,
                     exportVar: false,
+                },
+                '--c': {
+                    _kind: 'cssVar',
+                    name: '--c',
+                    global: false,
+                    exportVar: true,
                 },
             });
         });
