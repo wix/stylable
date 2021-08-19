@@ -345,7 +345,7 @@ export class StylableTransformer {
         for (const localVarName of Object.keys(meta.cssVars)) {
             const cssVar = meta.cssVars[localVarName];
 
-            if (!cssVarsMapping[localVarName]) {
+            if (!cssVarsMapping[localVarName] && cssVar.exportVar) {
                 cssVarsMapping[localVarName] = cssVar.global
                     ? localVarName
                     : generateScopedCSSVar(meta.namespace, localVarName.slice(2));
