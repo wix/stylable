@@ -268,16 +268,22 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
 
-        it.skip('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
+        it('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
-                'style.st.css': `.root{}`,
+                'style.st.css': `/* @st-diagnostic "Test info diagnostic" */.root {} `,
             });
 
-            // Should emit info diagnostic
-            const { status } = runCliSync(['--rootDir', tempDir.path, '--diagnosticsMode=strict']);
+            const { status, stdout } = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--diagnosticsMode=strict',
+            ]);
 
             expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(/Test info diagnostic/);
         });
 
         it('(diagnosticsMode) should report diagnostics and ignore process exit', () => {
