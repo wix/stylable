@@ -225,6 +225,34 @@ export class StylableProcessor {
             this.collectUrls(decl);
         });
 
+        root.walkComments((comment) => {
+            const diagnosticRegex = new RegExp('^@st-diagnostic\\s*(\\[(.*)\\])?\\s*?\\"(.*)"$');
+
+            if (diagnosticRegex.test(comment.text)) {
+                const match = diagnosticRegex.exec(comment.text);
+                const diagnosticMessage = match?.[3];
+                const diagnosticTypes = ['error', 'warn', 'info'] as const;
+                const nextNode = comment.next();
+                let diagnosticType = match?.[2] || 'info';
+
+                if (nextNode && match && diagnosticMessage) {
+                    diagnosticType = diagnosticTypes.includes(diagnosticType as any)
+                        ? diagnosticType
+                        : 'info';
+
+                    const emitDiagnostic =
+                        this.diagnostics[
+                            diagnosticType as keyof Pick<
+                                Diagnostics,
+                                typeof diagnosticTypes[number]
+                            >
+                        ];
+
+                    emitDiagnostic.call(this.diagnostics, nextNode, diagnosticMessage);
+                }
+            }
+        });
+
         stubs.forEach((s) => s && s.remove());
 
         this.meta.scopes.forEach((scope) => this.handleScope(scope));

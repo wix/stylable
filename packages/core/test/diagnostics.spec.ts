@@ -166,6 +166,30 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
         });
+
+        describe.only('comments', () => {
+            it('should emit info diagnostic in info comment', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'main',
+                            content: `
+                            /* @st-diagnostic [info] "test-comment!" */
+                            |.root {}|
+                            `,
+                        },
+                    },
+                };
+                expectWarningsFromTransform(config, [
+                    {
+                        message: 'test-comment!',
+                        file: '/main.st.css',
+                    },
+                ]);
+            });
+        });
+
         describe('pseudo selectors', () => {
             xit('should return warning for native pseudo elements without selector', () => {
                 expectWarnings(
