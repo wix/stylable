@@ -173,7 +173,8 @@ export const processorWarnings = {
 export class StylableProcessor {
     protected meta!: StylableMeta;
     protected dirContext!: string;
-    private nodesToRemove: postcss.Node[] = [];
+    protected nodesToRemove: postcss.Node[] = [];
+
     constructor(
         protected diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
@@ -251,7 +252,7 @@ export class StylableProcessor {
         expandCustomSelectors(rule, this.meta.customSelectors, this.meta.diagnostics);
     }
 
-    private removeNodes() {
+    protected removeNodes() {
         this.nodesToRemove.forEach((node) => node.remove());
         this.nodesToRemove = [];
     }
@@ -365,7 +366,7 @@ export class StylableProcessor {
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
-    private handleHoistedDeclarations(root: postcss.Root) {
+    protected handleHoistedDeclarations(root: postcss.Root) {
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
                 case 'st-global-custom-property': {
