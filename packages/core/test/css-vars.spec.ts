@@ -45,7 +45,7 @@ describe('css custom-properties (vars)', () => {
             const { cssVars, diagnostics } = processSource(
                 `
                 @st-global-custom-property --myVar;
-                @property stGlobal(--myGlobalVar);
+                @property st-global(--myGlobalVar);
 
                 .root {
                     --myVar: blue;
@@ -78,7 +78,7 @@ describe('css custom-properties (vars)', () => {
                 .root {
                     --a: blue;
 
-                    color: var(stGlobal(--b), red);
+                    color: var(st-global(--b), red);
                     color: var(--c, red);
                 }
             `,
@@ -659,7 +659,7 @@ describe('css custom-properties (vars)', () => {
                             namespace: 'entry',
                             content: `
                             .root {
-                                color: var(stGlobal(--x), red);
+                                color: var(st-global(--x), red);
                             }
                             `,
                         },
