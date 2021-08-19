@@ -168,6 +168,9 @@ export const processorWarnings = {
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
     },
+    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
+        return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`;
+    },
 };
 
 export class StylableProcessor {
@@ -190,14 +193,6 @@ export class StylableProcessor {
         this.removeNodes();
 
         const stubs = this.insertCustomSelectorsStubs();
-
-        for (const node of root.nodes) {
-            if (node.type === 'rule' && node.selector === rootValueMapping.import) {
-                const imported = this.handleImport(node);
-                this.meta.imports.push(imported);
-                this.addImportSymbols(imported);
-            }
-        }
 
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
@@ -340,20 +335,7 @@ export class StylableProcessor {
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
                     break;
-                case 'st-import':
-                    if (atRule.parent?.type !== 'root') {
-                        this.diagnostics.warn(
-                            atRule,
-                            processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE()
-                        );
-                        atRule.remove();
-                    } else {
-                        const stImport = this.handleStImport(atRule);
-                        this.meta.imports.push(stImport);
-                        this.addImportSymbols(stImport);
-                    }
 
-                    break;
                 case 'property':
                     this.addCSSVarDefinition(atRule);
 
@@ -367,52 +349,67 @@ export class StylableProcessor {
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     protected handleHoistedDeclarations(root: postcss.Root) {
-        root.walkAtRules((atRule) => {
-            switch (atRule.name) {
-                case 'st-global-custom-property': {
-                    deprecated(
-                        `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`
+        // Todo: Deprecate next major (at 5)
+        root.walkAtRules('st-global-custom-property', (atRule) => {
+            this.diagnostics.warn(atRule, processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY());
+
+            const cssVarsByComma = atRule.params.split(',');
+            const cssVarsBySpacing = atRule.params
+                .trim()
+                .split(/\s+/g)
+                .filter((s) => s !== ',');
+
+            if (cssVarsBySpacing.length > cssVarsByComma.length) {
+                this.diagnostics.warn(
+                    atRule,
+                    processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
+                    { word: atRule.params }
+                );
+                return;
+            }
+
+            for (const entry of cssVarsByComma) {
+                const cssVar = entry.trim();
+
+                if (isCSSVarProp(cssVar)) {
+                    if (!this.meta.cssVars[cssVar]) {
+                        this.meta.cssVars[cssVar] = {
+                            _kind: 'cssVar',
+                            name: cssVar,
+                            global: true,
+                            exportVar: true,
+                        };
+                        this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
+                    }
+                } else {
+                    this.diagnostics.warn(
+                        atRule,
+                        processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar),
+                        { word: cssVar }
                     );
-
-                    const cssVarsByComma = atRule.params.split(',');
-                    const cssVarsBySpacing = atRule.params
-                        .trim()
-                        .split(/\s+/g)
-                        .filter((s) => s !== ',');
-
-                    if (cssVarsBySpacing.length > cssVarsByComma.length) {
-                        this.diagnostics.warn(
-                            atRule,
-                            processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
-                            { word: atRule.params }
-                        );
-                        break;
-                    }
-
-                    for (const entry of cssVarsByComma) {
-                        const cssVar = entry.trim();
-
-                        if (isCSSVarProp(cssVar)) {
-                            if (!this.meta.cssVars[cssVar]) {
-                                this.meta.cssVars[cssVar] = {
-                                    _kind: 'cssVar',
-                                    name: cssVar,
-                                    global: true,
-                                    exportVar: true,
-                                };
-                                this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
-                            }
-                        } else {
-                            this.diagnostics.warn(
-                                atRule,
-                                processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar),
-                                { word: cssVar }
-                            );
-                        }
-                    }
-                    this.nodesToRemove.push(atRule);
-                    break;
                 }
+            }
+            this.nodesToRemove.push(atRule);
+        });
+
+        // :import
+        for (const node of root.nodes) {
+            if (node.type === 'rule' && node.selector === rootValueMapping.import) {
+                const imported = this.handleImport(node);
+                this.meta.imports.push(imported);
+                this.addImportSymbols(imported);
+            }
+        }
+
+        // @st-import
+        root.walkAtRules('st-import', (atRule) => {
+            if (atRule.parent?.type !== 'root') {
+                this.diagnostics.warn(atRule, processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE());
+                atRule.remove();
+            } else {
+                const stImport = this.handleStImport(atRule);
+                this.meta.imports.push(stImport);
+                this.addImportSymbols(stImport);
             }
         });
     }
