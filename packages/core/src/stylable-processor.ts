@@ -173,6 +173,7 @@ export const processorWarnings = {
 export class StylableProcessor {
     protected meta!: StylableMeta;
     protected dirContext!: string;
+    private nodesToRemove: postcss.Node[] = [];
     constructor(
         protected diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
@@ -182,7 +183,10 @@ export class StylableProcessor {
 
         this.dirContext = path.dirname(this.meta.source);
 
+        this.handleHoistedDeclarations(root);
         this.handleAtRules(root);
+
+        this.removeNodes();
 
         const stubs = this.insertCustomSelectorsStubs();
 
@@ -247,9 +251,14 @@ export class StylableProcessor {
         expandCustomSelectors(rule, this.meta.customSelectors, this.meta.diagnostics);
     }
 
+    private removeNodes() {
+        this.nodesToRemove.forEach((node) => node.remove());
+        this.nodesToRemove = [];
+    }
+
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
-        const toRemove: postcss.Node[] = [];
+
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
                 case 'namespace': {
@@ -260,7 +269,7 @@ export class StylableProcessor {
                         } else {
                             this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
                         }
-                        toRemove.push(atRule);
+                        this.nodesToRemove.push(atRule);
                     } else {
                         this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
                     }
@@ -317,7 +326,7 @@ export class StylableProcessor {
                 case 'custom-selector': {
                     const params = atRule.params.split(/\s/);
                     const customName = params.shift();
-                    toRemove.push(atRule);
+                    this.nodesToRemove.push(atRule);
                     if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
                         this.meta.customSelectors[customName] = atRule.params
                             .replace(customName, '')
@@ -347,6 +356,14 @@ export class StylableProcessor {
                 case 'property':
                     this.addCSSVarDefinition(atRule);
                     break;
+            }
+        });
+        namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
+        this.meta.namespace = this.handleNamespaceReference(namespace);
+    }
+    private handleHoistedDeclarations(root: postcss.Root) {
+        root.walkAtRules((atRule) => {
+            switch (atRule.name) {
                 case 'st-global-custom-property': {
                     deprecated(
                         `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`
@@ -388,14 +405,11 @@ export class StylableProcessor {
                             );
                         }
                     }
-                    toRemove.push(atRule);
+                    this.nodesToRemove.push(atRule);
                     break;
                 }
             }
         });
-        toRemove.forEach((node) => node.remove());
-        namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
-        this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     private collectUrls(decl: postcss.Declaration) {
         processDeclarationUrls(decl, (node) => this.meta.urls.push(node.url), false);

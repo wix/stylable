@@ -137,6 +137,26 @@ describe('css custom-properties (vars)', () => {
         // What does it do?
         // - generates namespace for var declarations
 
+        it('should hoist st-global-custom-property', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @property --x;
+                        @st-global-custom-property --x;
+                        `,
+                    },
+                },
+            });
+
+            expect((res.meta.outputAst!.nodes[0] as postcss.AtRule).params).to.eql('--x');
+            expect(res.exports.vars).to.eql({
+                x: '--x',
+            });
+        });
+
         it('css vars with their newly created namespace', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
