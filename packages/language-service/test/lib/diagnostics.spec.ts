@@ -153,7 +153,7 @@ describe('diagnostics', () => {
 
             const diagnostics = createDiagnostics(
                 {
-                    [filePath]: `@st-global-custom-property --x;   /* unknownAtRules */`,
+                    [filePath]: `@property st-global(--x);   /* unknownAtRules */`,
                 },
                 filePath
             );
