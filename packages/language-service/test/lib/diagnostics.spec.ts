@@ -148,19 +148,6 @@ describe('diagnostics', () => {
             expect(diagnostics).to.eql([]);
         });
 
-        it('should not warn about pseudo-states with params', () => {
-            const filePath = '/style.st.css';
-
-            const diagnostics = createDiagnostics(
-                {
-                    [filePath]: `@property st-global(--x);   /* unknownAtRules */`,
-                },
-                filePath
-            );
-
-            expect(diagnostics).to.eql([]);
-        });
-
         it('should ignore errors from stylable vars in a media query', () => {
             const filePath = '/style.st.css';
 
