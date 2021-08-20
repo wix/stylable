@@ -229,7 +229,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 ]);
             });
-            it('should not emit diagnostic st-diagnostic message', () => {
+            it('should not emit diagnostic for invalid st-diagnostic comment', () => {
                 const config = {
                     entry: '/main.st.css',
                     files: {
