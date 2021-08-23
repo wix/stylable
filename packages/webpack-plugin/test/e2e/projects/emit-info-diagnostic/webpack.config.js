@@ -9,6 +9,15 @@ module.exports = {
     plugins: [
         new StylableWebpackPlugin({
             diagnosticsMode: 'strict',
+            stylableConfig: (config) => ({
+                ...config,
+                hooks: {
+                    postProcessor: (result) => {
+                        result.meta.diagnostics.info(result.meta.ast.root(), 'test info warning!');
+                        return result;
+                    },
+                },
+            }),
         }),
         new HtmlWebpackPlugin(),
     ],
