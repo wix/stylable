@@ -30,13 +30,11 @@ describe('css custom-properties (vars)', () => {
                     _kind: 'cssVar',
                     name: '--myVar',
                     global: false,
-                    exportVar: true,
                 },
                 '--myOtherVar': {
                     _kind: 'cssVar',
                     name: '--myOtherVar',
                     global: false,
-                    exportVar: true,
                 },
             });
         });
@@ -59,43 +57,6 @@ describe('css custom-properties (vars)', () => {
                     _kind: 'cssVar',
                     name: '--myGlobalVar',
                     global: true,
-                    exportVar: true,
-                },
-            });
-        });
-
-        it('global (unscoped) declarations inside rules and indicate if should be exported', () => {
-            const { cssVars, diagnostics } = processSource(
-                `
-                .root {
-                    --a: blue;
-
-                    color: var(st-global(--b), red);
-                    color: var(--c, red);
-                }
-            `,
-                { from: 'path/to/style.css' }
-            );
-
-            expect(diagnostics.reports.length, 'no reports').to.eql(0);
-            expect(cssVars).to.eql({
-                '--a': {
-                    _kind: 'cssVar',
-                    name: '--a',
-                    global: false,
-                    exportVar: true,
-                },
-                '--b': {
-                    _kind: 'cssVar',
-                    name: '--b',
-                    global: true,
-                    exportVar: false,
-                },
-                '--c': {
-                    _kind: 'cssVar',
-                    name: '--c',
-                    global: false,
-                    exportVar: true,
                 },
             });
         });
@@ -119,7 +80,6 @@ describe('css custom-properties (vars)', () => {
                     _kind: 'cssVar',
                     name: '--myVar',
                     global: false,
-                    exportVar: true,
                 },
             });
         });
@@ -691,33 +651,6 @@ describe('css custom-properties (vars)', () => {
         });
 
         describe('global (unscoped)', () => {
-            it('should not transform declaration global css vars and not export them', () => {
-                const res = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                            .root {
-                                color: var(st-global(--x), red);
-                            }
-                            `,
-                        },
-                    },
-                });
-
-                expect(
-                    res.meta.diagnostics.reports,
-                    'no diagnostics reported for native states'
-                ).to.eql([]);
-
-                const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
-                    .nodes[0] as postcss.Declaration;
-
-                expect(decl.value).to.eql('var(--x, red)');
-                expect(res.exports.vars).to.eql({});
-            });
-
             it('does not scope css var declarations', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,

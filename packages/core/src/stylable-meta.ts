@@ -121,7 +121,6 @@ export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
     global: boolean;
-    exportVar: boolean;
 }
 
 export type StylableSymbol =

@@ -377,7 +377,6 @@ export class StylableProcessor {
                             _kind: 'cssVar',
                             name: cssVar,
                             global: true,
-                            exportVar: true,
                         };
                         this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
                     }
@@ -694,15 +693,7 @@ export class StylableProcessor {
         const parsed = postcssValueParser(decl.value);
         parsed.walk((node) => {
             if (node.type === 'function' && node.value === 'var' && node.nodes) {
-                let varName = postcssValueParser.stringify(node.nodes[0]).trim();
-                let isGlobal = false;
-                const globalVarName = globalValue(varName);
-
-                if (globalVarName !== undefined) {
-                    varName = globalVarName;
-                    isGlobal = true;
-                }
-
+                const varName = node.nodes[0];
                 if (!validateAllowedNodesUntil(node, 1)) {
                     const args = postcssValueParser.stringify(node.nodes);
                     this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_ARGS(args), {
@@ -710,7 +701,7 @@ export class StylableProcessor {
                     });
                 }
 
-                this.addCSSVar(varName, decl, isGlobal, !isGlobal);
+                this.addCSSVar(postcssValueParser.stringify(varName).trim(), decl, false);
             }
         });
     }
@@ -730,14 +721,13 @@ export class StylableProcessor {
             this.checkRedeclareSymbol(varName, node);
         }
 
-        this.addCSSVar(varName, node, isGlobal, true);
+        this.addCSSVar(varName, node, isGlobal);
     }
 
     protected addCSSVar(
         varName: string,
         node: postcss.Declaration | postcss.AtRule,
-        global: boolean,
-        exportVar: boolean
+        global: boolean
     ) {
         if (isCSSVarProp(varName)) {
             if (!this.meta.cssVars[varName]) {
@@ -745,7 +735,6 @@ export class StylableProcessor {
                     _kind: 'cssVar',
                     name: varName,
                     global,
-                    exportVar,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
                 if (!this.meta.mappedSymbols[varName]) {

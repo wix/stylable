@@ -12,7 +12,6 @@ import { isCSSVarProp } from './stylable-utils';
 import {
     getFormatterArgs,
     getStringValue,
-    paramMapping,
     strategies,
     valueMapping,
 } from './stylable-value-parsers';
@@ -248,8 +247,6 @@ export function processDeclarationValue(
                     }
                 } else if (value === '') {
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                } else if (paramMapping.global === value) {
-                    parsedNode.resolvedValue = parsedNode.nodes[0].value.trim();
                 } else if (customValues[value]) {
                     // no op resolved at the bottom
                 } else if (value === 'url') {
