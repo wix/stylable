@@ -230,7 +230,11 @@ export function createChecker(types: Array<string | string[]>) {
         };
     };
 }
-const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
+export const createSimpleSelectorChecker = createChecker([
+    'selectors',
+    'selector',
+    ['element', 'class'],
+]);
 export function isSimpleSelector(selectorAst: SelectorAstNode) {
     const isSimpleSelectorASTNode = createSimpleSelectorChecker();
     const isSimple = traverseNode(

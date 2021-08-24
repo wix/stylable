@@ -38,6 +38,31 @@ export { pseudoStates };
 
 import { wrapFunctionForDeprecation } from './helpers/deprecation';
 
+import { isCompRoot as deprecatedIsCompRoot } from './helpers/selector';
+/**@deprecated*/
+export const isCompRoot = wrapFunctionForDeprecation(deprecatedIsCompRoot, {
+    name: `isCompRoot`,
+});
+
+import {
+    isChildOfAtRule as deprecatedIsChildOfAtRule,
+    createWarningRule as deprecatedCreateWarningRule,
+} from './helpers/rule';
+/**@deprecated*/
+export const isChildOfAtRule = wrapFunctionForDeprecation(deprecatedIsChildOfAtRule, {
+    name: `isChildOfAtRule`,
+});
+/**@deprecated*/
+export const createWarningRule = wrapFunctionForDeprecation(deprecatedCreateWarningRule, {
+    name: `createWarningRule`,
+});
+
+import { getOriginDefinition as deprecatedGetOriginDefinition } from './helpers/resolve';
+/**@deprecated*/
+export const getOriginDefinition = wrapFunctionForDeprecation(deprecatedGetOriginDefinition, {
+    name: `getOriginDefinition`,
+});
+
 export type { SRule, SDecl, DeclStylableProps } from './deprecated/postcss-ast-extension';
 import { getDeclStylable as deprecatedGetDeclStylable } from './deprecated/postcss-ast-extension';
 /**@deprecated*/
@@ -94,6 +119,7 @@ import {
     parseSelector as deprecatedParseSelector,
     stringifySelector as deprecatedStringifySelector,
     isNodeMatch as deprecatedIsNodeMatch,
+    createSimpleSelectorChecker as deprecatedCreateSimpleSelectorChecker,
 } from './deprecated/deprecated-selector-utils';
 /**@deprecated*/
 export const matchSelectorTarget = wrapFunctionForDeprecation(deprecatedMatchSelectorTarget, {
@@ -170,3 +196,10 @@ export const stringifySelector = wrapFunctionForDeprecation(deprecatedStringifyS
     name: `stringifySelector`,
     pleaseUse: `"import { stringifySelector } from '@tokey/css-selector-parser'"`,
 });
+/**@deprecated*/
+export const createSimpleSelectorChecker = wrapFunctionForDeprecation(
+    deprecatedCreateSimpleSelectorChecker,
+    {
+        name: `createSimpleSelectorChecker`,
+    }
+);
