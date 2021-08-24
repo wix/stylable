@@ -349,7 +349,7 @@ export class StylableProcessor {
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     protected handleHoistedDeclarations(root: postcss.Root) {
-        // Todo: Deprecate next major (at 5)
+        // Todo: Deprecate
         root.walkAtRules('st-global-custom-property', (atRule) => {
             this.diagnostics.warn(atRule, processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY());
 
