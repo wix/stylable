@@ -1,1 +1,3 @@
-export * from './formatter';
+export {
+    getDocumentFormatting
+} from './formatter';

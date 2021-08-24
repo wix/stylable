@@ -1,4 +1,14 @@
-export * from './module-source';
-export * from './module-factory';
-export * from './generate-dts';
-export * from './generate-dts-sourcemaps';
+export {
+    createModuleSource,
+    generateModuleSource
+} from './module-source';
+export {
+    Options,
+    stylableModuleFactory
+} from './module-factory';
+export {
+    generateDTSContent
+} from './generate-dts';
+export {
+    generateDTSSourceMap
+} from './generate-dts-sourcemaps';

@@ -1,3 +1,12 @@
-export * from './require-hook';
-export * from './resolve-namespace';
-export * from './find-files';
+export {
+    Options,
+    attachHook
+} from './require-hook';
+export {
+    resolveNamespace,
+    resolveNamespaceFactory
+} from './resolve-namespace';
+export {
+    FileSystem,
+    findFiles
+} from './find-files';

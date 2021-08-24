@@ -1,2 +1,8 @@
-export * from './uni-driver';
-export * from './types';
+export {
+    StylableUnidriverUtil
+} from './uni-driver';
+export {
+    ElementRemoteApi,
+    MinimalStylesheet,
+    StateValue
+} from './types';
