@@ -6,7 +6,7 @@ import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { levels, Log } from './logger';
-import { reportDiagnostics } from './report-diagnostics';
+import { DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
 
 export const messages = {
     START_WATCHING: 'start watching...',
@@ -100,7 +100,7 @@ export async function build({
     const generated = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
-    const diagnosticsMessages = new Map<string, string[]>();
+    const diagnosticsMessages: DiagnosticMessages = new Map();
 
     const service = new DirectoryProcessService(fs, {
         watchMode: watch,

@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
 
-export type DiagnosticType = 'error' | 'warning';
+export type DiagnosticType = 'error' | 'warning' | 'info';
 
 export interface DiagnosticOptions {
     word?: string;
@@ -28,5 +28,8 @@ export class Diagnostics {
     }
     public warn(node: postcss.Node, message: string, options?: DiagnosticOptions) {
         this.add('warning', node, message, options);
+    }
+    public info(node: postcss.Node, message: string, options?: DiagnosticOptions) {
+        this.add('info', node, message, options);
     }
 }
