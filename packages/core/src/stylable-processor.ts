@@ -415,7 +415,7 @@ export class StylableProcessor {
             (node) => {
                 if (node.type === 'nested-item' && deprecatedStFunctions[node.name]) {
                     const { alternativeName } = deprecatedStFunctions[node.name];
-                    this.diagnostics.warn(
+                    this.diagnostics.info(
                         decl,
                         processorWarnings.DEPRECATED_ST_FUNCTION_NAME(node.name, alternativeName),
                         {

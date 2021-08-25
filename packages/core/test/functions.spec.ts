@@ -701,6 +701,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 'st-map'
                             ),
                             file: '/style.st.css',
+                            severity: 'info'
                         },
                     ]
                 );
@@ -727,6 +728,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 'st-array'
                             ),
                             file: '/style.st.css',
+                            severity: 'info'
                         },
                     ]
                 );
@@ -756,11 +758,13 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             'st-array'
                         ),
                         file: '/style.st.css',
+                        severity: 'info'
                     },
                     {
                         message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME('stMap', 'st-map'),
                         skip: true,
                         file: '/style.st.css',
+                        severity: 'info'
                     },
                 ]);
             });
