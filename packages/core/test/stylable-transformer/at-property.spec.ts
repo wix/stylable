@@ -1,4 +1,4 @@
-import { processorWarnings } from '@stylable/core';
+import { processorWarnings, atPropertyValidationWarnings } from '@stylable/core';
 import { expectWarningsFromTransform, generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
@@ -41,6 +41,7 @@ describe('@property support', () => {
         expect(prop1.params).to.equal('--global');
         expect(prop2.params).to.equal('--entry-radius');
     });
+
     it('should detect and export @property definition', () => {
         const { exports, meta } = generateStylableResult({
             entry: `/entry.st.css`,
@@ -97,5 +98,151 @@ describe('@property support', () => {
                 message: processorWarnings.REDECLARE_SYMBOL('--my-var'),
             },
         ]);
+    });
+
+    describe('validation', () => {
+        it('should remove at property when used without a body', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @property --x {
+                            syntax: '<color>';
+                            inherits: false;
+                            initial-value: #c0ffee;
+                        }
+                        
+                        |@property $--y$|
+                        `,
+                    },
+                },
+            };
+
+            const result = expectWarningsFromTransform(config, []);
+
+            const declarations = result.meta.outputAst!.nodes;
+            const atProperty = declarations[0] as postcss.AtRule;
+
+            expect(declarations).to.have.length(1);
+            expect(atProperty.params).to.eql('--entry-x');
+            expect(atProperty.nodes.length).to.be.greaterThan(0);
+            expect(result.exports.vars).to.eql({
+                x: '--entry-x',
+                y: '--entry-y',
+            });
+        });
+
+        it('should emit warning when used without "syntax" descriptor', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@property $--x$ {|
+                            inherits: true;
+                            initial-value: #c0ffee;
+                        }
+                        
+                        `,
+                    },
+                },
+            };
+
+            const result = expectWarningsFromTransform(config, [
+                {
+                    file: '/entry.st.css',
+                    message: atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('syntax'),
+                },
+            ]);
+
+            const declarations = result.meta.outputAst!.nodes;
+
+            expect(declarations).to.have.length(1);
+        });
+
+        it('should emit warning when used without "inherits" descriptor', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@property $--x$ {|
+                            syntax: '<color>';
+                            initial-value: #c0ffee;
+                        }
+                        
+                        `,
+                    },
+                },
+            };
+
+            const result = expectWarningsFromTransform(config, [
+                {
+                    file: '/entry.st.css',
+                    message: atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('inherits'),
+                },
+            ]);
+
+            const declarations = result.meta.outputAst!.nodes;
+
+            expect(declarations).to.have.length(1);
+        });
+
+        it('should emit warning when used without "initial-value" descriptor and "syntax" descriptor is not "*"', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@property $--x$ {|
+                            syntax: '<color>';
+                            inherits: false;
+                        }
+                        
+                        `,
+                    },
+                },
+            };
+
+            const result = expectWarningsFromTransform(config, [
+                {
+                    file: '/entry.st.css',
+                    message:
+                        atPropertyValidationWarnings.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR(),
+                },
+            ]);
+
+            const declarations = result.meta.outputAst!.nodes;
+
+            expect(declarations).to.have.length(1);
+        });
+
+        it('should detect valid at-property when used without "initial-value" descriptor and "syntax" descriptor is "*"', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@property $--x$ {|
+                            syntax: '*';
+                            inherits: false;
+                        }
+                        
+                        `,
+                    },
+                },
+            };
+
+            const result = expectWarningsFromTransform(config, []);
+            const declarations = result.meta.outputAst!.nodes;
+
+            expect(declarations).to.have.length(1);
+        });
     });
 });

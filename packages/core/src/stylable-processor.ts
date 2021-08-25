@@ -43,6 +43,7 @@ import {
     valueMapping,
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
+import { validateAtProperty } from './validate-at-property';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -335,14 +336,20 @@ export class StylableProcessor {
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
                     break;
-
-                case 'property':
+                case 'property': {
                     this.addCSSVarDefinition(atRule);
 
-                    if (!atRule.nodes?.length) {
+                    const { valid, message, remove } = validateAtProperty(atRule);
+
+                    if (!valid && message) {
+                        this.diagnostics.warn(atRule, message, { word: atRule.params });
+                    }
+
+                    if (remove) {
                         this.nodesToRemove.push(atRule);
                     }
                     break;
+                }
             }
         });
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';

@@ -89,37 +89,6 @@ describe('css custom-properties (vars)', () => {
         // What does it do?
         // - generates namespace for var declarations
 
-        it('should remove at-property without body', () => {
-            const res = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        @property --x {
-                            syntax: '<color>';
-                            inherits: false;
-                            initial-value: #c0ffee;
-                        }
-
-                        @property --y 
-                        `,
-                    },
-                },
-            });
-
-            const declarations = res.meta.outputAst!.nodes;
-            const atProperty = declarations[0] as postcss.AtRule;
-
-            expect(declarations).to.have.length(1);
-            expect(atProperty.params).to.eql('--entry-x');
-            expect(atProperty.nodes.length).to.be.greaterThan(0);
-            expect(res.exports.vars).to.eql({
-                x: '--entry-x',
-                y: '--entry-y',
-            });
-        });
-
         it('should hoist st-global-custom-property', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,

@@ -23,6 +23,7 @@ export * from './report-diagnostic';
 export * from './visit-meta-css-dependencies';
 export * from './murmurhash';
 export * from './timed-cache';
+export { atPropertyValidationWarnings } from './validate-at-property';
 
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };
