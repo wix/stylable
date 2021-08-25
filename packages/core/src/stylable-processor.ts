@@ -358,7 +358,7 @@ export class StylableProcessor {
     protected handleHoistedDeclarations(root: postcss.Root) {
         // Todo: Deprecate
         root.walkAtRules('st-global-custom-property', (atRule) => {
-            this.diagnostics.warn(atRule, processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY());
+            this.diagnostics.info(atRule, processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY());
 
             const cssVarsByComma = atRule.params.split(',');
             const cssVarsBySpacing = atRule.params

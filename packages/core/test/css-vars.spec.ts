@@ -677,6 +677,7 @@ describe('css custom-properties (vars)', () => {
                     {
                         file: '/entry.st.css',
                         message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                        severity: 'info',
                     },
                 ]);
 
@@ -833,6 +834,7 @@ describe('css custom-properties (vars)', () => {
                 {
                     file: '/entry.st.css',
                     message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                    severity: 'info',
                 },
             ]);
             expect(res.exports.vars).to.eql({
@@ -962,6 +964,7 @@ describe('css custom-properties (vars)', () => {
                 {
                     message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     file: '/entry.st.css',
+                    severity: 'info',
                 },
                 {
                     message: processorWarnings.ILLEGAL_GLOBAL_CSS_VAR('illegalVar'),
@@ -988,6 +991,7 @@ describe('css custom-properties (vars)', () => {
                 {
                     message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     file: '/entry.st.css',
+                    severity: 'info',
                 },
                 {
                     message: processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA('--var1 --var2'),
@@ -1041,6 +1045,7 @@ describe('css custom-properties (vars)', () => {
                 {
                     message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     file: '/entry.st.css',
+                    severity: 'info',
                 },
                 {
                     message: processorWarnings.REDECLARE_SYMBOL('--myVar'),
