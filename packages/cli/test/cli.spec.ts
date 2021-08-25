@@ -268,6 +268,25 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
 
+        it.skip('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
+            // Todo: test info diagnostic when we have one.
+            // https://github.com/wix/stylable/pull/2018
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root {} `,
+            });
+
+            const { status, stdout } = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--diagnosticsMode=strict',
+            ]);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+        });
+
         it('(diagnosticsMode) should report diagnostics and ignore process exit', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
