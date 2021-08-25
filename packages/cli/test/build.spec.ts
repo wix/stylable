@@ -164,11 +164,13 @@ describe('build stand alone', () => {
         });
         const messages = diagnosticsMessages.get('/comp.st.css')!;
 
-        expect(messages[0]).to.contain(processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp'));
-        expect(messages[1]).to.contain(
+        expect(messages[0].message).to.contain(
+            processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp')
+        );
+        expect(messages[1].message).to.contain(
             resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
         );
-        expect(messages[2]).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
+        expect(messages[2].message).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
     });
 
     it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', async () => {
