@@ -114,7 +114,7 @@ describe('@property support', () => {
                             initial-value: #c0ffee;
                         }
                         
-                        |@property $--y$|
+                        @property --y;
                         `,
                     },
                 },
