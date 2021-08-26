@@ -679,7 +679,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
     describe('diagnostics', () => {
         describe('deprecation', () => {
-            it('should return a warning when used deprecated stMap', () => {
+            it('should return a warning when using deprecated "stMap" syntax', () => {
                 expectWarningsFromTransform(
                     {
                         entry: '/style.st.css',
@@ -701,13 +701,13 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 'st-map'
                             ),
                             file: '/style.st.css',
-                            severity: 'info'
+                            severity: 'info',
                         },
                     ]
                 );
             });
 
-            it('should return a warning when used deprecated stArray', () => {
+            it('should return a warning when using deprecated "stArray" syntax', () => {
                 expectWarningsFromTransform(
                     {
                         entry: '/style.st.css',
@@ -728,13 +728,13 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 'st-array'
                             ),
                             file: '/style.st.css',
-                            severity: 'info'
+                            severity: 'info',
                         },
                     ]
                 );
             });
 
-            it('should return a warning when used deprecated nested stArray or stMap', () => {
+            it('should return a warning when using a nested deprecated "stArray" or "stMap" syntax', () => {
                 const config = {
                     entry: '/style.st.css',
                     files: {
@@ -758,13 +758,13 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             'st-array'
                         ),
                         file: '/style.st.css',
-                        severity: 'info'
+                        severity: 'info',
                     },
                     {
                         message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME('stMap', 'st-map'),
                         skip: true,
                         file: '/style.st.css',
-                        severity: 'info'
+                        severity: 'info',
                     },
                 ]);
             });
