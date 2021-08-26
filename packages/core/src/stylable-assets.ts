@@ -1,6 +1,6 @@
 import path from 'path';
 import type * as postcss from 'postcss';
-import { processDeclarationFunctions } from './stylable-processor';
+import { processDeclarationFunctions } from './stylable-utils';
 
 export interface UrlNode {
     type: 'url';
