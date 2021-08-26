@@ -32,6 +32,7 @@ import {
     expandCustomSelectors,
     getAlias,
     isCSSVarProp,
+    processDeclarationFunctions,
     scopeSelector,
 } from './stylable-utils';
 import {
