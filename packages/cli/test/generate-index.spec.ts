@@ -236,7 +236,7 @@ describe('build index', () => {
                 log,
             });
         } catch (error) {
-            expect(error.message).to.equal(
+            expect((error as Error)?.message).to.equal(
                 `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`
             );
         }

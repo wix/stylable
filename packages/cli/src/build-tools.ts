@@ -29,7 +29,7 @@ export function tryRun<T>(fn: () => T, errorMessage: string): T {
     try {
         return fn();
     } catch (e) {
-        throw new Error(errorMessage + ': \n' + e.stack);
+        throw new Error(errorMessage + ': \n' + (e as Error)?.stack);
     }
 }
 

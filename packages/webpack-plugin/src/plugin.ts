@@ -9,7 +9,7 @@ import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/bui
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
 import { dirname, relative } from 'path';
-import type { Compilation, Compiler, NormalModule } from 'webpack';
+import type { Compilation, Compiler, NormalModule, WebpackError } from 'webpack';
 
 import findConfig from 'find-config';
 
@@ -446,7 +446,7 @@ export class StylableWebpackPlugin {
                         buildData.namespace = namespaceMapping[namespace];
                     }
                 } catch (e) {
-                    compilation.errors.push(e);
+                    compilation.errors.push(e as WebpackError);
                 }
             }
         });
