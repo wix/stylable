@@ -83,7 +83,7 @@ export function appendMixin(
                     } catch (e) {
                         transformer.diagnostics.error(
                             rule,
-                            mixinWarnings.FAILED_TO_APPLY_MIXIN(e),
+                            mixinWarnings.FAILED_TO_APPLY_MIXIN(String(e)),
                             { word: mix.mixin.type }
                         );
                         return;

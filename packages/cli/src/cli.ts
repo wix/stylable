@@ -4,7 +4,7 @@ import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
 import { createLogger } from './logger';
-import { reportDiagnostics } from './report-diagnostics';
+import { handleCliDiagnostics } from './report-diagnostics';
 
 const { join, resolve } = nodeFs;
 
@@ -234,13 +234,8 @@ async function main() {
         diagnostics,
     });
 
-    if (!watch && diagnosticsMessages.size) {
-        if (diagnostics) {
-            reportDiagnostics(diagnosticsMessages);
-        }
-        if (diagnosticsMode === 'strict') {
-            process.exitCode = 1;
-        }
+    if (!watch) {
+        handleCliDiagnostics(diagnostics, diagnosticsMessages, diagnosticsMode);
     }
 }
 

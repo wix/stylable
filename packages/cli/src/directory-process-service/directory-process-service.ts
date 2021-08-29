@@ -46,7 +46,7 @@ export class DirectoryProcessService {
         try {
             return this.options.processFiles?.(this, affectedFiles, new Set());
         } catch (error) {
-            this.options.onError?.(error);
+            this.options.onError?.(error as Error);
         }
     }
     private addFileToWatchedDirectory(filePath: string) {

@@ -8,6 +8,7 @@ import { StylableOptimizer } from '@stylable/optimizer';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
+import type { DiagnosticMessages } from './report-diagnostics';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -27,7 +28,7 @@ export interface BuildCommonOptions {
 
 export interface BuildFileOptions extends BuildCommonOptions {
     stylable: Stylable;
-    diagnosticsMessages: Map<string, string[]>;
+    diagnosticsMessages: DiagnosticMessages;
     projectAssets: Set<string>;
     includeCSSInJS?: boolean;
     useNamespaceReference?: boolean;

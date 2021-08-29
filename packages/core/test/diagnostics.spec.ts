@@ -219,6 +219,7 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
         });
+
         describe('pseudo selectors', () => {
             xit('should return warning for native pseudo elements without selector', () => {
                 expectWarnings(
