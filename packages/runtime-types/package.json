@@ -1,0 +1,21 @@
+{
+  "name": "@stylable/runtime-types",
+  "version": "4.6.0",
+  "description": "Stylable runtime types",
+  "typings": "index.d.ts",
+  "scripts": {},
+  "files": [
+    "index.d.ts"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Wix.com",
+  "license": "MIT",
+  "dependencies": {
+    "@stylable/runtime": "^4.6.0"
+  }
+}

@@ -1,7 +1,8 @@
 /** @type {import('create-stylable-app').TemplateDefinition} */
 module.exports = {
-    dependencies: ['@stylable/runtime', 'react', 'react-dom'],
+    dependencies: ['react', 'react-dom'],
     devDependencies: [
+        '@stylable/runtime-types',
         '@rollup/plugin-commonjs',
         '@rollup/plugin-html',
         '@rollup/plugin-image',

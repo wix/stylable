@@ -1,7 +1,8 @@
 /** @type {import('create-stylable-app').TemplateDefinition} */
 module.exports = {
-    dependencies: ['@stylable/runtime', 'react', 'react-dom'],
+    dependencies: ['react', 'react-dom'],
     devDependencies: [
+        '@stylable/runtime-types',
         '@stylable/core',
         '@stylable/webpack-plugin',
         '@types/react',
