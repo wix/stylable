@@ -27,9 +27,9 @@ export function processUrlDependencies(
     meta.outputAst!.walkDecls((node) => {
         processDeclarationFunctions(
             node,
-            (urlNode) => {
-                if (urlNode.type === 'url') {
-                    onUrl(urlNode);
+            (functionNode) => {
+                if (functionNode.type === 'url') {
+                    onUrl(functionNode);
                 }
             },
             true
