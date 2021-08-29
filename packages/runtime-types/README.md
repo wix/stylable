@@ -9,7 +9,7 @@ Regardless we highly encourage to use the Stylable CLI declaration types instead
 
 Add `@stylable/runtime-types` to your `tsconfig.json`
 
-```json
+```jsonc
 {
     "compilerOptions": {
         //...
