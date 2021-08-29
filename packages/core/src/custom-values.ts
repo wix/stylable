@@ -53,45 +53,37 @@ export interface CustomValueExtension<T> {
     ): string;
 }
 
+function createStArrayCustomFunction() {
+    return createCustomValue<BoxedValueArray, BoxedValueArray>({
+        processArgs: (node, customTypes) => {
+            return CustomValueStrategy.args(node, customTypes);
+        },
+        createValue: (args) => {
+            return args;
+        },
+        getValue: (value, index) => value[parseInt(index, 10)],
+    });
+}
+
+function createStMapCustomFunction() {
+    return createCustomValue<BoxedValueMap, BoxedValueMap>({
+        processArgs: (node, customTypes) => {
+            return CustomValueStrategy.named(node, customTypes);
+        },
+        createValue: (args) => {
+            return args;
+        },
+        getValue: (value, index) => value[index],
+    });
+}
+
 export const stTypes: CustomTypes = {
     /** @deprecated - use `st-array` */
-    stArray: createCustomValue<BoxedValueArray, BoxedValueArray>({
-        processArgs: (node, customTypes) => {
-            return CustomValueStrategy.args(node, customTypes);
-        },
-        createValue: (args) => {
-            return args;
-        },
-        getValue: (value, index) => value[parseInt(index, 10)],
-    }).register('stArray'),
+    stArray: createStArrayCustomFunction().register('stArray'),
     /** @deprecated - use `st-map` */
-    stMap: createCustomValue<BoxedValueMap, BoxedValueMap>({
-        processArgs: (node, customTypes) => {
-            return CustomValueStrategy.named(node, customTypes);
-        },
-        createValue: (args) => {
-            return args;
-        },
-        getValue: (value, index) => value[index],
-    }).register('stMap'),
-    'st-array': createCustomValue<BoxedValueArray, BoxedValueArray>({
-        processArgs: (node, customTypes) => {
-            return CustomValueStrategy.args(node, customTypes);
-        },
-        createValue: (args) => {
-            return args;
-        },
-        getValue: (value, index) => value[parseInt(index, 10)],
-    }).register('st-array'),
-    'st-map': createCustomValue<BoxedValueMap, BoxedValueMap>({
-        processArgs: (node, customTypes) => {
-            return CustomValueStrategy.named(node, customTypes);
-        },
-        createValue: (args) => {
-            return args;
-        },
-        getValue: (value, index) => value[index],
-    }).register('st-map'),
+    stMap: createStMapCustomFunction().register('stMap'),
+    'st-array': createStArrayCustomFunction().register('st-array'),
+    'st-map': createStMapCustomFunction().register('st-map'),
 } as const;
 
 export const deprecatedStFunctions: Record<string, { alternativeName: string }> = {
