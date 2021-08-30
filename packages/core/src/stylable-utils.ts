@@ -24,6 +24,7 @@ import {
 import type { ImportSymbol } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 import type { StylableResolver } from './stylable-resolver';
+import { AnyValueNode, parseValues, stringifyValues } from 'css-selector-tokenizer';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -388,4 +389,34 @@ export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symb
 export function isValidClassName(className: string) {
     const test = /^-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/g; // checks valid classname
     return !!className.match(test);
+}
+
+export function processDeclarationFunctions(
+    decl: postcss.Declaration,
+    onFunction: (node: AnyValueNode) => void,
+    transform = false
+) {
+    const ast = parseValues(decl.value);
+
+    ast.nodes.forEach((node) => findFunction(node, onFunction));
+
+    if (transform) {
+        decl.value = stringifyValues(ast);
+    }
+}
+
+function findFunction(node: AnyValueNode, onFunctionNode: (node: AnyValueNode) => void) {
+    switch (node.type) {
+        case 'value':
+        case 'values':
+            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
+            break;
+        case 'url':
+            onFunctionNode(node);
+            break;
+        case 'nested-item':
+            onFunctionNode(node);
+            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
+            break;
+    }
 }

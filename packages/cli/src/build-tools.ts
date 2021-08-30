@@ -1,10 +1,11 @@
 import type { StylableResults } from '@stylable/core';
 import type { FileSystem } from '@stylable/node';
+import type { DiagnosticMessages } from './report-diagnostics';
 import { dirname } from 'path';
 
 export function handleDiagnostics(
     res: StylableResults,
-    diagnosticsMessages: Map<string, string[]>,
+    diagnosticsMessages: DiagnosticMessages,
     filePath: string
 ) {
     const reports = res.meta.transformDiagnostics
@@ -15,7 +16,10 @@ export function handleDiagnostics(
             filePath,
             reports.map((report) => {
                 const err = report.node.error(report.message, report.options);
-                return `${report.message}\n${err.showSourceCode()}`;
+                return {
+                    type: report.type,
+                    message: `${report.message}\n${err.showSourceCode()}`,
+                };
             })
         );
     }
@@ -25,7 +29,7 @@ export function tryRun<T>(fn: () => T, errorMessage: string): T {
     try {
         return fn();
     } catch (e) {
-        throw new Error(errorMessage + ': \n' + e.stack);
+        throw new Error(errorMessage + ': \n' + (e as Error)?.stack);
     }
 }
 

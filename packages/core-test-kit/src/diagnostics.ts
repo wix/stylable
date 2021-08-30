@@ -1,11 +1,18 @@
 import { expect } from 'chai';
 import deindent from 'deindent';
 import type { Position } from 'postcss';
-import { Diagnostics, process, safeParse, StylableMeta, StylableResults } from '@stylable/core';
+import {
+    Diagnostics,
+    DiagnosticType,
+    process,
+    safeParse,
+    StylableMeta,
+    StylableResults,
+} from '@stylable/core';
 import { Config, generateStylableResult } from './generate-test-util';
 
 export interface Diagnostic {
-    severity?: 'warning' | 'error';
+    severity?: DiagnosticType;
     message: string;
     file: string;
     skipLocationCheck?: boolean;

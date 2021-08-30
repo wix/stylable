@@ -185,7 +185,9 @@ export class ProjectRunner {
             await recompile;
             await validate();
         } catch (e) {
-            e.message = actionDesc + '\n' + e.message;
+            if (e) {
+                (e as Error).message = actionDesc + '\n' + (e as Error).message;
+            }
             throw e;
         }
     }
