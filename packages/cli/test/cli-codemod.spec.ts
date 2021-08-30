@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { populateDirectorySync, loadDirSync } from './test-kit';
+import { populateDirectorySync, loadDirSync } from './test-kit/cli-test-kit';
 import { runCliCodeMod } from './test-kit/cli-test-kit';
 
 describe('Stylable Cli Code Mods', () => {
