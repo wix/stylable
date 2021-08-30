@@ -1,8 +1,30 @@
-export * from './stylable-forcestates-plugin';
-export * from './stylable-html-snapshot';
-export * from './stylable-metadata-plugin';
-export * from './component-metadata-builder';
-export * from './hash-content-util';
-export * from './stylable-metadata-loader';
-export * from './stylable-manifest-plugin';
-export * from './types';
+export {
+    AddForceStateSelectorsContext,
+    DOMLocationBasedPseudoClasses,
+    MATCH_STATE_ATTR,
+    MATCH_STATE_CLASS,
+    OVERRIDE_STATE_PREFIX,
+    SelectorWithStatesMatcher,
+    addForceStateSelectors,
+    applyStylableForceStateSelectors,
+    createDataAttr,
+    createForceStateMatchers,
+    separateStateChunks,
+} from './stylable-forcestates-plugin';
+export {
+    GetLogicModule,
+    HTMLSnapshotPlugin,
+    HTMLSnapshotPluginOptions,
+} from './stylable-html-snapshot';
+export { MetadataOptions, StylableMetadataPlugin } from './stylable-metadata-plugin';
+export {
+    ComponentConfig,
+    ComponentMetadataBuilder,
+    ComponentsMetadata,
+    LocalComponentConfig,
+    Preset,
+} from './component-metadata-builder';
+export { hashContent } from './hash-content-util';
+export { LoaderOptions, metadataLoaderLocation } from './stylable-metadata-loader';
+export { Options, StylableManifestPlugin } from './stylable-manifest-plugin';
+export { Manifest, Metadata } from './types';
