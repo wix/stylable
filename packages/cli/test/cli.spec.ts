@@ -272,7 +272,7 @@ describe('Stylable Cli', function () {
         it('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
-                'style.st.css': `:vars { colors: stArray(red, blue); } `,
+                'style.st.css': `:vars { colors: stArray(red, blue); }`,
             });
 
             const { status, stdout } = runCliSync([
