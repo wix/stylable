@@ -1,1 +1,3 @@
-.root {}
+:vars {
+  colors: stArray(color, red);
+}
