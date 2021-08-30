@@ -2,5 +2,5 @@ export {
     CreateProjectFromTemplateOptions,
     TemplateCommand,
     TemplateDefinition,
-    createProjectFromTemplate
+    createProjectFromTemplate,
 } from './create-project';

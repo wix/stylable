@@ -5,11 +5,6 @@ export {
     removeCommentNodes,
     removeEmptyNodes,
     removeRecursiveUpIfEmpty,
-    replaceRecursiveUpIfEmpty
+    replaceRecursiveUpIfEmpty,
 } from './stylable-optimizer';
-export {
-    MappedName,
-    Name,
-    NameMapper,
-    Prefix
-} from './name-mapper';
+export { MappedName, Name, NameMapper, Prefix } from './name-mapper';

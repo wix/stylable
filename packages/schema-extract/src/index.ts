@@ -1,11 +1,5 @@
-export {
-    extractSchema,
-    generateSchema
-} from './main';
-export {
-    CssDoc,
-    getCssDocsForSymbol
-} from './cssdocs';
+export { extractSchema, generateSchema } from './main';
+export { CssDoc, getCssDocsForSymbol } from './cssdocs';
 export {
     MinimalPath,
     SchemaStates,
@@ -17,5 +11,5 @@ export {
     stylableCssVar,
     stylableElement,
     stylableModule,
-    stylableVar
+    stylableVar,
 } from './types';

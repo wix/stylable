@@ -9,36 +9,22 @@ export {
     applyStylableForceStateSelectors,
     createDataAttr,
     createForceStateMatchers,
-    separateStateChunks
+    separateStateChunks,
 } from './stylable-forcestates-plugin';
 export {
     GetLogicModule,
     HTMLSnapshotPlugin,
-    HTMLSnapshotPluginOptions
+    HTMLSnapshotPluginOptions,
 } from './stylable-html-snapshot';
-export {
-    MetadataOptions,
-    StylableMetadataPlugin
-} from './stylable-metadata-plugin';
+export { MetadataOptions, StylableMetadataPlugin } from './stylable-metadata-plugin';
 export {
     ComponentConfig,
     ComponentMetadataBuilder,
     ComponentsMetadata,
     LocalComponentConfig,
-    Preset
+    Preset,
 } from './component-metadata-builder';
-export {
-    hashContent
-} from './hash-content-util';
-export {
-    LoaderOptions,
-    metadataLoaderLocation
-} from './stylable-metadata-loader';
-export {
-    Options,
-    StylableManifestPlugin
-} from './stylable-manifest-plugin';
-export {
-    Manifest,
-    Metadata
-} from './types';
+export { hashContent } from './hash-content-util';
+export { LoaderOptions, metadataLoaderLocation } from './stylable-metadata-loader';
+export { Options, StylableManifestPlugin } from './stylable-manifest-plugin';
+export { Manifest, Metadata } from './types';

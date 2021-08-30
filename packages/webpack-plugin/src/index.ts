@@ -1,7 +1,4 @@
-export {
-    StylableWebpackPlugin,
-    StylableWebpackPluginOptions
-} from './plugin';
+export { StylableWebpackPlugin, StylableWebpackPluginOptions } from './plugin';
 export {
     OptimizationMapping,
     createCalcDepthContext,
@@ -35,15 +32,10 @@ export {
     replaceMappedCSSAssetPlaceholders,
     reportNamespaceCollision,
     staticCSSWith,
-    uniqueFilterMap
+    uniqueFilterMap,
 } from './plugin-utils';
-export {
-    getImports,
-    getReplacementToken
-} from './loader-utils';
-export {
-    applyWebpackConfigStylableExcludes
-} from './webpack-config-stylable-excludes';
+export { getImports, getReplacementToken } from './loader-utils';
+export { applyWebpackConfigStylableExcludes } from './webpack-config-stylable-excludes';
 export {
     BuildData,
     CompilationParams,
@@ -56,7 +48,7 @@ export {
     StylableBuildMeta,
     StylableLoaderContext,
     WebpackCreateHash,
-    WebpackOutputOptions
+    WebpackOutputOptions,
 } from './types';
 export {
     Loader,
@@ -65,5 +57,5 @@ export {
     getOptions,
     isUrlRequest,
     loaderCallback,
-    stringifyRequest
+    stringifyRequest,
 } from './webpack-loader-types';

@@ -1,5 +1,1 @@
-export {
-    PartialElement,
-    StylableDOMUtil,
-    StylesheetHost
-} from './stylable-dom-util';
+export { PartialElement, StylableDOMUtil, StylesheetHost } from './stylable-dom-util';

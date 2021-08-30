@@ -1,11 +1,5 @@
-export {
-    $,
-    RuntimeRenderer
-} from './css-runtime-renderer';
-export {
-    create,
-    createRenderable
-} from './css-runtime-stylesheet';
+export { $, RuntimeRenderer } from './css-runtime-renderer';
+export { create, createRenderable } from './css-runtime-stylesheet';
 export {
     AttributeMap,
     ClassesMap,
@@ -17,9 +11,6 @@ export {
     STFunction,
     StateMap,
     StateValue,
-    StylableExports
+    StylableExports,
 } from './types';
-export {
-    DOMListRenderer,
-    createDOMListRenderer
-} from './keyed-list-renderer';
+export { DOMListRenderer, createDOMListRenderer } from './keyed-list-renderer';
