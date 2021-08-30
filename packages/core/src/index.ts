@@ -29,6 +29,7 @@ export {
     processNamespace,
     processorWarnings,
     validateScopingSelector,
+    parsePseudoImport,
 } from './stylable-processor';
 export {
     AdditionalSelector,

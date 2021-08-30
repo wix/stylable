@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "bin": {
     "stc": "bin/stc.js",
+    "stc-codemod": "bin/stc-codemod.js",
     "stc-format": "bin/stc-format.js"
   },
   "scripts": {
