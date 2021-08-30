@@ -4,7 +4,7 @@ import fs from 'fs';
 import yargs from 'yargs';
 import { registeredMods } from './code-mods/apply-code-mods';
 import { codeMods } from './code-mods/code-mods';
-import { createLogger } from './create-logger';
+import { createLogger } from './logger';
 
 const argv = yargs
     .option('rootDir', {
