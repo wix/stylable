@@ -32,7 +32,7 @@ export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
 
     const loadedMods = new Set<{ id: string; apply: CodeMod }>();
     for (const id of mods) {
-        const apply = registeredMods[id];
+        const apply = registeredMods.get(id);
         if (!apply) {
             log(`Unknown mod ${id}`);
         } else {

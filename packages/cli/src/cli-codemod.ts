@@ -16,7 +16,7 @@ const argv = yargs
     .option('mods', {
         type: 'array',
         default: [] as string[],
-        choices: Object.keys(registeredMods),
+        choices: [...registeredMods.keys()],
     })
     .alias('h', 'help')
     .help()

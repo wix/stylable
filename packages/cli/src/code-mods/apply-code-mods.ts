@@ -3,9 +3,9 @@ import { stImportToAtImport } from './st-import-to-at-import';
 
 export type CodeMod = (ast: Root, messages: string[]) => void;
 
-export const registeredMods: Record<string, CodeMod> = Object.assign(Object.create(null), {
-    'st-import-to-at-import': stImportToAtImport,
-});
+export const registeredMods: Map<string, CodeMod> = new Map([
+    ['st-import-to-at-import', stImportToAtImport],
+]);
 
 export function applyCodeMods(css: string, mods: Set<{ id: string; apply: CodeMod }>) {
     const reports = new Map<string, string[]>();
