@@ -45,12 +45,12 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@file-services/memory@^5.4.0":
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/@file-services/memory/-/memory-5.4.0.tgz#f3d125aa9125a75314a657d1efdb26181c06fabd"
-  integrity sha512-VFBJO+JF+AFK/ILIYN/HsEfalmtF0MU4MkQ/axMOPPXHvMWGP96nVd2wgwQK/MLMpJ3VWSLvMXB/rOP/pK1OwQ==
+"@file-services/memory@^5.4.1":
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/@file-services/memory/-/memory-5.4.1.tgz#888e716ac047bf8995335e9f4ea68f0a4a939f29"
+  integrity sha512-zr844e6PO4E8l05R9xSuCFEU0LeUVfjSp1P0WM6oG+ijW8BBpADbrn7yFExlW9uQ/D4kw6MYinecZeYYNh9Fig==
   dependencies:
-    "@file-services/path" "^5.4.0"
+    "@file-services/path" "^5.4.1"
     "@file-services/types" "^5.4.0"
     "@file-services/utils" "^5.4.0"
 
@@ -62,10 +62,10 @@
     "@file-services/types" "^5.4.0"
     "@file-services/utils" "^5.4.0"
 
-"@file-services/path@^5.4.0":
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/@file-services/path/-/path-5.4.0.tgz#bd421aa3e31f435c05633b8f646e7b51567ea466"
-  integrity sha512-LtHxN1Ss9eOBdSJw8U2jVbxBayHorEYE5cVsJvo6GHKd2Tv8FrQE9eYpFwzD93pL1A9/jy6r5dgFZwZjk6i6jg==
+"@file-services/path@^5.4.1":
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/@file-services/path/-/path-5.4.1.tgz#bf27dc0a02df7e91e0f5d9dbd3ac32128ed12221"
+  integrity sha512-/nV3e2GHMZBYzGqyxle5XMu9cRD48scOKKOkrlaBS/v+5sZFEU82Ny2qfKTDGQACLs4QeFpecQqA7fF2G3GT6g==
   dependencies:
     "@file-services/types" "^5.4.0"
 
