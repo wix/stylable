@@ -8,7 +8,7 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({
-            diagnosticsMode: 'strict',
+            diagnosticsMode: 'strict', // to make sure that every diagnostic which is not "info" will be fatal.
         }),
         new HtmlWebpackPlugin(),
     ],
