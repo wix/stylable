@@ -1,15 +1,15 @@
 {
   "name": "@stylable/experimental-loader",
-  "version": "4.2.4",
+  "version": "4.6.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "dependencies": {
-    "@stylable/core": "^4.2.4",
-    "@stylable/optimizer": "^4.2.4",
-    "@stylable/runtime": "^4.2.4",
-    "css-loader": "^5.2.6",
+    "@stylable/core": "^4.6.0",
+    "@stylable/optimizer": "^4.6.0",
+    "@stylable/runtime": "^4.6.0",
+    "css-loader": "^6.2.0",
     "decache": "^4.6.0"
   },
   "files": [
@@ -23,5 +23,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/experimental-loader",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }

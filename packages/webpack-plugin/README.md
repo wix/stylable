@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)
 
-`@stylable/webpack-plugin` (for webpack `^5.20.0`) is the main build utility for [Stylable](https://stylable.io/). It supports both development and production modes, providing various configurations that can be tweaked according to your specific needs. It enables loading Stylable files (`.st.css`) from local projects or imported from a 3rd party source (for example, NPM node modules).
+`@stylable/webpack-plugin` (for webpack `^5.30.0`) is the main build utility for [Stylable](https://stylable.io/). It supports both development and production modes, providing various configurations that can be tweaked according to your specific needs. It enables loading Stylable files (`.st.css`) from local projects or imported from a 3rd party source (for example, NPM node modules).
 
 ## Getting started
 Install `@stylable/webpack-plugin` as a dev dependency in your local project.
@@ -43,7 +43,7 @@ interface StylableWebpackPluginOptions {
      * Determine the way css is injected to the document
      * js - every js module contains the css and inject it independently
      * css - emit bundled css asset to injected via link
-     * mini-css - inject css modules via webpack mini-css-extract-plugin (can support dynamic splitting but order is not deterministic)
+     * mini-css - inject css modules via webpack mini-css-extract-plugin (can support dynamic splitting but order is not deterministic, requires minimum version 1.3.9)
      * none - will not generate any output css (usually good for ssr bundles)
      */
     cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
@@ -65,7 +65,7 @@ interface StylableWebpackPluginOptions {
      */
     target?: 'oldie' | 'modern';
     /**
-     * Set the <style> tag st-id attribute to allow multiple Stylable build to be separated in the head
+     * Set the <style> tag st_id attribute to allow multiple Stylable build to be separated in the head
      * This only apply to cssInjection js mode
      */
     runtimeId?: string;
@@ -164,4 +164,4 @@ CSS assets are handled by webpack native AssetsModules support.
 If you're using css_loader/extract make sure to exclude `.st.css` files from the process. You cannot use loaders with Stylable `.st.css` files
 
 ## License
-Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).
+Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [MIT license](./LICENSE).

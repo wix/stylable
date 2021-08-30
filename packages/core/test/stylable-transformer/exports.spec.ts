@@ -519,11 +519,11 @@ describe('Exports to js', () => {
                         namespace: 'entry',
                         content: `
                             :vars {
-                                myArray: stArray(1, 2, 3);
-                                deepArray: stArray(1, stArray(2, 3), value(myArray));
-                                object: stMap(x 1, y 2);
-                                deepObject: stMap(x 1, y 2, z stMap(x 1, y 2));
-                                mixed: stMap(x 1, y stArray(2, 3, stArray(4, stMap(z 5))));
+                                myArray: st-array(1, 2, 3);
+                                deepArray: st-array(1, st-array(2, 3), value(myArray));
+                                object: st-map(x 1, y 2);
+                                deepObject: st-map(x 1, y 2, z st-map(x 1, y 2));
+                                mixed: st-map(x 1, y st-array(2, 3, st-array(4, st-map(z 5))));
                             }
                         `,
                     },

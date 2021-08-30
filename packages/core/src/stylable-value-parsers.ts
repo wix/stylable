@@ -70,6 +70,10 @@ export const valueMapping = {
     global: '-st-global' as const,
 };
 
+export const paramMapping = {
+    global: 'st-global' as const,
+};
+
 export const mixinDeclRegExp = new RegExp(`(${valueMapping.mixin})|(${valueMapping.partialMixin})`);
 
 export type stKeys = keyof typeof valueMapping;
@@ -77,6 +81,11 @@ export type stKeys = keyof typeof valueMapping;
 export const stValues: string[] = Object.keys(valueMapping).map(
     (key) => valueMapping[key as stKeys]
 );
+
+export const animationPropRegExp = /animation$|animation-name$/;
+
+export const globalValueRegExp = new RegExp(`^${paramMapping.global}\\((.*?)\\)$`);
+
 export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce((acc, key) => {
     acc[valueMapping[key as stKeys]] = true;
     return acc;

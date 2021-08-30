@@ -9,37 +9,48 @@
 
 ## Installation
 
-This package is currently a work-in-progress and is set to `private`. Once it matures, it will be published externally to NPM.
+Using NPM:
+```
+npm install @stylable/cli --save-dev
+```
+
+Using Yarn:
+```
+yarn add @stylable/cli -D
+```
 
 ## Usage
 
-After installing `@stylable/cli`, a new `stc` command will be available, running `stc --help` will provide a brief description for the options available.
+After installing `@stylable/cli`, the `stc` command will be available, running `stc --help` will provide a brief description for the options available.
 
-| Option                    | Alias  | Description                                                                        | Default Value    |
-| ------------------------- | ------ | ---------------------------------------------------------------------------------- | ---------------- |
-| `--version`               | `-v`   | show CLI version number                                                            | `boolean`        |
-| `--rootDir`               |        | root directory of project                                                          | `cwd`            |
-| `--srcDir`                |        | source directory relative to root                                                  | `./`             |
-| `--outDir`                |        | target directory relative to root                                                  | `./`             |
-| `--indexFile`             |        | filename of the generated index                                                    | `false`          |
-| `--cjs`                   |        | output commonjs modules (`.js`)                                                    | `true`           |
-| `--esm`                   |        | output esm modules (`.mjs`)                                                        | `false`          |
-| `--css`                   |        | output transpiled css files (`.css`)                                               | `false`          |
-| `--stcss`                 |        | output stylable source files (`.st.css`)                                           | `false`          |
-| `--useNamespaceReference` | `unsr` | mark output stylable source files with relative path for namespacing purposes (\*) | `false`          |
-| `--customGenerator`       |        | path of a custom index file generator                                              | -                |
-| `--ext`                   |        | extension of stylable css files                                                    | `.st.css`        |
-| `--cssInJs`               |        | output transpiled css into the js module                                           | `false`          |
-| `--cssFilename`           |        | pattern of the generated css file                                                  | `[filename].css` |
-| `--injectCSSRequest`      | `icr`  | add a static import for the generated css in the js module output                  | `false`          |
-| `--namespaceResolver`     | `nsr`  | node request to a module that exports a stylable resolveNamespace function         | `@stylable/node` |
-| `--require`               | `r`    | require hook to execture before running                                            | `-`              |
-| `--optimize`              | `o`    | removes: empty nodes, stylable directives, comments                                | `false`          |
-| `--minify`                | `m`    | minify generated css                                                               | `false`          |
-| `--log`                   |        | verbose log                                                                        | `false`          |
-| `--diagnostics`           |        | print verbose diagnostics                                                          | `true`           |
+| Option                    | Alias  | Description                                                                            | Default Value    |
+| ------------------------- | ------ | ----------------------------------------------------------------------------------     | ---------------- |
+| `--version`               |  `v`   | show CLI version number                                                                | `boolean`        |
+| `--rootDir`               |        | root directory of project                                                              | `cwd`            |
+| `--srcDir`                |        | source directory relative to root                                                      | `./`             |
+| `--outDir`                |        | target directory relative to root                                                      | `./`             |
+| `--indexFile`             |        | filename of the generated index                                                        | `false`          |
+| `--cjs`                   |        | output commonjs modules (`.js`)                                                        | `true`           |
+| `--esm`                   |        | output esm modules (`.mjs`)                                                            | `false`          |
+| `--css`                   |        | output transpiled css files (`.css`)                                                   | `false`          |
+| `--stcss`                 |        | output stylable source files (`.st.css`)                                               | `false`          |
+| `--dts`                   |        | output definition files for the stylable source files (`.st.css.d.ts`)                 | `false`          |
+| `--dtsSourceMap`          |        | output source-maps for the definitions of stylable source files (`.st.css.d.ts.map`)   | `true` if `--dts` is true, otherwise `false` |
+| `--watch`                 |  `w`   | enable watch mode                                                                      | `false`          |
+| `--useNamespaceReference` | `unsr` | mark output stylable source files with relative path for namespacing purposes (\*)     | `false`          |
+| `--customGenerator`       |        | path of a custom index file generator                                                  | -                |
+| `--ext`                   |        | extension of stylable css files                                                        | `.st.css`        |
+| `--cssInJs`               |        | output transpiled css into the js module                                               | `false`          |
+| `--cssFilename`           |        | pattern of the generated css file                                                      | `[filename].css` |
+| `--injectCSSRequest`      | `icr`  | add a static import for the generated css in the js module output                      | `false`          |
+| `--namespaceResolver`     | `nsr`  | node request to a module that exports a stylable resolveNamespace function             | `@stylable/node` |
+| `--require`               | `r`    | require hook to execture before running                                                | `-`              |
+| `--optimize`              | `o`    | removes: empty nodes, stylable directives, comments                                    | `false`          |
+| `--minify`                | `m`    | minify generated css                                                                   | `false`          |
+| `--log`                   |        | verbose log                                                                            | `false`          |
+| `--diagnostics`           |        | print verbose diagnostics                                                              | `true`           |
 | `--diagnosticsMode`       |        | determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions                         | `false`          |
-| `--help`                  | `h`    | Show help                                                                          | `boolean`        |
+| `--help`                  | `h`    | Show help                                                                              | `boolean`                                    |
 
 `*` - For the `useNamespaceReference` flag to function properly, the `source` folder must be published in addition to the output `target` code
 
@@ -90,6 +101,33 @@ To transform your project stylesheets to target JavaScript modules containing th
 $ stc --srcDir="./src" --outDir="./dist"
 ```
 
+## Usage `stc-format`
+
+After installing `@stylable/cli`, the `stc-format` command will be available, running `stc-format --help` will provide a brief description for the options available.
+
+| Option                        | Alias | Description                                                   | Value Type    | Default Value                 |
+| ----------------------------- | ----- | ------------------------------------------------------------- | --------------| ----------------------------- |
+| `--target`                    | `T`   | file or directory to format                                   | `string`      | `current working directory`   |
+| `--endWithNewline`            | `n`   | End output with newline                                       | `boolean`     | `false`                       |
+| `--indentEmptyLines`          | `E`   | Keep indentation on empty lines                               | `boolean`     | `false`                       |
+| `--indentSize`                | `s`   | Indentation size                                              | `number`      | `4`                           |
+| `--indentWithTabs`            | `t`   | Indent with tabs, overrides -s and -c                         | `boolean`     | `false`                       |
+| `--maxPerserveNewlines`       | `m`   | Maximum number of line-breaks to be preserved in one chunk    | `number`      | `1`                           |
+| `--newlineBetweenRules`       | `N`   | Add a newline between CSS rules                               | `boolean`     | `true`                        |
+| `--perserveNewlines`          | `p`   | Preserve existing line-breaks                                 | `boolean`     | `true`                        |
+| `--selectorSeparatorNewline`  | `L`   | Add a newline between multiple selectors                      | `boolean`     | `true`                        |
+| `--debug`                     | `D`   | Enable explicit debug log (overrides --silent)                | `boolean`     | `false`                       |
+| `--silent`                    | `S`   | Will not print any messages to the log                        | `boolean`     | `false`                       |
+| `--require`                   | `r`   | require hooks                                                 | `array`       | `[]`                          |
+| `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
+| `--version`                   | `v`   | Show version number                                           | `boolean`     |                               |
+
+### Formatting the source directory
+
+```sh
+$ stc-format --target ./src
+```
+
 ## License
 
-Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
+Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

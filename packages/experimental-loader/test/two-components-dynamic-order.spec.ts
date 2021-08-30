@@ -1,6 +1,6 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 
 const project = 'two-components-dynamic-order';
 const projectDir = dirname(
@@ -13,6 +13,9 @@ describe(`(${project})`, () => {
             projectDir,
             launchOptions: {
                 // headless: false,
+            },
+            webpackOptions: {
+                output: { path: join(projectDir, 'dist2') },
             },
         },
         before,

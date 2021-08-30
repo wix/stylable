@@ -1,9 +1,11 @@
-import { murmurhash3_32_gc } from './murmurhash';
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { tokenizeImports } from 'toky';
+import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
+import { murmurhash3_32_gc } from './murmurhash';
+import { reservedKeyFrames } from './native-reserved-lists';
 import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
@@ -14,7 +16,6 @@ import {
     SelectorAstNode,
     traverseNode,
 } from './selector-utils';
-import { processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
     CSSVarSymbol,
@@ -31,16 +32,18 @@ import {
     expandCustomSelectors,
     getAlias,
     isCSSVarProp,
+    processDeclarationFunctions,
     scopeSelector,
 } from './stylable-utils';
 import {
+    paramMapping,
     rootValueMapping,
     SBTypesParsers,
     stValuesMap,
     validateAllowedNodesUntil,
     valueMapping,
 } from './stylable-value-parsers';
-import { deprecated, filename2varname, stripQuotation } from './utils';
+import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -78,6 +81,9 @@ export const processorWarnings = {
     },
     REDECLARE_SYMBOL_KEYFRAMES(name: string) {
         return `redeclare keyframes symbol "${name}"`;
+    },
+    KEYFRAME_NAME_RESERVED(name: string) {
+        return `keyframes "${name}" is reserved`;
     },
     CANNOT_RESOLVE_EXTEND(name: string) {
         return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
@@ -136,6 +142,12 @@ export const processorWarnings = {
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" missing scoping selector parameter';
     },
+    MISSING_KEYFRAMES_NAME() {
+        return '"@keyframes" missing parameter';
+    },
+    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL() {
+        return `"@keyframes" missing parameter inside "${paramMapping.global}()"`;
+    },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
     },
@@ -153,6 +165,12 @@ export const processorWarnings = {
     },
     INVALID_NAMESPACE_REFERENCE() {
         return 'st-namespace-reference dose not have any value';
+    },
+    INVALID_NESTING(child: string, parent: string) {
+        return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
+    },
+    DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
+        return `"${name}" is deprecated, use "${alternativeName}`;
     },
 };
 
@@ -184,6 +202,16 @@ export class StylableProcessor {
             if (!isChildOfAtRule(rule, 'keyframes')) {
                 this.handleCustomSelectors(rule);
                 this.handleRule(rule as SRule, isChildOfAtRule(rule, rootValueMapping.stScope));
+            }
+            const parent = rule.parent;
+            if (parent?.type === 'rule') {
+                this.diagnostics.error(
+                    rule,
+                    processorWarnings.INVALID_NESTING(
+                        rule.selector,
+                        (parent as postcss.Rule).selector
+                    )
+                );
             }
         });
 
@@ -245,13 +273,47 @@ export class StylableProcessor {
                 case 'keyframes':
                     if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
                         this.meta.keyframes.push(atRule);
-                        const { params: name } = atRule;
-                        this.checkRedeclareKeyframes(name, atRule);
-                        this.meta.mappedKeyframes[name] = {
-                            _kind: 'keyframes',
-                            alias: name,
-                            name: name,
-                        };
+                        let { params: name } = atRule;
+
+                        if (name) {
+                            let global: boolean | undefined;
+                            const globalName = globalValue(name);
+
+                            if (globalName !== undefined) {
+                                name = globalName;
+                                global = true;
+                            }
+
+                            if (name === '') {
+                                this.diagnostics.warn(
+                                    atRule,
+                                    processorWarnings.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL()
+                                );
+                            }
+
+                            if (reservedKeyFrames.includes(name)) {
+                                this.diagnostics.error(
+                                    atRule,
+                                    processorWarnings.KEYFRAME_NAME_RESERVED(name),
+                                    {
+                                        word: name,
+                                    }
+                                );
+                            }
+
+                            this.checkRedeclareKeyframes(name, atRule);
+                            this.meta.mappedKeyframes[name] = {
+                                _kind: 'keyframes',
+                                alias: name,
+                                name,
+                                global,
+                            };
+                        } else {
+                            this.diagnostics.warn(
+                                atRule,
+                                processorWarnings.MISSING_KEYFRAMES_NAME()
+                            );
+                        }
                     } else {
                         this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
                     }
@@ -287,6 +349,7 @@ export class StylableProcessor {
 
                     break;
                 case 'property':
+                    this.checkRedeclareSymbol(atRule.params, atRule);
                     this.addCSSVarDefinition(atRule);
                     break;
                 case 'st-global-custom-property': {
@@ -335,8 +398,36 @@ export class StylableProcessor {
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     private collectUrls(decl: postcss.Declaration) {
-        processDeclarationUrls(decl, (node) => this.meta.urls.push(node.url), false);
+        processDeclarationFunctions(
+            decl,
+            (node) => {
+                if (node.type === 'url') {
+                    this.meta.urls.push(node.url);
+                }
+            },
+            false
+        );
     }
+
+    private handleStFunctions(decl: postcss.Declaration) {
+        processDeclarationFunctions(
+            decl,
+            (node) => {
+                if (node.type === 'nested-item' && deprecatedStFunctions[node.name]) {
+                    const { alternativeName } = deprecatedStFunctions[node.name];
+                    this.diagnostics.info(
+                        decl,
+                        processorWarnings.DEPRECATED_ST_FUNCTION_NAME(node.name, alternativeName),
+                        {
+                            word: node.name,
+                        }
+                    );
+                }
+            },
+            false
+        );
+    }
+
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
         for (const node of this.meta.ast.nodes) {
@@ -586,6 +677,7 @@ export class StylableProcessor {
     protected addVarSymbols(rule: postcss.Rule) {
         rule.walkDecls((decl) => {
             this.collectUrls(decl);
+            this.handleStFunctions(decl);
             this.checkRedeclareSymbol(decl.prop, decl);
             let type = null;
 

@@ -6,7 +6,6 @@ import type { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
 import type { SRule, StylableMeta } from './stylable-processor';
 import type { StylableResolver } from './stylable-resolver';
-import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
@@ -22,6 +21,8 @@ export const stateErrors = {
         `pseudo-state "${name}" defined with unknown type: "${type}"`,
     TOO_MANY_STATE_TYPES: (name: string, types: string[]) =>
         `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
+    NO_STATE_ARGUMENT_GIVEN: (name: string, type: string) =>
+        `pseudo-state "${name}" expected argument of type "${type}" but got none`,
     NO_STATE_TYPE_GIVEN: (name: string) =>
         `pseudo-state "${name}" expected a definition of a single type, but received none`,
     TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) =>
@@ -29,7 +30,7 @@ export const stateErrors = {
             ', '
         )}"`,
     STATE_STARTS_WITH_HYPHEN: (name: string) =>
-        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`,
+        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`,
 };
 
 // PROCESS
@@ -296,6 +297,12 @@ function resolveStateValue(
         node.content || stateDef.defaultValue
     );
 
+    if (rule && !node.content && !stateDef.defaultValue) {
+        diagnostics.warn(rule, stateErrors.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
+            word: name,
+        });
+    }
+
     const validator = systemValidators[stateDef.type];
 
     let stateParamOutput;
@@ -326,13 +333,8 @@ function resolveStateValue(
     }
 
     const strippedParam = stripQuotation(actualParam);
-    if (isValidClassName(strippedParam)) {
-        node.type = 'class';
-        node.name = createStateWithParamClassName(name, namespace, strippedParam);
-    } else {
-        node.type = 'attribute';
-        node.content = createAttributeState(name, namespace, strippedParam);
-    }
+    node.type = 'class';
+    node.name = createStateWithParamClassName(name, namespace, strippedParam);
 }
 
 function resolveParam(
@@ -355,16 +357,9 @@ export function createStateWithParamClassName(stateName: string, namespace: stri
     return `${namespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(param)}`;
 }
 
-export function createAttributeState(stateName: string, namespace: string, param: string) {
-    return `class~="${createStateWithParamClassName(stateName, namespace, param)}"`;
-}
-
 export function resolveStateParam(param: string) {
-    if (isValidClassName(param)) {
-        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
-    } else {
-        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(
-            JSON.stringify(param).replace(/\s/gm, '_')
-        )}`;
-    }
+    return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(
+        /\s/gm,
+        '_'
+    )}`;
 }

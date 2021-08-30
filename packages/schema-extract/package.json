@@ -1,13 +1,14 @@
 {
   "name": "@stylable/schema-extract",
-  "version": "4.2.4",
+  "version": "4.6.0",
   "description": "A utility for extracting JSON schema objects from a Stylable stylesheet",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "^4.2.4"
+    "@stylable/core": "^4.6.0",
+    "jest-docblock": "^27.0.6"
   },
   "files": [
     "dist",
@@ -21,7 +22,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "repository": "https://github.com/wix/stylable/tree/master/packages/schema-extract",
   "sideEffects": false,
   "author": "Wix.com"

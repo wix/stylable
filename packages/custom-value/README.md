@@ -22,3 +22,7 @@ Currently, this package only offers an `stBorder` type, with more to be added in
   background-color: value(stBorder, color); /* returns: green */
 }
 ```
+
+## License
+
+Copyright (c) 2021 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

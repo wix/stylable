@@ -1,17 +1,12 @@
 import { join } from 'path';
-import { spawnSync } from 'child_process';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
-import { populateDirectorySync, loadDirSync } from './test-kit';
+import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
 
-function runCli(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
-}
-
-describe('Stylable Cli', () => {
+describe('Stylable Cli', function () {
+    this.timeout(25000);
     let tempDir: ITempDirectory;
     const testNsrPath = require.resolve('./fixtures/test-ns-resolver');
 
@@ -28,10 +23,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', testNsrPath]);
-
-        expect(stderr).equal('');
-        expect(stdout).equal('');
+        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath]);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(
@@ -48,11 +40,11 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        runCli(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--outDir', './dist']);
+        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--outDir', './dist']);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(Object.keys(dirContent)).to.eql([
-            join('dist', 'style.st.css.js'),
+            'dist/style.st.css.js',
             'package.json',
             'style.st.css',
         ]);
@@ -64,15 +56,15 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root {color:red}`,
         });
 
-        const { status, output } = runCli([
+        const { status, output } = runCliSync([
             '--rootDir',
             tempDir.path,
             '--outDir',
             './dist',
             '--unknownFlag',
         ]);
-
         expect(status, output.join('')).to.not.equal(0);
+        expect(output.join(''), 'output').to.match(/Unknown argument: unknownFlag/g);
     });
 
     it('single file build with all targets', () => {
@@ -81,7 +73,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli([
+        runCliSync([
             '--rootDir',
             tempDir.path,
             '--nsr',
@@ -95,13 +87,11 @@ describe('Stylable Cli', () => {
         ]);
         const dirContent = loadDirSync(tempDir.path);
 
-        expect(stderr).equal('');
-        expect(stdout).equal('');
         expect(Object.keys(dirContent)).to.eql([
-            join('dist', 'style.css'),
-            join('dist', 'style.st.css'),
-            join('dist', 'style.st.css.js'),
-            join('dist', 'style.st.css.mjs'),
+            'dist/style.css',
+            'dist/style.st.css',
+            'dist/style.st.css.js',
+            'dist/style.st.css.mjs',
             'package.json',
             'style.st.css',
         ]);
@@ -114,10 +104,7 @@ describe('Stylable Cli', () => {
         });
 
         const nsr = require.resolve('@stylable/node');
-        const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
-
-        expect(stderr).equal('');
-        expect(stdout).equal('');
+        runCliSync(['--rootDir', tempDir.path, '--nsr', nsr]);
 
         const dirContent = loadDirSync(tempDir.path);
 
@@ -135,7 +122,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli([
+        runCliSync([
             '--rootDir',
             tempDir.path,
             '--outDir',
@@ -144,15 +131,65 @@ describe('Stylable Cli', () => {
             '--useNamespaceReference',
         ]);
 
-        expect(stderr).equal('');
-        expect(stdout).equal('');
-
         const dirContent = loadDirSync(tempDir.path);
-        const stylesheetContent = dirContent[join('dist', 'style.st.css')];
+        const stylesheetContent = dirContent['dist/style.st.css'];
 
         expect(
             stylesheetContent.startsWith('/* st-namespace-reference="../style.st.css" */')
         ).equal(true);
+    });
+
+    it('build .st.css.d.ts alongside source files with source-maps on by default', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': srcContent,
+        });
+
+        runCliSync(['--rootDir', tempDir.path, '--outDir', 'dist', '--stcss', '--dts']);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const stylesheetContent = dirContent['dist/style.st.css'];
+        const dtsContent = dirContent['dist/style.st.css.d.ts'];
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(stylesheetContent).to.equal(srcContent);
+        expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
+            true
+        );
+        expect(
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+        ).to.equal(true);
+    });
+
+    it('build .st.css.d.ts alongside source files with source-maps explicitly off', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': srcContent,
+        });
+
+        runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            'dist',
+            '--stcss',
+            '--dts',
+            '--dtsSourceMap',
+            'false',
+        ]);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const stylesheetContent = dirContent['dist/style.st.css'];
+        const dtsContent = dirContent['dist/style.st.css.d.ts'];
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(stylesheetContent).to.equal(srcContent);
+        expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
+            true
+        );
+        expect(dtsSourceMapContent).to.equal(undefined);
     });
 
     it('manifest', () => {
@@ -161,7 +198,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli([
+        runCliSync([
             '--rootDir',
             tempDir.path,
             '--nsr',
@@ -171,13 +208,9 @@ describe('Stylable Cli', () => {
             '--manifest',
         ]);
 
-        expect(stderr).equal('');
-        expect(stdout).equal('');
-
         const dirContent = loadDirSync(tempDir.path);
-        const file = join('dist', 'stylable.manifest.json');
 
-        const m = JSON.parse(dirContent[file]);
+        const m = JSON.parse(dirContent['dist/stylable.manifest.json']);
         expect(m.namespaceMapping).eql({ 'style.st.css': 'test-ns-0' });
     });
 
@@ -187,7 +220,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli([
+        runCliSync([
             '--rootDir',
             tempDir.path,
             '--nsr',
@@ -199,20 +232,16 @@ describe('Stylable Cli', () => {
             '/x/y/m.json',
         ]);
 
-        expect(stderr).equal('');
-        expect(stdout).equal('');
-
         const dirContent = loadDirSync(tempDir.path);
-        const file = join('dist', 'x/y/m.json');
 
-        const m = JSON.parse(dirContent[file]);
+        const m = JSON.parse(dirContent['dist/x/y/m.json']);
         expect(m.namespaceMapping).eql({ 'style.st.css': 'test-ns-0' });
     });
 
     it('test require hook', () => {
         populateDirectorySync(tempDir.path, {});
         const requireHook = require.resolve('./fixtures/test-require-hook');
-        const { stderr, stdout } = runCli([
+        const { stdout } = runCliSync([
             '--rootDir',
             tempDir.path,
             '--nsr',
@@ -221,7 +250,6 @@ describe('Stylable Cli', () => {
             requireHook,
         ]);
 
-        expect(stderr).equal('');
         expect(stdout).to.contain('I HAVE BEEN REQUIRED');
     });
 
@@ -232,31 +260,73 @@ describe('Stylable Cli', () => {
                 'style.st.css': `.root{color:value(xxx)}`,
             });
 
-            const { stderr, stdout, status } = runCli(['--rootDir', tempDir.path]);
+            const { stdout, status } = runCliSync(['--rootDir', tempDir.path]);
 
             expect(status).to.equal(1);
-            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
-            expect(stderr, 'stderr').equal('');
         });
-        it('(diagnosticsMode) should report diagnostics and ignore process process exit', () => {
+
+        it.skip('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
+            // Todo: test info diagnostic when we have one.
+            // https://github.com/wix/stylable/pull/2018
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root {} `,
+            });
+
+            const { status, stdout } = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--diagnosticsMode=strict',
+            ]);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+        });
+
+        it('(diagnosticsMode) should report diagnostics and ignore process exit', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{color:value(xxx)}`,
             });
 
-            const { stderr, stdout, status } = runCli([
+            const { stdout, status } = runCliSync([
                 '--rootDir',
                 tempDir.path,
                 '--diagnosticsMode=loose',
             ]);
 
             expect(status).to.equal(0);
-            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
-            expect(stderr, 'stderr').equal('');
+        });
+
+        it('should fail to build when "--dtsSourceMap" is on but "--dts" is off', () => {
+            const srcContent = '.root{color:red}';
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': srcContent,
+            });
+
+            const { stdout, stderr, status } = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--outDir',
+                'dist',
+                '--stcss',
+                '--dts',
+                'false',
+                '--dtsSourceMap',
+                'true',
+            ]);
+
+            expect(status).to.equal(1);
+            expect(stdout).to.equal('');
+            expect(stderr).to.include('--dtsSourceMap requires turning on --dts');
         });
     });
 });

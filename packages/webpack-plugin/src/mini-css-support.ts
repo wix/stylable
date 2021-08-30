@@ -46,7 +46,28 @@ export function injectCssModules(
                 }),
                 media: '',
                 sourceMap: null,
+                assets: {},
+                assetsInfo: {},
             });
+
+            try {
+                let syncCheck = false;
+                cssModule.build(
+                    compilation.options,
+                    compilation,
+                    compilation.resolverFactory.get('normal'),
+                    compilation.compiler.inputFileSystem,
+                    () => (syncCheck = true)
+                );
+                if (!syncCheck) {
+                    throw new Error('Expect CssModule build to be sync');
+                }
+            } catch (e) {
+                throw new Error(
+                    'CssModule build failed inside Stylable integration with Error:\n' +
+                        (e as Error)?.message
+                );
+            }
 
             compilation.modules.add(cssModule);
             for (const chunk of chunkGraph.getModuleChunksIterable(module)) {

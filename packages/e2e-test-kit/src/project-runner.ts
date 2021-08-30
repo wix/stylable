@@ -93,7 +93,7 @@ export class ProjectRunner {
         log = false,
     }: Options) {
         this.projectDir = projectDir;
-        this.outputDir = join(this.projectDir, 'dist');
+        this.outputDir = webpackOptions?.output?.path ?? join(this.projectDir, 'dist');
         this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
@@ -185,7 +185,9 @@ export class ProjectRunner {
             await recompile;
             await validate();
         } catch (e) {
-            e.message = actionDesc + '\n' + e.message;
+            if (e) {
+                (e as Error).message = actionDesc + '\n' + (e as Error).message;
+            }
             throw e;
         }
     }
@@ -338,14 +340,10 @@ export class ProjectRunner {
 
     private getWebpackConfig() {
         const webpackConfig = this.webpackConfig;
-        if (webpackConfig.output && webpackConfig.output.path) {
-            throw new Error('Test project should not specify output.path option');
-        } else {
-            webpackConfig.output = {
-                ...webpackConfig.output,
-                path: this.outputDir,
-            };
-        }
+        webpackConfig.output = {
+            ...webpackConfig.output,
+            path: this.outputDir,
+        };
         return webpackConfig;
     }
 }

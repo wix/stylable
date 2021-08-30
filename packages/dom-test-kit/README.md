@@ -18,12 +18,14 @@
 ```ts
 /* test.ts */
 import { StylableDOMUtil } from '@stylable/dom-test-kit';
-import style from './my-component.st.css';
+import * as stylesheet from './my-component.st.css';
 
-const domUtil = new StylableDOMUtil(style, document.body);
+const domUtil = new StylableDOMUtil(stylesheet, document.body);
 const partElement = domUtil.select('.part');
 
-domUtil.hasStyleState(partElement, 'loading');
+if (partElement) {
+    domUtil.hasStyleState(partElement, 'loading');
+}
 ```
 
 ## What does it do?
@@ -56,4 +58,4 @@ Get an `element` state value if exists, `null` if it does not.
 
 ## License
 
-Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
+Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-
-import fs from 'fs';
-import path from 'path';
 import yargs from 'yargs';
+import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
-import { createLogger } from './create-logger';
+import { createLogger } from './logger';
+import { handleCliDiagnostics } from './report-diagnostics';
+
+const { join, resolve } = nodeFs;
 
 const argv = yargs
+    .usage('$0 [options]')
     .option('rootDir', {
         type: 'string',
         description: 'root directory of project',
@@ -43,6 +45,17 @@ const argv = yargs
         type: 'boolean',
         description: 'output stylable sources (.st.css)',
         default: false,
+    })
+    .option('dts', {
+        type: 'boolean',
+        description: 'output stylable definition files for sources (.st.css.d.ts)',
+        default: false,
+    })
+    .option('dtsSourceMap', {
+        type: 'boolean',
+        description:
+            'output source maps for stylable definition files for sources (.st.css.d.ts.map)',
+        defaultDescription: 'true if "--dts" option is enabled, otherwise false',
     })
     .option('useNamespaceReference', {
         type: 'boolean',
@@ -131,10 +144,17 @@ const argv = yargs
         default: 'strict',
         choices: ['strict', 'loose'],
     })
+    .option('watch', {
+        alias: 'w',
+        type: 'boolean',
+        description: 'enable watch mode',
+        default: false,
+    })
     .alias('h', 'help')
     .alias('v', 'version')
     .help()
     .strict()
+    .wrap(yargs.terminalWidth())
     .parseSync();
 
 const log = createLogger('[Stylable]', argv.log);
@@ -145,11 +165,13 @@ const {
     rootDir,
     ext,
     indexFile,
-    customGenerator: generatorPath,
+    customGenerator,
     esm,
     cjs,
     css,
     stcss,
+    dts,
+    dtsSourceMap,
     cssInJs,
     namespaceResolver,
     injectCSSRequest,
@@ -162,53 +184,58 @@ const {
     useNamespaceReference,
     diagnosticsMode,
     diagnostics,
+    watch,
 } = argv;
 
 log('[Arguments]', argv);
 
-// execute all require hooks before running the CLI build
-for (const request of requires) {
-    if (request) {
-        require(request);
+async function main() {
+    if (!dts && dtsSourceMap) {
+        throw new Error(`--dtsSourceMap requires turning on --dts`);
     }
-}
-
-const stylable = Stylable.create({
-    fileSystem: fs,
-    requireModule: require,
-    projectRoot: rootDir,
-    resolveNamespace: require(namespaceResolver).resolveNamespace,
-    resolverCache: new Map(),
-});
-
-const { diagnosticsMessages } = build({
-    extension: ext,
-    fs,
-    stylable,
-    outDir,
-    srcDir,
-    rootDir,
-    log,
-    indexFile,
-    generatorPath,
-    moduleFormats: getModuleFormats({ esm, cjs }),
-    outputCSS: css,
-    includeCSSInJS: cssInJs,
-    outputSources: stcss,
-    injectCSSRequest,
-    outputCSSNameTemplate: cssFilename,
-    optimize,
-    minify,
-    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
-    useSourceNamespace: useNamespaceReference,
-});
-
-if (diagnosticsMessages.length) {
-    if (diagnostics) {
-        console.log('[Stylable Diagnostics]\n', diagnosticsMessages.join('\n\n'));
+    // execute all require hooks before running the CLI build
+    for (const request of requires) {
+        if (request) {
+            require(request);
+        }
     }
-    if (diagnosticsMode === 'strict') {
-        process.exitCode = 1;
+
+    const stylable = Stylable.create({
+        fileSystem: nodeFs,
+        requireModule: require,
+        projectRoot: rootDir,
+        resolveNamespace: require(namespaceResolver).resolveNamespace,
+        resolverCache: new Map(),
+    });
+
+    const { diagnosticsMessages } = await build({
+        extension: ext,
+        fs: nodeFs,
+        stylable,
+        outDir,
+        srcDir,
+        rootDir,
+        log,
+        indexFile,
+        generatorPath: customGenerator !== undefined ? resolve(customGenerator) : customGenerator,
+        moduleFormats: getModuleFormats({ esm, cjs }),
+        outputCSS: css,
+        includeCSSInJS: cssInJs,
+        outputSources: stcss,
+        injectCSSRequest,
+        outputCSSNameTemplate: cssFilename,
+        optimize,
+        minify,
+        manifest: manifest ? join(rootDir, outDir, manifestFilepath) : undefined,
+        useNamespaceReference,
+        dts,
+        dtsSourceMap,
+        watch,
+        diagnostics,
+    });
+
+    if (!watch) {
+        handleCliDiagnostics(diagnostics, diagnosticsMessages, diagnosticsMode);
     }
 }
 
@@ -223,4 +250,7 @@ function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
     return formats;
 }
 
-
+main().catch((e) => {
+    process.exitCode = 1;
+    console.error(e);
+});

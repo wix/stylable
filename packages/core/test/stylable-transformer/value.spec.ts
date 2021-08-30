@@ -296,8 +296,8 @@ describe('Generator variables interpolation', () => {
             );
         });
 
-        describe('stMap', () => {
-            it('should support stMap type', () => {
+        describe('st-map', () => {
+            it('should support st-map type', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -306,7 +306,7 @@ describe('Generator variables interpolation', () => {
                             content: `
                                 :vars {
                                     otherColor: red;
-                                    colors: stMap(
+                                    colors: st-map(
                                         bg orange,
                                         text green
                                     );
@@ -325,7 +325,7 @@ describe('Generator variables interpolation', () => {
                 expect((rule.nodes[1] as postcss.Declaration).value).to.equal('green');
             });
 
-            it('should support stMap type with deep structure', () => {
+            it('should support st-map type with deep structure', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -334,9 +334,9 @@ describe('Generator variables interpolation', () => {
                             content: `
                                 :vars {
                                     color1: stColor(red);
-                                    designs: stMap(
+                                    designs: st-map(
                                         bg green,
-                                        box stMap(
+                                        box st-map(
                                             border 1px solid green,
                                             font monospace
                                         )
@@ -356,7 +356,7 @@ describe('Generator variables interpolation', () => {
                 expect((rule.nodes[1] as postcss.Declaration).value).to.equal('1px solid green');
             });
 
-            it('should support stMap type with imported deep structure', () => {
+            it('should support st-map type with imported deep structure', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -377,9 +377,9 @@ describe('Generator variables interpolation', () => {
                             namespace: 'imported',
                             content: `
                                 :vars {
-                                    colors: stMap(
+                                    colors: st-map(
                                         bg red,
-                                        text stMap(
+                                        text st-map(
                                             header gold,
                                             body green
                                         )
@@ -395,7 +395,7 @@ describe('Generator variables interpolation', () => {
                 expect((rule.nodes[1] as postcss.Declaration).value).to.equal('green');
             });
 
-            it('should support stMap type with var usage in variable invocation', () => {
+            it('should support st-map type with var usage in variable invocation', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -404,7 +404,7 @@ describe('Generator variables interpolation', () => {
                             content: `
                                 :vars {
                                     content: text;
-                                    colors: stMap(
+                                    colors: st-map(
                                         bg red,
                                         text green
                                     );
@@ -423,7 +423,7 @@ describe('Generator variables interpolation', () => {
                 expect((rule.nodes[1] as postcss.Declaration).value).to.equal('green');
             });
 
-            it('should support stMap type with imported var usage in variable invocation', () => {
+            it('should support st-map type with imported var usage in variable invocation', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -446,7 +446,7 @@ describe('Generator variables interpolation', () => {
                             namespace: 'imported',
                             content: `
                                 :vars {
-                                    colors: stMap(
+                                    colors: st-map(
                                         bg red,
                                         text green
                                     );
@@ -459,7 +459,7 @@ describe('Generator variables interpolation', () => {
                 expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
             });
 
-            it('should support stMap type with inner var in definition', () => {
+            it('should support st-map type with inner var in definition', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -470,7 +470,7 @@ describe('Generator variables interpolation', () => {
                                     size: 1px;
                                     style: solid;
                                     color: green;
-                                    borders: stMap(
+                                    borders: st-map(
                                         border1 2px dashed red,
                                         border2 value(size) value(style) value(color)
                                     );
@@ -493,8 +493,8 @@ describe('Generator variables interpolation', () => {
             });
         });
 
-        describe('stArray', () => {
-            it('should support stArray type', () => {
+        describe('st-array', () => {
+            it('should support st-array type', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -503,7 +503,7 @@ describe('Generator variables interpolation', () => {
                             content: `
                                 :vars {
                                     otherColor: red;
-                                    colors: stArray(yellow, green);
+                                    colors: st-array(yellow, green);
                                 }
                                 .root {
                                     background-color: value(otherColor);
@@ -521,7 +521,7 @@ describe('Generator variables interpolation', () => {
                 expect((rule.nodes[2] as postcss.Declaration).value).to.equal('green');
             });
 
-            it('should support imported stArray type', () => {
+            it('should support imported st-array type', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -542,7 +542,7 @@ describe('Generator variables interpolation', () => {
                             namespace: 'imported',
                             content: `
                                 :vars {
-                                    colors: stArray(red, green);
+                                    colors: st-array(red, green);
                                 }
                             `,
                         },
@@ -556,7 +556,7 @@ describe('Generator variables interpolation', () => {
         });
 
         describe('complex examples', () => {
-            it('should support an stMap nested inside an stArray type', () => {
+            it('should support an st-map nested inside an st-array type', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -565,18 +565,18 @@ describe('Generator variables interpolation', () => {
                             content: `
                                 :vars {
                                     otherColor: red;
-                                    borders: stArray(
-                                        stMap(
+                                    borders: st-array(
+                                        st-map(
                                             size 1px,
                                             style solid,
                                             color red
                                         ),
-                                        stMap(
+                                        st-map(
                                             size 3px,
                                             style dashed,
                                             color yellow
                                         ),
-                                        stMap(
+                                        st-map(
                                             size 5px,
                                             style dotted,
                                             color green
@@ -595,7 +595,7 @@ describe('Generator variables interpolation', () => {
                 expect((rule.nodes[0] as postcss.Declaration).value).to.equal('1px solid red');
             });
 
-            it('should support an stArray nested inside an stMap type', () => {
+            it('should support an st-array nested inside an st-map type', () => {
                 const { meta } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -604,12 +604,12 @@ describe('Generator variables interpolation', () => {
                             content: `
                                 :vars {
                                     otherColor: red;
-                                    colors: stMap(
-                                        reds stArray(
+                                    colors: st-map(
+                                        reds st-array(
                                             rgb(100, 0, 0),
                                             rgb(255, 0, 0)
                                         ),
-                                        greens stArray(
+                                        greens st-array(
                                             rgb(0, 100, 0),
                                             rgb(0, 255, 0)
                                         )
@@ -667,8 +667,8 @@ describe('Generator variables interpolation', () => {
             }
 
             contract(
-                'basic stMap functionality',
-                { typeDef: 'stMap(k1 v1, k2 v2)', path: ['k1'] },
+                'basic st-map functionality',
+                { typeDef: 'st-map(k1 v1, k2 v2)', path: ['k1'] },
                 {
                     matchValue: (map) => expect(map).to.eql({ k1: 'v1', k2: 'v2' }),
                     match: (value) => expect(value).to.equal('v1'),
@@ -676,18 +676,18 @@ describe('Generator variables interpolation', () => {
             );
 
             contract(
-                'nested stMap functionality',
+                'nested st-map functionality',
                 {
-                    typeDef: 'stMap(k1 v1, k2 stMap(k3 v3, k4 stMap(k5 v5) ))',
+                    typeDef: 'st-map(k1 v1, k2 st-map(k3 v3, k4 st-map(k5 v5) ))',
                     path: ['k2', 'k4', 'k5'],
                 },
                 {
                     matchValue: (map) =>
                         expect(map).to.deep.include({
                             k1: 'v1',
-                            k2: box('stMap', {
+                            k2: box('st-map', {
                                 k3: 'v3',
-                                k4: box('stMap', {
+                                k4: box('st-map', {
                                     k5: 'v5',
                                 }),
                             }),
@@ -697,8 +697,8 @@ describe('Generator variables interpolation', () => {
             );
 
             contract(
-                'basic stArray functionality',
-                { typeDef: 'stArray(v0, v1)', path: ['1'] },
+                'basic st-array functionality',
+                { typeDef: 'st-array(v0, v1)', path: ['1'] },
                 {
                     matchValue: (array) => expect(array).to.eql(['v0', 'v1']),
                     match: (value) => expect(value).to.equal('v1'),
@@ -706,32 +706,38 @@ describe('Generator variables interpolation', () => {
             );
 
             contract(
-                'nested stArray functionality',
-                { typeDef: 'stArray(v0, stArray(v1))', path: ['1', '0'] },
+                'nested st-array functionality',
+                { typeDef: 'st-array(v0, st-array(v1))', path: ['1', '0'] },
                 {
-                    matchValue: (array) => expect(array).to.eql(['v0', box('stArray', ['v1'])]),
+                    matchValue: (array) => expect(array).to.eql(['v0', box('st-array', ['v1'])]),
                     match: (value) => expect(value).to.equal('v1'),
                 }
             );
 
             contract(
-                'complex nested stArray/stMap/stArray functionality',
-                { typeDef: 'stArray(v0, stMap(k2 stArray(v2))', path: ['1', 'k2', '0'] },
+                'complex nested st-array/st-map/st-array functionality',
+                { typeDef: 'st-array(v0, st-map(k2 st-array(v2))', path: ['1', 'k2', '0'] },
                 {
                     matchValue: (array) =>
-                        expect(array).to.eql(['v0', box('stMap', { k2: box('stArray', ['v2']) })]),
+                        expect(array).to.eql([
+                            'v0',
+                            box('st-map', { k2: box('st-array', ['v2']) }),
+                        ]),
                     match: (value) => expect(value).to.equal('v2'),
                 }
             );
 
             contract(
-                'complex nested stMap/stArray/stMap functionality',
-                { typeDef: 'stMap(k0 v0, k1 stArray(v2, stMap(k3 v3)))', path: ['k1', '1', 'k3'] },
+                'complex nested st-map/st-array/st-map functionality',
+                {
+                    typeDef: 'st-map(k0 v0, k1 st-array(v2, st-map(k3 v3)))',
+                    path: ['k1', '1', 'k3'],
+                },
                 {
                     matchValue: (array) =>
                         expect(array).to.eql({
                             k0: 'v0',
-                            k1: box('stArray', ['v2', box('stMap', { k3: 'v3' })]),
+                            k1: box('st-array', ['v2', box('st-map', { k3: 'v3' })]),
                         }),
                     match: (value) => expect(value).to.equal('v3'),
                 }

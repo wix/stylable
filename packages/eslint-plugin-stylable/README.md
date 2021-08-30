@@ -40,3 +40,13 @@ or
 |-----------|:-----:|:-------:|-------------|
 | `resolveOptions` | `object` | `{}` | Stylable resolver options |
 | `exposeDiagnosticsReports` | `boolean` | `false` | expose Stylable transpilation diagnostics on the import statement |
+
+## Known issue
+
+ESLint is not intended for multi-file operations, such as validating your TS when an `.st.css` files changes. This means that the plugin might lose track of stylesheet changes and work with stale data.
+
+This behavior will show out-of-date errors or will miss new errors in your TS files. Manually triggering a change in the stylesheet file will sync ESlint and update the diagnostics.
+
+## License
+
+Copyright (c) 2021 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

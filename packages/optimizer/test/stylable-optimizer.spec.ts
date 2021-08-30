@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import deindent from 'deindent';
-import { createStylableInstance } from '@stylable/core-test-kit';
+import { generateStylableResult } from '@stylable/core-test-kit';
 import { removeCommentNodes, StylableOptimizer } from '@stylable/optimizer';
 
 describe('StylableOptimizer', () => {
@@ -55,7 +55,7 @@ describe('StylableOptimizer', () => {
     });
 
     it('removeUnusedComponents', () => {
-        const index = 'index.st.css';
+        const index = '/index.st.css';
         const files = {
             [index]: {
                 content: `
@@ -64,8 +64,7 @@ describe('StylableOptimizer', () => {
             },
         };
 
-        const stylable = createStylableInstance({ files });
-        const result = stylable.transform(files[index].content, index);
+        const result = generateStylableResult({ entry: index, files });
         const usageMapping = {
             [result.meta.namespace]: false,
         };
@@ -74,14 +73,14 @@ describe('StylableOptimizer', () => {
             { removeUnusedComponents: true },
             result,
             usageMapping,
-            stylable.delimiter
+            '__'
         );
 
         expect(result.meta.outputAst!.toString().trim()).to.equal('');
     });
 
     it('minifyCSS', () => {
-        const index = 'index.st.css';
+        const index = '/index.st.css';
         const files = {
             [index]: {
                 content: `
@@ -93,9 +92,7 @@ describe('StylableOptimizer', () => {
                 `,
             },
         };
-
-        const stylable = createStylableInstance({ files });
-        const { meta } = stylable.transform(files[index].content, index);
+        const { meta } = generateStylableResult({ entry: index, files });
         const output = new StylableOptimizer().minifyCSS(meta.outputAst!.toString());
         expect(output).to.equal(`.${meta.namespace}__x{color:red}`);
     }).timeout(25000);

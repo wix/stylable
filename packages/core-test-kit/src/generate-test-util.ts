@@ -6,16 +6,13 @@ import {
     process,
     processNamespace,
     replaceValueHook,
-    Stylable,
     StylableMeta,
     StylableResolver,
-    StylableResults,
     StylableTransformer,
     createInfrastructure,
 } from '@stylable/core';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
-import { matchFromSource } from './match-rules';
 
 export interface File {
     content: string;
@@ -95,79 +92,28 @@ export function processSource(
     return process(postcss.parse(source, options), undefined, resolveNamespace);
 }
 
-export function generateFromMock(
-    config: Config,
-    diagnostics: Diagnostics = new Diagnostics()
-): StylableResults {
-    if (!isAbsolute(config.entry || '')) {
-        throw new Error('entry must be absolute path: ' + config.entry);
-    }
-    const entry = config.entry;
-
-    const t = createTransformer(config, diagnostics);
-
-    const result = t.transform(t.fileProcessor.process(entry || ''));
-
-    return result;
-}
-
 export function createProcess(
     fileProcessor: FileProcessor<StylableMeta>
 ): (path: string) => StylableMeta {
     return (path: string) => fileProcessor.process(path);
 }
 
-/* LEGACY */
-export function createTransform(
-    fileProcessor: FileProcessor<StylableMeta>,
-    requireModule: RequireType
-): (meta: StylableMeta) => StylableMeta {
-    return (meta: StylableMeta) => {
-        return new StylableTransformer({
-            fileProcessor,
-            requireModule,
-            diagnostics: new Diagnostics(),
-            keepValues: false,
-        }).transform(meta).meta;
-    };
-}
-
-export function expectTransformOutput(config: Config, numOfAssertions: number) {
-    const res = generateFromMock(config);
-    matchFromSource(res, numOfAssertions);
-    return res;
-}
-
-export function generateStylableResult(config: Config) {
-    return generateFromMock(config);
+export function generateStylableResult(
+    config: Config,
+    diagnostics: Diagnostics = new Diagnostics()
+) {
+    const { entry } = config;
+    if (!isAbsolute(entry || '')) {
+        throw new Error(`entry must be absolute path got: ${entry}`);
+    }
+    const transformer = createTransformer(config, diagnostics);
+    return transformer.transform(transformer.fileProcessor.process(entry || ''));
 }
 
 export function generateStylableRoot(config: Config) {
-    return generateFromMock(config).meta.outputAst!;
+    return generateStylableResult(config).meta.outputAst!;
 }
 
 export function generateStylableExports(config: Config) {
-    return generateFromMock(config).exports;
-}
-
-export function createStylableInstance(config: Config) {
-    config.trimWS = true;
-
-    const { fs, requireModule } = createMinimalFS(config);
-
-    const stylable = new Stylable(
-        '/',
-        fs,
-        requireModule,
-        '__',
-        (meta, path) => {
-            meta.namespace = config.files[path].namespace || meta.namespace;
-            return meta;
-        },
-        undefined,
-        undefined,
-        config.resolve
-    );
-
-    return stylable;
+    return generateStylableResult(config).exports;
 }

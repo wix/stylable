@@ -15,38 +15,99 @@ An assortment of `Chai` matchers used by Stylable.
 
 ### Diagnostics tooling
 
-A collection of tools aimed at testing Stylable diagnostics messages (warnings and errors).
+A collection of tools used for testing Stylable diagnostics messages (warnings and errors).
+
+- `expectWarnings` - processes a Stylable input and checks for diagnostics during processing
+- `expectWarningsFromTransform` - checks for diagnostics after a full transformation
+- `shouldReportNoDiagnostics` - helper to check no diagnostics were reported
 
 ### Testing infrastructure
 
-Used for easily setting up Stylable instances (processor/transformer) and its infrastructure.
+Used for setting up Stylable instances (`processor`/`transformer`) and their infrastructure:
 
-Exposes `expectTransformOutput` utility for creating transformation tests. These are the most common core tests and the recommended way to test the core transform functionality.
+- `generateInfra` - create Stylable basic in memory infrastructure (`resolver`, `requireModule`, `fileProcessor`)
+- `generateStylableResult` - genetare transformation results from in memory configuration
+- `generateStylableRoot` - helper over `generateStylableResult` that returns the `outputAst`
+- `generateStylableExports` - helper over `generateStylableResult` that returns the `exports` mapping
 
-Currently only supports testing target selector but when needed the functionality can be expended here to support: 
+### `testInlineExpects` utility
 
-* JavaScript exports output
-* Declaration values
-* Mixins output  
+Exposes `testInlineExpects` for testing transformed stylesheets that include inline expectation comments. These are the most common type of core tests and the recommended way of testing the core functionality.
 
+#### Supported checks:
+
+Rule checking (place just before rule) supporting multi-line declarations and multiple `@checks` statements
+
+##### Terminilogy
+- `LABEL: <string>` - label for the test expectation 
+- `OFFEST: <number>` - offest for the tested rule after the `@check`   
+- `SELECTOR: <string>` - output selector
+- `DECL: <string>` - declaration name
+- `VALUE: <string>` - declaration value 
+
+Full options:
+```css
+/* @check(LABEL)[OFFEST] SELECTOR {DECL: VALUE} */
+```
+
+Basic - `@check SELECTOR`
+```css 
+/* @check header::before */
+header::before {}
+```
+
+With declarations - ` @check SELECTOR {DECL1: VALUE1; DECL2: VALUE2;}`
+
+This will check full match and order.
+```css 
+.my-mixin {
+    color: red;
+}
+
+/* @check .entry__container {color: red;} */
+.container {
+    -st-mixin: my-mixin;
+}
+```
+
+Target generated rules (mixin) - ` @check[OFFEST] SELECTOR`
+```css
+.my-mixin {
+    color: blue;
+}
+/* 
+    @check[1] .entry__container:hover {color: blue;} 
+*/
+.container {
+    -st-mixin: my-mixin;
+}
+```
+
+Support atrule params (anything between the @atrule and body or semicolon):
+```css
+/* @check screen and (min-width: 900px) */
+@media value(smallScreen) {}
+```
 #### Example 
-Using the `/* @expect selector */` comment to test the root class selector target 
+Here we are generating a Stylable AST which lncludes the `/* @check SELECTOR */` comment to test the root class selector target.
 
-```js
-expectTransformOutput(
-    {
+The `testInlineExpects` function performs that actual assertions to perform the test.
+
+```ts
+it('...', ()=>{
+    const root = generateStylableRoot({
         entry: `/style.st.css`,
         files: {
             '/style.st.css': {
                 namespace: 'ns',
                 content: `
-                /* @expect .ns__root */
+                /* @check .ns__root */
                 .root {}
             `
         },
-    },
-    1
-);
+    });
+    testInlineExpects(root, 1);
+})
 ```
 
 ### Match rules
@@ -55,4 +116,4 @@ Exposes two utility functions (`matchRuleAndDeclaration` and `matchAllRulesAndDe
 
 ## License
 
-Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
+Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

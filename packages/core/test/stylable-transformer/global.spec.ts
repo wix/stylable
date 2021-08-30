@@ -1,6 +1,12 @@
+import {
+    expectWarningsFromTransform,
+    generateStylableExports,
+    generateStylableResult,
+    generateStylableRoot,
+    testInlineExpects,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 
 describe('Stylable postcss transform (Global)', () => {
     it('should support :global()', () => {
@@ -140,5 +146,115 @@ describe('Stylable postcss transform (Global)', () => {
         expect((meta.outputAst!.nodes[6] as postcss.Rule).selector).to.equal(
             '.style__mixIntoMe .global-test2'
         );
+    });
+
+    describe('@keyframes', () => {
+        it('should not transform global keyframes', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+
+                        /* @check global-name */
+                        @keyframes st-global(global-name) {
+                            from {}
+                            to {}
+                        }
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
+
+        it('should import global keyframe', () => {
+            const config = {
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @st-import [keyframes(globalName)] from "./a.st.css";
+
+                        /* @check .style__foo {animation-name: globalName;} */
+                        .foo {
+                            animation-name: globalName;
+                        }
+                        `,
+                    },
+                    '/a.st.css': {
+                        namespace: 'a',
+                        content: `
+                        @keyframes st-global(globalName) {
+                            from {}
+                            to {}
+                        }
+                        
+                        `,
+                    },
+                },
+            };
+
+            testInlineExpects(generateStylableRoot(config));
+            expectWarningsFromTransform(config, []);
+        });
+
+        it('should import global keyframe (alias)', () => {
+            const config = {
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @st-import [keyframes(globalName as bar)] from "./a.st.css";
+
+                        /* @check .style__foo {animation-name: globalName;} */
+                        .foo {
+                            animation-name: bar;
+                        }
+                        `,
+                    },
+                    '/a.st.css': {
+                        namespace: 'a',
+                        content: `
+                        @keyframes st-global(globalName) {
+                            from {}
+                            to {}
+                        }
+                        
+                        `,
+                    },
+                },
+            };
+
+            testInlineExpects(generateStylableRoot(config));
+            expectWarningsFromTransform(config, []);
+        });
+
+        it('should export global keyframe', () => {
+            const config = {
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @keyframes st-global(globalName) {
+                            from {}
+                            to {}
+                        }
+                        `,
+                    },
+                },
+            };
+
+            const cssExports = generateStylableExports(config);
+
+            expect(cssExports.keyframes).to.eql({
+                globalName: 'globalName',
+            });
+        });
     });
 });

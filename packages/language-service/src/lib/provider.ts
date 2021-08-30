@@ -155,10 +155,25 @@ export class Provider {
         const defs: ProviderLocation[] = [];
         let temp: ClassSymbol | null = null;
         let stateMeta: StylableMeta;
+        let maybeRequestPath;
 
-        if (Object.keys(meta.mappedSymbols).find((sym) => sym === word.replace('.', ''))) {
-            const symb = meta.mappedSymbols[word.replace('.', '')];
-            switch (symb._kind) {
+        try {
+            maybeRequestPath = this.stylable.resolver.resolvePath(word, fs.dirname(meta.source));
+        } catch {
+            // todo: figure out proper logging
+        }
+        if (maybeRequestPath) {
+            if (fs.statSync(maybeRequestPath)) {
+                defs.push(
+                    new ProviderLocation(maybeRequestPath, {
+                        start: { line: 0, character: 0 },
+                        end: { line: 0, character: 0 },
+                    })
+                );
+            }
+        } else if (Object.keys(meta.mappedSymbols).find((sym) => sym === word.replace('.', ''))) {
+            const symbol = meta.mappedSymbols[word.replace('.', '')];
+            switch (symbol._kind) {
                 case 'class': {
                     defs.push(
                         new ProviderLocation(
@@ -182,26 +197,33 @@ export class Provider {
                     break;
                 }
                 case 'import': {
-                    let rslvd: CSSResolve | JSResolve | null = null;
+                    let resolved: CSSResolve | JSResolve | null = null;
                     try {
-                        rslvd = this.stylable.resolver.resolve(symb);
+                        resolved = this.stylable.resolver.resolve(symbol);
                     } catch {
                         /**/
                     }
 
-                    let filePath: string;
+                    let filePath: string | undefined;
 
-                    if (rslvd && rslvd._kind !== 'js') {
-                        filePath = rslvd.meta.source;
+                    if (resolved && resolved._kind !== 'js') {
+                        filePath = resolved.meta.source;
                     } else {
-                        filePath = this.stylable.resolvePath(undefined, symb.import.from);
+                        try {
+                            filePath = this.stylable.resolvePath(undefined, symbol.import.from);
+                        } catch {
+                            // todo: figure out proper logging
+                        }
                     }
-                    const doc = fs.readFileSync(filePath, 'utf8');
 
-                    if (doc !== '') {
-                        defs.push(
-                            new ProviderLocation(filePath, this.findWord(word, doc, position))
-                        );
+                    if (filePath) {
+                        const doc = fs.readFileSync(filePath, 'utf8');
+
+                        if (doc !== '') {
+                            defs.push(
+                                new ProviderLocation(filePath, this.findWord(word, doc, position))
+                            );
+                        }
                     }
                     break;
                 }
@@ -1541,7 +1563,7 @@ export function extractTsSignature(
             return (f as any).exportSymbol && (f as any).exportSymbol.escapedName === mixin;
         }
     });
-    if (!mix) {
+    if (!mix || !mix.declarations) {
         return;
     }
     return tc.getSignatureFromDeclaration(mix.declarations[0] as ts.SignatureDeclaration);
@@ -1738,7 +1760,15 @@ export function getDefSymbol(
         }
     }
 
-    const word: string = val.value;
+    let word: string = val.value;
+
+    // sanitize @st-import named imports
+    if (word.startsWith('[')) {
+        word = word.slice(1, word.length);
+    }
+    if (word.endsWith(']')) {
+        word = word.slice(0, word.length - 1);
+    }
 
     const { lineChunkAtCursor } = getChunkAtCursor(
         res.currentLine.slice(0, val.sourceIndex + val.value.length),
@@ -1762,8 +1792,11 @@ export function getDefSymbol(
     if (match && localSymbol) {
         // We're in an -st directive
         let imp;
-        if (localSymbol._kind === 'import') {
+        if (localSymbol._kind === 'import' && localSymbol.type !== 'default') {
             imp = stylable.resolver.resolveImport(localSymbol);
+        } else if (localSymbol._kind === 'import' && localSymbol.type === 'default') {
+            imp = stylable.resolver.resolveImport(localSymbol);
+            return { word: imp?.meta?.root || '', meta: imp?.meta || null };
         } else if (localSymbol._kind === 'element' && localSymbol.alias) {
             imp = stylable.resolver.resolveImport(localSymbol.alias);
         } else if (localSymbol._kind === 'class') {
@@ -1822,7 +1855,7 @@ export function getDefSymbol(
         reso = resolvedElements[0][resolvedElements[0].length - 1].resolved.find(
             (res) => !!(res.symbol as ClassSymbol)['-st-root']
         );
-    } else {
+    } else if (resolvedElements.length && resolvedElements[0].length) {
         reso = resolvedElements[0][resolvedElements[0].length - 1].resolved.find((res) => {
             let symbolStates;
             if (res.symbol._kind === 'class') {

@@ -9,7 +9,7 @@ import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/bui
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
 import { dirname, relative } from 'path';
-import type { Compilation, Compiler, NormalModule } from 'webpack';
+import type { Compilation, Compiler, NormalModule, WebpackError } from 'webpack';
 
 import findConfig from 'find-config';
 
@@ -85,7 +85,7 @@ export interface StylableWebpackPluginOptions {
      */
     target?: 'oldie' | 'modern';
     /**
-     * Set the <style> tag st-id attribute to allow multiple Stylable build to be separated in the head
+     * Set the <style> tag st_id attribute to allow multiple Stylable build to be separated in the head
      * This only apply to cssInjection js mode
      */
     runtimeId?: string;
@@ -446,7 +446,7 @@ export class StylableWebpackPlugin {
                         buildData.namespace = namespaceMapping[namespace];
                     }
                 } catch (e) {
-                    compilation.errors.push(e);
+                    compilation.errors.push(e as WebpackError);
                 }
             }
         });

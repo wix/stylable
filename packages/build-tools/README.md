@@ -13,4 +13,4 @@ A collection of helper functions for Stylable based tooling.
 
 
 ## License
-Copyright (c) 2021 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).
+Copyright (c) 2021 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [MIT license](./LICENSE).

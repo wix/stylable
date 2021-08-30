@@ -1,15 +1,15 @@
 {
   "name": "@stylable/dom-test-kit",
-  "version": "4.2.4",
+  "version": "4.6.0",
   "description": "Stylable DOM testing utilities",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\"",
-    "start": "webpack serve"
+    "start": "mocha-play ./dist/test/**/*.spec.js -c ./webpack.config.js -w"
   },
   "dependencies": {
-    "@stylable/core": "^4.2.4",
-    "@stylable/runtime": "^4.2.4"
+    "@stylable/core": "^4.6.0",
+    "@stylable/runtime": "^4.6.0"
   },
   "files": [
     "dist",
@@ -25,5 +25,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/dom-test-kit",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "MIT"
 }
