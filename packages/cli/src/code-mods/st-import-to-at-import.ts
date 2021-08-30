@@ -6,7 +6,7 @@ export function stImportToAtImport(ast: Root, messages: string[]) {
         if (rule.selector === ':import') {
             const diagnostics = new Diagnostics();
             const importObj = parsePseudoImport(rule, '*', diagnostics);
-            if (diagnostics.reports.length) {
+            if (diagnostics.reports.map((report) => report.type !== 'info').length) {
                 messages.push(`failed to parse/replace :import`);
             } else {
                 rule.replaceWith(createAtImport(importObj));
