@@ -1,3 +1,4 @@
+import { processorWarnings } from '@stylable/core';
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { dirname } from 'path';
@@ -26,7 +27,9 @@ describe(`(${project})`, () => {
         const warnings = projectRunner.getBuildWarningMessages();
 
         expect(warnings).to.have.length(1);
-        expect(warnings[0]).to.match(/"stArray" is deprecated, use "st-array"/);
+        expect(warnings[0]).to.match(
+            new RegExp(processorWarnings.DEPRECATED_ST_FUNCTION_NAME('stArray', 'st-array'))
+        );
         expect(errors).to.deep.equal([]);
     });
 });
