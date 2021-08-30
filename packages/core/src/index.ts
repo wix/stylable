@@ -62,6 +62,7 @@ export {
     scopeCSSVar,
     scopeSelector,
     transformMatchesOnRule,
+    processDeclarationFunctions,
 } from './stylable-utils';
 export {
     CSSResolve,
@@ -129,7 +130,6 @@ export {
     isExternal,
     isUrl,
     makeAbsolute,
-    processDeclarationUrls,
 } from './stylable-assets';
 export {
     ResolvedFormatter,
