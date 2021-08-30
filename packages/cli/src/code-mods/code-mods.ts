@@ -1,5 +1,6 @@
 import { FileSystem, findFiles } from '@stylable/node';
 import { applyCodeMods, CodeMod, registeredMods } from './apply-code-mods';
+import { relative, join } from 'path';
 
 export interface BuildOptions {
     fs: FileSystem;
@@ -12,6 +13,8 @@ export interface BuildOptions {
 export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
     const { result: files } = findFiles(
         fs,
+        join,
+        relative,
         rootDir,
         extension,
         new Set<string>(['node_modules', '.git'])
@@ -21,11 +24,11 @@ export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
         return log('No mods provided.');
     }
 
-    if (files.length === 0) {
+    if (files.size === 0) {
         return log('No stylable files found.');
     }
 
-    log(`Transforming ${files.length} stylable files.`);
+    log(`Transforming ${files.size} stylable files.`);
 
     const loadedMods = new Set<{ id: string; apply: CodeMod }>();
     for (const id of mods) {

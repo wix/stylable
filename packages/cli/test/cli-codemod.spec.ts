@@ -1,14 +1,9 @@
-import { spawnSync } from 'child_process';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { populateDirectorySync, loadDirSync } from './test-kit';
+import { runCliCodeMod } from './test-kit/cli-test-kit';
 
-function runCliCodeMod(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc-codemod.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
-}
-
-describe('Stylable Cli', () => {
+describe('Stylable Cli Code Mods', () => {
     let tempDir: ITempDirectory;
 
     beforeEach(async () => {
@@ -18,21 +13,19 @@ describe('Stylable Cli', () => {
         await tempDir.remove();
     });
 
-    describe('Code Mods', () => {
-        it('apply all code mods when no specific filter applied', () => {
-            populateDirectorySync(tempDir.path, {
-                'package.json': `{"name": "test", "version": "0.0.0"}`,
-                'style.st.css': `:import {-st-from: './x'; -st-default: Name}`,
-            });
-
-            runCliCodeMod(['--rootDir', tempDir.path, '--mods', 'st-import-to-at-import']);
-
-            const dirContent = loadDirSync(tempDir.path);
-            expect(dirContent['style.st.css']).equal('@st-import Name from "./x";');
+    it('apply all code mods when no specific filter applied', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `:import {-st-from: './x'; -st-default: Name}`,
         });
+
+        runCliCodeMod(['--rootDir', tempDir.path, '--mods', 'st-import-to-at-import']);
+
+        const dirContent = loadDirSync(tempDir.path);
+        expect(dirContent['style.st.css']).equal('@st-import Name from "./x";');
     });
 
-    describe(':import to @st-import', () => {
+    describe('st-import-to-at-import', () => {
         it('handle all named cases', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
