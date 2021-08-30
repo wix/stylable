@@ -1,6 +1,10 @@
-export * from './stylable-project-runner';
-export * from './browser-functions';
-export * from './mem-fs';
-export * from './webpack-in-memory-test';
-export * from './run-server';
-export * from './dts-kit';
+export { StylableProjectRunner } from './stylable-project-runner';
+export { browserFunctions, filterAssetResponses } from './browser-functions';
+export { CustomMemoryFs, memoryFS } from './mem-fs';
+export {
+    createMemoryFileSystemWithFiles,
+    evalCssJSModule,
+    webpackTest,
+} from './webpack-in-memory-test';
+export { runServer } from './run-server';
+export { DTSKit } from './dts-kit';
