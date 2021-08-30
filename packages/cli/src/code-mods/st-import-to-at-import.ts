@@ -27,22 +27,10 @@ function createAtImport(importObj: Imported): AtRule {
     }
     if (named.length || keyframes.length) {
         params += '[';
-        const namedParts: string[] = [];
-        for (const [as, name] of named) {
-            if (as === name) {
-                namedParts.push(name);
-            } else {
-                namedParts.push(`${name} as ${as}`);
-            }
-        }
-        const keyFramesParts: string[] = [];
-        for (const [as, name] of keyframes) {
-            if (as === name) {
-                keyFramesParts.push(name);
-            } else {
-                keyFramesParts.push(`${name} as ${as}`);
-            }
-        }
+
+        const namedParts = getNamedImportParts(named);
+        const keyFramesParts = getNamedImportParts(keyframes);
+
         params += namedParts.join(', ');
 
         if (keyFramesParts.length) {
@@ -57,4 +45,17 @@ function createAtImport(importObj: Imported): AtRule {
     params += ` from ${JSON.stringify(importObj.request)};`;
 
     return postcss.atRule({ name: 'st-import', params });
+}
+
+function getNamedImportParts(named: [string, string][]) {
+    const parts: string[] = [];
+    for (const [as, name] of named) {
+        if (as === name) {
+            parts.push(name);
+        } else {
+            parts.push(`${name} as ${as}`);
+        }
+    }
+
+    return parts;
 }
