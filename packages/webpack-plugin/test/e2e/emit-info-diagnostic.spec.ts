@@ -27,9 +27,7 @@ describe(`(${project})`, () => {
         const warnings = projectRunner.getBuildWarningMessages();
 
         expect(warnings).to.have.length(1);
-        expect(warnings[0]).to.match(
-            new RegExp(processorWarnings.DEPRECATED_ST_FUNCTION_NAME('stArray', 'st-array'))
-        );
+        expect(warnings[0]).to.match(/test info diagnostic!/);
         expect(errors).to.deep.equal([]);
     });
 });
