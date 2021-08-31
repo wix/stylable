@@ -4,16 +4,14 @@ import postcss, { Root, AtRule } from 'postcss';
 export function stImportToAtImport(ast: Root, diagnostics: Diagnostics) {
     ast.walkRules((rule) => {
         if (rule.selector === ':import') {
-            const currentDiagnostics = new Diagnostics();
-            const importObj = parsePseudoImport(rule, '*', currentDiagnostics);
-            const fatalDiagnostics = currentDiagnostics.reports.filter(
-                (report) => report.type !== 'info'
-            );
+            const importObj = parsePseudoImport(rule, '*', diagnostics);
+            const fatalDiagnostics = diagnostics.reports.filter((report) => report.type !== 'info');
 
             if (fatalDiagnostics.length) {
-                diagnostics.reports.push(...fatalDiagnostics);
+                diagnostics.reports = fatalDiagnostics;
             } else {
                 rule.replaceWith(createAtImport(importObj));
+                diagnostics.reports = [];
             }
         }
     });
