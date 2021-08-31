@@ -1,4 +1,3 @@
-import { processorWarnings } from '@stylable/core';
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { dirname } from 'path';
