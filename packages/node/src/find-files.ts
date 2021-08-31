@@ -32,11 +32,11 @@ export function findFiles(
                         );
                     }
                 } catch (e) {
-                    errors.push(e);
+                    errors.push(e as Error);
                 }
             });
         } catch (e) {
-            errors.push(e);
+            errors.push(e as Error);
         }
     }
     return { result, errors };

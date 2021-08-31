@@ -353,7 +353,7 @@ function evalTemplate(fs: IFileSystem, filePath: string) {
     try {
         templateCode = fs.readFileSync(filePath, 'utf8');
     } catch (e) {
-        errors.add(e.message);
+        errors.add((e as Error)?.message);
     }
 
     const deps = new Set<string>();

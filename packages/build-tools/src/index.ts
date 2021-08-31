@@ -1,5 +1,5 @@
-export * from './process-url-dependencies';
-export * from './has-imported-side-effects';
-export * from './sort-modules-by-depth';
-export * from './load-stylable-config';
-export * from './calc-depth';
+export { processUrlDependencies } from './process-url-dependencies';
+export { hasImportedSideEffects } from './has-imported-side-effects';
+export { sortModulesByDepth } from './sort-modules-by-depth';
+export { loadStylableConfig } from './load-stylable-config';
+export { CalcDepthContext, calcDepth, getCSSViewModule } from './calc-depth';

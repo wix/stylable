@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@stylable/core": "^4.6.0",
-    "@typescript-eslint/experimental-utils": "^4.29.3"
+    "@typescript-eslint/experimental-utils": "^4.30.0"
   },
   "devDependencies": {
     "create-temp-directory": "^1.1.1"

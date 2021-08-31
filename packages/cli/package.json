@@ -5,14 +5,15 @@
   "main": "dist/index.js",
   "bin": {
     "stc": "bin/stc.js",
+    "stc-codemod": "bin/stc-codemod.js",
     "stc-format": "bin/stc-format.js"
   },
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 25000"
   },
   "dependencies": {
-    "@file-services/node": "^5.3.1",
-    "@file-services/types": "^5.3.1",
+    "@file-services/node": "^5.4.0",
+    "@file-services/types": "^5.4.0",
     "@stylable/code-formatter": "^4.6.0",
     "@stylable/core": "^4.6.0",
     "@stylable/node": "^4.6.0",

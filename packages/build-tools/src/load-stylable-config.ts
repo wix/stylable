@@ -7,7 +7,9 @@ export function loadStylableConfig<T>(context: string, extract: (config: any) =>
         try {
             config = require(path);
         } catch (e) {
-            throw new Error(`Failed to load "stylable.config.js" from ${path}\n${e.stack}`);
+            throw new Error(
+                `Failed to load "stylable.config.js" from ${path}\n${(e as Error)?.stack}`
+            );
         }
         if (!config) {
             throw new Error(
