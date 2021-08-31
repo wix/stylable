@@ -1008,12 +1008,14 @@ describe('css custom-properties (vars)', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                            |@st-global-custom-property --myVar, --mySecondVar|;
-                            @st-import [--mySecondVar] from "./st-imported.st.css";
+                            @property st-global(--myVar);
+                            @property st-global(--mySecondVar);
+
+                            |@st-import [--myVar] from "./st-imported.st.css"|;
 
                             :import {
                                 -st-from: "./imported.st.css";
-                                -st-named: --myVar;
+                                -st-named: --mySecondVar;
                             }
 
                             .root {
@@ -1026,7 +1028,7 @@ describe('css custom-properties (vars)', () => {
                         namespace: 'imported',
                         content: `
                             .root {
-                                --myVar: red;
+                                --mySecondVar: red;
                             }
                             `,
                     },
@@ -1034,7 +1036,67 @@ describe('css custom-properties (vars)', () => {
                         namespace: 'st-imported',
                         content: `
                             .root {
+                                --myVar: red;
+                            }
+                            `,
+                    },
+                },
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                {
+                    message: processorWarnings.REDECLARE_SYMBOL('--myVar'),
+                    file: '/entry.st.css',
+                },
+                {
+                    message: processorWarnings.REDECLARE_SYMBOL('--mySecondVar'),
+                    file: '/entry.st.css',
+                    skipLocationCheck: true,
+                },
+            ]);
+
+            const rule = meta.outputAst!.nodes[0] as postcss.Rule;
+            const firstDecl = rule.nodes[0] as postcss.Declaration;
+            const secondDecl = rule.nodes[1] as postcss.Declaration;
+
+            expect(firstDecl.value).to.equal('var(--st-imported-myVar)');
+            expect(secondDecl.value).to.equal('var(--imported-mySecondVar)');
+        });
+
+        it('clashing imported and global css var (deprecated)', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            |@st-global-custom-property --myVar, --mySecondVar|;
+                            @st-import [--myVar] from "./st-imported.st.css";
+
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: --mySecondVar;
+                            }
+
+                            .root {
+                                prop1: var(--myVar);
+                                prop2: var(--mySecondVar);
+                            }
+                            `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {
                                 --mySecondVar: red;
+                            }
+                            `,
+                    },
+                    '/st-imported.st.css': {
+                        namespace: 'st-imported',
+                        content: `
+                            .root {
+                                --myVar: red;
                             }
                             `,
                     },
@@ -1059,11 +1121,12 @@ describe('css custom-properties (vars)', () => {
                 },
             ]);
 
-            const baseDecl = (meta.outputAst!.nodes[0] as postcss.Rule)
-                .nodes[0] as postcss.Declaration;
+            const rule = meta.outputAst!.nodes[0] as postcss.Rule;
+            const firstDecl = rule.nodes[0] as postcss.Declaration;
+            const secondDecl = rule.nodes[1] as postcss.Declaration;
 
-            expect(baseDecl.prop).to.equal('prop1');
-            expect(baseDecl.value).to.equal('var(--imported-myVar)');
+            expect(firstDecl.value).to.equal('var(--st-imported-myVar)');
+            expect(secondDecl.value).to.equal('var(--imported-mySecondVar)');
         });
     });
 });
