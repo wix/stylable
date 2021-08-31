@@ -181,7 +181,6 @@ export const processorWarnings = {
 export class StylableProcessor {
     protected meta!: StylableMeta;
     protected dirContext!: string;
-    protected nodesToRemove: postcss.Node[] = [];
 
     constructor(
         protected diagnostics = new Diagnostics(),
@@ -192,12 +191,17 @@ export class StylableProcessor {
 
         this.dirContext = path.dirname(this.meta.source);
 
-        this.handleHoistedDeclarations(root);
         this.handleAtRules(root);
 
-        this.removeNodes();
-
         const stubs = this.insertCustomSelectorsStubs();
+
+        for (const node of root.nodes) {
+            if (node.type === 'rule' && node.selector === rootValueMapping.import) {
+                const imported = parsePseudoImport(node, this.dirContext, this.diagnostics);
+                this.meta.imports.push(imported);
+                this.addImportSymbols(imported);
+            }
+        }
 
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
@@ -252,13 +256,9 @@ export class StylableProcessor {
         expandCustomSelectors(rule, this.meta.customSelectors, this.meta.diagnostics);
     }
 
-    protected removeNodes() {
-        this.nodesToRemove.forEach((node) => node.remove());
-        this.nodesToRemove = [];
-    }
-
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
+        const toRemove: postcss.Node[] = [];
 
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
@@ -270,7 +270,7 @@ export class StylableProcessor {
                         } else {
                             this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
                         }
-                        this.nodesToRemove.push(atRule);
+                        toRemove.push(atRule);
                     } else {
                         this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
                     }
@@ -327,7 +327,7 @@ export class StylableProcessor {
                 case 'custom-selector': {
                     const params = atRule.params.split(/\s/);
                     const customName = params.shift();
-                    this.nodesToRemove.push(atRule);
+                    toRemove.push(atRule);
                     if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
                         this.meta.customSelectors[customName] = atRule.params
                             .replace(customName, '')
@@ -340,6 +340,20 @@ export class StylableProcessor {
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
                     break;
+                case 'st-import': {
+                    if (atRule.parent?.type !== 'root') {
+                        this.diagnostics.warn(
+                            atRule,
+                            processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE()
+                        );
+                        atRule.remove();
+                    } else {
+                        const stImport = this.handleStImport(atRule);
+                        this.meta.imports.push(stImport);
+                        this.addImportSymbols(stImport);
+                    }
+                    break;
+                }
                 case 'property': {
                     this.addCSSVarDefinition(atRule);
 
@@ -350,78 +364,30 @@ export class StylableProcessor {
                     }
 
                     if (remove) {
-                        this.nodesToRemove.push(atRule);
+                        toRemove.push(atRule);
                     }
                     break;
                 }
-            }
-        });
-        namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
-        this.meta.namespace = this.handleNamespaceReference(namespace);
-    }
-    protected handleHoistedDeclarations(root: postcss.Root) {
-        // Todo: Deprecate
-        root.walkAtRules('st-global-custom-property', (atRule) => {
-            this.diagnostics.info(atRule, processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY());
-
-            const cssVarsByComma = atRule.params.split(',');
-            const cssVarsBySpacing = atRule.params
-                .trim()
-                .split(/\s+/g)
-                .filter((s) => s !== ',');
-
-            if (cssVarsBySpacing.length > cssVarsByComma.length) {
-                this.diagnostics.warn(
-                    atRule,
-                    processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
-                    { word: atRule.params }
-                );
-                return;
-            }
-
-            for (const entry of cssVarsByComma) {
-                const cssVar = entry.trim();
-
-                if (isCSSVarProp(cssVar)) {
-                    if (!this.meta.cssVars[cssVar]) {
-                        this.meta.cssVars[cssVar] = {
-                            _kind: 'cssVar',
-                            name: cssVar,
-                            global: true,
-                        };
-                        this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
-                    }
-                } else {
-                    this.diagnostics.warn(
+                case 'st-global-custom-property': {
+                    this.diagnostics.info(
                         atRule,
-                        processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar),
-                        { word: cssVar }
+                        processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()
                     );
+                    const properties = parseStGlobalCustomProperty(atRule, this.diagnostics);
+
+                    for (const property of properties) {
+                        const { name } = property;
+                        this.meta.cssVars[name] = property;
+                        this.meta.mappedSymbols[name] = property;
+                    }
+
+                    toRemove.push(atRule);
                 }
             }
-            this.nodesToRemove.push(atRule);
         });
-
-        // :import
-        for (const node of root.nodes) {
-            if (node.type === 'rule' && node.selector === rootValueMapping.import) {
-                const imported = parsePseudoImport(node, this.dirContext, this.diagnostics);
-                this.meta.imports.push(imported);
-                this.addImportSymbols(imported);
-            }
-        }
-
-        // @st-import
-        root.walkAtRules('st-import', (atRule) => {
-            if (atRule.parent?.type !== 'root') {
-                this.diagnostics.warn(atRule, processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE());
-                atRule.remove();
-            } else {
-                const stImport = this.handleStImport(atRule);
-                this.meta.imports.push(stImport);
-                this.addImportSymbols(stImport);
-            }
-        });
+        toRemove.forEach((node) => node.remove());
+        namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
+        this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     private collectUrls(decl: postcss.Declaration) {
         processDeclarationFunctions(
@@ -1076,6 +1042,43 @@ export function parsePseudoImport(rule: postcss.Rule, context: string, diagnosti
         diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
     }
     return importObj;
+}
+
+export function parseStGlobalCustomProperty(
+    atRule: postcss.AtRule,
+    diagnostics: Diagnostics
+): CSSVarSymbol[] {
+    const cssVars: CSSVarSymbol[] = [];
+    const cssVarsByComma = atRule.params.split(',');
+    const cssVarsBySpacing = atRule.params
+        .trim()
+        .split(/\s+/g)
+        .filter((s) => s !== ',');
+
+    if (cssVarsBySpacing.length > cssVarsByComma.length) {
+        diagnostics.warn(atRule, processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params), {
+            word: atRule.params,
+        });
+        return cssVars;
+    }
+
+    for (const entry of cssVarsByComma) {
+        const cssVar = entry.trim();
+
+        if (isCSSVarProp(cssVar)) {
+            cssVars.push({
+                _kind: 'cssVar',
+                name: cssVar,
+                global: true,
+            });
+        } else {
+            diagnostics.warn(atRule, processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
+                word: cssVar,
+            });
+        }
+    }
+
+    return cssVars;
 }
 
 export function validateScopingSelector(
