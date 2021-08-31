@@ -49,9 +49,14 @@ export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
     for (const filePath of files) {
         const { css, reports } = applyCodeMods(fs.readFileSync(filePath).toString(), loadedMods);
         if (reports.size) {
-            for (const [modName, messages] of reports) {
-                for (const message of messages) {
-                    log(`[${modName}]`, `${filePath}: ${message}`);
+            for (const [modName, diagnosticsReports] of reports) {
+                for (const report of diagnosticsReports) {
+                    const error = report.node.error(report.message, report.options);
+
+                    log(
+                        `[${modName}]`,
+                        `${filePath}: ${report.message}\n${error.showSourceCode()}`
+                    );
                 }
             }
             skipped.push(filePath);

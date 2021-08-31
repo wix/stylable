@@ -1,13 +1,17 @@
 import { parsePseudoImport, Diagnostics, Imported } from '@stylable/core';
 import postcss, { Root, AtRule } from 'postcss';
 
-export function stImportToAtImport(ast: Root, messages: string[]) {
+export function stImportToAtImport(ast: Root, diagnostics: Diagnostics) {
     ast.walkRules((rule) => {
         if (rule.selector === ':import') {
-            const diagnostics = new Diagnostics();
-            const importObj = parsePseudoImport(rule, '*', diagnostics);
-            if (diagnostics.reports.some((report) => report.type !== 'info')) {
-                messages.push(`failed to parse/replace :import`);
+            const currentDiagnostics = new Diagnostics();
+            const importObj = parsePseudoImport(rule, '*', currentDiagnostics);
+            const fatalDiagnostics = currentDiagnostics.reports.filter(
+                (report) => report.type !== 'info'
+            );
+
+            if (fatalDiagnostics.length) {
+                diagnostics.reports.push(...fatalDiagnostics);
             } else {
                 rule.replaceWith(createAtImport(importObj));
             }
