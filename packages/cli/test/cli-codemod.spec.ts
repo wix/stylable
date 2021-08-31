@@ -41,4 +41,67 @@ describe('Stylable Cli Code Mods', () => {
             );
         });
     });
+
+    describe('st-cusatom-global-property-to-at-property', () => {
+        it('should handle one param', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `@st-global-custom-property --myVar;`,
+            });
+
+            runCliCodeMod([
+                '--rootDir',
+                tempDir.path,
+                '--mods',
+                'st-global-custom-property-to-at-property',
+            ]);
+
+            const dirContent = loadDirSync(tempDir.path);
+
+            expect(dirContent['style.st.css']).equal('@property st-global(--myVar);');
+        });
+
+        it('should handle multiple params', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `@st-global-custom-property --myVar, --mySecondVar, --myThirdVar;`,
+            });
+
+            runCliCodeMod([
+                '--rootDir',
+                tempDir.path,
+                '--mods',
+                'st-global-custom-property-to-at-property',
+            ]);
+
+            const dirContent = loadDirSync(tempDir.path);
+
+            expect(dirContent['style.st.css']).equal(
+                '@property st-global(--myVar);\n@property st-global(--mySecondVar);\n@property st-global(--myThirdVar);'
+            );
+        });
+
+        it('should handle invalid global-custom-property structure', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `@st-global-custom-property --myVar --mySecondVar;`,
+            });
+
+            const { stdout } = runCliCodeMod([
+                '--rootDir',
+                tempDir.path,
+                '--mods',
+                'st-global-custom-property-to-at-property',
+            ]);
+
+            const dirContent = loadDirSync(tempDir.path);
+
+            expect(stdout).to.match(
+                /style.st.css: failed to parse\/replace "st-global-custom-property"/
+            );
+            expect(dirContent['style.st.css']).equal(
+                '@st-global-custom-property --myVar --mySecondVar;'
+            );
+        });
+    });
 });
