@@ -1,14 +1,14 @@
-import { Diagnostics, paramMapping, parseStGlobalCustomProperty } from '@stylable/core';
+import { paramMapping, parseStGlobalCustomProperty } from '@stylable/core';
 import postcss from 'postcss';
 import type { CodeMod } from './apply-code-mods';
 
-export const stGlobalCustomPropertyToAtProperty: CodeMod = (ast, messages) => {
+export const stGlobalCustomPropertyToAtProperty: CodeMod = (ast, diagnostics) => {
     ast.walkAtRules('st-global-custom-property', (atRule) => {
-        const diagnostics = new Diagnostics();
         const properties = parseStGlobalCustomProperty(atRule, diagnostics);
+        const fatalDiagnostics = diagnostics.reports.filter((report) => report.type !== 'info');
 
         if (diagnostics.reports.some((report) => report.type !== 'info')) {
-            messages.push(`failed to parse/replace "st-global-custom-property"`);
+            diagnostics.reports = fatalDiagnostics;
         } else {
             for (const property of properties) {
                 atRule.before(
@@ -20,6 +20,7 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = (ast, messages) => {
             }
 
             atRule.remove();
+            diagnostics.reports = [];
         }
     });
 };

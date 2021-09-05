@@ -84,7 +84,7 @@ describe('Stylable Cli Code Mods', () => {
         });
     });
 
-    describe('st-cusatom-global-property-to-at-property', () => {
+    describe('st-global-custom-property-to-at-property', () => {
         it('should handle one param', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -139,7 +139,11 @@ describe('Stylable Cli Code Mods', () => {
             const dirContent = loadDirSync(tempDir.path);
 
             expect(stdout).to.match(
-                /style.st.css: failed to parse\/replace "st-global-custom-property"/
+                new RegExp(
+                    `style.st.css: ${processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(
+                        '--myVar --mySecondVar'
+                    )}`
+                )
             );
             expect(dirContent['style.st.css']).equal(
                 '@st-global-custom-property --myVar --mySecondVar;'
