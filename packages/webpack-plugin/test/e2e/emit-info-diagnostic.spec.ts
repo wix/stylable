@@ -26,7 +26,7 @@ describe(`(${project})`, () => {
         const warnings = projectRunner.getBuildWarningMessages();
 
         expect(warnings).to.have.length(1);
-        expect(warnings[0]).to.match(/test info warning!/);
+        expect(warnings[0]).to.match(/test info diagnostic!/);
         expect(errors).to.deep.equal([]);
     });
 });

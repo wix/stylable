@@ -170,7 +170,7 @@ export const processorWarnings = {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
     },
     DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
-        return `"${name}" is deprecated, use "${alternativeName}`;
+        return `"${name}" is deprecated, use "${alternativeName}"`;
     },
 };
 
