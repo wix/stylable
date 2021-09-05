@@ -4,6 +4,7 @@ import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
+import { processorWarnings } from '@stylable/core';
 
 describe('Stylable Cli', function () {
     this.timeout(25000);
@@ -268,12 +269,10 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
 
-        it.skip('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
-            // Todo: test info diagnostic when we have one.
-            // https://github.com/wix/stylable/pull/2018
+        it('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
-                'style.st.css': `.root {} `,
+                'style.st.css': `:vars { colors: stArray(red, blue); }`, // Todo: replace case with permanent info diagnostic
             });
 
             const { status, stdout } = runCliSync([
@@ -285,6 +284,14 @@ describe('Stylable Cli', function () {
             expect(status).to.equal(0);
             expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(
+                new RegExp(
+                    `\\[info\\]: ${processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                        'stArray',
+                        'st-array'
+                    )}`
+                )
+            );
         });
 
         it('(diagnosticsMode) should report diagnostics and ignore process exit', () => {

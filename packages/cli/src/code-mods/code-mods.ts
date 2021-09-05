@@ -47,17 +47,30 @@ export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
     const skipped = [];
     const finished = [];
     for (const filePath of files) {
-        const { css, reports } = applyCodeMods(fs.readFileSync(filePath).toString(), loadedMods);
-        if (reports.size) {
-            for (const [modName, messages] of reports) {
-                for (const message of messages) {
-                    log(`[${modName}]`, `${filePath}: ${message}`);
-                }
-            }
+        const result = applyCodeMods(fs.readFileSync(filePath).toString(), loadedMods);
+
+        if (result.type === 'failure') {
+            log(`${filePath}: failed to parse\n${result.error.toString()}`);
             skipped.push(filePath);
         } else {
-            fs.writeFileSync(filePath, css);
-            finished.push(filePath);
+            const { css, reports } = result;
+
+            if (reports.size) {
+                for (const [modName, diagnosticsReports] of reports) {
+                    for (const report of diagnosticsReports) {
+                        const error = report.node.error(report.message, report.options);
+
+                        log(
+                            `[${modName}]`,
+                            `${filePath}: ${report.message}\n${error.showSourceCode()}`
+                        );
+                    }
+                }
+                skipped.push(filePath);
+            } else {
+                fs.writeFileSync(filePath, css);
+                finished.push(filePath);
+            }
         }
     }
 

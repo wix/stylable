@@ -174,7 +174,7 @@ export const processorWarnings = {
         return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`;
     },
     DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
-        return `"${name}" is deprecated, use "${alternativeName}`;
+        return `"${name}" is deprecated, use "${alternativeName}"`;
     },
 };
 
