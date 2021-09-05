@@ -7,7 +7,7 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = (ast, diagnostics) =>
         const properties = parseStGlobalCustomProperty(atRule, diagnostics);
         const fatalDiagnostics = diagnostics.reports.filter((report) => report.type !== 'info');
 
-        if (diagnostics.reports.some((report) => report.type !== 'info')) {
+        if (fatalDiagnostics.length) {
             diagnostics.reports = fatalDiagnostics;
         } else {
             for (const property of properties) {
