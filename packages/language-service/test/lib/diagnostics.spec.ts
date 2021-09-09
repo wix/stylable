@@ -148,22 +148,6 @@ describe('diagnostics', () => {
             expect(diagnostics).to.eql([]);
         });
 
-        it('should not warn about pseudo-states with params', () => {
-            const filePath = '/style.st.css';
-
-            const diagnostics = createDiagnostics(
-                {
-                    [filePath]: `@st-global-custom-property --x;   /* unknownAtRules */`,
-                },
-                filePath
-            );
-
-            expect(diagnostics).to.have.length(1);
-            expect(diagnostics[0]).to.deep.include({
-                message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
-            });
-        });
-
         it('should ignore errors from stylable vars in a media query', () => {
             const filePath = '/style.st.css';
 
