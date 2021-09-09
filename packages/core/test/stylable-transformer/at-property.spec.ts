@@ -159,9 +159,7 @@ describe('@property support', () => {
                 },
             ]);
 
-            const declarations = result.meta.outputAst!.nodes;
-
-            expect(declarations).to.have.length(1);
+            expect(result.meta.outputAst!.nodes).to.have.length(1);
         });
 
         it('should emit warning when used without "inherits" descriptor', () => {
@@ -188,9 +186,7 @@ describe('@property support', () => {
                 },
             ]);
 
-            const declarations = result.meta.outputAst!.nodes;
-
-            expect(declarations).to.have.length(1);
+            expect(result.meta.outputAst!.nodes).to.have.length(1);
         });
 
         it('should emit warning when used without "initial-value" descriptor and "syntax" descriptor is not "*"', () => {
@@ -218,9 +214,7 @@ describe('@property support', () => {
                 },
             ]);
 
-            const declarations = result.meta.outputAst!.nodes;
-
-            expect(declarations).to.have.length(1);
+            expect(result.meta.outputAst!.nodes).to.have.length(1);
         });
 
         it('should detect valid at-property when used without "initial-value" descriptor and "syntax" descriptor is "*"', () => {
@@ -241,9 +235,8 @@ describe('@property support', () => {
             };
 
             const result = expectWarningsFromTransform(config, []);
-            const declarations = result.meta.outputAst!.nodes;
 
-            expect(declarations).to.have.length(1);
+            expect(result.meta.outputAst!.nodes).to.have.length(1);
         });
     });
 });
