@@ -30,7 +30,6 @@ export {
     processorWarnings,
     validateScopingSelector,
     parsePseudoImport,
-    parseStGlobalCustomProperty,
 } from './stylable-processor';
 export {
     AdditionalSelector,

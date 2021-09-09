@@ -364,12 +364,43 @@ export class StylableProcessor {
                         atRule,
                         processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()
                     );
-                    const properties = parseStGlobalCustomProperty(atRule, this.diagnostics);
 
-                    for (const property of properties) {
-                        const { name } = property;
-                        this.meta.cssVars[name] = property;
-                        this.meta.mappedSymbols[name] = property;
+                    const cssVarsByComma = atRule.params.split(',');
+                    const cssVarsBySpacing = atRule.params
+                        .trim()
+                        .split(/\s+/g)
+                        .filter((s) => s !== ',');
+
+                    if (cssVarsBySpacing.length > cssVarsByComma.length) {
+                        this.diagnostics.warn(
+                            atRule,
+                            processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
+                            {
+                                word: atRule.params,
+                            }
+                        );
+                        break;
+                    }
+
+                    for (const entry of cssVarsByComma) {
+                        const cssVar = entry.trim();
+
+                        if (isCSSVarProp(cssVar)) {
+                            const property: CSSVarSymbol = {
+                                _kind: 'cssVar',
+                                name: cssVar,
+                                global: true,
+                            };
+
+                            this.meta.cssVars[cssVar] = property;
+                            this.meta.mappedSymbols[cssVar] = property;
+                        } else {
+                            this.diagnostics.warn(
+                                atRule,
+                                processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar),
+                                { word: cssVar }
+                            );
+                        }
                     }
 
                     toRemove.push(atRule);
@@ -1034,43 +1065,6 @@ export function parsePseudoImport(rule: postcss.Rule, context: string, diagnosti
         diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
     }
     return importObj;
-}
-
-export function parseStGlobalCustomProperty(
-    atRule: postcss.AtRule,
-    diagnostics: Diagnostics
-): CSSVarSymbol[] {
-    const cssVars: CSSVarSymbol[] = [];
-    const cssVarsByComma = atRule.params.split(',');
-    const cssVarsBySpacing = atRule.params
-        .trim()
-        .split(/\s+/g)
-        .filter((s) => s !== ',');
-
-    if (cssVarsBySpacing.length > cssVarsByComma.length) {
-        diagnostics.warn(atRule, processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params), {
-            word: atRule.params,
-        });
-        return cssVars;
-    }
-
-    for (const entry of cssVarsByComma) {
-        const cssVar = entry.trim();
-
-        if (isCSSVarProp(cssVar)) {
-            cssVars.push({
-                _kind: 'cssVar',
-                name: cssVar,
-                global: true,
-            });
-        } else {
-            diagnostics.warn(atRule, processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
-                word: cssVar,
-            });
-        }
-    }
-
-    return cssVars;
 }
 
 export function validateScopingSelector(
