@@ -356,12 +356,7 @@ export class StylableProcessor {
                 }
                 case 'property': {
                     this.addCSSVarDefinition(atRule);
-
-                    const { remove } = validateAtProperty(atRule, this.diagnostics);
-
-                    if (remove) {
-                        toRemove.push(atRule);
-                    }
+                    validateAtProperty(atRule, this.diagnostics);
                     break;
                 }
                 case 'st-global-custom-property': {

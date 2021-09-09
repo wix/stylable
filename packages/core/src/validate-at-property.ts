@@ -6,7 +6,6 @@ const UNIVERSAL_SYNTAX_DEFINITION = '*';
 
 interface AtPropertyValidationResponse {
     valid: boolean;
-    remove?: boolean;
 }
 
 export const atPropertyValidationWarnings = {
@@ -31,7 +30,6 @@ export function validateAtProperty(
     if (!atRule.nodes?.length) {
         return {
             valid: true,
-            remove: true,
         };
     }
 

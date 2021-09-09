@@ -199,7 +199,11 @@ export class StylableTransformer {
                     undefined
                 );
             } else if (name === 'property') {
-                atRule.params = cssVarsMapping[atRule.params] ?? atRule.params;
+                if (atRule.nodes?.length) {
+                    atRule.params = cssVarsMapping[atRule.params] ?? atRule.params;
+                } else {
+                    atRule.remove();
+                }
             }
         });
 
