@@ -201,7 +201,6 @@ export { DiagnosticsMode, EmitDiagnosticsContext, emitDiagnostics } from './repo
 export { visitMetaCSSDependenciesBFS } from './visit-meta-css-dependencies';
 export { murmurhash3_32_gc } from './murmurhash';
 export { TimedCacheOptions, timedCache } from './timed-cache';
-export { atPropertyValidationWarnings } from './validate-at-property';
 import {
     booleanStateDelimiter,
     createBooleanStateClassName,

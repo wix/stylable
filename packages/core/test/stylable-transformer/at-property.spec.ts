@@ -1,7 +1,8 @@
-import { processorWarnings, atPropertyValidationWarnings } from '@stylable/core';
+import { processorWarnings } from '@stylable/core';
 import { expectWarningsFromTransform, generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
+import { atPropertyValidationWarnings } from '@stylable/core/dist/validate-at-property';
 
 describe('@property support', () => {
     it('should transform @property definition', () => {
@@ -40,6 +41,39 @@ describe('@property support', () => {
 
         expect(prop1.params).to.equal('--global');
         expect(prop2.params).to.equal('--entry-radius');
+    });
+
+    it('should remove at property when used without a body', () => {
+        const config = {
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                    @property --x {
+                        syntax: '<color>';
+                        inherits: false;
+                        initial-value: #c0ffee;
+                    }
+                    
+                    @property --y;
+                    `,
+                },
+            },
+        };
+
+        const result = expectWarningsFromTransform(config, []);
+
+        const { nodes } = result.meta.outputAst!;
+        const atProperty = nodes[0] as postcss.AtRule;
+
+        expect(nodes).to.have.length(1);
+        expect(atProperty.params).to.eql('--entry-x');
+        expect(atProperty.nodes.length).to.be.greaterThan(0);
+        expect(result.exports.vars).to.eql({
+            x: '--entry-x',
+            y: '--entry-y',
+        });
     });
 
     it('should detect and export @property definition', () => {
@@ -101,39 +135,6 @@ describe('@property support', () => {
     });
 
     describe('validation', () => {
-        it('should remove at property when used without a body', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        @property --x {
-                            syntax: '<color>';
-                            inherits: false;
-                            initial-value: #c0ffee;
-                        }
-                        
-                        @property --y;
-                        `,
-                    },
-                },
-            };
-
-            const result = expectWarningsFromTransform(config, []);
-
-            const declarations = result.meta.outputAst!.nodes;
-            const atProperty = declarations[0] as postcss.AtRule;
-
-            expect(declarations).to.have.length(1);
-            expect(atProperty.params).to.eql('--entry-x');
-            expect(atProperty.nodes.length).to.be.greaterThan(0);
-            expect(result.exports.vars).to.eql({
-                x: '--entry-x',
-                y: '--entry-y',
-            });
-        });
-
         it('should emit warning when used without "syntax" descriptor', () => {
             const config = {
                 entry: `/entry.st.css`,
