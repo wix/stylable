@@ -45,6 +45,7 @@ describe('build stand alone', () => {
             log,
             moduleFormats: ['cjs'],
             outputSources: true,
+            diagnosticsMode: 'strict',
         });
 
         [
@@ -102,6 +103,7 @@ describe('build stand alone', () => {
             moduleFormats: ['cjs'],
             outputSources: true,
             useNamespaceReference: true,
+            diagnosticsMode: 'strict',
         });
 
         [
@@ -126,6 +128,7 @@ describe('build stand alone', () => {
             outDir: 'cjs2',
             log,
             moduleFormats: ['cjs'],
+            diagnosticsMode: 'strict',
         });
 
         // check two builds using sourceNamespace are identical
@@ -161,6 +164,7 @@ describe('build stand alone', () => {
             rootDir: '/',
             log,
             moduleFormats: ['cjs'],
+            diagnosticsMode: 'strict',
         });
         const messages = diagnosticsMessages.get('/comp.st.css')!;
 
@@ -199,6 +203,7 @@ describe('build stand alone', () => {
             moduleFormats: ['cjs'],
             outputCSS: true,
             outputCSSNameTemplate: '[filename].global.css',
+            diagnosticsMode: 'strict',
         });
 
         const builtFile = fs.readFileSync('/dist/comp.global.css', 'utf8');
@@ -237,6 +242,7 @@ describe('build stand alone', () => {
             moduleFormats: ['cjs'],
             outputCSS: true,
             outputCSSNameTemplate: '[filename].global.css',
+            diagnosticsMode: 'strict',
         });
 
         const builtFile = fs.readFileSync('/dist/comp.global.css', 'utf8');
@@ -267,6 +273,7 @@ describe('build stand alone', () => {
             outputCSS: true,
             injectCSSRequest: true,
             outputCSSNameTemplate: '[filename].global.css',
+            diagnosticsMode: 'strict',
         });
 
         expect(fs.readFileSync('/dist/comp.st.css.js', 'utf8')).contains(
@@ -295,6 +302,7 @@ describe('build stand alone', () => {
             log,
             dts: true,
             dtsSourceMap: false,
+            diagnosticsMode: 'strict',
         });
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
@@ -330,6 +338,7 @@ describe('build stand alone', () => {
             log,
             dts: true,
             dtsSourceMap: false,
+            diagnosticsMode: 'strict',
         });
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
@@ -379,6 +388,7 @@ describe('build stand alone', () => {
             log,
             dts: true,
             dtsSourceMap: true,
+            diagnosticsMode: 'strict',
         });
 
         ['/main.st.css', '/main.st.css.d.ts', '/main.st.css.d.ts.map'].forEach((p) => {

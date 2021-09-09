@@ -18,7 +18,7 @@ export function reportDiagnostics(diagnosticsMessages: DiagnosticMessages) {
 }
 
 export function handleCliDiagnostics(
-    diagnostics: boolean,
+    diagnostics: boolean | undefined,
     diagnosticsMessages: DiagnosticMessages,
     diagnosticsMode: string
 ) {
