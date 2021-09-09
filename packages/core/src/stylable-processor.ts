@@ -357,11 +357,7 @@ export class StylableProcessor {
                 case 'property': {
                     this.addCSSVarDefinition(atRule);
 
-                    const { valid, message, remove } = validateAtProperty(atRule);
-
-                    if (!valid && message) {
-                        this.diagnostics.warn(atRule, message, { word: atRule.params });
-                    }
+                    const { remove } = validateAtProperty(atRule, this.diagnostics);
 
                     if (remove) {
                         toRemove.push(atRule);

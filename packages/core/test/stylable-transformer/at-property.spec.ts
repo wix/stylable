@@ -135,6 +135,54 @@ describe('@property support', () => {
     });
 
     describe('validation', () => {
+        it('should emit warning when used invalid descriptor', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-import [--y] from "./secondary.st.css";
+
+                        @property --x {
+                            syntax: '*';
+                            inherits: false;
+                            |@st-scope $.root$ {|
+
+                            }
+                        }
+                        
+                        `,
+                    },
+                    '/secondary.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @property --y {
+                            syntax: '*';
+                            inherits: false;
+                            |$.my-class$ {|
+                                color: red;
+                            }
+                        }
+                        `,
+                    },
+                },
+            };
+
+            const result = expectWarningsFromTransform(config, [
+                {
+                    file: '/entry.st.css',
+                    message: atPropertyValidationWarnings.INVALID_DESCRIPTOR('atrule'),
+                },
+                {
+                    file: '/secondary.st.css',
+                    message: atPropertyValidationWarnings.INVALID_DESCRIPTOR('rule'),
+                },
+            ]);
+
+            expect(result.meta.outputAst!.nodes).to.have.length(1);
+        });
+
         it('should emit warning when used without "syntax" descriptor', () => {
             const config = {
                 entry: `/entry.st.css`,
