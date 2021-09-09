@@ -382,6 +382,7 @@ export class StylableProcessor {
                     }
 
                     toRemove.push(atRule);
+                    break;
                 }
             }
         });
