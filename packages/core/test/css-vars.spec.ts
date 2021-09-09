@@ -813,7 +813,7 @@ describe('css custom-properties (vars)', () => {
     });
 
     describe('diagnostics', () => {
-        it('global (unscoped) declarations (deprecated)', () => {
+        it('should report on "@st-global-custom-property" deprecation', () => {
             const config = {
                 entry: '/entry.st.css',
                 files: {
