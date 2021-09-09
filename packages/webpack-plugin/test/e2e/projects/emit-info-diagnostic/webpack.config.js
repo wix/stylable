@@ -8,14 +8,16 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({
-            diagnosticsMode: 'strict',
+            diagnosticsMode: 'strict', // to make sure that every diagnostic which is not "info" will be fatal.
             stylableConfig: (config) => ({
                 ...config,
                 hooks: {
                     postProcessor: (result) => {
-                        // Todo: remove this and emit info diagnostic in a programmatic way.
-
-                        result.meta.diagnostics.info(result.meta.ast.root(), 'test info warning!');
+                        // Todo: replace implementation with permanent info diagnostic
+                        result.meta.diagnostics.info(
+                            result.meta.ast.root(),
+                            'test info diagnostic!'
+                        );
                         return result;
                     },
                 },

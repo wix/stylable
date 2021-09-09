@@ -1,8 +1,6 @@
 import path from 'path';
 import type * as postcss from 'postcss';
-import cssSelectorTokenizer from 'css-selector-tokenizer';
-
-const { parseValues, stringifyValues } = cssSelectorTokenizer;
+import { processDeclarationFunctions } from './stylable-utils';
 
 export interface UrlNode {
     type: 'url';
@@ -19,8 +17,17 @@ export type OnUrlCallback = (node: UrlNode) => void;
 
 export function collectAssets(ast: postcss.Root) {
     const assetDependencies: string[] = [];
-    const onUrl: OnUrlCallback = (node) => assetDependencies.push(node.url);
-    ast.walkDecls((decl) => processDeclarationUrls(decl, onUrl, false));
+    ast.walkDecls((decl) => {
+        processDeclarationFunctions(
+            decl,
+            (node) => {
+                if (node.type === 'url') {
+                    assetDependencies.push(node.url);
+                }
+            },
+            false
+        );
+    });
     return assetDependencies;
 }
 
@@ -60,45 +67,27 @@ export function makeAbsolute(resourcePath: string, rootContext: string, moduleCo
     return abs;
 }
 
-export function processDeclarationUrls(
-    decl: postcss.Declaration,
-    onUrl: OnUrlCallback,
-    transform: boolean
-) {
-    const ast = parseValues(decl.value);
-    ast.nodes.forEach((node) => {
-        node.nodes.forEach((node) => findUrls(node, onUrl));
-    });
-    if (transform) {
-        decl.value = stringifyValues(ast);
-    }
-}
-
-function findUrls(node: cssSelectorTokenizer.AnyValueNode, onUrl: OnUrlCallback) {
-    switch (node.type) {
-        case 'value':
-            node.nodes.forEach((child) => findUrls(child, onUrl));
-            break;
-        case 'nested-item':
-            node.nodes.forEach((child) => findUrls(child, onUrl));
-            break;
-        case 'url':
-            onUrl(node);
-            break;
-    }
-}
-
 export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPath: string) {
-    const onUrl = (node: UrlNode) => {
-        if (!node.url || !isAsset(node.url) || !node.url.startsWith('.')) {
-            return;
-        }
-        const url = path
-            .join(path.relative(path.dirname(targetPath), path.dirname(originPath)), node.url)
-            .replace(/\\/gm, '/');
-        node.url = assureRelativeUrlPrefix(url);
-    };
-    ast.walkDecls((decl) => processDeclarationUrls(decl, onUrl, true));
+    ast.walkDecls((decl) => {
+        processDeclarationFunctions(
+            decl,
+            (node) => {
+                if (node.type === 'url') {
+                    if (!node.url || !isAsset(node.url) || !node.url.startsWith('.')) {
+                        return;
+                    }
+                    const url = path
+                        .join(
+                            path.relative(path.dirname(targetPath), path.dirname(originPath)),
+                            node.url
+                        )
+                        .replace(/\\/gm, '/');
+                    node.url = assureRelativeUrlPrefix(url);
+                }
+            },
+            true
+        );
+    });
 }
 
 export function assureRelativeUrlPrefix(url: string) {

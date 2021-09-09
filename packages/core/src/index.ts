@@ -1,20 +1,151 @@
-export * from './parser';
-export * from './cached-process-file';
-export * from './stylable-processor';
-export * from './stylable-transformer';
-export * from './stylable-utils';
-export * from './stylable-resolver';
-export * from './diagnostics';
-export * from './memory-minimal-fs';
-export * from './stylable-value-parsers';
-export * from './create-infra-structure';
-export * from './stylable';
-export * from './types';
-export * from './stylable-mixins';
-export * from './stylable-assets';
-export * from './functions';
-export * from './custom-values';
-export * from './state-validators';
+export { CssParser, cssObjectToAst, cssParse, safeParse } from './parser';
+export {
+    CacheItem,
+    FileProcessor,
+    MinimalFS,
+    cachedProcessFile,
+    processFn,
+} from './cached-process-file';
+export {
+    CSSVarSymbol,
+    ClassSymbol,
+    ElementSymbol,
+    ImportSymbol,
+    Imported,
+    KeyframesSymbol,
+    RESERVED_ROOT_NAME,
+    RefedMixin,
+    SimpleSelector,
+    StylableDirectives,
+    StylableMeta,
+    StylableProcessor,
+    StylableSymbol,
+    VarSymbol,
+    createEmptyMeta,
+    process,
+    processNamespace,
+    processorWarnings,
+    validateScopingSelector,
+    parsePseudoImport,
+} from './stylable-processor';
+export {
+    KeyFrameWithNode,
+    ResolvedElement,
+    StylableExports,
+    StylableResults,
+    StylableTransformer,
+    TransformHooks,
+    TransformerOptions,
+    postProcessor,
+    replaceValueHook,
+    transformerWarnings,
+} from './stylable-transformer';
+export {
+    CUSTOM_SELECTOR_RE,
+    expandCustomSelectors,
+    findDeclaration,
+    generateScopedCSSVar,
+    getAlias,
+    getSourcePath,
+    isCSSVarProp,
+    isValidClassName,
+    isValidDeclaration,
+    mergeRules,
+    scopeCSSVar,
+    transformMatchesOnRule,
+    processDeclarationFunctions,
+} from './stylable-utils';
+export {
+    CSSResolve,
+    CachedModule,
+    JSResolve,
+    JsModule,
+    StylableResolver,
+    StylableResolverCache,
+    isInPath,
+    resolverWarnings,
+} from './stylable-resolver';
+export { Diagnostic, DiagnosticOptions, DiagnosticType, Diagnostics } from './diagnostics';
+export { File, MinimalFSSetup, createMinimalFS } from './memory-minimal-fs';
+export {
+    ArgValue,
+    ExtendsValue,
+    MappedStates,
+    MixinValue,
+    ReportWarning,
+    SBTypesParsers,
+    STYLABLE_NAMED_MATCHER,
+    STYLABLE_VALUE_MATCHER,
+    TypedClass,
+    animationPropRegExp,
+    getFormatterArgs,
+    getNamedArgs,
+    getStringValue,
+    globalValueRegExp,
+    groupValues,
+    listOptions,
+    mixinDeclRegExp,
+    paramMapping,
+    rootValueMapping,
+    stKeys,
+    stValues,
+    stValuesMap,
+    strategies,
+    validateAllowedNodesUntil,
+    valueMapping,
+    valueParserWarnings,
+} from './stylable-value-parsers';
+export { StylableInfrastructure, createInfrastructure } from './create-infra-structure';
+export { CreateProcessorOptions, Stylable, StylableConfig } from './stylable';
+export {
+    CSSObject,
+    IStylableClassNameOptimizer,
+    IStylableNamespaceOptimizer,
+    IStylableOptimizer,
+    ModuleResolver,
+    OptimizeConfig,
+    ParsedValue,
+    PartialObject,
+    StateArguments,
+    StateParsedValue,
+    StateTypeValidator,
+} from './types';
+export { appendMixin, appendMixins, mixinWarnings } from './stylable-mixins';
+export {
+    OnUrlCallback,
+    UrlNode,
+    assureRelativeUrlPrefix,
+    collectAssets,
+    fixRelativeUrls,
+    isAsset,
+    isExternal,
+    isUrl,
+    makeAbsolute,
+} from './stylable-assets';
+export {
+    ResolvedFormatter,
+    ValueFormatter,
+    evalDeclarationValue,
+    functionWarnings,
+    processDeclarationValue,
+    resolveArgumentsValue,
+} from './functions';
+export {
+    Box,
+    BoxedValueArray,
+    BoxedValueMap,
+    CustomValueExtension,
+    CustomValueStrategy,
+    JSValueExtension,
+    box,
+    createCustomValue,
+    getBoxValue,
+    isCustomValue,
+    resolveCustomValues,
+    stTypes,
+    unbox,
+} from './custom-values';
+export { StateParamType, StateResult, SubValidator, systemValidators } from './state-validators';
 export {
     isCssNativeFunction,
     nativeFunctions,
@@ -23,16 +154,40 @@ export {
     nativePseudoElements,
     reservedKeyFrames,
 } from './native-reserved-lists';
-export * from './resolve-namespace-factories';
-export * from './module-resolver';
-export * from './report-diagnostic';
-export * from './visit-meta-css-dependencies';
-export * from './murmurhash';
-export * from './timed-cache';
-export { getRuleScopeSelector } from './helpers/rule';
+export { noCollisionNamespace, packageNamespaceFactory } from './resolve-namespace-factories';
+export { createDefaultResolver } from './module-resolver';
+export { DiagnosticsMode, EmitDiagnosticsContext, emitDiagnostics } from './report-diagnostic';
+export { visitMetaCSSDependenciesBFS } from './visit-meta-css-dependencies';
+export { murmurhash3_32_gc } from './murmurhash';
+export { TimedCacheOptions, timedCache } from './timed-cache';
 
-import * as pseudoStates from './pseudo-states';
-export { pseudoStates };
+import {
+    booleanStateDelimiter,
+    createBooleanStateClassName,
+    createStateWithParamClassName,
+    processPseudoStates,
+    resolveStateParam,
+    setStateToNode,
+    stateErrors,
+    stateMiddleDelimiter,
+    stateWithParamDelimiter,
+    validateStateArgument,
+    validateStateDefinition,
+} from './pseudo-states';
+export const pseudoStates = {
+    booleanStateDelimiter,
+    createBooleanStateClassName,
+    createStateWithParamClassName,
+    processPseudoStates,
+    resolveStateParam,
+    setStateToNode,
+    stateErrors,
+    stateMiddleDelimiter,
+    stateWithParamDelimiter,
+    validateStateArgument,
+    validateStateDefinition,
+};
+export { getRuleScopeSelector } from './helpers/rule';
 
 // *** deprecated ***
 

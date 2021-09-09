@@ -1,1 +1,1 @@
-export * from './st-border';
+export { stBorder } from './st-border';
