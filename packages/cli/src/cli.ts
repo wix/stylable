@@ -1,56 +1,44 @@
 #!/usr/bin/env node
-import yargs from 'yargs';
-import { nodeFs } from '@file-services/node';
-import { Stylable } from '@stylable/core';
 import { build } from './build';
-import { createLogger } from './logger';
+import { resolveCliOptions, resolveDefaultOptions } from './options';
+import { projectConfig } from './project-config';
 import { handleCliDiagnostics } from './report-diagnostics';
-import { projectConfig, Options } from './project-config';
-
-const { join, resolve } = nodeFs;
+import yargs from 'yargs';
 
 const argv = yargs
     .usage('$0 [options]')
     .option('rootDir', {
         type: 'string',
         description: 'root directory of project',
-        default: process.cwd(),
         defaultDescription: 'current working directory',
     })
     .option('srcDir', {
         type: 'string',
         description: 'source directory relative to root',
-        default: '.',
     })
     .option('outDir', {
         type: 'string',
         description: 'target directory relative to root',
-        default: '.',
     })
     .option('esm', {
         type: 'boolean',
         description: 'output esm module (.mjs)',
-        default: false,
     })
     .option('cjs', {
         type: 'boolean',
         description: 'output commonjs module (.js)',
-        default: true,
     })
     .option('css', {
         type: 'boolean',
         description: 'output transpiled css (.css)',
-        default: false,
     })
     .option('stcss', {
         type: 'boolean',
         description: 'output stylable sources (.st.css)',
-        default: false,
     })
     .option('dts', {
         type: 'boolean',
         description: 'output stylable definition files for sources (.st.css.d.ts)',
-        default: false,
     })
     .option('dtsSourceMap', {
         type: 'boolean',
@@ -62,7 +50,6 @@ const argv = yargs
         type: 'boolean',
         description:
             'mark output .st.css files in outDir (cjs, esm) with the relative path to the matching output source file to use for its namespace',
-        default: false,
         alias: 'unsr',
     })
     .option('namespaceResolver', {
@@ -73,30 +60,25 @@ const argv = yargs
     .option('injectCSSRequest', {
         type: 'boolean',
         description: 'add a static import for the generated css in the js module output',
-        default: false,
         alias: 'icr',
     })
     .option('cssFilename', {
         type: 'string',
         description: 'pattern of the generated css file',
-        default: '[filename].css',
     })
     .option('cssInJs', {
         type: 'boolean',
         description: 'output transpiled css into the js module',
-        default: false,
     })
     .option('optimize', {
         type: 'boolean',
         description: 'removes: empty nodes, stylable directives, comments',
         alias: 'o',
-        default: false,
     })
     .option('minify', {
         type: 'boolean',
         description: 'minify generated css',
         alias: 'm',
-        default: false,
     })
     .option('indexFile', {
         type: 'string',
@@ -105,7 +87,6 @@ const argv = yargs
     .option('manifest', {
         type: 'boolean',
         description: 'should output manifest file',
-        default: false,
     })
     .option('manifestFilepath', {
         type: 'string',
@@ -119,7 +100,6 @@ const argv = yargs
     .option('ext', {
         type: 'string',
         description: 'extension of stylable css files',
-        default: '.st.css',
     })
     .option('require', {
         type: 'array',
@@ -130,19 +110,16 @@ const argv = yargs
     .option('log', {
         type: 'boolean',
         description: 'verbose log',
-        default: false,
     })
     .option('diagnostics', {
         type: 'boolean',
         description: 'print verbose diagnostics',
-        default: true,
     })
     .option('diagnosticsMode', {
         alias: 'dm',
         type: 'string',
         description:
             'determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions',
-        default: 'strict',
         choices: ['strict', 'loose'],
     })
     .option('watch', {
@@ -158,19 +135,20 @@ const argv = yargs
     .wrap(yargs.terminalWidth())
     .parseSync();
 
-const log = createLogger('[Stylable]', argv.log);
-
-log('[CLI Arguments]', argv);
-
 async function main() {
-    const { watch, require: requires } = argv;
-    const { options } = projectConfig(resolveDefaultOptions());
-    const { dts, dtsSourceMap, diagnostics, diagnosticsMode } = options;
+    const defaultOptions = resolveDefaultOptions();
+    const {
+        options: cliOptions,
+        cli: { requires, watch },
+    } = resolveCliOptions(argv, defaultOptions);
+
+    const { options } = projectConfig(defaultOptions, cliOptions);
+    const { dts, dtsSourceMap, diagnostics, diagnosticsMode, log } = options;
 
     log('[Options]', options);
 
     if (!dts && dtsSourceMap) {
-        throw new Error(`--dtsSourceMap requires turning on --dts`);
+        throw new Error(`"dtsSourceMap" requires turning on "dts"`);
     }
     // execute all require hooks before running the CLI build
     for (const request of requires) {
@@ -184,56 +162,6 @@ async function main() {
     if (!watch) {
         handleCliDiagnostics(diagnostics, diagnosticsMessages, diagnosticsMode);
     }
-}
-
-function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
-    const formats: Array<'esm' | 'cjs'> = [];
-    if (esm) {
-        formats.push('esm');
-    }
-    if (cjs) {
-        formats.push('cjs');
-    }
-    return formats;
-}
-
-function resolveDefaultOptions(): Options {
-    return {
-        outDir: argv.outDir,
-        srcDir: argv.srcDir,
-        rootDir: argv.rootDir,
-        extension: argv.ext,
-        indexFile: argv.indexFile,
-        moduleFormats: getModuleFormats({ esm: argv.esm, cjs: argv.cjs }),
-        dts: argv.dts,
-        dtsSourceMap: argv.dtsSourceMap,
-        injectCSSRequest: argv.injectCSSRequest,
-        optimize: argv.optimize,
-        minify: argv.minify,
-        manifest: argv.manifest
-            ? join(argv.rootDir, argv.outDir, argv.manifestFilepath)
-            : undefined,
-        useNamespaceReference: argv.useNamespaceReference,
-        diagnostics: argv.diagnostics,
-        fs: nodeFs,
-        log,
-        generatorPath:
-            argv.customGenerator !== undefined
-                ? resolve(argv.customGenerator)
-                : argv.customGenerator,
-        outputCSS: argv.css,
-        includeCSSInJS: argv.cssInJs,
-        outputSources: argv.stcss,
-        outputCSSNameTemplate: argv.cssFilename,
-        diagnosticsMode: argv.diagnosticsMode as Options['diagnosticsMode'],
-        stylable: Stylable.create({
-            fileSystem: nodeFs,
-            requireModule: require,
-            projectRoot: argv.rootDir,
-            resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
-            resolverCache: new Map(),
-        }),
-    };
 }
 
 main().catch((e) => {

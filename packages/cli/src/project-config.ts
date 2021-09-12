@@ -1,8 +1,8 @@
 import type { BuildOptions } from './build';
 import { loadStylableConfig } from '@stylable/build-tools';
 
-export type Options = Omit<BuildOptions, 'watch'>;
-export type PartialOptions = Partial<Options>;
+export type ConfigOptions = Omit<BuildOptions, 'watch'>;
+export type PartialConfigOptions = Partial<ConfigOptions>;
 
 /**
  * User's configuration method
@@ -17,15 +17,15 @@ export type Configuration<T extends string> = () => SingleProjectConfig | MultiP
 
 export interface STCConfig<T extends string> {
     presets: MultiProjectsConfig<T>['presets'];
-    options: Options;
+    options: ConfigOptions;
     projects: MultiProjectsConfig<T>['projects'];
 }
 
 interface SingleProjectConfig {
-    options: PartialOptions;
+    options: PartialConfigOptions;
 }
 interface MultiProjectsConfig<T extends string> {
-    presets?: Record<T, PartialOptions>;
+    presets?: Record<T, PartialConfigOptions>;
     options?: SingleProjectConfig['options'];
     projects:
         | Array<string>
@@ -33,24 +33,22 @@ interface MultiProjectsConfig<T extends string> {
               string,
               | Array<T>
               | T
-              | PartialOptions
-              | PartialOptions[]
-              | { preset?: T; options?: PartialOptions; prepend?: boolean }
+              | PartialConfigOptions
+              | PartialConfigOptions[]
+              | { preset?: T; options?: PartialConfigOptions; prepend?: boolean }
           >;
 }
 
 export function projectConfig<T extends string>(
-    defaults: Options
+    defaultOptions: ConfigOptions,
+    cliOptions: PartialConfigOptions
 ): { options: STCConfig<T>['options'] } {
-    let options: Options = { ...defaults };
-    const optionsFromFile = resolveConfigFile(defaults.rootDir);
-
-    if (optionsFromFile?.options) {
-        options = {
-            ...options,
-            ...optionsFromFile.options,
-        };
-    }
+    const optionsFromFile = resolveConfigFile(cliOptions.rootDir || defaultOptions.rootDir);
+    const options: ConfigOptions = {
+        ...defaultOptions,
+        ...(optionsFromFile?.options || {}),
+        ...cliOptions,
+    };
 
     return {
         options,

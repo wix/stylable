@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
+import { join } from 'path';
 import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
 
 describe('Stylable Cli Config', function () {
@@ -37,19 +38,19 @@ describe('Stylable Cli Config', function () {
             ]);
         });
 
-        it('should override cli arguments from config file', () => {
+        it('should override config file from cli arguments', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{color:red}`,
                 'stylable.config.js': `
                   exports.stcConfig = () => ({ options: { 
                     rootDir: '${tempDir.path}',
-                    outDir: './dist',
+                    outDir: './out',
                    } })
                 `,
             });
 
-            runCliSync(['--outDir', './out'], tempDir.path);
+            runCliSync(['--outDir', './dist'], tempDir.path);
 
             const dirContent = loadDirSync(tempDir.path);
             expect(Object.keys(dirContent)).to.eql([
@@ -60,26 +61,27 @@ describe('Stylable Cli Config', function () {
             ]);
         });
 
-        it('should get defaults from cli', () => {
+        it('should get config file from specified root', () => {
             populateDirectorySync(tempDir.path, {
-                'package.json': `{"name": "test", "version": "0.0.0"}`,
-                'style.st.css': `.root{color:red}`,
-                'stylable.config.js': `
-                  exports.stcConfig = (defaults) => ({ options: { 
-                    rootDir: '${tempDir.path}',
-                    outDir: defaults.outDir + '-dir',
-                   } })
+                'my-project': {
+                    'package.json': `{"name": "test", "version": "0.0.0"}`,
+                    'style.st.css': `.root{color:red}`,
+                    'stylable.config.js': `
+                        exports.stcConfig = () => ({ options: { 
+                            outDir: './dist',
+                        } })
                 `,
+                },
             });
 
-            runCliSync(['--outDir', './dist'], tempDir.path);
+            runCliSync(['--rootDir', join(tempDir.path, 'my-project')], tempDir.path);
 
             const dirContent = loadDirSync(tempDir.path);
             expect(Object.keys(dirContent)).to.eql([
-                'dist-dir/style.st.css.js',
-                'package.json',
-                'stylable.config.js',
-                'style.st.css',
+                'my-project/dist/style.st.css.js',
+                'my-project/package.json',
+                'my-project/stylable.config.js',
+                'my-project/style.st.css',
             ]);
         });
     });
