@@ -135,7 +135,7 @@ describe('@property support', () => {
     });
 
     describe('validation', () => {
-        it('should emit warning when used invalid descriptor', () => {
+        it('should emit warning when used invalid descriptor type', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
@@ -172,11 +172,38 @@ describe('@property support', () => {
             const result = expectWarningsFromTransform(config, [
                 {
                     file: '/entry.st.css',
-                    message: atPropertyValidationWarnings.INVALID_DESCRIPTOR('atrule'),
+                    message: atPropertyValidationWarnings.INVALID_DESCRIPTOR_TYPE('atrule'),
                 },
                 {
                     file: '/secondary.st.css',
-                    message: atPropertyValidationWarnings.INVALID_DESCRIPTOR('rule'),
+                    message: atPropertyValidationWarnings.INVALID_DESCRIPTOR_TYPE('rule'),
+                },
+            ]);
+
+            expect(result.meta.outputAst!.nodes).to.have.length(1);
+        });
+
+        it('should emit warning when used invalid descriptor name', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @property --x {
+                            syntax: '*';
+                            inherits: false;
+                            |$initialValue$: red;|
+                        }
+                        `,
+                    },
+                },
+            };
+
+            const result = expectWarningsFromTransform(config, [
+                {
+                    file: '/entry.st.css',
+                    message: atPropertyValidationWarnings.INVALID_DESCRIPTOR_NAME('initialValue'),
                 },
             ]);
 
