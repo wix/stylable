@@ -312,7 +312,7 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
 
-        it('should fail to build when "--dtsSourceMap" is on but "--dts" is off', () => {
+        it.only('should fail to build when "--dtsSourceMap" is on but "--dts" is off', () => {
             const srcContent = '.root{color:red}';
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -333,7 +333,7 @@ describe('Stylable Cli', function () {
 
             expect(status).to.equal(1);
             expect(stdout).to.equal('');
-            expect(stderr).to.include('--dtsSourceMap requires turning on --dts');
+            expect(stderr).to.include('"dtsSourceMap" requires turning on "dts"');
         });
     });
 });
