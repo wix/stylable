@@ -16,7 +16,7 @@ export interface CliArguments {
     css: boolean | undefined;
     stcss: boolean | undefined;
     dts: boolean | undefined;
-    dtsSourceMap: boolean | undefined | undefined;
+    dtsSourceMap: boolean | undefined;
     useNamespaceReference: boolean | undefined;
     namespaceResolver: string;
     injectCSSRequest: boolean | undefined;
@@ -24,10 +24,10 @@ export interface CliArguments {
     cssInJs: boolean | undefined;
     optimize: boolean | undefined;
     minify: boolean | undefined;
-    indexFile: string | undefined | undefined;
+    indexFile: string | undefined;
     manifest: boolean | undefined;
     manifestFilepath: string;
-    customGenerator: string | undefined | undefined;
+    customGenerator: string | undefined;
     ext: string | undefined;
     require: string[];
     log: boolean | undefined;
