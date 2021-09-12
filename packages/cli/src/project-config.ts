@@ -7,7 +7,7 @@ export type PartialOptions = Partial<Options>;
 /**
  * User's configuration method
  * @example
- * const stcConfig = (defaults) => ({
+ * exports.stcConfig = (defaults) => ({
  *  options: {
  *      ...defaults,
  *      rootDir: './src'
