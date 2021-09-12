@@ -7,16 +7,13 @@ export type PartialOptions = Partial<Options>;
 /**
  * User's configuration method
  * @example
- * exports.stcConfig = (defaults) => ({
+ * exports.stcConfig = () => ({
  *  options: {
- *      ...defaults,
  *      rootDir: './src'
  *  }
  * })
  */
-export type Configuration<T extends string> = (
-    defaults: Options
-) => SingleProjectConfig | MultiProjectsConfig<T>;
+export type Configuration<T extends string> = () => SingleProjectConfig | MultiProjectsConfig<T>;
 
 export interface STCConfig<T extends string> {
     presets: MultiProjectsConfig<T>['presets'];
@@ -46,7 +43,7 @@ export function projectConfig<T extends string>(
     defaults: Options
 ): { options: STCConfig<T>['options'] } {
     let options: Options = { ...defaults };
-    const optionsFromFile = findProjectConfig(process.cwd(), defaults);
+    const optionsFromFile = resolveConfigFile(defaults.rootDir);
 
     if (optionsFromFile?.options) {
         options = {
@@ -60,9 +57,9 @@ export function projectConfig<T extends string>(
     };
 }
 
-export function findProjectConfig(context: string, defaults: Options) {
+export function resolveConfigFile(context: string) {
     return loadStylableConfig(context, (config) => {
-        return isSTCConfig(config) ? config.stcConfig(defaults) : undefined;
+        return isSTCConfig(config) ? config.stcConfig() : undefined;
     });
 }
 
