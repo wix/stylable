@@ -13,36 +13,20 @@ export type PartialConfigOptions = Partial<ConfigOptions>;
  *  }
  * })
  */
-export type Configuration<T extends string> = () => SingleProjectConfig | MultiProjectsConfig<T>;
+export type Configuration = () => SingleProjectConfig;
 
-export interface STCConfig<T extends string> {
-    presets: MultiProjectsConfig<T>['presets'];
+export interface STCConfig {
     options: ConfigOptions;
-    projects: MultiProjectsConfig<T>['projects'];
 }
 
 interface SingleProjectConfig {
     options: PartialConfigOptions;
 }
-interface MultiProjectsConfig<T extends string> {
-    presets?: Record<T, PartialConfigOptions>;
-    options?: SingleProjectConfig['options'];
-    projects:
-        | Array<string>
-        | Record<
-              string,
-              | Array<T>
-              | T
-              | PartialConfigOptions
-              | PartialConfigOptions[]
-              | { preset?: T; options?: PartialConfigOptions; prepend?: boolean }
-          >;
-}
 
-export function projectConfig<T extends string>(
+export function projectConfig(
     defaultOptions: ConfigOptions,
     cliOptions: PartialConfigOptions
-): { options: STCConfig<T>['options'] } {
+): { options: STCConfig['options'] } {
     const optionsFromFile = resolveConfigFile(cliOptions.rootDir || defaultOptions.rootDir);
     const options: ConfigOptions = {
         ...defaultOptions,
@@ -61,6 +45,6 @@ export function resolveConfigFile(context: string) {
     });
 }
 
-function isSTCConfig<T extends string>(config: any): config is { stcConfig: Configuration<T> } {
+function isSTCConfig(config: any): config is { stcConfig: Configuration } {
     return typeof config === 'object' && typeof config.stcConfig === 'function';
 }
