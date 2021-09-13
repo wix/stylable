@@ -128,6 +128,44 @@ describe('Javascript Mixins', () => {
         expect(rule.nodes[1].toString()).to.equal('color: red');
     });
 
+    it('exported js mixin via st.css file', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./index.st.css";
+                        -st-named: mixin;
+                    }
+                    .container {
+                        -st-mixin: mixin;
+                    }
+                `,
+                },
+                '/index.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./mixin";
+                        -st-default: mixin;
+                    }
+                `,
+                },
+                '/mixin.js': {
+                    content: `
+                    module.exports = function() {
+                        return {
+                            color: "red"
+                        }
+                    }
+                `,
+                },
+            },
+        });
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[0].toString()).to.equal('color: red');
+    });
+
     it('simple mixin with element', () => {
         const result = generateStylableRoot({
             entry: `/style.st.css`,
