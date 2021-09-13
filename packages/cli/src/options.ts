@@ -1,4 +1,3 @@
-import type { BuildOptions } from './build';
 import type { ConfigOptions, PartialConfigOptions } from './project-config';
 import type { Arguments } from 'yargs';
 import { nodeFs } from '@file-services/node';
