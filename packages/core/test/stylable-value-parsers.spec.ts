@@ -4,17 +4,25 @@ import { SBTypesParsers, valueMapping, Diagnostics } from '@stylable/core';
 import postcssValueParser from 'postcss-value-parser';
 
 const parseMixin = (mixinValue: string) => {
-    return SBTypesParsers[valueMapping.mixin](
+    const mix = SBTypesParsers[valueMapping.mixin](
         postcss.decl({ prop: '', value: mixinValue }),
         () => 'named'
     );
+    mix.forEach((m) => {
+        delete m.originDecl;
+    });
+    return mix;
 };
 
 const parsePartialMixin = (mixinValue: string) => {
-    return SBTypesParsers[valueMapping.partialMixin](
+    const mix = SBTypesParsers[valueMapping.partialMixin](
         postcss.decl({ prop: valueMapping.partialMixin, value: mixinValue }),
         () => 'named'
     );
+    mix.forEach((m) => {
+        delete m.originDecl;
+    });
+    return mix;
 };
 const parseNamedImport = (value: string) =>
     SBTypesParsers[valueMapping.named](value, postcss.decl(), new Diagnostics());
