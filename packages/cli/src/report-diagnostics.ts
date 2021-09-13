@@ -18,9 +18,9 @@ function report(diagnosticsMessages: DiagnosticMessages) {
 }
 
 export function reportDiagnostics(
-    diagnostics: boolean | undefined,
     diagnosticsMessages: DiagnosticMessages,
-    diagnosticsMode: string | undefined
+    diagnostics?: boolean,
+    diagnosticsMode?: string
 ) {
     if (!diagnosticsMessages.size) {
         return;

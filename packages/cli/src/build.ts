@@ -188,7 +188,7 @@ export async function build({
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
             // report build diagnostics
-            reportDiagnostics(diagnostics, diagnosticsMessages, diagnosticsMode);
+            reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
 
             const count = deletedFiles.size + affectedFiles.size;
             log(

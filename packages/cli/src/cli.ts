@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import type { BuildOptions } from './build';
 import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
@@ -141,7 +140,7 @@ const argv = yargs
         type: 'string',
         description:
             'determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions',
-        default: 'strict',
+        default: 'strict' as 'strict' | 'loose',
         choices: ['strict', 'loose'],
     })
     .option('watch', {
@@ -156,8 +155,6 @@ const argv = yargs
     .strict()
     .wrap(yargs.terminalWidth())
     .parseSync();
-
-const log = createLogger('[Stylable]', argv.log);
 
 const {
     outDir,
@@ -186,6 +183,8 @@ const {
     diagnostics,
     watch,
 } = argv;
+
+const log = createLogger('[Stylable]', argv.log);
 
 log('[Arguments]', argv);
 
@@ -232,7 +231,7 @@ async function main() {
         dtsSourceMap,
         watch,
         diagnostics,
-        diagnosticsMode: diagnosticsMode as BuildOptions['diagnosticsMode'],
+        diagnosticsMode,
     });
 }
 
