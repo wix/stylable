@@ -39,10 +39,7 @@ export interface CliArguments {
 export function resolveCliOptions(
     argv: Arguments<CliArguments>,
     defaults: ConfigOptions
-): {
-    options: PartialConfigOptions;
-    cli: Pick<BuildOptions, 'watch'> & { requires: string[] };
-} {
+): PartialConfigOptions {
     const log = createLogger('[Stylable]', argv.log ?? false);
     const rootDir = argv.rootDir ?? defaults.rootDir;
     const outDir = argv.outDir ?? defaults.outDir;
@@ -55,48 +52,42 @@ export function resolveCliOptions(
 
     log('[CLI Arguments]', argv);
 
-    return {
-        cli: {
-            requires: argv.require,
-            watch: argv.watch,
-        },
-        options: removeUndefined({
-            rootDir,
-            outDir: argv.outDir,
-            srcDir: argv.srcDir,
-            extension: argv.ext,
-            indexFile: argv.indexFile,
-            moduleFormats,
-            dts: argv.dts,
-            dtsSourceMap: argv.dtsSourceMap ?? argv.dts,
-            injectCSSRequest: argv.injectCSSRequest,
-            optimize: argv.optimize,
-            minify: argv.minify,
-            manifest: argv.manifest ? join(rootDir, outDir, argv.manifestFilepath) : undefined,
-            useNamespaceReference: argv.useNamespaceReference,
-            diagnostics: argv.diagnostics,
-            fs: nodeFs,
-            log,
-            generatorPath:
-                argv.customGenerator !== undefined
-                    ? resolve(argv.customGenerator)
-                    : argv.customGenerator,
-            outputCSS: argv.css,
-            includeCSSInJS: argv.cssInJs,
-            outputSources: argv.stcss,
-            outputCSSNameTemplate: argv.cssFilename,
-            diagnosticsMode: argv.diagnosticsMode as ConfigOptions['diagnosticsMode'],
-            stylable: argv.namespaceResolver
-                ? Stylable.create({
-                      fileSystem: nodeFs,
-                      requireModule: require,
-                      projectRoot: rootDir,
-                      resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
-                      resolverCache: new Map(),
-                  })
-                : undefined,
-        }),
-    };
+    return removeUndefined({
+        rootDir,
+        outDir: argv.outDir,
+        srcDir: argv.srcDir,
+        extension: argv.ext,
+        indexFile: argv.indexFile,
+        moduleFormats,
+        dts: argv.dts,
+        dtsSourceMap: argv.dtsSourceMap ?? argv.dts,
+        injectCSSRequest: argv.injectCSSRequest,
+        optimize: argv.optimize,
+        minify: argv.minify,
+        manifest: argv.manifest ? join(rootDir, outDir, argv.manifestFilepath) : undefined,
+        useNamespaceReference: argv.useNamespaceReference,
+        diagnostics: argv.diagnostics,
+        fs: nodeFs,
+        log,
+        generatorPath:
+            argv.customGenerator !== undefined
+                ? resolve(argv.customGenerator)
+                : argv.customGenerator,
+        outputCSS: argv.css,
+        includeCSSInJS: argv.cssInJs,
+        outputSources: argv.stcss,
+        outputCSSNameTemplate: argv.cssFilename,
+        diagnosticsMode: argv.diagnosticsMode as ConfigOptions['diagnosticsMode'],
+        stylable: argv.namespaceResolver
+            ? Stylable.create({
+                  fileSystem: nodeFs,
+                  requireModule: require,
+                  projectRoot: rootDir,
+                  resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
+                  resolverCache: new Map(),
+              })
+            : undefined,
+    });
 }
 
 export function resolveDefaultOptions(): ConfigOptions {

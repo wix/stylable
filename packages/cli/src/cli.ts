@@ -137,13 +137,11 @@ const argv = yargs
 
 async function main() {
     const defaultOptions = resolveDefaultOptions();
-    const {
-        options: cliOptions,
-        cli: { requires, watch },
-    } = resolveCliOptions(argv, defaultOptions);
+    const cliOptions = resolveCliOptions(argv, defaultOptions);
 
     const { options } = projectConfig(defaultOptions, cliOptions);
     const { dts, dtsSourceMap, diagnostics, diagnosticsMode, log } = options;
+    const { watch, require: requires } = argv;
 
     log('[Options]', options);
 
