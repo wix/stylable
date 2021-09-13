@@ -795,12 +795,17 @@ export class StylableProcessor {
              * This functionality is broken we don't know what strategy to choose here.
              * Should be fixed when we refactor to the new flow
              */
-            SBTypesParsers[decl.prop](decl, (type) => {
-                const symbol = this.meta.mappedSymbols[type];
-                return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
-                    ? 'args'
-                    : 'named';
-            }).forEach((mixin) => {
+            SBTypesParsers[decl.prop](
+                decl,
+                (type) => {
+                    const symbol = this.meta.mappedSymbols[type];
+                    return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
+                        ? 'args'
+                        : 'named';
+                },
+                this.diagnostics,
+                false
+            ).forEach((mixin) => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
                 if (
                     mixinRefSymbol &&

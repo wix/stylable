@@ -406,7 +406,7 @@ function reParseMixinNamedArgs(
     const options =
         mix.mixin.valueNode?.type === 'function'
             ? strategies.named(mix.mixin.valueNode, (message, options) => {
-                  diagnostics.warn(rule, message, options);
+                  diagnostics.warn(mix.mixin.originDecl || rule, message, options);
               })
             : (mix.mixin.options as Record<string, string>) || {};
 
@@ -427,7 +427,7 @@ function reParseMixinArgs(
     const options =
         mix.mixin.valueNode?.type === 'function'
             ? strategies.args(mix.mixin.valueNode, (message, options) => {
-                  diagnostics.warn(rule, message, options);
+                  diagnostics.warn(mix.mixin.originDecl || rule, message, options);
               })
             : Array.isArray(mix.mixin.options)
             ? (mix.mixin.options as { value: string }[])
