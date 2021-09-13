@@ -41,6 +41,7 @@ export interface MixinValue {
     options: Array<{ value: string }> | Record<string, string>;
     partial?: boolean;
     valueNode?: FunctionNode | WordNode;
+    originDecl?: postcss.Declaration;
 }
 
 export interface ArgValue {
@@ -153,13 +154,16 @@ export const SBTypesParsers = {
     '-st-mixin'(
         mixinNode: postcss.Declaration,
         strategy: (type: string) => 'named' | 'args',
-        diagnostics?: Diagnostics
+        diagnostics?: Diagnostics,
+        emitStrategyDiagnostics = true
     ) {
         const ast = postcssValueParser(mixinNode.value);
         const mixins: Array<MixinValue> = [];
 
         function reportWarning(message: string, options?: { word: string }) {
-            diagnostics?.warn(mixinNode, message, options);
+            if (emitStrategyDiagnostics) {
+                diagnostics?.warn(mixinNode, message, options);
+            }
         }
 
         ast.nodes.forEach((node) => {
@@ -168,12 +172,14 @@ export const SBTypesParsers = {
                     type: node.value,
                     options: strategies[strategy(node.value)](node, reportWarning),
                     valueNode: node,
+                    originDecl: mixinNode,
                 });
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
                     options: strategy(node.value) === 'named' ? {} : [],
                     valueNode: node,
+                    originDecl: mixinNode,
                 });
             } else if (node.type === 'string') {
                 diagnostics?.error(mixinNode, valueParserWarnings.VALUE_CANNOT_BE_STRING(), {
