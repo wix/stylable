@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
+import type { BuildOptions } from './build';
 import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
 import { createLogger } from './logger';
-import { handleCliDiagnostics } from './report-diagnostics';
 
 const { join, resolve } = nodeFs;
 
@@ -208,7 +208,7 @@ async function main() {
         resolverCache: new Map(),
     });
 
-    const { diagnosticsMessages } = await build({
+    await build({
         extension: ext,
         fs: nodeFs,
         stylable,
@@ -232,11 +232,8 @@ async function main() {
         dtsSourceMap,
         watch,
         diagnostics,
+        diagnosticsMode: diagnosticsMode as BuildOptions['diagnosticsMode'],
     });
-
-    if (!watch) {
-        handleCliDiagnostics(diagnostics, diagnosticsMessages, diagnosticsMode);
-    }
 }
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
