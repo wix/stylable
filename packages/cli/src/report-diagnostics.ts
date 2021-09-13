@@ -20,7 +20,7 @@ function report(diagnosticsMessages: DiagnosticMessages) {
 export function reportDiagnostics(
     diagnostics: boolean | undefined,
     diagnosticsMessages: DiagnosticMessages,
-    diagnosticsMode: string
+    diagnosticsMode: string | undefined
 ) {
     if (!diagnosticsMessages.size) {
         return;

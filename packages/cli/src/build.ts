@@ -62,7 +62,7 @@ export interface BuildOptions {
     /** should emit diagnostics */
     diagnostics?: boolean;
     /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
-    diagnosticsMode: 'strict' | 'loose';
+    diagnosticsMode?: 'strict' | 'loose';
 }
 
 export async function build({
