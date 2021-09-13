@@ -2,6 +2,8 @@ import * as postcss from 'postcss';
 import postcssValueParser, {
     ParsedValue as PostCSSParsedValue,
     FunctionNode,
+    WordNode,
+    Node as ValueNode,
 } from 'postcss-value-parser';
 import { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
@@ -38,6 +40,7 @@ export interface MixinValue {
     type: string;
     options: Array<{ value: string }> | Record<string, string>;
     partial?: boolean;
+    valueNode?: FunctionNode | WordNode;
 }
 
 export interface ArgValue {
@@ -156,25 +159,24 @@ export const SBTypesParsers = {
         const mixins: Array<MixinValue> = [];
 
         function reportWarning(message: string, options?: { word: string }) {
-            if (diagnostics) {
-                diagnostics.warn(mixinNode, message, options);
-            }
+            diagnostics?.warn(mixinNode, message, options);
         }
 
-        ast.nodes.forEach((node: any) => {
-            const strat = strategy(node.value);
+        ast.nodes.forEach((node) => {
             if (node.type === 'function') {
                 mixins.push({
                     type: node.value,
-                    options: strategies[strat](node, reportWarning),
+                    options: strategies[strategy(node.value)](node, reportWarning),
+                    valueNode: node,
                 });
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
-                    options: strat === 'named' ? {} : [],
+                    options: strategy(node.value) === 'named' ? {} : [],
+                    valueNode: node,
                 });
-            } else if (node.type === 'string' && diagnostics) {
-                diagnostics.error(mixinNode, valueParserWarnings.VALUE_CANNOT_BE_STRING(), {
+            } else if (node.type === 'string') {
+                diagnostics?.error(mixinNode, valueParserWarnings.VALUE_CANNOT_BE_STRING(), {
                     word: mixinNode.value,
                 });
             }
@@ -323,9 +325,9 @@ export function getStringValue(nodes: ParsedValue | ParsedValue[]): string {
     });
 }
 
-export function groupValues(nodes: any[], divType = 'div') {
-    const grouped: any[] = [];
-    let current: any[] = [];
+export function groupValues(nodes: ValueNode[], divType = 'div') {
+    const grouped: ValueNode[][] = [];
+    let current: ValueNode[] = [];
 
     nodes.forEach((n: any) => {
         if (n.type === divType) {
