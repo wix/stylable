@@ -23,12 +23,12 @@ async function main() {
 
     const projects = projectsConfig(argv);
 
-    for (const contextDir in projects) {
-        const options = projects[contextDir];
+    for (const projectRoot in projects) {
+        const options = projects[projectRoot];
 
         const { dts, dtsSourceMap } = options;
 
-        log('[Project]', contextDir, options);
+        log('[Project]', projectRoot, options);
 
         if (!dts && dtsSourceMap) {
             throw new Error(`"dtsSourceMap" requires turning on "dts"`);
@@ -38,7 +38,7 @@ async function main() {
         const stylable = Stylable.create({
             fileSystem,
             requireModule: require,
-            projectRoot: contextDir,
+            projectRoot,
             resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
             resolverCache: new Map(),
         });
@@ -49,7 +49,7 @@ async function main() {
             stylable,
             log,
             fs: fileSystem,
-            rootDir: contextDir,
+            rootDir: projectRoot,
         });
     }
 }

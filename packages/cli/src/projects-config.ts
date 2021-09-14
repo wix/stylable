@@ -17,7 +17,7 @@ export type PartialConfigOptions = Partial<ConfigOptions>;
 export type Configuration = () => SingleProjectConfig;
 
 export interface STCConfig {
-    [contextDir: string]: ConfigOptions;
+    [projectRoot: string]: ConfigOptions;
 }
 
 interface SingleProjectConfig {
@@ -25,9 +25,9 @@ interface SingleProjectConfig {
 }
 
 export function projectsConfig(argv: CliArguments): STCConfig {
-    const contextDir = argv.rootDir;
+    const projectRoot = argv.rootDir;
     const defaultOptions = getDefaultOptions();
-    const optionsFromFile = resolveConfigFile(contextDir);
+    const optionsFromFile = resolveConfigFile(projectRoot);
     const cliOptions = resolveCliOptions(argv, defaultOptions);
 
     const topLevelOptions: ConfigOptions = {
@@ -37,7 +37,7 @@ export function projectsConfig(argv: CliArguments): STCConfig {
     };
 
     return {
-        [contextDir]: topLevelOptions,
+        [projectRoot]: topLevelOptions,
     };
 }
 
