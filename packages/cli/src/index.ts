@@ -1,6 +1,6 @@
 export { BuildOptions, build, messages } from './build';
 export { Generator, ReExports, reExportsAllSymbols } from './base-generator';
-export { Configuration, STCConfig, projectConfig } from './project-config';
+export { Configuration, STCConfig, projectsConfig } from './projects-config';
 export {
     DirectoryProcessService,
     DirectoryProcessServiceOptions,

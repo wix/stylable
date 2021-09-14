@@ -21,13 +21,12 @@ describe('Stylable Cli Config', function () {
                 'style.st.css': `.root{color:red}`,
                 'stylable.config.js': `
                   exports.stcConfig = () => ({ options: { 
-                    rootDir: '${tempDir.path}',
                     outDir: './dist',
                    } })
                 `,
             });
 
-            runCliSync([], tempDir.path);
+            runCliSync(['--rootDir', tempDir.path]);
 
             const dirContent = loadDirSync(tempDir.path);
             expect(Object.keys(dirContent)).to.eql([
@@ -44,13 +43,12 @@ describe('Stylable Cli Config', function () {
                 'style.st.css': `.root{color:red}`,
                 'stylable.config.js': `
                   exports.stcConfig = () => ({ options: { 
-                    rootDir: '${tempDir.path}',
                     outDir: './out',
                    } })
                 `,
             });
 
-            runCliSync(['--outDir', './dist'], tempDir.path);
+            runCliSync(['--rootDir', tempDir.path, '--outDir', './dist']);
 
             const dirContent = loadDirSync(tempDir.path);
             expect(Object.keys(dirContent)).to.eql([
@@ -74,7 +72,7 @@ describe('Stylable Cli Config', function () {
                 },
             });
 
-            runCliSync(['--rootDir', join(tempDir.path, 'my-project')], tempDir.path);
+            runCliSync(['--rootDir', join(tempDir.path, 'my-project')]);
 
             const dirContent = loadDirSync(tempDir.path);
             expect(Object.keys(dirContent)).to.eql([

@@ -64,9 +64,9 @@ export function runCli(cliArgs: string[] = [], cwd: string) {
     return spawn('node', [cliPath, ...cliArgs], { cwd });
 }
 
-export function runCliSync(cliArgs: string[] = [], cwd?: string) {
+export function runCliSync(cliArgs: string[] = []) {
     const cliPath = require.resolve('@stylable/cli/bin/stc.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8', cwd });
+    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 export function runFormatCliSync(cliArgs: string[] = []) {

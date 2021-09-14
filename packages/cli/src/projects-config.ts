@@ -1,7 +1,8 @@
 import type { BuildOptions } from './build';
 import { loadStylableConfig } from '@stylable/build-tools';
+import { CliArguments, resolveCliOptions, getDefaultOptions } from './resolve-options';
 
-export type ConfigOptions = Omit<BuildOptions, 'watch'>;
+export type ConfigOptions = Omit<BuildOptions, 'watch' | 'rootDir' | 'stylable' | 'log' | 'fs'>;
 export type PartialConfigOptions = Partial<ConfigOptions>;
 
 /**
@@ -16,26 +17,27 @@ export type PartialConfigOptions = Partial<ConfigOptions>;
 export type Configuration = () => SingleProjectConfig;
 
 export interface STCConfig {
-    options: ConfigOptions;
+    [contextDir: string]: ConfigOptions;
 }
 
 interface SingleProjectConfig {
     options: PartialConfigOptions;
 }
 
-export function projectConfig(
-    defaultOptions: ConfigOptions,
-    cliOptions: PartialConfigOptions
-): { options: STCConfig['options'] } {
-    const optionsFromFile = resolveConfigFile(cliOptions.rootDir || defaultOptions.rootDir);
-    const options: ConfigOptions = {
+export function projectsConfig(argv: CliArguments): STCConfig {
+    const contextDir = argv.rootDir;
+    const defaultOptions = getDefaultOptions();
+    const optionsFromFile = resolveConfigFile(contextDir);
+    const cliOptions = resolveCliOptions(argv, defaultOptions);
+
+    const topLevelOptions: ConfigOptions = {
         ...defaultOptions,
         ...(optionsFromFile?.options || {}),
         ...cliOptions,
     };
 
     return {
-        options,
+        [contextDir]: topLevelOptions,
     };
 }
 
