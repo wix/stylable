@@ -110,7 +110,7 @@ export function appendMixin(
                 );
             }
         } else {
-            // TODO: error cannot resolve mixin (this might be covered by unknown symbol)
+            // TODO: error cannot resolve mixin - this should be a diagnostic covered by unknown symbol
         }
     }
 }
