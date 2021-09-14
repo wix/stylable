@@ -1,14 +1,7 @@
 import { Diagnostic, Diagnostics } from '@stylable/core';
-import { Root, parse, CssSyntaxError } from 'postcss';
-import { stImportToAtImport } from './st-import-to-at-import';
-import { stGlobalCustomPropertyToAtProperty } from './st-global-custom-property-to-at-property';
+import postcss, { Postcss, Root, parse, CssSyntaxError } from 'postcss';
 
-export type CodeMod = (ast: Root, diagnostics: Diagnostics) => void;
-
-export const registeredMods: Map<string, CodeMod> = new Map([
-    ['st-import-to-at-import', stImportToAtImport],
-    ['st-global-custom-property-to-at-property', stGlobalCustomPropertyToAtProperty],
-]);
+export type CodeMod = (ast: Root, diagnostics: Diagnostics, context: { postcss: Postcss }) => void;
 
 interface ApplyCodeModsFailure {
     type: 'failure';
@@ -49,7 +42,7 @@ export function applyCodeMods(
     for (const { id, apply } of mods) {
         const diagnostics = new Diagnostics();
 
-        apply(ast, diagnostics);
+        apply(ast, diagnostics, { postcss });
 
         if (diagnostics.reports.length) {
             reports.set(id, diagnostics.reports);

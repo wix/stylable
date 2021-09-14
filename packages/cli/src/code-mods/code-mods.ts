@@ -1,16 +1,21 @@
 import { FileSystem, findFiles } from '@stylable/node';
-import { applyCodeMods, CodeMod, registeredMods } from './apply-code-mods';
+import { applyCodeMods, CodeMod } from './apply-code-mods';
 import { relative, join } from 'path';
+import type { Log } from '../logger';
 
 export interface BuildOptions {
     fs: FileSystem;
     rootDir: string;
     extension: string;
-    mods: string[];
-    log: (...args: string[]) => void;
+    mods: Set<{ id: string; apply: CodeMod }>;
+    log: Log;
 }
 
 export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
+    if (mods.size === 0) {
+        return log('No codemods to apply provided. Bail execution.');
+    }
+
     const { result: files } = findFiles(
         fs,
         join,
@@ -20,34 +25,16 @@ export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
         new Set<string>(['node_modules', '.git'])
     );
 
-    if (mods.length === 0) {
-        return log('No mods provided.');
-    }
-
     if (files.size === 0) {
         return log('No stylable files found.');
     }
 
     log(`Transforming ${files.size} stylable files.`);
 
-    const loadedMods = new Set<{ id: string; apply: CodeMod }>();
-    for (const id of mods) {
-        const apply = registeredMods.get(id);
-        if (!apply) {
-            log(`Unknown mod ${id}`);
-        } else {
-            loadedMods.add({ id, apply });
-        }
-    }
-
-    if (loadedMods.size !== mods.length) {
-        return;
-    }
-
     const skipped = [];
     const finished = [];
     for (const filePath of files) {
-        const result = applyCodeMods(fs.readFileSync(filePath).toString(), loadedMods);
+        const result = applyCodeMods(fs.readFileSync(filePath).toString(), mods);
 
         if (result.type === 'failure') {
             log(`${filePath}: failed to parse\n${result.error.toString()}`);
