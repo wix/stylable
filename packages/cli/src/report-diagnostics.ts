@@ -7,7 +7,7 @@ export interface Diagnostic {
 
 export type DiagnosticMessages = Map<string, Diagnostic[]>;
 
-export function reportDiagnostics(diagnosticsMessages: DiagnosticMessages) {
+function report(diagnosticsMessages: DiagnosticMessages) {
     console.log('[Stylable Diagnostics]');
     for (const [filePath, diagnostics] of diagnosticsMessages.entries()) {
         console.log(
@@ -17,17 +17,17 @@ export function reportDiagnostics(diagnosticsMessages: DiagnosticMessages) {
     }
 }
 
-export function handleCliDiagnostics(
-    diagnostics: boolean | undefined,
+export function reportDiagnostics(
     diagnosticsMessages: DiagnosticMessages,
-    diagnosticsMode: string
+    diagnostics?: boolean,
+    diagnosticsMode?: string
 ) {
     if (!diagnosticsMessages.size) {
         return;
     }
 
     if (diagnostics) {
-        reportDiagnostics(diagnosticsMessages);
+        report(diagnosticsMessages);
     }
 
     if (diagnosticsMode === 'strict' && hasErrorOrWarning(diagnosticsMessages)) {

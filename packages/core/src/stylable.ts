@@ -95,10 +95,11 @@ export class Stylable {
         );
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
-        this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
+        this.resolver = this.createResolver();
     }
     public initCache() {
         this.resolverCache = new Map();
+        this.resolver = this.createResolver();
     }
     public createResolver({
         requireModule,

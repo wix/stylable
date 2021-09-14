@@ -335,5 +335,19 @@ describe('Stylable Cli', function () {
             expect(stdout).to.equal('');
             expect(stderr).to.include('"dtsSourceMap" requires turning on "dts"');
         });
+
+        it('should report diagnostic once', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `:vars {x: red; x: blue}`,
+            });
+
+            const { stdout, status } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(status).to.equal(1);
+            expect(
+                stdout.match(new RegExp(processorWarnings.REDECLARE_SYMBOL('x'), 'g'))
+            ).to.have.length(1);
+        });
     });
 });

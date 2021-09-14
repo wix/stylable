@@ -62,7 +62,7 @@ export interface BuildOptions {
     /** should emit diagnostics */
     diagnostics?: boolean;
     /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
-    diagnosticsMode: 'strict' | 'loose';
+    diagnosticsMode?: 'strict' | 'loose';
 }
 
 export async function build({
@@ -89,6 +89,7 @@ export async function build({
     dtsSourceMap,
     watch,
     diagnostics,
+    diagnosticsMode,
 }: BuildOptions) {
     const { join, resolve } = fs;
     rootDir = resolve(rootDir);
@@ -186,11 +187,8 @@ export async function build({
             updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
-
             // report build diagnostics
-            if (diagnostics && diagnosticsMessages.size) {
-                reportDiagnostics(diagnosticsMessages);
-            }
+            reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
 
             const count = deletedFiles.size + affectedFiles.size;
             log(

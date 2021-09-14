@@ -2,7 +2,6 @@
 import { build } from './build';
 import { resolveCliOptions, resolveDefaultOptions } from './options';
 import { projectConfig } from './project-config';
-import { handleCliDiagnostics } from './report-diagnostics';
 import yargs from 'yargs';
 
 const argv = yargs
@@ -120,6 +119,7 @@ const argv = yargs
         type: 'string',
         description:
             'determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions',
+        default: 'strict' as 'strict' | 'loose',
         choices: ['strict', 'loose'],
     })
     .option('watch', {
@@ -140,7 +140,7 @@ async function main() {
     const cliOptions = resolveCliOptions(argv, defaultOptions);
 
     const { options } = projectConfig(defaultOptions, cliOptions);
-    const { dts, dtsSourceMap, diagnostics, diagnosticsMode, log } = options;
+    const { dts, dtsSourceMap, log } = options;
     const { watch, require: requires } = argv;
 
     log('[Options]', options);
@@ -155,11 +155,7 @@ async function main() {
         }
     }
 
-    const { diagnosticsMessages } = await build({ ...options, watch });
-
-    if (!watch) {
-        handleCliDiagnostics(diagnostics, diagnosticsMessages, diagnosticsMode);
-    }
+    await build({ ...options, watch });
 }
 
 main().catch((e) => {
