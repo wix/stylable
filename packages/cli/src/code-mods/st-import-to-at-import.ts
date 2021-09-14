@@ -11,6 +11,9 @@ export const stImportToAtImport: CodeMod = (ast: Root, diagnostics: Diagnostics,
             if (fatalDiagnostics.length) {
                 diagnostics.reports = fatalDiagnostics;
             } else {
+                if (ast.last === rule) {
+                    ast.raws.semicolon = true;
+                }
                 rule.replaceWith(createAtImport(importObj, postcss));
                 diagnostics.reports = [];
             }
