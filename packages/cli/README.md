@@ -161,6 +161,13 @@ module.exports.codemods = [
 ]
 ```
 
+#### builtin codemods
+
+`st-import-to-at-import` - Convert `:import` to `@st-import` syntax.
+> Note that this codemod does not preserve comments inside the `:import` 
+
+`st-global-custom-property-to-at-property` - Convert deprecated `@st-global-custom-property *;` to `@property st-global(*);` syntax.
+
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).
