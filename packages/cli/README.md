@@ -128,6 +128,39 @@ After installing `@stylable/cli`, the `stc-format` command will be available, ru
 $ stc-format --target ./src
 ```
 
+
+## Usage `stc-codemod`
+
+After installing `@stylable/cli`, the `stc-codemod` command will be available, running `stc-codemod --help` will provide a brief description for the options available.
+
+| Option                        | Alias | Description                                                   | Value Type    | Default Value                 |
+| ----------------------------- | ----- | ------------------------------------------------------------- | --------------| ----------------------------- |
+| `--rootDir`                   | `d`   | Root directory of a project                                   | `string`      | `current working directory`   |
+| `--mods`                      | `m`   | Array of builtin codemods to execute                          | `array`       | `[]`                          |
+| `--external`                  | `e`   | Array of external codemod to execute                          | `array`       | `[]`                          |
+| `--require`                   | `r`   | require hooks                                                 | `array`       | `[]`                          |
+| `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
+
+
+### Provide an external codemod
+
+Codemods are transform operations for code based on AST.
+
+The contract of the external codemod is that the requested module (cjs) will provide module.export.codemods which is an iterable with the following signature: 
+
+```ts
+type Codemods = Iterable<{ id: string, apply: CodeModApply }>;
+type CodeModApply = (ast: postcss.Root, diagnostics: Diagnostics, context: { postcss: Postcss }) => void;
+```
+
+#### Basic codemod example
+
+```ts
+module.exports.codemods = [
+    {id: 'banner', apply(ast, _, { postcss }){ ast.prepend(postcss.comment({text: 'Hello Codemod'})) }}
+]
+```
+
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

@@ -14,26 +14,29 @@ import type { CodeMod } from './code-mods/apply-code-mods';
 
 const argv = yargs
     .option('rootDir', {
+        alias: 'd',
         type: 'string',
-        description: 'root directory of project',
+        description: 'root directory of a project',
         default: process.cwd(),
         defaultDescription: 'current working directory',
     })
     .option('mods', {
+        alias: 'm',
         type: 'array',
+        description: 'array of builtin codemods to execute',
         default: [] as string[],
         choices: [...registeredMods.keys()],
     })
     .option('external', {
-        type: 'array',
-        description: 'allow to load mods from external',
         alias: 'e',
+        type: 'array',
+        description: 'array of external codemod to execute',
         default: [] as string[],
     })
     .option('require', {
+        alias: 'r',
         type: 'array',
         description: 'require hooks',
-        alias: 'r',
         default: [] as string[],
     })
     .alias('h', 'help')
