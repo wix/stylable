@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import nodeFs from '@file-services/node';
+import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
 import { createLogger } from './logger';
