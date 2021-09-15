@@ -146,20 +146,36 @@ After installing `@stylable/cli`, the `stc-codemod` command will be available, r
 
 Codemods are transform operations for code based on AST.
 
-The contract of the external codemod is that the requested module (cjs) will provide module.export.codemods which is an iterable with the following signature: 
+The contract of the external codemod is that the requested module (cjs) will provide `module.export.codemods` which is an iterable with the following signature: 
 
 ```ts
-type Codemods = Iterable<{ id: string, apply: CodeModApply }>;
-type CodeModApply = (ast: postcss.Root, diagnostics: Diagnostics, context: { postcss: Postcss }) => void;
+type Codemods = Iterable<{ id: string, apply: CodeMod }>;
+
+type CodeMod = (context: CodeModContext) => void;
+
+interface CodeModContext {
+    ast: Root;
+    diagnostics: Diagnostics;
+    modifications: Modifications;
+    postcss: Postcss;
+}
 ```
+> Codemod id's should be namespaced properly to avoid collision.
 
 #### Basic codemod example
 
 ```ts
 module.exports.codemods = [
-    {id: 'banner', apply(ast, _, { postcss }){ ast.prepend(postcss.comment({text: 'Hello Codemod'})) }}
+    {
+        id: 'banner', 
+        apply({ ast, postcss, modifications }) { 
+            ast.prepend(postcss.comment({text: 'Hello Codemod'}));
+            modifications.count++;
+        }
+    }
 ]
 ```
+> It is required to bump up the `modifications.count` otherwise the changes might not be written to disk.
 
 #### builtin codemods
 

@@ -5,17 +5,19 @@ import {
     paramMapping,
     processorWarnings,
 } from '@stylable/core';
-import * as postcss from 'postcss';
-import type { CodeMod } from './apply-code-mods';
+import type { AtRule } from 'postcss';
+import type { CodeMod } from './types';
 
-export const stGlobalCustomPropertyToAtProperty: CodeMod = (ast, diagnostics) => {
+export const stGlobalCustomPropertyToAtProperty: CodeMod = ({
+    ast,
+    diagnostics,
+    modifications,
+    postcss,
+}) => {
     ast.walkAtRules('st-global-custom-property', (atRule) => {
         const properties = parseStGlobalCustomProperty(atRule, diagnostics);
-        const fatalDiagnostics = diagnostics.reports.filter((report) => report.type !== 'info');
 
-        if (fatalDiagnostics.length) {
-            diagnostics.reports = fatalDiagnostics;
-        } else {
+        if (!diagnostics.reports.length) {
             for (const property of properties) {
                 atRule.before(
                     postcss.atRule({
@@ -24,17 +26,13 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = (ast, diagnostics) =>
                     })
                 );
             }
-
             atRule.remove();
-            diagnostics.reports = [];
+            modifications.count++;
         }
     });
 };
 
-function parseStGlobalCustomProperty(
-    atRule: postcss.AtRule,
-    diagnostics: Diagnostics
-): CSSVarSymbol[] {
+function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): CSSVarSymbol[] {
     const cssVars: CSSVarSymbol[] = [];
     const cssVarsByComma = atRule.params.split(',');
     const cssVarsBySpacing = atRule.params

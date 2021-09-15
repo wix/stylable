@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { populateDirectorySync, loadDirSync } from './test-kit/cli-test-kit';
 import { runCliCodeMod } from './test-kit/cli-test-kit';
+import type { CodeMod } from '@stylable/cli';
 
 describe('Stylable Cli Code Mods', () => {
     let tempDir: ITempDirectory;
@@ -26,21 +27,21 @@ describe('Stylable Cli Code Mods', () => {
     });
 
     it('should load external codemods', () => {
+        const inlineCodeMod: CodeMod = ({ ast, postcss, modifications }) => {
+            ast.append(postcss.comment({ text: 'Hello CodeMod' }));
+            modifications.count++;
+        };
+
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'my-custom-mod.js': `module.exports.codemods = [{id:'test-mod', apply(ast, _, {postcss}){ast.append(postcss.comment({text: 'Test Comment'}))}}]`,
+            'my-custom-mod.js': `module.exports.codemods = [{id:'banner', apply: ${inlineCodeMod}}]`,
             'style.st.css': ``,
         });
 
-        runCliCodeMod([
-            '--rootDir',
-            tempDir.path,
-            '--external',
-            './my-custom-mod.js',
-        ]);
+        runCliCodeMod(['--rootDir', tempDir.path, '--external', './my-custom-mod.js']);
 
         const dirContent = loadDirSync(tempDir.path);
-        expect(dirContent['style.st.css']).equal('/* Test Comment */');
+        expect(dirContent['style.st.css']).equal('/* Hello CodeMod */');
     });
 
     it('should handle parse failure', () => {

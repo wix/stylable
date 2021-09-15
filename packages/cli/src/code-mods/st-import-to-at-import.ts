@@ -1,21 +1,18 @@
-import { parsePseudoImport, Diagnostics, Imported } from '@stylable/core';
-import type { Postcss, AtRule, Root } from 'postcss';
-import type { CodeMod } from './apply-code-mods';
+import { parsePseudoImport, Imported } from '@stylable/core';
+import type { Postcss, AtRule } from 'postcss';
+import type { CodeMod } from './types';
 
-export const stImportToAtImport: CodeMod = (ast: Root, diagnostics: Diagnostics, { postcss }) => {
+export const stImportToAtImport: CodeMod = ({ ast, diagnostics, postcss, modifications }) => {
     ast.walkRules((rule) => {
         if (rule.selector === ':import') {
             const importObj = parsePseudoImport(rule, '*', diagnostics);
-            const fatalDiagnostics = diagnostics.reports.filter((report) => report.type !== 'info');
 
-            if (fatalDiagnostics.length) {
-                diagnostics.reports = fatalDiagnostics;
-            } else {
+            if (!diagnostics.reports.length) {
                 if (ast.last === rule) {
                     ast.raws.semicolon = true;
                 }
                 rule.replaceWith(createAtImport(importObj, postcss));
-                diagnostics.reports = [];
+                modifications.count++;
             }
         }
     });

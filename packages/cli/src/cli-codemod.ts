@@ -10,7 +10,7 @@ import {
     registeredMods,
 } from './code-mods/load-codemods';
 import { createLogger } from './logger';
-import type { CodeMod } from './code-mods/apply-code-mods';
+import type { CodeMod } from './code-mods/types';
 
 const argv = yargs
     .option('rootDir', {

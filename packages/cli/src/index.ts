@@ -5,3 +5,4 @@ export {
     DirectoryProcessService,
     DirectoryProcessServiceOptions,
 } from './directory-process-service/directory-process-service';
+export type { CodeMod } from './code-mods/types';

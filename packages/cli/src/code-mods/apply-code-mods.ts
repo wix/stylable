@@ -1,56 +1,43 @@
 import { Diagnostic, Diagnostics } from '@stylable/core';
-import postcss, { Postcss, Root, parse, CssSyntaxError } from 'postcss';
-
-export type CodeMod = (ast: Root, diagnostics: Diagnostics, context: { postcss: Postcss }) => void;
-
-interface ApplyCodeModsFailure {
-    type: 'failure';
-    error: CssSyntaxError | Error;
-}
-
-interface ApplyCodeModsSuccess {
-    type: 'success';
-    css: string;
-    reports: Map<string, Diagnostic[]>;
-}
-
-type ApplyCodeModsResult = ApplyCodeModsSuccess | ApplyCodeModsFailure;
+import postcss, { parse, CssSyntaxError } from 'postcss';
+import type { CodeMod, ApplyCodeModsResult } from './types';
 
 export function applyCodeMods(
+    filePath: string,
     css: string,
     mods: Set<{ id: string; apply: CodeMod }>
 ): ApplyCodeModsResult {
-    const reports = new Map<string, Diagnostic[]>();
-    let ast: Root;
-
     try {
-        ast = parse(css);
+        const reports = new Map<string, Diagnostic[]>();
+        const ast = parse(css);
+        const modifications = { count: 0 };
+        for (const { id, apply } of mods) {
+            const diagnostics = new Diagnostics();
+
+            apply({ ast, diagnostics, postcss, modifications });
+
+            if (diagnostics.reports.length) {
+                reports.set(id, diagnostics.reports);
+            }
+        }
+        return {
+            filePath,
+            type: 'success',
+            css: ast.toString(),
+            reports,
+            modifications,
+        };
     } catch (error) {
-        if (error instanceof CssSyntaxError || error instanceof Error) {
-            return {
-                type: 'failure',
-                error,
-            };
-        } else {
-            return {
-                type: 'failure',
-                error: new Error(String(error)),
-            };
-        }
+        return {
+            filePath,
+            type: 'failure',
+            error: normalizeError(error),
+        };
     }
+}
 
-    for (const { id, apply } of mods) {
-        const diagnostics = new Diagnostics();
-
-        apply(ast, diagnostics, { postcss });
-
-        if (diagnostics.reports.length) {
-            reports.set(id, diagnostics.reports);
-        }
-    }
-    return {
-        type: 'success',
-        css: ast.toString(),
-        reports,
-    };
+function normalizeError(error: unknown): CssSyntaxError | Error {
+    return error instanceof CssSyntaxError || error instanceof Error
+        ? error
+        : new Error(String(error));
 }

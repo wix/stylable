@@ -1,4 +1,4 @@
-import type { CodeMod } from './apply-code-mods';
+import type { CodeMod } from './types';
 import type { Log } from '../logger';
 
 // Builtin codemods
