@@ -29,7 +29,6 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            diagnosticsMode: 'strict',
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -64,7 +63,6 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            diagnosticsMode: 'strict',
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -99,7 +97,6 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            diagnosticsMode: 'strict',
             generatorPath: require.resolve('./fixtures/test-generator'),
         });
 
@@ -136,7 +133,6 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            diagnosticsMode: 'strict',
             generatorPath: require.resolve('./fixtures/test-generator'),
         });
 
@@ -174,7 +170,6 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            diagnosticsMode: 'strict',
             generatorPath: require.resolve('./fixtures/named-exports-generator'),
         });
 
@@ -210,7 +205,6 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            diagnosticsMode: 'strict',
         });
 
         const res = fs.readFileSync('/some-dir/other-dir/index.st.css').toString();
@@ -240,7 +234,6 @@ describe('build index', () => {
                 indexFile: 'index.st.css',
                 rootDir: '/',
                 log,
-                diagnosticsMode: 'strict',
             });
         } catch (error) {
             expect((error as Error)?.message).to.equal(
