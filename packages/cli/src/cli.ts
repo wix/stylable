@@ -4,7 +4,6 @@ import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
 import { createLogger } from './logger';
-import { handleCliDiagnostics } from './report-diagnostics';
 
 const { join, resolve } = nodeFs;
 
@@ -141,7 +140,7 @@ const argv = yargs
         type: 'string',
         description:
             'determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions',
-        default: 'strict',
+        default: 'strict' as 'strict' | 'loose',
         choices: ['strict', 'loose'],
     })
     .option('watch', {
@@ -156,8 +155,6 @@ const argv = yargs
     .strict()
     .wrap(yargs.terminalWidth())
     .parseSync();
-
-const log = createLogger('[Stylable]', argv.log);
 
 const {
     outDir,
@@ -187,6 +184,8 @@ const {
     watch,
 } = argv;
 
+const log = createLogger('[Stylable]', argv.log);
+
 log('[Arguments]', argv);
 
 async function main() {
@@ -208,7 +207,7 @@ async function main() {
         resolverCache: new Map(),
     });
 
-    const { diagnosticsMessages } = await build({
+    await build({
         extension: ext,
         fs: nodeFs,
         stylable,
@@ -232,11 +231,8 @@ async function main() {
         dtsSourceMap,
         watch,
         diagnostics,
+        diagnosticsMode,
     });
-
-    if (!watch) {
-        handleCliDiagnostics(diagnostics, diagnosticsMessages, diagnosticsMode);
-    }
 }
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {

@@ -1,11 +1,13 @@
 import { Diagnostic, Diagnostics } from '@stylable/core';
 import { Root, parse, CssSyntaxError } from 'postcss';
 import { stImportToAtImport } from './st-import-to-at-import';
+import { stGlobalCustomPropertyToAtProperty } from './st-global-custom-property-to-at-property';
 
 export type CodeMod = (ast: Root, diagnostics: Diagnostics) => void;
 
 export const registeredMods: Map<string, CodeMod> = new Map([
     ['st-import-to-at-import', stImportToAtImport],
+    ['st-global-custom-property-to-at-property', stGlobalCustomPropertyToAtProperty],
 ]);
 
 interface ApplyCodeModsFailure {

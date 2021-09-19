@@ -28,6 +28,7 @@ export function attachHook({
             fileSystem: fs,
             requireModule: require,
             resolveNamespace,
+            resolverCache: new Map(),
             ...stylableConfig,
         },
         { runtimePath }

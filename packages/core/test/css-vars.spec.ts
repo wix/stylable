@@ -29,10 +29,12 @@ describe('css custom-properties (vars)', () => {
                 '--myVar': {
                     _kind: 'cssVar',
                     name: '--myVar',
+                    global: false,
                 },
                 '--myOtherVar': {
                     _kind: 'cssVar',
                     name: '--myOtherVar',
+                    global: false,
                 },
             });
         });
@@ -40,9 +42,10 @@ describe('css custom-properties (vars)', () => {
         it('global (unscoped) declarations', () => {
             const { cssVars, diagnostics } = processSource(
                 `
-                @st-global-custom-property --myVar;
+                @property st-global(--myGlobalVar);
+
                 .root {
-                    --myVar: blue;
+                    --myGlobalVar: red;
                 }
             `,
                 { from: 'path/to/style.css' }
@@ -50,9 +53,9 @@ describe('css custom-properties (vars)', () => {
 
             expect(diagnostics.reports.length, 'no reports').to.eql(0);
             expect(cssVars).to.eql({
-                '--myVar': {
+                '--myGlobalVar': {
                     _kind: 'cssVar',
-                    name: '--myVar',
+                    name: '--myGlobalVar',
                     global: true,
                 },
             });
@@ -76,6 +79,7 @@ describe('css custom-properties (vars)', () => {
                 '--myVar': {
                     _kind: 'cssVar',
                     name: '--myVar',
+                    global: false,
                 },
             });
         });
@@ -84,6 +88,23 @@ describe('css custom-properties (vars)', () => {
     describe('transform', () => {
         // What does it do?
         // - generates namespace for var declarations
+
+        it('should hoist st-global-custom-property', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @property --x;
+                        @st-global-custom-property --x;
+                        `,
+                    },
+                },
+            });
+
+            expect(res.exports.vars).to.eql({ x: '--x' });
+        });
 
         it('css vars with their newly created namespace', () => {
             const res = generateStylableResult({
@@ -564,7 +585,7 @@ describe('css custom-properties (vars)', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                        @st-global-custom-property --myGlobal;
+                        @property st-global(--myGlobal);
 
                         :vars {
                             arg1: red;
@@ -606,7 +627,8 @@ describe('css custom-properties (vars)', () => {
                         '/entry.st.css': {
                             namespace: 'entry',
                             content: `
-                            @st-global-custom-property --myVar1, --myVar2;
+                            @property st-global(--myVar1);
+                            @property st-global(--myVar2);
 
                             .root {
                                 --myVar1: green;
@@ -632,15 +654,14 @@ describe('css custom-properties (vars)', () => {
             });
 
             it('should support any spacing between global variable definitions', () => {
-                const res = generateStylableResult({
+                const config = {
                     entry: `/entry.st.css`,
                     files: {
                         '/entry.st.css': {
                             namespace: 'entry',
                             content: `
-                            @st-global-custom-property --myVar1      ,--myVar2,
-                              --myVar3  ,  --myVar4  ;
-
+                            |@st-global-custom-property --myVar1      ,--myVar2,
+                              --myVar3  ,  --myVar4  |;
                             .root {
                                 --myVar1: 1;
                                 --myVar2: 2;
@@ -650,11 +671,15 @@ describe('css custom-properties (vars)', () => {
                             `,
                         },
                     },
-                });
-                expect(
-                    res.meta.diagnostics.reports,
-                    'no diagnostics reported for native states'
-                ).to.eql([]);
+                };
+
+                const res = expectWarningsFromTransform(config, [
+                    {
+                        file: '/entry.st.css',
+                        message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                        severity: 'info',
+                    },
+                ]);
 
                 const decl1 = (res.meta.outputAst!.nodes[0] as postcss.Rule)
                     .nodes[0] as postcss.Declaration;
@@ -681,7 +706,7 @@ describe('css custom-properties (vars)', () => {
                         '/entry.st.css': {
                             namespace: 'entry',
                             content: `
-                            @st-global-custom-property --myVar;
+                            @property st-global(--myVar);
 
                             .root {
                                 --myVar: blue;
@@ -711,7 +736,7 @@ describe('css custom-properties (vars)', () => {
                         '/entry.st.css': {
                             namespace: 'entry',
                             content: `
-                            @st-global-custom-property --myVar;
+                            @property st-global(--myVar);
 
                             .root {
                                 --myVar: blue;
@@ -743,7 +768,7 @@ describe('css custom-properties (vars)', () => {
                                 -st-named: --importedGlobal, --importedScoped;
                             }
 
-                            @st-global-custom-property --localGlobal;
+                            @property st-global(--localGlobal);
 
                             .root {
                                 x1: var(--localScoped);
@@ -758,7 +783,7 @@ describe('css custom-properties (vars)', () => {
                         '/imported.st.css': {
                             namespace: 'imported',
                             content: `
-                            @st-global-custom-property --importedGlobal;
+                            @property st-global(--importedGlobal);
 
                             .root {
                                 --importedScoped: red;
@@ -788,6 +813,35 @@ describe('css custom-properties (vars)', () => {
     });
 
     describe('diagnostics', () => {
+        it('should report on "@st-global-custom-property" deprecation', () => {
+            const config = {
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@st-global-custom-property --myVar|;
+            
+                        .root {
+                            --myVar: blue;
+                        }
+                    `,
+                    },
+                },
+            };
+
+            const res = expectWarningsFromTransform(config, [
+                {
+                    file: '/entry.st.css',
+                    message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                    severity: 'info',
+                },
+            ]);
+            expect(res.exports.vars).to.eql({
+                myVar: '--myVar',
+            });
+        });
+
         it('trying to use illegal css var syntax', () => {
             const config = {
                 entry: `/entry.st.css`,
@@ -879,7 +933,7 @@ describe('css custom-properties (vars)', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                        |@st-global-custom-property $illegalVar$|;
+                        |@property st-global($illegalVar$)|;
                         `,
                     },
                 },
@@ -887,20 +941,20 @@ describe('css custom-properties (vars)', () => {
 
             expectWarningsFromTransform(config, [
                 {
-                    message: processorWarnings.ILLEGAL_GLOBAL_CSS_VAR('illegalVar'),
+                    message: processorWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'),
                     file: '/entry.st.css',
                 },
             ]);
         });
 
-        it('global css vars must be separated by commas', () => {
+        it('global css var declarations must begin with "--" (deprecated)', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                        |@st-global-custom-property $--var1 --var2$|;
+                        |@st-global-custom-property illegalVar|;
                         `,
                     },
                 },
@@ -908,8 +962,41 @@ describe('css custom-properties (vars)', () => {
 
             expectWarningsFromTransform(config, [
                 {
+                    message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                    file: '/entry.st.css',
+                    severity: 'info',
+                },
+                {
+                    message: processorWarnings.ILLEGAL_GLOBAL_CSS_VAR('illegalVar'),
+                    file: '/entry.st.css',
+                    skipLocationCheck: true,
+                },
+            ]);
+        });
+
+        it('global css vars must be separated by commas (deprecated)', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@st-global-custom-property --var1 --var2|;
+                        `,
+                    },
+                },
+            };
+
+            expectWarningsFromTransform(config, [
+                {
+                    message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                    file: '/entry.st.css',
+                    severity: 'info',
+                },
+                {
                     message: processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA('--var1 --var2'),
                     file: '/entry.st.css',
+                    skipLocationCheck: true,
                 },
             ]);
         });
@@ -921,18 +1008,32 @@ describe('css custom-properties (vars)', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                            @st-global-custom-property --myVar;
-                            |:import {
+                            @property st-global(--myVar);
+                            @property st-global(--mySecondVar);
+
+                            |@st-import [--myVar] from "./st-imported.st.css"|;
+
+                            :import {
                                 -st-from: "./imported.st.css";
-                                -st-named: --myVar;
-                            }|
+                                -st-named: --mySecondVar;
+                            }
+
                             .root {
                                 prop1: var(--myVar);
+                                prop2: var(--mySecondVar);
                             }
                             `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
+                        content: `
+                            .root {
+                                --mySecondVar: red;
+                            }
+                            `,
+                    },
+                    '/st-imported.st.css': {
+                        namespace: 'st-imported',
                         content: `
                             .root {
                                 --myVar: red;
@@ -943,14 +1044,89 @@ describe('css custom-properties (vars)', () => {
             };
 
             const { meta } = expectWarningsFromTransform(config, [
-                { message: processorWarnings.REDECLARE_SYMBOL('--myVar'), file: '/entry.st.css' },
+                {
+                    message: processorWarnings.REDECLARE_SYMBOL('--myVar'),
+                    file: '/entry.st.css',
+                },
+                {
+                    message: processorWarnings.REDECLARE_SYMBOL('--mySecondVar'),
+                    file: '/entry.st.css',
+                    skipLocationCheck: true,
+                },
             ]);
 
-            const baseDecl = (meta.outputAst!.nodes[0] as postcss.Rule)
-                .nodes[0] as postcss.Declaration;
+            const rule = meta.outputAst!.nodes[0] as postcss.Rule;
+            const firstDecl = rule.nodes[0] as postcss.Declaration;
+            const secondDecl = rule.nodes[1] as postcss.Declaration;
 
-            expect(baseDecl.prop).to.equal('prop1');
-            expect(baseDecl.value).to.equal('var(--imported-myVar)');
+            expect(firstDecl.value).to.equal('var(--st-imported-myVar)');
+            expect(secondDecl.value).to.equal('var(--imported-mySecondVar)');
+        });
+
+        it('clashing imported and global css var (deprecated)', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            |@st-global-custom-property --myVar, --mySecondVar|;
+                            @st-import [--myVar] from "./st-imported.st.css";
+
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: --mySecondVar;
+                            }
+
+                            .root {
+                                prop1: var(--myVar);
+                                prop2: var(--mySecondVar);
+                            }
+                            `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {
+                                --mySecondVar: red;
+                            }
+                            `,
+                    },
+                    '/st-imported.st.css': {
+                        namespace: 'st-imported',
+                        content: `
+                            .root {
+                                --myVar: red;
+                            }
+                            `,
+                    },
+                },
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                {
+                    message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                    file: '/entry.st.css',
+                    severity: 'info',
+                },
+                {
+                    message: processorWarnings.REDECLARE_SYMBOL('--myVar'),
+                    file: '/entry.st.css',
+                    skipLocationCheck: true,
+                },
+                {
+                    message: processorWarnings.REDECLARE_SYMBOL('--mySecondVar'),
+                    file: '/entry.st.css',
+                    skipLocationCheck: true,
+                },
+            ]);
+
+            const rule = meta.outputAst!.nodes[0] as postcss.Rule;
+            const firstDecl = rule.nodes[0] as postcss.Declaration;
+            const secondDecl = rule.nodes[1] as postcss.Declaration;
+
+            expect(firstDecl.value).to.equal('var(--st-imported-myVar)');
+            expect(secondDecl.value).to.equal('var(--imported-mySecondVar)');
         });
     });
 });

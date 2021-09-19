@@ -122,7 +122,7 @@ export interface KeyframesSymbol {
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
-    global?: boolean;
+    global: boolean;
 }
 
 export type StylableSymbol =

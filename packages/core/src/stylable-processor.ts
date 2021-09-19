@@ -48,6 +48,7 @@ import {
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
+import { validateAtProperty } from './validate-at-property';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -176,6 +177,9 @@ export const processorWarnings = {
     INVALID_FUNCTIONAL_SELECTOR(selector: string, type: string) {
         return `"${selector}" ${type} is not functional`;
     },
+    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
+        return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`;
+    },
     DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
         return `"${name}" is deprecated, use "${alternativeName}"`;
     },
@@ -184,6 +188,7 @@ export const processorWarnings = {
 export class StylableProcessor {
     protected meta!: StylableMeta;
     protected dirContext!: string;
+
     constructor(
         protected diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
@@ -261,6 +266,7 @@ export class StylableProcessor {
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
         const toRemove: postcss.Node[] = [];
+
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
                 case 'namespace': {
@@ -341,7 +347,7 @@ export class StylableProcessor {
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
                     break;
-                case 'st-import':
+                case 'st-import': {
                     if (atRule.parent?.type !== 'root') {
                         this.diagnostics.warn(
                             atRule,
@@ -353,13 +359,19 @@ export class StylableProcessor {
                         this.meta.imports.push(stImport);
                         this.addImportSymbols(stImport);
                     }
-
                     break;
-                case 'property':
-                    this.checkRedeclareSymbol(atRule.params, atRule);
+                }
+                case 'property': {
                     this.addCSSVarDefinition(atRule);
+                    validateAtProperty(atRule, this.diagnostics);
                     break;
+                }
                 case 'st-global-custom-property': {
+                    this.diagnostics.info(
+                        atRule,
+                        processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()
+                    );
+
                     const cssVarsByComma = atRule.params.split(',');
                     const cssVarsBySpacing = atRule.params
                         .trim()
@@ -370,7 +382,9 @@ export class StylableProcessor {
                         this.diagnostics.warn(
                             atRule,
                             processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
-                            { word: atRule.params }
+                            {
+                                word: atRule.params,
+                            }
                         );
                         break;
                     }
@@ -379,14 +393,14 @@ export class StylableProcessor {
                         const cssVar = entry.trim();
 
                         if (isCSSVarProp(cssVar)) {
-                            if (!this.meta.cssVars[cssVar]) {
-                                this.meta.cssVars[cssVar] = {
-                                    _kind: 'cssVar',
-                                    name: cssVar,
-                                    global: true,
-                                };
-                                this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
-                            }
+                            const property: CSSVarSymbol = {
+                                _kind: 'cssVar',
+                                name: cssVar,
+                                global: true,
+                            };
+
+                            this.meta.cssVars[cssVar] = property;
+                            this.meta.mappedSymbols[cssVar] = property;
                         } else {
                             this.diagnostics.warn(
                                 atRule,
@@ -395,6 +409,7 @@ export class StylableProcessor {
                             );
                         }
                     }
+
                     toRemove.push(atRule);
                     break;
                 }
@@ -796,22 +811,40 @@ export class StylableProcessor {
                     });
                 }
 
-                this.addCSSVar(postcssValueParser.stringify(varName).trim(), decl);
+                this.addCSSVar(postcssValueParser.stringify(varName).trim(), decl, false);
             }
         });
     }
 
     protected addCSSVarDefinition(node: postcss.Declaration | postcss.AtRule) {
-        const varName = node.type === 'atrule' ? node.params : node.prop;
-        this.addCSSVar(varName.trim(), node);
+        let varName = node.type === 'atrule' ? node.params.trim() : node.prop.trim();
+        let isGlobal = false;
+
+        const globalVarName = globalValue(varName);
+
+        if (globalVarName !== undefined) {
+            varName = globalVarName.trim();
+            isGlobal = true;
+        }
+
+        if (node.type === 'atrule') {
+            this.checkRedeclareSymbol(varName, node);
+        }
+
+        this.addCSSVar(varName, node, isGlobal);
     }
 
-    protected addCSSVar(varName: string, node: postcss.Declaration | postcss.AtRule) {
+    protected addCSSVar(
+        varName: string,
+        node: postcss.Declaration | postcss.AtRule,
+        global: boolean
+    ) {
         if (isCSSVarProp(varName)) {
             if (!this.meta.cssVars[varName]) {
                 const cssVarSymbol: CSSVarSymbol = {
                     _kind: 'cssVar',
                     name: varName,
+                    global,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
                 if (!this.meta.mappedSymbols[varName]) {
