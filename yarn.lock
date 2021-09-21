@@ -2045,9 +2045,9 @@ camelcase@^6.0.0:
   integrity sha512-c7wVvbw3f37nuobQNtgsgG9POC9qMbNuMQmTCqZv23b6MIz0fcYpBiOlv9gEN/hdLdnZTDQhg6e9Dq5M1vKvfg==
 
 caniuse-lite@^1.0.30001252, caniuse-lite@^1.0.30001254:
-  version "1.0.30001258"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001258.tgz#b604eed80cc54a578e4bf5a02ae3ed49f869d252"
-  integrity sha512-RBByOG6xWXUp0CR2/WU2amXz3stjKpSl5J1xU49F1n2OxD//uBZO4wCKUiG+QMGf7CHGfDDcqoKriomoGVxTeA==
+  version "1.0.30001259"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001259.tgz#ae21691d3da9c4be6144403ac40f71d9f6efd790"
+  integrity sha512-V7mQTFhjITxuk9zBpI6nYsiTXhcPe05l+364nZjK7MFK/E7ibvYBSAXr4YcA6oPR8j3ZLM/LN+lUqUVAQEUZFg==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -5019,9 +5019,9 @@ node-eval@^2.0.0:
     path-is-absolute "1.0.1"
 
 node-fetch@^2.6.1:
-  version "2.6.3"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.3.tgz#57b29b34400e9c52346cbfb575cf3d10f7a49e92"
-  integrity sha512-BXSmNTLLDHT0UjQDg5E23x+0n/hPDjySqc0ELE4NpCa2wE5qmmaEWFRP/+v8pfuocchR9l5vFLbSB7CPE2ahvQ==
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.4.tgz#7f1d13b8f9ff0c1a994dc6f73c69f7d652c7ace2"
+  integrity sha512-aD1fO+xtLiSCc9vuD+sYMxpIuQyhHscGSkBEo2o5LTV/3bTEAYvdUii29n8LlO5uLCmWdGP7uVUVXFo5SRdkLA==
   dependencies:
     whatwg-url "^5.0.0"
 
@@ -5684,10 +5684,10 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-playwright-chromium@^1.14.1:
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.14.1.tgz#0a43fdb33d77bd7053a7c9b7619f9f445c371835"
-  integrity sha512-gAHDcrBKrl1Az6TuzC4T013Nl+qKVZeblc2VkElHqEuNQHPKW7840cQBZavFz38xJshC993iClVc6Y+bLgF8FA==
+playwright-chromium@^1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.15.0.tgz#cffb051346d732bcd27990f13cad81660f223888"
+  integrity sha512-bp+x7THqk11JoFglUiujOaRtxvK1/MrDe1pAzVTvWOSOky89v9gd5w/USmOgTZyo6bYPIWnPIQjnrk4qRUr0rg==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -5704,10 +5704,10 @@ playwright-chromium@^1.14.1:
     ws "^7.4.6"
     yazl "^2.5.1"
 
-playwright-core@^1.12.3, playwright-core@^1.14.1:
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.14.1.tgz#d2a15f6f38ef153fe4ca3f1f0ee065c2269d8550"
-  integrity sha512-G4fO98T/DOTj3uabIlhkWrWzhXGXx8y8rVzBgR6DKPqEz8NfTxuQ3NFGWA1u+sfD1CtAXRxBisaUvlmnD2jRYw==
+playwright-core@^1.12.3, playwright-core@^1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.15.0.tgz#28c236d1d27656ac200bec7011607fc98159f7cd"
+  integrity sha512-U3znz7ZHj0j7/mgg3mVSMl8Jtu/APKqGmIlacXhfacfuekXqP7+YuBr8D0nmv9z3OV6JmsuApPJjeJ058gRU3Q==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -6902,9 +6902,9 @@ terser@^4.6.3:
     source-map-support "~0.5.12"
 
 terser@^5.7.2:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-5.8.0.tgz#c6d352f91aed85cc6171ccb5e84655b77521d947"
-  integrity sha512-f0JH+6yMpneYcRJN314lZrSwu9eKkUFEHLN/kNy8ceh8gaRiLgFPJqrB9HsXjhEGdv4e/ekjTOFxIlL6xlma8A==
+  version "5.9.0"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-5.9.0.tgz#47d6e629a522963240f2b55fcaa3c99083d2c351"
+  integrity sha512-h5hxa23sCdpzcye/7b8YqbE5OwKca/ni0RQz1uRX3tGh8haaGHqcuSqbGRybuAKNdntZ0mDgFNXPJ48xQ2RXKQ==
   dependencies:
     commander "^2.20.0"
     source-map "~0.7.2"
