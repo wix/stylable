@@ -15,6 +15,7 @@ import type { LoaderContext, Loader } from '@stylable/webpack-plugin';
 const { urlParser } = require('css-loader/dist/plugins');
 const { getImportCode, getModuleCode, sort } = require('css-loader/dist/utils');
 const cssLoaderRuntimeApiPath = require.resolve('css-loader/dist/runtime/api');
+const cssLoaderNoSourceMapRuntime  = require.resolve('css-loader/dist/runtime/noSourceMaps')
 const { isUrlRequest, stringifyRequest } = require('loader-utils');
 
 export interface LoaderOptions {
@@ -39,6 +40,7 @@ interface UrlReplacement {
     needQuotes: boolean;
 }
 interface LoaderImport {
+    type: string;
     importName: string;
     url: string;
     index: number;
@@ -87,11 +89,19 @@ const stylableLoader: Loader = function (content) {
 
     const urlPluginImports: LoaderImport[] = [
         {
+            type: 'api_import',
             importName: '___CSS_LOADER_API_IMPORT___',
             url: stringifyRequest(this, cssLoaderRuntimeApiPath),
             index: -1,
         },
+        {
+            type: 'api_sourcemap_import',
+            importName: '___CSS_LOADER_API_NO_SOURCEMAP_IMPORT___',
+            url: stringifyRequest(this, cssLoaderNoSourceMapRuntime),
+            index: 0,
+        },
     ];
+
     const urlReplacements: UrlReplacement[] = [];
 
     const urlResolver = (this as any).getResolve({
