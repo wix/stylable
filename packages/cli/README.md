@@ -133,6 +133,14 @@ $ stc-format --target ./src
 
 After installing `@stylable/cli`, the `stc-codemod` command will be available, running `stc-codemod --help` will provide a brief description for the options available.
 
+#### Usage with `npx`
+
+It is possible to run the codemod cli with npx with the following command
+
+```bash
+npx -p @stylable/cli stc-codemod --help
+```
+
 | Option                        | Alias | Description                                                   | Value Type    | Default Value                 |
 | ----------------------------- | ----- | ------------------------------------------------------------- | --------------| ----------------------------- |
 | `--rootDir`                   | `d`   | Root directory of a project                                   | `string`      | `current working directory`   |

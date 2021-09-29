@@ -63,4 +63,40 @@ describe('Stylable Cli Code Mods', () => {
         expect(stdout).to.match(/failed to parse/);
         expect(stdout).to.match(/CssSyntaxError: <css input>:1:20: Missed semicolon/);
     });
+
+    it('should report skipped files with no changes', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{}`,
+        });
+
+        const { stdout } = runCliCodeMod([
+            '--rootDir',
+            tempDir.path,
+            '--mods',
+            'st-import-to-at-import',
+        ]);
+
+        const dirContent = loadDirSync(tempDir.path);
+
+        expect(dirContent['style.st.css']).equal(`.root{}`);
+        expect(stdout).to.match(/Summery:\n\[CodeMod\] − .*?style\.st\.css/);
+    });
+
+    it('should fail with exit code 1 when failed to load a mod', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{}`,
+        });
+
+        const { stdout, status } = runCliCodeMod([
+            '--rootDir',
+            tempDir.path,
+            '--external',
+            'unknown-mod.js',
+        ]);
+
+        expect(status, 'exit code').to.equal(1);
+        expect(stdout).to.match(/Failed to load external codemods from: unknown-mod.js/);
+    });
 });
