@@ -2,7 +2,6 @@ import type { ConfigOptions, PartialConfigOptions } from './projects-config';
 import type { Arguments } from 'yargs';
 import { nodeFs } from '@file-services/node';
 import yargs from 'yargs';
-import { removeUndefined } from './helpers';
 
 const { join, resolve } = nodeFs;
 
@@ -36,7 +35,7 @@ export interface CliArguments {
 }
 
 export function getCliArguments(): Arguments<CliArguments> {
-    const defaults = getDefaultOptions();
+    const defaults = createDefaultOptions();
     return yargs
         .usage('$0 [options]')
         .option('rootDir', {
@@ -200,7 +199,7 @@ export function resolveCliOptions(
         ]),
     ];
 
-    return removeUndefined<PartialConfigOptions>({
+    return {
         outDir: argv.outDir,
         srcDir: argv.srcDir,
         extension: argv.ext,
@@ -223,10 +222,10 @@ export function resolveCliOptions(
         outputSources: argv.stcss,
         outputCSSNameTemplate: argv.cssFilename,
         diagnosticsMode: argv.diagnosticsMode as ConfigOptions['diagnosticsMode'],
-    });
+    };
 }
 
-export function getDefaultOptions(): ConfigOptions {
+export function createDefaultOptions(): ConfigOptions {
     return {
         outDir: '.',
         srcDir: '.',

@@ -23,9 +23,7 @@ async function main() {
 
     const projects = projectsConfig(argv);
 
-    for (const projectRoot in projects) {
-        const options = projects[projectRoot];
-
+    for (const [projectRoot, options] of Object.entries(projects)) {
         const { dts, dtsSourceMap } = options;
 
         log('[Project]', projectRoot, options);

@@ -1,6 +1,8 @@
 import type { BuildOptions } from './build';
 import { loadStylableConfig } from '@stylable/build-tools';
-import { CliArguments, resolveCliOptions, getDefaultOptions } from './resolve-options';
+import { CliArguments, resolveCliOptions, createDefaultOptions } from './resolve-options';
+import { removeUndefined } from './helpers';
+import { resolve } from 'path';
 
 export type ConfigOptions = Omit<BuildOptions, 'watch' | 'rootDir' | 'stylable' | 'log' | 'fs'>;
 export type PartialConfigOptions = Partial<ConfigOptions>;
@@ -25,16 +27,11 @@ interface SingleProjectConfig {
 }
 
 export function projectsConfig(argv: CliArguments): STCConfig {
-    const projectRoot = argv.rootDir;
-    const defaultOptions = getDefaultOptions();
-    const optionsFromFile = resolveConfigFile(projectRoot);
+    const projectRoot = resolve(argv.rootDir);
+    const defaultOptions = createDefaultOptions();
+    const configFile = resolveConfigFile(projectRoot);
     const cliOptions = resolveCliOptions(argv, defaultOptions);
-
-    const topLevelOptions: ConfigOptions = {
-        ...defaultOptions,
-        ...(optionsFromFile?.options || {}),
-        ...cliOptions,
-    };
+    const topLevelOptions = mergeProjectsConfigs(defaultOptions, configFile?.options, cliOptions);
 
     return {
         [projectRoot]: topLevelOptions,
@@ -49,4 +46,15 @@ export function resolveConfigFile(context: string) {
 
 function isSTCConfig(config: any): config is { stcConfig: Configuration } {
     return typeof config === 'object' && typeof config.stcConfig === 'function';
+}
+
+function mergeProjectsConfigs(
+    ...configs: [ConfigOptions, ...(ConfigOptions | PartialConfigOptions | undefined)[]]
+): ConfigOptions {
+    const [config, ...rest] = configs;
+
+    return Object.assign(
+        config,
+        ...rest.map((currentConfig) => (currentConfig ? removeUndefined(currentConfig) : {}))
+    );
 }
