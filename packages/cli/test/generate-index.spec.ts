@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { Stylable } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
+import { createGenerator } from '@stylable/cli/dist/build';
 
 const log = () => {
     /**/
@@ -29,6 +30,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
+            generator: createGenerator('/', stylable, log, undefined),
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -63,6 +65,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
+            generator: createGenerator('/', stylable, log, undefined),
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -97,7 +100,12 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/test-generator'),
+            generator: createGenerator(
+                '/',
+                stylable,
+                log,
+                require.resolve('./fixtures/test-generator')
+            ),
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -133,7 +141,12 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/test-generator'),
+            generator: createGenerator(
+                '/',
+                stylable,
+                log,
+                require.resolve('./fixtures/test-generator')
+            ),
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -170,7 +183,12 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/named-exports-generator'),
+            generator: createGenerator(
+                '/',
+                stylable,
+                log,
+                require.resolve('./fixtures/named-exports-generator')
+            ),
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -205,6 +223,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
+            generator: createGenerator('/', stylable, log, undefined),
         });
 
         const res = fs.readFileSync('/some-dir/other-dir/index.st.css').toString();
@@ -234,6 +253,7 @@ describe('build index', () => {
                 indexFile: 'index.st.css',
                 rootDir: '/',
                 log,
+                generator: createGenerator('/', stylable, log, undefined),
             });
         } catch (error) {
             expect((error as Error)?.message).to.equal(
