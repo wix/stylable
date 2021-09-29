@@ -17,7 +17,7 @@ export type PartialConfigOptions = Partial<ConfigOptions>;
 export type Configuration = () => SingleProjectConfig;
 
 export interface STCConfig {
-    [projectRoot: string]: ConfigOptions;
+    [absoluteProjectRoot: string]: ConfigOptions;
 }
 
 interface SingleProjectConfig {
