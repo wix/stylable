@@ -1,9 +1,9 @@
-import type { ConfigOptions, PartialConfigOptions } from './projects-config';
-import type { Arguments } from 'yargs';
 import { nodeFs } from '@file-services/node';
+import type { Arguments } from 'yargs';
 import yargs from 'yargs';
+import type { ConfigOptions, PartialConfigOptions } from './projects-config';
 
-const { join, resolve } = nodeFs;
+const { join } = nodeFs;
 
 export interface CliArguments {
     rootDir: string;
@@ -213,10 +213,6 @@ export function resolveCliOptions(
         manifest: argv.manifest ? join(rootDir, outDir, argv.manifestFilepath) : undefined,
         useNamespaceReference: argv.useNamespaceReference,
         diagnostics: argv.diagnostics,
-        generatorPath:
-            argv.customGenerator !== undefined
-                ? resolve(argv.customGenerator)
-                : argv.customGenerator,
         outputCSS: argv.css,
         includeCSSInJS: argv.cssInJs,
         outputSources: argv.stcss,

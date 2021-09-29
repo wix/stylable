@@ -4,7 +4,10 @@ import { CliArguments, resolveCliOptions, createDefaultOptions } from './resolve
 import { removeUndefined } from './helpers';
 import { resolve } from 'path';
 
-export type ConfigOptions = Omit<BuildOptions, 'watch' | 'rootDir' | 'stylable' | 'log' | 'fs'>;
+export type ConfigOptions = Omit<
+    BuildOptions,
+    'watch' | 'rootDir' | 'stylable' | 'log' | 'fs' | 'generator'
+>;
 export type PartialConfigOptions = Partial<ConfigOptions>;
 
 /**

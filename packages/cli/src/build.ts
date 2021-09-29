@@ -33,8 +33,8 @@ export interface BuildOptions {
     log: Log;
     /** opt into build index file and specify the filepath for the generated index file */
     indexFile?: string;
-    /** path to a custom cli index generator */
-    generatorPath?: string;
+    /** custom cli index generator */
+    generator: Generator;
     /** specify emitted module formats */
     moduleFormats?: Array<'cjs' | 'esm'>;
     /** template of the css file emitted when using outputCSS */
@@ -74,7 +74,7 @@ export async function build({
     outDir,
     log,
     indexFile,
-    generatorPath,
+    generator,
     moduleFormats,
     includeCSSInJS,
     outputCSS,
@@ -99,7 +99,6 @@ export async function build({
 
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
-    const generator = createGenerator(stylable, log, generatorPath);
     const generated = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
@@ -254,10 +253,17 @@ export async function build({
     }
 }
 
-function createGenerator(stylable: Stylable, log: Log, generatorPath?: string) {
-    const generatorModule: { Generator: typeof Generator } = generatorPath
-        ? require(generatorPath)
-        : require('./base-generator');
+export function createGenerator(
+    root: string,
+    stylable: Stylable,
+    log: Log,
+    generatorPath?: string
+) {
+    const pathToGenerator = generatorPath
+        ? require.resolve(generatorPath, { paths: [root] })
+        : './base-generator';
+
+    const generatorModule: { Generator: typeof Generator } = require(pathToGenerator);
     return new generatorModule.Generator(stylable, log);
 }
 
