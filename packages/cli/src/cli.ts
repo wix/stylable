@@ -22,6 +22,7 @@ async function main() {
     }
 
     const projects = projectsConfig(argv);
+    const resolverCache = new Map();
 
     for (const [projectRoot, options] of Object.entries(projects)) {
         const { dts, dtsSourceMap } = options;
@@ -38,7 +39,7 @@ async function main() {
             requireModule: require,
             projectRoot,
             resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
-            resolverCache: new Map(),
+            resolverCache,
         });
 
         await build({
