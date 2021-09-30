@@ -9,7 +9,6 @@ import {
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 
-const generator = undefined as any;
 const log = () => {
     /**/
 };
@@ -46,7 +45,6 @@ describe('build stand alone', () => {
             log,
             moduleFormats: ['cjs'],
             outputSources: true,
-            generator,
         });
 
         [
@@ -104,7 +102,6 @@ describe('build stand alone', () => {
             moduleFormats: ['cjs'],
             outputSources: true,
             useNamespaceReference: true,
-            generator,
         });
 
         [
@@ -129,7 +126,6 @@ describe('build stand alone', () => {
             outDir: 'cjs2',
             log,
             moduleFormats: ['cjs'],
-            generator,
         });
 
         // check two builds using sourceNamespace are identical
@@ -165,7 +161,6 @@ describe('build stand alone', () => {
             rootDir: '/',
             log,
             moduleFormats: ['cjs'],
-            generator,
         });
         const messages = diagnosticsMessages.get('/comp.st.css')!;
 
@@ -204,7 +199,6 @@ describe('build stand alone', () => {
             moduleFormats: ['cjs'],
             outputCSS: true,
             outputCSSNameTemplate: '[filename].global.css',
-            generator,
         });
 
         const builtFile = fs.readFileSync('/dist/comp.global.css', 'utf8');
@@ -243,7 +237,6 @@ describe('build stand alone', () => {
             moduleFormats: ['cjs'],
             outputCSS: true,
             outputCSSNameTemplate: '[filename].global.css',
-            generator,
         });
 
         const builtFile = fs.readFileSync('/dist/comp.global.css', 'utf8');
@@ -274,7 +267,6 @@ describe('build stand alone', () => {
             outputCSS: true,
             injectCSSRequest: true,
             outputCSSNameTemplate: '[filename].global.css',
-            generator,
         });
 
         expect(fs.readFileSync('/dist/comp.st.css.js', 'utf8')).contains(
@@ -303,7 +295,6 @@ describe('build stand alone', () => {
             log,
             dts: true,
             dtsSourceMap: false,
-            generator,
         });
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
@@ -339,7 +330,6 @@ describe('build stand alone', () => {
             log,
             dts: true,
             dtsSourceMap: false,
-            generator,
         });
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
@@ -389,7 +379,6 @@ describe('build stand alone', () => {
             log,
             dts: true,
             dtsSourceMap: true,
-            generator,
         });
 
         ['/main.st.css', '/main.st.css.d.ts', '/main.st.css.d.ts.map'].forEach((p) => {
