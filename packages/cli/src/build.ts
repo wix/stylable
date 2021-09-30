@@ -1,6 +1,6 @@
 import { Stylable, visitMetaCSSDependenciesBFS } from '@stylable/core';
 import type { IFileSystem } from '@file-services/types';
-import type { Generator } from './base-generator';
+import { Generator as BaseGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
@@ -33,8 +33,8 @@ export interface BuildOptions {
     log: Log;
     /** opt into build index file and specify the filepath for the generated index file */
     indexFile?: string;
-    /** custom cli index generator */
-    generator: Generator;
+    /** custom cli index generator class */
+    Generator?: typeof BaseGenerator;
     /** specify emitted module formats */
     moduleFormats?: Array<'cjs' | 'esm'>;
     /** template of the css file emitted when using outputCSS */
@@ -74,7 +74,7 @@ export async function build({
     outDir,
     log,
     indexFile,
-    generator,
+    Generator = BaseGenerator,
     moduleFormats,
     includeCSSInJS,
     outputCSS,
@@ -99,6 +99,7 @@ export async function build({
 
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
+    const generator = new Generator(stylable, log);
     const generated = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
@@ -255,16 +256,23 @@ export async function build({
 
 export function createGenerator(
     root: string,
-    stylable: Stylable,
-    log: Log,
     generatorPath?: string
-) {
-    const pathToGenerator = generatorPath
-        ? require.resolve(generatorPath, { paths: [root] })
-        : './base-generator';
+): undefined | typeof BaseGenerator {
+    if (!generatorPath) {
+        return undefined;
+    }
 
-    const generatorModule: { Generator: typeof Generator } = require(pathToGenerator);
-    return new generatorModule.Generator(stylable, log);
+    const absoluteGeneratorPath = require.resolve(generatorPath, { paths: [root] });
+
+    try {
+        const generatorModule: { Generator: typeof BaseGenerator } = require(absoluteGeneratorPath);
+
+        return generatorModule.Generator;
+    } catch (error) {
+        throw new Error(
+            `Stylable CLI could not resolve custom generator from "${absoluteGeneratorPath}"`
+        );
+    }
 }
 
 function validateConfiguration(outputSources: boolean | undefined, outDir: string, srcDir: string) {

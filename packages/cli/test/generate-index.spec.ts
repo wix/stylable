@@ -97,7 +97,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/test-generator'),
+            Generator: require('./fixtures/test-generator').Generator,
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -133,7 +133,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/test-generator'),
+            Generator: require('./fixtures/test-generator').Generator,
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -170,7 +170,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/named-exports-generator'),
+            Generator: require('./fixtures/named-exports-generator').Generator,
         });
 
         const res = fs.readFileSync('/index.st.css').toString();

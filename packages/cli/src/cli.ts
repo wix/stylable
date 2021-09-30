@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
-import { build, createGenerator } from './build';
+import { build } from './build';
 import { createLogger } from './logger';
 import { projectsConfig } from './projects-config';
 import { getCliArguments } from './resolve-options';
@@ -42,16 +42,13 @@ async function main() {
             resolverCache,
         });
 
-        const generator = createGenerator(projectRoot, stylable, log, argv.customGenerator);
-
         await build({
-            ...options,
             watch,
             stylable,
             log,
             fs: fileSystem,
             rootDir: projectRoot,
-            generator,
+            ...options,
         });
     }
 }

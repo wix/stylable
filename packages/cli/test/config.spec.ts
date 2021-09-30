@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
+import { readFileSync } from 'fs';
 import { join } from 'path';
 import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
 
@@ -81,6 +82,91 @@ describe('Stylable Cli Config', function () {
                 'my-project/stylable.config.js',
                 'my-project/style.st.css',
             ]);
+        });
+
+        it('should override generator from config file', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'comp-A.st.css': `
+                      .a{}
+                    `,
+                'stylable.config.js': `
+                        exports.stcConfig = () => ({ 
+                            options: { 
+                                indexFile: 'my-index.st.css',
+                                Generator: require('${require.resolve(
+                                    './fixtures/test-generator'
+                                )}').Generator,
+                                outDir: './dist',
+                            }
+                        })
+                `,
+                b: {
+                    '/1-some-comp-B-.st.css': `
+                      .b{}
+                     `,
+                },
+            });
+
+            runCliSync(['--rootDir', tempDir.path]);
+
+            const indexFileResult = readFileSync(
+                join(tempDir.path, 'dist', 'my-index.st.css')
+            ).toString();
+
+            expect(indexFileResult.trim()).to.eql(
+                [
+                    ':import {-st-from: "../b/1-some-comp-B-.st.css";-st-default:Style0;}',
+                    '.root Style0{}',
+                    ':import {-st-from: "../comp-A.st.css";-st-default:Style1;}',
+                    '.root Style1{}',
+                ].join('\n')
+            );
+        });
+
+        it('should override config file generator from cli when passed customGenerator path', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'comp-A.st.css': `
+                      .a{}
+                    `,
+                'stylable.config.js': `
+                        exports.stcConfig = () => ({ 
+                            options: { 
+                                indexFile: 'my-index.st.css',
+                                Generator: require('${require.resolve(
+                                    './fixtures/named-exports-generator'
+                                )}').Generator,
+                                outDir: './dist',
+                            }
+                        })
+                `,
+                b: {
+                    '/1-some-comp-B-.st.css': `
+                      .b{}
+                     `,
+                },
+            });
+
+            runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--customGenerator',
+                require.resolve('./fixtures/test-generator'),
+            ]);
+
+            const indexFileResult = readFileSync(
+                join(tempDir.path, 'dist', 'my-index.st.css')
+            ).toString();
+
+            expect(indexFileResult.trim()).to.eql(
+                [
+                    ':import {-st-from: "../b/1-some-comp-B-.st.css";-st-default:Style0;}',
+                    '.root Style0{}',
+                    ':import {-st-from: "../comp-A.st.css";-st-default:Style1;}',
+                    '.root Style1{}',
+                ].join('\n')
+            );
         });
     });
 });

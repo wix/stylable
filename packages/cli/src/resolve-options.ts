@@ -1,6 +1,7 @@
 import { nodeFs } from '@file-services/node';
 import type { Arguments } from 'yargs';
 import yargs from 'yargs';
+import { createGenerator } from './build';
 import type { ConfigOptions, PartialConfigOptions } from './projects-config';
 
 const { join } = nodeFs;
@@ -218,6 +219,7 @@ export function resolveCliOptions(
         outputSources: argv.stcss,
         outputCSSNameTemplate: argv.cssFilename,
         diagnosticsMode: argv.diagnosticsMode as ConfigOptions['diagnosticsMode'],
+        Generator: createGenerator(rootDir, argv.customGenerator),
     };
 }
 
