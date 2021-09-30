@@ -14,7 +14,7 @@ describe('Stylable Cli Code Mods', () => {
         await tempDir.remove();
     });
 
-    it('apply all code mods when no specific filter applied', () => {
+    it('apply built-in code mods', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `:import {-st-from: './x'; -st-default: Name} .dummy{}`,
@@ -80,7 +80,7 @@ describe('Stylable Cli Code Mods', () => {
         const dirContent = loadDirSync(tempDir.path);
 
         expect(dirContent['style.st.css']).equal(`.root{}`);
-        expect(stdout).to.match(/Summery:\n\[CodeMod\] − .*?style\.st\.css/);
+        expect(stdout, 'Summery contains the skipped file prefixed with "−"').to.match(/Summery:\n\[CodeMod\] − .*?style\.st\.css/);
     });
 
     it('should fail with exit code 1 when failed to load a mod', () => {
