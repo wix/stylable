@@ -93,7 +93,7 @@ describe('Stylable Cli Config', function () {
                 'stylable.config.js': `
                         exports.stcConfig = () => ({ 
                             options: { 
-                                indexFile: './my-index.st.css',
+                                indexFile: 'my-index.st.css',
                                 Generator: require('${require.resolve(
                                     './fixtures/test-generator'
                                 )}').Generator,
@@ -133,7 +133,7 @@ describe('Stylable Cli Config', function () {
                 'stylable.config.js': `
                         exports.stcConfig = () => ({ 
                             options: { 
-                                indexFile: './my-index.st.css',
+                                indexFile: 'my-index.st.css',
                                 Generator: require('${require.resolve(
                                     './fixtures/named-exports-generator'
                                 )}').Generator,
