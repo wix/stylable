@@ -9,7 +9,7 @@
     "@stylable/core": "^4.6.0",
     "@stylable/optimizer": "^4.6.0",
     "@stylable/runtime": "^4.6.0",
-    "css-loader": "^6.2.0",
+    "css-loader": "^6.3.0",
     "decache": "^4.6.0"
   },
   "files": [
