@@ -68,7 +68,7 @@ export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions)
     }
 
     for (const { filePath, modifications } of finished) {
-        log(`√ ${filePath} (${modifications} modifications)`);
+        log(`√ ${filePath} (${modifications} applied codemods)`);
     }
 
     for (const { filePath } of failed) {
