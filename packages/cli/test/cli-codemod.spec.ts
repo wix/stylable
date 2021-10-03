@@ -27,9 +27,12 @@ describe('Stylable Cli Code Mods', () => {
     });
 
     it('should load external codemods', () => {
-        const inlineCodeMod: CodeMod = ({ ast, postcss, modifications }) => {
+        const inlineCodeMod: CodeMod = ({ ast, postcss }) => {
             ast.append(postcss.comment({ text: 'Hello CodeMod' }));
-            modifications.count++;
+
+            return {
+                changed: true,
+            };
         };
 
         populateDirectorySync(tempDir.path, {
@@ -80,7 +83,9 @@ describe('Stylable Cli Code Mods', () => {
         const dirContent = loadDirSync(tempDir.path);
 
         expect(dirContent['style.st.css']).equal(`.root{}`);
-        expect(stdout, 'Summery contains the skipped file prefixed with "−"').to.match(/Summery:\n\[CodeMod\] − .*?style\.st\.css/);
+        expect(stdout, 'Summery contains the skipped file prefixed with "−"').to.match(
+            /Summery:\n\[CodeMod\] − .*?style\.st\.css/
+        );
     });
 
     it('should fail with exit code 1 when failed to load a mod', () => {
