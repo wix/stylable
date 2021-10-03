@@ -94,9 +94,9 @@ describe('Stylable Cli Config', function () {
                         exports.stcConfig = () => ({ 
                             options: { 
                                 indexFile: 'my-index.st.css',
-                                Generator: require('${require.resolve(
-                                    './fixtures/test-generator'
-                                )}').Generator,
+                                Generator: require(${JSON.stringify(
+                                    require.resolve('./fixtures/test-generator')
+                                )}).Generator,
                                 outDir: './dist',
                             }
                         })
@@ -134,9 +134,9 @@ describe('Stylable Cli Config', function () {
                         exports.stcConfig = () => ({ 
                             options: { 
                                 indexFile: 'my-index.st.css',
-                                Generator: require('${require.resolve(
-                                    './fixtures/named-exports-generator'
-                                )}').Generator,
+                                Generator: require(${JSON.stringify(
+                                    require.resolve('./fixtures/named-exports-generator')
+                                )}).Generator,
                                 outDir: './dist',
                             }
                         })
