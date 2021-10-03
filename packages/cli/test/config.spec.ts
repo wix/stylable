@@ -168,5 +168,24 @@ describe('Stylable Cli Config', function () {
                 ].join('\n')
             );
         });
+
+        it('should give a custom error message when fail to eval stcConfig', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'entry.st.css': `
+                      .a{}
+                    `,
+                'stylable.config.js': `
+                        exports.stcConfig = () => {
+                            throw new Error('Custom Error')
+                        }
+                `,
+            });
+
+            const { stderr } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(stderr).to.match(/Error: Failed to evaluate "stcConfig"/);
+            expect(stderr).to.match(/Custom Error/);
+        });
     });
 });

@@ -3,6 +3,7 @@ import { loadStylableConfig } from '@stylable/build-tools';
 import { CliArguments, resolveCliOptions, createDefaultOptions } from './resolve-options';
 import { removeUndefined } from './helpers';
 import { resolve } from 'path';
+import { tryRun } from './build-tools';
 
 export type ConfigOptions = Omit<BuildOptions, 'watch' | 'rootDir' | 'stylable' | 'log' | 'fs'>;
 export type PartialConfigOptions = Partial<ConfigOptions>;
@@ -39,9 +40,12 @@ export function projectsConfig(argv: CliArguments): STCConfig {
 }
 
 export function resolveConfigFile(context: string) {
-    return loadStylableConfig(context, (config) => {
-        return isSTCConfig(config) ? config.stcConfig() : undefined;
-    });
+    return loadStylableConfig(context, (config) =>
+        tryRun(
+            () => (isSTCConfig(config) ? config.stcConfig() : undefined),
+            'Failed to evaluate "stcConfig"'
+        )
+    );
 }
 
 function isSTCConfig(config: any): config is { stcConfig: Configuration } {
