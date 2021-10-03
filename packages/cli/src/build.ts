@@ -7,6 +7,7 @@ import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { levels, Log } from './logger';
 import { DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
+import { tryRun } from './build-tools';
 
 export const messages = {
     START_WATCHING: 'start watching...',
@@ -264,15 +265,11 @@ export function createGenerator(
 
     const absoluteGeneratorPath = require.resolve(generatorPath, { paths: [root] });
 
-    try {
+    return tryRun(() => {
         const generatorModule: { Generator: typeof BaseGenerator } = require(absoluteGeneratorPath);
 
         return generatorModule.Generator;
-    } catch (error) {
-        throw new Error(
-            `Stylable CLI could not resolve custom generator from "${absoluteGeneratorPath}"`
-        );
-    }
+    }, `Could not resolve custom generator from "${absoluteGeneratorPath}"`);
 }
 
 function validateConfiguration(outputSources: boolean | undefined, outDir: string, srcDir: string) {
