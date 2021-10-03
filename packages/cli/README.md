@@ -128,6 +128,74 @@ After installing `@stylable/cli`, the `stc-format` command will be available, ru
 $ stc-format --target ./src
 ```
 
+
+## Usage `stc-codemod`
+
+After installing `@stylable/cli`, the `stc-codemod` command will be available, running `stc-codemod --help` will provide a brief description for the options available.
+
+### Usage with `npx`
+
+It is possible to run the codemod cli with npx with the following command
+
+```bash
+npx -p @stylable/cli stc-codemod --help
+```
+
+| Option                        | Alias | Description                                                   | Value Type    | Default Value                 |
+| ----------------------------- | ----- | ------------------------------------------------------------- | --------------| ----------------------------- |
+| `--rootDir`                   | `d`   | Root directory of a project                                   | `string`      | `current working directory`   |
+| `--mods`                      | `m`   | Array of builtin codemods to execute                          | `array`       | `[]`                          |
+| `--external`                  | `e`   | Array of external codemod requests to execute                          | `array`       | `[]`                          |
+| `--require`                   | `r`   | require hooks                                                 | `array`       | `[]`                          |
+| `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
+
+
+#### builtin codemods
+
+- `st-import-to-at-import` - Convert `:import` to `@st-import` syntax.
+> Note that this codemod does not preserve comments inside the `:import` 
+
+- `st-global-custom-property-to-at-property` - Convert deprecated `@st-global-custom-property *;` to `@property st-global(*);` syntax.
+
+### Provide an external codemod
+
+Codemods are transformation operations for code based on AST.
+
+The contract for external codemods is that any requested module (`cjs`) will provide a `module.export.codemods` which is an iterable with the following signature: 
+
+```ts
+interface CodeModResponse {
+    changed: boolean;
+}
+
+type Codemods = Iterable<{ id: string, apply: CodeMod }>;
+
+type CodeMod = (context: CodeModContext) => CodeModResponse;
+
+interface CodeModContext {
+    ast: Root;
+    diagnostics: Diagnostics;
+    postcss: Postcss;
+}
+```
+> Codemod ids should be namespaced to avoid collision.
+
+#### Basic codemod example
+
+```ts
+module.exports.codemods = [
+    {
+        id: 'banner', 
+        apply({ ast, postcss }) { 
+            ast.prepend(postcss.comment({text: 'Hello Codemod'}));
+            
+            return {
+                changed: true
+            }
+        }
+    }
+]
+```
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).
