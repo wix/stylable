@@ -4,15 +4,14 @@ import type { Postcss, Root, CssSyntaxError } from 'postcss';
 export interface CodeModContext {
     ast: Root;
     diagnostics: Diagnostics;
-    modifications: Modifications;
     postcss: Postcss;
 }
 
-export type CodeMod = (context: CodeModContext) => void;
-
-export interface Modifications {
-    count: number;
+export interface CodeModResponse {
+    changed: boolean;
 }
+
+export type CodeMod = (context: CodeModContext) => CodeModResponse;
 
 export interface ApplyCodeModsFailure {
     type: 'failure';
@@ -25,7 +24,7 @@ export interface ApplyCodeModsSuccess {
     filePath: string;
     css: string;
     reports: Map<string, Diagnostic[]>;
-    modifications: { count: number };
+    modifications: number;
 }
 
 export type ApplyCodeModsResult = ApplyCodeModsSuccess | ApplyCodeModsFailure;

@@ -8,12 +8,8 @@ import {
 import type { AtRule } from 'postcss';
 import type { CodeMod } from './types';
 
-export const stGlobalCustomPropertyToAtProperty: CodeMod = ({
-    ast,
-    diagnostics,
-    modifications,
-    postcss,
-}) => {
+export const stGlobalCustomPropertyToAtProperty: CodeMod = ({ ast, diagnostics, postcss }) => {
+    let changed = false;
     ast.walkAtRules('st-global-custom-property', (atRule) => {
         const properties = parseStGlobalCustomProperty(atRule, diagnostics);
 
@@ -27,9 +23,13 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = ({
                 );
             }
             atRule.remove();
-            modifications.count++;
+            changed = true;
         }
     });
+
+    return {
+        changed,
+    };
 };
 
 function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): CSSVarSymbol[] {

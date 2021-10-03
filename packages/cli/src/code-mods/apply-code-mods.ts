@@ -10,11 +10,16 @@ export function applyCodeMods(
     try {
         const reports = new Map<string, Diagnostic[]>();
         const ast = parse(css);
-        const modifications = { count: 0 };
+        let modifications = 0;
+
         for (const { id, apply } of mods) {
             const diagnostics = new Diagnostics();
 
-            apply({ ast, diagnostics, postcss, modifications });
+            const { changed } = apply({ ast, diagnostics, postcss });
+
+            if (changed) {
+                modifications++;
+            }
 
             if (diagnostics.reports.length) {
                 reports.set(id, diagnostics.reports);

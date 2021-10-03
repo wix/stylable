@@ -51,7 +51,7 @@ export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions)
                 logReports(reports, filePath, log);
                 failed.push(result);
             } else {
-                if (modifications.count > 0) {
+                if (modifications > 0) {
                     fs.writeFileSync(filePath, css);
                     finished.push(result);
                 } else {
@@ -68,7 +68,7 @@ export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions)
     }
 
     for (const { filePath, modifications } of finished) {
-        log(`√ ${filePath} (${modifications.count} modifications)`);
+        log(`√ ${filePath} (${modifications} modifications)`);
     }
 
     for (const { filePath } of failed) {

@@ -2,7 +2,8 @@ import { parsePseudoImport, Imported } from '@stylable/core';
 import type { Postcss, AtRule } from 'postcss';
 import type { CodeMod } from './types';
 
-export const stImportToAtImport: CodeMod = ({ ast, diagnostics, postcss, modifications }) => {
+export const stImportToAtImport: CodeMod = ({ ast, diagnostics, postcss }) => {
+    let changed = false;
     ast.walkRules((rule) => {
         if (rule.selector === ':import') {
             const importObj = parsePseudoImport(rule, '*', diagnostics);
@@ -12,10 +13,14 @@ export const stImportToAtImport: CodeMod = ({ ast, diagnostics, postcss, modific
                     ast.raws.semicolon = true;
                 }
                 rule.replaceWith(createAtImport(importObj, postcss));
-                modifications.count++;
+                changed = true;
             }
         }
     });
+
+    return {
+        changed,
+    };
 };
 
 function createAtImport(importObj: Imported, postcss: Postcss): AtRule {

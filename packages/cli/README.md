@@ -164,14 +164,17 @@ Codemods are transformation operations for code based on AST.
 The contract for external codemods is that any requested module (`cjs`) will provide a `module.export.codemods` which is an iterable with the following signature: 
 
 ```ts
+interface CodeModResponse {
+    changed: boolean;
+}
+
 type Codemods = Iterable<{ id: string, apply: CodeMod }>;
 
-type CodeMod = (context: CodeModContext) => void;
+type CodeMod = (context: CodeModContext) => CodeModResponse;
 
 interface CodeModContext {
     ast: Root;
     diagnostics: Diagnostics;
-    modifications: Modifications;
     postcss: Postcss;
 }
 ```
@@ -183,15 +186,16 @@ interface CodeModContext {
 module.exports.codemods = [
     {
         id: 'banner', 
-        apply({ ast, postcss, modifications }) { 
+        apply({ ast, postcss }) { 
             ast.prepend(postcss.comment({text: 'Hello Codemod'}));
-            modifications.count++;
+            
+            return {
+                changed: true
+            }
         }
     }
 ]
 ```
-> It is required to bump up the `modifications.count` otherwise the changes might not be written to disk.
-
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).
