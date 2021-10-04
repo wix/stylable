@@ -21,7 +21,7 @@ export const resolveNpmProjects: ResolveProjects = (projectsMap, { projectRoot }
             for (const [packageName] of projectsMap) {
                 if (!projects.some((project) => project.displayName === packageName)) {
                     throw new Error(
-                        `Stylable CLI default resolution could not find package named "${packageName}" under "${projectRoot}"`
+                        `Stylable CLI default resolution could not find package named "${packageName}"`
                     );
                 }
             }

@@ -252,7 +252,7 @@ describe('Stylable Cli Config', function () {
             // TODO
         });
 
-        it('should handle multiple options for specific package', () => {
+        it('should handle multiple build outputs with different options for specific package', () => {
             // TODO
         });
 
@@ -313,7 +313,7 @@ describe('Stylable Cli Config', function () {
 
             expect(stderr).to.match(
                 new RegExp(
-                    `Error: Stylable CLI default resolution could not find package named "not-exists" under "${tempDir.path}"`
+                    `Error: Stylable CLI default resolution could not find package named "not-exists"`
                 )
             );
         });
