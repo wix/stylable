@@ -164,19 +164,14 @@ export function resolveCliOptions(
 ): PartialConfigOptions {
     const rootDir = argv.rootDir;
     const outDir = argv.outDir ?? defaults.outDir;
-    const moduleFormats = [
-        ...new Set([
-            ...(defaults.moduleFormats || []),
-            ...getModuleFormats({ esm: argv.esm, cjs: argv.cjs }),
-        ]),
-    ];
+    const moduleFormats = getModuleFormats({ esm: argv.esm, cjs: argv.cjs });
 
     return {
         outDir: argv.outDir,
         srcDir: argv.srcDir,
         extension: argv.ext,
         indexFile: argv.indexFile,
-        moduleFormats,
+        moduleFormats: moduleFormats.length ? moduleFormats : undefined,
         dts: argv.dts,
         dtsSourceMap: argv.dtsSourceMap ?? argv.dts,
         injectCSSRequest: argv.injectCSSRequest,

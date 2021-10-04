@@ -23,6 +23,7 @@ describe('Stylable Cli Config', function () {
                 'stylable.config.js': `
                   exports.stcConfig = () => ({ options: { 
                     outDir: './dist',
+                    moduleFormats: ['esm'],
                    } })
                 `,
             });
@@ -31,7 +32,7 @@ describe('Stylable Cli Config', function () {
 
             const dirContent = loadDirSync(tempDir.path);
             expect(Object.keys(dirContent)).to.eql([
-                'dist/style.st.css.js',
+                'dist/style.st.css.mjs',
                 'package.json',
                 'stylable.config.js',
                 'style.st.css',
