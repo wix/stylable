@@ -1,5 +1,6 @@
 import { dirname } from 'path';
 import * as postcss from 'postcss';
+import type { Diagnostics } from './diagnostics';
 
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
@@ -11,7 +12,7 @@ import type { CSSResolve } from './stylable-resolver';
 import type { StylableTransformer } from './stylable-transformer';
 import { createSubsetAst } from './helpers/rule';
 import { isValidDeclaration, mergeRules } from './stylable-utils';
-import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
+import { valueMapping, mixinDeclRegExp, strategies } from './stylable-value-parsers';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
 
 export const mixinWarnings = {
@@ -65,16 +66,24 @@ export function appendMixin(
 
     const local = meta.mappedSymbols[mix.mixin.type];
     if (local && (local._kind === 'class' || local._kind === 'element')) {
-        handleLocalClassMixin(mix, transformer, meta, variableOverride, cssVarsMapping, path, rule);
+        handleLocalClassMixin(
+            reParseMixinNamedArgs(mix, rule, transformer.diagnostics),
+            transformer,
+            meta,
+            variableOverride,
+            cssVarsMapping,
+            path,
+            rule
+        );
     } else {
-        const resolvedMixin = transformer.resolver.resolve(mix.ref);
+        const resolvedMixin = transformer.resolver.deepResolve(mix.ref);
         if (resolvedMixin) {
             if (resolvedMixin._kind === 'js') {
                 if (typeof resolvedMixin.symbol === 'function') {
                     try {
                         handleJSMixin(
                             transformer,
-                            mix,
+                            reParseMixinArgs(mix, rule, transformer.diagnostics),
                             resolvedMixin.symbol,
                             meta,
                             rule,
@@ -96,7 +105,7 @@ export function appendMixin(
             } else {
                 handleImportedCSSMixin(
                     transformer,
-                    mix,
+                    reParseMixinNamedArgs(mix, rule, transformer.diagnostics),
                     rule,
                     meta,
                     path,
@@ -105,7 +114,7 @@ export function appendMixin(
                 );
             }
         } else {
-            // TODO: error cannot resolve mixin
+            // TODO: error cannot resolve mixin - this should be a diagnostic covered by unknown symbol
         }
     }
 }
@@ -390,4 +399,49 @@ function filterPartialMixinDecl(
             }
         }
     });
+}
+
+/** this is a workaround for parsing the mixin args too early  */
+function reParseMixinNamedArgs(
+    mix: RefedMixin,
+    rule: postcss.Rule,
+    diagnostics: Diagnostics
+): RefedMixin {
+    const options =
+        mix.mixin.valueNode?.type === 'function'
+            ? strategies.named(mix.mixin.valueNode, (message, options) => {
+                  diagnostics.warn(mix.mixin.originDecl || rule, message, options);
+              })
+            : (mix.mixin.options as Record<string, string>) || {};
+
+    return {
+        ...mix,
+        mixin: {
+            ...mix.mixin,
+            options,
+        },
+    };
+}
+
+function reParseMixinArgs(
+    mix: RefedMixin,
+    rule: postcss.Rule,
+    diagnostics: Diagnostics
+): RefedMixin {
+    const options =
+        mix.mixin.valueNode?.type === 'function'
+            ? strategies.args(mix.mixin.valueNode, (message, options) => {
+                  diagnostics.warn(mix.mixin.originDecl || rule, message, options);
+              })
+            : Array.isArray(mix.mixin.options)
+            ? (mix.mixin.options as { value: string }[])
+            : [];
+
+    return {
+        ...mix,
+        mixin: {
+            ...mix.mixin,
+            options,
+        },
+    };
 }

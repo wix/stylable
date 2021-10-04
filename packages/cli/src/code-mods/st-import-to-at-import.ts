@@ -1,23 +1,29 @@
-import { parsePseudoImport, Diagnostics, Imported } from '@stylable/core';
-import postcss, { Root, AtRule } from 'postcss';
+import { parsePseudoImport, Imported } from '@stylable/core';
+import type { Postcss, AtRule } from 'postcss';
+import type { CodeMod } from './types';
 
-export function stImportToAtImport(ast: Root, diagnostics: Diagnostics) {
+export const stImportToAtImport: CodeMod = ({ ast, diagnostics, postcss }) => {
+    let changed = false;
     ast.walkRules((rule) => {
         if (rule.selector === ':import') {
             const importObj = parsePseudoImport(rule, '*', diagnostics);
-            const fatalDiagnostics = diagnostics.reports.filter((report) => report.type !== 'info');
 
-            if (fatalDiagnostics.length) {
-                diagnostics.reports = fatalDiagnostics;
-            } else {
-                rule.replaceWith(createAtImport(importObj));
-                diagnostics.reports = [];
+            if (!diagnostics.reports.length) {
+                if (ast.last === rule) {
+                    ast.raws.semicolon = true;
+                }
+                rule.replaceWith(createAtImport(importObj, postcss));
+                changed = true;
             }
         }
     });
-}
 
-function createAtImport(importObj: Imported): AtRule {
+    return {
+        changed,
+    };
+};
+
+function createAtImport(importObj: Imported, postcss: Postcss): AtRule {
     const named = Object.entries(importObj.named);
     const keyframes = Object.entries(importObj.keyframes);
     let params = '';
@@ -44,7 +50,7 @@ function createAtImport(importObj: Imported): AtRule {
         params += ']';
     }
 
-    params += ` from ${JSON.stringify(importObj.request)};`;
+    params += ` from ${JSON.stringify(importObj.request)}`;
 
     return postcss.atRule({ name: 'st-import', params });
 }

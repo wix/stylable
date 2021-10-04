@@ -16,4 +16,4 @@ export function createLogger(prefix: string, shouldLog: boolean) {
     };
 }
 
-export type Log = (...args: [...string[], symbol | string]) => void;
+export type Log = (...args: [...any[]]) => void;

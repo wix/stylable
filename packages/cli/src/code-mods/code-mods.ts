@@ -1,16 +1,23 @@
 import { FileSystem, findFiles } from '@stylable/node';
-import { applyCodeMods, CodeMod, registeredMods } from './apply-code-mods';
+import { applyCodeMods } from './apply-code-mods';
 import { relative, join } from 'path';
+import type { ApplyCodeModsResult, ApplyCodeModsSuccess, CodeMod } from './types';
+import type { Log } from '../logger';
+import type { Diagnostic } from '@stylable/core';
 
-export interface BuildOptions {
+export interface CodeModsOptions {
     fs: FileSystem;
     rootDir: string;
     extension: string;
-    mods: string[];
-    log: (...args: string[]) => void;
+    mods: Set<{ id: string; apply: CodeMod }>;
+    log: Log;
 }
 
-export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
+export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions) {
+    if (mods.size === 0) {
+        return log('No codemods to apply provided. Bail execution.');
+    }
+
     const { result: files } = findFiles(
         fs,
         join,
@@ -20,67 +27,60 @@ export function codeMods({ fs, rootDir, extension, mods, log }: BuildOptions) {
         new Set<string>(['node_modules', '.git'])
     );
 
-    if (mods.length === 0) {
-        return log('No mods provided.');
-    }
-
     if (files.size === 0) {
         return log('No stylable files found.');
     }
 
     log(`Transforming ${files.size} stylable files.`);
 
-    const loadedMods = new Set<{ id: string; apply: CodeMod }>();
-    for (const id of mods) {
-        const apply = registeredMods.get(id);
-        if (!apply) {
-            log(`Unknown mod ${id}`);
-        } else {
-            loadedMods.add({ id, apply });
-        }
-    }
+    const failed: ApplyCodeModsResult[] = [];
+    const skipped: ApplyCodeModsSuccess[] = [];
+    const finished: ApplyCodeModsSuccess[] = [];
 
-    if (loadedMods.size !== mods.length) {
-        return;
-    }
-
-    const skipped = [];
-    const finished = [];
     for (const filePath of files) {
-        const result = applyCodeMods(fs.readFileSync(filePath).toString(), loadedMods);
+        const source = fs.readFileSync(filePath).toString();
+        const result = applyCodeMods(filePath, source, mods);
 
         if (result.type === 'failure') {
             log(`${filePath}: failed to parse\n${result.error.toString()}`);
-            skipped.push(filePath);
+            failed.push(result);
         } else {
-            const { css, reports } = result;
+            const { css, reports, modifications } = result;
 
             if (reports.size) {
-                for (const [modName, diagnosticsReports] of reports) {
-                    for (const report of diagnosticsReports) {
-                        const error = report.node.error(report.message, report.options);
-
-                        log(
-                            `[${modName}]`,
-                            `${filePath}: ${report.message}\n${error.showSourceCode()}`
-                        );
-                    }
-                }
-                skipped.push(filePath);
+                logReports(reports, filePath, log);
+                failed.push(result);
             } else {
-                fs.writeFileSync(filePath, css);
-                finished.push(filePath);
+                if (modifications > 0) {
+                    fs.writeFileSync(filePath, css);
+                    finished.push(result);
+                } else {
+                    skipped.push(result);
+                }
             }
         }
     }
 
     log('Summery:');
 
-    for (const filePath of finished) {
-        log(`√ ${filePath}`);
+    for (const { filePath } of skipped) {
+        log(`− ${filePath}`);
     }
 
-    for (const filePath of skipped) {
+    for (const { filePath, modifications } of finished) {
+        log(`√ ${filePath} (${modifications} applied codemods)`);
+    }
+
+    for (const { filePath } of failed) {
         log(`✗ ${filePath}`);
+    }
+}
+
+function logReports(reports: Map<string, Diagnostic[]>, filePath: string, log: Log) {
+    for (const [name, diagnosticsReports] of reports) {
+        for (const report of diagnosticsReports) {
+            const error = report.node.error(report.message, report.options);
+            log(`[${name}]`, `${filePath}: ${report.message}\n${error.showSourceCode()}`);
+        }
     }
 }

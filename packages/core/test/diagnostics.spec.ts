@@ -370,20 +370,27 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return a warning for a CSS mixin using un-named params', () => {
-                expectWarnings(
-                    `
-                    .mixed {
-                        color: red;
-                    }
-                    .gaga{
-                        |-st-mixin: mixed($1$)|;
-                    }
-
-                `,
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                                .mixed {
+                                    color: red;
+                                }
+                                .gaga{
+                                    |-st-mixin: mixed($1$)|;
+                                }
+            
+                            `,
+                            },
+                        },
+                    },
                     [
                         {
                             message: valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
-                            file: 'main.css',
+                            file: '/style.st.css',
                         },
                     ]
                 );
