@@ -63,7 +63,6 @@ export {
     scopeCSSVar,
     scopeSelector,
     transformMatchesOnRule,
-    processDeclarationFunctions,
 } from './stylable-utils';
 export {
     CSSResolve,
