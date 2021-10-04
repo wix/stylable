@@ -34,7 +34,7 @@ import {
     isCSSVarProp,
     scopeSelector,
 } from './stylable-utils';
-import { processDeclarationFunctions } from "./internal/process-declaration-functions";
+import { processDeclarationFunctions } from "./process-declaration-functions";
 import {
     paramMapping,
     rootValueMapping,
