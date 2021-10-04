@@ -32,9 +32,9 @@ import {
     expandCustomSelectors,
     getAlias,
     isCSSVarProp,
-    processDeclarationFunctions,
     scopeSelector,
 } from './stylable-utils';
+import { processDeclarationFunctions } from "./internal/process-declaration-functions";
 import {
     paramMapping,
     rootValueMapping,
