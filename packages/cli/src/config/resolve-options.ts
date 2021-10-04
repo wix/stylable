@@ -1,39 +1,10 @@
 import { nodeFs } from '@file-services/node';
 import type { Arguments } from 'yargs';
 import yargs from 'yargs';
-import { createGenerator } from './build';
-import type { ConfigOptions, PartialConfigOptions } from './projects-config';
+import { createGenerator } from '../build';
+import type { CliArguments, ConfigOptions, PartialConfigOptions } from './types';
 
 const { join } = nodeFs;
-
-export interface CliArguments {
-    rootDir: string;
-    srcDir: string | undefined;
-    outDir: string | undefined;
-    esm: boolean | undefined;
-    cjs: boolean | undefined;
-    css: boolean | undefined;
-    stcss: boolean | undefined;
-    dts: boolean | undefined;
-    dtsSourceMap: boolean | undefined;
-    useNamespaceReference: boolean | undefined;
-    namespaceResolver: string;
-    injectCSSRequest: boolean | undefined;
-    cssFilename: string | undefined;
-    cssInJs: boolean | undefined;
-    optimize: boolean | undefined;
-    minify: boolean | undefined;
-    indexFile: string | undefined;
-    manifest: boolean | undefined;
-    manifestFilepath: string;
-    customGenerator: string | undefined;
-    ext: string | undefined;
-    require: string[];
-    log: boolean | undefined;
-    diagnostics: boolean | undefined;
-    diagnosticsMode: string | undefined;
-    watch: boolean;
-}
 
 export function getCliArguments(): Arguments<CliArguments> {
     const defaults = createDefaultOptions();

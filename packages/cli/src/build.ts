@@ -196,7 +196,7 @@ export async function build({
                 mode,
                 `${messages.FINISHED_PROCESSING} ${count} ${count === 1 ? 'file' : 'files'}${
                     changeOrigin ? ', watching...' : ''
-                }`,
+                } in "${rootDir}"`,
                 levels.info
             );
         },
