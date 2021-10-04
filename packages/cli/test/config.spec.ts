@@ -248,15 +248,72 @@ describe('Stylable Cli Config', function () {
             ]);
         });
 
+        it('should handle override for specific request', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{
+                    "name": "workspace", 
+                    "version": "0.0.0",
+                    "private": true,
+                    "workspaces": ["packages/*"]
+                }`,
+                packages: {
+                    'project-a': {
+                        'style.st.css': `.root{color:red}`,
+                        'package.json': `{
+                            "name": "a", 
+                            "version": "0.0.0"
+                        }`,
+                    },
+                    'project-b': {
+                        'style.st.css': `.root{color:blue}`,
+                        'package.json': `{
+                            "name": "b", 
+                            "version": "0.0.0",
+                            "dependencies": {
+                                "a": "0.0.0"
+                            }
+                        }`,
+                    },
+                },
+                'stylable.config.js': `
+                exports.stcConfig = () => ({ 
+                    options: { 
+                        outDir: './dist',
+                        dts: true,
+                    },
+                    projects: [
+                        'a', 
+                        [
+                            'b', 
+                            { options: { dts: false } }
+                        ]
+                    ]
+                })
+                `,
+            });
+
+            runCliSync(['--rootDir', tempDir.path]);
+
+            const dirContent = loadDirSync(tempDir.path);
+
+            expect(Object.keys(dirContent)).to.include.members([
+                'packages/project-a/dist/style.st.css.d.ts',
+            ]);
+
+            expect(Object.keys(dirContent)).to.not.include.members([
+                'packages/project-b/dist/style.st.css.d.ts',
+            ]);
+        });
+
         it('should handle topological watch built order', () => {
             // TODO
         });
 
-        it('should handle multiple build outputs with different options for specific package', () => {
+        it('should handle multiple build outputs with different options for specific request', () => {
             // TODO
         });
 
-        it('should handle options overrides for specific package', () => {
+        it('should handle options overrides for specific request', () => {
             // TODO
         });
 

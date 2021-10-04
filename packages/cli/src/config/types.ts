@@ -34,7 +34,17 @@ export interface SingleProjectConfig {
 }
 
 export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
-    projects: string[] | Record<string, PartialConfigOptions | PartialConfigOptions[]>;
+    projects:
+        | Array<
+              | string
+              | [
+                    string,
+                    {
+                        options: PartialConfigOptions | PartialConfigOptions[];
+                    }
+                ]
+          >
+        | Record<string, PartialConfigOptions | PartialConfigOptions[]>;
     resolveProjects?: ResolveProjects;
 }
 

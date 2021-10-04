@@ -26,13 +26,23 @@ export function projectsConfig(argv: CliArguments): STCConfig {
         const projects: ResolveProjectsRequestsParams['projects'] = new Map();
 
         if (Array.isArray(configFile.projects)) {
-            for (const projectRequest of configFile.projects) {
-                projects.set(projectRequest, [topLevelOptions]);
+            for (const projectEntry of configFile.projects) {
+                if (typeof projectEntry === 'string') {
+                    projects.set(projectEntry, [topLevelOptions]);
+                } else {
+                    const [request, { options }] = projectEntry;
+                    projects.set(
+                        request,
+                        (Array.isArray(options) ? options : [options])
+                            .slice()
+                            .map((option) => mergeProjectsConfigs(topLevelOptions, option))
+                    );
+                }
             }
         } else if (typeof configFile.projects === 'object') {
-            for (const [projectRequest, options] of Object.entries(projects)) {
+            for (const [request, options] of Object.entries(projects)) {
                 projects.set(
-                    projectRequest,
+                    request,
                     (Array.isArray(options) ? options : [options])
                         .slice()
                         .map((option) => mergeProjectsConfigs(topLevelOptions, option))
@@ -78,7 +88,7 @@ function mergeProjectsConfigs(
     const [config, ...rest] = configs;
 
     return Object.assign(
-        config,
+        { ...config },
         ...rest.map((currentConfig) => (currentConfig ? removeUndefined(currentConfig) : {}))
     );
 }
