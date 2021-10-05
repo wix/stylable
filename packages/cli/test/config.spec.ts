@@ -21,10 +21,13 @@ describe('Stylable Cli Config', function () {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{color:red}`,
                 'stylable.config.js': `
-                  exports.stcConfig = () => ({ options: { 
-                    outDir: './dist',
-                    moduleFormats: ['esm'],
-                   } })
+                  exports.stcConfig = () => ({ 
+                      options: { 
+                            outDir: './dist',
+                            cjs: false
+                            esm: true,
+                        } 
+                    })
                 `,
             });
 
