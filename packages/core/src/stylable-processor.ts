@@ -23,8 +23,8 @@ import {
     expandCustomSelectors,
     getAlias,
     isCSSVarProp,
-    processDeclarationFunctions,
 } from './stylable-utils';
+import { processDeclarationFunctions } from "./process-declaration-functions";
 import {
     walkSelector,
     isSimpleSelector,

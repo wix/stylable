@@ -53,7 +53,6 @@ export {
     mergeRules,
     scopeCSSVar,
     transformMatchesOnRule,
-    processDeclarationFunctions,
 } from './stylable-utils';
 export {
     CSSResolve,
