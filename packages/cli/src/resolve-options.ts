@@ -63,7 +63,7 @@ export function getCliArguments(): Arguments<CliArguments> {
         .option('cjs', {
             type: 'boolean',
             description: 'output commonjs module (.js)',
-            defaultDescription: String(defaults.esm),
+            defaultDescription: String(defaults.cjs),
         })
         .option('css', {
             type: 'boolean',
