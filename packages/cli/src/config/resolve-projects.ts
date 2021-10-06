@@ -1,39 +1,40 @@
-import type { ResolveProjects, STCConfig } from './types';
-import { INpmPackage, resolveDirectoryContext } from '@wixc3/resolve-directory-context';
-import { asteriskMatch } from '../helpers';
+import {
+    INpmPackage,
+    resolveWorkspacePackages,
+    sortPackagesByDepth,
+} from '@wixc3/resolve-directory-context';
+import type { RawProjectEntry, ResolveProjects } from './types';
 
 export const resolveNpmProjects: ResolveProjects = (projectsEntries, { projectRoot }) => {
-    const directoryContext = resolveDirectoryContext(projectRoot);
+    const projectEntriesMap = new Map<string, RawProjectEntry>();
+    const packagesSet = new Set<INpmPackage>();
 
-    if (directoryContext.type === 'single') {
-        throw new Error(
-            'Stylable CLI multiple project config default resolution does not support single package'
-        );
-    } else {
-        const projects: STCConfig = [];
-        const packages = directoryContext.packages.slice() as Array<INpmPackage | null>;
+    for (const entry of projectsEntries) {
+        const { request } = entry;
+        const packages = sortPackagesByDepth(resolveWorkspacePackages(projectRoot, [request]));
 
-        for (const { request, options } of projectsEntries) {
-            let foundMatch = false;
-            for (let i = 0; i < packages.length; i++) {
-                const pkg = packages[i];
+        for (const pkg of packages) {
+            const previousEntry = projectEntriesMap.get(pkg.displayName)!;
 
-                if (!pkg) {
+            if (previousEntry) {
+                if (previousEntry.request === request) {
+                    throw new Error(
+                        'Stylable CLI config can not have a duplicate project requests'
+                    );
+                } else {
                     continue;
                 }
-
-                if (asteriskMatch(request, pkg.displayName)) {
-                    foundMatch = true;
-                    packages[i] = null;
-                    projects.push({ projectRoot: pkg.directoryPath, options });
-                }
             }
 
-            if (!foundMatch) {
-                throw new Error(`Stylable CLI could not resolve project named "${request}"`);
-            }
+            projectEntriesMap.set(pkg.displayName, entry);
+            packagesSet.add(pkg);
         }
-
-        return projects;
     }
+
+    const packages = Array.from(packagesSet).map((pkg) => ({
+        projectRoot: pkg.directoryPath,
+        options: projectEntriesMap.get(pkg.displayName)!.options,
+    }));
+
+    return packages;
 };

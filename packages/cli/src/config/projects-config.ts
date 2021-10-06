@@ -30,13 +30,13 @@ export function projectsConfig(argv: CliArguments): STCConfig {
             for (const RawProjectEntry of configFile.projects) {
                 if (typeof RawProjectEntry === 'string') {
                     projects.push({
-                        request: RawProjectEntry,
+                        request: RawProjectEntry.trim(),
                         options: [topLevelOptions],
                     });
                 } else {
                     const [request, { options }] = RawProjectEntry;
                     projects.push({
-                        request,
+                        request: request.trim(),
                         options: (Array.isArray(options) ? options : [options])
                             .slice()
                             .map((option) => mergeProjectsConfigs(topLevelOptions, option)),
@@ -46,7 +46,7 @@ export function projectsConfig(argv: CliArguments): STCConfig {
         } else if (typeof configFile.projects === 'object') {
             for (const [request, options] of Object.entries(projects)) {
                 projects.push({
-                    request,
+                    request: request.trim(),
                     options: (Array.isArray(options) ? options : [options])
                         .slice()
                         .map((option) => mergeProjectsConfigs(topLevelOptions, option)),
@@ -92,7 +92,8 @@ function mergeProjectsConfigs(
     const [config, ...rest] = configs;
 
     return Object.assign(
-        { ...config },
+        {},
+        config,
         ...rest.map((currentConfig) => (currentConfig ? removeUndefined(currentConfig) : {}))
     );
 }
