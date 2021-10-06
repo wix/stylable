@@ -45,18 +45,12 @@ export interface SingleProjectConfig {
     options: PartialConfigOptions;
 }
 
+export interface ProjectEntryValue {
+    options: PartialConfigOptions | PartialConfigOptions[];
+}
+
 export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
-    projects:
-        | Array<
-              | string
-              | [
-                    string,
-                    {
-                        options: PartialConfigOptions | PartialConfigOptions[];
-                    }
-                ]
-          >
-        | Record<string, PartialConfigOptions | PartialConfigOptions[]>;
+    projects: Array<string | [string, ProjectEntryValue]> | Record<string, ProjectEntryValue>;
     resolveProjects?: ResolveProjects;
 }
 

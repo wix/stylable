@@ -404,7 +404,70 @@ describe('Stylable Cli Config', function () {
         });
 
         it('should handle multiple build outputs with different options for specific request', () => {
-            // TODO
+            populateDirectorySync(tempDir.path, {
+                'package.json': JSON.stringify({
+                    name: 'workspace',
+                    version: '0.0.0',
+                    private: true,
+                }),
+                packages: {
+                    'project-a': {
+                        test: {
+                            'style.st.css': `.test: {color: gold}`,
+                        },
+                        src: {
+                            'style.st.css': `
+                                .root {color: blue;}
+                                .foo {color:red;}
+                            `,
+                        },
+                        'package.json': `{
+                            "name": "a", 
+                            "version": "0.0.0"
+                        }`,
+                    },
+                },
+                'stylable.config.js': `
+                exports.stcConfig = () => ({ 
+                    options: { 
+                        outDir: './dist',
+                        outputSources: true,
+                        cjs: false,
+                        dts: true
+                    },
+                    projects: {
+                        'packages/*': {
+                            options: [
+                                {
+                                    srcDir: 'src'
+                                },
+                                {
+                                    outDir: './dist/test',
+                                    srcDir: 'test',
+                                    dts: false
+                                }
+                            ]
+                        }
+                    }
+                })
+                `,
+            });
+
+            const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+            const dirContent = loadDirSync(tempDir.path);
+
+            expect(stderr, 'has cli error').not.to.match(/error/i);
+            expect(stdout, 'has diagnostic error').not.to.match(/error/i);
+
+            expect(Object.keys(dirContent)).to.include.members([
+                'packages/project-a/dist/test/style.st.css',
+                'packages/project-a/dist/style.st.css',
+                'packages/project-a/dist/style.st.css.d.ts',
+            ]);
+
+            expect(Object.keys(dirContent)).not.to.include.members([
+                'packages/project-a/dist/test/style.st.css.d.ts',
+            ]);
         });
 
         it('should throw when the property "projects" is invalid', () => {

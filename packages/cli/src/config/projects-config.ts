@@ -9,6 +9,7 @@ import type {
     Configuration,
     MultipleProjectsConfig,
     PartialConfigOptions,
+    ProjectEntryValue,
     RawProjectEntry,
     ResolveProjectsContext,
     ResolveProjectsRequestsParams,
@@ -27,30 +28,17 @@ export function projectsConfig(argv: CliArguments): STCConfig {
         const projects: RawProjectEntry[] = [];
 
         if (Array.isArray(configFile.projects)) {
-            for (const RawProjectEntry of configFile.projects) {
-                if (typeof RawProjectEntry === 'string') {
-                    projects.push({
-                        request: RawProjectEntry.trim(),
-                        options: [topLevelOptions],
-                    });
-                } else {
-                    const [request, { options }] = RawProjectEntry;
-                    projects.push({
-                        request: request.trim(),
-                        options: (Array.isArray(options) ? options : [options])
-                            .slice()
-                            .map((option) => mergeProjectsConfigs(topLevelOptions, option)),
-                    });
-                }
+            for (const entry of configFile.projects) {
+                projects.push(
+                    resolveProjectEntry(
+                        typeof entry === 'string' ? [entry, { options: {} }] : entry,
+                        topLevelOptions
+                    )
+                );
             }
         } else if (typeof configFile.projects === 'object') {
-            for (const [request, options] of Object.entries(projects)) {
-                projects.push({
-                    request: request.trim(),
-                    options: (Array.isArray(options) ? options : [options])
-                        .slice()
-                        .map((option) => mergeProjectsConfigs(topLevelOptions, option)),
-                });
+            for (const entry of Object.entries(configFile.projects)) {
+                projects.push(resolveProjectEntry(entry, topLevelOptions));
             }
         }
 
@@ -106,4 +94,16 @@ function resolveProjectsRequests({
     const context: ResolveProjectsContext = { projectRoot };
 
     return resolveProjects(projects, context);
+}
+
+function resolveProjectEntry(
+    [request, { options }]: [string, ProjectEntryValue],
+    configOptions: ConfigOptions
+): RawProjectEntry {
+    return {
+        request: request.trim(),
+        options: (Array.isArray(options) ? options : [options])
+            .slice()
+            .map((option) => mergeProjectsConfigs(configOptions, option)),
+    };
 }
