@@ -43,7 +43,7 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputSources: true,
         });
 
@@ -99,7 +99,7 @@ describe('build stand alone', () => {
             srcDir: 'src',
             outDir: 'cjs',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputSources: true,
             useNamespaceReference: true,
         });
@@ -125,7 +125,7 @@ describe('build stand alone', () => {
             srcDir: 'cjs',
             outDir: 'cjs2',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
         });
 
         // check two builds using sourceNamespace are identical
@@ -160,7 +160,7 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
         });
         const messages = diagnosticsMessages.get('/comp.st.css')!;
 
@@ -196,7 +196,7 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputCSS: true,
             outputCSSNameTemplate: '[filename].global.css',
         });
@@ -234,7 +234,7 @@ describe('build stand alone', () => {
             minify: true,
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputCSS: true,
             outputCSSNameTemplate: '[filename].global.css',
         });
@@ -263,7 +263,7 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputCSS: true,
             injectCSSRequest: true,
             outputCSSNameTemplate: '[filename].global.css',
@@ -291,7 +291,6 @@ describe('build stand alone', () => {
             outDir: '.',
             srcDir: '.',
             rootDir: '/',
-            moduleFormats: [],
             log,
             dts: true,
             dtsSourceMap: false,
@@ -326,7 +325,6 @@ describe('build stand alone', () => {
             outDir: '.',
             srcDir: '.',
             rootDir: '/',
-            moduleFormats: [],
             log,
             dts: true,
             dtsSourceMap: false,
@@ -375,7 +373,6 @@ describe('build stand alone', () => {
             outDir: '.',
             srcDir: '.',
             rootDir: '/',
-            moduleFormats: [],
             log,
             dts: true,
             dtsSourceMap: true,

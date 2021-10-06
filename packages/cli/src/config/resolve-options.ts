@@ -29,12 +29,12 @@ export function getCliArguments(): Arguments<CliArguments> {
         .option('esm', {
             type: 'boolean',
             description: 'output esm module (.mjs)',
-            defaultDescription: 'false',
+            defaultDescription: String(defaults.esm),
         })
         .option('cjs', {
             type: 'boolean',
             description: 'output commonjs module (.js)',
-            defaultDescription: 'true',
+            defaultDescription: String(defaults.cjs),
         })
         .option('css', {
             type: 'boolean',
@@ -164,14 +164,14 @@ export function resolveCliOptions(
 ): PartialConfigOptions {
     const rootDir = argv.rootDir;
     const outDir = argv.outDir ?? defaults.outDir;
-    const moduleFormats = getModuleFormats({ esm: argv.esm, cjs: argv.cjs });
 
     return {
         outDir: argv.outDir,
         srcDir: argv.srcDir,
         extension: argv.ext,
         indexFile: argv.indexFile,
-        moduleFormats: moduleFormats.length ? moduleFormats : undefined,
+        esm: argv.esm,
+        cjs: argv.cjs,
         dts: argv.dts,
         dtsSourceMap: argv.dtsSourceMap ?? argv.dts,
         injectCSSRequest: argv.injectCSSRequest,
@@ -194,7 +194,8 @@ export function createDefaultOptions(): ConfigOptions {
         outDir: '.',
         srcDir: '.',
         extension: '.st.css',
-        moduleFormats: ['cjs'],
+        cjs: true,
+        esm: false,
         dts: false,
         dtsSourceMap: false,
         injectCSSRequest: false,
@@ -208,15 +209,4 @@ export function createDefaultOptions(): ConfigOptions {
         outputCSSNameTemplate: '[filename].css',
         diagnosticsMode: 'strict',
     };
-}
-
-function getModuleFormats({ esm, cjs }: { [k: string]: boolean | undefined }) {
-    const formats: Array<'esm' | 'cjs'> = [];
-    if (esm) {
-        formats.push('esm');
-    }
-    if (cjs) {
-        formats.push('cjs');
-    }
-    return formats;
 }

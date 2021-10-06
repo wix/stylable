@@ -36,8 +36,10 @@ export interface BuildOptions {
     indexFile?: string;
     /** custom cli index generator class */
     Generator?: typeof BaseGenerator;
-    /** specify emitted module formats */
-    moduleFormats?: Array<'cjs' | 'esm'>;
+    /** output commonjs module (.js) */
+    cjs?: boolean;
+    /** output esm module (.mjs) */
+    esm?: boolean;
     /** template of the css file emitted when using outputCSS */
     outputCSSNameTemplate?: string;
     /** should include the css in the generated JS module */
@@ -76,7 +78,8 @@ export async function build({
     log,
     indexFile,
     Generator = BaseGenerator,
-    moduleFormats,
+    cjs,
+    esm,
     includeCSSInJS,
     outputCSS,
     outputCSSNameTemplate,
@@ -105,6 +108,7 @@ export async function build({
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
     const diagnosticsMessages: DiagnosticMessages = new Map();
+    const moduleFormats = getModuleFormats({ cjs, esm });
 
     const service = new DirectoryProcessService(fs, {
         watchMode: watch,
@@ -300,4 +304,15 @@ function updateWatcherDependencies(
             resolver
         );
     }
+}
+
+function getModuleFormats({ esm, cjs }: { [k: string]: boolean | undefined }) {
+    const formats: Array<'esm' | 'cjs'> = [];
+    if (esm) {
+        formats.push('esm');
+    }
+    if (cjs) {
+        formats.push('cjs');
+    }
+    return formats;
 }
