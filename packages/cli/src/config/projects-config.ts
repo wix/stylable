@@ -9,7 +9,7 @@ import type {
     Configuration,
     MultipleProjectsConfig,
     PartialConfigOptions,
-    ProjectEntry,
+    RawProjectEntry,
     ResolveProjectsContext,
     ResolveProjectsRequestsParams,
     STCConfig,
@@ -24,17 +24,17 @@ export function projectsConfig(argv: CliArguments): STCConfig {
     const topLevelOptions = mergeProjectsConfigs(defaultOptions, configFile?.options, cliOptions);
 
     if (isMultpleConfigProject(configFile)) {
-        const projects: ProjectEntry[] = [];
+        const projects: RawProjectEntry[] = [];
 
         if (Array.isArray(configFile.projects)) {
-            for (const projectEntry of configFile.projects) {
-                if (typeof projectEntry === 'string') {
+            for (const RawProjectEntry of configFile.projects) {
+                if (typeof RawProjectEntry === 'string') {
                     projects.push({
-                        request: projectEntry,
+                        request: RawProjectEntry,
                         options: [topLevelOptions],
                     });
                 } else {
-                    const [request, { options }] = projectEntry;
+                    const [request, { options }] = RawProjectEntry;
                     projects.push({
                         request,
                         options: (Array.isArray(options) ? options : [options])

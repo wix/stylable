@@ -14,19 +14,20 @@ export type PartialConfigOptions = Partial<ConfigOptions>;
  */
 export type Configuration = () => SingleProjectConfig | MultipleProjectsConfig;
 
-export interface STCConfigEntry {
+interface BaseProjectEntry {
+    options: ConfigOptions[];
+}
+
+export interface ProjectEntry extends BaseProjectEntry {
     projectRoot: string;
-    options: ConfigOptions[];
 }
-
-export interface ProjectEntry {
+export interface RawProjectEntry extends BaseProjectEntry {
     request: string;
-    options: ConfigOptions[];
 }
 
-export type STCConfig = STCConfigEntry[];
+export type STCConfig = ProjectEntry[];
 export type ResolveProjects = (
-    projects: Array<ProjectEntry>,
+    projects: Array<RawProjectEntry>,
     context: ResolveProjectsContext
 ) => STCConfig;
 
@@ -36,7 +37,7 @@ export interface ResolveProjectsContext {
 
 export interface ResolveProjectsRequestsParams {
     projectRoot: string;
-    projects: Array<ProjectEntry>;
+    projects: Array<RawProjectEntry>;
     resolveProjects: ResolveProjects;
 }
 
