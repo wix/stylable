@@ -21,9 +21,13 @@ describe('Stylable Cli Config', function () {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{color:red}`,
                 'stylable.config.js': `
-                  exports.stcConfig = () => ({ options: { 
-                    outDir: './dist',
-                   } })
+                  exports.stcConfig = () => ({ 
+                      options: { 
+                            outDir: './dist',
+                            cjs: false,
+                            esm: true,
+                        } 
+                    })
                 `,
             });
 
@@ -31,7 +35,7 @@ describe('Stylable Cli Config', function () {
 
             const dirContent = loadDirSync(tempDir.path);
             expect(Object.keys(dirContent)).to.eql([
-                'dist/style.st.css.js',
+                'dist/style.st.css.mjs',
                 'package.json',
                 'stylable.config.js',
                 'style.st.css',
