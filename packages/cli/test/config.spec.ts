@@ -234,7 +234,7 @@ describe('Stylable Cli Config', function () {
                         outDir: './dist',
                         dts: true,
                     },
-                    projects: ['c' ,'a', 'b']
+                    projects: ['*']
                 })
                 `,
             });
@@ -283,11 +283,11 @@ describe('Stylable Cli Config', function () {
                         dts: true,
                     },
                     projects: [
-                        'a', 
                         [
                             'b', 
                             { options: { dts: false } }
-                        ]
+                        ],
+                        '*'
                     ]
                 })
                 `,
@@ -307,19 +307,112 @@ describe('Stylable Cli Config', function () {
         });
 
         it('should handle topological watch built order', () => {
-            // TODO
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{
+                    "name": "workspace", 
+                    "version": "0.0.0",
+                    "private": true,
+                    "workspaces": ["packages/*"]
+                }`,
+                packages: {
+                    'project-a': {
+                        'style.st.css': `
+                        @st-import B from "../project-b/dist/style.st.css";
+
+                        .root {
+                            -st-extends: B;
+
+                            color: gold;
+                        }
+                        `,
+                        'package.json': `{
+                            "name": "a", 
+                            "version": "0.0.0",
+                            "dependencies": {
+                                "b": "0.0.0"
+                            }
+                        }`,
+                    },
+                    'project-b': {
+                        'style.st.css': `.root{color:red}`,
+                        'package.json': `{
+                            "name": "b", 
+                            "version": "0.0.0"
+                        }`,
+                    },
+                },
+                'stylable.config.js': `
+                exports.stcConfig = () => ({ 
+                    options: { 
+                        outDir: './dist',
+                        outputSources: true,
+                        moduleFormats: [],
+                    },
+                    projects: ['*']
+                })
+                `,
+            });
+
+            const { stdout } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(stdout).not.to.match(/cannot resolve imported file/);
         });
 
         it('should handle multiple build outputs with different options for specific request', () => {
             // TODO
         });
 
-        it('should handle options overrides for specific request', () => {
+        it('should throw when the property "projects" is invalid', () => {
             // TODO
         });
 
-        it('should throw when the property "projects" is invalid array', () => {
-            // TODO
+        it('should prioritize build order by projects specification', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{
+                    "name": "workspace", 
+                    "version": "0.0.0",
+                    "private": true,
+                    "workspaces": ["packages/*"]
+                }`,
+                packages: {
+                    'project-a': {
+                        'style.st.css': `.root{color:red}`,
+                        'package.json': `{
+                            "name": "a", 
+                            "version": "0.0.0"
+                        }`,
+                    },
+                    'project-b': {
+                        'style.st.css': `.root{color:blue}`,
+                        'package.json': `{
+                            "name": "first-b", 
+                            "version": "0.0.0",
+                            "dependencies": {
+                                "a": "0.0.0"
+                            }
+                        }`,
+                    },
+                },
+                'stylable.config.js': `
+                exports.stcConfig = () => ({ 
+                    options: { 
+                        outDir: './dist',
+                        dts: true,
+                    },
+                    projects: [
+                        'first-*',
+                        '*'
+                    ]
+                })
+                `,
+            });
+
+            const { stdout } = runCliSync(['--rootDir', tempDir.path]);
+
+            const projectBIndex = stdout.indexOf('project-b');
+            const projectAIndex = stdout.indexOf('project-a');
+
+            expect(projectBIndex, 'correct build order').to.be.lessThan(projectAIndex);
         });
 
         it('should throw when one of the dependency does not exist', () => {
@@ -352,7 +445,10 @@ describe('Stylable Cli Config', function () {
                         'style.st.css': `.root{color:gold}`,
                         'package.json': `{
                             "name": "b", 
-                            "version": "0.0.0"
+                            "version": "0.0.0",
+                            "dependencies": {
+                                "c": "0.0.0"
+                            }
                         }`,
                     },
                 },
@@ -360,9 +456,8 @@ describe('Stylable Cli Config', function () {
                 exports.stcConfig = () => ({ 
                     options: { 
                         outDir: './dist',
-                        dts: true,
                     },
-                    projects: ['not-exists' ,'a', 'b']
+                    projects: [ '*', 'not-exists' ]
                 })
                 `,
             });
@@ -370,9 +465,7 @@ describe('Stylable Cli Config', function () {
             const { stderr } = runCliSync(['--rootDir', tempDir.path]);
 
             expect(stderr).to.match(
-                new RegExp(
-                    `Error: Stylable CLI default resolution could not find package named "not-exists"`
-                )
+                new RegExp(`Error: Stylable CLI could not resolve project named "not-exists"`)
             );
         });
 
@@ -389,7 +482,7 @@ describe('Stylable Cli Config', function () {
                         outDir: './dist',
                         dts: true,
                     },
-                    projects: ['a', 'b']
+                    projects: ['*']
                 })
                 `,
             });
@@ -398,7 +491,7 @@ describe('Stylable Cli Config', function () {
 
             expect(stderr).to.match(
                 new RegExp(
-                    ` Stylable CLI multiple project config default resolution does not support single package`
+                    `Stylable CLI multiple project config default resolution does not support single package`
                 )
             );
         });

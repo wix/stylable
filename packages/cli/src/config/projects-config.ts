@@ -9,11 +9,12 @@ import type {
     Configuration,
     MultipleProjectsConfig,
     PartialConfigOptions,
+    ProjectEntry,
     ResolveProjectsContext,
     ResolveProjectsRequestsParams,
     STCConfig,
 } from './types';
-import { resolveNpmProjects } from './project-resolution';
+import { resolveNpmProjects } from './resolve-projects';
 
 export function projectsConfig(argv: CliArguments): STCConfig {
     const projectRoot = resolve(argv.rootDir);
@@ -23,30 +24,33 @@ export function projectsConfig(argv: CliArguments): STCConfig {
     const topLevelOptions = mergeProjectsConfigs(defaultOptions, configFile?.options, cliOptions);
 
     if (isMultpleConfigProject(configFile)) {
-        const projects: ResolveProjectsRequestsParams['projects'] = new Map();
+        const projects: ProjectEntry[] = [];
 
         if (Array.isArray(configFile.projects)) {
             for (const projectEntry of configFile.projects) {
                 if (typeof projectEntry === 'string') {
-                    projects.set(projectEntry, [topLevelOptions]);
+                    projects.push({
+                        request: projectEntry,
+                        options: [topLevelOptions],
+                    });
                 } else {
                     const [request, { options }] = projectEntry;
-                    projects.set(
+                    projects.push({
                         request,
-                        (Array.isArray(options) ? options : [options])
+                        options: (Array.isArray(options) ? options : [options])
                             .slice()
-                            .map((option) => mergeProjectsConfigs(topLevelOptions, option))
-                    );
+                            .map((option) => mergeProjectsConfigs(topLevelOptions, option)),
+                    });
                 }
             }
         } else if (typeof configFile.projects === 'object') {
             for (const [request, options] of Object.entries(projects)) {
-                projects.set(
+                projects.push({
                     request,
-                    (Array.isArray(options) ? options : [options])
+                    options: (Array.isArray(options) ? options : [options])
                         .slice()
-                        .map((option) => mergeProjectsConfigs(topLevelOptions, option))
-                );
+                        .map((option) => mergeProjectsConfigs(topLevelOptions, option)),
+                });
             }
         }
 

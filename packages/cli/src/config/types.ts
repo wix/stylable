@@ -19,14 +19,25 @@ export interface STCConfigEntry {
     options: ConfigOptions[];
 }
 
+export interface ProjectEntry {
+    request: string;
+    options: ConfigOptions[];
+}
+
 export type STCConfig = STCConfigEntry[];
 export type ResolveProjects = (
-    projects: Map<string, STCConfigEntry['options']>,
+    projects: Array<ProjectEntry>,
     context: ResolveProjectsContext
 ) => STCConfig;
 
 export interface ResolveProjectsContext {
     projectRoot: string;
+}
+
+export interface ResolveProjectsRequestsParams {
+    projectRoot: string;
+    projects: Array<ProjectEntry>;
+    resolveProjects: ResolveProjects;
 }
 
 export interface SingleProjectConfig {
@@ -46,12 +57,6 @@ export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
           >
         | Record<string, PartialConfigOptions | PartialConfigOptions[]>;
     resolveProjects?: ResolveProjects;
-}
-
-export interface ResolveProjectsRequestsParams {
-    projectRoot: string;
-    projects: Map<string, STCConfigEntry['options']>;
-    resolveProjects: ResolveProjects;
 }
 
 export interface CliArguments {
