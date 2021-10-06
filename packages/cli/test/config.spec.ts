@@ -16,7 +16,7 @@ describe('Stylable Cli Config', function () {
     });
 
     describe('Config file', () => {
-        it.only('should handle single project', () => {
+        it('should handle single project', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{color:red}`,
