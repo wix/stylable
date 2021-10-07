@@ -347,9 +347,37 @@ describe('Stylable CLI config multiple projects', function () {
         });
     });
 
-    describe('Projects Entries validation', () => {
+    describe('Projects validation', () => {
         it('should throw when the property "projects" is invalid', () => {
-            // TODO
+            populateDirectorySync(tempDir.path, {
+                'package.json': JSON.stringify({
+                    name: 'workspace',
+                    version: '0.0.0',
+                    private: true,
+                }),
+                packages: {
+                    'project-a': {
+                        'style.st.css': `.root{color:red}`,
+                        'package.json': `{
+                            "name": "a", 
+                            "version": "0.0.0",
+                        }`,
+                    },
+                },
+                'stylable.config.js': `
+                    exports.stcConfig = () => ({ 
+                        options: { 
+                            outDir: './dist',
+                        },
+                        projects: 999
+                    })
+                    `,
+            });
+
+            const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(stdout, 'has diagnostic error').not.to.match(/error/i);
+            expect(stderr).to.match(new RegExp(`Error: Invalid projects type`));
         });
 
         it('should throw when have duplicate request', () => {

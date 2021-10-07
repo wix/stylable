@@ -45,9 +45,15 @@ export interface SingleProjectConfig {
     options: PartialConfigOptions;
 }
 
+export type Presets = Record<string, PartialConfigOptions>;
+
+export type Projects =
+    | Array<string | [string, ProjectEntryValue]>
+    | Record<string, ProjectEntryValue>;
+
 export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
-    presets?: Record<string, PartialConfigOptions>;
-    projects: Array<string | [string, ProjectEntryValue]> | Record<string, ProjectEntryValue>;
+    presets?: Presets;
+    projects: Projects;
     resolveProjects?: ResolveProjects;
 }
 
@@ -59,6 +65,10 @@ export type ProjectEntryValue =
           presets?: string[];
           options: PartialConfigOptions | PartialConfigOptions[];
       };
+
+export interface ProcessProjectsOptions {
+    onProjectEntry(entry: [string, ProjectEntryValue] | [string]): void;
+}
 
 export interface CliArguments {
     rootDir: string;

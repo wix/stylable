@@ -9,7 +9,10 @@ import type {
     Configuration,
     MultipleProjectsConfig,
     PartialConfigOptions,
+    Presets,
+    ProcessProjectsOptions,
     ProjectEntryValue,
+    Projects,
     RawProjectEntity,
     ResolveProjectsContext,
     ResolveProjectsRequestsParams,
@@ -27,21 +30,11 @@ export function projectsConfig(argv: CliArguments): STCConfig {
     if (isMultpleConfigProject(configFile)) {
         const projects: RawProjectEntity[] = [];
 
-        if (Array.isArray(configFile.projects)) {
-            for (const entry of configFile.projects) {
-                projects.push(
-                    resolveProjectEntry(
-                        typeof entry === 'string' ? [entry] : entry,
-                        topLevelOptions,
-                        configFile.presets
-                    )
-                );
-            }
-        } else if (typeof configFile.projects === 'object') {
-            for (const entry of Object.entries(configFile.projects)) {
+        processProjects(configFile.projects, {
+            onProjectEntry(entry) {
                 projects.push(resolveProjectEntry(entry, topLevelOptions, configFile.presets));
-            }
-        }
+            },
+        });
 
         return resolveProjectsRequests({
             projectRoot,
@@ -87,6 +80,22 @@ function mergeProjectsConfigs(
     );
 }
 
+function processProjects(projects: Projects, { onProjectEntry }: ProcessProjectsOptions) {
+    if (!Array.isArray(projects) && typeof projects !== 'object') {
+        throw new Error('Invalid projects type');
+    }
+
+    if (Array.isArray(projects)) {
+        for (const entry of projects) {
+            onProjectEntry(typeof entry === 'string' ? [entry] : entry);
+        }
+    } else if (typeof projects === 'object') {
+        for (const entry of Object.entries<ProjectEntryValue>(projects)) {
+            onProjectEntry(entry);
+        }
+    }
+}
+
 function resolveProjectsRequests({
     projects,
     projectRoot,
@@ -100,7 +109,7 @@ function resolveProjectsRequests({
 function resolveProjectEntry(
     [request, value]: [string, ProjectEntryValue] | [string],
     configOptions: ConfigOptions,
-    availablePresets: MultipleProjectsConfig['presets']
+    availablePresets: Presets = {}
 ): RawProjectEntity {
     if (!value) {
         value = { options: {} };
