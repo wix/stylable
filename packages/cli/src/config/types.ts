@@ -21,13 +21,13 @@ interface BaseProjectEntry {
 export interface ProjectEntry extends BaseProjectEntry {
     projectRoot: string;
 }
-export interface RawProjectEntry extends BaseProjectEntry {
+export interface RawProjectEntity extends BaseProjectEntry {
     request: string;
 }
 
 export type STCConfig = ProjectEntry[];
 export type ResolveProjects = (
-    projects: Array<RawProjectEntry>,
+    projects: Array<RawProjectEntity>,
     context: ResolveProjectsContext
 ) => STCConfig;
 
@@ -37,7 +37,7 @@ export interface ResolveProjectsContext {
 
 export interface ResolveProjectsRequestsParams {
     projectRoot: string;
-    projects: Array<RawProjectEntry>;
+    projects: Array<RawProjectEntity>;
     resolveProjects: ResolveProjects;
 }
 

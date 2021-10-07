@@ -10,7 +10,7 @@ import type {
     MultipleProjectsConfig,
     PartialConfigOptions,
     ProjectEntryValue,
-    RawProjectEntry,
+    RawProjectEntity,
     ResolveProjectsContext,
     ResolveProjectsRequestsParams,
     STCConfig,
@@ -25,7 +25,7 @@ export function projectsConfig(argv: CliArguments): STCConfig {
     const topLevelOptions = mergeProjectsConfigs(defaultOptions, configFile?.options, cliOptions);
 
     if (isMultpleConfigProject(configFile)) {
-        const projects: RawProjectEntry[] = [];
+        const projects: RawProjectEntity[] = [];
 
         if (Array.isArray(configFile.projects)) {
             for (const entry of configFile.projects) {
@@ -99,7 +99,7 @@ function resolveProjectsRequests({
 function resolveProjectEntry(
     [request, { options }]: [string, ProjectEntryValue],
     configOptions: ConfigOptions
-): RawProjectEntry {
+): RawProjectEntity {
     return {
         request: request.trim(),
         options: (Array.isArray(options) ? options : [options])
