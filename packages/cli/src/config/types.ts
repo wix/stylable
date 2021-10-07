@@ -14,18 +14,18 @@ export type PartialConfigOptions = Partial<ConfigOptions>;
  */
 export type Configuration = () => SingleProjectConfig | MultipleProjectsConfig;
 
-interface BaseProjectEntry {
+interface BaseProjectEntity {
     options: ConfigOptions[];
 }
 
-export interface ProjectEntry extends BaseProjectEntry {
+export interface ProjectEntity extends BaseProjectEntity {
     projectRoot: string;
 }
-export interface RawProjectEntity extends BaseProjectEntry {
+export interface RawProjectEntity extends BaseProjectEntity {
     request: string;
 }
 
-export type STCConfig = ProjectEntry[];
+export type STCConfig = ProjectEntity[];
 export type ResolveProjects = (
     projects: Array<RawProjectEntity>,
     context: ResolveProjectsContext
@@ -45,13 +45,13 @@ export interface SingleProjectConfig {
     options: PartialConfigOptions;
 }
 
-export interface ProjectEntryValue {
-    options: PartialConfigOptions | PartialConfigOptions[];
-}
-
 export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
     projects: Array<string | [string, ProjectEntryValue]> | Record<string, ProjectEntryValue>;
     resolveProjects?: ResolveProjects;
+}
+
+export interface ProjectEntryValue {
+    options: PartialConfigOptions | PartialConfigOptions[];
 }
 
 export interface CliArguments {
