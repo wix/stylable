@@ -14,7 +14,7 @@ export const resolveNpmProjects: ResolveProjects = (projectsEntities, { projectR
         const packages = sortPackagesByDepth(resolveWorkspacePackages(projectRoot, [request]));
 
         for (const pkg of packages) {
-            const previousEntry = projectEntriesMap.get(pkg.displayName)!;
+            const previousEntry = projectEntriesMap.get(pkg.displayName);
 
             if (previousEntry) {
                 if (previousEntry.request === request) {
