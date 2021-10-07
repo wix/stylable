@@ -46,13 +46,19 @@ export interface SingleProjectConfig {
 }
 
 export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
+    presets?: Record<string, PartialConfigOptions>;
     projects: Array<string | [string, ProjectEntryValue]> | Record<string, ProjectEntryValue>;
     resolveProjects?: ResolveProjects;
 }
 
-export interface ProjectEntryValue {
-    options: PartialConfigOptions | PartialConfigOptions[];
-}
+export type ProjectEntryValue =
+    | string
+    | string[]
+    | {
+          preset?: string;
+          presets?: string[];
+          options: PartialConfigOptions | PartialConfigOptions[];
+      };
 
 export interface CliArguments {
     rootDir: string;

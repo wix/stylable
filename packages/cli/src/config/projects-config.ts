@@ -31,14 +31,15 @@ export function projectsConfig(argv: CliArguments): STCConfig {
             for (const entry of configFile.projects) {
                 projects.push(
                     resolveProjectEntry(
-                        typeof entry === 'string' ? [entry, { options: {} }] : entry,
-                        topLevelOptions
+                        typeof entry === 'string' ? [entry] : entry,
+                        topLevelOptions,
+                        configFile.presets
                     )
                 );
             }
         } else if (typeof configFile.projects === 'object') {
             for (const entry of Object.entries(configFile.projects)) {
-                projects.push(resolveProjectEntry(entry, topLevelOptions));
+                projects.push(resolveProjectEntry(entry, topLevelOptions, configFile.presets));
             }
         }
 
@@ -97,13 +98,66 @@ function resolveProjectsRequests({
 }
 
 function resolveProjectEntry(
-    [request, { options }]: [string, ProjectEntryValue],
-    configOptions: ConfigOptions
+    [request, value]: [string, ProjectEntryValue] | [string],
+    configOptions: ConfigOptions,
+    availablePresets: MultipleProjectsConfig['presets']
 ): RawProjectEntity {
+    if (!value) {
+        value = { options: {} };
+    }
+
+    if (typeof value === 'string') {
+        value = {
+            preset: value,
+            options: {},
+        };
+    }
+
+    if (Array.isArray(value)) {
+        value = {
+            presets: [...value],
+            options: {},
+        };
+    }
+
+    if (typeof value.preset === 'string') {
+        value = {
+            ...value,
+            presets: [...(value.presets || []), value.preset],
+        };
+    }
+
+    if (!Array.isArray(value.presets)) {
+        value.presets = [];
+    }
+
+    const { options, presets } = value;
+
     return {
         request: request.trim(),
         options: (Array.isArray(options) ? options : [options])
             .slice()
-            .map((option) => mergeProjectsConfigs(configOptions, option)),
+            .map((option) =>
+                mergeProjectsConfigs(
+                    configOptions,
+                    ...resolvePresets(presets, availablePresets),
+                    option
+                )
+            ),
     };
+}
+
+function resolvePresets(
+    presetsNames: string[],
+    availablePresets: MultipleProjectsConfig['presets'] = {}
+): (ConfigOptions | PartialConfigOptions)[] {
+    return presetsNames.map((name) => {
+        const preset = availablePresets[name];
+
+        if (!preset) {
+            throw new Error(`Cannot resolve preset named "${name}"`);
+        }
+
+        return preset;
+    });
 }
