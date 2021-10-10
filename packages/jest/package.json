@@ -9,6 +9,7 @@
   "dependencies": {
     "@stylable/core": "^4.7.2",
     "@stylable/module-utils": "^4.7.2",
+    "@stylable/node": "^4.7.2",
     "@stylable/runtime": "^4.7.2"
   },
   "files": [
