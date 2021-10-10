@@ -29,7 +29,6 @@ function getCacheKey(
 }
 
 export const createTransformer = (options?: Partial<StylableConfig>) => {
-    // ...
     return {
         process: stylableModuleFactory(
             {

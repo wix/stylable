@@ -6,16 +6,41 @@
 
 ## Installation
 
-This package is still a work-in-progress within the Stylable mono-repo. Once it matures, further details will be added here.
+Install `@stylable/jest` as a dev dependency in your local project.
+
+Install using npm:
+```bash
+npm install @stylable/jest --save-dev
+```
+
+Install using yarn:
+```bash
+yarn add @stylable/jest --dev
+```
 
 ## Usage
 
-Add the transformation to the `jest.config.js` file:
+Add the transformer to your `jest.config.js` file:
 
 ```js
 module.exports = {
   transform: {
-    '\\.st\\.css?$': require.resolve('@stylable/jest'),
+    '\\.st\\.css?$': '@stylable/jest',
+  },
+  transformIgnorePatterns: [
+    '/node_modules/(?!(.*?\\.st\\.css$))', // libraries publish .st.css files in their dist
+  ],
+};
+```
+
+### Configuring Stylable options
+
+See the interface for `StylableConfig` [here](https://github.com/wix/stylable/blob/master/packages/core/src/stylable.ts).
+
+```js
+module.exports = {
+  transform: {
+    '\\.st\\.css?$': ['@stylable/jest', { /* Stylable options */ }],
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(.*?\\.st\\.css$))', // libraries publish .st.css files in their dist
