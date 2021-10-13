@@ -79,7 +79,7 @@
     "style-loader": "^3.3.0",
     "typescript": "~4.4.4",
     "url-loader": "^4.1.1",
-    "webpack": "^5.58.1"
+    "webpack": "^5.58.2"
   },
   "engines": {
     "node": ">=12"
