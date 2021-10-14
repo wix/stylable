@@ -16,7 +16,7 @@ export const resolveNpmProjects: ResolveProjects = (projectsEntities, { projectR
         );
 
         if (!workspacePackages.length) {
-            throw new Error(`Stylable CLI config can not resolve request "${request}"`);
+            throw new Error(`Stylable CLI config can not resolve project request "${request}"`);
         }
 
         for (const pkg of workspacePackages) {

@@ -447,7 +447,7 @@ describe('Stylable CLI config multiple projects', function () {
             expect(stdout, 'has diagnostic error').not.to.match(/error/i);
             expect(stderr).to.match(
                 new RegExp(
-                    `Error: Stylable CLI config can not resolve request "packages/project-b"`
+                    `Error: Stylable CLI config can not resolve project request "packages/project-b"`
                 )
             );
         });
