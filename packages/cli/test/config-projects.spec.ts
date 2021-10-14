@@ -14,7 +14,7 @@ describe('Stylable CLI config multiple projects', function () {
     });
 
     describe('Options resolution and overrides', () => {
-        it('should handle multiple projects requests', () => {
+        it('should handle multiple projects', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': JSON.stringify({
                     name: 'workspace',
@@ -104,14 +104,13 @@ describe('Stylable CLI config multiple projects', function () {
                 exports.stcConfig = () => ({ 
                     options: { 
                         outDir: './dist',
-                        dts: true,
                     },
                     projects: [
+                        'packages/*',
                         [
                             'packages/project-b', 
-                            { options: { dts: false } }
+                            { options: { dts: true } }
                         ],
-                        'packages/*'
                     ]
                 })
                 `,
@@ -124,11 +123,11 @@ describe('Stylable CLI config multiple projects', function () {
             expect(stdout, 'has diagnostic error').not.to.match(/error/i);
 
             expect(Object.keys(dirContent)).to.include.members([
-                'packages/project-a/dist/style.st.css.d.ts',
+                'packages/project-b/dist/style.st.css.d.ts',
             ]);
 
             expect(Object.keys(dirContent)).to.not.include.members([
-                'packages/project-b/dist/style.st.css.d.ts',
+                'packages/project-a/dist/style.st.css.d.ts',
             ]);
         });
 

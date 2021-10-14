@@ -7,13 +7,15 @@ import type { RawProjectEntity, ResolveProjects } from '../types';
 
 export const resolveNpmProjects: ResolveProjects = (projectsEntities, { projectRoot }) => {
     const projectEntriesMap = new Map<string, RawProjectEntity>();
-    const packagesSet = new Set<INpmPackage>();
+    const packages = new Set<INpmPackage>();
 
     for (const entity of projectsEntities) {
         const { request } = entity;
-        const packages = sortPackagesByDepth(resolveWorkspacePackages(projectRoot, [request]));
+        const workspacePackages = sortPackagesByDepth(
+            resolveWorkspacePackages(projectRoot, [request])
+        );
 
-        for (const pkg of packages) {
+        for (const pkg of workspacePackages) {
             const previousEntry = projectEntriesMap.get(pkg.displayName);
 
             if (previousEntry) {
@@ -21,20 +23,17 @@ export const resolveNpmProjects: ResolveProjects = (projectsEntities, { projectR
                     throw new Error(
                         'Stylable CLI config can not have a duplicate project requests'
                     );
-                } else {
-                    continue;
                 }
+            } else {
+                packages.add(pkg);
             }
 
             projectEntriesMap.set(pkg.displayName, entity);
-            packagesSet.add(pkg);
         }
     }
 
-    const packages = Array.from(packagesSet).map((pkg) => ({
+    return Array.from(packages).map((pkg) => ({
         projectRoot: pkg.directoryPath,
         options: projectEntriesMap.get(pkg.displayName)!.options,
     }));
-
-    return packages;
 };
