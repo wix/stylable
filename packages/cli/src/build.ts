@@ -1,11 +1,11 @@
+import type { BuildMetaData, BuildOptions } from './types';
 import { Stylable, visitMetaCSSDependenciesBFS } from '@stylable/core';
-import type { IFileSystem } from '@file-services/types';
 import { Generator as BaseGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
-import { levels, Log } from './logger';
+import { levels } from './logger';
 import { DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
 import { tryRun } from './build-tools';
 
@@ -15,91 +15,35 @@ export const messages = {
     BUILD_SKIPPED: 'No stylable files found. build skipped.',
 };
 
-export interface BuildOptions {
-    /** Specify the extension of stylable files */
-    extension: string;
-    /** provide a custom file-system for the build */
-    fs: IFileSystem;
-    /** provide Stylable instance */
-    stylable: Stylable;
-    /** project root directory */
-    rootDir: string;
-    /** specify where to find source files */
-    srcDir: string;
-    /** specify where to build the target files */
-    outDir: string;
-    /** should the build need to output manifest file */
-    manifest?: string;
-    /** log function */
-    log: Log;
-    /** opt into build index file and specify the filepath for the generated index file */
-    indexFile?: string;
-    /** custom cli index generator class */
-    Generator?: typeof BaseGenerator;
-    /** output commonjs module (.js) */
-    cjs?: boolean;
-    /** output esm module (.mjs) */
-    esm?: boolean;
-    /** template of the css file emitted when using outputCSS */
-    outputCSSNameTemplate?: string;
-    /** should include the css in the generated JS module */
-    includeCSSInJS?: boolean;
-    /** should output build css for each source file */
-    outputCSS?: boolean;
-    /** should output source .st.css file to dist */
-    outputSources?: boolean;
-    /** should add namespace reference to the .st.css copy  */
-    useNamespaceReference?: boolean;
-    /** should inject css import in the JS module for the generated css from outputCSS */
-    injectCSSRequest?: boolean;
-    /** should apply css optimizations */
-    optimize?: boolean;
-    /** should minify css */
-    minify?: boolean;
-    /** should generate .d.ts definitions for every stylesheet */
-    dts?: boolean;
-    /** should generate .d.ts.map files for every .d.ts mapping back to the source .st.css */
-    dtsSourceMap?: boolean;
-    /** enable watch mode */
-    watch?: boolean;
-    /** should emit diagnostics */
-    diagnostics?: boolean;
-    /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
-    diagnosticsMode?: 'strict' | 'loose';
-}
-
-export async function build({
-    extension,
-    fs,
-    stylable,
-    rootDir,
-    srcDir,
-    outDir,
-    log,
-    indexFile,
-    Generator = BaseGenerator,
-    cjs,
-    esm,
-    includeCSSInJS,
-    outputCSS,
-    outputCSSNameTemplate,
-    outputSources,
-    useNamespaceReference,
-    injectCSSRequest,
-    optimize,
-    minify,
-    manifest,
-    dts,
-    dtsSourceMap,
-    watch,
-    diagnostics,
-    diagnosticsMode,
-}: BuildOptions) {
-    const { join, resolve } = fs;
-    rootDir = resolve(rootDir);
-    const fullSrcDir = join(rootDir, srcDir);
-    const fullOutDir = join(rootDir, outDir);
-    const nodeModules = join(rootDir, 'node_modules');
+export async function build(
+    {
+        extension,
+        srcDir,
+        outDir,
+        indexFile,
+        Generator = BaseGenerator,
+        cjs,
+        esm,
+        includeCSSInJS,
+        outputCSS,
+        outputCSSNameTemplate,
+        outputSources,
+        useNamespaceReference,
+        injectCSSRequest,
+        optimize,
+        minify,
+        manifest,
+        dts,
+        dtsSourceMap,
+        diagnostics,
+        diagnosticsMode,
+    }: BuildOptions,
+    { watch, fs, stylable, projectRoot, log }: BuildMetaData
+) {
+    const { join } = fs;
+    const fullSrcDir = join(projectRoot, srcDir);
+    const fullOutDir = join(projectRoot, outDir);
+    const nodeModules = join(projectRoot, 'node_modules');
 
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
@@ -114,7 +58,7 @@ export async function build({
         watchMode: watch,
         autoResetInvalidations: true,
         directoryFilter(dirPath) {
-            if (!dirPath.startsWith(rootDir)) {
+            if (!dirPath.startsWith(projectRoot)) {
                 return false;
             }
             if (dirPath.startsWith(nodeModules) || dirPath.includes('.git')) {
@@ -200,7 +144,7 @@ export async function build({
                 mode,
                 `${messages.FINISHED_PROCESSING} ${count} ${count === 1 ? 'file' : 'files'}${
                     changeOrigin ? ', watching...' : ''
-                } in "${rootDir}"`,
+                } in "${projectRoot}"`,
                 levels.info
             );
         },
@@ -253,8 +197,8 @@ export async function build({
             generated.add(indexFilePath);
             generator.generateIndexFile(fs, indexFilePath);
         } else {
-            handleAssets(assets, rootDir, srcDir, outDir, fs);
-            generateManifest(rootDir, sourceFiles, manifest, stylable, mode, log, fs);
+            handleAssets(assets, projectRoot, srcDir, outDir, fs);
+            generateManifest(projectRoot, sourceFiles, manifest, stylable, mode, log, fs);
         }
     }
 }

@@ -21,14 +21,14 @@ async function main() {
         }
     }
 
-    const projects = projectsConfig(argv);
+    const { rootDir, projects } = projectsConfig(argv);
     const resolverCache = new Map();
 
     for (const { projectRoot, options } of projects) {
-        for (const optionsEntry of options) {
-            const { dts, dtsSourceMap } = optionsEntry;
+        for (const optionsEntity of options) {
+            const { dts, dtsSourceMap } = optionsEntity;
 
-            log('[Project]', projectRoot, optionsEntry);
+            log('[Project]', projectRoot, optionsEntity);
 
             if (!dts && dtsSourceMap) {
                 throw new Error(`"dtsSourceMap" requires turning on "dts"`);
@@ -43,13 +43,13 @@ async function main() {
                 resolverCache,
             });
 
-            await build({
+            await build(optionsEntity, {
                 watch,
                 stylable,
                 log,
                 fs: fileSystem,
-                rootDir: projectRoot,
-                ...optionsEntry,
+                rootDir,
+                projectRoot,
             });
         }
     }

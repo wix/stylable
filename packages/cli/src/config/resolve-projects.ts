@@ -3,7 +3,7 @@ import {
     resolveWorkspacePackages,
     sortPackagesByDepth,
 } from '@wixc3/resolve-directory-context';
-import type { RawProjectEntity, ResolveProjects } from './types';
+import type { RawProjectEntity, ResolveProjects } from '../types';
 
 export const resolveNpmProjects: ResolveProjects = (projectsEntities, { projectRoot }) => {
     const projectEntriesMap = new Map<string, RawProjectEntity>();

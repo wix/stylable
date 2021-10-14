@@ -2,7 +2,7 @@ import { nodeFs } from '@file-services/node';
 import type { Arguments } from 'yargs';
 import yargs from 'yargs';
 import { createGenerator } from '../build';
-import type { CliArguments, ConfigOptions, PartialConfigOptions } from './types';
+import type { CliArguments, BuildOptions, PartialBuildOptions } from '../types';
 
 const { join } = nodeFs;
 
@@ -158,10 +158,7 @@ export function getCliArguments(): Arguments<CliArguments> {
         .parseSync();
 }
 
-export function resolveCliOptions(
-    argv: CliArguments,
-    defaults: ConfigOptions
-): PartialConfigOptions {
+export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): PartialBuildOptions {
     const rootDir = argv.rootDir;
     const outDir = argv.outDir ?? defaults.outDir;
 
@@ -184,12 +181,12 @@ export function resolveCliOptions(
         includeCSSInJS: argv.cssInJs,
         outputSources: argv.stcss,
         outputCSSNameTemplate: argv.cssFilename,
-        diagnosticsMode: argv.diagnosticsMode as ConfigOptions['diagnosticsMode'],
+        diagnosticsMode: argv.diagnosticsMode as BuildOptions['diagnosticsMode'],
         Generator: createGenerator(rootDir, argv.customGenerator),
     };
 }
 
-export function createDefaultOptions(): ConfigOptions {
+export function createDefaultOptions(): BuildOptions {
     return {
         outDir: '.',
         srcDir: '.',

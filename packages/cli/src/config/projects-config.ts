@@ -5,10 +5,10 @@ import { resolve } from 'path';
 import { tryRun } from '../build-tools';
 import type {
     CliArguments,
-    ConfigOptions,
+    BuildOptions,
     Configuration,
     MultipleProjectsConfig,
-    PartialConfigOptions,
+    PartialBuildOptions,
     Presets,
     ProcessProjectsOptions,
     ProjectEntryValue,
@@ -17,15 +17,16 @@ import type {
     ResolveProjectsContext,
     ResolveProjectsRequestsParams,
     STCConfig,
-} from './types';
+    ProjectsConfigResult,
+} from '../types';
 import { resolveNpmProjects } from './resolve-projects';
 
-export function projectsConfig(argv: CliArguments): STCConfig {
+export function projectsConfig(argv: CliArguments): ProjectsConfigResult {
     const projectRoot = resolve(argv.rootDir);
     const defaultOptions = createDefaultOptions();
     const configFile = resolveConfigFile(projectRoot);
     const cliOptions = resolveCliOptions(argv, defaultOptions);
-    const topLevelOptions = mergeProjectsConfigs(defaultOptions, configFile?.options, cliOptions);
+    const topLevelOptions = mergeBuildOptions(defaultOptions, configFile?.options, cliOptions);
 
     if (isMultpleConfigProject(configFile)) {
         const projects: RawProjectEntity[] = [];
@@ -36,18 +37,24 @@ export function projectsConfig(argv: CliArguments): STCConfig {
             },
         });
 
-        return resolveProjectsRequests({
-            projectRoot,
-            projects,
-            resolveProjects: configFile.resolveProjects || resolveNpmProjects,
-        });
-    } else {
-        return [
-            {
+        return {
+            rootDir: projectRoot,
+            projects: resolveProjectsRequests({
                 projectRoot,
-                options: [topLevelOptions],
-            },
-        ];
+                projects,
+                resolveProjects: configFile.resolveProjects || resolveNpmProjects,
+            }),
+        };
+    } else {
+        return {
+            rootDir: projectRoot,
+            projects: [
+                {
+                    projectRoot,
+                    options: [topLevelOptions],
+                },
+            ],
+        };
     }
 }
 
@@ -68,9 +75,9 @@ function isMultpleConfigProject(config: any): config is MultipleProjectsConfig {
     return Boolean(config?.projects);
 }
 
-function mergeProjectsConfigs(
-    ...configs: [ConfigOptions, ...(ConfigOptions | PartialConfigOptions | undefined)[]]
-): ConfigOptions {
+function mergeBuildOptions(
+    ...configs: [BuildOptions, ...(BuildOptions | PartialBuildOptions | undefined)[]]
+): BuildOptions {
     const [config, ...rest] = configs;
 
     return Object.assign(
@@ -108,7 +115,7 @@ function resolveProjectsRequests({
 
 function resolveProjectEntry(
     [request, value]: [string, ProjectEntryValue] | [string],
-    configOptions: ConfigOptions,
+    configOptions: BuildOptions,
     availablePresets: Presets = {}
 ): RawProjectEntity {
     if (!value) {
@@ -147,7 +154,7 @@ function resolveProjectEntry(
         options: (Array.isArray(options) ? options : [options])
             .slice()
             .map((option) =>
-                mergeProjectsConfigs(
+                mergeBuildOptions(
                     configOptions,
                     ...resolvePresets(presets, availablePresets),
                     option
@@ -159,7 +166,7 @@ function resolveProjectEntry(
 function resolvePresets(
     presetsNames: string[],
     availablePresets: MultipleProjectsConfig['presets'] = {}
-): (ConfigOptions | PartialConfigOptions)[] {
+): (BuildOptions | PartialBuildOptions)[] {
     return presetsNames.map((name) => {
         const preset = availablePresets[name];
 

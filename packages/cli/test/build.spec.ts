@@ -35,17 +35,22 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: 'lib',
-            srcDir: '.',
-            rootDir: '/',
-            log,
-            cjs: true,
-            outputSources: true,
-        });
+        await build(
+            {
+                extension: '.st.css',
+                outDir: 'lib',
+                srcDir: '.',
+                cjs: true,
+                outputSources: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         [
             '/lib/main.st.css',
@@ -91,18 +96,23 @@ describe('build stand alone', () => {
             },
         });
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            rootDir: '/',
-            srcDir: 'src',
-            outDir: 'cjs',
-            log,
-            cjs: true,
-            outputSources: true,
-            useNamespaceReference: true,
-        });
+        await build(
+            {
+                extension: '.st.css',
+                srcDir: 'src',
+                outDir: 'cjs',
+                cjs: true,
+                outputSources: true,
+                useNamespaceReference: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         [
             '/cjs/main.st.css',
@@ -117,16 +127,21 @@ describe('build stand alone', () => {
             'st-namespace-reference="../src/main.st.css"'
         );
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            rootDir: '/',
-            srcDir: 'cjs',
-            outDir: 'cjs2',
-            log,
-            cjs: true,
-        });
+        await build(
+            {
+                extension: '.st.css',
+                srcDir: 'cjs',
+                outDir: 'cjs2',
+                cjs: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         // check two builds using sourceNamespace are identical
         // compare two serializable js modules including their namespace
@@ -152,16 +167,21 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        const { diagnosticsMessages } = await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            rootDir: '/',
-            log,
-            cjs: true,
-        });
+        const { diagnosticsMessages } = await build(
+            {
+                extension: '.st.css',
+                outDir: '.',
+                srcDir: '.',
+                cjs: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
         const messages = diagnosticsMessages.get('/comp.st.css')!;
 
         expect(messages[0].message).to.contain(
@@ -188,18 +208,23 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: './dist',
-            srcDir: '.',
-            rootDir: '/',
-            log,
-            cjs: true,
-            outputCSS: true,
-            outputCSSNameTemplate: '[filename].global.css',
-        });
+        await build(
+            {
+                extension: '.st.css',
+                outDir: './dist',
+                srcDir: '.',
+                cjs: true,
+                outputCSS: true,
+                outputCSSNameTemplate: '[filename].global.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         const builtFile = fs.readFileSync('/dist/comp.global.css', 'utf8');
 
@@ -225,19 +250,24 @@ describe('build stand alone', () => {
             },
         });
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: './dist',
-            srcDir: '.',
-            minify: true,
-            rootDir: '/',
-            log,
-            cjs: true,
-            outputCSS: true,
-            outputCSSNameTemplate: '[filename].global.css',
-        });
+        await build(
+            {
+                extension: '.st.css',
+                outDir: './dist',
+                srcDir: '.',
+                minify: true,
+                cjs: true,
+                outputCSS: true,
+                outputCSSNameTemplate: '[filename].global.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         const builtFile = fs.readFileSync('/dist/comp.global.css', 'utf8');
 
@@ -255,19 +285,24 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: './dist',
-            srcDir: '.',
-            rootDir: '/',
-            log,
-            cjs: true,
-            outputCSS: true,
-            injectCSSRequest: true,
-            outputCSSNameTemplate: '[filename].global.css',
-        });
+        await build(
+            {
+                extension: '.st.css',
+                outDir: './dist',
+                srcDir: '.',
+                cjs: true,
+                outputCSS: true,
+                injectCSSRequest: true,
+                outputCSSNameTemplate: '[filename].global.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         expect(fs.readFileSync('/dist/comp.st.css.js', 'utf8')).contains(
             `require("./comp.global.css")`
@@ -284,17 +319,22 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            rootDir: '/',
-            log,
-            dts: true,
-            dtsSourceMap: false,
-        });
+        await build(
+            {
+                extension: '.st.css',
+                outDir: '.',
+                srcDir: '.',
+                dts: true,
+                dtsSourceMap: false,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
             expect(fs.existsSync(p), p).to.equal(true);
@@ -318,17 +358,22 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            rootDir: '/',
-            log,
-            dts: true,
-            dtsSourceMap: false,
-        });
+        await build(
+            {
+                extension: '.st.css',
+                outDir: '.',
+                srcDir: '.',
+                dts: true,
+                dtsSourceMap: false,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
             expect(fs.existsSync(p), p).to.equal(true);
@@ -366,17 +411,22 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            rootDir: '/',
-            log,
-            dts: true,
-            dtsSourceMap: true,
-        });
+        await build(
+            {
+                extension: '.st.css',
+                outDir: '.',
+                srcDir: '.',
+                dts: true,
+                dtsSourceMap: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         ['/main.st.css', '/main.st.css.d.ts', '/main.st.css.d.ts.map'].forEach((p) => {
             expect(fs.existsSync(p), p).to.equal(true);
