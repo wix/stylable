@@ -13,7 +13,7 @@ export function createCliTester() {
     }: {
         dirPath: string;
         args: string[];
-        steps: Array<{ msg: string; action?: () => void }>;
+        steps: Array<{ msg: string | RegExp; action?: () => void }>;
     }) {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess as any);
@@ -25,7 +25,7 @@ export function createCliTester() {
             for (const line of lines) {
                 const step = steps[found.length];
 
-                if (line.includes(step.msg)) {
+                if (match(step.msg, line)) {
                     found.push(true);
 
                     if (step.action) {
@@ -37,6 +37,16 @@ export function createCliTester() {
                     }
                 }
             }
+        }
+    }
+
+    function match(source: string | RegExp, target: string) {
+        if (typeof source === 'string') {
+            return target.includes(source);
+        } else if (source instanceof RegExp) {
+            return Boolean(target.match(source));
+        } else {
+            return false;
         }
     }
 

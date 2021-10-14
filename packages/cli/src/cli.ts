@@ -2,8 +2,9 @@
 import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
-import { createLogger } from './logger';
+import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
+import { messages } from './build';
 import { getCliArguments } from './config/resolve-options';
 
 async function main() {
@@ -23,6 +24,7 @@ async function main() {
 
     const { rootDir, projects } = projectsConfig(argv);
     const resolverCache = new Map();
+    const filesMetaData = new Map();
 
     for (const { projectRoot, options } of projects) {
         for (const optionsEntity of options) {
@@ -50,8 +52,13 @@ async function main() {
                 fs: fileSystem,
                 rootDir,
                 projectRoot,
+                filesMetaData,
             });
         }
+    }
+
+    if (watch) {
+        log(messages.START_WATCHING, levels.info);
     }
 }
 

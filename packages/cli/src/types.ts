@@ -162,4 +162,11 @@ export interface BuildMetaData {
     stylable: Stylable;
     /** log function */
     log: Log;
+    /** files source meta data */
+    filesMetaData?: Map<string, FileMetaData>;
+}
+
+export interface FileMetaData {
+    srcPath: string;
+    outPath: string;
 }

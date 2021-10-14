@@ -12,7 +12,7 @@ import { tryRun } from './build-tools';
 export const messages = {
     START_WATCHING: 'start watching...',
     FINISHED_PROCESSING: 'finished processing',
-    BUILD_SKIPPED: 'No stylable files found. build skipped.',
+    BUILD_SKIPPED: 'No stylable files found. build skipped',
 };
 
 export async function build(
@@ -38,12 +38,13 @@ export async function build(
         diagnostics,
         diagnosticsMode,
     }: BuildOptions,
-    { watch, fs, stylable, projectRoot, log }: BuildMetaData
+    { watch, fs, stylable, rootDir, projectRoot, log, filesMetaData = new Map() }: BuildMetaData
 ) {
     const { join } = fs;
     const fullSrcDir = join(projectRoot, srcDir);
     const fullOutDir = join(projectRoot, outDir);
     const nodeModules = join(projectRoot, 'node_modules');
+    const isMultiPackagesProject = projectRoot !== rootDir;
 
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
@@ -53,6 +54,7 @@ export async function build(
     const assets = new Set<string>();
     const diagnosticsMessages: DiagnosticMessages = new Map();
     const moduleFormats = getModuleFormats({ cjs, esm });
+    const dependedBy = new Map<string, Set<string>>();
 
     const service = new DirectoryProcessService(fs, {
         watchMode: watch,
@@ -123,39 +125,68 @@ export async function build(
             }
             diagnosticsMessages.clear();
 
-            // remove assets from the affected files (handled in buildAggregatedEntities)
             for (const filePath of affectedFiles) {
-                if (assets.has(filePath)) {
+                if (filePath.startsWith(projectRoot)) {
+                    filesMetaData.set(filePath, {
+                        srcPath: filePath,
+                        outPath: filePath.replace(fullSrcDir, fullOutDir),
+                    });
+
+                    if (assets.has(filePath)) {
+                        // remove assets from the affected files
+                        affectedFiles.delete(filePath);
+                    }
+                } else {
+                    // remove file that is not related to the current project scope
                     affectedFiles.delete(filePath);
+                }
+
+                // check if source file is a dependecy as out file or as source file
+                const outFilePath = dependedBy.has(filePath)
+                    ? filePath
+                    : filesMetaData.get(filePath)?.outPath;
+
+                if (outFilePath && dependedBy.has(outFilePath)) {
+                    for (const affectedDependency of dependedBy.get(outFilePath)!) {
+                        // add dependencies from current scope
+                        affectedFiles.add(affectedDependency);
+                    }
                 }
             }
 
             // rebuild
             buildFiles(affectedFiles);
             // rewire invalidations
-            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
+            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles, dependedBy);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
             // report build diagnostics
             reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
 
             const count = deletedFiles.size + affectedFiles.size;
-            log(
-                mode,
-                `${messages.FINISHED_PROCESSING} ${count} ${count === 1 ? 'file' : 'files'}${
-                    changeOrigin ? ', watching...' : ''
-                } in "${projectRoot}"`,
-                levels.info
-            );
+
+            if (!changeOrigin || count) {
+                log(
+                    mode,
+                    messages.FINISHED_PROCESSING,
+                    count,
+                    count === 1 ? 'file' : 'files',
+                    isMultiPackagesProject ? `in "${projectRoot}"` : '',
+                    levels.info
+                );
+            }
         },
     });
 
     await service.init(fullSrcDir);
 
-    if (watch) {
-        log(mode, messages.START_WATCHING, levels.info);
-    } else if (sourceFiles.size === 0) {
-        log(mode, messages.BUILD_SKIPPED, levels.info);
+    if (sourceFiles.size === 0) {
+        log(
+            mode,
+            messages.BUILD_SKIPPED,
+            isMultiPackagesProject ? `for "${projectRoot}"` : '',
+            levels.info
+        );
     }
 
     return { diagnosticsMessages };
@@ -234,7 +265,8 @@ function updateWatcherDependencies(
     stylable: Stylable,
     service: DirectoryProcessService,
     affectedFiles: Set<string>,
-    sourceFiles: Set<string>
+    sourceFiles: Set<string>,
+    dependedBy: Map<string, Set<string>>
 ) {
     const resolver = stylable.createResolver();
     for (const filePath of affectedFiles) {
@@ -244,6 +276,12 @@ function updateWatcherDependencies(
             meta,
             ({ source }) => {
                 service.registerInvalidateOnChange(source, filePath);
+
+                if (!dependedBy.has(source)) {
+                    dependedBy.set(source, new Set());
+                }
+
+                dependedBy.get(source)!.add(filePath);
             },
             resolver
         );
