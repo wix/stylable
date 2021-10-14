@@ -415,5 +415,41 @@ describe('Stylable CLI config multiple projects', function () {
                 new RegExp(`Error: Stylable CLI config can not have a duplicate project requests`)
             );
         });
+
+        it('should throw when request does not resolve', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': JSON.stringify({
+                    name: 'workspace',
+                    version: '0.0.0',
+                    private: true,
+                }),
+                packages: {
+                    'project-a': {
+                        'style.st.css': `.root{color:red}`,
+                        'package.json': `{
+                            "name": "a", 
+                            "version": "0.0.0",
+                        }`,
+                    },
+                },
+                'stylable.config.js': `
+                    exports.stcConfig = () => ({ 
+                        options: { 
+                            outDir: './dist',
+                        },
+                        projects: ['packages/project-b']
+                    })
+                    `,
+            });
+
+            const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(stdout, 'has diagnostic error').not.to.match(/error/i);
+            expect(stderr).to.match(
+                new RegExp(
+                    `Error: Stylable CLI config can not resolve request "packages/project-b"`
+                )
+            );
+        });
     });
 });

@@ -15,6 +15,10 @@ export const resolveNpmProjects: ResolveProjects = (projectsEntities, { projectR
             resolveWorkspacePackages(projectRoot, [request])
         );
 
+        if (!workspacePackages.length) {
+            throw new Error(`Stylable CLI config can not resolve request "${request}"`);
+        }
+
         for (const pkg of workspacePackages) {
             const previousEntry = projectEntriesMap.get(pkg.displayName);
 
