@@ -163,7 +163,7 @@ export async function build(
             // report build diagnostics
             reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
 
-            const count = deletedFiles.size + affectedFiles.size;
+            const count = deletedFiles.size + affectedFiles.size + assets.size;
 
             if (!changeOrigin || count) {
                 log(
