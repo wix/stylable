@@ -109,7 +109,7 @@ describe('Stylable CLI config multiple projects', function () {
                         'packages/*',
                         [
                             'packages/project-b', 
-                            { options: { dts: true } }
+                            {  dts: true }
                         ],
                     ]
                 })
@@ -164,8 +164,7 @@ describe('Stylable CLI config multiple projects', function () {
                         dts: true
                     },
                     projects: {
-                        'packages/*': {
-                            options: [
+                        'packages/*': [
                                 {
                                     srcDir: 'src'
                                 },
@@ -175,7 +174,6 @@ describe('Stylable CLI config multiple projects', function () {
                                     dts: false
                                 }
                             ]
-                        }
                     }
                 })
                 `,
@@ -450,6 +448,80 @@ describe('Stylable CLI config multiple projects', function () {
                     `Error: Stylable CLI config can not resolve project request "packages/project-b"`
                 )
             );
+        });
+
+        it('should throw when request has invalid single value', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': JSON.stringify({
+                    name: 'workspace',
+                    version: '0.0.0',
+                    private: true,
+                }),
+                packages: {
+                    'project-a': {
+                        src: {
+                            'style.st.css': `.root{color:red}`,
+                        },
+                        'package.json': JSON.stringify({
+                            name: 'a',
+                            version: '0.0.0',
+                        }),
+                    },
+                },
+                'stylable.config.js': `
+                    exports.stcConfig = () => ({ 
+                        options: { 
+                            outDir: './dist',
+                            srcDir: './src',
+                        },
+                        projects: [
+                            [ 'packages/*', 5 ],
+                        ]
+                   })
+                `,
+            });
+
+            const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(stdout, 'has diagnostic error').not.to.match(/error/i);
+            expect(stderr, 'has cli error').to.include('Error: Cannot resolve entry "5"');
+        });
+
+        it('should throw when request has invalid value in multiple entry values', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': JSON.stringify({
+                    name: 'workspace',
+                    version: '0.0.0',
+                    private: true,
+                }),
+                packages: {
+                    'project-a': {
+                        src: {
+                            'style.st.css': `.root{color:red}`,
+                        },
+                        'package.json': JSON.stringify({
+                            name: 'a',
+                            version: '0.0.0',
+                        }),
+                    },
+                },
+                'stylable.config.js': `
+                    exports.stcConfig = () => ({ 
+                        options: { 
+                            outDir: './dist',
+                            srcDir: './src',
+                        },
+                        projects: [
+                            [ 'packages/*', [{ dts: true }, true] ],
+                        ]
+                   })
+                `,
+            });
+
+            const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(stdout, 'has diagnostic error').not.to.match(/error/i);
+            expect(stderr, 'has cli error').to.include('Error: Cannot resolve entry "true"');
         });
     });
 });

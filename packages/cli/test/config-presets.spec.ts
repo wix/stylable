@@ -111,7 +111,7 @@ describe('Stylable CLI config presets', function () {
         ]);
     });
 
-    it('should handle multiple presets and overrides between them (object)', () => {
+    it('should handle multiple presets (object)', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': JSON.stringify({
                 name: 'workspace',
@@ -133,12 +133,10 @@ describe('Stylable CLI config presets', function () {
               exports.stcConfig = () => ({ 
                   presets: {
                     'a': {
-                      dts: true,
                       outputSources: true,
                     },
                     'b': {
-                      dts: false,
-                      cjs: false,
+                      dts: true,
                     }
                   },
                   options: { 
@@ -160,15 +158,11 @@ describe('Stylable CLI config presets', function () {
 
         expect(Object.keys(dirContent)).to.include.members([
             'packages/project-a/dist/style.st.css',
-        ]);
-
-        expect(Object.keys(dirContent)).not.to.include.members([
             'packages/project-a/dist/style.st.css.d.ts',
-            'packages/project-a/dist/style.st.css.js',
         ]);
     });
 
-    it('should handle multiple presets and overrides between them (array)', () => {
+    it('should handle multiple presets (array)', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': JSON.stringify({
                 name: 'workspace',
@@ -189,14 +183,12 @@ describe('Stylable CLI config presets', function () {
             'stylable.config.js': `
             exports.stcConfig = () => ({ 
                 presets: {
-                  'a': {
-                    dts: true,
-                    outputSources: true,
-                  },
-                  'b': {
-                    dts: false,
-                    cjs: false,
-                  }
+                    'a': {
+                        outputSources: true,
+                      },
+                      'b': {
+                        dts: true,
+                      }
                 },
                 options: { 
                     outDir: './dist',
@@ -217,15 +209,11 @@ describe('Stylable CLI config presets', function () {
 
         expect(Object.keys(dirContent)).to.include.members([
             'packages/project-a/dist/style.st.css',
-        ]);
-
-        expect(Object.keys(dirContent)).not.to.include.members([
             'packages/project-a/dist/style.st.css.d.ts',
-            'packages/project-a/dist/style.st.css.js',
         ]);
     });
 
-    it('should handle single preset override (object)', () => {
+    it('should handle single preset override', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': JSON.stringify({
                 name: 'workspace',
@@ -282,67 +270,7 @@ describe('Stylable CLI config presets', function () {
         ]);
     });
 
-    it('should handle single preset override (array)', () => {
-        populateDirectorySync(tempDir.path, {
-            'package.json': JSON.stringify({
-                name: 'workspace',
-                version: '0.0.0',
-                private: true,
-            }),
-            packages: {
-                'project-a': {
-                    src: {
-                        'style.st.css': `.root{color:red}`,
-                    },
-                    'package.json': JSON.stringify({
-                        name: 'a',
-                        version: '0.0.0',
-                    }),
-                },
-            },
-            'stylable.config.js': `
-        exports.stcConfig = () => ({ 
-            presets: {
-              'comp-lib': {
-                dts: true,
-                outputSources: true,
-              }
-            },
-            options: { 
-                outDir: './dist',
-                srcDir: './src',
-            },
-            projects: [
-              [
-                'packages/*', 
-                {
-                  preset: 'comp-lib',
-                  options: {
-                    dts: false
-                  }
-                }
-              ]
-            ]
-        })
-  `,
-        });
-
-        const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
-        const dirContent = loadDirSync(tempDir.path);
-
-        expect(stderr, 'has cli error').not.to.match(/error/i);
-        expect(stdout, 'has diagnostic error').not.to.match(/error/i);
-
-        expect(Object.keys(dirContent)).to.include.members([
-            'packages/project-a/dist/style.st.css',
-        ]);
-
-        expect(Object.keys(dirContent)).not.to.include.members([
-            'packages/project-a/dist/style.st.css.d.ts',
-        ]);
-    });
-
-    it('should handle multiple presets overrides (object)', () => {
+    it('should handle multiple presets overrides', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': JSON.stringify({
                 name: 'workspace',
@@ -367,8 +295,7 @@ describe('Stylable CLI config presets', function () {
                     outputSources: true,
                   },
                   'b': {
-                    cjs: false,
-                    mjs: true
+                    esm: true,
                   }
                 },
                 options: { 
@@ -379,9 +306,7 @@ describe('Stylable CLI config presets', function () {
                   'packages/*': {
                     presets: ['a', 'b'],
                     options: {
-                      outputSources: false,
-                      cjs: true,
-                      mjs: false,
+                      cjs: false,
                     }
                   }
                 }
@@ -396,16 +321,16 @@ describe('Stylable CLI config presets', function () {
         expect(stdout, 'has diagnostic error').not.to.match(/error/i);
 
         expect(Object.keys(dirContent)).to.include.members([
-            'packages/project-a/dist/style.st.css.js',
-        ]);
-
-        expect(Object.keys(dirContent)).not.to.include.members([
             'packages/project-a/dist/style.st.css',
             'packages/project-a/dist/style.st.css.mjs',
         ]);
+
+        expect(Object.keys(dirContent)).not.to.include.members([
+            'packages/project-a/dist/style.st.css.js',
+        ]);
     });
 
-    it('should handle multiple presets overrides (array)', () => {
+    it('should handle options and preset mix', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': JSON.stringify({
                 name: 'workspace',
@@ -424,35 +349,21 @@ describe('Stylable CLI config presets', function () {
                 },
             },
             'stylable.config.js': `
-          exports.stcConfig = () => ({ 
-              presets: {
-                'a': {
-                  outputSources: true,
-                },
-                'b': {
-                  cjs: false,
-                  mjs: true
-                }
-              },
-              options: { 
-                  outDir: './dist',
-                  srcDir: './src',
-              },
-              projects: [
-                [
-                  'packages/*',
-                  {
-                    presets: ['a', 'b'],
-                    options: {
-                      outputSources: false,
-                      cjs: true,
-                      mjs: false,
-                    }
+            exports.stcConfig = () => ({ 
+                presets: {
+                  'a': {
+                    outputSources: true,
                   }
-                ]
-              ]
-          })
-  `,
+                },
+                options: { 
+                    outDir: './dist',
+                    srcDir: './src',
+                },
+                projects: {
+                  'packages/*': ['a', { indexFile: './index.st.css' }]                   
+                }
+            })
+    `,
         });
 
         const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
@@ -462,12 +373,8 @@ describe('Stylable CLI config presets', function () {
         expect(stdout, 'has diagnostic error').not.to.match(/error/i);
 
         expect(Object.keys(dirContent)).to.include.members([
-            'packages/project-a/dist/style.st.css.js',
-        ]);
-
-        expect(Object.keys(dirContent)).not.to.include.members([
             'packages/project-a/dist/style.st.css',
-            'packages/project-a/dist/style.st.css.mjs',
+            'packages/project-a/dist/index.st.css',
         ]);
     });
 
@@ -506,49 +413,5 @@ describe('Stylable CLI config presets', function () {
 
         expect(stdout, 'has diagnostic error').not.to.match(/error/i);
         expect(stderr, 'has cli error').to.match(/Cannot resolve preset named "a"/i);
-    });
-
-    it('should throw when used invalid preset', () => {
-        populateDirectorySync(tempDir.path, {
-            'package.json': JSON.stringify({
-                name: 'workspace',
-                version: '0.0.0',
-                private: true,
-            }),
-            packages: {
-                'project-a': {
-                    src: {
-                        'style.st.css': `.root{color:red}`,
-                    },
-                    'package.json': JSON.stringify({
-                        name: 'a',
-                        version: '0.0.0',
-                    }),
-                },
-            },
-            'stylable.config.js': `
-        exports.stcConfig = () => ({ 
-            presets: {
-                a: {
-                    dts: true
-                }
-            },
-            options: { 
-                outDir: './dist',
-                srcDir: './src',
-            },
-            projects: [
-              ['packages/*', ['a', {}]]
-            ]
-        })
-`,
-        });
-
-        const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
-
-        expect(stdout, 'has diagnostic error').not.to.match(/error/i);
-        expect(stderr, 'has cli error').to.include(
-            'Error: Cannot resolve preset named "[object Object]"'
-        );
     });
 });

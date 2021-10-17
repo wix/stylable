@@ -121,62 +121,59 @@ function resolveProjectEntry(
     configOptions: BuildOptions,
     availablePresets: Presets = {}
 ): RawProjectEntity {
+    const totalOptions: Array<BuildOptions | PartialBuildOptions> = [];
+
     if (!value) {
-        value = { options: {} };
+        totalOptions.push({ ...configOptions });
+    } else if (Array.isArray(value)) {
+        for (const valueEntry of value) {
+            totalOptions.push(...normalizeEntry(valueEntry));
+        }
+    } else {
+        totalOptions.push(...normalizeEntry(value));
     }
-
-    if (typeof value === 'string') {
-        value = {
-            preset: value,
-            options: {},
-        };
-    }
-
-    if (Array.isArray(value)) {
-        value = {
-            presets: [...value],
-            options: {},
-        };
-    }
-
-    if (typeof value.preset === 'string') {
-        value = {
-            ...value,
-            presets: [...(value.presets || []), value.preset],
-        };
-    }
-
-    if (!Array.isArray(value.presets)) {
-        value.presets = [];
-    }
-
-    const { options, presets } = value;
 
     return {
         request: request.trim(),
-        options: (Array.isArray(options) ? options : [options])
-            .slice()
-            .map((option) =>
-                mergeBuildOptions(
-                    configOptions,
-                    ...resolvePresets(presets, availablePresets),
-                    option
-                )
-            ),
+        options: totalOptions.map((options) => mergeBuildOptions(configOptions, options)),
     };
+
+    function normalizeEntry(entryValue: Exclude<ProjectEntryValue, Array<any>>) {
+        if (typeof entryValue === 'string') {
+            return [resolvePreset(entryValue, availablePresets)];
+        } else if (typeof entryValue === 'object') {
+            if ('options' in entryValue) {
+                const currentPresets = entryValue.presets || [];
+
+                if (typeof entryValue.preset === 'string') {
+                    currentPresets.push(entryValue.preset);
+                }
+
+                return currentPresets.map((presetName) =>
+                    mergeBuildOptions(
+                        configOptions,
+                        resolvePreset(presetName, availablePresets),
+                        entryValue.options || {}
+                    )
+                );
+            } else {
+                return [entryValue];
+            }
+        } else {
+            throw new Error(`Cannot resolve entry "${entryValue}"`);
+        }
+    }
 }
 
-function resolvePresets(
-    presetsNames: string[],
-    availablePresets: MultipleProjectsConfig['presets'] = {}
-): (BuildOptions | PartialBuildOptions)[] {
-    return presetsNames.map((name) => {
-        const preset = availablePresets[name];
+function resolvePreset(
+    presetName: string,
+    availablePresets: NonNullable<MultipleProjectsConfig['presets']>
+): BuildOptions | PartialBuildOptions {
+    const preset = availablePresets[presetName];
 
-        if (!preset || typeof name !== 'string') {
-            throw new Error(`Cannot resolve preset named "${name}"`);
-        }
+    if (!preset || typeof presetName !== 'string') {
+        throw new Error(`Cannot resolve preset named "${presetName}"`);
+    }
 
-        return preset;
-    });
+    return preset;
 }

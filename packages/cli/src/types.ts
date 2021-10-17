@@ -62,11 +62,18 @@ export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
 export type ProjectEntryValue =
     | string
     | string[]
+    | PartialBuildOptions
+    | PartialBuildOptions[]
     | {
           preset?: string;
           presets?: string[];
-          options: PartialBuildOptions | PartialBuildOptions[];
-      };
+          options: PartialBuildOptions;
+      }
+    | {
+          preset?: string;
+          presets?: string[];
+          options: PartialBuildOptions;
+      }[];
 
 export interface ProcessProjectsOptions {
     onProjectEntry(entry: [string, ProjectEntryValue] | [string]): void;
