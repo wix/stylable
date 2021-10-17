@@ -187,7 +187,7 @@ describe('Stylable CLI config file options', function () {
         );
     });
 
-    it('should give a custom error message when fail to eval stcConfig', () => {
+    it('should give a custom error message when fail to evaluate stcConfig', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'entry.st.css': `
