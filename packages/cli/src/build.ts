@@ -165,7 +165,7 @@ export async function build(
 
             const count = deletedFiles.size + affectedFiles.size + assets.size;
 
-            if (!changeOrigin || count) {
+            if (!changeOrigin || (changeOrigin && count)) {
                 log(
                     mode,
                     messages.FINISHED_PROCESSING,
