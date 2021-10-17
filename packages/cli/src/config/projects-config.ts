@@ -28,34 +28,37 @@ export function projectsConfig(argv: CliArguments): ProjectsConfigResult {
     const cliOptions = resolveCliOptions(argv, defaultOptions);
     const topLevelOptions = mergeBuildOptions(defaultOptions, configFile?.options, cliOptions);
 
+    let projects: STCConfig;
+
     if (isMultpleConfigProject(configFile)) {
-        const projects: RawProjectEntity[] = [];
+        const projectsEntities: RawProjectEntity[] = [];
 
         processProjects(configFile.projects, {
             onProjectEntry(entry) {
-                projects.push(resolveProjectEntry(entry, topLevelOptions, configFile.presets));
+                projectsEntities.push(
+                    resolveProjectEntry(entry, topLevelOptions, configFile.presets)
+                );
             },
         });
 
-        return {
-            rootDir: projectRoot,
-            projects: resolveProjectsRequests({
-                projectRoot,
-                projects,
-                resolveProjects: configFile.resolveProjects || resolveNpmProjects,
-            }),
-        };
+        projects = resolveProjectsRequests({
+            projectRoot,
+            projects: projectsEntities,
+            resolveProjects: configFile.resolveProjects || resolveNpmProjects,
+        });
     } else {
-        return {
-            rootDir: projectRoot,
-            projects: [
-                {
-                    projectRoot,
-                    options: [topLevelOptions],
-                },
-            ],
-        };
+        projects = [
+            {
+                projectRoot,
+                options: [topLevelOptions],
+            },
+        ];
     }
+
+    return {
+        rootDir: projectRoot,
+        projects,
+    };
 }
 
 export function resolveConfigFile(context: string) {
