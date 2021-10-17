@@ -173,7 +173,7 @@ function resolvePresets(
     return presetsNames.map((name) => {
         const preset = availablePresets[name];
 
-        if (!preset) {
+        if (!preset || typeof name !== 'string') {
             throw new Error(`Cannot resolve preset named "${name}"`);
         }
 

@@ -404,6 +404,7 @@ describe('Stylable CLI config presets', function () {
             'packages/project-a/dist/style.st.css.mjs',
         ]);
     });
+
     it('should handle multiple presets overrides (array)', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': JSON.stringify({
@@ -505,5 +506,49 @@ describe('Stylable CLI config presets', function () {
 
         expect(stdout, 'has diagnostic error').not.to.match(/error/i);
         expect(stderr, 'has cli error').to.match(/Cannot resolve preset named "a"/i);
+    });
+
+    it('should throw when used invalid preset', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': JSON.stringify({
+                name: 'workspace',
+                version: '0.0.0',
+                private: true,
+            }),
+            packages: {
+                'project-a': {
+                    src: {
+                        'style.st.css': `.root{color:red}`,
+                    },
+                    'package.json': JSON.stringify({
+                        name: 'a',
+                        version: '0.0.0',
+                    }),
+                },
+            },
+            'stylable.config.js': `
+        exports.stcConfig = () => ({ 
+            presets: {
+                a: {
+                    dts: true
+                }
+            },
+            options: { 
+                outDir: './dist',
+                srcDir: './src',
+            },
+            projects: [
+              ['packages/*', ['a', {}]]
+            ]
+        })
+`,
+        });
+
+        const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+
+        expect(stdout, 'has diagnostic error').not.to.match(/error/i);
+        expect(stderr, 'has cli error').to.include(
+            'Error: Cannot resolve preset named "[object Object]"'
+        );
     });
 });
