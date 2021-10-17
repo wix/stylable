@@ -141,7 +141,7 @@ export async function build(
                     affectedFiles.delete(filePath);
                 }
 
-                // check if source file is a dependecy as out file or as source file
+                // check if a file is a dependecy as out file (from outDir) or as source file (from srcDir)
                 const outFilePath = dependedBy.has(filePath)
                     ? filePath
                     : filesMetaData.get(filePath)?.outPath;
