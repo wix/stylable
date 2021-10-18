@@ -7327,10 +7327,10 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vlq@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/vlq/-/vlq-1.0.1.tgz#c003f6e7c0b4c1edd623fd6ee50bbc0d6a1de468"
-  integrity sha512-gQpnTgkubC6hQgdIcRdYGDSDc+SaujOdyesZQMv6JlfQee/9Mp0Qhnys6WxDWvQnL5WZdT7o2Ul187aSt0Rq+w==
+vlq@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/vlq/-/vlq-2.0.2.tgz#d545b6be4957e23e765dc3fcea87b513e32fc2a0"
+  integrity sha512-/CdioGwnaPoZvGly0W5oGIAVBCT5EjNVNhwcvIfycNxEv93SUXFpQoeqEbAy7P6dy6uG05fFNRrZiWRlQyNiPg==
 
 vscode-css-languageservice@^5.1.7:
   version "5.1.7"

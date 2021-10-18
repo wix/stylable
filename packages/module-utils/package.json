@@ -9,7 +9,7 @@
   "dependencies": {
     "@stylable/core": "^4.7.2",
     "toky": "^0.1.0",
-    "vlq": "^1.0.1"
+    "vlq": "^2.0.2"
   },
   "files": [
     "dist",
