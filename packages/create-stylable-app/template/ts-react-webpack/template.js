@@ -12,7 +12,7 @@ module.exports = {
         'eslint-plugin-react',
         'eslint-plugin-react-hooks',
         'eslint-plugin-stylable',
-        'eslint',
+        'eslint@7',
         'html-webpack-plugin',
         'rimraf',
         'serve',
