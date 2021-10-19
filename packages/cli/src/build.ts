@@ -40,7 +40,7 @@ export async function build(
     }: BuildOptions,
     { watch, fs, stylable, rootDir, projectRoot, log, filesMetaData = new Map() }: BuildMetaData
 ) {
-    const { join } = fs;
+    const { resolve, join } = fs;
     const fullSrcDir = join(projectRoot, srcDir);
     const fullOutDir = join(projectRoot, outDir);
     const nodeModules = join(projectRoot, 'node_modules');
@@ -79,6 +79,16 @@ export async function build(
             if (assets.has(filePath)) {
                 return true;
             }
+
+            const outputFile = filesMetaData.get(filePath);
+            const isDependency =
+                dependedBy.has(filePath) || (outputFile && dependedBy.has(outputFile.outPath));
+
+            // is not from current scope and also not a dependency
+            if (!filePath.startsWith(fullSrcDir) && !isDependency) {
+                return false;
+            }
+
             // stylable files
             return filePath.endsWith(extension);
         },
@@ -96,6 +106,8 @@ export async function build(
                             assets.delete(deletedFile);
                             continue;
                         } else if (!sourceFiles.has(deletedFile)) {
+                            continue;
+                        } else if (!deletedFile.startsWith(fullSrcDir)) {
                             continue;
                         }
                         diagnosticsMessages.delete(deletedFile);
@@ -126,30 +138,15 @@ export async function build(
             diagnosticsMessages.clear();
 
             for (const filePath of affectedFiles) {
-                if (filePath.startsWith(projectRoot)) {
+                if (filePath.startsWith(fullSrcDir)) {
                     filesMetaData.set(filePath, {
                         srcPath: filePath,
-                        outPath: filePath.replace(fullSrcDir, fullOutDir),
+                        outPath: resolve(filePath.replace(fullSrcDir, fullOutDir)),
                     });
 
                     if (assets.has(filePath)) {
                         // remove assets from the affected files
                         affectedFiles.delete(filePath);
-                    }
-                } else {
-                    // remove file that is not related to the current project scope
-                    affectedFiles.delete(filePath);
-                }
-
-                // check if a file is a dependecy as out file (from outDir) or as source file (from srcDir)
-                const outFilePath = dependedBy.has(filePath)
-                    ? filePath
-                    : filesMetaData.get(filePath)?.outPath;
-
-                if (outFilePath && dependedBy.has(outFilePath)) {
-                    for (const affectedDependency of dependedBy.get(outFilePath)!) {
-                        // add dependencies from current scope
-                        affectedFiles.add(affectedDependency);
                     }
                 }
             }
@@ -194,6 +191,10 @@ export async function build(
     function buildFiles(filesToBuild: Set<string>) {
         for (const filePath of filesToBuild) {
             if (indexFile) {
+                if (!filePath.startsWith(fullSrcDir)) {
+                    continue;
+                }
+
                 generator.generateFileIndexEntry(filePath, fullOutDir);
             } else {
                 buildSingleFile({

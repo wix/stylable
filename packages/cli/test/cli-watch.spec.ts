@@ -482,7 +482,84 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: new RegExp(`(?=${messages.FINISHED_PROCESSING})(?=.*?project-a)`),
+                        msg: [messages.FINISHED_PROCESSING, String(2), 'project-a'],
+                    },
+                ],
+            });
+            const files = loadDirSync(tempDir.path);
+            expect(files['packages/project-a/dist/style.css']).to.include('color:blue');
+        });
+
+        it.skip('should re-build index files', async () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'stylable.config.js': `
+                exports.stcConfig = () => {
+                    return {
+                        options: {
+                            outputSources: true,
+                            cjs: false,
+                            outDir: './dist',
+                            outputCSS: true,
+                        },
+                        projects: [
+                            'packages/*',
+                            [
+                                'packages/project-b',
+                                {
+                                    indexFile: './index.st.css',
+                                },
+                            ],
+                        ],
+                    };
+                };
+                `,
+                packages: {
+                    'project-a': {
+                        'package.json': JSON.stringify({
+                            name: 'a',
+                            version: '0.0.0',
+                            dependencies: { b: '0.0.0' },
+                        }),
+                        'style.st.css': `
+                            @st-import [App, color] from "../project-b/dist/index.st.css";
+                            .root{ 
+                                -st-extends: App; 
+                                color:value(color); 
+                            }
+                        `,
+                    },
+                    'project-b': {
+                        'package.json': JSON.stringify({
+                            name: 'b',
+                            version: '0.0.0',
+                        }),
+                        'app.st.css': `
+                            :vars {
+                                color: red;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            await run({
+                dirPath: tempDir.path,
+                args: ['-w'],
+                steps: [
+                    {
+                        msg: messages.START_WATCHING,
+                        action() {
+                            writeToExistingFile(
+                                join(tempDir.path, './packages/project-b/app.st.css'),
+                                `:vars {
+                                    color: blue;
+                                }`
+                            );
+                        },
+                    },
+                    {
+                        msg: messages.FINISHED_PROCESSING,
                     },
                 ],
             });
