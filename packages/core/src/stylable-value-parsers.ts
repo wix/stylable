@@ -267,7 +267,7 @@ export function getNamedArgs(node: ParsedValue) {
             if (node.type === 'div') {
                 args.push([]);
             } else {
-                const { sourceIndex, ...clone } = node;
+                const { sourceIndex: _sourceIndex, ...clone } = node;
                 args[args.length - 1].push(clone);
             }
         });
