@@ -50,12 +50,3 @@ export {
     WebpackCreateHash,
     WebpackOutputOptions,
 } from './types';
-export {
-    Loader,
-    LoaderContext,
-    OptionObject,
-    getOptions,
-    isUrlRequest,
-    loaderCallback,
-    stringifyRequest,
-} from './webpack-loader-types';
