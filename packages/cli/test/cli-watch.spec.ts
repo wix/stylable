@@ -343,6 +343,15 @@ describe('Stylable Cli Watch', () => {
                     {
                         msg: messages.FINISHED_PROCESSING,
                         action() {
+                            writeToExistingFile(
+                                join(tempDir.path, 'style.st.css'),
+                                `.root{ color:blue }`
+                            );
+                        },
+                    },
+                    {
+                        msg: messages.FINISHED_PROCESSING,
+                        action() {
                             writeFileSync(
                                 join(tempDir.path, 'comp.st.css'),
                                 `.root{ color:green }`
