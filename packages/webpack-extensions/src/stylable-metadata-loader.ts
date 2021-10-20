@@ -3,6 +3,8 @@ import findConfig from 'find-config';
 import type { LoaderContext } from '@stylable/webpack-plugin';
 import { createMetadataForStylesheet, ResolvedImport } from './create-metadata-stylesheet';
 
+const { getOptions } = require('loader-utils');
+
 let stylable: Stylable;
 const getLocalConfig = loadLocalConfigLoader();
 
@@ -21,7 +23,7 @@ export const metadataLoaderLocation = __filename;
 export default function metadataLoader(this: LoaderContext, content: string) {
     const { resolveNamespace, exposeNamespaceMapping }: LoaderOptions = {
         ...defaultOptions,
-        ...this.getOptions(),
+        ...getOptions(this),
         ...getLocalConfig(this.rootContext),
     };
 
