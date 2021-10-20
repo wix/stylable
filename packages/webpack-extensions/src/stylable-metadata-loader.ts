@@ -1,9 +1,7 @@
-import { Stylable, StylableMeta, processNamespace } from '@stylable/core';
+import { Stylable, processNamespace, MinimalFS } from '@stylable/core';
 import findConfig from 'find-config';
-import type { LoaderContext } from '@stylable/webpack-plugin';
-import { createMetadataForStylesheet, ResolvedImport } from './create-metadata-stylesheet';
-
-const { getOptions } = require('loader-utils');
+import type { LoaderDefinition } from 'webpack';
+import { createMetadataForStylesheet } from './create-metadata-stylesheet';
 
 let stylable: Stylable;
 const getLocalConfig = loadLocalConfigLoader();
@@ -20,10 +18,10 @@ const defaultOptions: LoaderOptions = {
 
 export const metadataLoaderLocation = __filename;
 
-export default function metadataLoader(this: LoaderContext, content: string) {
+const metadataLoader: LoaderDefinition = function (content) {
     const { resolveNamespace, exposeNamespaceMapping }: LoaderOptions = {
         ...defaultOptions,
-        ...getOptions(this),
+        ...this.getOptions(),
         ...getLocalConfig(this.rootContext),
     };
 
@@ -31,9 +29,9 @@ export default function metadataLoader(this: LoaderContext, content: string) {
         stylable ||
         Stylable.create({
             projectRoot: this.rootContext,
-            fileSystem: this.fs,
-            mode: this._compiler.options.mode === 'development' ? 'development' : 'production',
-            resolveOptions: this._compiler.options.resolve as any /* make stylable types better */,
+            fileSystem: this.fs as unknown as MinimalFS,
+            mode: this._compiler!.options.mode === 'development' ? 'development' : 'production',
+            resolveOptions: this._compiler!.options.resolve,
             timedCacheOptions: { useTimer: true, timeout: 1000 },
             resolveNamespace,
         });
@@ -45,10 +43,12 @@ export default function metadataLoader(this: LoaderContext, content: string) {
         exposeNamespaceMapping
     );
 
-    addWebpackWatchDependencies(this, usedMeta);
+    for (const [meta] of usedMeta) {
+        this.addDependency(meta.source);
+    }
 
     return 'export default ' + JSON.stringify(output);
-}
+};
 
 function loadLocalConfigLoader() {
     const localConfig = new Map<string, Partial<LoaderOptions>>();
@@ -67,11 +67,4 @@ function loadLocalConfigLoader() {
     };
 }
 
-function addWebpackWatchDependencies(
-    ctx: LoaderContext,
-    usedMeta: Map<StylableMeta, ResolvedImport[]>
-) {
-    for (const [meta] of usedMeta) {
-        ctx.addDependency(meta.source);
-    }
-}
+export default metadataLoader;

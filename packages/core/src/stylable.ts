@@ -22,8 +22,8 @@ export interface StylableConfig {
     diagnostics?: Diagnostics;
     hooks?: TransformHooks;
     resolveOptions?: {
-        alias: any;
-        symlinks: boolean;
+        alias?: any;
+        symlinks?: boolean;
         [key: string]: any;
     };
     optimizer?: IStylableOptimizer;

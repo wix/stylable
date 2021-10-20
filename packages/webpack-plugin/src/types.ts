@@ -1,6 +1,5 @@
 import type { DiagnosticsMode, Stylable, StylableExports } from '@stylable/core';
-import type { Chunk, Compilation, Compiler } from 'webpack';
-import type { LoaderContext } from './webpack-loader-types';
+import type { Chunk, Compilation, Compiler, LoaderContext } from 'webpack';
 
 export interface StylableBuildMeta {
     css: string;
@@ -23,7 +22,7 @@ export type LoaderData = Pick<
     'css' | 'urls' | 'exports' | 'namespace' | 'globals' | 'unusedImports'
 >;
 
-export interface StylableLoaderContext extends LoaderContext {
+export interface StylableLoaderContext extends LoaderContext<{}> {
     resourcePath: string;
     stylable: Stylable;
     assetsMode: 'loader' | 'url';
