@@ -21,10 +21,9 @@ describe('jest process', () => {
         const filename = require.resolve('@stylable/jest/test/fixtures/test.st.css');
         const content = readFileSync(filename, 'utf8');
         const module = nodeEval(
-            createTransformer({ resolveNamespace: (ns, _srcPath) => `${ns}-custom` }).process(
-                content,
-                filename
-            ),
+            createTransformer({
+                stylable: { resolveNamespace: (ns, _srcPath) => `${ns}-custom` },
+            }).process(content, filename),
             filename
         ) as RuntimeStylesheet;
 

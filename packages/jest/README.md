@@ -40,7 +40,7 @@ See the interface for `StylableConfig` [here](https://github.com/wix/stylable/bl
 ```js
 module.exports = {
   transform: {
-    '\\.st\\.css?$': ['@stylable/jest', { /* Stylable options */ }],
+    '\\.st\\.css?$': ['@stylable/jest', { stylable: { /* Stylable options */ } }],
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(.*?\\.st\\.css$))', // libraries publish .st.css files in their dist

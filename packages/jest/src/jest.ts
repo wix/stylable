@@ -28,7 +28,11 @@ function getCacheKey(
     );
 }
 
-export const createTransformer = (options?: Partial<StylableConfig>) => {
+interface StylableJestConfig {
+    stylable?: Partial<StylableConfig>;
+}
+
+export const createTransformer = (options?: StylableJestConfig) => {
     return {
         process: stylableModuleFactory(
             {
@@ -36,7 +40,7 @@ export const createTransformer = (options?: Partial<StylableConfig>) => {
                 requireModule: require,
                 projectRoot: '',
                 resolveNamespace,
-                ...options,
+                ...options?.stylable,
             },
             // ensure the generated module points to our own @stylable/runtime copy
             // this allows @stylable/jest to be used as part of a globally installed CLI
