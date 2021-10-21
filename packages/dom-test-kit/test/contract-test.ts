@@ -43,9 +43,9 @@ export const contractTest =
                     'selector with pseudo-element is not supported yet.'
                 );
             });
-            it('scopeSelector Error("element")', () => {
+            it('scopeSelector Error("type")', () => {
                 expect(() => util.scopeSelector('x')).to.throw(
-                    'selector with element is not supported yet.'
+                    'selector with type is not supported yet.'
                 );
             });
             it('scopeSelector handle local states', () => {

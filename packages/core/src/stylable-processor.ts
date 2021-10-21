@@ -1,21 +1,12 @@
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import { tokenizeImports } from 'toky';
+import { parseImports } from '@tokey/imports-parser';
 import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
+import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { murmurhash3_32_gc } from './murmurhash';
 import { reservedKeyFrames } from './native-reserved-lists';
-import {
-    createSimpleSelectorChecker,
-    isChildOfAtRule,
-    isCompRoot,
-    isNested,
-    isRootValid,
-    parseSelector,
-    SelectorAstNode,
-    traverseNode,
-} from './selector-utils';
 import {
     ClassSymbol,
     CSSVarSymbol,
@@ -32,9 +23,21 @@ import {
     expandCustomSelectors,
     getAlias,
     isCSSVarProp,
-    scopeSelector,
 } from './stylable-utils';
 import { processDeclarationFunctions } from "./process-declaration-functions";
+import {
+    walkSelector,
+    isSimpleSelector,
+    isInPseudoClassContext,
+    isRootValid,
+    isCompRoot,
+    scopeNestedSelector,
+    parseSelectorWithCache,
+    stringifySelector,
+} from './helpers/selector';
+import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
+import { isChildOfAtRule } from './helpers/rule';
+import type { SRule } from './deprecated/postcss-ast-extension';
 import {
     paramMapping,
     rootValueMapping,
@@ -44,6 +47,7 @@ import {
     valueMapping,
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
+import { ignoreDeprecationWarn } from './helpers/deprecation';
 import { validateAtProperty } from './validate-at-property';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
@@ -56,8 +60,8 @@ export const processorWarnings = {
     UNSCOPED_CLASS(name: string) {
         return `unscoped class "${name}" will affect all elements of the same type in the document`;
     },
-    UNSCOPED_ELEMENT(name: string) {
-        return `unscoped element "${name}" will affect all elements of the same type in the document`;
+    UNSCOPED_TYPE_SELECTOR(name: string) {
+        return `unscoped type selector "${name}" will affect all elements of the same type in the document`;
     },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) {
         return `cannot define "${name}" inside a complex selector`;
@@ -72,7 +76,7 @@ export const processorWarnings = {
         return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`;
     },
     STATE_DEFINITION_IN_ELEMENT() {
-        return 'cannot define pseudo states inside element selectors';
+        return 'cannot define pseudo states inside a type selector';
     },
     STATE_DEFINITION_IN_COMPLEX() {
         return 'cannot define pseudo states inside complex selectors';
@@ -169,6 +173,9 @@ export const processorWarnings = {
     },
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
+    },
+    INVALID_FUNCTIONAL_SELECTOR(selector: string, type: string) {
+        return `"${selector}" ${type} is not functional`;
     },
     DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
         return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`;
@@ -466,30 +473,31 @@ export class StylableProcessor {
     }
 
     protected handleRule(rule: SRule, inStScope = false) {
-        rule.selectorAst = parseSelector(rule.selector);
+        rule.selectorAst = deprecatedParseSelector(rule.selector);
 
-        const checker = createSimpleSelectorChecker();
+        const selectorAst = parseSelectorWithCache(rule.selector);
 
         let locallyScoped = false;
-
-        traverseNode(rule.selectorAst, (node, index, nodes, parents) => {
-            if (node.type === 'selector' && !isNested(parents)) {
+        let simpleSelector: boolean;
+        walkSelector(selectorAst, (node, index, nodes, parents) => {
+            const type = node.type;
+            if (type === 'selector' && !isInPseudoClassContext(parents)) {
                 locallyScoped = false;
             }
-            if (!checker(node)) {
-                rule.isSimpleSelector = false;
+            if (type !== `selector` && type !== `class` && type !== `type`) {
+                simpleSelector = false;
             }
-            const { name, type } = node;
-            if (type === 'pseudo-class') {
-                if (name === 'import') {
+
+            if (node.type === 'pseudo_class') {
+                if (node.value === 'import') {
                     if (rule.selector === rootValueMapping.import) {
                         if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
                             this.diagnostics.warn(rule, processorWarnings.NO_IMPORT_IN_ST_SCOPE());
                             rule.remove();
-                            return false;
+                            return walkSelector.stopAll;
                         }
                         rule.remove();
-                        return false;
+                        return walkSelector.stopAll;
                     } else {
                         this.diagnostics.warn(
                             rule,
@@ -498,7 +506,7 @@ export class StylableProcessor {
                             )
                         );
                     }
-                } else if (name === 'vars') {
+                } else if (node.value === 'vars') {
                     if (rule.selector === rootValueMapping.vars) {
                         if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
                             this.diagnostics.warn(
@@ -506,11 +514,11 @@ export class StylableProcessor {
                                 processorWarnings.NO_VARS_DEF_IN_ST_SCOPE()
                             );
                             rule.remove();
-                            return false;
+                            return walkSelector.stopAll;
                         }
 
                         this.addVarSymbols(rule);
-                        return false;
+                        return walkSelector.stopAll;
                     } else {
                         this.diagnostics.warn(
                             rule,
@@ -519,49 +527,117 @@ export class StylableProcessor {
                             )
                         );
                     }
+                } else if (node.value === `global`) {
+                    return walkSelector.skipNested;
                 }
-            } else if (type === 'class') {
-                this.addClassSymbolOnce(name, rule);
-
-                if (this.meta.classes[name]) {
-                    if (!this.meta.classes[name].alias) {
+            } else if (node.type === 'class') {
+                this.addClassSymbolOnce(node.value, rule);
+                if (node.nodes) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `class`),
+                        {
+                            word: stringifySelector(node),
+                        }
+                    );
+                }
+                if (this.meta.classes[node.value]) {
+                    if (!this.meta.classes[node.value].alias) {
                         locallyScoped = true;
                     } else if (locallyScoped === false && !inStScope) {
                         if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
-                            this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
-                                word: name,
-                            });
+                            this.diagnostics.warn(
+                                rule,
+                                processorWarnings.UNSCOPED_CLASS(node.value),
+                                {
+                                    word: node.value,
+                                }
+                            );
                         } else {
                             locallyScoped = true;
                         }
                     }
                 }
-            } else if (type === 'element') {
-                this.addElementSymbolOnce(name, rule);
-
+            } else if (node.type === 'type') {
+                this.addElementSymbolOnce(node.value, rule);
+                /**
+                 * intent to deprecate: currently `value(param)` can be used
+                 * as a custom state value. Unless there is a reasonable
+                 * use case, this should be removed.
+                 */
+                if (
+                    node.nodes &&
+                    (parents.length < 2 ||
+                        parents[parents.length - 2].type !== `pseudo_class` ||
+                        node.value !== `value`)
+                ) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
+                        {
+                            word: stringifySelector(node),
+                        }
+                    );
+                }
                 if (locallyScoped === false && !inStScope) {
                     if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
-                        this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), {
-                            word: name,
-                        });
+                        this.diagnostics.warn(
+                            rule,
+                            processorWarnings.UNSCOPED_TYPE_SELECTOR(node.value),
+                            {
+                                word: node.value,
+                            }
+                        );
                     } else {
                         locallyScoped = true;
                     }
                 }
-            } else if (type === 'nested-pseudo-class' && name === 'global') {
-                return true;
+            } else if (node.type === `id`) {
+                if (node.nodes) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
+                        {
+                            word: stringifySelector(node),
+                        }
+                    );
+                }
+            } else if (node.type === `attribute`) {
+                if (node.nodes) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(
+                            `[${node.value}]`,
+                            `attribute`
+                        ),
+                        {
+                            word: stringifySelector(node),
+                        }
+                    );
+                }
+            } else if (node.type === `nesting`) {
+                if (node.nodes) {
+                    this.diagnostics.error(
+                        rule,
+                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
+                        {
+                            word: stringifySelector(node),
+                        }
+                    );
+                }
             }
-            return void 0;
+            return;
         });
 
-        if (rule.isSimpleSelector !== false) {
+        if (simpleSelector! !== false) {
             rule.isSimpleSelector = true;
             rule.selectorType = rule.selector.match(/^\./) ? 'class' : 'element';
         } else {
             rule.selectorType = 'complex';
         }
 
-        if (!isRootValid(rule.selectorAst, 'root')) {
+        // ToDo: check cases of root in nested selectors?
+        if (!isRootValid(selectorAst)) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
     }
@@ -585,20 +661,25 @@ export class StylableProcessor {
         return symbol;
     }
 
-    protected checkForScopedNodeAfter(rule: postcss.Rule, nodes: SelectorAstNode[], index: number) {
+    protected checkForScopedNodeAfter(
+        rule: postcss.Rule,
+        nodes: ImmutableSelectorNode[],
+        index: number
+    ) {
         for (let i = index + 1; i < nodes.length; i++) {
             const element = nodes[i];
             if (!element) {
+                // ToDo: can this get here???
                 break;
             }
-            if (element.type === 'spacing' || element.type === 'operator') {
+            if (element.type === 'combinator') {
                 break;
             }
             if (element.type === 'class') {
-                this.addClassSymbolOnce(element.name, rule);
+                this.addClassSymbolOnce(element.value, rule);
 
-                if (this.meta.classes[element.name]) {
-                    if (!this.meta.classes[element.name].alias) {
+                if (this.meta.classes[element.value]) {
+                    if (!this.meta.classes[element.value].alias) {
                         return true;
                     }
                 }
@@ -778,8 +859,13 @@ export class StylableProcessor {
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
+        const isSimplePerSelector = isSimpleSelector(rule.selector);
+        const type = isSimplePerSelector.reduce((accType, { type }) => {
+            return !accType ? type : accType !== type ? `complex` : type;
+        }, `` as typeof isSimplePerSelector[number]['type']);
+        const isSimple = type !== `complex`;
         if (decl.prop === valueMapping.states) {
-            if (rule.isSimpleSelector && rule.selectorType !== 'element') {
+            if (isSimple && type !== 'type') {
                 this.extendTypedRule(
                     decl,
                     rule.selector,
@@ -787,14 +873,14 @@ export class StylableProcessor {
                     parseStates(decl.value, decl, this.diagnostics)
                 );
             } else {
-                if (rule.selectorType === 'element') {
+                if (type === 'type') {
                     this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_ELEMENT());
                 } else {
                     this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_COMPLEX());
                 }
             }
         } else if (decl.prop === valueMapping.extends) {
-            if (rule.isSimpleSelector) {
+            if (isSimple) {
                 const parsed = parseExtends(decl.value);
                 const symbolName = parsed.types[0] && parsed.types[0].symbolName;
 
@@ -858,7 +944,7 @@ export class StylableProcessor {
                         ref: mixinRefSymbol,
                     };
                     mixins.push(refedMixin);
-                    this.meta.mixins.push(refedMixin);
+                    ignoreDeprecationWarn(() => this.meta.mixins).push(refedMixin);
                 } else {
                     this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), {
                         word: mixin.type,
@@ -866,9 +952,10 @@ export class StylableProcessor {
                 }
             });
 
-            if (rule.mixins) {
-                const partials = rule.mixins.filter((r) => r.mixin.partial);
-                const nonPartials = rule.mixins.filter((r) => !r.mixin.partial);
+            const previousMixins = ignoreDeprecationWarn(() => rule.mixins);
+            if (previousMixins) {
+                const partials = previousMixins.filter((r) => r.mixin.partial);
+                const nonPartials = previousMixins.filter((r) => !r.mixin.partial);
                 const isInPartial = decl.prop === valueMapping.partialMixin;
                 if (
                     (partials.length && decl.prop === valueMapping.partialMixin) ||
@@ -889,7 +976,7 @@ export class StylableProcessor {
                 rule.mixins = mixins;
             }
         } else if (decl.prop === valueMapping.global) {
-            if (rule.isSimpleSelector && rule.selectorType !== 'element') {
+            if (isSimple && type !== 'type') {
                 this.setClassGlobalMapping(decl, rule);
             } else {
                 // TODO: diagnostics - scoped on none class
@@ -932,7 +1019,7 @@ export class StylableProcessor {
             context: this.dirContext,
             keyframes: {},
         };
-        const imports = tokenizeImports(`import ${atRule.params}`, '[', ']', true)[0];
+        const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
 
         if (imports && imports.star) {
             this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
@@ -975,7 +1062,10 @@ export class StylableProcessor {
         if (scopingRule.selector) {
             atRule.walkRules((rule) => {
                 const scopedRule = rule.clone({
-                    selector: scopeSelector(scopingRule.selector, rule.selector, false).selector,
+                    selector: scopeNestedSelector(
+                        parseSelectorWithCache(scopingRule.selector),
+                        parseSelectorWithCache(rule.selector)
+                    ).selector,
                 });
                 (scopedRule as SRule).stScopeSelector = atRule.params;
                 rule.replaceWith(scopedRule);
@@ -1094,22 +1184,4 @@ export function process(
     resolveNamespace?: typeof processNamespace
 ) {
     return new StylableProcessor(diagnostics, resolveNamespace).process(root);
-}
-
-// TODO: maybe put under stylable namespace object in v2
-export interface SRule extends postcss.Rule {
-    selectorAst: SelectorAstNode;
-    isSimpleSelector: boolean;
-    selectorType: 'class' | 'element' | 'complex';
-    mixins?: RefedMixin[];
-    stScopeSelector?: string;
-}
-
-// TODO: maybe put under stylable namespace object in v2
-export interface DeclStylableProps {
-    sourceValue: string;
-}
-
-export interface SDecl extends postcss.Declaration {
-    stylable: DeclStylableProps;
 }

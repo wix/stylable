@@ -1001,6 +1001,25 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
+"@tokey/core@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@tokey/core/-/core-1.2.1.tgz#6aca4d365d0ce97518a02c7da2b6de4b0a76ffbe"
+  integrity sha512-mSbVzBfj8Sjuab1yYHPUmVKET9M7uyzlfp56qiTtYaBnZnkKf+rEip8F94wL7PwruScKosmljJs3VXi7GrEiKA==
+
+"@tokey/css-selector-parser@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@tokey/css-selector-parser/-/css-selector-parser-0.5.0.tgz#8aa0976fd7d1f4a49373202e2ace8a0f45880d20"
+  integrity sha512-c2La/8BssZ2lK5ajvuZxuHmLvhgbqkCOP0yacXJ8MlZofbA2/dGGv/pXqGBxHUVKRgxknj/S/1RTCBqkor3vfQ==
+  dependencies:
+    "@tokey/core" "^1.2.1"
+
+"@tokey/imports-parser@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@tokey/imports-parser/-/imports-parser-0.0.2.tgz#b4504e4c8fe04efb58f2d032b9cb89bdb166d098"
+  integrity sha512-Ej3N7OnHuLpY9wOxUP4Mm2H97OXM0+49T3yzjtcgQ/GGVr4TnEZCYvwy9wLN/WtJywqehkpq6HYdDBX6FTFq/A==
+  dependencies:
+    "@tokey/core" "^1.2.1"
+
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
@@ -1052,6 +1071,11 @@
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@types/css-tree/-/css-tree-1.0.6.tgz#1eeb4838bb7ae2db2c223206f9ca4814610944b8"
   integrity sha512-zjSMDm4C7J1azi9SdT1XwNaVCzeHZx+Y5AVebcg/mrtUULNxZjeamc8oQpUDKpaudM5R+Sy7RFvm2xphfwN64w==
+
+"@types/cssesc@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/cssesc/-/cssesc-3.0.0.tgz#91350c4d72375d9b9c055fb2ef5895287ccb5cbc"
+  integrity sha512-4mBnOrTpVKn+tYzlnMO7cwDkDa6wlQ2bBXW+79/6ahMd36GF216kxWYxgz+S4d5Ev1ByFbnQbPGxV4P5BSL8MA==
 
 "@types/csso@^4.2.0":
   version "4.2.0"
@@ -7011,11 +7035,6 @@ toidentifier@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
-
-toky@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/toky/-/toky-0.1.0.tgz#28d6473fd3145bb4afacfd1da07b93ab51cb94f4"
-  integrity sha512-+EudMPGOVW/U7w76T3UQ66cBvWnsMmL0+ci1qRe6epVxN070t2YnKwP/vs7YQP9rEVkah83IzyFRw05fcz3JaQ==
 
 tough-cookie@^4.0.0:
   version "4.0.0"

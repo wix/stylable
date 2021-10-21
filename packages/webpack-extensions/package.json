@@ -13,6 +13,8 @@
     "@stylable/core": "^4.7.4",
     "@stylable/node": "^4.7.4",
     "@stylable/webpack-plugin": "^4.7.4",
+    "@tokey/css-selector-parser": "^0.5.0",
+    "loader-utils": "^2.0.0",
     "lodash.clonedeep": "^4.5.0"
   },
   "files": [

@@ -429,6 +429,25 @@ describe('Exports to js', () => {
                 z: 'entry__z',
             });
         });
+
+        it(`should export escaped class with`, () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .class\\.A {}
+                        `,
+                    },
+                },
+            });
+
+            expect(cssExports.classes).to.eql({
+                root: 'entry__root',
+                'class\\.A': 'entry__class.A',
+            });
+        });
     });
 
     describe('stylable vars', () => {
@@ -536,6 +555,26 @@ describe('Exports to js', () => {
                 object: { x: '1', y: '2' },
                 deepObject: { x: '1', y: '2', z: { x: '1', y: '2' } },
                 mixed: { x: '1', y: ['2', '3', ['4', { z: '5' }]] },
+            });
+        });
+
+        it('should preserve escaping', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :vars {
+                                color\\.1: red;
+                            }
+                            `,
+                    },
+                },
+            });
+
+            expect(cssExports.stVars).to.eql({
+                'color\\.1': 'red',
             });
         });
     });
@@ -821,6 +860,26 @@ describe('Exports to js', () => {
                 importedScoped2: '--imported-importedScoped2',
                 importedGlobal1: '--importedGlobal1',
                 importedGlobal2: '--importedGlobal2',
+            });
+        });
+
+        it.skip('exports escaped css variable', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                --my\\.Var: green;
+                            }
+                            `,
+                    },
+                },
+            });
+            // ToDo: fix for https://github.com/wix/stylable/issues/1932
+            expect(cssExports.vars).to.eql({
+                'my\\.Var': `--entry-my.Var`,
             });
         });
     });

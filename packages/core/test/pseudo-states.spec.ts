@@ -8,8 +8,10 @@ import {
     expectWarningsFromTransform,
     generateStylableResult,
     processSource,
+    testInlineExpects,
 } from '@stylable/core-test-kit';
 import { processorWarnings, valueMapping, nativePseudoClasses, pseudoStates } from '@stylable/core';
+import { reservedPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -26,7 +28,37 @@ describe('pseudo-states', () => {
     describe('process', () => {
         // What does it do?
         // Works in the scope of a single file, collecting state definitions for later usage
-
+        describe(`reserved pseudo classes`, () => {
+            reservedPseudoClasses.forEach((name) => {
+                it(`should NOT collect "${name}"`, () => {
+                    const { classes } = processSource(
+                        `
+                        .root {
+                            -st-states: custom-only, ${name};
+                        }`,
+                        { from: 'path/to/style.css' }
+                    );
+                    expect(classes).to.flatMatch({
+                        root: {
+                            [valueMapping.states]: {
+                                'custom-only': null,
+                            },
+                        },
+                    });
+                    expectWarnings(
+                        `.root{
+                            |-st-states: $${name}$|;
+                        }`,
+                        [
+                            {
+                                message: stateErrors.RESERVED_NATIVE_STATE(name),
+                                file: 'main.css',
+                            },
+                        ]
+                    );
+                });
+            });
+        });
         describe('boolean', () => {
             it('should collect state definitions as null (for boolean)', () => {
                 const { classes, diagnostics } = processSource(
@@ -617,6 +649,58 @@ describe('pseudo-states', () => {
                     1: '.entry__my-class.entry--state1 {}',
                 });
             });
+
+            it('should accept escaped state', () => {
+                const res = generateStylableResult({
+                    entry: '/entry.st.css',
+                    usedFiles: ['/entry.st.css'],
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                .root {
+                                     -st-states: state1\\.;
+                                }
+                                .root:state1\\. {}
+                            `,
+                        },
+                    },
+                });
+
+                expect(
+                    res.meta.diagnostics.reports,
+                    'no diagnostics reported for native states'
+                ).to.eql([]);
+                expect(res).to.have.styleRules({
+                    1: '.entry__root.entry--state1\\. {}',
+                });
+            });
+
+            it('should escape namespace', () => {
+                const res = generateStylableResult({
+                    entry: '/entry.st.css',
+                    usedFiles: ['/entry.st.css'],
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entr.y',
+                            content: `
+                                .root {
+                                     -st-states: state1;
+                                }
+                                .root:state1 {}
+                            `,
+                        },
+                    },
+                });
+
+                expect(
+                    res.meta.diagnostics.reports,
+                    'no diagnostics reported for native states'
+                ).to.eql([]);
+                expect(res).to.have.styleRules({
+                    1: '.entr\\.y__root.entr\\.y--state1 {}',
+                });
+            });
         });
 
         describe('advanced type / validation', () => {
@@ -674,7 +758,7 @@ describe('pseudo-states', () => {
                 });
             });
 
-            it('should use an attribute selector for illegal param syntax (and replaces spaces with underscores)', () => {
+            it('should use an escaped class selector for illegal param syntax (and replaces spaces with underscores)', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
@@ -801,6 +885,56 @@ describe('pseudo-states', () => {
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry__my-class.entry---stateWithDefault-8-username {}',
+                    });
+                });
+
+                it('should accept escaped name', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state\\.1(string);
+                                }
+                                .my-class:state\\.1(someString) {}
+                                `,
+                            },
+                        },
+                    });
+
+                    expect(
+                        res.meta.diagnostics.reports,
+                        'no diagnostics reported for native states'
+                    ).to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry__my-class.entry---state\\.1-10-someString {}',
+                    });
+                });
+
+                it('should escape namespace', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entr.y',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string);
+                                }
+                                .my-class:state1(someString) {}
+                                `,
+                            },
+                        },
+                    });
+
+                    expect(
+                        res.meta.diagnostics.reports,
+                        'no diagnostics reported for native states'
+                    ).to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entr\\.y__my-class.entr\\.y---state1-10-someString {}',
                     });
                 });
 
@@ -1238,6 +1372,31 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css',
                         },
                     ]);
+                });
+
+                it('should transform state param ignoring possible selector symbols', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .abc {}
+                                .my-class {
+                                    -st-states: state1(string);
+                                }
+                                /* @check .entry__my-class.entry---state1-4-\\.abc */
+                                .my-class:state1(.abc) {}
+                                `,
+                            },
+                        },
+                    });
+
+                    testInlineExpects(res.meta.outputAst!);
+                    expect(
+                        res.meta.diagnostics.reports,
+                        'no diagnostics reported for native states'
+                    ).to.eql([]);
                 });
 
                 describe('specific validators', () => {
@@ -2139,7 +2298,7 @@ describe('pseudo-states', () => {
             );
         });
 
-        it('should warn when defining a state inside an element selector', () => {
+        it('should warn when defining a state inside a type selector', () => {
             expectWarnings(
                 `
                 MyElement {
@@ -2149,12 +2308,12 @@ describe('pseudo-states', () => {
                 [
                     // skipping root scoping warning
                     {
-                        message: processorWarnings.UNSCOPED_ELEMENT('MyElement'),
+                        message: processorWarnings.UNSCOPED_TYPE_SELECTOR('MyElement'),
                         file: 'main.css',
                         skip: true,
                     },
                     {
-                        message: 'cannot define pseudo states inside element selectors',
+                        message: processorWarnings.STATE_DEFINITION_IN_ELEMENT(),
                         file: 'main.css',
                     },
                 ]
