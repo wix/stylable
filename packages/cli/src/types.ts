@@ -175,5 +175,5 @@ export interface BuildMetaData {
 
 export interface FileMetaData {
     srcPath: string;
-    outPath: string;
+    outPaths: string[];
 }

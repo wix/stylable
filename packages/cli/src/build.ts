@@ -82,7 +82,8 @@ export async function build(
 
             const outputFile = filesMetaData.get(filePath);
             const isDependency =
-                dependedBy.has(filePath) || (outputFile && dependedBy.has(outputFile.outPath));
+                dependedBy.has(filePath) ||
+                outputFile?.outPaths.some((outPath) => dependedBy.has(outPath));
 
             // is not from current scope and also not a dependency
             if (!filePath.startsWith(fullSrcDir) && !isDependency) {
@@ -139,10 +140,18 @@ export async function build(
 
             for (const filePath of affectedFiles) {
                 if (filePath.startsWith(fullSrcDir)) {
-                    filesMetaData.set(filePath, {
-                        srcPath: filePath,
-                        outPath: resolve(filePath.replace(fullSrcDir, fullOutDir)),
-                    });
+                    const outputFilePath = resolve(filePath.replace(fullSrcDir, fullOutDir));
+                    if (filesMetaData.has(filePath)) {
+                        const file = filesMetaData.get(filePath)!;
+
+                        // remove duplicated out paths
+                        file.outPaths = Array.from(new Set([...file.outPaths, outputFilePath]));
+                    } else {
+                        filesMetaData.set(filePath, {
+                            srcPath: filePath,
+                            outPaths: [outputFilePath],
+                        });
+                    }
 
                     if (assets.has(filePath)) {
                         // remove assets from the affected files
@@ -165,6 +174,7 @@ export async function build(
             if (!changeOrigin || (changeOrigin && count)) {
                 log(
                     mode,
+                    `[${new Date().toLocaleTimeString()}]`,
                     messages.FINISHED_PROCESSING,
                     count,
                     count === 1 ? 'file' : 'files',
