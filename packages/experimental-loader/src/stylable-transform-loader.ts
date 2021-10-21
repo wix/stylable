@@ -4,23 +4,24 @@ import {
     emitDiagnostics,
     visitMetaCSSDependenciesBFS,
     DiagnosticsMode,
+    MinimalFS,
 } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
-import type { LoaderContext, Loader } from '@stylable/webpack-plugin';
+import type { LoaderDefinition, LoaderContext } from 'webpack';
 
 // TODO: maybe adopt the code
 const { urlParser } = require('css-loader/dist/plugins');
 const { getImportCode, getModuleCode, sort } = require('css-loader/dist/utils');
 const cssLoaderRuntimeApiPath = require.resolve('css-loader/dist/runtime/api');
-const cssLoaderNoSourceMapRuntime  = require.resolve('css-loader/dist/runtime/noSourceMaps')
-const { isUrlRequest, stringifyRequest } = require('loader-utils');
+const cssLoaderNoSourceMapRuntime = require.resolve('css-loader/dist/runtime/noSourceMaps');
+const { isUrlRequest } = require('loader-utils');
 
 export interface LoaderOptions {
     resolveNamespace(namespace: string, filePath: string): string;
-    filterUrls(url: string, ctx: LoaderContext): boolean;
+    filterUrls(url: string, ctx: LoaderContext<{}>): boolean;
     exportsOnly: boolean;
     diagnosticsMode: DiagnosticsMode;
 }
@@ -29,10 +30,11 @@ const defaultOptions: LoaderOptions = {
     resolveNamespace: processNamespace,
     exportsOnly: false,
     diagnosticsMode: 'auto',
-    filterUrls(_url: string, _ctx: LoaderContext) {
+    filterUrls(_url: string, _ctx: LoaderContext<{}>) {
         return true;
     },
 };
+
 interface UrlReplacement {
     replacementName: string;
     importName: string;
@@ -48,7 +50,7 @@ interface LoaderImport {
 
 const optimizer = new StylableOptimizer();
 
-const stylableLoader: Loader = function (content) {
+const stylableLoader: LoaderDefinition = function (content) {
     const callback = this.async();
 
     if (!callback) {
@@ -63,13 +65,13 @@ const stylableLoader: Loader = function (content) {
         ...defaultOptions,
         ...this.getOptions(),
     };
-    const mode = this._compiler.options.mode === 'development' ? 'development' : 'production';
+    const mode = this._compiler!.options.mode === 'development' ? 'development' : 'production';
 
-    const stylable = getStylable(this._compiler, {
+    const stylable = getStylable(this._compiler!, {
         projectRoot: this.rootContext,
-        fileSystem: this.fs,
+        fileSystem: this.fs as unknown as MinimalFS,
         mode,
-        resolveOptions: this._compiler.options.resolve as any /* make stylable types better */,
+        resolveOptions: this._compiler!.options.resolve,
         resolveNamespace,
     });
 
@@ -91,13 +93,13 @@ const stylableLoader: Loader = function (content) {
         {
             type: 'api_import',
             importName: '___CSS_LOADER_API_IMPORT___',
-            url: stringifyRequest(this, cssLoaderRuntimeApiPath),
+            url: JSON.stringify(this.utils.contextify(this.context, cssLoaderRuntimeApiPath)),
             index: -1,
         },
         {
             type: 'api_sourcemap_import',
             importName: '___CSS_LOADER_API_NO_SOURCEMAP_IMPORT___',
-            url: stringifyRequest(this, cssLoaderNoSourceMapRuntime),
+            url: JSON.stringify(this.utils.contextify(this.context, cssLoaderNoSourceMapRuntime)),
             index: 0,
         },
     ];
@@ -119,7 +121,7 @@ const stylableLoader: Loader = function (content) {
             rootContext: this.rootContext,
             resolver: urlResolver,
             filter: (value: string) => isUrlRequest(value) && filterUrls(value, this),
-            urlHandler: (url: string) => stringifyRequest(this, url),
+            urlHandler: (url: string) => JSON.stringify(this.utils.contextify(this.context, url)),
         }),
     ];
 

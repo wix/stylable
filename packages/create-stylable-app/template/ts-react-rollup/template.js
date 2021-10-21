@@ -14,7 +14,7 @@ module.exports = {
         '@types/react-dom',
         '@typescript-eslint/eslint-plugin',
         '@typescript-eslint/parser',
-        'eslint',
+        'eslint@7',
         'eslint-config-prettier',
         'eslint-plugin-react',
         'eslint-plugin-react-hooks',

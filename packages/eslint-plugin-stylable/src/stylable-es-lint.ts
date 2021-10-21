@@ -132,7 +132,6 @@ export default createRule({
             },
         ],
         docs: {
-            category: 'Possible Errors',
             description: '',
             recommended: 'error',
         },
@@ -147,7 +146,10 @@ function getStylableRequest(importStatement: esTree.ImportDeclaration) {
     return;
 }
 
-function getMemberAccessor(property: esTree.Expression, isComputed: boolean) {
+function getMemberAccessor(
+    property: esTree.PrivateIdentifier | esTree.Expression,
+    isComputed: boolean
+) {
     if (isIdentifier(property) && !isComputed) {
         return property.name;
     } else if (property.type === AST_NODE_TYPES.Literal && typeof property.value === 'string') {

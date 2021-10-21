@@ -131,7 +131,7 @@ class NameCollisionDetector<Origin> {
     nameMapping = new Map<string, Origin>();
     collisions = new Map<string, Origin>();
     detect(name: string, origin: Origin) {
-        if (this.nameMapping.has(name)) {
+        if (this.nameMapping.has(name) && origin !== this.nameMapping.get(name)) {
             this.collisions.set(name, this.nameMapping.get(name)!);
         } else {
             this.nameMapping.set(name, origin);
