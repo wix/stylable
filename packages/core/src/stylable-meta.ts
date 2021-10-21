@@ -1,7 +1,8 @@
 import type * as postcss from 'postcss';
 import type { Diagnostics } from './diagnostics';
-import type { SelectorAstNode, SelectorChunk2 } from './selector-utils';
 import { getSourcePath } from './stylable-utils';
+import type { SelectorNode, SelectorList } from '@tokey/css-selector-parser';
+import { setFieldForDeprecation } from './helpers/deprecation';
 import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
 export const RESERVED_ROOT_NAME = 'root';
 
@@ -22,7 +23,7 @@ export class StylableMeta {
     public urls: string[];
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
-    public transformedScopes: Record<string, SelectorChunk2[][]> | null;
+    public transformedScopes: Record<string, SelectorList> | null;
     public scopes: postcss.AtRule[];
     public simpleSelectors: Record<string, SimpleSelector>;
     public mixins: RefedMixin[];
@@ -56,6 +57,7 @@ export class StylableMeta {
         this.urls = [];
         this.scopes = [];
         this.simpleSelectors = {};
+        setFieldForDeprecation(this, `mixins`, { objectType: `stylableMeta` });
         this.mixins = [];
         this.transformDiagnostics = null;
         this.transformedScopes = null;
@@ -76,7 +78,7 @@ export interface StylableDirectives {
     '-st-root'?: boolean;
     '-st-states'?: MappedStates;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
-    '-st-global'?: SelectorAstNode[];
+    '-st-global'?: SelectorNode[];
 }
 
 export interface ClassSymbol extends StylableDirectives {

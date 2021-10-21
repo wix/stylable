@@ -2,6 +2,7 @@ import { resolve } from 'path';
 import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
+import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 
 chai.use(flatMatch);
 
@@ -404,7 +405,7 @@ describe('Stylable postcss process', () => {
         );
 
         const mixinRule = result.ast.nodes[0] as SRule;
-        expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin');
+        expect(ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type).to.eql('my-mixin');
     });
     it('should use last mixin deceleration', () => {
         const result = processSource(
@@ -420,7 +421,7 @@ describe('Stylable postcss process', () => {
         );
 
         const mixinRule = result.ast.nodes[0] as SRule;
-        expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin2');
+        expect(ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type).to.eql('my-mixin2');
     });
     it('should use last mixin deceleration for -st-partial-mixin', () => {
         const result = processSource(
@@ -436,7 +437,7 @@ describe('Stylable postcss process', () => {
         );
 
         const mixinRule = result.ast.nodes[0] as SRule;
-        expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin2');
+        expect(ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type).to.eql('my-mixin2');
     });
     it('should use mixin deceleration in order for mixed -st-mixin and -st-partial-mixin', () => {
         const result = processSource(
@@ -457,10 +458,10 @@ describe('Stylable postcss process', () => {
 
         const mixinRule1 = result.ast.nodes[0] as SRule;
         const mixinRule2 = result.ast.nodes[1] as SRule;
-        expect(mixinRule1.mixins![0].mixin.type).to.eql('my-mixin1');
-        expect(mixinRule1.mixins![1].mixin.type).to.eql('my-mixin2');
-        expect(mixinRule2.mixins![0].mixin.type).to.eql('my-mixin2');
-        expect(mixinRule2.mixins![1].mixin.type).to.eql('my-mixin1');
+        expect(ignoreDeprecationWarn(() => mixinRule1.mixins!)[0].mixin.type).to.eql('my-mixin1');
+        expect(ignoreDeprecationWarn(() => mixinRule1.mixins!)[1].mixin.type).to.eql('my-mixin2');
+        expect(ignoreDeprecationWarn(() => mixinRule2.mixins!)[0].mixin.type).to.eql('my-mixin2');
+        expect(ignoreDeprecationWarn(() => mixinRule2.mixins!)[1].mixin.type).to.eql('my-mixin1');
     });
     it('should use mixin last deceleration in order for mixed -st-mixin and -st-partial-mixin with duplicates', () => {
         const result = processSource(
@@ -480,8 +481,8 @@ describe('Stylable postcss process', () => {
         );
 
         const mixinRule = result.ast.nodes[0] as SRule;
-        expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin3');
-        expect(mixinRule.mixins![1].mixin.type).to.eql('my-mixin4');
+        expect(ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type).to.eql('my-mixin3');
+        expect(ignoreDeprecationWarn(() => mixinRule.mixins!)[1].mixin.type).to.eql('my-mixin4');
     });
 
     describe('process assets', () => {

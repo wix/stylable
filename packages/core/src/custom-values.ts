@@ -5,15 +5,12 @@ import type { StylableResolver } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
 import type { ParsedValue } from './types';
 
-export interface Box<Type extends string, Value extends any> {
+export interface Box<Type extends string, Value> {
     type: Type;
     value: Value;
 }
 
-export function box<Type extends string, Value extends any>(
-    type: Type,
-    value: Value
-): Box<Type, Value> {
+export function box<Type extends string, Value>(type: Type, value: Value): Box<Type, Value> {
     return {
         type,
         value,

@@ -1,7 +1,6 @@
+import type { LoaderDefinition } from 'webpack';
 import type { StylableExports } from '@stylable/core';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
-
-import type { Loader } from '@stylable/webpack-plugin';
 
 function evalStylableExtractModule(source: string): [string, StylableExports] {
     if (!source) {
@@ -21,7 +20,7 @@ function evalStylableExtractModule(source: string): [string, StylableExports] {
     return _module.exports as [string, StylableExports];
 }
 
-const stylableRuntimeLoader: Loader = function loader(content) {
+const stylableRuntimeLoader: LoaderDefinition = function loader(content) {
     if (typeof content !== 'string') {
         throw new Error('content is not string');
     }

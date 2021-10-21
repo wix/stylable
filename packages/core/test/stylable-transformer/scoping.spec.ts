@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { generateStylableRoot, testInlineExpects } from '@stylable/core-test-kit';
-import { createWarningRule } from '@stylable/core';
+import { createWarningRule } from '@stylable/core/dist/helpers/rule';
 
 describe('Stylable postcss transform (Scoping)', () => {
     describe('scoped pseudo-classes', () => {
@@ -19,7 +19,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             -st-states: b, c;
                         } 
 
-                        /* @check .style__a:is( .button__label,  .button__icon, .style--b, .style--c) */
+                        /* @check .style__a:is(.button__label, .button__icon, .style--b, .style--c) */
                         .a:is(::label, ::icon, :b, :c) {}
                         `,
                     },
@@ -848,6 +848,23 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .b, .c {}
                             /* @check .entry__d .entry__e*/
                             .d .e {}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
+
+        it('scope escape namespace and preserve local class', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry.1',
+                        content: `
+                            /* @check .entry\\.1__a\\. */
+                            .a\\. {}
                         `,
                     },
                 },

@@ -2,14 +2,23 @@ import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
-import type { SelectorAstNode } from './selector-utils';
+import {
+    parseSelectorWithCache,
+    convertToClass,
+    stringifySelector,
+    convertToInvalid,
+} from './helpers/selector';
+import { wrapFunctionForDeprecation } from './helpers/deprecation';
+import type { PseudoClass } from '@tokey/css-selector-parser';
 import { StateResult, systemValidators } from './state-validators';
-import type { SRule, StylableMeta } from './stylable-processor';
+import type { StylableMeta } from './stylable-processor';
 import type { StylableResolver } from './stylable-resolver';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
+import { reservedPseudoClasses } from './native-reserved-lists';
+import cssesc from 'cssesc';
 
 export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
@@ -31,6 +40,7 @@ export const stateErrors = {
         )}"`,
     STATE_STARTS_WITH_HYPHEN: (name: string) =>
         `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`,
+    RESERVED_NATIVE_STATE: (name: string) => `state "${name}" is reserved for native pseudo-class`,
 };
 
 // PROCESS
@@ -51,6 +61,11 @@ export function processPseudoStates(
             diagnostics.error(decl, stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
                 word: stateDefinition.value,
             });
+        } else if (reservedPseudoClasses.includes(stateDefinition.value)) {
+            diagnostics.warn(decl, stateErrors.RESERVED_NATIVE_STATE(stateDefinition.value), {
+                word: stateDefinition.value,
+            });
+            return;
         }
 
         if (stateDefinition.type === 'function') {
@@ -166,7 +181,8 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
 
 // TRANSFORM
 
-export function validateStateDefinition(
+/* @deprecated */
+export const validateStateDefinition = wrapFunctionForDeprecation(function(
     decl: postcss.Declaration,
     meta: StylableMeta,
     resolver: StylableResolver,
@@ -175,13 +191,14 @@ export function validateStateDefinition(
     if (decl.parent && decl.parent.type !== 'root') {
         const container = decl.parent;
         if (container.type !== 'atrule') {
-            const sRule: SRule = container as SRule;
-            if (sRule.selectorAst.nodes && sRule.selectorAst.nodes.length === 1) {
-                const singleSelectorAst = sRule.selectorAst.nodes[0];
+            const parentRule = container as postcss.Rule;
+            const selectorAst = parseSelectorWithCache(parentRule.selector);
+            if (selectorAst.length && selectorAst.length === 1) {
+                const singleSelectorAst = selectorAst[0];
                 const selectorChunk = singleSelectorAst.nodes;
 
                 if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
-                    const className = selectorChunk[0].name;
+                    const className = selectorChunk[0].value;
                     const classMeta = meta.classes[className];
                     const states = classMeta[valueMapping.states];
 
@@ -196,7 +213,7 @@ export function validateStateDefinition(
                                     state.defaultValue || '',
                                     resolver,
                                     diagnostics,
-                                    sRule,
+                                    parentRule,
                                     true,
                                     !!state.defaultValue
                                 );
@@ -218,7 +235,7 @@ export function validateStateDefinition(
             }
         }
     }
-}
+}, {name: `validateStateDefinition`});
 
 export function validateStateArgument(
     stateAst: StateParsedValue,
@@ -260,7 +277,7 @@ export function setStateToNode(
     states: MappedStates,
     meta: StylableMeta,
     name: string,
-    node: SelectorAstNode,
+    node: PseudoClass,
     namespace: string,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -269,14 +286,14 @@ export function setStateToNode(
     const stateDef = states[name];
 
     if (stateDef === null) {
-        node.type = 'class';
-        node.name = createBooleanStateClassName(name, namespace);
+        convertToClass(node).value = createBooleanStateClassName(name, namespace);
     } else if (typeof stateDef === 'string') {
-        node.type = 'invalid'; // simply concat global mapped selector - ToDo: maybe change to 'selector'
-        node.value = stateDef;
+        // simply concat global mapped selector - ToDo: maybe change to 'selector'
+        convertToInvalid(node).value = stateDef;
     } else if (typeof stateDef === 'object') {
         resolveStateValue(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
     }
+    delete node.nodes;
 }
 
 function resolveStateValue(
@@ -284,20 +301,21 @@ function resolveStateValue(
     resolver: StylableResolver,
     diagnostics: Diagnostics,
     rule: postcss.Rule | undefined,
-    node: SelectorAstNode,
+    node: PseudoClass,
     stateDef: StateParsedValue,
     name: string,
     namespace: string
 ) {
+    const inputValue = node.nodes && node.nodes.length ? stringifySelector(node.nodes) : ``;
     let actualParam = resolveParam(
         meta,
         resolver,
         diagnostics,
         rule,
-        node.content || stateDef.defaultValue
+        inputValue ? inputValue : stateDef.defaultValue
     );
 
-    if (rule && !node.content && !stateDef.defaultValue) {
+    if (rule && !inputValue && !stateDef.defaultValue) {
         diagnostics.warn(rule, stateErrors.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
             word: name,
         });
@@ -333,8 +351,7 @@ function resolveStateValue(
     }
 
     const strippedParam = stripQuotation(actualParam);
-    node.type = 'class';
-    node.name = createStateWithParamClassName(name, namespace, strippedParam);
+    convertToClass(node).value = createStateWithParamClassName(name, namespace, strippedParam);
 }
 
 function resolveParam(
@@ -350,16 +367,23 @@ function resolveParam(
 }
 
 export function createBooleanStateClassName(stateName: string, namespace: string) {
-    return `${namespace}${booleanStateDelimiter}${stateName}`;
+    const escapedNamespace = cssesc(namespace, { isIdentifier: true });
+    return `${escapedNamespace}${booleanStateDelimiter}${stateName}`;
 }
 
 export function createStateWithParamClassName(stateName: string, namespace: string, param: string) {
-    return `${namespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(param)}`;
+    const escapedNamespace = cssesc(namespace, { isIdentifier: true });
+    return `${escapedNamespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(
+        param,
+        true
+    )}`;
 }
 
-export function resolveStateParam(param: string) {
-    return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(
+export function resolveStateParam(param: string, escape = false) {
+    const result = `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(
         /\s/gm,
         '_'
     )}`;
+    // adding/removing initial `s` to indicate that it's not the first param of the identifier
+    return escape ? cssesc(`s` + result, { isIdentifier: true }).slice(1) : result;
 }

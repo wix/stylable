@@ -1,11 +1,13 @@
+import { nativePseudoClasses, pseudoStates } from '@stylable/core';
 import {
-    nativePseudoClasses,
-    parseSelector,
-    pseudoStates,
-    SelectorAstNode,
-    stringifySelector,
-    traverseNode,
-} from '@stylable/core';
+    parseCssSelector,
+    stringifySelectorAst,
+    walk,
+    SelectorList,
+    Selector,
+    SelectorNode,
+    Attribute,
+} from '@tokey/css-selector-parser';
 import cloneDeep from 'lodash.clonedeep';
 import type * as postcss from 'postcss';
 export * from './create-forcestate-matchers';
@@ -90,18 +92,18 @@ export interface AddForceStateSelectorsContext {
 
 export function addForceStateSelectors(ast: postcss.Root, context: AddForceStateSelectorsContext) {
     ast.walkRules((rule) => {
-        const selectorAst = parseSelector(rule.selector);
+        const selectorAst = parseCssSelector(rule.selector);
 
-        const overrideSelectors = selectorAst.nodes.reduce((selectors, selector) => {
+        const overrideSelectors = selectorAst.reduce((selectors, selector) => {
             if (hasStates(selector, context)) {
                 selectors.push(transformStates(cloneDeep(selector), context));
             }
             return selectors;
-        }, [] as SelectorAstNode[]);
+        }, [] as SelectorList);
 
         if (overrideSelectors.length) {
-            selectorAst.nodes.push(...overrideSelectors);
-            rule.selector = stringifySelector(selectorAst);
+            selectorAst.push(...overrideSelectors);
+            rule.selector = stringifySelectorAst(selectorAst);
         }
     });
 }
@@ -110,40 +112,45 @@ function isNative(name: string) {
     return hasOwnProperty.call(nativePseudoClassesMap, name);
 }
 
-function hasStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {
+function hasStates(selector: Selector, context: AddForceStateSelectorsContext) {
     let hasStates = false;
-    traverseNode(selector, (node) => {
-        if (node.type === 'pseudo-class') {
-            return (hasStates = true);
-        } else if (node.type === 'class' && context.isStateClassName(node.name)) {
-            return (hasStates = true);
-        } else if (node.type === 'attribute' && node.content && context.isStateAttr(node.content)) {
-            return (hasStates = true);
+    walk(selector, (node) => {
+        if (
+            node.type === 'pseudo_class' ||
+            (node.type === 'class' && context.isStateClassName(node.value)) ||
+            (node.type === 'attribute' && node.value && context.isStateAttr(node.value))
+        ) {
+            hasStates = true;
+            return walk.skipNested;
         }
-        return undefined;
+        return;
     });
     return hasStates;
 }
 
-function transformStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {
-    traverseNode(selector, (node) => {
-        if (node.type === 'pseudo-class') {
-            node.type = 'attribute';
-            node.content = isNative(node.name)
-                ? context.getForceStateAttrContentFromNative(node.name)
-                : context.getForceStateAttrContent(node.name);
+function convertToAttribute(node: SelectorNode): Attribute {
+    const castNode = node as Attribute;
+    castNode.type = `attribute`;
+    return castNode;
+}
 
-            context.onMapping(node.name, node.content);
-        } else if (node.type === 'class' && context.isStateClassName(node.name)) {
-            node.type = 'attribute';
-            const name = context.getStateClassName(node.name);
-            node.content = context.getForceStateAttrContent(name);
-            context.onMapping(name, node.content);
-        } else if (node.type === 'attribute' && node.content && context.isStateAttr(node.content)) {
-            node.type = 'attribute';
-            const name = context.getStateAttr(node.content);
-            node.content = context.getForceStateAttrContent(name);
-            context.onMapping(name, node.content);
+function transformStates(selector: Selector, context: AddForceStateSelectorsContext) {
+    walk(selector, (node) => {
+        if (node.type === 'pseudo_class') {
+            const name = node.value;
+            convertToAttribute(node).value = isNative(node.value)
+                ? context.getForceStateAttrContentFromNative(node.value)
+                : context.getForceStateAttrContent(node.value);
+
+            context.onMapping(name, node.value);
+        } else if (node.type === 'class' && context.isStateClassName(node.value)) {
+            const name = context.getStateClassName(node.value);
+            convertToAttribute(node).value = context.getForceStateAttrContent(name);
+            context.onMapping(name, node.value);
+        } else if (node.type === 'attribute' && node.value && context.isStateAttr(node.value)) {
+            const name = context.getStateAttr(node.value);
+            convertToAttribute(node).value = context.getForceStateAttrContent(name);
+            context.onMapping(name, node.value);
         }
     });
     return selector;
