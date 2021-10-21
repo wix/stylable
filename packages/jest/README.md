@@ -26,10 +26,7 @@ Add the transformer to your `jest.config.js` file:
 module.exports = {
   transform: {
     '\\.st\\.css?$': '@stylable/jest',
-  },
-  transformIgnorePatterns: [
-    '/node_modules/(?!(.*?\\.st\\.css$))', // libraries publish .st.css files in their dist
-  ],
+  }
 };
 ```
 
@@ -41,7 +38,18 @@ See the interface for `StylableConfig` [here](https://github.com/wix/stylable/bl
 module.exports = {
   transform: {
     '\\.st\\.css?$': ['@stylable/jest', { stylable: { /* Stylable options */ } }],
-  },
+  }
+};
+```
+
+### Ignoring `node_modules` stylesheets
+
+To disable transformation for stylehseets originating from your `node_modules` add the following configuration:
+
+```js
+module.exports = {
+  // existing configuration...
+  
   transformIgnorePatterns: [
     '/node_modules/(?!(.*?\\.st\\.css$))', // libraries publish .st.css files in their dist
   ],
