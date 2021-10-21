@@ -437,7 +437,7 @@ describe('Stylable Cli Watch', () => {
             });
         });
 
-        it.only('should re-build derived files deep', async () => {
+        it('should re-build derived files deep', async () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'stylable.config.js': `
@@ -568,7 +568,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: [messages.FINISHED_PROCESSING, '2 files in', 'project-a'],
                     },
                 ],
             });
