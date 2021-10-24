@@ -3,13 +3,11 @@ import {
     stringifySelector,
     scopeNestedSelector,
     walkSelector,
-    walkSelectorReadonly,
     convertToSelector,
     matchTypeAndValue,
     isSimpleSelector,
 } from './selector';
-import type { SelectorNode, Selector } from '@tokey/css-selector-parser';
-import type { DeepReadonlyObject } from './readonly';
+import type { Selector, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import { valueMapping } from '../stylable-value-parsers';
 import * as postcss from 'postcss';
 import { ignoreDeprecationWarn } from './deprecation';
@@ -123,7 +121,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
 
 function replaceTargetWithNesting(
     selectorNode: Selector,
-    prefixType: DeepReadonlyObject<SelectorNode>
+    prefixType: ImmutableSelectorNode
 ) {
     walkSelector(selectorNode, (node) => {
         if (matchTypeAndValue(node, prefixType)) {
@@ -139,7 +137,7 @@ function replaceTargetWithNesting(
     });
 }
 
-function fixChunkOrdering(selectorNode: Selector, prefixType: DeepReadonlyObject<SelectorNode>) {
+function fixChunkOrdering(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
     let startChunkIndex = 0;
     let moved = false;
     walkSelector(selectorNode, (node, index, nodes) => {
@@ -158,11 +156,11 @@ function fixChunkOrdering(selectorNode: Selector, prefixType: DeepReadonlyObject
 }
 
 function containsMatchInFirstChunk(
-    prefixType: DeepReadonlyObject<SelectorNode>,
-    selectorNode: DeepReadonlyObject<SelectorNode>
+    prefixType: ImmutableSelectorNode,
+    selectorNode: ImmutableSelectorNode
 ) {
     let isMatch = false;
-    walkSelectorReadonly(selectorNode, (node) => {
+    walkSelector(selectorNode, (node) => {
         if (node.type === `combinator`) {
             return walkSelector.stopAll;
         } else if (node.type === 'pseudo_class') {

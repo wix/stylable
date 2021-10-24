@@ -5,15 +5,12 @@ import type { StylableResolver } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
 import type { ParsedValue } from './types';
 
-export interface Box<Type extends string, Value extends any> {
+export interface Box<Type extends string, Value> {
     type: Type;
     value: Value;
 }
 
-export function box<Type extends string, Value extends any>(
-    type: Type,
-    value: Value
-): Box<Type, Value> {
+export function box<Type extends string, Value>(type: Type, value: Value): Box<Type, Value> {
     return {
         type,
         value,
@@ -53,8 +50,8 @@ export interface CustomValueExtension<T> {
     ): string;
 }
 
-export const stTypes: CustomTypes = {
-    stArray: createCustomValue<BoxedValueArray, BoxedValueArray>({
+function createStArrayCustomFunction() {
+    return createCustomValue<BoxedValueArray, BoxedValueArray>({
         processArgs: (node, customTypes) => {
             return CustomValueStrategy.args(node, customTypes);
         },
@@ -62,8 +59,11 @@ export const stTypes: CustomTypes = {
             return args;
         },
         getValue: (value, index) => value[parseInt(index, 10)],
-    }).register('stArray'),
-    stMap: createCustomValue<BoxedValueMap, BoxedValueMap>({
+    });
+}
+
+function createStMapCustomFunction() {
+    return createCustomValue<BoxedValueMap, BoxedValueMap>({
         processArgs: (node, customTypes) => {
             return CustomValueStrategy.named(node, customTypes);
         },
@@ -71,7 +71,25 @@ export const stTypes: CustomTypes = {
             return args;
         },
         getValue: (value, index) => value[index],
-    }).register('stMap'),
+    });
+}
+
+export const stTypes: CustomTypes = {
+    /** @deprecated - use `st-array` */
+    stArray: createStArrayCustomFunction().register('stArray'),
+    /** @deprecated - use `st-map` */
+    stMap: createStMapCustomFunction().register('stMap'),
+    'st-array': createStArrayCustomFunction().register('st-array'),
+    'st-map': createStMapCustomFunction().register('st-map'),
+} as const;
+
+export const deprecatedStFunctions: Record<string, { alternativeName: string }> = {
+    stArray: {
+        alternativeName: 'st-array',
+    },
+    stMap: {
+        alternativeName: 'st-map',
+    },
 };
 
 export const CustomValueStrategy = {

@@ -19,7 +19,7 @@ describe('No collision namespace resolver', () => {
             nsResolver('Button', '/a/b/c');
             nsResolver('Button', '/a/b/fail');
         } catch (e) {
-            error = e.message;
+            error = (e as Error).message;
         }
 
         expect(error).to.equal('namespace (MyApp_Button of /a/b/fail) is already in use');

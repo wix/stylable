@@ -4,6 +4,7 @@ import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
+import { processorWarnings } from '@stylable/core';
 
 describe('Stylable Cli', function () {
     this.timeout(25000);
@@ -268,6 +269,31 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
 
+        it('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `:vars { colors: stArray(red, blue); }`, // Todo: replace case with permanent info diagnostic
+            });
+
+            const { status, stdout } = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--diagnosticsMode=strict',
+            ]);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(
+                new RegExp(
+                    `\\[info\\]: ${processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                        'stArray',
+                        'st-array'
+                    )}`
+                )
+            );
+        });
+
         it('(diagnosticsMode) should report diagnostics and ignore process exit', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -307,7 +333,21 @@ describe('Stylable Cli', function () {
 
             expect(status).to.equal(1);
             expect(stdout).to.equal('');
-            expect(stderr).to.include('dtsSourceMap -> dts');
+            expect(stderr).to.include('"dtsSourceMap" requires turning on "dts"');
+        });
+
+        it('should report diagnostic once', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `:vars {x: red; x: blue}`,
+            });
+
+            const { stdout, status } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(status).to.equal(1);
+            expect(
+                stdout.match(new RegExp(processorWarnings.REDECLARE_SYMBOL('x'), 'g'))
+            ).to.have.length(1);
         });
     });
 });

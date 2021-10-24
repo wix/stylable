@@ -72,6 +72,9 @@ This will check full match and order.
 
 Target generated rules (mixin) - ` @check[OFFEST] SELECTOR`
 ```css
+.my-mixin {
+    color: blue;
+}
 /* 
     @check[1] .entry__container:hover {color: blue;} 
 */
@@ -113,4 +116,4 @@ Exposes two utility functions (`matchRuleAndDeclaration` and `matchAllRulesAndDe
 
 ## License
 
-Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
+Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

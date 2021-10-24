@@ -1,7 +1,5 @@
 name: tests
-
 on: [push, pull_request]
-
 jobs:
   tests:
     name: node ${{ matrix.node-version }} / ${{ matrix.os }}
@@ -16,7 +14,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
+          cache: yarn
       - run: npm i -g yarn@1
       - run: yarn config set network-timeout 300000
       - run: yarn --frozen-lockfile

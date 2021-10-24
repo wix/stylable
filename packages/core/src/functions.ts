@@ -81,7 +81,7 @@ export function processDeclarationValue(
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
     args: string[] = []
-): { topLevelType: any; outputValue: string; typeError: Error } {
+): { topLevelType: any; outputValue: string; typeError?: Error } {
     diagnostics = node ? diagnostics : undefined;
     const customValues = resolveCustomValues(meta, resolver);
     const parsedValue: any = postcssValueParser(value);
@@ -292,7 +292,7 @@ export function processDeclarationValue(
                                     node,
                                     functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
                                         parsedNode.resolvedValue,
-                                        error.message
+                                        (error as Error)?.message
                                     ),
                                     { word: (node as postcss.Declaration).value }
                                 );
@@ -328,7 +328,7 @@ export function processDeclarationValue(
 
     let outputValue = '';
     let topLevelType = null;
-    let typeError = null;
+    let typeError: Error | undefined = undefined;
     for (const n of parsedValue.nodes) {
         if (n.type === 'function') {
             const matchingType = customValues[n.value];
@@ -338,7 +338,7 @@ export function processDeclarationValue(
                 try {
                     outputValue += matchingType.getValue(args, topLevelType, n, customValues);
                 } catch (e) {
-                    typeError = e;
+                    typeError = e as Error;
                     // catch broken variable resolutions
                 }
             } else {

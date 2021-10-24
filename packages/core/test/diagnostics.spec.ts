@@ -219,6 +219,7 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
         });
+
         describe('pseudo selectors', () => {
             xit('should return warning for native pseudo elements without selector', () => {
                 expectWarnings(
@@ -369,20 +370,27 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return a warning for a CSS mixin using un-named params', () => {
-                expectWarnings(
-                    `
-                    .mixed {
-                        color: red;
-                    }
-                    .gaga{
-                        |-st-mixin: mixed($1$)|;
-                    }
-
-                `,
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                                .mixed {
+                                    color: red;
+                                }
+                                .gaga{
+                                    |-st-mixin: mixed($1$)|;
+                                }
+            
+                            `,
+                            },
+                        },
+                    },
                     [
                         {
                             message: valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
-                            file: 'main.css',
+                            file: '/style.st.css',
                         },
                     ]
                 );
@@ -1236,7 +1244,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
                 expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
+                    { message: processorWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
                 ]);
             });
         });
@@ -1416,7 +1424,7 @@ describe('diagnostics: warnings and errors', () => {
                     {
                         message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
                         file: '/main.st.css',
-                    }
+                    },
                 ]);
             });
 

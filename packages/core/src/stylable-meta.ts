@@ -1,8 +1,7 @@
 import type * as postcss from 'postcss';
 import type { Diagnostics } from './diagnostics';
 import { getSourcePath } from './stylable-utils';
-import type { ChunkedSelector } from './helpers/selector';
-import type { SelectorNode } from '@tokey/css-selector-parser';
+import type { SelectorNode, SelectorList } from '@tokey/css-selector-parser';
 import { setFieldForDeprecation } from './helpers/deprecation';
 import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
 export const RESERVED_ROOT_NAME = 'root';
@@ -24,7 +23,7 @@ export class StylableMeta {
     public urls: string[];
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
-    public transformedScopes: Record<string, ChunkedSelector[]> | null;
+    public transformedScopes: Record<string, SelectorList> | null;
     public scopes: postcss.AtRule[];
     public simpleSelectors: Record<string, SimpleSelector>;
     public mixins: RefedMixin[];
@@ -117,12 +116,13 @@ export interface KeyframesSymbol {
     alias: string;
     name: string;
     import?: Imported;
+    global?: boolean;
 }
 
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
-    global?: boolean;
+    global: boolean;
 }
 
 export type StylableSymbol =

@@ -97,7 +97,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/test-generator'),
+            Generator: require('./fixtures/test-generator').Generator,
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -133,7 +133,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/test-generator'),
+            Generator: require('./fixtures/test-generator').Generator,
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -170,7 +170,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: '/',
             log,
-            generatorPath: require.resolve('./fixtures/named-exports-generator'),
+            Generator: require('./fixtures/named-exports-generator').Generator,
         });
 
         const res = fs.readFileSync('/index.st.css').toString();
@@ -236,7 +236,7 @@ describe('build index', () => {
                 log,
             });
         } catch (error) {
-            expect(error.message).to.equal(
+            expect((error as Error)?.message).to.equal(
                 `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`
             );
         }

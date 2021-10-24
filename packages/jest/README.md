@@ -6,17 +6,50 @@
 
 ## Installation
 
-This package is still a work-in-progress within the Stylable mono-repo. Once it matures, further details will be added here.
+Install `@stylable/jest` as a dev dependency in your local project.
+
+Install using npm:
+```bash
+npm install @stylable/jest --save-dev
+```
+
+Install using yarn:
+```bash
+yarn add @stylable/jest --dev
+```
 
 ## Usage
 
-Add the transformation to the `jest.config.js` file:
+Add the transformer to your `jest.config.js` file:
 
 ```js
 module.exports = {
   transform: {
-    '\\.st\\.css?$': require.resolve('@stylable/jest'),
-  },
+    '\\.st\\.css?$': '@stylable/jest',
+  }
+};
+```
+
+### Configuring Stylable options
+
+See the interface for `StylableConfig` [here](https://github.com/wix/stylable/blob/master/packages/core/src/stylable.ts).
+
+```js
+module.exports = {
+  transform: {
+    '\\.st\\.css?$': ['@stylable/jest', { stylable: { /* Stylable options */ } }],
+  }
+};
+```
+
+### Ignoring `node_modules` stylesheets
+
+To disable transformation for stylehseets originating from your `node_modules` add the following configuration:
+
+```js
+module.exports = {
+  // existing configuration...
+  
   transformIgnorePatterns: [
     '/node_modules/(?!(.*?\\.st\\.css$))', // libraries publish .st.css files in their dist
   ],
@@ -25,4 +58,4 @@ module.exports = {
 
 ## License
 
-Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
+Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).

@@ -1,1 +1,6 @@
-export * from './create-project';
+export {
+    CreateProjectFromTemplateOptions,
+    TemplateCommand,
+    TemplateDefinition,
+    createProjectFromTemplate,
+} from './create-project';

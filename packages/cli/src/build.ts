@@ -1,12 +1,13 @@
 import { Stylable, visitMetaCSSDependenciesBFS } from '@stylable/core';
 import type { IFileSystem } from '@file-services/types';
-import type { Generator } from './base-generator';
+import { Generator as BaseGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { levels, Log } from './logger';
-import { reportDiagnostics } from './report-diagnostics';
+import { DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
+import { tryRun } from './build-tools';
 
 export const messages = {
     START_WATCHING: 'start watching...',
@@ -33,10 +34,12 @@ export interface BuildOptions {
     log: Log;
     /** opt into build index file and specify the filepath for the generated index file */
     indexFile?: string;
-    /** path to a custom cli index generator */
-    generatorPath?: string;
-    /** specify emitted module formats */
-    moduleFormats?: Array<'cjs' | 'esm'>;
+    /** custom cli index generator class */
+    Generator?: typeof BaseGenerator;
+    /** output commonjs module (.js) */
+    cjs?: boolean;
+    /** output esm module (.mjs) */
+    esm?: boolean;
     /** template of the css file emitted when using outputCSS */
     outputCSSNameTemplate?: string;
     /** should include the css in the generated JS module */
@@ -61,6 +64,8 @@ export interface BuildOptions {
     watch?: boolean;
     /** should emit diagnostics */
     diagnostics?: boolean;
+    /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
+    diagnosticsMode?: 'strict' | 'loose';
 }
 
 export async function build({
@@ -72,8 +77,9 @@ export async function build({
     outDir,
     log,
     indexFile,
-    generatorPath,
-    moduleFormats,
+    Generator = BaseGenerator,
+    cjs,
+    esm,
     includeCSSInJS,
     outputCSS,
     outputCSSNameTemplate,
@@ -87,6 +93,7 @@ export async function build({
     dtsSourceMap,
     watch,
     diagnostics,
+    diagnosticsMode,
 }: BuildOptions) {
     const { join, resolve } = fs;
     rootDir = resolve(rootDir);
@@ -96,11 +103,12 @@ export async function build({
 
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
-    const generator = createGenerator(stylable, log, generatorPath);
+    const generator = new Generator(stylable, log);
     const generated = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
-    const diagnosticsMessages = new Map<string, string[]>();
+    const diagnosticsMessages: DiagnosticMessages = new Map();
+    const moduleFormats = getModuleFormats({ cjs, esm });
 
     const service = new DirectoryProcessService(fs, {
         watchMode: watch,
@@ -184,11 +192,8 @@ export async function build({
             updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
-
             // report build diagnostics
-            if (diagnostics && diagnosticsMessages.size) {
-                reportDiagnostics(diagnosticsMessages);
-            }
+            reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
 
             const count = deletedFiles.size + affectedFiles.size;
             log(
@@ -254,11 +259,21 @@ export async function build({
     }
 }
 
-function createGenerator(stylable: Stylable, log: Log, generatorPath?: string) {
-    const generatorModule: { Generator: typeof Generator } = generatorPath
-        ? require(generatorPath)
-        : require('./base-generator');
-    return new generatorModule.Generator(stylable, log);
+export function createGenerator(
+    root: string,
+    generatorPath?: string
+): undefined | typeof BaseGenerator {
+    if (!generatorPath) {
+        return undefined;
+    }
+
+    const absoluteGeneratorPath = require.resolve(generatorPath, { paths: [root] });
+
+    return tryRun(() => {
+        const generatorModule: { Generator: typeof BaseGenerator } = require(absoluteGeneratorPath);
+
+        return generatorModule.Generator;
+    }, `Could not resolve custom generator from "${absoluteGeneratorPath}"`);
 }
 
 function validateConfiguration(outputSources: boolean | undefined, outDir: string, srcDir: string) {
@@ -289,4 +304,15 @@ function updateWatcherDependencies(
             resolver
         );
     }
+}
+
+function getModuleFormats({ esm, cjs }: { [k: string]: boolean | undefined }) {
+    const formats: Array<'esm' | 'cjs'> = [];
+    if (esm) {
+        formats.push('esm');
+    }
+    if (cjs) {
+        formats.push('cjs');
+    }
+    return formats;
 }

@@ -1,0 +1,21 @@
+name: Proposal
+description: Request a change or new feature
+labels: [triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this proposal!
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal Description
+      description: Also tell us if you have thoughts on how to integrate the proposal
+      placeholder: What would you like to propose?
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Describe any additional context you think is related

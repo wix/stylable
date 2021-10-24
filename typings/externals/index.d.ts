@@ -7,8 +7,8 @@ declare module 'mini-css-extract-plugin' {
             content: string;
             media: string;
             sourceMap: null;
-            assets: {},
-            assetsInfo: {},
+            assets: {};
+            assetsInfo: {};
         }): import('webpack').Module;
     }
     class MiniCssExtractPlugin {

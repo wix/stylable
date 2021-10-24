@@ -8,8 +8,10 @@ import {
     expectWarningsFromTransform,
     generateStylableResult,
     processSource,
+    testInlineExpects,
 } from '@stylable/core-test-kit';
 import { processorWarnings, valueMapping, nativePseudoClasses, pseudoStates } from '@stylable/core';
+import { reservedPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -26,7 +28,37 @@ describe('pseudo-states', () => {
     describe('process', () => {
         // What does it do?
         // Works in the scope of a single file, collecting state definitions for later usage
-
+        describe(`reserved pseudo classes`, () => {
+            reservedPseudoClasses.forEach((name) => {
+                it(`should NOT collect "${name}"`, () => {
+                    const { classes } = processSource(
+                        `
+                        .root {
+                            -st-states: custom-only, ${name};
+                        }`,
+                        { from: 'path/to/style.css' }
+                    );
+                    expect(classes).to.flatMatch({
+                        root: {
+                            [valueMapping.states]: {
+                                'custom-only': null,
+                            },
+                        },
+                    });
+                    expectWarnings(
+                        `.root{
+                            |-st-states: $${name}$|;
+                        }`,
+                        [
+                            {
+                                message: stateErrors.RESERVED_NATIVE_STATE(name),
+                                file: 'main.css',
+                            },
+                        ]
+                    );
+                });
+            });
+        });
         describe('boolean', () => {
             it('should collect state definitions as null (for boolean)', () => {
                 const { classes, diagnostics } = processSource(
@@ -544,6 +576,29 @@ describe('pseudo-states', () => {
         });
 
         describe('boolean', () => {
+            it('should resolve boolean pseudo-state', () => {
+                const config = {
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: state1;
+                            }
+                            .my-class:state1 {}
+                            `,
+                        },
+                    },
+                };
+
+                const res = expectWarningsFromTransform(config, []);
+
+                expect(res).to.have.styleRules({
+                    1: '.entry__my-class.entry--state1 {}',
+                });
+            });
+
             it('should resolve nested pseudo-states', () => {
                 const res = generateStylableResult({
                     entry: '/entry.st.css',
@@ -725,6 +780,31 @@ describe('pseudo-states', () => {
                 ).to.eql([]);
                 expect(res).to.have.styleRules({
                     1: '.entry__root.entry---state-9-user_name {}',
+                });
+            });
+
+            it('should support default values when invoked', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: stateWithDefault(string) aDefaultValue;
+                            }
+                            .my-class:stateWithDefault() {}
+                            `,
+                        },
+                    },
+                });
+
+                expect(
+                    res.meta.diagnostics.reports,
+                    'no diagnostics reported for native states'
+                ).to.eql([]);
+                expect(res).to.have.styleRules({
+                    1: '.entry__my-class.entry---stateWithDefault-13-aDefaultValue {}',
                 });
             });
 
@@ -1292,6 +1372,31 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css',
                         },
                     ]);
+                });
+
+                it('should transform state param ignoring possible selector symbols', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .abc {}
+                                .my-class {
+                                    -st-states: state1(string);
+                                }
+                                /* @check .entry__my-class.entry---state1-4-\\.abc */
+                                .my-class:state1(.abc) {}
+                                `,
+                            },
+                        },
+                    });
+
+                    testInlineExpects(res.meta.outputAst!);
+                    expect(
+                        res.meta.diagnostics.reports,
+                        'no diagnostics reported for native states'
+                    ).to.eql([]);
                 });
 
                 describe('specific validators', () => {
@@ -2099,6 +2204,64 @@ describe('pseudo-states', () => {
                     },
                 ]
             );
+        });
+
+        it('should warn when pseudo-class expects params but none was given (no default)', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .my-class {
+                            -st-states: state1(string);
+                        }
+                        |.my-class:$state1$ {}
+                        `,
+                    },
+                },
+            };
+
+            const res = expectWarningsFromTransform(config, [
+                {
+                    message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
+                    file: '/entry.st.css',
+                    severity: 'warning',
+                },
+            ]);
+
+            expect(res).to.have.styleRules({
+                1: '.entry__my-class.entry---state1-0- {}',
+            });
+        });
+
+        it('should warn when pseudo-class invoked and expects params but none was given', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .my-class {
+                            -st-states: state1(string);
+                        }
+                        |.my-class:$state1$() {}
+                        `,
+                    },
+                },
+            };
+
+            const res = expectWarningsFromTransform(config, [
+                {
+                    message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
+                    file: '/entry.st.css',
+                    severity: 'warning',
+                },
+            ]);
+
+            expect(res).to.have.styleRules({
+                1: '.entry__my-class.entry---state1-0- {}',
+            });
         });
 
         it('should trigger a warning when trying to target an unknown state and keep the state', () => {

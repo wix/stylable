@@ -43,7 +43,7 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputSources: true,
         });
 
@@ -99,7 +99,7 @@ describe('build stand alone', () => {
             srcDir: 'src',
             outDir: 'cjs',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputSources: true,
             useNamespaceReference: true,
         });
@@ -125,7 +125,7 @@ describe('build stand alone', () => {
             srcDir: 'cjs',
             outDir: 'cjs2',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
         });
 
         // check two builds using sourceNamespace are identical
@@ -160,15 +160,17 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
         });
         const messages = diagnosticsMessages.get('/comp.st.css')!;
 
-        expect(messages[0]).to.contain(processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp'));
-        expect(messages[1]).to.contain(
+        expect(messages[0].message).to.contain(
+            processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp')
+        );
+        expect(messages[1].message).to.contain(
             resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
         );
-        expect(messages[2]).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
+        expect(messages[2].message).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
     });
 
     it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', async () => {
@@ -194,7 +196,7 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputCSS: true,
             outputCSSNameTemplate: '[filename].global.css',
         });
@@ -232,7 +234,7 @@ describe('build stand alone', () => {
             minify: true,
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputCSS: true,
             outputCSSNameTemplate: '[filename].global.css',
         });
@@ -261,7 +263,7 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: '/',
             log,
-            moduleFormats: ['cjs'],
+            cjs: true,
             outputCSS: true,
             injectCSSRequest: true,
             outputCSSNameTemplate: '[filename].global.css',
@@ -289,7 +291,6 @@ describe('build stand alone', () => {
             outDir: '.',
             srcDir: '.',
             rootDir: '/',
-            moduleFormats: [],
             log,
             dts: true,
             dtsSourceMap: false,
@@ -324,7 +325,6 @@ describe('build stand alone', () => {
             outDir: '.',
             srcDir: '.',
             rootDir: '/',
-            moduleFormats: [],
             log,
             dts: true,
             dtsSourceMap: false,
@@ -373,7 +373,6 @@ describe('build stand alone', () => {
             outDir: '.',
             srcDir: '.',
             rootDir: '/',
-            moduleFormats: [],
             log,
             dts: true,
             dtsSourceMap: true,
