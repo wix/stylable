@@ -170,5 +170,10 @@ export interface BuildMetaData {
     /** log function */
     log: Log;
     /** files source meta data */
-    outputFiles?: Map<string, string>;
+    filesMetaData?: Map<string, FileMetaData>;
+}
+
+export interface FileMetaData {
+    srcPath: string;
+    outPaths: string[];
 }
