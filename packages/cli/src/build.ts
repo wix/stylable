@@ -157,6 +157,9 @@ export async function build(
                         // remove assets from the affected files
                         affectedFiles.delete(filePath);
                     }
+                } else {
+                    // remove files not from current scope
+                    affectedFiles.delete(filePath);
                 }
             }
 
