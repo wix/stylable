@@ -593,7 +593,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: [messages.FINISHED_PROCESSING, 'project-a'],
                     },
                 ],
             });
