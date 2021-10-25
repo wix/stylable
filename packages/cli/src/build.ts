@@ -38,9 +38,9 @@ export async function build(
         diagnostics,
         diagnosticsMode,
     }: BuildOptions,
-    { watch, fs, stylable, rootDir, projectRoot, log }: BuildMetaData
+    { watch, fs, stylable, rootDir, projectRoot, log, outputFiles = new Map() }: BuildMetaData
 ) {
-    const { join } = fs;
+    const { resolve, join } = fs;
     const fullSrcDir = join(projectRoot, srcDir);
     const fullOutDir = join(projectRoot, outDir);
     const nodeModules = join(projectRoot, 'node_modules');
@@ -58,6 +58,9 @@ export async function build(
     const service = new DirectoryProcessService(fs, {
         watchMode: watch,
         autoResetInvalidations: true,
+        watchOptions: {
+            skipInitialWatch: true,
+        },
         directoryFilter(dirPath) {
             if (!dirPath.startsWith(projectRoot)) {
                 return false;
@@ -77,6 +80,9 @@ export async function build(
             // assets used in stylable files should re-trigger "processFiles" when changed
             if (assets.has(filePath)) {
                 return true;
+            }
+            if (!filePath.startsWith(fullSrcDir)) {
+                return false;
             }
             // stylable files
             return filePath.endsWith(extension);
@@ -126,6 +132,8 @@ export async function build(
 
             // remove assets from the affected files (handled in buildAggregatedEntities)
             for (const filePath of affectedFiles) {
+                outputFiles.set(resolve(filePath.replace(fullSrcDir, fullOutDir)), filePath);
+
                 if (assets.has(filePath)) {
                     affectedFiles.delete(filePath);
                 }
@@ -134,7 +142,7 @@ export async function build(
             // rebuild
             buildFiles(affectedFiles);
             // rewire invalidations
-            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
+            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles, outputFiles);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
             // report build diagnostics
@@ -167,7 +175,7 @@ export async function build(
         );
     }
 
-    return { diagnosticsMessages };
+    return { service, diagnosticsMessages };
 
     function buildFiles(filesToBuild: Set<string>) {
         for (const filePath of filesToBuild) {
@@ -243,7 +251,8 @@ function updateWatcherDependencies(
     stylable: Stylable,
     service: DirectoryProcessService,
     affectedFiles: Set<string>,
-    sourceFiles: Set<string>
+    sourceFiles: Set<string>,
+    outputFiles: Map<string, string>
 ) {
     const resolver = stylable.createResolver();
     for (const filePath of affectedFiles) {
@@ -253,6 +262,10 @@ function updateWatcherDependencies(
             meta,
             ({ source }) => {
                 service.registerInvalidateOnChange(source, filePath);
+
+                if (outputFiles.has(source)) {
+                    service.registerInvalidateOnChange(outputFiles.get(source)!, filePath);
+                }
             },
             resolver
         );

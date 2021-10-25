@@ -1,3 +1,4 @@
+import nodeFs from '@file-services/node';
 import type { IFileSystem, IWatchEvent } from '@file-services/types';
 import { directoryDeepChildren, DirectoryItem } from './walk-fs';
 
@@ -13,15 +14,23 @@ export interface DirectoryProcessServiceOptions {
     onError?(error: Error): void;
     autoResetInvalidations?: boolean;
     watchMode?: boolean;
+    watchOptions?: {
+        skipInitialWatch?: boolean;
+    };
 }
 
 export class DirectoryProcessService {
     public invalidationMap = new Map<string, Set<string>>();
     public watchedDirectoryFiles = new Map<string, Set<string>>();
     constructor(private fs: IFileSystem, private options: DirectoryProcessServiceOptions = {}) {
-        if (this.options.watchMode) {
-            this.fs.watchService.addGlobalListener(this.watchHandler);
+        if (this.options.watchMode && !this.options.watchOptions?.skipInitialWatch) {
+            this.startWatch();
         }
+    }
+    public startWatch() {
+        this.fs.watchService.addGlobalListener((event) => {
+            void this.watchHandler(event);
+        });
     }
     public async dispose() {
         this.invalidationMap.clear();
@@ -86,63 +95,64 @@ export class DirectoryProcessService {
         this.watchedDirectoryFiles.set(directoryPath, new Set());
         return this.fs.watchService.watchPath(directoryPath);
     }
-    private async handleWatchChange(event: IWatchEvent) {
-        if (event.stats?.isDirectory()) {
-            if (this.options.directoryFilter?.(event.path) ?? true) {
-                return this.init(event.path);
-            }
-            return;
-        }
+    public async handleWatchChange(files: Map<string, IWatchEvent>, originalEvent: IWatchEvent) {
+        const affectedFiles = new Set<string>();
+        const deletedFiles = new Set<string>();
 
-        if (
-            !this.invalidationMap.has(event.path) &&
-            (this.options.fileFilter?.(event.path) ?? true)
-        ) {
-            this.registerInvalidateOnChange(event.path);
-        }
-        if (this.invalidationMap.has(event.path)) {
-            const affectedFiles = this.getAffectedFiles(event.path);
-            const deletedFiles = new Set<string>();
-            if (!event.stats) {
-                this.invalidationMap.delete(event.path);
-                this.removeFileFromWatchedDirectory(event.path);
-                deletedFiles.add(event.path);
-                affectedFiles.delete(event.path);
-            }
-            if (this.options.autoResetInvalidations) {
-                for (const filePath of affectedFiles) {
-                    const invalidationSet = this.invalidationMap.get(filePath);
-                    invalidationSet?.clear();
+        for (const event of files.values()) {
+            if (event.stats?.isDirectory()) {
+                if (this.options.directoryFilter?.(event.path) ?? true) {
+                    await this.init(event.path);
                 }
+                continue;
             }
-            return this.options.processFiles?.(this, affectedFiles, deletedFiles, event);
-        } else if (!event.stats) {
-            const fileSet = new Set<string>();
-            for (const [dirPath, files] of this.watchedDirectoryFiles) {
-                if (dirPath.startsWith(event.path)) {
-                    for (const filePath of files) {
-                        fileSet.add(filePath);
+
+            if (this.options.fileFilter?.(event.path) ?? true) {
+                this.registerInvalidateOnChange(event.path);
+                affectedFiles.add(event.path);
+
+                if (!event.stats) {
+                    this.invalidationMap.delete(event.path);
+                    this.removeFileFromWatchedDirectory(event.path);
+                    deletedFiles.add(event.path);
+                    affectedFiles.delete(event.path);
+                }
+
+                if (this.options.autoResetInvalidations) {
+                    for (const filePath of affectedFiles) {
+                        const invalidationSet = this.invalidationMap.get(filePath);
+                        invalidationSet?.clear();
+                    }
+                }
+            } else if (!event.stats) {
+                // handle deleted directory
+                const fileSet = new Set<string>();
+                for (const [dirPath, files] of this.watchedDirectoryFiles) {
+                    if (dirPath.startsWith(event.path)) {
+                        for (const filePath of files) {
+                            fileSet.add(filePath);
+                        }
+                    }
+                }
+
+                if (fileSet.size) {
+                    for (const filePath of fileSet) {
+                        this.getAffectedFiles(filePath, deletedFiles);
+                    }
+
+                    for (const filePath of deletedFiles) {
+                        this.invalidationMap.delete(filePath);
+                        this.removeFileFromWatchedDirectory(filePath);
                     }
                 }
             }
+        }
 
-            if (fileSet.size) {
-                const affectedFiles = new Set<string>();
-                const deletedFiles = new Set<string>();
-                for (const filePath of fileSet) {
-                    this.getAffectedFiles(filePath, affectedFiles);
-                }
-                for (const filePath of fileSet) {
-                    this.invalidationMap.delete(filePath);
-                    this.removeFileFromWatchedDirectory(filePath);
-                    deletedFiles.add(filePath);
-                    affectedFiles.delete(filePath);
-                }
-                return this.options.processFiles?.(this, affectedFiles, deletedFiles, event);
-            }
+        if (affectedFiles.size || deletedFiles.size) {
+            return this.options.processFiles?.(this, affectedFiles, deletedFiles, originalEvent);
         }
     }
-    private getAffectedFiles(filePath: string, visited = new Set<string>()): Set<string> {
+    public getAffectedFiles(filePath: string, visited = new Set<string>()): Set<string> {
         if (visited.has(filePath)) {
             return visited;
         }
@@ -157,7 +167,14 @@ export class DirectoryProcessService {
         return visited;
     }
     private watchHandler = (event: IWatchEvent) => {
-        this.handleWatchChange(event).catch((error) => this.options.onError?.(error));
+        const files = new Map<string, IWatchEvent>();
+        files.set(event.path, event);
+
+        for (const file of this.getAffectedFiles(event.path)) {
+            files.set(file, createWatchEvent(file, this.fs));
+        }
+
+        return this.handleWatchChange(files, event).catch((error) => this.options.onError?.(error));
     };
     private filterWatchItems = (event: DirectoryItem): boolean => {
         const { fileFilter, directoryFilter } = this.options;
@@ -167,5 +184,12 @@ export class DirectoryProcessService {
             return true;
         }
         return false;
+    };
+}
+
+export function createWatchEvent(filePath: string, fs = nodeFs): IWatchEvent {
+    return {
+        path: filePath,
+        stats: fs.existsSync(filePath) ? fs.statSync(filePath) : null,
     };
 }

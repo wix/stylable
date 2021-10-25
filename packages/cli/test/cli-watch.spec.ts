@@ -390,7 +390,7 @@ describe('Stylable Cli Watch', () => {
         });
     });
 
-    describe.skip('Multiple Projects', () => {
+    describe('Multiple Projects', () => {
         it('simple watch mode on one project', async () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -444,6 +444,7 @@ describe('Stylable Cli Watch', () => {
                 exports.stcConfig = () => ({
                     options: {
                         outDir: './dist',
+                        srcDir: './src',
                         outputCSS: true,
                         outputSources: true
                     },
@@ -456,21 +457,25 @@ describe('Stylable Cli Watch', () => {
                             version: '0.0.0',
                             dependencies: { b: '0.0.0' },
                         }),
-                        'style.st.css': `
-                            @st-import [color] from "../project-b/dist/depend.st.css";
+                        src: {
+                            'style.st.css': `
+                            @st-import [color] from "../../project-b/dist/depend.st.css";
                             .root{ color:value(color); }
                         `,
+                        },
                     },
                     'project-b': {
                         'package.json': JSON.stringify({
                             name: 'b',
                             version: '0.0.0',
                         }),
-                        'depend.st.css': `
+                        src: {
+                            'depend.st.css': `
                             :vars {
                                 color: red;
                             }
                         `,
+                        },
                     },
                 },
             });
@@ -483,7 +488,7 @@ describe('Stylable Cli Watch', () => {
                         msg: messages.START_WATCHING,
                         action() {
                             writeToExistingFile(
-                                join(tempDir.path, './packages/project-b/depend.st.css'),
+                                join(tempDir.path, './packages/project-b/src/depend.st.css'),
                                 `:vars {
                                     color: blue;
                                 }`
@@ -565,18 +570,6 @@ describe('Stylable Cli Watch', () => {
                     {
                         msg: messages.START_WATCHING,
                         action() {
-                            writeToExistingFile(
-                                join(tempDir.path, './packages/project-b/foo.st.css'),
-                                `
-                                .foo {}
-                                .bar {}
-                                `
-                            );
-                        },
-                    },
-                    {
-                        msg: [messages.FINISHED_PROCESSING, 'project-b'],
-                        action() {
                             writeFileSync(
                                 join(tempDir.path, './packages/project-a/style.st.css'),
                                 `
@@ -589,6 +582,18 @@ describe('Stylable Cli Watch', () => {
 
                             .a::bar {color: blue;}
                             `
+                            );
+                        },
+                    },
+                    {
+                        msg: [messages.FINISHED_PROCESSING, 'project-a'],
+                        action() {
+                            writeToExistingFile(
+                                join(tempDir.path, './packages/project-b/foo.st.css'),
+                                `
+                                .foo {}
+                                .bar {}
+                                `
                             );
                         },
                     },

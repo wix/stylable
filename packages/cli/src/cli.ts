@@ -6,6 +6,7 @@ import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
 import { messages } from './build';
 import { getCliArguments } from './config/resolve-options';
+import { DirectoriesHandlerService } from './directory-process-service/directories-handler-service';
 
 async function main() {
     const argv = getCliArguments();
@@ -23,10 +24,9 @@ async function main() {
     }
 
     const { rootDir, projects } = projectsConfig(argv);
-
-    if (projects.length > 1 && watch) {
-        throw new Error('Stylable CLI watch mode in multiple projects is not supported yet');
-    }
+    const fileSystem = nodeFs;
+    const directoriesHandler = new DirectoriesHandlerService(fileSystem);
+    const outputFiles = new Map<string, string>();
 
     for (const { projectRoot, options } of projects) {
         for (const optionsEntity of options) {
@@ -38,7 +38,6 @@ async function main() {
                 throw new Error(`"dtsSourceMap" requires turning on "dts"`);
             }
 
-            const fileSystem = nodeFs;
             const stylable = Stylable.create({
                 fileSystem,
                 requireModule: require,
@@ -47,19 +46,26 @@ async function main() {
                 resolverCache: new Map(),
             });
 
-            await build(optionsEntity, {
+            const { service } = await build(optionsEntity, {
                 watch,
                 stylable,
                 log,
                 fs: fileSystem,
                 rootDir,
                 projectRoot,
+                outputFiles,
+            });
+
+            directoriesHandler.register(service, {
+                id: `${projectRoot}__${Math.random().toString(32).slice(2)}`,
             });
         }
     }
 
     if (watch) {
         log(messages.START_WATCHING, levels.info);
+
+        directoriesHandler.start();
     }
 }
 
