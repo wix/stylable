@@ -1,4 +1,4 @@
-import { Stylable } from '@stylable/core';
+import { Stylable, StylableMeta } from '@stylable/core';
 import { resolveNamespace } from '@stylable/node';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
 import { hashContent } from './hash-content-util';
@@ -6,7 +6,7 @@ import { basename } from 'path';
 import { EOL } from 'os';
 import type { Compilation, Compiler, Module } from 'webpack';
 import type { ComponentsMetadata } from './component-metadata-builder';
-import type { Metadata, Manifest } from './types';
+import type { Manifest, MetadataList } from './types';
 
 export interface Options {
     outputType: 'manifest' | 'fs-manifest';
@@ -14,6 +14,7 @@ export interface Options {
     packageAlias: Record<string, string>;
     contentHashLength?: number;
     exposeNamespaceMapping: boolean;
+    generateNamedExports(compId: string, meta: StylableMeta): string | void;
     resolveNamespace(namespace: string, filePath: string): string;
     filterComponents(resourcePath: string): boolean;
     getCompId(resourcePath: string): string;
@@ -38,7 +39,16 @@ const defaultOptions: Options = {
     getOutputFileName(contentHash) {
         return `stylable.manifest.${contentHash}.json`;
     },
+    generateNamedExports() {
+        return void 0;
+    },
 };
+
+export function generateCssVarsNamedExport(name: string, meta: StylableMeta) {
+    return Object.keys(meta.cssVars)
+        .map((varName) => `${varName} as --${name}-${varName.slice(2)}`)
+        .join(',');
+}
 
 export class StylableManifestPlugin {
     private options: Options;
@@ -65,29 +75,29 @@ export class StylableManifestPlugin {
             stylable.initCache()
         );
 
-        let metadata: Array<{ compId: string; metadata: Metadata }>;
+        let metadataList: MetadataList;
         compiler.hooks.compilation.tap(this.constructor.name, (compilation) => {
             compilation.hooks.optimizeModules.tap(this.constructor.name, (modules) => {
-                metadata = this.createModulesMetadata(compiler, stylable, [...modules]);
+                metadataList = this.createModulesMetadata(compiler, stylable, [...modules]);
             });
 
             compilation.hooks.processAssets.tap(this.constructor.name, () =>
-                this.emitManifest(metadata, compilation)
+                this.emitManifest(metadataList, compilation)
             );
         });
     }
-    private emitManifest(
-        metadata: { compId: string; metadata: Metadata }[],
-        compilation: Compilation
-    ) {
-        const manifest = metadata.reduce<Manifest>(
-            (manifest, { compId, metadata }) => {
+    private emitManifest(metadataList: MetadataList, compilation: Compilation) {
+        const manifest = metadataList.reduce<Manifest>(
+            (manifest, { meta, compId, metadata }) => {
+                const cssVars = this.options.generateNamedExports(compId, meta);
                 Object.assign(manifest.stylesheetMapping, metadata.stylesheetMapping);
                 Object.assign(manifest.namespaceMapping, metadata.namespaceMapping);
                 manifest.componentsEntries[compId] = metadata.entry;
                 manifest.componentsIndex += `:import{-st-from: ${JSON.stringify(
                     metadata.entry
-                )};-st-default: ${compId};} .root ${compId}{}${EOL}`;
+                )};-st-default: ${compId};${
+                    cssVars ? `-st-named:${cssVars};` : ``
+                }} .root ${compId}{}${EOL}`;
                 return manifest;
             },
             {
@@ -120,7 +130,11 @@ export class StylableManifestPlugin {
         );
     }
 
-    private createModulesMetadata(compiler: Compiler, stylable: Stylable, modules: Module[]) {
+    private createModulesMetadata(
+        compiler: Compiler,
+        stylable: Stylable,
+        modules: Module[]
+    ): MetadataList {
         const stylableComps = modules.filter((module) => {
             const resource = (module as any).resource;
             return resource && this.options.filterComponents(resource);
@@ -129,14 +143,16 @@ export class StylableManifestPlugin {
         return stylableComps.map((module) => {
             const resource = (module as any).resource;
             const source = (compiler.inputFileSystem as any).readFileSync(resource).toString();
-
+            const meta = stylable.fileProcessor.processContent(source, resource);
             return {
+                meta,
                 compId: this.options.getCompId(resource),
                 metadata: createMetadataForStylesheet(
                     stylable,
                     source,
                     resource,
-                    this.options.exposeNamespaceMapping
+                    this.options.exposeNamespaceMapping,
+                    meta
                 ),
             };
         });

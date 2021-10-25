@@ -25,5 +25,9 @@ export {
 } from './component-metadata-builder';
 export { hashContent } from './hash-content-util';
 export { LoaderOptions, metadataLoaderLocation } from './stylable-metadata-loader';
-export { Options, StylableManifestPlugin } from './stylable-manifest-plugin';
+export {
+    Options,
+    StylableManifestPlugin,
+    generateCssVarsNamedExport,
+} from './stylable-manifest-plugin';
 export { Manifest, Metadata } from './types';
