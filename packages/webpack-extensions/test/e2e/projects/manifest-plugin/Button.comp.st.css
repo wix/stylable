@@ -4,5 +4,6 @@
 }
 
 .root {
+    --myColor: red;
     color: value(myColor)
 }

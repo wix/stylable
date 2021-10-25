@@ -1,22 +1,15 @@
-import {
-    Stylable,
-    StylableMeta,
-    valueMapping,
-    Imported,
-    CSSResolve,
-    JSResolve,
-} from '@stylable/core';
-import { Rule, ChildNode, AtRule } from 'postcss';
+import { Stylable, StylableMeta, valueMapping } from '@stylable/core';
+import type { Rule, ChildNode, AtRule } from 'postcss';
+import type { Metadata, ResolvedImport } from './types';
 import { hashContent } from './hash-content-util';
 
 export function createMetadataForStylesheet(
     stylable: Stylable,
     content: string,
     resourcePath: string,
-    exposeNamespaceMapping = true
-) {
-    const meta = stylable.fileProcessor.processContent(content, resourcePath);
-
+    exposeNamespaceMapping = true,
+    meta = stylable.fileProcessor.processContent(content, resourcePath)
+): Metadata {
     const usedMeta = collectDependenciesDeep(stylable, meta);
 
     const hashes = createContentHashPerMeta(usedMeta.keys());
@@ -109,11 +102,6 @@ export function createContentHashPerMeta(usedMeta: Iterable<StylableMeta>) {
     }
     return hashes;
 }
-
-export type ResolvedImport = {
-    stImport: Imported;
-    resolved: CSSResolve | JSResolve | null;
-};
 
 export function collectDependenciesDeep(
     stylable: Stylable,
