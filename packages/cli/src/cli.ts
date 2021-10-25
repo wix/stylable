@@ -23,7 +23,6 @@ async function main() {
     }
 
     const { rootDir, projects } = projectsConfig(argv);
-    const resolverCache = new Map();
     const outputFiles = new Map();
 
     for (const { projectRoot, options } of projects) {
@@ -42,7 +41,7 @@ async function main() {
                 requireModule: require,
                 projectRoot,
                 resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
-                resolverCache,
+                resolverCache: new Map(),
             });
 
             await build(optionsEntity, {
