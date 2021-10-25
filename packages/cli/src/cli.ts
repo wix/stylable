@@ -25,11 +25,13 @@ async function main() {
 
     const { rootDir, projects } = projectsConfig(argv);
     const fileSystem = nodeFs;
-    const directoriesHandler = new DirectoriesHandlerService(fileSystem);
+    const directoriesHandler = new DirectoriesHandlerService(fileSystem, { log });
     const outputFiles = new Map<string, string>();
 
     for (const { projectRoot, options } of projects) {
-        for (const optionsEntity of options) {
+        for (let i = 0; i < options.length; i++) {
+            const optionsEntity = options[i];
+
             const { dts, dtsSourceMap } = optionsEntity;
 
             log('[Project]', projectRoot, optionsEntity);
@@ -57,7 +59,7 @@ async function main() {
             });
 
             directoriesHandler.register(service, {
-                id: `${projectRoot}__${Math.random().toString(32).slice(2)}`,
+                id: `${projectRoot}__${i}`,
             });
         }
     }

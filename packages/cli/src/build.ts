@@ -45,6 +45,7 @@ export async function build(
     const fullOutDir = join(projectRoot, outDir);
     const nodeModules = join(projectRoot, 'node_modules');
     const isMultiPackagesProject = projectRoot !== rootDir;
+    const relavetiveProjectRoot = projectRoot.replace(rootDir, '');
 
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
@@ -157,7 +158,7 @@ export async function build(
                     messages.FINISHED_PROCESSING,
                     count,
                     count === 1 ? 'file' : 'files',
-                    isMultiPackagesProject ? `in "${projectRoot}"` : '',
+                    isMultiPackagesProject ? `in "${relavetiveProjectRoot}"` : '',
                     levels.info
                 );
             }
@@ -170,7 +171,7 @@ export async function build(
         log(
             mode,
             messages.BUILD_SKIPPED,
-            isMultiPackagesProject ? `for "${projectRoot}"` : '',
+            isMultiPackagesProject ? `for "${relavetiveProjectRoot}"` : '',
             levels.info
         );
     }
