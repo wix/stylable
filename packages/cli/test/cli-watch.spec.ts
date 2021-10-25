@@ -390,7 +390,7 @@ describe('Stylable Cli Watch', () => {
         });
     });
 
-    describe('Multiple Projects', () => {
+    describe.skip('Multiple Projects', () => {
         it('simple watch mode on one project', async () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -597,8 +597,6 @@ describe('Stylable Cli Watch', () => {
                     },
                 ],
             });
-
-            await new Promise((res) => setTimeout(res, 2000));
 
             const files = loadDirSync(tempDir.path);
             expect(files['packages/project-a/dist/style.css']).to.match(

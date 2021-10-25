@@ -23,7 +23,10 @@ async function main() {
     }
 
     const { rootDir, projects } = projectsConfig(argv);
-    const outputFiles = new Map();
+
+    if (projects.length > 1 && watch) {
+        throw new Error('Stylable CLI watch mode in multiple projects is not supported yet');
+    }
 
     for (const { projectRoot, options } of projects) {
         for (const optionsEntity of options) {
@@ -51,7 +54,6 @@ async function main() {
                 fs: fileSystem,
                 rootDir,
                 projectRoot,
-                outputFiles,
             });
         }
     }
