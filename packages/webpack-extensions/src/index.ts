@@ -28,6 +28,6 @@ export { LoaderOptions, metadataLoaderLocation } from './stylable-metadata-loade
 export {
     Options,
     StylableManifestPlugin,
-    generateCssVarsNamedExport,
+    generateCssVarsNamedExports,
 } from './stylable-manifest-plugin';
 export { Manifest, Metadata } from './types';
