@@ -597,6 +597,9 @@ describe('Stylable Cli Watch', () => {
                     },
                 ],
             });
+
+            await new Promise((res) => setTimeout(res, 2000));
+
             const files = loadDirSync(tempDir.path);
             expect(files['packages/project-a/dist/style.css']).to.match(
                 /foo[0-9]+__foo {color: red;}/g
