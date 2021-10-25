@@ -18,9 +18,6 @@ describe(`${project} - manifest`, () => {
                 // headless: false
             },
             configName: 'webpack.css-vars.config',
-            webpackOptions: {
-                output: { path: join(projectDir, 'dist3') },
-            },
         },
         before,
         afterEach,

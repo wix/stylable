@@ -1,7 +1,7 @@
 const { stylableLoaders } = require('@stylable/experimental-loader');
 const {
     StylableManifestPlugin,
-    generateCssVarsNamedExport,
+    generateCssVarsNamedExports,
 } = require('@stylable/webpack-extensions');
 
 /** @type {import('webpack').Configuration} */
@@ -16,7 +16,7 @@ module.exports = {
     plugins: [
         new StylableManifestPlugin({
             package: require('./package.json'),
-            generateNamedExports: generateCssVarsNamedExport,
+            generateNamedExports: generateCssVarsNamedExports,
         }),
     ],
     module: {

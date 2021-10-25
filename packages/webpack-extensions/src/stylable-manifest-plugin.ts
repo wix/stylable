@@ -45,7 +45,7 @@ const defaultOptions: Options = {
     },
 };
 
-export function generateCssVarsNamedExport(name: string, meta: StylableMeta) {
+export function generateCssVarsNamedExports(name: string, meta: StylableMeta) {
     return Object.keys(meta.cssVars)
         .map((varName) => `${varName} as --${name}-${varName.slice(2)}`)
         .join(',');
