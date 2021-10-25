@@ -93,6 +93,7 @@ export class DirectoryProcessService {
             }
             return;
         }
+
         if (
             !this.invalidationMap.has(event.path) &&
             (this.options.fileFilter?.(event.path) ?? true)
@@ -102,6 +103,7 @@ export class DirectoryProcessService {
         if (this.invalidationMap.has(event.path)) {
             const affectedFiles = this.getAffectedFiles(event.path);
             const deletedFiles = new Set<string>();
+
             if (!event.stats) {
                 this.invalidationMap.delete(event.path);
                 this.removeFileFromWatchedDirectory(event.path);
@@ -114,7 +116,14 @@ export class DirectoryProcessService {
                     invalidationSet?.clear();
                 }
             }
-            return this.options.processFiles?.(this, affectedFiles, deletedFiles, event);
+
+            const relevantAffectedFiles = new Set(
+                Array.from(affectedFiles).filter(
+                    (filePath) => this.options.fileFilter?.(filePath) ?? true
+                )
+            );
+
+            return this.options.processFiles?.(this, relevantAffectedFiles, deletedFiles, event);
         } else if (!event.stats) {
             const fileSet = new Set<string>();
             for (const [dirPath, files] of this.watchedDirectoryFiles) {

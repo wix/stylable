@@ -59,7 +59,7 @@ export async function build(
         watchMode: watch,
         autoResetInvalidations: true,
         directoryFilter(dirPath) {
-            if (!dirPath.startsWith(projectRoot)) {
+            if (!dirPath.startsWith(fullSrcDir)) {
                 return false;
             }
             if (dirPath.startsWith(nodeModules) || dirPath.includes('.git')) {
@@ -78,7 +78,9 @@ export async function build(
             if (assets.has(filePath)) {
                 return true;
             }
-
+            if (!filePath.startsWith(fullSrcDir)) {
+                return false;
+            }
             // stylable files
             return filePath.endsWith(extension);
         },
@@ -86,12 +88,6 @@ export async function build(
             console.error(error);
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
-            for (const filePath of affectedFiles) {
-                if (!filePath.startsWith(projectRoot)) {
-                    affectedFiles.delete(filePath);
-                }
-            }
-
             if (changeOrigin) {
                 // watched file changed, invalidate cache
                 stylable.initCache();
