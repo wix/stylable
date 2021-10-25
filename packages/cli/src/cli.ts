@@ -24,7 +24,7 @@ async function main() {
 
     const { rootDir, projects } = projectsConfig(argv);
     const resolverCache = new Map();
-    const filesMetaData = new Map();
+    const outputFiles = new Map();
 
     for (const { projectRoot, options } of projects) {
         for (const optionsEntity of options) {
@@ -52,7 +52,7 @@ async function main() {
                 fs: fileSystem,
                 rootDir,
                 projectRoot,
-                filesMetaData,
+                outputFiles,
             });
         }
     }

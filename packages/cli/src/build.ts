@@ -38,7 +38,7 @@ export async function build(
         diagnostics,
         diagnosticsMode,
     }: BuildOptions,
-    { watch, fs, stylable, rootDir, projectRoot, log, filesMetaData = new Map() }: BuildMetaData
+    { watch, fs, stylable, rootDir, projectRoot, log, outputFiles = new Map() }: BuildMetaData
 ) {
     const { resolve, join } = fs;
     const fullSrcDir = join(projectRoot, srcDir);
@@ -54,7 +54,6 @@ export async function build(
     const assets = new Set<string>();
     const diagnosticsMessages: DiagnosticMessages = new Map();
     const moduleFormats = getModuleFormats({ cjs, esm });
-    const dependedBy = new Map<string, Set<string>>();
 
     const service = new DirectoryProcessService(fs, {
         watchMode: watch,
@@ -80,16 +79,6 @@ export async function build(
                 return true;
             }
 
-            const outputFile = filesMetaData.get(filePath);
-            const isDependency =
-                dependedBy.has(filePath) ||
-                outputFile?.outPaths.some((outPath) => dependedBy.has(outPath));
-
-            // is not from current scope and also not a dependency
-            if (!filePath.startsWith(fullSrcDir) && !isDependency) {
-                return false;
-            }
-
             // stylable files
             return filePath.endsWith(extension);
         },
@@ -97,6 +86,12 @@ export async function build(
             console.error(error);
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
+            for (const filePath of affectedFiles) {
+                if (!filePath.startsWith(projectRoot)) {
+                    affectedFiles.delete(filePath);
+                }
+            }
+
             if (changeOrigin) {
                 // watched file changed, invalidate cache
                 stylable.initCache();
@@ -107,8 +102,6 @@ export async function build(
                             assets.delete(deletedFile);
                             continue;
                         } else if (!sourceFiles.has(deletedFile)) {
-                            continue;
-                        } else if (!deletedFile.startsWith(fullSrcDir)) {
                             continue;
                         }
                         diagnosticsMessages.delete(deletedFile);
@@ -139,26 +132,11 @@ export async function build(
             diagnosticsMessages.clear();
 
             for (const filePath of affectedFiles) {
-                if (filePath.startsWith(fullSrcDir)) {
-                    const outputFilePath = resolve(filePath.replace(fullSrcDir, fullOutDir));
-                    if (filesMetaData.has(filePath)) {
-                        const file = filesMetaData.get(filePath)!;
+                const outputFilePath = resolve(filePath.replace(fullSrcDir, fullOutDir));
+                outputFiles.set(outputFilePath, filePath);
 
-                        // remove duplicated out paths
-                        file.outPaths = Array.from(new Set([...file.outPaths, outputFilePath]));
-                    } else {
-                        filesMetaData.set(filePath, {
-                            srcPath: filePath,
-                            outPaths: [outputFilePath],
-                        });
-                    }
-
-                    if (assets.has(filePath)) {
-                        // remove assets from the affected files
-                        affectedFiles.delete(filePath);
-                    }
-                } else {
-                    // remove files not from current scope
+                if (assets.has(filePath)) {
+                    // remove assets from the affected files
                     affectedFiles.delete(filePath);
                 }
             }
@@ -166,7 +144,7 @@ export async function build(
             // rebuild
             buildFiles(affectedFiles);
             // rewire invalidations
-            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles, dependedBy);
+            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles, outputFiles);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
             // report build diagnostics
@@ -204,10 +182,6 @@ export async function build(
     function buildFiles(filesToBuild: Set<string>) {
         for (const filePath of filesToBuild) {
             if (indexFile) {
-                if (!filePath.startsWith(fullSrcDir)) {
-                    continue;
-                }
-
                 generator.generateFileIndexEntry(filePath, fullOutDir);
             } else {
                 buildSingleFile({
@@ -280,7 +254,7 @@ function updateWatcherDependencies(
     service: DirectoryProcessService,
     affectedFiles: Set<string>,
     sourceFiles: Set<string>,
-    dependedBy: Map<string, Set<string>>
+    outputFiles: Map<string, string>
 ) {
     const resolver = stylable.createResolver();
     for (const filePath of affectedFiles) {
@@ -291,11 +265,9 @@ function updateWatcherDependencies(
             ({ source }) => {
                 service.registerInvalidateOnChange(source, filePath);
 
-                if (!dependedBy.has(source)) {
-                    dependedBy.set(source, new Set());
+                if (outputFiles.has(source)) {
+                    service.registerInvalidateOnChange(outputFiles.get(source)!, filePath);
                 }
-
-                dependedBy.get(source)!.add(filePath);
             },
             resolver
         );
