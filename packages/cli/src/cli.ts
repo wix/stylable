@@ -26,6 +26,7 @@ async function main() {
     const { rootDir, projects } = projectsConfig(argv);
     const fileSystem = nodeFs;
     const directoriesHandler = new DirectoriesHandlerService(fileSystem, { log });
+    const resolverCache = new Map();
     const outputFiles = new Map<string, string>();
 
     for (const { projectRoot, options } of projects) {
@@ -33,6 +34,11 @@ async function main() {
             const optionsEntity = options[i];
 
             const { dts, dtsSourceMap } = optionsEntity;
+
+            const identifier =
+                options.length > 1
+                    ? `[${i}] ${projectRoot.replace(rootDir, '')}`
+                    : projectRoot.replace(rootDir, '');
 
             log('[Project]', projectRoot, optionsEntity);
 
@@ -45,7 +51,7 @@ async function main() {
                 requireModule: require,
                 projectRoot,
                 resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
-                resolverCache: new Map(),
+                resolverCache,
             });
 
             const { service } = await build(optionsEntity, {
@@ -56,11 +62,10 @@ async function main() {
                 rootDir,
                 projectRoot,
                 outputFiles,
+                identifier,
             });
 
-            directoriesHandler.register(service, {
-                id: `${projectRoot}__${i}`,
-            });
+            directoriesHandler.register(service, { identifier });
         }
     }
 

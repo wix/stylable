@@ -157,6 +157,8 @@ export interface BuildOptions {
 }
 
 export interface BuildMetaData {
+    /** build identifier */
+    identifier?: string;
     /** enable watch mode */
     watch?: boolean;
     /** main project root directory */

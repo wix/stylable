@@ -3,11 +3,11 @@ import { Log, levels } from '../logger';
 import { createWatchEvent, DirectoryProcessService } from './directory-process-service';
 
 interface RegisterMetaData {
-    id: string;
+    identifier: string;
 }
 
 interface Service {
-    id: string;
+    identifier: string;
     directoryProcess: DirectoryProcessService;
 }
 
@@ -23,9 +23,9 @@ export class DirectoriesHandlerService {
         private options: DirectoriesHandlerServiceOptions = {}
     ) {}
 
-    public register(directoryProcess: DirectoryProcessService, { id }: RegisterMetaData) {
+    public register(directoryProcess: DirectoryProcessService, { identifier }: RegisterMetaData) {
         this.services.add({
-            id,
+            identifier,
             directoryProcess,
         });
     }
@@ -45,16 +45,16 @@ export class DirectoriesHandlerService {
                 deleted: 0,
             };
 
-            for (const { directoryProcess, id } of this.services) {
-                this.options.log?.(`Aggregating affected files of "${id}"`);
+            for (const { directoryProcess, identifier } of this.services) {
+                this.options.log?.(`Aggregating affected files of "${identifier}"`);
 
                 for (const path of directoryProcess.getAffectedFiles(event.path)) {
                     files.set(path, createWatchEvent(path, this.fileSystem));
                 }
             }
 
-            for (const { directoryProcess, id } of this.services) {
-                this.options.log?.(`Handling watch of "${id}"`);
+            for (const { directoryProcess, identifier } of this.services) {
+                this.options.log?.(`Handling watch of "${identifier}"`);
                 await directoryProcess.handleWatchChange(files, event);
             }
 

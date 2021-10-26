@@ -38,14 +38,22 @@ export async function build(
         diagnostics,
         diagnosticsMode,
     }: BuildOptions,
-    { watch, fs, stylable, rootDir, projectRoot, log, outputFiles = new Map() }: BuildMetaData
+    {
+        watch,
+        fs,
+        stylable,
+        rootDir,
+        projectRoot,
+        log,
+        outputFiles = new Map(),
+        identifier = projectRoot,
+    }: BuildMetaData
 ) {
     const { resolve, join } = fs;
     const fullSrcDir = join(projectRoot, srcDir);
     const fullOutDir = join(projectRoot, outDir);
     const nodeModules = join(projectRoot, 'node_modules');
     const isMultiPackagesProject = projectRoot !== rootDir;
-    const relavetiveProjectRoot = projectRoot.replace(rootDir, '');
 
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
@@ -158,7 +166,7 @@ export async function build(
                     messages.FINISHED_PROCESSING,
                     count,
                     count === 1 ? 'file' : 'files',
-                    isMultiPackagesProject ? `in "${relavetiveProjectRoot}"` : '',
+                    isMultiPackagesProject ? `in "${identifier}"` : '',
                     levels.info
                 );
             }
@@ -171,7 +179,7 @@ export async function build(
         log(
             mode,
             messages.BUILD_SKIPPED,
-            isMultiPackagesProject ? `for "${relavetiveProjectRoot}"` : '',
+            isMultiPackagesProject ? `for "${identifier}"` : '',
             levels.info
         );
     }
