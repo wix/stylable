@@ -1,6 +1,8 @@
 {
   "files": [],
   "references": [
+    { "path": "./packages/ast-tools/test" },
+    { "path": "./packages/ast-tools/src" },
     { "path": "./packages/build-tools/test" },
     { "path": "./packages/build-tools/src" },
     { "path": "./packages/cli/src" },
