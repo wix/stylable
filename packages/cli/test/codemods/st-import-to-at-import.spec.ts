@@ -1,4 +1,4 @@
-import { processorWarnings } from '@stylable/core';
+import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { populateDirectorySync, loadDirSync } from '../test-kit/cli-test-kit';
@@ -47,6 +47,6 @@ describe('CLI Codemods st-import-to-at-import', () => {
         expect(dirContent['style.st.css']).equal(
             `:import {-st-from: './x.st.css'; -st-from: './y.st.css';}`
         );
-        expect(stdout).to.match(new RegExp(processorWarnings.MULTIPLE_FROM_IN_IMPORT()));
+        expect(stdout).to.match(new RegExp(parseImportMessages.MULTIPLE_FROM_IN_IMPORT()));
     });
 });
