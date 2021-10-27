@@ -1,5 +1,42 @@
-import { parsePseudoImport, Imported, parseStImport } from '@stylable/core';
-import { Root, decl, Declaration, atRule, rule, Rule } from 'postcss';
+import path from 'path';
+import { parseImports } from '@tokey/imports-parser';
+import type { Diagnostics } from './diagnostics';
+import type { Imported } from './stylable-meta';
+import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
+import { rootValueMapping, SBTypesParsers, valueMapping } from './stylable-value-parsers';
+import { stripQuotation } from './utils';
+import { isCompRoot } from './helpers/selector';
+
+const parseNamed = SBTypesParsers[valueMapping.named];
+
+const parseImportMessages = {
+    ST_IMPORT_STAR() {
+        return '@st-import * is not supported';
+    },
+    INVALID_ST_IMPORT_FORMAT(errors: string[]) {
+        return `Invalid @st-import format:\n - ${errors.join('\n - ')}`;
+    },
+
+    ST_IMPORT_EMPTY_FROM() {
+        return '@st-import must specify a valid "from" string value';
+    },
+    EMPTY_IMPORT_FROM() {
+        return '"-st-from" cannot be empty';
+    },
+
+    MULTIPLE_FROM_IN_IMPORT() {
+        return `cannot define multiple "${valueMapping.from}" declarations in a single import`;
+    },
+    DEFAULT_IMPORT_IS_LOWER_CASE() {
+        return 'Default import of a Stylable stylesheet must start with an upper-case letter';
+    },
+    ILLEGAL_PROP_IN_IMPORT(propName: string) {
+        return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`;
+    },
+    FROM_PROP_MISSING_IN_IMPORT() {
+        return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
+    },
+};
 
 export function createAtImportProps(
     importObj: Partial<Pick<Imported, 'named' | 'keyframes' | 'defaultExport' | 'request'>>
@@ -88,6 +125,117 @@ export function ensureStylableImports(
             ast.prepend(rule(createPseudoImportProps(item)));
         }
     }
+}
+
+function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imported) {
+    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+        importObj.request = importPath;
+        importObj.from = importPath;
+    } else {
+        importObj.request = importPath;
+        importObj.from =
+            path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
+                ? path.posix.resolve(dirPath, importPath)
+                : path.resolve(dirPath, importPath);
+    }
+}
+
+export function parseStImport(atRule: AtRule, context: string, diagnostics: Diagnostics) {
+    const importObj: Imported = {
+        defaultExport: '',
+        from: '',
+        request: '',
+        named: {},
+        rule: atRule,
+        context,
+        keyframes: {},
+    };
+    const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
+
+    if (imports && imports.star) {
+        diagnostics.error(atRule, parseImportMessages.ST_IMPORT_STAR());
+    } else {
+        importObj.defaultExport = imports.defaultName || '';
+        setImportObjectFrom(imports.from || '', context, importObj);
+
+        if (imports.tagged?.keyframes) {
+            // importObj.keyframes = imports.tagged?.keyframes;
+            for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
+                importObj.keyframes[impAsName] = impName;
+            }
+        }
+        if (imports.named) {
+            for (const [impName, impAsName] of Object.entries(imports.named)) {
+                importObj.named[impAsName] = impName;
+            }
+        }
+
+        if (imports.errors.length) {
+            diagnostics.error(atRule, parseImportMessages.INVALID_ST_IMPORT_FORMAT(imports.errors));
+        } else if (!imports.from?.trim()) {
+            diagnostics.error(atRule, parseImportMessages.ST_IMPORT_EMPTY_FROM());
+        }
+    }
+
+    return importObj;
+}
+
+export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diagnostics) {
+    let fromExists = false;
+    const importObj: Imported = {
+        defaultExport: '',
+        from: '',
+        request: '',
+        named: {},
+        keyframes: {},
+        rule,
+        context,
+    };
+
+    rule.walkDecls((decl) => {
+        switch (decl.prop) {
+            case valueMapping.from: {
+                const importPath = stripQuotation(decl.value);
+                if (!importPath.trim()) {
+                    diagnostics.error(decl, parseImportMessages.EMPTY_IMPORT_FROM());
+                }
+
+                if (fromExists) {
+                    diagnostics.warn(rule, parseImportMessages.MULTIPLE_FROM_IN_IMPORT());
+                }
+
+                setImportObjectFrom(importPath, context, importObj);
+                fromExists = true;
+                break;
+            }
+            case valueMapping.default:
+                importObj.defaultExport = decl.value;
+
+                if (!isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
+                    diagnostics.warn(decl, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                        word: importObj.defaultExport,
+                    });
+                }
+                break;
+            case valueMapping.named:
+                {
+                    const { keyframesMap, namedMap } = parseNamed(decl.value, decl, diagnostics);
+                    importObj.named = namedMap;
+                    importObj.keyframes = keyframesMap;
+                }
+                break;
+            default:
+                diagnostics.warn(decl, parseImportMessages.ILLEGAL_PROP_IN_IMPORT(decl.prop), {
+                    word: decl.prop,
+                });
+                break;
+        }
+    });
+
+    if (!importObj.from) {
+        diagnostics.error(rule, parseImportMessages.FROM_PROP_MISSING_IN_IMPORT());
+    }
+    return importObj;
 }
 
 function createPseudoImportProps(

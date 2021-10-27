@@ -1,5 +1,4 @@
-import { parsePseudoImport } from '@stylable/core';
-import { createAtImportProps } from './stylable-imports-tools';
+import { parsePseudoImport, createAtImportProps } from '@stylable/core';
 import type { CodeMod } from './types';
 
 export const stImportToAtImport: CodeMod = ({ ast, diagnostics, postcss }) => {

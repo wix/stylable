@@ -1,7 +1,6 @@
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import { parseImports } from '@tokey/imports-parser';
 import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
@@ -49,9 +48,9 @@ import {
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
 import { validateAtProperty } from './validate-at-property';
+import { parsePseudoImport, parseStImport } from './stylable-imports-tools';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
-const parseNamed = SBTypesParsers[valueMapping.named];
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
@@ -68,12 +67,6 @@ export const processorWarnings = {
     },
     ROOT_AFTER_SPACING() {
         return '".root" class cannot be used after native elements or selectors external to the stylesheet';
-    },
-    DEFAULT_IMPORT_IS_LOWER_CASE() {
-        return 'Default import of a Stylable stylesheet must start with an upper-case letter';
-    },
-    ILLEGAL_PROP_IN_IMPORT(propName: string) {
-        return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`;
     },
     STATE_DEFINITION_IN_ELEMENT() {
         return 'cannot define pseudo states inside a type selector';
@@ -108,20 +101,11 @@ export const processorWarnings = {
     PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
         return `"${valueMapping.partialMixin}" can only be used with override arguments provided, missing overrides on "${type}"`;
     },
-    FROM_PROP_MISSING_IN_IMPORT() {
-        return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
-    },
     INVALID_NAMESPACE_DEF() {
         return 'invalid @namespace';
     },
     EMPTY_NAMESPACE_DEF() {
         return '@namespace must contain at least one character or digit';
-    },
-    EMPTY_IMPORT_FROM() {
-        return '"-st-from" cannot be empty';
-    },
-    MULTIPLE_FROM_IN_IMPORT() {
-        return `cannot define multiple "${valueMapping.from}" declarations in a single import`;
     },
     NO_VARS_DEF_IN_ST_SCOPE() {
         return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`;
@@ -131,15 +115,6 @@ export const processorWarnings = {
     },
     NO_ST_IMPORT_IN_NESTED_SCOPE() {
         return `cannot use "@st-import" inside of nested scope`;
-    },
-    ST_IMPORT_STAR() {
-        return '@st-import * is not supported';
-    },
-    ST_IMPORT_EMPTY_FROM() {
-        return '@st-import must specify a valid "from" string value';
-    },
-    INVALID_ST_IMPORT_FORMAT(errors: string[]) {
-        return `Invalid @st-import format:\n - ${errors.join('\n - ')}`;
     },
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
@@ -1041,117 +1016,6 @@ export class StylableProcessor {
             }
         }
     }
-}
-
-function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imported) {
-    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
-        importObj.request = importPath;
-        importObj.from = importPath;
-    } else {
-        importObj.request = importPath;
-        importObj.from =
-            path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
-                ? path.posix.resolve(dirPath, importPath)
-                : path.resolve(dirPath, importPath);
-    }
-}
-
-export function parseStImport(atRule: postcss.AtRule, context: string, diagnostics: Diagnostics) {
-    const importObj: Imported = {
-        defaultExport: '',
-        from: '',
-        request: '',
-        named: {},
-        rule: atRule,
-        context,
-        keyframes: {},
-    };
-    const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
-
-    if (imports && imports.star) {
-        diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
-    } else {
-        importObj.defaultExport = imports.defaultName || '';
-        setImportObjectFrom(imports.from || '', context, importObj);
-
-        if (imports.tagged?.keyframes) {
-            // importObj.keyframes = imports.tagged?.keyframes;
-            for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
-                importObj.keyframes[impAsName] = impName;
-            }
-        }
-        if (imports.named) {
-            for (const [impName, impAsName] of Object.entries(imports.named)) {
-                importObj.named[impAsName] = impName;
-            }
-        }
-
-        if (imports.errors.length) {
-            diagnostics.error(atRule, processorWarnings.INVALID_ST_IMPORT_FORMAT(imports.errors));
-        } else if (!imports.from?.trim()) {
-            diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
-        }
-    }
-
-    return importObj;
-}
-
-export function parsePseudoImport(rule: postcss.Rule, context: string, diagnostics: Diagnostics) {
-    let fromExists = false;
-    const importObj: Imported = {
-        defaultExport: '',
-        from: '',
-        request: '',
-        named: {},
-        keyframes: {},
-        rule,
-        context,
-    };
-
-    rule.walkDecls((decl) => {
-        switch (decl.prop) {
-            case valueMapping.from: {
-                const importPath = stripQuotation(decl.value);
-                if (!importPath.trim()) {
-                    diagnostics.error(decl, processorWarnings.EMPTY_IMPORT_FROM());
-                }
-
-                if (fromExists) {
-                    diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
-                }
-
-                setImportObjectFrom(importPath, context, importObj);
-                fromExists = true;
-                break;
-            }
-            case valueMapping.default:
-                importObj.defaultExport = decl.value;
-
-                if (!isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
-                    diagnostics.warn(decl, processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(), {
-                        word: importObj.defaultExport,
-                    });
-                }
-                break;
-            case valueMapping.named:
-                {
-                    const { keyframesMap, namedMap } = parseNamed(decl.value, decl, diagnostics);
-                    importObj.named = namedMap;
-                    importObj.keyframes = keyframesMap;
-                }
-                break;
-            default:
-                diagnostics.warn(decl, processorWarnings.ILLEGAL_PROP_IN_IMPORT(decl.prop), {
-                    word: decl.prop,
-                });
-                break;
-        }
-    });
-
-    if (!importObj.from) {
-        diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
-    }
-    return importObj;
 }
 
 export function validateScopingSelector(

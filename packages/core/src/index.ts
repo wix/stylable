@@ -26,9 +26,15 @@ export {
     processNamespace,
     processorWarnings,
     validateScopingSelector,
+} from './stylable-processor';
+
+export {
+    createAtImportProps,
+    ensureStylableImports,
     parsePseudoImport,
     parseStImport,
-} from './stylable-processor';
+} from './stylable-imports-tools';
+
 export {
     KeyFrameWithNode,
     ResolvedElement,
