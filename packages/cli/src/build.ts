@@ -278,16 +278,3 @@ function getModuleFormats({ esm, cjs }: { [k: string]: boolean | undefined }) {
     }
     return formats;
 }
-
-function getInvalidatedFiles(service: DirectoryProcessService, files: Set<string>): Set<string> {
-    const totalFiles = new Set<string>();
-
-    for (const file of files) {
-        const affectedFiles = service.getAffectedFiles(file);
-        for (const affectedFile of affectedFiles) {
-            totalFiles.add(affectedFile);
-        }
-    }
-
-    return totalFiles;
-}
