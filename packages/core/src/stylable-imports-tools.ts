@@ -9,7 +9,7 @@ import { isCompRoot } from './helpers/selector';
 
 const parseNamed = SBTypesParsers[valueMapping.named];
 
-const parseImportMessages = {
+export const parseImportMessages = {
     ST_IMPORT_STAR() {
         return '@st-import * is not supported';
     },
@@ -76,34 +76,52 @@ export function createAtImportProps(
 
 export function ensureStylableImports(
     ast: Root,
-    ensureItems: Array<EnsureImportItem>,
-    { mode }: { mode: 'patch-only' | 'st-import' | ':import' },
-    diagnostics: any
+    importPatches: Array<ImportPatch>,
+    options: { mode: 'patch-only' | 'st-import' | ':import' },
+    diagnostics: Diagnostics
 ) {
-    const handled = new Set<EnsureImportItem>();
+    const patches = createImportPatches(ast, importPatches, options, diagnostics);
+    for (const patch of patches) {
+        patch();
+    }
+}
+function createImportPatches(
+    ast: Root,
+    importPatches: Array<ImportPatch>,
+    { mode }: { mode: 'patch-only' | 'st-import' | ':import' },
+    diagnostics: Diagnostics
+) {
+    const patches: Array<() => void> = [];
+    const handled = new Set<ImportPatch>();
     for (const node of ast.nodes) {
         if (node.type === 'atrule' && node.name === 'st-import') {
             const pseudoImport = parseStImport(node, '*', diagnostics);
-            processImports(pseudoImport, ensureItems, handled);
-            node.assign(createAtImportProps(pseudoImport));
+            processImports(pseudoImport, importPatches, handled);
+            patches.push(() => node.assign(createAtImportProps(pseudoImport)));
         } else if (node.type === 'rule' && node.selector === ':import') {
             const pseudoImport = parsePseudoImport(node, '*', diagnostics);
-            processImports(pseudoImport, ensureItems, handled);
+            processImports(pseudoImport, importPatches, handled);
 
-            const named = generateNamedValue(pseudoImport);
-            const { defaultDecls, namedDecls } = patchDecls(node, named, pseudoImport);
+            patches.push(() => {
+                const named = generateNamedValue(pseudoImport);
+                const { defaultDecls, namedDecls } = patchDecls(node, named, pseudoImport);
 
-            ensureSingleDecl(defaultDecls, node, '-st-default', pseudoImport.defaultExport);
-            ensureSingleDecl(namedDecls, node, '-st-named', named.join(','));
+                if (pseudoImport.defaultExport) {
+                    ensureSingleDecl(defaultDecls, node, '-st-default', pseudoImport.defaultExport);
+                }
+                if (named.length) {
+                    ensureSingleDecl(namedDecls, node, '-st-named', named.join(', '));
+                }
+            });
         }
     }
     if (mode === 'patch-only') {
-        return;
+        return patches;
     }
-    if (handled.size === ensureItems.length) {
-        return;
+    if (handled.size === importPatches.length) {
+        return patches;
     }
-    for (const item of ensureItems) {
+    for (const item of importPatches) {
         if (handled.has(item)) {
             continue;
         }
@@ -111,20 +129,25 @@ export function ensureStylableImports(
             continue;
         }
         if (mode === 'st-import') {
-            ast.prepend(
-                atRule(
-                    createAtImportProps({
-                        defaultExport: item.defaultExport || '',
-                        keyframes: item.keyframes || {},
-                        named: item.named || {},
-                        request: item.request,
-                    })
-                )
-            );
+            patches.push(() => {
+                ast.prepend(
+                    atRule(
+                        createAtImportProps({
+                            defaultExport: item.defaultExport || '',
+                            keyframes: item.keyframes || {},
+                            named: item.named || {},
+                            request: item.request,
+                        })
+                    )
+                );
+            });
         } else {
-            ast.prepend(rule(createPseudoImportProps(item)));
+            patches.push(() => {
+                ast.prepend(rule(createPseudoImportProps(item)));
+            });
         }
     }
+    return patches;
 }
 
 function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imported) {
@@ -258,7 +281,7 @@ function createPseudoImportProps(
         nodes.push(
             decl({
                 prop: '-st-named',
-                value: named.join(','),
+                value: named.join(', '),
             })
         );
     }
@@ -274,7 +297,7 @@ function patchDecls(node: Rule, named: string[], pseudoImport: Imported) {
     const defaultDecls: Declaration[] = [];
     node.walkDecls((decl) => {
         if (decl.prop === '-st-named') {
-            decl.assign({ value: named.join(',') });
+            decl.assign({ value: named.join(', ') });
             namedDecls.push(decl);
         } else if (decl.prop === '-st-default') {
             decl.assign({ value: pseudoImport.defaultExport });
@@ -308,7 +331,7 @@ function getNamedImportParts(named: [string, string][]) {
     return parts;
 }
 
-type EnsureImportItem = {
+type ImportPatch = {
     request: string;
     named?: Record<string, string>;
     keyframes?: Record<string, string>;
@@ -322,7 +345,7 @@ function generateNamedValue({
     const namedParts = getNamedImportParts(Object.entries(named));
     const keyframesParts = getNamedImportParts(Object.entries(keyframes));
     if (keyframesParts.length) {
-        namedParts.push(`keyframes(${keyframesParts.join(',')})`);
+        namedParts.push(`keyframes(${keyframesParts.join(', ')})`);
     }
     return namedParts;
 }
@@ -337,14 +360,14 @@ function hasDefinitions({
 
 function processImports(
     pseudoImport: Imported,
-    ensureItems: Array<EnsureImportItem>,
-    handled: Set<EnsureImportItem>
+    importPatches: Array<ImportPatch>,
+    handled: Set<ImportPatch>
 ) {
     const ops = ['named', 'keyframes'] as const;
-    for (const item of ensureItems) {
-        if (pseudoImport.request === item.request) {
+    for (const patch of importPatches) {
+        if (pseudoImport.request === patch.request) {
             for (const op of ops) {
-                const bucket = item[op];
+                const bucket = patch[op];
                 if (!bucket) {
                     continue;
                 }
@@ -359,14 +382,14 @@ function processImports(
                     }
                 }
             }
-            if (pseudoImport.defaultExport !== item.defaultExport) {
-                if (!pseudoImport.defaultExport && item.defaultExport) {
-                    pseudoImport.defaultExport = item.defaultExport;
+            if (pseudoImport.defaultExport !== patch.defaultExport) {
+                if (!pseudoImport.defaultExport && patch.defaultExport) {
+                    pseudoImport.defaultExport = patch.defaultExport;
                 } else {
                     // throw "Attempt to override existing import name"
                 }
             }
-            handled.add(item);
+            handled.add(patch);
         }
     }
 }
