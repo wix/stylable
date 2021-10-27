@@ -24,7 +24,7 @@ import {
     getAlias,
     isCSSVarProp,
 } from './stylable-utils';
-import { processDeclarationFunctions } from "./process-declaration-functions";
+import { processDeclarationFunctions } from './process-declaration-functions';
 import {
     walkSelector,
     isSimpleSelector,
@@ -355,7 +355,8 @@ export class StylableProcessor {
                         );
                         atRule.remove();
                     } else {
-                        const stImport = this.handleStImport(atRule);
+                        const stImport = parseStImport(atRule, this.dirContext, this.diagnostics);
+                        atRule.remove();
                         this.meta.imports.push(stImport);
                         this.addImportSymbols(stImport);
                     }
@@ -1009,50 +1010,6 @@ export class StylableProcessor {
             typedRule[key] = value;
         }
     }
-    protected handleStImport(atRule: postcss.AtRule) {
-        const importObj: Imported = {
-            defaultExport: '',
-            from: '',
-            request: '',
-            named: {},
-            rule: atRule,
-            context: this.dirContext,
-            keyframes: {},
-        };
-        const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
-
-        if (imports && imports.star) {
-            this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
-        } else {
-            importObj.defaultExport = imports.defaultName || '';
-            setImportObjectFrom(imports.from || '', this.dirContext, importObj);
-
-            if (imports.tagged?.keyframes) {
-                // importObj.keyframes = imports.tagged?.keyframes;
-                for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
-                    importObj.keyframes[impAsName] = impName;
-                }
-            }
-            if (imports.named) {
-                for (const [impName, impAsName] of Object.entries(imports.named)) {
-                    importObj.named[impAsName] = impName;
-                }
-            }
-
-            if (imports.errors.length) {
-                this.diagnostics.error(
-                    atRule,
-                    processorWarnings.INVALID_ST_IMPORT_FORMAT(imports.errors)
-                );
-            } else if (!imports.from?.trim()) {
-                this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
-            }
-        }
-
-        atRule.remove();
-
-        return importObj;
-    }
 
     private handleScope(atRule: postcss.AtRule) {
         const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
@@ -1097,6 +1054,46 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
                 ? path.posix.resolve(dirPath, importPath)
                 : path.resolve(dirPath, importPath);
     }
+}
+
+export function parseStImport(atRule: postcss.AtRule, context: string, diagnostics: Diagnostics) {
+    const importObj: Imported = {
+        defaultExport: '',
+        from: '',
+        request: '',
+        named: {},
+        rule: atRule,
+        context,
+        keyframes: {},
+    };
+    const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
+
+    if (imports && imports.star) {
+        diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
+    } else {
+        importObj.defaultExport = imports.defaultName || '';
+        setImportObjectFrom(imports.from || '', context, importObj);
+
+        if (imports.tagged?.keyframes) {
+            // importObj.keyframes = imports.tagged?.keyframes;
+            for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
+                importObj.keyframes[impAsName] = impName;
+            }
+        }
+        if (imports.named) {
+            for (const [impName, impAsName] of Object.entries(imports.named)) {
+                importObj.named[impAsName] = impName;
+            }
+        }
+
+        if (imports.errors.length) {
+            diagnostics.error(atRule, processorWarnings.INVALID_ST_IMPORT_FORMAT(imports.errors));
+        } else if (!imports.from?.trim()) {
+            diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
+        }
+    }
+
+    return importObj;
 }
 
 export function parsePseudoImport(rule: postcss.Rule, context: string, diagnostics: Diagnostics) {

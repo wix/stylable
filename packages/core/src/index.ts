@@ -27,6 +27,7 @@ export {
     processorWarnings,
     validateScopingSelector,
     parsePseudoImport,
+    parseStImport,
 } from './stylable-processor';
 export {
     KeyFrameWithNode,
