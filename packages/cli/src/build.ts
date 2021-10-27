@@ -101,8 +101,6 @@ export async function build(
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
-                // watched file changed, invalidate cache
-                stylable.initCache();
                 // handle deleted files by removing their generated content
                 if (deletedFiles.size) {
                     for (const deletedFile of deletedFiles) {
@@ -290,4 +288,17 @@ function getModuleFormats({ esm, cjs }: { [k: string]: boolean | undefined }) {
         formats.push('cjs');
     }
     return formats;
+}
+
+function getInvalidatedFiles(service: DirectoryProcessService, files: Set<string>): Set<string> {
+    const totalFiles = new Set<string>();
+
+    for (const file of files) {
+        const affectedFiles = service.getAffectedFiles(file);
+        for (const affectedFile of affectedFiles) {
+            totalFiles.add(affectedFile);
+        }
+    }
+
+    return totalFiles;
 }

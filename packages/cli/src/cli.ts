@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { nodeFs } from '@file-services/node';
-import { Stylable } from '@stylable/core';
+import { Stylable, StylableResolverCache } from '@stylable/core';
 import { build } from './build';
 import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
@@ -25,9 +25,13 @@ async function main() {
 
     const { rootDir, projects } = projectsConfig(argv);
     const fileSystem = nodeFs;
-    const directoriesHandler = new DirectoriesHandlerService(fileSystem, { log });
-    const resolverCache = new Map();
+    const resolverCache: StylableResolverCache = new Map();
     const outputFiles = new Map<string, string>();
+    const directoriesHandler = new DirectoriesHandlerService(fileSystem, {
+        log,
+        resolverCache,
+        outputFiles,
+    });
 
     for (const { projectRoot, options } of projects) {
         for (let i = 0; i < options.length; i++) {
