@@ -55,7 +55,6 @@ export async function build(
     const nodeModules = join(projectRoot, 'node_modules');
     const isMultiPackagesProject = projectRoot !== rootDir;
 
-    validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
     const generator = new Generator(stylable, log);
     const generated = new Set<string>();
@@ -242,16 +241,6 @@ export function createGenerator(
 
         return generatorModule.Generator;
     }, `Could not resolve custom generator from "${absoluteGeneratorPath}"`);
-}
-
-function validateConfiguration(outputSources: boolean | undefined, outDir: string, srcDir: string) {
-    if (outputSources && srcDir === outDir) {
-        throw new Error(
-            'Invalid configuration: When using "stcss" outDir and srcDir must be different.' +
-                `\noutDir: ${outDir}` +
-                `\nsrcDir: ${srcDir}`
-        );
-    }
 }
 
 function updateWatcherDependencies(

@@ -1,5 +1,5 @@
 import { loadStylableConfig } from '@stylable/build-tools';
-import { resolveCliOptions, createDefaultOptions } from './resolve-options';
+import { resolveCliOptions, createDefaultOptions, validateOptions } from './resolve-options';
 import { removeUndefined } from '../helpers';
 import { resolve } from 'path';
 import { tryRun } from '../build-tools';
@@ -27,6 +27,8 @@ export function projectsConfig(argv: CliArguments): ProjectsConfigResult {
     const configFile = resolveConfigFile(projectRoot);
     const cliOptions = resolveCliOptions(argv, defaultOptions);
     const topLevelOptions = mergeBuildOptions(defaultOptions, configFile?.options, cliOptions);
+
+    validateOptions(topLevelOptions);
 
     let projects: STCConfig;
 
@@ -133,9 +135,16 @@ function resolveProjectEntry(
         totalOptions.push(...normalizeEntry(value));
     }
 
+    request = request.trim();
     return {
-        request: request.trim(),
-        options: totalOptions.map((options) => mergeBuildOptions(configOptions, options)),
+        request,
+        options: totalOptions.map((options, i, { length }) => {
+            const mergedOptions = mergeBuildOptions(configOptions, options);
+
+            validateOptions(mergedOptions, length > 1 ? `[${i}] ${request}` : request);
+
+            return mergedOptions;
+        }),
     };
 
     function normalizeEntry(entryValue: Exclude<ProjectEntryValue, Array<any>>) {

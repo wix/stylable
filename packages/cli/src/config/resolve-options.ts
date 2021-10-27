@@ -207,3 +207,23 @@ export function createDefaultOptions(): BuildOptions {
         diagnosticsMode: 'strict',
     };
 }
+
+export function validateOptions(
+    { outDir, srcDir, outputSources, dts, dtsSourceMap }: BuildOptions,
+    name?: string
+) {
+    const prefix = name ? `"${name}" options - ` : '';
+
+    if (!dts && dtsSourceMap) {
+        throw new Error(prefix + `"dtsSourceMap" requires turning on "dts"`);
+    }
+
+    if (outputSources && srcDir === outDir) {
+        throw new Error(
+            prefix +
+                'Invalid configuration: When using "stcss" outDir and srcDir must be different.' +
+                `\noutDir: ${outDir}` +
+                `\nsrcDir: ${srcDir}`
+        );
+    }
+}

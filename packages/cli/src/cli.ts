@@ -36,19 +36,12 @@ async function main() {
     for (const { projectRoot, options } of projects) {
         for (let i = 0; i < options.length; i++) {
             const optionsEntity = options[i];
-
-            const { dts, dtsSourceMap } = optionsEntity;
-
             const identifier =
                 options.length > 1
                     ? `[${i}] ${projectRoot.replace(rootDir, '')}`
                     : projectRoot.replace(rootDir, '');
 
             log('[Project]', projectRoot, optionsEntity);
-
-            if (!dts && dtsSourceMap) {
-                throw new Error(`"dtsSourceMap" requires turning on "dts"`);
-            }
 
             const stylable = Stylable.create({
                 fileSystem,
