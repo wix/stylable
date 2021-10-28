@@ -32,6 +32,9 @@ export function parseSelectorWithCache(
     options: { clone?: boolean } = {}
 ): ImmutableSelectorList {
     if (!selectorAstCache.has(selector)) {
+        if (selectorAstCache.size > 10000) {
+            selectorAstCache.delete(selectorAstCache.keys().next().value);
+        }
         selectorAstCache.set(selector, parseCssSelector(selector));
     }
     const cachedValue = selectorAstCache.get(selector);
