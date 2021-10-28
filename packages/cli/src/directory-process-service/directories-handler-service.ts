@@ -97,7 +97,7 @@ export class DirectoriesHandlerService {
     }
 
     private invalidateCache(path: string) {
-        for (const [key, meta] of Array.from(this.resolverCache.entries())) {
+        for (const [key, meta] of this.resolverCache) {
             if (!meta) {
                 continue;
             }
