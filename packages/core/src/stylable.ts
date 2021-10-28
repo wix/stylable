@@ -28,7 +28,6 @@ export interface StylableConfig {
         symlinks?: boolean;
         [key: string]: any;
     };
-    /** @deprecated - check if statement is valid */
     optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
