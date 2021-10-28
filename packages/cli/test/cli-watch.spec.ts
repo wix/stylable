@@ -611,5 +611,74 @@ describe('Stylable Cli Watch', () => {
                 /foo[0-9]+__bar {color: blue;}/g
             );
         });
+
+        it('should not trigger circular build on assets', async () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'stylable.config.js': `
+                exports.stcConfig = () => ({
+                    options: {
+                        cjs: false,
+                    },
+                    projects: {
+                        'packages/*': [
+                            {
+                                outDir: './dist',
+                                srcDir: './src',
+                                outputSources: true
+                            },
+                            {
+                                srcDir: './src',
+                                outDir: './src',
+                                dts: true
+                            }
+                        ]
+                    }
+                })`,
+                packages: {
+                    'project-a': {
+                        'package.json': JSON.stringify({ name: 'a', version: '0.0.0' }),
+                        src: {
+                            'icon.svg': `<svg height="100" width="100">
+                                <circle cx="5" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+                            </svg> `,
+                            'style.st.css': `
+                            .root{ 
+                                color:red;
+                                background: url('./icon.svg')
+                             }
+                        `,
+                        },
+                    },
+                },
+            });
+
+            const { output } = await run({
+                dirPath: tempDir.path,
+                args: ['-w'],
+                resolveStepsDelay: 700,
+                steps: [
+                    {
+                        msg: messages.START_WATCHING,
+                        action() {
+                            writeToExistingFile(
+                                join(tempDir.path, './packages/project-a/src/style.st.css'),
+                                `.root{ 
+                                    color:red;
+                                    background: url('./icon.svg')
+                                 }`
+                            );
+                        },
+                    },
+                    {
+                        msg: [messages.FINISHED_PROCESSING, '1', 'project-a'],
+                    },
+                ],
+            });
+
+            const matches = output.match(/Processing files of "\[1\] \/packages\/project-a"/gi);
+
+            expect(matches?.length).to.eql(1);
+        });
     });
 });

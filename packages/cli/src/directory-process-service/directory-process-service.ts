@@ -148,9 +148,15 @@ export class DirectoryProcessService {
             }
         }
 
+        let hasChanges = false;
         if (affectedFiles.size || deletedFiles.size) {
-            return this.options.processFiles?.(this, affectedFiles, deletedFiles, originalEvent);
+            await this.options.processFiles?.(this, affectedFiles, deletedFiles, originalEvent);
+            hasChanges = true;
         }
+
+        return {
+            hasChanges,
+        };
     }
     public getAffectedFiles(filePath: string, visited = new Set<string>()): Set<string> {
         if (visited.has(filePath)) {

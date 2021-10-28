@@ -3,41 +3,73 @@ import { spawn, ChildProcessWithoutNullStreams, spawnSync } from 'child_process'
 import { on } from 'events';
 import { join, relative } from 'path';
 
+interface ProcessCliOutputParams {
+    dirPath: string;
+    args: string[];
+    resolveStepsDelay?: number;
+    steps: Array<{ msg: string | string[]; action?: () => void }>;
+}
+
+interface ProcessCliOutputResult {
+    output: string;
+}
+
 export function createCliTester() {
     const cliProcesses: ChildProcessWithoutNullStreams[] = [];
 
-    async function processCliOutput({
+    function processCliOutput({
         dirPath,
         args,
         steps,
-    }: {
-        dirPath: string;
-        args: string[];
-        steps: Array<{ msg: string | string[]; action?: () => void }>;
-    }) {
+        resolveStepsDelay,
+    }: ProcessCliOutputParams): Promise<ProcessCliOutputResult> {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess as any);
+
         const found = [];
+        const outputs: string[] = [];
 
-        for await (const e of on(cliProcess.stdout as any, 'data')) {
-            const lines = e.toString().split('\n');
+        return new Promise((result, reject) => {
+            let timer: NodeJS.Timeout;
+            void run()
+                .then(() => result({ output: outputs.join('\n') }))
+                .catch(reject);
 
-            for (const line of lines) {
-                const step = steps[found.length];
+            async function run() {
+                for await (const e of on(cliProcess.stdout as any, 'data')) {
+                    const step = steps[found.length];
+                    const lines = e.toString().split('\n');
+                    outputs.push(...lines);
 
-                if (match(step.msg, line)) {
-                    found.push(true);
-
-                    if (step.action) {
-                        step.action();
+                    if (!step) {
+                        continue;
                     }
 
-                    if (steps.length === found.length) {
-                        return;
+                    for (const line of lines) {
+                        if (match(step.msg, line)) {
+                            found.push(true);
+
+                            if (step.action) {
+                                step.action();
+                            }
+
+                            if (steps.length === found.length) {
+                                if (resolveStepsDelay) {
+                                    if (!timer) {
+                                        timer = setTimeout(
+                                            () => result({ output: outputs.join('\n') }),
+                                            resolveStepsDelay
+                                        );
+                                    }
+                                } else {
+                                    return;
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
+        });
     }
 
     function match(source: string | string[], target: string) {

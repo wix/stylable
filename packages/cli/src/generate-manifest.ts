@@ -42,4 +42,8 @@ export function generateManifest(
             'Write Index File Error'
         );
     }
+
+    return {
+        manifestOutputPath,
+    };
 }

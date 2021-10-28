@@ -40,15 +40,9 @@ export class DirectoriesHandlerService {
 
     public start() {
         this.listener = async (event) => {
-            this.options.log?.(levels.clear);
-            this.options.log?.(
-                `[${new Date().toLocaleTimeString()}]`,
-                'Change detected. Starting compilation...',
-                levels.info
-            );
-
             this.invalidateCache(event.path);
 
+            let foundChanges = false;
             const files = new Map<string, IWatchEvent>();
             const filesChangesSummary = {
                 changed: 0,
@@ -56,33 +50,45 @@ export class DirectoriesHandlerService {
             };
 
             for (const { directoryProcess, identifier } of this.services) {
-                this.options.log?.(`Aggregating affected files of "${identifier}"`);
-
                 for (const path of directoryProcess.getAffectedFiles(event.path)) {
                     files.set(path, createWatchEvent(path, this.fileSystem));
                 }
 
-                this.options.log?.(`Processing files...`);
-                await directoryProcess.handleWatchChange(files, event);
-            }
+                const { hasChanges } = await directoryProcess.handleWatchChange(files, event);
 
-            for (const file of files.values()) {
-                if (file.stats) {
-                    filesChangesSummary.changed++;
-                } else {
-                    filesChangesSummary.deleted++;
+                if (hasChanges) {
+                    this.options.log?.(`Processing files of "${identifier}"`);
                 }
+
+                foundChanges = foundChanges || hasChanges;
             }
 
-            this.options.log?.(
-                `[${new Date().toLocaleTimeString()}]`,
-                'Found',
-                filesChangesSummary.changed,
-                'changes and',
-                filesChangesSummary.deleted,
-                'deletions.',
-                levels.info
-            );
+            if (foundChanges) {
+                this.options.log?.(levels.clear);
+                this.options.log?.(
+                    `[${new Date().toLocaleTimeString()}]`,
+                    `Change detected at "${event.path}". Starting compilation...`,
+                    levels.info
+                );
+
+                for (const file of files.values()) {
+                    if (file.stats) {
+                        filesChangesSummary.changed++;
+                    } else {
+                        filesChangesSummary.deleted++;
+                    }
+                }
+
+                this.options.log?.(
+                    `[${new Date().toLocaleTimeString()}]`,
+                    'Found',
+                    filesChangesSummary.changed,
+                    'changes and',
+                    filesChangesSummary.deleted,
+                    'deletions.',
+                    levels.info
+                );
+            }
         };
 
         this.fileSystem.watchService.addGlobalListener(this.listener);

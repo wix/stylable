@@ -220,8 +220,22 @@ export async function build(
             generated.add(indexFilePath);
             generator.generateIndexFile(fs, indexFilePath);
         } else {
-            handleAssets(assets, projectRoot, srcDir, outDir, fs);
-            generateManifest(projectRoot, sourceFiles, manifest, stylable, mode, log, fs);
+            const generatedAssets = handleAssets(assets, projectRoot, srcDir, outDir, fs);
+            const { manifestOutputPath } = generateManifest(
+                projectRoot,
+                sourceFiles,
+                manifest,
+                stylable,
+                mode,
+                log,
+                fs
+            );
+
+            generated.add(manifestOutputPath);
+
+            for (const generatedAsset of generatedAssets) {
+                generated.add(generatedAsset);
+            }
         }
     }
 }
