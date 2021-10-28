@@ -37,9 +37,7 @@ async function main() {
         for (let i = 0; i < options.length; i++) {
             const optionsEntity = options[i];
             const identifier =
-                options.length > 1
-                    ? `[${i}] ${projectRoot.replace(rootDir, '')}`
-                    : projectRoot.replace(rootDir, '');
+                options.length > 1 ? `[${i}] ${projectRoot.replace(rootDir, '')}` : projectRoot;
 
             log('[Project]', projectRoot, optionsEntity);
 
