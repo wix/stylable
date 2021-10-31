@@ -169,3 +169,7 @@ export function populateDirectorySync(rootDir: string, files: FilesStructure) {
         }
     }
 }
+
+export function escapeRegExp(str: string) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

@@ -1,5 +1,5 @@
 import { writeFileSync, unlinkSync, rmdirSync, renameSync } from 'fs';
-import { join } from 'path';
+import { join, normalize } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { messages } from '@stylable/cli';
@@ -9,6 +9,7 @@ import {
     populateDirectorySync,
     runCliSync,
     writeToExistingFile,
+    escapeRegExp,
 } from './test-kit/cli-test-kit';
 
 describe('Stylable Cli Watch', () => {
@@ -676,7 +677,14 @@ describe('Stylable Cli Watch', () => {
                 ],
             });
 
-            const matches = output.match(/Processing files of "\[1\] \/packages\/project-a"/gi);
+            const matches = output.match(
+                new RegExp(
+                    `Processing files of "\\[1\\] ${escapeRegExp(
+                        normalize('/packages/project-a')
+                    )}`,
+                    'ig'
+                )
+            );
 
             expect(matches?.length).to.eql(1);
         });
