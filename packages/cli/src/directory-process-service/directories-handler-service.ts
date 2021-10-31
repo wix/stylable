@@ -1,6 +1,7 @@
 import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
 import type { StylableResolverCache } from '@stylable/core';
 import { Log, levels } from '../logger';
+import { messages } from '../messages';
 import { createWatchEvent, DirectoryProcessService } from './directory-process-service';
 
 interface RegisterMetaData {
@@ -58,7 +59,7 @@ export class DirectoriesHandlerService {
                 const { hasChanges } = await directoryProcess.handleWatchChange(files, event);
 
                 if (hasChanges) {
-                    this.options.log?.(`Processing files of "${identifier}"`);
+                    this.log(messages.BUILD_PROCESS_INFO(identifier));
                 }
 
                 foundChanges = foundChanges || hasChanges;
@@ -67,7 +68,8 @@ export class DirectoriesHandlerService {
             if (foundChanges) {
                 this.log(levels.clear);
                 this.log(
-                    `Change detected at "${event.path.replace(this.options.rootDir ?? '', '')}".`
+                    messages.CHANGE_DETECTED(event.path.replace(this.options.rootDir ?? '', '')),
+                    levels.info
                 );
 
                 for (const file of files.values()) {
@@ -79,13 +81,13 @@ export class DirectoriesHandlerService {
                 }
 
                 this.log(
-                    'Found',
-                    filesChangesSummary.changed,
-                    'changes and',
-                    filesChangesSummary.deleted,
-                    'deletions.'
+                    messages.WATCH_SUMMARY(
+                        filesChangesSummary.changed,
+                        filesChangesSummary.deleted
+                    ),
+                    levels.info
                 );
-                this.log('Watching files...');
+                this.log(messages.CONTINUE_WATCH(), levels.info);
             }
         };
 
@@ -116,10 +118,6 @@ export class DirectoriesHandlerService {
     }
 
     private log(...messages: any[]) {
-        if (messages[0] === levels.clear) {
-            this.options.log?.(levels.clear);
-        } else {
-            this.options.log?.(`[${new Date().toLocaleTimeString()}]`, ...messages, levels.info);
-        }
+        this.options.log?.(`[${new Date().toLocaleTimeString()}]`, ...messages);
     }
 }
