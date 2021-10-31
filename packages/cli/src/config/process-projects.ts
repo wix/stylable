@@ -11,15 +11,16 @@ import { createDefaultOptions, mergeBuildOptions, validateOptions } from './reso
 
 export function processProjects(
     { projects, presets }: MultipleProjectsConfig,
-    { defaultOptions = createDefaultOptions(), onProjectEntity }: ProcessProjectsOptions
+    { defaultOptions = createDefaultOptions() }: ProcessProjectsOptions = {}
 ) {
+    const entities: RawProjectEntity[] = [];
     if (!Array.isArray(projects) && typeof projects !== 'object') {
         throw new Error('Invalid projects type');
     }
 
     if (Array.isArray(projects)) {
         for (const entry of projects) {
-            onProjectEntity(
+            entities.push(
                 resolveProjectEntry(
                     typeof entry === 'string' ? [entry] : entry,
                     defaultOptions,
@@ -29,9 +30,13 @@ export function processProjects(
         }
     } else if (typeof projects === 'object') {
         for (const entry of Object.entries<ProjectEntryValue>(projects)) {
-            onProjectEntity(resolveProjectEntry(entry, defaultOptions, presets));
+            entities.push(resolveProjectEntry(entry, defaultOptions, presets));
         }
     }
+
+    return {
+        entities,
+    };
 }
 
 function resolveProjectEntry(

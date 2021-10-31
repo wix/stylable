@@ -3,13 +3,13 @@ import {
     resolveWorkspacePackages,
     sortPackagesByDepth,
 } from '@wixc3/resolve-directory-context';
-import type { RawProjectEntity, ResolveProjects } from '../types';
+import type { RawProjectEntity, ResolveRequests } from '../types';
 
-export const resolveNpmProjects: ResolveProjects = (projectsEntities, { projectRoot }) => {
+export const resolveNpmRequests: ResolveRequests = (entities, { projectRoot }) => {
     const projectEntriesMap = new Map<string, RawProjectEntity>();
     const packages = new Set<INpmPackage>();
 
-    for (const entity of projectsEntities) {
+    for (const entity of entities) {
         const { request } = entity;
         const workspacePackages = sortPackagesByDepth(
             resolveWorkspacePackages(projectRoot, [request])

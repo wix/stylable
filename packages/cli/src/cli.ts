@@ -23,7 +23,7 @@ async function main() {
         }
     }
 
-    const { rootDir, projects } = projectsConfig(argv);
+    const { rootDir, projects } = await projectsConfig(argv);
     const fileSystem = nodeFs;
     const resolverCache: StylableResolverCache = new Map();
     const outputFiles = new Map<string, string>();

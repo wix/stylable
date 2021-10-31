@@ -6,7 +6,6 @@ import type {
     Configuration,
     MultipleProjectsConfig,
     ProjectsConfigResult,
-    RawProjectEntity,
     ResolveProjectsContext,
     ResolveProjectsRequestsParams,
     STCConfig,
@@ -18,9 +17,9 @@ import {
     resolveCliOptions,
     validateOptions,
 } from './resolve-options';
-import { resolveNpmProjects } from './resolve-projects';
+import { resolveNpmRequests } from './resolve-requests';
 
-export function projectsConfig(argv: CliArguments): ProjectsConfigResult {
+export async function projectsConfig(argv: CliArguments): Promise<ProjectsConfigResult> {
     const projectRoot = resolve(argv.rootDir);
     const defaultOptions = createDefaultOptions();
     const configFile = resolveConfigFile(projectRoot);
@@ -32,19 +31,14 @@ export function projectsConfig(argv: CliArguments): ProjectsConfigResult {
     let projects: STCConfig;
 
     if (isMultpleConfigProject(configFile)) {
-        const projectsEntities: RawProjectEntity[] = [];
-
-        processProjects(configFile, {
+        const { entities } = processProjects(configFile, {
             defaultOptions: topLevelOptions,
-            onProjectEntity(entity) {
-                projectsEntities.push(entity);
-            },
         });
 
-        projects = resolveProjectsRequests({
+        projects = await resolveProjectsRequests({
             projectRoot,
-            projects: projectsEntities,
-            resolveProjects: configFile.resolveProjects || resolveNpmProjects,
+            entities,
+            resolveRequests: configFile.projectsOptions?.resolveRequests ?? resolveNpmRequests,
         });
     } else {
         projects = [
@@ -78,12 +72,12 @@ function isMultpleConfigProject(config: any): config is MultipleProjectsConfig {
     return Boolean(config?.projects);
 }
 
-function resolveProjectsRequests({
-    projects,
+async function resolveProjectsRequests({
+    entities,
     projectRoot,
-    resolveProjects,
-}: ResolveProjectsRequestsParams): STCConfig {
+    resolveRequests,
+}: ResolveProjectsRequestsParams): Promise<STCConfig> {
     const context: ResolveProjectsContext = { projectRoot };
 
-    return resolveProjects(projects, context);
+    return resolveRequests(entities, context);
 }

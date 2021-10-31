@@ -28,10 +28,10 @@ export interface RawProjectEntity extends BaseProjectEntity {
 }
 
 export type STCConfig = ProjectEntity[];
-export type ResolveProjects = (
+export type ResolveRequests = (
     projects: Array<RawProjectEntity>,
     context: ResolveProjectsContext
-) => STCConfig;
+) => Promise<STCConfig> | STCConfig;
 
 export interface ResolveProjectsContext {
     projectRoot: string;
@@ -39,8 +39,8 @@ export interface ResolveProjectsContext {
 
 export interface ResolveProjectsRequestsParams {
     projectRoot: string;
-    projects: Array<RawProjectEntity>;
-    resolveProjects: ResolveProjects;
+    entities: Array<RawProjectEntity>;
+    resolveRequests: ResolveRequests;
 }
 
 export interface SingleProjectConfig {
@@ -56,7 +56,9 @@ export type Projects =
 export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
     presets?: Presets;
     projects: Projects;
-    resolveProjects?: ResolveProjects;
+    projectsOptions?: {
+        resolveRequests?: ResolveRequests;
+    };
 }
 
 export type ProjectEntryValue =
@@ -77,7 +79,6 @@ export type ProjectEntryValue =
 
 export interface ProcessProjectsOptions {
     defaultOptions?: BuildOptions;
-    onProjectEntity(entity: RawProjectEntity): void;
 }
 
 export interface CliArguments {
