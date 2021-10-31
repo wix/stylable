@@ -2,6 +2,7 @@ import { nodeFs } from '@file-services/node';
 import type { Arguments } from 'yargs';
 import yargs from 'yargs';
 import { createGenerator } from '../build';
+import { removeUndefined } from '../helpers';
 import type { CliArguments, BuildOptions, PartialBuildOptions } from '../types';
 
 const { join } = nodeFs;
@@ -226,4 +227,16 @@ export function validateOptions(
                 `\nsrcDir: ${srcDir}`
         );
     }
+}
+
+export function mergeBuildOptions(
+    ...configs: [BuildOptions, ...(BuildOptions | PartialBuildOptions | undefined)[]]
+): BuildOptions {
+    const [config, ...rest] = configs;
+
+    return Object.assign(
+        {},
+        config,
+        ...rest.map((currentConfig) => (currentConfig ? removeUndefined(currentConfig) : {}))
+    );
 }

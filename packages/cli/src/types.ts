@@ -76,7 +76,8 @@ export type ProjectEntryValue =
       }[];
 
 export interface ProcessProjectsOptions {
-    onProjectEntry(entry: [string, ProjectEntryValue] | [string]): void;
+    defaultOptions?: BuildOptions;
+    onProjectEntity(entity: RawProjectEntity): void;
 }
 
 export interface CliArguments {
