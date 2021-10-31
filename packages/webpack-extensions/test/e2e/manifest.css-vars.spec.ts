@@ -43,7 +43,7 @@ describe(`${project} - manifest`, () => {
         expect(JSON.parse(source)).to.deep.include({
             name: 'manifest-plugin-test',
             version: '0.0.0-test',
-            componentsIndex: `:import{-st-from: "/${compHash}.st.css";-st-default: Button;-st-named:--myColor as --Button-myColor;} .root Button{}${EOL}`,
+            componentsIndex: `:import{-st-from: "/${compHash}.st.css";-st-default: Button;-st-named:--myColor as --Button-myColor;} Button{}${EOL}`,
             componentsEntries: { Button: `/${compHash}.st.css` },
             stylesheetMapping: {
                 [`/${compHash}.st.css`]: compContent.replace(
