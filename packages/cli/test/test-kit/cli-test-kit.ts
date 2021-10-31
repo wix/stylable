@@ -46,7 +46,7 @@ export function createCliTester() {
                     }
 
                     for (const line of lines) {
-                        if (match(step.msg, line)) {
+                        if (line.includes(step.msg)) {
                             found.push(true);
 
                             if (step.action) {
@@ -70,26 +70,6 @@ export function createCliTester() {
                 }
             }
         });
-    }
-
-    function match(source: string | string[], target: string) {
-        if (typeof source === 'string') {
-            return target.includes(source);
-        } else if (Array.isArray(source)) {
-            const latestIndex = -Infinity;
-
-            for (const current of source) {
-                const currentIndex = target.indexOf(current);
-
-                if (currentIndex < 0 || currentIndex < latestIndex) {
-                    return false;
-                }
-            }
-
-            return true;
-        } else {
-            return false;
-        }
     }
 
     return {

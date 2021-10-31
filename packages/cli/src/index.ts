@@ -1,4 +1,4 @@
-export { build, messages } from './build';
+export { build } from './build';
 export { Generator, ReExports, reExportsAllSymbols } from './base-generator';
 export { BuildOptions, Configuration, STCConfig, ResolveRequests } from './types';
 export {

@@ -4,9 +4,9 @@ import { Stylable, StylableResolverCache } from '@stylable/core';
 import { build } from './build';
 import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
-import { messages } from './build';
 import { getCliArguments } from './config/resolve-options';
 import { DirectoriesHandlerService } from './directory-process-service/directories-handler-service';
+import { messages } from './messages';
 
 async function main() {
     const argv = getCliArguments();
@@ -72,7 +72,7 @@ async function main() {
     }
 
     if (watch) {
-        log(messages.START_WATCHING, levels.info);
+        log(messages.START_WATCHING(), levels.info);
 
         directoriesHandler.start();
     }

@@ -8,12 +8,7 @@ import { DirectoryProcessService } from './directory-process-service/directory-p
 import { levels } from './logger';
 import { DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
 import { tryRun } from './build-tools';
-
-export const messages = {
-    START_WATCHING: 'start watching...',
-    FINISHED_PROCESSING: 'finished processing',
-    BUILD_SKIPPED: 'No stylable files found. build skipped',
-};
+import { messages } from './messages';
 
 export async function build(
     {
@@ -160,10 +155,10 @@ export async function build(
                 log(
                     mode,
                     `[${new Date().toLocaleTimeString()}]`,
-                    messages.FINISHED_PROCESSING,
-                    count,
-                    count === 1 ? 'file' : 'files',
-                    isMultiPackagesProject ? `in "${identifier}"` : '',
+                    messages.FINISHED_PROCESSING(
+                        count,
+                        isMultiPackagesProject ? identifier : undefined
+                    ),
                     levels.info
                 );
             }
@@ -175,8 +170,7 @@ export async function build(
     if (sourceFiles.size === 0) {
         log(
             mode,
-            messages.BUILD_SKIPPED,
-            isMultiPackagesProject ? `for "${identifier}"` : '',
+            messages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined),
             levels.info
         );
     }

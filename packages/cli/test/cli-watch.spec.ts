@@ -1,8 +1,8 @@
 import { writeFileSync, unlinkSync, rmdirSync, renameSync } from 'fs';
-import { join, normalize } from 'path';
+import { join } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { messages } from '@stylable/cli';
+import { messages } from '@stylable/cli/dist/messages';
 import {
     createCliTester,
     loadDirSync,
@@ -41,7 +41,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeToExistingFile(
                                 join(tempDir.path, 'depend.st.css'),
@@ -50,7 +50,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(2),
                     },
                 ],
             });
@@ -82,7 +82,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeToExistingFile(
                                 join(tempDir.path, 'deep.st.css'),
@@ -91,7 +91,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(3),
                     },
                 ],
             });
@@ -109,7 +109,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeFileSync(
                                 join(tempDir.path, 'style.st.css'),
@@ -118,7 +118,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                     },
                 ],
             });
@@ -144,13 +144,13 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeFileSync(join(tempDir.path, 'asset.svg'), getSvgContent(NEW_SIZE));
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                     },
                 ],
             });
@@ -170,13 +170,13 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs', '--css'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             unlinkSync(join(tempDir.path, 'style.st.css'));
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                     },
                 ],
             });
@@ -197,13 +197,13 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs', '--css'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                     },
                 ],
             });
@@ -226,13 +226,13 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs', '--css'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                     },
                 ],
             });
@@ -253,7 +253,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs', '--css'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             renameSync(
                                 join(tempDir.path, 'style.st.css'),
@@ -262,10 +262,10 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                     },
                 ],
             });
@@ -290,7 +290,7 @@ describe('Stylable Cli Watch', () => {
         //         args: ['--outDir', './dist', '-w', '--cjs', '--css'],
         //         steps: [
         //             {
-        //                 msg: messages.START_WATCHING,
+        //                 msg: messages.START_WATCHING(),
         //                 action() {
         //                     renameSync(
         //                         join(tempDir.path, 'styles'),
@@ -300,13 +300,13 @@ describe('Stylable Cli Watch', () => {
         //                 },
         //             },
         //             {
-        //                 msg: messages.FINISHED_PROCESSING,
+        //                 msg: messages.FINISHED_PROCESSING(2),
         //                 action() {
         //                     return true;
         //                 },
         //             },
         //             {
-        //                 msg: messages.FINISHED_PROCESSING,
+        //                 msg: messages.FINISHED_PROCESSING(2),
         //                 action() {
         //                     return false;
         //                 },
@@ -333,7 +333,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--indexFile', 'index.st.css'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeFileSync(
                                 join(tempDir.path, 'style.st.css'),
@@ -342,7 +342,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                         action() {
                             writeToExistingFile(
                                 join(tempDir.path, 'style.st.css'),
@@ -351,7 +351,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                         action() {
                             writeFileSync(
                                 join(tempDir.path, 'comp.st.css'),
@@ -360,7 +360,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(1),
                     },
                 ],
             });
@@ -418,16 +418,19 @@ describe('Stylable Cli Watch', () => {
                 args: ['-w'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeToExistingFile(
-                                join(tempDir.path, './packages/project-a/style.st.css'),
+                                join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                                 '.root{ color:yellow; }'
                             );
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING,
+                        msg: messages.FINISHED_PROCESSING(
+                            1,
+                            join(tempDir.path, 'packages', 'project-a')
+                        ),
                     },
                 ],
             });
@@ -486,7 +489,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['-w'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeToExistingFile(
                                 join(tempDir.path, './packages/project-b/src/depend.st.css'),
@@ -497,7 +500,10 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: [messages.FINISHED_PROCESSING, 'project-a'],
+                        msg: messages.FINISHED_PROCESSING(1, '/' + join('packages', 'project-b')),
+                    },
+                    {
+                        msg: messages.FINISHED_PROCESSING(1, '/' + join('packages', 'project-a')),
                     },
                 ],
             });
@@ -569,10 +575,10 @@ describe('Stylable Cli Watch', () => {
                 args: ['-w'],
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeFileSync(
-                                join(tempDir.path, './packages/project-a/style.st.css'),
+                                join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                                 `
                             @st-import [Foo] from "../project-b/dist/index.st.css";
                             .a { 
@@ -587,10 +593,10 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: [messages.FINISHED_PROCESSING, 'project-a'],
+                        msg: messages.FINISHED_PROCESSING(1, '/' + join('packages', 'project-a')),
                         action() {
                             writeToExistingFile(
-                                join(tempDir.path, './packages/project-b/foo.st.css'),
+                                join(tempDir.path, 'packages', 'project-b', 'foo.st.css'),
                                 `
                                 .foo {}
                                 .bar {}
@@ -599,7 +605,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: [messages.FINISHED_PROCESSING, 'project-a'],
+                        msg: messages.FINISHED_PROCESSING(1, '/' + join('packages', 'project-a')),
                     },
                 ],
             });
@@ -660,10 +666,10 @@ describe('Stylable Cli Watch', () => {
                 resolveStepsDelay: 700,
                 steps: [
                     {
-                        msg: messages.START_WATCHING,
+                        msg: messages.START_WATCHING(),
                         action() {
                             writeToExistingFile(
-                                join(tempDir.path, './packages/project-a/src/style.st.css'),
+                                join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
                                 `.root{ 
                                     color:red;
                                     background: url('./icon.svg')
@@ -672,7 +678,16 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: [messages.FINISHED_PROCESSING, '1', 'project-a'],
+                        msg: messages.FINISHED_PROCESSING(
+                            2,
+                            '[1] /' + join('packages', 'project-a')
+                        ),
+                    },
+                    {
+                        msg: messages.FINISHED_PROCESSING(
+                            1,
+                            '[0] /' + join('packages', 'project-a')
+                        ),
                     },
                 ],
             });
@@ -680,7 +695,7 @@ describe('Stylable Cli Watch', () => {
             const matches = output.match(
                 new RegExp(
                     `Processing files of "\\[1\\] ${escapeRegExp(
-                        normalize('/packages/project-a')
+                        '/' + join('packages', 'project-a')
                     )}`,
                     'ig'
                 )
