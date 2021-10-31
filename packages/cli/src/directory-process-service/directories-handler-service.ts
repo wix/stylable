@@ -16,6 +16,7 @@ interface DirectoriesHandlerServiceOptions {
     log?: Log;
     resolverCache?: StylableResolverCache;
     outputFiles?: Map<string, string>;
+    rootDir?: string;
 }
 
 export class DirectoriesHandlerService {
@@ -67,7 +68,7 @@ export class DirectoriesHandlerService {
                 this.options.log?.(levels.clear);
                 this.options.log?.(
                     `[${new Date().toLocaleTimeString()}]`,
-                    `Change detected at "${event.path}". Starting compilation...`,
+                    `Change detected at "${event.path.replace(this.options.rootDir ?? '', '')}".`,
                     levels.info
                 );
 

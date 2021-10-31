@@ -27,17 +27,24 @@ async function main() {
     const fileSystem = nodeFs;
     const resolverCache: StylableResolverCache = new Map();
     const outputFiles = new Map<string, string>();
+    const isMultipleProjects = projects.length > 1;
     const directoriesHandler = new DirectoriesHandlerService(fileSystem, {
         log,
         resolverCache,
         outputFiles,
+        rootDir,
     });
 
     for (const { projectRoot, options } of projects) {
+        const hasMultipleOptions = options.length > 1;
+
         for (let i = 0; i < options.length; i++) {
             const optionsEntity = options[i];
-            const identifier =
-                options.length > 1 ? `[${i}] ${projectRoot.replace(rootDir, '')}` : projectRoot;
+            const identifier = hasMultipleOptions
+                ? `[${i}] ${projectRoot.replace(rootDir, '')}`
+                : isMultipleProjects
+                ? projectRoot.replace(rootDir, '')
+                : projectRoot;
 
             log('[Project]', projectRoot, optionsEntity);
 
