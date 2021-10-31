@@ -65,11 +65,9 @@ export class DirectoriesHandlerService {
             }
 
             if (foundChanges) {
-                this.options.log?.(levels.clear);
-                this.options.log?.(
-                    `[${new Date().toLocaleTimeString()}]`,
-                    `Change detected at "${event.path.replace(this.options.rootDir ?? '', '')}".`,
-                    levels.info
+                this.log(levels.clear);
+                this.log(
+                    `Change detected at "${event.path.replace(this.options.rootDir ?? '', '')}".`
                 );
 
                 for (const file of files.values()) {
@@ -80,15 +78,14 @@ export class DirectoriesHandlerService {
                     }
                 }
 
-                this.options.log?.(
-                    `[${new Date().toLocaleTimeString()}]`,
+                this.log(
                     'Found',
                     filesChangesSummary.changed,
                     'changes and',
                     filesChangesSummary.deleted,
-                    'deletions.',
-                    levels.info
+                    'deletions.'
                 );
+                this.log('Watching files...');
             }
         };
 
@@ -115,6 +112,14 @@ export class DirectoriesHandlerService {
             ) {
                 this.resolverCache.delete(key);
             }
+        }
+    }
+
+    private log(...messages: any[]) {
+        if (messages[0] === levels.clear) {
+            this.options.log?.(levels.clear);
+        } else {
+            this.options.log?.(`[${new Date().toLocaleTimeString()}]`, ...messages, levels.info);
         }
     }
 }
