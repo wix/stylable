@@ -6,7 +6,7 @@ import {
 import type { RawProjectEntity, ResolveRequests } from '../types';
 
 export const resolveNpmRequests: ResolveRequests = (entities, { projectRoot }) => {
-    const projectEntriesMap = new Map<string, RawProjectEntity>();
+    const entitiesMap = new Map<string, RawProjectEntity>();
     const packages = new Set<INpmPackage>();
 
     for (const entity of entities) {
@@ -20,10 +20,12 @@ export const resolveNpmRequests: ResolveRequests = (entities, { projectRoot }) =
         }
 
         for (const pkg of workspacePackages) {
-            const previousEntry = projectEntriesMap.get(pkg.displayName);
+            const previousEntity = entitiesMap.get(pkg.displayName);
 
-            if (previousEntry) {
-                if (previousEntry.request === request) {
+            // adding the npm package once to keep the original package order and to avoid duplicates
+            if (previousEntity) {
+                // validate duplicate requests, e.g. "packages/*" twice
+                if (previousEntity.request === request) {
                     throw new Error(
                         'Stylable CLI config can not have a duplicate project requests'
                     );
@@ -32,12 +34,13 @@ export const resolveNpmRequests: ResolveRequests = (entities, { projectRoot }) =
                 packages.add(pkg);
             }
 
-            projectEntriesMap.set(pkg.displayName, entity);
+            // adding to entities map and overriding the correct package's entity if exists
+            entitiesMap.set(pkg.displayName, entity);
         }
     }
 
     return Array.from(packages).map((pkg) => ({
         projectRoot: pkg.directoryPath,
-        options: projectEntriesMap.get(pkg.displayName)!.options,
+        options: entitiesMap.get(pkg.displayName)!.options,
     }));
 };
