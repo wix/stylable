@@ -271,11 +271,7 @@ function updateWatcherDependencies(
         visitMetaCSSDependenciesBFS(
             meta,
             ({ source }) => {
-                service.registerInvalidateOnChange(source, filePath);
-
-                if (outputFiles.has(source)) {
-                    service.registerInvalidateOnChange(outputFiles.get(source)!, filePath);
-                }
+                service.registerInvalidateOnChange(outputFiles.get(source) ?? source, filePath);
             },
             resolver
         );
