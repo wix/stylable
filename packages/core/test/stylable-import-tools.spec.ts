@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { parse } from 'postcss';
 import { Diagnostics, ensureStylableImports } from '@stylable/core';
+import { ensureImportsMessages } from '@stylable/core/dist/stylable-imports-tools';
 
 describe('ensureStylableImports', () => {
     describe('all modes', () => {
@@ -388,6 +389,73 @@ describe('ensureStylableImports', () => {
             expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
             expect(oneSpace(importNode.toString())).to.equal(
                 `@st-import Test, [a, b as c, keyframes(a, b as c)] from "test"`
+            );
+        });
+    });
+
+    describe.only('edges', () => {
+        it('should report collision diagnostics for defaultExport and not patch', () => {
+            const root = parse(`@st-import Test from "x";`);
+
+            const { diagnostics } = ensureStylableImports(
+                root,
+                [{ request: 'x', defaultExport: 'Y' }],
+                { mode: 'patch-only' }
+            );
+            const importNode = root.nodes[0];
+
+            expect(importNode.toString(), 'no change').to.equal(`@st-import Test from "x"`);
+            expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
+            expect(diagnostics.reports[0].message).to.equal(
+                ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y')
+            );
+        });
+        it('should report collision diagnostics for named and not patch', () => {
+            const root = parse(`@st-import [Y] from "x";`);
+
+            const { diagnostics } = ensureStylableImports(
+                root,
+                [{ request: 'x', named: { Y: 'X' } }],
+                { mode: 'patch-only' }
+            );
+            const importNode = root.nodes[0];
+
+            expect(importNode.toString(), 'no change').to.equal(`@st-import [Y] from "x"`);
+            expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
+            expect(diagnostics.reports[0].message).to.equal(
+                ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y')
+            );
+        });
+        it('should report collision diagnostics for named "as" with "as" (no patch)', () => {
+            const root = parse(`@st-import [A as Y] from "x";`);
+
+            const { diagnostics } = ensureStylableImports(
+                root,
+                [{ request: 'x', named: { Y: 'X' } }],
+                { mode: 'patch-only' }
+            );
+            const importNode = root.nodes[0];
+
+            expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
+            expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
+            expect(diagnostics.reports[0].message).to.equal(
+                ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'X as Y')
+            );
+        });
+        it('should report collision diagnostics for named "as" (no patch)', () => {
+            const root = parse(`@st-import [A as Y] from "x";`);
+
+            const { diagnostics } = ensureStylableImports(
+                root,
+                [{ request: 'x', named: { Y: 'Y' } }],
+                { mode: 'patch-only' }
+            );
+            const importNode = root.nodes[0];
+
+            expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
+            expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
+            expect(diagnostics.reports[0].message).to.equal(
+                ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y')
             );
         });
     });

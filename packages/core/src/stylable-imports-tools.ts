@@ -1,6 +1,6 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
-import type { Diagnostics } from './diagnostics';
+import { Diagnostics } from './diagnostics';
 import type { Imported } from './stylable-meta';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { rootValueMapping, SBTypesParsers, valueMapping } from './stylable-value-parsers';
@@ -35,6 +35,16 @@ export const parseImportMessages = {
     },
     FROM_PROP_MISSING_IN_IMPORT() {
         return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
+    },
+};
+
+export const ensureImportsMessages = {
+    ATTEMPT_OVERRIDE_SYMBOL(
+        kind: 'default' | 'named' | 'keyframes',
+        origin: string,
+        override: string
+    ) {
+        return `Attempt to override existing ${kind} import symbol. ${origin} -> ${override} `;
     },
 };
 
@@ -77,13 +87,20 @@ export function createAtImportProps(
 export function ensureStylableImports(
     ast: Root,
     importPatches: Array<ImportPatch>,
-    options: { mode: 'patch-only' | 'st-import' | ':import' },
-    diagnostics: Diagnostics
+    options: {
+        mode: 'patch-only' | 'st-import' | ':import';
+        shouldPatch?: (diagnostics: Diagnostics) => boolean;
+    },
+    diagnostics: Diagnostics = new Diagnostics()
 ) {
     const patches = createImportPatches(ast, importPatches, options, diagnostics);
-    for (const patch of patches) {
-        patch();
+    const shouldPatch = options.shouldPatch || (() => !diagnostics.reports.length);
+    if (shouldPatch(diagnostics)) {
+        for (const patch of patches) {
+            patch();
+        }
     }
+    return { diagnostics };
 }
 function createImportPatches(
     ast: Root,
@@ -96,11 +113,11 @@ function createImportPatches(
     for (const node of ast.nodes) {
         if (node.type === 'atrule' && node.name === 'st-import') {
             const pseudoImport = parseStImport(node, '*', diagnostics);
-            processImports(pseudoImport, importPatches, handled);
+            processImports(pseudoImport, importPatches, handled, diagnostics);
             patches.push(() => node.assign(createAtImportProps(pseudoImport)));
         } else if (node.type === 'rule' && node.selector === ':import') {
             const pseudoImport = parsePseudoImport(node, '*', diagnostics);
-            processImports(pseudoImport, importPatches, handled);
+            processImports(pseudoImport, importPatches, handled, diagnostics);
 
             patches.push(() => {
                 const named = generateNamedValue(pseudoImport);
@@ -361,32 +378,50 @@ function hasDefinitions({
 function processImports(
     pseudoImport: Imported,
     importPatches: Array<ImportPatch>,
-    handled: Set<ImportPatch>
+    handled: Set<ImportPatch>,
+    diagnostics: Diagnostics
 ) {
     const ops = ['named', 'keyframes'] as const;
     for (const patch of importPatches) {
         if (pseudoImport.request === patch.request) {
             for (const op of ops) {
-                const bucket = patch[op];
-                if (!bucket) {
+                const patchBucket = patch[op];
+                if (!patchBucket) {
                     continue;
                 }
-                for (const [asName, symbol] of Object.entries(bucket)) {
+                for (const [asName, symbol] of Object.entries(patchBucket)) {
                     const currentSymbol = pseudoImport[op][asName];
                     if (currentSymbol === symbol) {
                         continue;
                     } else if (currentSymbol) {
-                        // throw "Attempt to override existing import name"
+                        diagnostics.error(
+                            pseudoImport.rule,
+                            ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
+                                op,
+                                currentSymbol === asName
+                                    ? currentSymbol
+                                    : `${currentSymbol} as ${asName}`,
+                                symbol === asName ? symbol : `${symbol} as ${asName}`
+                            )
+                        );
                     } else {
                         pseudoImport[op][asName] = symbol;
                     }
                 }
             }
-            if (pseudoImport.defaultExport !== patch.defaultExport) {
-                if (!pseudoImport.defaultExport && patch.defaultExport) {
+
+            if (patch.defaultExport) {
+                if (!pseudoImport.defaultExport) {
                     pseudoImport.defaultExport = patch.defaultExport;
-                } else {
-                    // throw "Attempt to override existing import name"
+                } else if (pseudoImport.defaultExport !== patch.defaultExport) {
+                    diagnostics.error(
+                        pseudoImport.rule,
+                        ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
+                            'default',
+                            pseudoImport.defaultExport,
+                            patch.defaultExport
+                        )
+                    );
                 }
             }
             handled.add(patch);
