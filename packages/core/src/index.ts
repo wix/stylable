@@ -6,21 +6,21 @@ export {
     cachedProcessFile,
     processFn,
 } from './cached-process-file';
-export {
+export type {
     CSSVarSymbol,
     ClassSymbol,
     ElementSymbol,
     ImportSymbol,
     Imported,
     KeyframesSymbol,
-    RESERVED_ROOT_NAME,
     RefedMixin,
     SimpleSelector,
     StylableDirectives,
-    StylableMeta,
-    StylableProcessor,
     StylableSymbol,
     VarSymbol,
+} from './features';
+export {
+    StylableProcessor,
     createEmptyMeta,
     process,
     processNamespace,
@@ -28,6 +28,7 @@ export {
     validateScopingSelector,
     parsePseudoImport,
 } from './stylable-processor';
+export { StylableMeta, RESERVED_ROOT_NAME } from './stylable-meta';
 export {
     KeyFrameWithNode,
     ResolvedElement,

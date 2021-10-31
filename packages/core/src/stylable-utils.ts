@@ -2,10 +2,10 @@ import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
-import type { Imported, StylableMeta, StylableSymbol } from './stylable-processor';
+import type { Imported, ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
-import type { ImportSymbol } from './stylable-meta';
+import type { StylableMeta } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 import type { StylableResolver } from './stylable-resolver';
 

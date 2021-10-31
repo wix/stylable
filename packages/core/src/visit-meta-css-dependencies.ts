@@ -1,5 +1,5 @@
 import type { StylableMeta } from './stylable-meta';
-import type { Imported } from './stylable-processor';
+import type { Imported } from './features';
 import type { StylableResolver } from './stylable-resolver';
 
 export function visitMetaCSSDependenciesBFS(

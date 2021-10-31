@@ -11,7 +11,7 @@ import {
 import { wrapFunctionForDeprecation } from './helpers/deprecation';
 import type { PseudoClass } from '@tokey/css-selector-parser';
 import { StateResult, systemValidators } from './state-validators';
-import type { StylableMeta } from './stylable-processor';
+import type { StylableMeta } from './stylable-meta';
 import type { StylableResolver } from './stylable-resolver';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
