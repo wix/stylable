@@ -1,5 +1,5 @@
 import { setFieldForDeprecation } from '../helpers/deprecation';
-import type { RefedMixin } from '../stylable-meta';
+import type { RefedMixin } from '../features';
 import type { SelectorAstNode } from './deprecated-selector-utils';
 import { Rule, Declaration } from 'postcss';
 

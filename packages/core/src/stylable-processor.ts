@@ -7,7 +7,8 @@ import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { murmurhash3_32_gc } from './murmurhash';
 import { reservedKeyFrames } from './native-reserved-lists';
-import {
+import { StylableMeta } from './stylable-meta';
+import type {
     ClassSymbol,
     CSSVarSymbol,
     ElementSymbol,
@@ -15,16 +16,15 @@ import {
     ImportSymbol,
     RefedMixin,
     StylableDirectives,
-    StylableMeta,
     VarSymbol,
-} from './stylable-meta';
+} from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
     getAlias,
     isCSSVarProp,
 } from './stylable-utils';
-import { processDeclarationFunctions } from "./process-declaration-functions";
+import { processDeclarationFunctions } from './process-declaration-functions';
 import {
     walkSelector,
     isSimpleSelector,
@@ -49,7 +49,7 @@ import {
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
 import { validateAtProperty } from './validate-at-property';
-export * from './stylable-meta'; /* TEMP EXPORT */
+// export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
 const parseStates = SBTypesParsers[valueMapping.states];

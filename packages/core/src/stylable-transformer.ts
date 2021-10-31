@@ -7,10 +7,7 @@ import type { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue, processDeclarationValue } from './functions';
-import {
-    nativePseudoClasses,
-    nativePseudoElements,
-} from './native-reserved-lists';
+import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
 import { setStateToNode, stateErrors } from './pseudo-states';
 import {
     walkSelector,
@@ -31,7 +28,8 @@ import {
 import { createWarningRule, isChildOfAtRule, findRule, getRuleScopeSelector } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
-import type { ClassSymbol, ElementSymbol, StylableMeta } from './stylable-processor';
+import type { ClassSymbol, ElementSymbol } from './features';
+import type { StylableMeta } from './stylable-meta';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';

@@ -1,4 +1,4 @@
-import type { ClassSymbol, ElementSymbol } from '../stylable-meta';
+import type { ClassSymbol, ElementSymbol } from '../features';
 import type { CSSResolve } from '../stylable-resolver';
 import { valueMapping } from '../stylable-value-parsers';
 
