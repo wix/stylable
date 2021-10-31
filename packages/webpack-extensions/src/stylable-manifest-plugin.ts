@@ -101,7 +101,7 @@ export class StylableManifestPlugin {
                     metadata.entry
                 )};-st-default: ${compId};${
                     cssVars ? `-st-named:${cssVars};` : ``
-                }} .root ${compId}{}${EOL}`;
+                }} ${compId}{}${EOL}`;
                 return manifest;
             },
             {
