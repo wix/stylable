@@ -11,10 +11,11 @@ import type {
     VarSymbol,
 } from './features';
 import type { Diagnostics } from './diagnostics';
-import { getSourcePath } from './stylable-utils';
 import type { SelectorList } from '@tokey/css-selector-parser';
+import { getSourcePath } from './stylable-utils';
 import { setFieldForDeprecation } from './helpers/deprecation';
 import { valueMapping } from './stylable-value-parsers';
+
 export const RESERVED_ROOT_NAME = 'root';
 
 export class StylableMeta {

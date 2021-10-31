@@ -28,7 +28,7 @@ export {
     validateScopingSelector,
     parsePseudoImport,
 } from './stylable-processor';
-export { StylableMeta } from './stylable-meta';
+export { StylableMeta, RESERVED_ROOT_NAME } from './stylable-meta';
 export {
     KeyFrameWithNode,
     ResolvedElement,
