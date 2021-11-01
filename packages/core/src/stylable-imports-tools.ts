@@ -346,12 +346,8 @@ function getNamedImportParts(named: [string, string][]) {
     return parts;
 }
 
-type ImportPatch = {
-    request: string;
-    named?: Record<string, string>;
-    keyframes?: Record<string, string>;
-    defaultExport?: string;
-};
+type ImportPatch = Partial<Pick<Imported, 'defaultExport' | 'named' | 'keyframes'>> &
+    Pick<Imported, 'request'>;
 
 function generateNamedValue({
     named = {},
