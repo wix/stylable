@@ -89,13 +89,11 @@ export function ensureStylableImports(
     importPatches: Array<ImportPatch>,
     options: {
         mode: 'patch-only' | 'st-import' | ':import';
-        shouldPatch?: (diagnostics: Diagnostics) => boolean;
     },
     diagnostics: Diagnostics = new Diagnostics()
 ) {
     const patches = createImportPatches(ast, importPatches, options, diagnostics);
-    const shouldPatch = options.shouldPatch || (() => !diagnostics.reports.length);
-    if (shouldPatch(diagnostics)) {
+    if (!diagnostics.reports.length) {
         for (const patch of patches) {
             patch();
         }
@@ -178,16 +176,6 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
                 ? path.posix.resolve(dirPath, importPath)
                 : path.resolve(dirPath, importPath);
     }
-}
-
-export function parseImport(
-    node: AtRule | Rule,
-    context: string,
-    diagnostics: Diagnostics
-): Imported {
-    return node.type === 'atrule'
-        ? parseStImport(node, context, diagnostics)
-        : parsePseudoImport(node, context, diagnostics);
 }
 
 export function parseStImport(atRule: AtRule, context: string, diagnostics: Diagnostics) {

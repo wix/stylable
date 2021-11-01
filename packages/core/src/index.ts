@@ -28,7 +28,7 @@ export {
     validateScopingSelector,
 } from './stylable-processor';
 
-export { ensureStylableImports, parseImport } from './stylable-imports-tools';
+export { ensureStylableImports } from './stylable-imports-tools';
 
 export {
     KeyFrameWithNode,
