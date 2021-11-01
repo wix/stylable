@@ -1,7 +1,7 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
 import { Diagnostics } from './diagnostics';
-import type { Imported } from './stylable-meta';
+import type { Imported } from './features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { rootValueMapping, SBTypesParsers, valueMapping } from './stylable-value-parsers';
 import { stripQuotation } from './utils';
