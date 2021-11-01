@@ -14,7 +14,7 @@ export interface Options {
     packageAlias: Record<string, string>;
     contentHashLength?: number;
     exposeNamespaceMapping: boolean;
-    generateVarsExports: boolean;
+    generateCSSVarsExports: boolean;
     resolveNamespace(namespace: string, filePath: string): string;
     filterComponents(resourcePath: string): boolean;
     getCompId(resourcePath: string): string;
@@ -30,7 +30,7 @@ const defaultOptions: Options = {
     packageAlias: {},
     resolveNamespace,
     exposeNamespaceMapping: true,
-    generateVarsExports: false,
+    generateCSSVarsExports: false,
     filterComponents(resourcePath) {
         return resourcePath.endsWith('.comp.st.css');
     },
@@ -87,7 +87,7 @@ export class StylableManifestPlugin {
     private emitManifest(metadataList: MetadataList, compilation: Compilation) {
         const manifest = metadataList.reduce<Manifest>(
             (manifest, { meta, compId, metadata }) => {
-                const cssVars = this.options.generateVarsExports
+                const cssVars = this.options.generateCSSVarsExports
                     ? generateCssVarsNamedExports(compId, meta)
                     : null;
                 Object.assign(manifest.stylesheetMapping, metadata.stylesheetMapping);

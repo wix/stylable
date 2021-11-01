@@ -13,7 +13,7 @@ module.exports = {
     plugins: [
         new StylableManifestPlugin({
             package: require('./package.json'),
-            generateVarsExports: true,
+            generateCSSVarsExports: true,
         }),
     ],
     module: {
