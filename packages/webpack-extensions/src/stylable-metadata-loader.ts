@@ -2,7 +2,8 @@ import { Stylable, StylableMeta, processNamespace } from '@stylable/core';
 import { loader as webpackLoader } from 'webpack';
 import findConfig from 'find-config';
 import { getOptions } from 'loader-utils';
-import { createMetadataForStylesheet, ResolvedImport } from './create-metadata-stylesheet';
+import { createMetadataForStylesheet } from './create-metadata-stylesheet';
+import { ResolvedImport } from './types';
 
 let stylable: Stylable;
 const getLocalConfig = loadLocalConfigLoader();
