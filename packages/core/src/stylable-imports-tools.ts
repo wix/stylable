@@ -44,7 +44,10 @@ export const ensureImportsMessages = {
         origin: string,
         override: string
     ) {
-        return `Attempt to override existing ${kind} import symbol. ${origin} -> ${override} `;
+        return `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`;
+    },
+    PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE() {
+        return `Attempt to insert new a import in newImport "none" mode`;
     },
 };
 
@@ -88,7 +91,7 @@ export function ensureStylableImports(
     ast: Root,
     importPatches: Array<ImportPatch>,
     options: {
-        mode: 'patch-only' | 'st-import' | ':import';
+        newImport: 'none' | 'st-import' | ':import';
     },
     diagnostics: Diagnostics = new Diagnostics()
 ) {
@@ -103,7 +106,7 @@ export function ensureStylableImports(
 function createImportPatches(
     ast: Root,
     importPatches: Array<ImportPatch>,
-    { mode }: { mode: 'patch-only' | 'st-import' | ':import' },
+    { newImport }: { newImport: 'none' | 'st-import' | ':import' },
     diagnostics: Diagnostics
 ) {
     const patches: Array<() => void> = [];
@@ -130,7 +133,13 @@ function createImportPatches(
             });
         }
     }
-    if (mode === 'patch-only') {
+    if (newImport === 'none') {
+        if (handled.size !== importPatches.length) {
+            diagnostics.error(
+                ast,
+                ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
+            );
+        }
         return patches;
     }
     if (handled.size === importPatches.length) {
@@ -143,7 +152,7 @@ function createImportPatches(
         if (!hasDefinitions(item)) {
             continue;
         }
-        if (mode === 'st-import') {
+        if (newImport === 'st-import') {
             patches.push(() => {
                 ast.prepend(
                     atRule(

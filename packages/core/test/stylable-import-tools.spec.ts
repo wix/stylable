@@ -12,9 +12,9 @@ describe('ensureStylableImports', () => {
 
             const diag = new Diagnostics();
 
-            ensureStylableImports(root, [], { mode: 'patch-only' }, diag);
-            ensureStylableImports(root, [], { mode: ':import' }, diag);
-            ensureStylableImports(root, [], { mode: 'st-import' }, diag);
+            ensureStylableImports(root, [], { newImport: 'none' }, diag);
+            ensureStylableImports(root, [], { newImport: ':import' }, diag);
+            ensureStylableImports(root, [], { newImport: 'st-import' }, diag);
 
             const importNode = root.nodes[0];
             expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
@@ -22,8 +22,8 @@ describe('ensureStylableImports', () => {
         });
     });
 
-    describe('patch-only mode', () => {
-        it('should not add missing imports in patch-only mode', () => {
+    describe('none mode', () => {
+        it('should not add missing imports in none mode', () => {
             const root = parse(``);
 
             const diag = new Diagnostics();
@@ -31,11 +31,14 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'missing', defaultExport: 'Missing' }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
-            expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
+            expect(diag.reports, 'diagnostics').to.have.lengthOf(1);
+            expect(diag.reports[0].message).to.equal(
+                ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
+            );
             expect(root.nodes, 'no imports added').to.have.lengthOf(0);
         });
 
@@ -49,7 +52,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', defaultExport: 'Test' }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -68,7 +71,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', named: { test: 'test' } }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -87,7 +90,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', keyframes: { test: 'test' } }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -108,7 +111,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', named: { asTest: 'test' } }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -129,7 +132,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', keyframes: { asTest: 'test' } }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -150,7 +153,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', named: { test: 'test', test2: 'test2' } }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -171,7 +174,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', named: { asTest: 'test' }, defaultExport: 'Test' }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -192,7 +195,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', named: { d: 'd', e: 'e' } }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -213,7 +216,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', named: { a: 'a', b: 'b' }, defaultExport: 'A' }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -241,7 +244,7 @@ describe('ensureStylableImports', () => {
                         defaultExport: 'Test',
                     },
                 ],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -262,7 +265,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'test', defaultExport: 'Test' }],
-                { mode: ':import' },
+                { newImport: ':import' },
                 diag
             );
 
@@ -281,7 +284,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'test', named: { a: 'a', c: 'b' } }],
-                { mode: ':import' },
+                { newImport: ':import' },
                 diag
             );
 
@@ -300,7 +303,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'test', keyframes: { a: 'a', c: 'b' } }],
-                { mode: ':import' },
+                { newImport: ':import' },
                 diag
             );
 
@@ -326,7 +329,7 @@ describe('ensureStylableImports', () => {
                         keyframes: { a: 'a', c: 'b' },
                     },
                 ],
-                { mode: ':import' },
+                { newImport: ':import' },
                 diag
             );
 
@@ -348,7 +351,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'test', defaultExport: 'Test' }],
-                { mode: 'st-import' },
+                { newImport: 'st-import' },
                 diag
             );
 
@@ -365,7 +368,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'test', named: { a: 'a', c: 'b' } }],
-                { mode: 'st-import' },
+                { newImport: 'st-import' },
                 diag
             );
 
@@ -382,7 +385,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'test', keyframes: { a: 'a', c: 'b' } }],
-                { mode: 'st-import' },
+                { newImport: 'st-import' },
                 diag
             );
 
@@ -408,7 +411,7 @@ describe('ensureStylableImports', () => {
                         keyframes: { a: 'a', c: 'b' },
                     },
                 ],
-                { mode: 'st-import' },
+                { newImport: 'st-import' },
                 diag
             );
 
@@ -433,7 +436,7 @@ describe('ensureStylableImports', () => {
             ensureStylableImports(
                 root,
                 [{ request: 'x', named: { test: 'test' } }],
-                { mode: 'patch-only' },
+                { newImport: 'none' },
                 diag
             );
 
@@ -447,7 +450,7 @@ describe('ensureStylableImports', () => {
             const { diagnostics } = ensureStylableImports(
                 root,
                 [{ request: 'x', defaultExport: 'Y' }],
-                { mode: 'patch-only' }
+                { newImport: 'none' }
             );
             const importNode = root.nodes[0];
 
@@ -463,7 +466,7 @@ describe('ensureStylableImports', () => {
             const { diagnostics } = ensureStylableImports(
                 root,
                 [{ request: 'x', named: { Y: 'X' } }],
-                { mode: 'patch-only' }
+                { newImport: 'none' }
             );
             const importNode = root.nodes[0];
 
@@ -479,7 +482,7 @@ describe('ensureStylableImports', () => {
             const { diagnostics } = ensureStylableImports(
                 root,
                 [{ request: 'x', named: { Y: 'X' } }],
-                { mode: 'patch-only' }
+                { newImport: 'none' }
             );
             const importNode = root.nodes[0];
 
@@ -495,7 +498,7 @@ describe('ensureStylableImports', () => {
             const { diagnostics } = ensureStylableImports(
                 root,
                 [{ request: 'x', named: { Y: 'Y' } }],
-                { mode: 'patch-only' }
+                { newImport: 'none' }
             );
             const importNode = root.nodes[0];
 
