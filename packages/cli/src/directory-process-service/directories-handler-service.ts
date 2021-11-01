@@ -1,25 +1,10 @@
 import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
 import type { StylableResolverCache } from '@stylable/core';
-import { Log, levels } from '../logger';
+import { levels } from '../logger';
 import { messages } from '../messages';
 import { reportDiagnostics } from '../report-diagnostics';
 import { createWatchEvent, DirectoryProcessService } from './directory-process-service';
-
-interface RegisterMetaData {
-    identifier: string;
-}
-
-interface Service {
-    identifier: string;
-    directoryProcess: DirectoryProcessService;
-}
-
-interface DirectoriesHandlerServiceOptions {
-    log?: Log;
-    resolverCache?: StylableResolverCache;
-    outputFiles?: Map<string, string>;
-    rootDir?: string;
-}
+import type { DirectoriesHandlerServiceOptions, RegisterMetaData, Service } from './types';
 
 export class DirectoriesHandlerService {
     private services = new Set<Service>();

@@ -1,6 +1,7 @@
 import type { IWatchEvent } from '@file-services/types';
-import type { DiagnosticsMode } from '@stylable/core';
+import type { DiagnosticsMode, StylableResolverCache } from '@stylable/core';
 import type { DirectoryProcessService } from '../directory-process-service/directory-process-service';
+import type { Log } from '../logger';
 import type { DiagnosticMessages } from '../report-diagnostics';
 
 export interface DirectoryProcessServiceOptions {
@@ -29,3 +30,19 @@ export interface ProcessFilesResponse {
 export type HandleWatchModeResponse =
     | (ProcessFilesResponse & { hasChanges: true })
     | (Partial<ProcessFilesResponse> & { hasChanges: false });
+
+export interface RegisterMetaData {
+    identifier: string;
+}
+
+export interface Service {
+    identifier: string;
+    directoryProcess: DirectoryProcessService;
+}
+
+export interface DirectoriesHandlerServiceOptions {
+    log?: Log;
+    resolverCache?: StylableResolverCache;
+    outputFiles?: Map<string, string>;
+    rootDir?: string;
+}
