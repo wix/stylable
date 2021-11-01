@@ -25,19 +25,23 @@ export type JsModule = {
     [key: string]: unknown;
 };
 
-interface BaseCachedModule<T> {
+export interface InvalidCachedModule {
+    value: null;
+    error: unknown;
+}
+
+export interface BaseCachedModule<T> {
     resolvedPath: string;
-    error?: unknown;
-    value: T | null;
+    value: T;
 }
 
-export interface CachedStylableMeta extends BaseCachedModule<StylableMeta> {
+export type CachedStylableMeta = (InvalidCachedModule | BaseCachedModule<StylableMeta>) & {
     kind: 'css';
-}
+};
 
-export interface CachedJsModule extends BaseCachedModule<JsModule> {
+export type CachedJsModule = (InvalidCachedModule | BaseCachedModule<JsModule>) & {
     kind: 'js';
-}
+};
 
 export type CachedModuleEntity = CachedStylableMeta | CachedJsModule;
 export type CachedModule = CachedModuleEntity['value'];
@@ -73,41 +77,34 @@ export class StylableResolver {
         protected requireModule: (modulePath: string) => any,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, request }: Imported): CachedModuleEntity {
+    private getModule({ context, request, from }: Imported): CachedModuleEntity {
         const key = `${context}${safePathDelimiter}${request}`;
         if (this.cache?.has(key)) {
             return this.cache.get(key)!;
         }
 
-        const resolvedPath = this.fileProcessor.resolvePath(request, context);
         let entity: CachedModuleEntity;
-        let error: CachedModuleEntity['error'];
 
         if (request.endsWith('.css')) {
-            let value: CachedStylableMeta['value'];
-            try {
-                value = this.fileProcessor.process(resolvedPath, false, context);
-            } catch (e) {
-                value = null;
-                error = e;
-            }
+            const kind = 'css';
 
-            entity = { kind: 'css', value, resolvedPath };
+            try {
+                const resolvedPath = this.fileProcessor.resolvePath(request, context);
+                const value = this.fileProcessor.process(resolvedPath, false, context);
+                entity = { kind, value, resolvedPath };
+            } catch (error) {
+                entity = { kind, value: null, error };
+            }
         } else {
-            let value: CachedJsModule['value'];
+            const kind = 'js';
 
             try {
-                value = this.requireModule(resolvedPath);
-            } catch (e) {
-                value = null;
-                error = e;
+                const resolvedPath = this.fileProcessor.resolvePath(request, context);
+                const value = this.requireModule(resolvedPath);
+                entity = { kind, value, resolvedPath };
+            } catch (error) {
+                entity = { kind, value: null, error };
             }
-
-            entity = { kind: 'js', value, resolvedPath };
-        }
-
-        if (error) {
-            entity.error = error;
         }
 
         this.cache?.set(key, entity);
