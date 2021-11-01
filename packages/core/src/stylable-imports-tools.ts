@@ -180,6 +180,16 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
     }
 }
 
+export function parseImport(
+    node: AtRule | Rule,
+    context: string,
+    diagnostics: Diagnostics
+): Imported {
+    return node.type === 'atrule'
+        ? parseStImport(node, context, diagnostics)
+        : parsePseudoImport(node, context, diagnostics);
+}
+
 export function parseStImport(atRule: AtRule, context: string, diagnostics: Diagnostics) {
     const importObj: Imported = {
         defaultExport: '',
