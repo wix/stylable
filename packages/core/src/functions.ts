@@ -5,7 +5,7 @@ import { resolveCustomValues } from './custom-values';
 import type { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
-import type { StylableMeta } from './stylable-processor';
+import type { StylableMeta } from './stylable-meta';
 import type { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { isCSSVarProp } from './stylable-utils';

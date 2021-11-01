@@ -2,7 +2,8 @@ import type { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { CssParser, cssParse } from './parser';
-import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
+import { processNamespace, StylableProcessor } from './stylable-processor';
+import type { StylableMeta } from './stylable-meta';
 import { StylableResolverCache, StylableResolver } from './stylable-resolver';
 import {
     StylableResults,

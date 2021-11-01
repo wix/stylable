@@ -6,7 +6,8 @@ import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { murmurhash3_32_gc } from './murmurhash';
 import { reservedKeyFrames } from './native-reserved-lists';
-import {
+import { StylableMeta } from './stylable-meta';
+import type {
     ClassSymbol,
     CSSVarSymbol,
     ElementSymbol,
@@ -14,9 +15,8 @@ import {
     ImportSymbol,
     RefedMixin,
     StylableDirectives,
-    StylableMeta,
     VarSymbol,
-} from './stylable-meta';
+} from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,

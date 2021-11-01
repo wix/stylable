@@ -7,7 +7,8 @@ import {
     isNodeMatch,
 } from './deprecated-selector-utils';
 import type { SRule } from './postcss-ast-extension';
-import type { Imported, StylableMeta } from '../stylable-processor';
+import type { Imported } from '../features';
+import type { StylableMeta } from '../stylable-meta';
 import { valueMapping } from '../stylable-value-parsers';
 import cloneDeep from 'lodash.clonedeep';
 import * as postcss from 'postcss';

@@ -1,7 +1,8 @@
 import path from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
 import { cssParse, CssParser } from './parser';
-import { process, processNamespace, StylableMeta } from './stylable-processor';
+import { process, processNamespace } from './stylable-processor';
+import type { StylableMeta } from './stylable-meta';
 import { timedCache, TimedCacheOptions } from './timed-cache';
 import { createDefaultResolver } from './module-resolver';
 import type { Diagnostics } from './diagnostics';

@@ -1,12 +1,11 @@
 import { dirname } from 'path';
 import * as postcss from 'postcss';
 import type { Diagnostics } from './diagnostics';
-
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
 import { fixRelativeUrls } from './stylable-assets';
-import type { ImportSymbol } from './stylable-meta';
-import type { RefedMixin, StylableMeta } from './stylable-processor';
+import type { StylableMeta } from './stylable-meta';
+import type { RefedMixin, ImportSymbol } from './features';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import type { CSSResolve } from './stylable-resolver';
 import type { StylableTransformer } from './stylable-transformer';
