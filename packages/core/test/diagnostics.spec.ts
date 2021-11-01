@@ -106,15 +106,6 @@ describe('diagnostics: warnings and errors', () => {
             it(`should not return an error for value() under pseudo-class`, () => {
                 expectWarnings(`|.root :cls($value(abc)$)| {}`, []);
             });
-            it(`should return error for class`, () => {
-                expectWarnings(`|.root $.abc()$| {}`, [
-                    {
-                        severity: `error`,
-                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`.abc`, `class`),
-                        file: `main.css`,
-                    },
-                ]);
-            });
             it(`should return error for id`, () => {
                 expectWarnings(`|.root $#abc()$| {}`, [
                     {

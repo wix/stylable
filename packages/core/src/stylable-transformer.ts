@@ -30,6 +30,7 @@ import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
+import { CSSClass } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
@@ -536,7 +537,7 @@ export class StylableTransformer {
                     return;
                 }
 
-                const requestedPart = meta.classes[node.value];
+                const requestedPart = CSSClass.getClass(meta, node.value);
 
                 if (symbol.alias || !requestedPart) {
                     // skip alias since they cannot add parts

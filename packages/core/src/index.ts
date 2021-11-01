@@ -14,7 +14,8 @@ export type {
     Imported,
     KeyframesSymbol,
     RefedMixin,
-    SimpleSelector,
+    StylablePart,
+    StylablePart as SimpleSelector, // deprecated
     StylableDirectives,
     StylableSymbol,
     VarSymbol,

@@ -318,6 +318,7 @@ describe('Stylable postcss process', () => {
                 _kind: 'class',
                 name: 'root',
                 '-st-root': true,
+                alias: undefined
             },
         });
     });
