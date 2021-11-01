@@ -1,5 +1,5 @@
 import { writeFileSync, unlinkSync, rmdirSync, renameSync } from 'fs';
-import { join } from 'path';
+import { join, sep } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { messages } from '@stylable/cli/dist/messages';
@@ -500,10 +500,10 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING(1, '/' + join('packages', 'project-b')),
+                        msg: messages.FINISHED_PROCESSING(1, sep + join('packages', 'project-b')),
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING(1, '/' + join('packages', 'project-a')),
+                        msg: messages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
                     },
                 ],
             });
@@ -593,7 +593,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING(1, '/' + join('packages', 'project-a')),
+                        msg: messages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
                         action() {
                             writeToExistingFile(
                                 join(tempDir.path, 'packages', 'project-b', 'foo.st.css'),
@@ -605,7 +605,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: messages.FINISHED_PROCESSING(1, '/' + join('packages', 'project-a')),
+                        msg: messages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
                     },
                 ],
             });
@@ -695,7 +695,7 @@ describe('Stylable Cli Watch', () => {
             const matches = output.match(
                 new RegExp(
                     `Processing files of "\\[1\\] ${escapeRegExp(
-                        '/' + join('packages', 'project-a')
+                        sep + join('packages', 'project-a')
                     )}`,
                     'ig'
                 )
