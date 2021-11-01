@@ -393,6 +393,9 @@ function processImports(
 ) {
     const ops = ['named', 'keyframes'] as const;
     for (const patch of importPatches) {
+        if (handled.has(patch)) {
+            continue;
+        }
         if (imported.request === patch.request) {
             for (const op of ops) {
                 const patchBucket = patch[op];

@@ -394,6 +394,25 @@ describe('ensureStylableImports', () => {
     });
 
     describe('edges', () => {
+        it('should only process patch on first matched import', () => {
+            const root = parse(`
+                :import {-st-from: 'x'; }
+                :import {-st-from: 'x'; }
+            `);
+
+            const diag = new Diagnostics();
+
+            ensureStylableImports(
+                root,
+                [{ request: 'x', named: { test: 'test' } }],
+                { mode: 'patch-only' },
+                diag
+            );
+
+            expect(root.nodes[0].toString()).to.equal(`:import {-st-from: 'x';-st-named: test; }`);
+            expect(root.nodes[1].toString()).to.equal(`:import {-st-from: 'x'; }`);
+            expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
+        });
         it('should report collision diagnostics for defaultExport and not patch', () => {
             const root = parse(`@st-import Test from "x";`);
 
