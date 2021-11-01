@@ -393,7 +393,7 @@ describe('ensureStylableImports', () => {
         });
     });
 
-    describe.only('edges', () => {
+    describe('edges', () => {
         it('should report collision diagnostics for defaultExport and not patch', () => {
             const root = parse(`@st-import Test from "x";`);
 
