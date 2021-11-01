@@ -112,19 +112,19 @@ function createImportPatches(
     const handled = new Set<ImportPatch>();
     for (const node of ast.nodes) {
         if (node.type === 'atrule' && node.name === 'st-import') {
-            const pseudoImport = parseStImport(node, '*', diagnostics);
-            processImports(pseudoImport, importPatches, handled, diagnostics);
-            patches.push(() => node.assign(createAtImportProps(pseudoImport)));
+            const imported = parseStImport(node, '*', diagnostics);
+            processImports(imported, importPatches, handled, diagnostics);
+            patches.push(() => node.assign(createAtImportProps(imported)));
         } else if (node.type === 'rule' && node.selector === ':import') {
-            const pseudoImport = parsePseudoImport(node, '*', diagnostics);
-            processImports(pseudoImport, importPatches, handled, diagnostics);
+            const imported = parsePseudoImport(node, '*', diagnostics);
+            processImports(imported, importPatches, handled, diagnostics);
 
             patches.push(() => {
-                const named = generateNamedValue(pseudoImport);
-                const { defaultDecls, namedDecls } = patchDecls(node, named, pseudoImport);
+                const named = generateNamedValue(imported);
+                const { defaultDecls, namedDecls } = patchDecls(node, named, imported);
 
-                if (pseudoImport.defaultExport) {
-                    ensureSingleDecl(defaultDecls, node, '-st-default', pseudoImport.defaultExport);
+                if (imported.defaultExport) {
+                    ensureSingleDecl(defaultDecls, node, '-st-default', imported.defaultExport);
                 }
                 if (named.length) {
                     ensureSingleDecl(namedDecls, node, '-st-named', named.join(', '));
@@ -386,26 +386,26 @@ function hasDefinitions({
 }
 
 function processImports(
-    pseudoImport: Imported,
+    imported: Imported,
     importPatches: Array<ImportPatch>,
     handled: Set<ImportPatch>,
     diagnostics: Diagnostics
 ) {
     const ops = ['named', 'keyframes'] as const;
     for (const patch of importPatches) {
-        if (pseudoImport.request === patch.request) {
+        if (imported.request === patch.request) {
             for (const op of ops) {
                 const patchBucket = patch[op];
                 if (!patchBucket) {
                     continue;
                 }
                 for (const [asName, symbol] of Object.entries(patchBucket)) {
-                    const currentSymbol = pseudoImport[op][asName];
+                    const currentSymbol = imported[op][asName];
                     if (currentSymbol === symbol) {
                         continue;
                     } else if (currentSymbol) {
                         diagnostics.error(
-                            pseudoImport.rule,
+                            imported.rule,
                             ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
                                 op,
                                 currentSymbol === asName
@@ -415,20 +415,20 @@ function processImports(
                             )
                         );
                     } else {
-                        pseudoImport[op][asName] = symbol;
+                        imported[op][asName] = symbol;
                     }
                 }
             }
 
             if (patch.defaultExport) {
-                if (!pseudoImport.defaultExport) {
-                    pseudoImport.defaultExport = patch.defaultExport;
-                } else if (pseudoImport.defaultExport !== patch.defaultExport) {
+                if (!imported.defaultExport) {
+                    imported.defaultExport = patch.defaultExport;
+                } else if (imported.defaultExport !== patch.defaultExport) {
                     diagnostics.error(
-                        pseudoImport.rule,
+                        imported.rule,
                         ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
                             'default',
-                            pseudoImport.defaultExport,
+                            imported.defaultExport,
                             patch.defaultExport
                         )
                     );
