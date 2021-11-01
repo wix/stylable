@@ -195,6 +195,7 @@ export class StylableWebpackPlugin {
 
                 const assetsModules = new Map<string, NormalModule>();
                 const stylableModules = new Map<NormalModule, BuildData | null>();
+                /** allow other plugins to access the stylableModules */
                 provideStylableModules(compilation, stylableModules);
 
                 /**
@@ -392,6 +393,7 @@ export class StylableWebpackPlugin {
                     compilation,
                     this.entities.UnusedDependency
                 );
+                /** legacy flow */
                 module.buildMeta.stylable.depth = calcDepth(module, context, [], cache);
 
                 const { css, urls, exports, namespace } = getStylableBuildMeta(module);
