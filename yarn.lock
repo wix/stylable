@@ -1006,10 +1006,10 @@
   resolved "https://registry.yarnpkg.com/@tokey/core/-/core-1.2.1.tgz#6aca4d365d0ce97518a02c7da2b6de4b0a76ffbe"
   integrity sha512-mSbVzBfj8Sjuab1yYHPUmVKET9M7uyzlfp56qiTtYaBnZnkKf+rEip8F94wL7PwruScKosmljJs3VXi7GrEiKA==
 
-"@tokey/css-selector-parser@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@tokey/css-selector-parser/-/css-selector-parser-0.5.0.tgz#8aa0976fd7d1f4a49373202e2ace8a0f45880d20"
-  integrity sha512-c2La/8BssZ2lK5ajvuZxuHmLvhgbqkCOP0yacXJ8MlZofbA2/dGGv/pXqGBxHUVKRgxknj/S/1RTCBqkor3vfQ==
+"@tokey/css-selector-parser@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@tokey/css-selector-parser/-/css-selector-parser-0.5.1.tgz#ef3a556b47c863579af1e4231eaef9bd2072b023"
+  integrity sha512-wNqvEgxghpkdHEG7QAKISbWR+jbojS900ZnzDcOe5YIZQlvMiyH0tqsxmwc7lbnWE47VGf9FmddP5rqL69rCqA==
   dependencies:
     "@tokey/core" "^1.2.1"
 
