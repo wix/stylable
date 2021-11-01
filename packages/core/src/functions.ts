@@ -5,7 +5,7 @@ import { resolveCustomValues } from './custom-values';
 import type { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
-import type { StylableMeta } from './stylable-processor';
+import type { StylableMeta } from './stylable-meta';
 import type { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { isCSSVarProp } from './stylable-utils';
@@ -244,6 +244,8 @@ export function processDeclarationValue(
                                 word: varName,
                             });
                         }
+                    } else {
+                        // TODO: warn
                     }
                 } else if (value === '') {
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
@@ -347,9 +349,6 @@ export function processDeclarationValue(
         }
     }
     return { outputValue, topLevelType, typeError };
-    // TODO: handle calc (parse internals but maintain expression)
-    // TODO: check this thing. native function that accent our function does not work
-    // e.g: calc(getVarName())
 }
 
 export function evalDeclarationValue(

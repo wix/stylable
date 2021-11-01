@@ -16,8 +16,7 @@
     "@stylable/optimizer": "^4.7.4",
     "@stylable/runtime": "^4.7.4",
     "decache": "^4.6.0",
-    "mime": "^2.5.2",
-    "toky": "^0.1.0"
+    "mime": "^2.5.2"
   },
   "files": [
     "dist",

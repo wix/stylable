@@ -7,7 +7,7 @@ import postcssValueParser, {
 } from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
-import { parseSelector } from './selector-utils';
+import { parseSelectorWithCache } from './helpers/selector';
 import type { ParsedValue, StateParsedValue } from './types';
 
 export const valueParserWarnings = {
@@ -104,8 +104,12 @@ export const SBTypesParsers = {
     },
     '-st-global'(decl: postcss.Declaration, _diagnostics: Diagnostics) {
         // Experimental
-        const selector: any = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
-        return selector.nodes[0].nodes;
+        const selector = parseSelectorWithCache(
+            decl.value.replace(/^['"]/, '').replace(/['"]$/, ''),
+            { clone: true }
+        );
+        // ToDo: handle or warn on multiple selectors
+        return selector[0].nodes;
     },
     '-st-states'(value: string, decl: postcss.Declaration, diagnostics: Diagnostics) {
         if (!value) {

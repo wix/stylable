@@ -1,4 +1,12 @@
-import { parseSelector, SelectorAstNode, stringifySelector, SelectorChunk2 } from '@stylable/core';
+import {
+    parseCssSelector,
+    stringifySelectorAst,
+    SelectorList,
+    SelectorNode,
+    Selector,
+    Combinator,
+    PseudoElement,
+} from '@tokey/css-selector-parser';
 
 export const DOMLocationBasedPseudoClasses = new Set([
     'root',
@@ -47,10 +55,10 @@ createForceStateMatchers('.x:hover .y:focus').forEach((selectorChunksWithStates)
 });
 
 */
-export type SelectorWithStatesMatcher = { states: SelectorAstNode[]; selector: string };
+export type SelectorWithStatesMatcher = { states: State[]; selector: string };
 
 export function createForceStateMatchers(selector: string): SelectorWithStatesMatcher[][] {
-    const ast = parseSelector(selector);
+    const ast = parseCssSelector(selector);
 
     const chunks = separateStateChunks(ast);
     const forces: SelectorWithStatesMatcher[][] = [];
@@ -64,59 +72,70 @@ export function createForceStateMatchers(selector: string): SelectorWithStatesMa
             const lastTarget = relevantChunks[relevantChunks.length - 1];
             selectorForces.push({
                 states: lastTarget.states,
-                selector: stringifySelector(mergeStateChunks([relevantChunks])),
+                selector: stringifySelectorAst(mergeStateChunks([relevantChunks])),
             });
         }
     }
     return forces;
 }
 
-interface SelectorChunkWithStates extends SelectorChunk2 {
-    states: SelectorAstNode[];
+interface State {
+    type: 'pseudo-class';
+    name: string;
+}
+export interface SelectorChunkWithStates {
+    cause: Combinator | PseudoElement | null;
+    before: string;
+    nodes: SelectorNode[];
+    states: State[];
 }
 
-function mergeStateChunks(chunks: SelectorChunk2[][]) {
-    const ast: any = { type: 'selectors', nodes: [] };
+function mergeStateChunks(chunks: SelectorChunkWithStates[][]) {
+    const ast: SelectorList = [];
     let i = 0;
 
     for (const selectorChunks of chunks) {
-        ast.nodes[i] = { type: 'selector', nodes: [] };
+        ast[i] = {
+            type: 'selector',
+            nodes: [],
+            start: 0,
+            end: 0,
+            before: selectorChunks.length ? selectorChunks[0].before : ``,
+            after: ``,
+        } as Selector;
         for (const chunk of selectorChunks) {
-            if (chunk.type !== 'selector') {
-                ast.nodes[i].nodes.push(chunk);
-            } else {
-                ast.nodes[i].before = chunk.before;
+            if (chunk.cause) {
+                ast[i].nodes.push(chunk.cause);
             }
             for (const node of chunk.nodes) {
-                ast.nodes[i].nodes.push(node);
+                ast[i].nodes.push(node);
             }
         }
         i++;
     }
     return ast;
 }
-export function separateStateChunks(selectorNode: SelectorAstNode) {
+function separateStateChunks(selectorList: SelectorList) {
     const selectors: SelectorChunkWithStates[][] = [];
-    selectorNode.nodes.map(({ nodes, before }) => {
-        selectors.push([{ type: 'selector', nodes: [], before, states: [] }]);
+    selectorList.map(({ nodes, before }) => {
+        selectors.push([{ cause: null, before, nodes: [], states: [] }]);
         nodes.forEach((node) => {
-            if (node.type === 'operator') {
+            if (node.type === 'combinator') {
                 const chunks = selectors[selectors.length - 1];
-                chunks.push({ ...node, nodes: [], states: [] });
-            } else if (node.type === 'spacing') {
-                const chunks = selectors[selectors.length - 1];
-                chunks.push({ ...node, nodes: [], states: [] });
+                chunks.push({ cause: node, before: ``, nodes: [], states: [] });
             } else if (
-                !DOMLocationBasedPseudoClasses.has(node.name) &&
-                (node.type === 'pseudo-class' ||
-                    (node.type === 'nested-pseudo-class' && node.name !== 'not'))
+                node.type === 'pseudo_class' &&
+                (!DOMLocationBasedPseudoClasses.has(node.value) && node.value !== 'not')
             ) {
                 const chunks = selectors[selectors.length - 1];
                 const current = chunks[chunks.length - 1];
-                current.states.push(node);
-            } else if (node.type === 'pseudo-element') {
+                current.states.push({
+                    type: `pseudo-class`,
+                    name: node.value,
+                });
+            } else if (node.type === 'pseudo_element') {
                 const chunks = selectors[selectors.length - 1];
-                chunks.push({ ...node, nodes: [], states: [] });
+                chunks.push({ cause: node, before: ``, nodes: [], states: [] });
             } else {
                 const chunks = selectors[selectors.length - 1];
                 chunks[chunks.length - 1].nodes.push(node);

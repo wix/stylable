@@ -1,16 +1,18 @@
 import { dirname } from 'path';
 import * as postcss from 'postcss';
 import type { Diagnostics } from './diagnostics';
-
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
 import { fixRelativeUrls } from './stylable-assets';
-import type { ImportSymbol } from './stylable-meta';
-import type { RefedMixin, SRule, StylableMeta } from './stylable-processor';
+import type { StylableMeta } from './stylable-meta';
+import type { RefedMixin, ImportSymbol } from './features';
+import type { SRule } from './deprecated/postcss-ast-extension';
 import type { CSSResolve } from './stylable-resolver';
 import type { StylableTransformer } from './stylable-transformer';
-import { createSubsetAst, isValidDeclaration, mergeRules } from './stylable-utils';
+import { createSubsetAst } from './helpers/rule';
+import { isValidDeclaration, mergeRules } from './stylable-utils';
 import { valueMapping, mixinDeclRegExp, strategies } from './stylable-value-parsers';
+import { ignoreDeprecationWarn } from './helpers/deprecation';
 
 export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) {
@@ -35,13 +37,14 @@ export function appendMixins(
     cssVarsMapping: Record<string, string>,
     path: string[] = []
 ) {
-    if (!rule.mixins || rule.mixins.length === 0) {
+    const mixins = ignoreDeprecationWarn(() => rule.mixins);
+    if (!mixins || mixins.length === 0) {
         return;
     }
-    rule.mixins.forEach((mix) => {
+    mixins.forEach((mix) => {
         appendMixin(mix, transformer, rule, meta, variableOverride, cssVarsMapping, path);
     });
-    rule.mixins.length = 0;
+    mixins.length = 0;
     rule.walkDecls(mixinDeclRegExp, (node) => {
         node.remove();
     });

@@ -16,6 +16,7 @@ import {
     rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
+import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
 
 describe('findTestLocations', () => {
     it('find single location 1', () => {
@@ -91,6 +92,59 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [{ message: '{ expected', file: 'main.css' }]
                 );
+            });
+        });
+        describe(`non spec functional selectors`, () => {
+            it(`should return error for element`, () => {
+                expectWarnings(`|.root $div()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`div`, `type`),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+            it(`should not return an error for value() under pseudo-class`, () => {
+                expectWarnings(`|.root :cls($value(abc)$)| {}`, []);
+            });
+            it(`should return error for class`, () => {
+                expectWarnings(`|.root $.abc()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`.abc`, `class`),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+            it(`should return error for id`, () => {
+                expectWarnings(`|.root $#abc()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+            it(`should return error for attribute`, () => {
+                expectWarnings(`|.root $[attr]()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(
+                            `[attr]`,
+                            `attribute`
+                        ),
+                        file: `main.css`,
+                    },
+                ]);
+            });
+            it(`should return error for nesting`, () => {
+                expectWarnings(`|.root $&()$| {}`, [
+                    {
+                        severity: `error`,
+                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`),
+                        file: `main.css`,
+                    },
+                ]);
             });
         });
         xdescribe('ruleset', () => {
@@ -279,7 +333,7 @@ describe('diagnostics: warnings and errors', () => {
                     |:global(*) div .root|{}
                 `,
                     [
-                        { message: processorWarnings.UNSCOPED_ELEMENT('div'), file: 'main.css' },
+                        { message: processorWarnings.UNSCOPED_TYPE_SELECTOR('div'), file: 'main.css' },
                         { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' },
                     ]
                 );
@@ -592,7 +646,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(),
+                            message: parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(),
                             file: 'main.css',
                         },
                     ]
@@ -623,7 +677,7 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config, [
                     {
-                        message: processorWarnings.ILLEGAL_PROP_IN_IMPORT('color'),
+                        message: parseImportMessages.ILLEGAL_PROP_IN_IMPORT('color'),
                         file: '/main.st.css',
                     },
                 ]);
@@ -638,7 +692,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.FROM_PROP_MISSING_IN_IMPORT(),
+                            message: parseImportMessages.FROM_PROP_MISSING_IN_IMPORT(),
                             file: 'main.st.css',
                         },
                     ]
@@ -656,7 +710,7 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             severity: 'error',
-                            message: processorWarnings.EMPTY_IMPORT_FROM(),
+                            message: parseImportMessages.EMPTY_IMPORT_FROM(),
                             file: 'main.st.css',
                         },
                     ]
@@ -672,7 +726,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-default: Comp;
                     }|
                 `,
-                    [{ message: processorWarnings.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
+                    [{ message: parseImportMessages.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
                 );
             });
 
@@ -1100,7 +1154,7 @@ describe('diagnostics: warnings and errors', () => {
                     `
                     |:global(div) $button$| {}
                 `,
-                    [{ message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }]
+                    [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'), file: 'main.css' }]
                 );
             });
 
@@ -1109,7 +1163,7 @@ describe('diagnostics: warnings and errors', () => {
                     `
                     |.x, $button$| {}
                 `,
-                    [{ message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }]
+                    [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'), file: 'main.css' }]
                 );
             });
 
@@ -1146,7 +1200,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     |$Blah$| {}
                 `,
-                    [{ message: processorWarnings.UNSCOPED_ELEMENT('Blah'), file: 'main.css' }]
+                    [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('Blah'), file: 'main.css' }]
                 );
             });
 
@@ -1155,7 +1209,7 @@ describe('diagnostics: warnings and errors', () => {
                     `
                     |$button$| {}
                 `,
-                    [{ message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }]
+                    [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'), file: 'main.css' }]
                 );
             });
 
