@@ -15,7 +15,7 @@ export interface Options {
     packageAlias: Record<string, string>;
     contentHashLength?: number;
     exposeNamespaceMapping: boolean;
-    generateNamedExports(compId: string, meta: StylableMeta): string | void;
+    generateCSSVarsExports: boolean;
     resolveNamespace(namespace: string, filePath: string): string;
     filterComponents(resourcePath: string): boolean;
     getCompId(resourcePath: string): string;
@@ -31,6 +31,7 @@ const defaultOptions: Options = {
     packageAlias: {},
     resolveNamespace,
     exposeNamespaceMapping: true,
+    generateCSSVarsExports: false,
     filterComponents(resourcePath) {
         return resourcePath.endsWith('.comp.st.css');
     },
@@ -39,9 +40,6 @@ const defaultOptions: Options = {
     },
     getOutputFileName(contentHash) {
         return `stylable.manifest.${contentHash}.json`;
-    },
-    generateNamedExports() {
-        return void 0;
     },
 };
 
@@ -93,7 +91,9 @@ export class StylableManifestPlugin {
     private emitManifest(metadataList: MetadataList, compilation: webpack.compilation.Compilation) {
         const manifest = metadataList.reduce<Manifest>(
             (manifest, { meta, compId, metadata }) => {
-                const cssVars = this.options.generateNamedExports(compId, meta);
+                const cssVars = this.options.generateCSSVarsExports
+                    ? generateCssVarsNamedExports(compId, meta)
+                    : null;
                 Object.assign(manifest.stylesheetMapping, metadata.stylesheetMapping);
                 Object.assign(manifest.namespaceMapping, metadata.namespaceMapping);
                 manifest.componentsEntries[compId] = metadata.entry;
