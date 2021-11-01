@@ -223,6 +223,34 @@ describe('ensureStylableImports', () => {
                 `:import {-st-from: 'x';-st-default: A;-st-named: a, b; }`
             );
         });
+
+        it('should patch all on @st-import', () => {
+            const root = parse(`
+                @st-import "x";
+            `);
+
+            const diag = new Diagnostics();
+
+            ensureStylableImports(
+                root,
+                [
+                    {
+                        request: 'x',
+                        named: { asTest: 'test' },
+                        keyframes: { asKf: 'kf' },
+                        defaultExport: 'Test',
+                    },
+                ],
+                { mode: 'patch-only' },
+                diag
+            );
+
+            const importNode = root.nodes[0];
+            expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
+            expect(importNode.toString()).to.equal(
+                `@st-import Test, [test as asTest, keyframes(kf as asKf)] from "x"`
+            );
+        });
     });
 
     describe(':import mode', () => {
