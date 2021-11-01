@@ -77,7 +77,7 @@ export class StylableResolver {
         protected requireModule: (modulePath: string) => any,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, request, from }: Imported): CachedModuleEntity {
+    private getModule({ context, request }: Imported): CachedModuleEntity {
         const key = `${context}${safePathDelimiter}${request}`;
         if (this.cache?.has(key)) {
             return this.cache.get(key)!;
