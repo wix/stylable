@@ -24,8 +24,24 @@ export type JsModule = {
     default?: unknown;
     [key: string]: unknown;
 };
-export type CachedModule = StylableMeta | JsModule | null;
-export type StylableResolverCache = Map<string, StylableMeta | JsModule | null>;
+
+interface BaseCachedModule<T> {
+    resolvedPath: string;
+    error?: unknown;
+    value: T | null;
+}
+
+export interface CachedStylableMeta extends BaseCachedModule<StylableMeta> {
+    kind: 'css';
+}
+
+export interface CachedJsModule extends BaseCachedModule<JsModule> {
+    kind: 'js';
+}
+
+export type CachedModuleEntity = CachedStylableMeta | CachedJsModule;
+export type CachedModule = CachedModuleEntity['value'];
+export type StylableResolverCache = Map<string, CachedModuleEntity>;
 
 export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
     _kind: 'css';
@@ -57,27 +73,46 @@ export class StylableResolver {
         protected requireModule: (modulePath: string) => any,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, from }: Imported): CachedModule {
-        const key = `${context}${safePathDelimiter}${from}`;
+    private getModule({ context, request }: Imported): CachedModuleEntity {
+        const key = `${context}${safePathDelimiter}${request}`;
         if (this.cache?.has(key)) {
             return this.cache.get(key)!;
         }
-        let res;
-        if (from.match(/\.css$/)) {
+
+        const resolvedPath = this.fileProcessor.resolvePath(request, context);
+        let entity: CachedModuleEntity;
+        let error: CachedModuleEntity['error'];
+
+        if (request.endsWith('.css')) {
+            let value: CachedStylableMeta['value'];
             try {
-                res = this.fileProcessor.process(from, false, context);
+                value = this.fileProcessor.process(resolvedPath, false, context);
             } catch (e) {
-                res = null;
+                value = null;
+                error = e;
             }
+
+            entity = { kind: 'css', value, resolvedPath };
         } else {
+            let value: CachedJsModule['value'];
+
             try {
-                res = this.requireModule(this.fileProcessor.resolvePath(from, context));
-            } catch {
-                res = null;
+                value = this.requireModule(resolvedPath);
+            } catch (e) {
+                value = null;
+                error = e;
             }
+
+            entity = { kind: 'js', value, resolvedPath };
         }
-        this.cache?.set(key, res);
-        return res;
+
+        if (error) {
+            entity.error = error;
+        }
+
+        this.cache?.set(key, entity);
+
+        return entity;
     }
 
     public resolveImported(
@@ -86,19 +121,19 @@ export class StylableResolver {
         subtype: 'mappedSymbols' | 'mappedKeyframes' = 'mappedSymbols'
     ): CSSResolve | JSResolve | null {
         const res = this.getModule(imported);
-        if (res === null) {
+        if (res.value === null) {
             return null;
         }
 
-        if (imported.from.match(/\.css$/)) {
-            const meta = res as StylableMeta;
+        if (res.kind === 'css') {
+            const { value: meta } = res;
             return {
                 _kind: 'css',
                 symbol: !name ? meta.mappedSymbols[meta.root] : meta[subtype][name],
                 meta,
             };
         } else {
-            const jsModule = res as JsModule;
+            const { value: jsModule } = res;
             return {
                 _kind: 'js',
                 symbol: !name ? jsModule.default || jsModule : jsModule[name],
