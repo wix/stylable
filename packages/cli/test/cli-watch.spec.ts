@@ -680,13 +680,13 @@ describe('Stylable Cli Watch', () => {
                     {
                         msg: messages.FINISHED_PROCESSING(
                             2,
-                            '[1] /' + join('packages', 'project-a')
+                            `[1] ${sep}` + join('packages', 'project-a')
                         ),
                     },
                     {
                         msg: messages.FINISHED_PROCESSING(
                             1,
-                            '[0] /' + join('packages', 'project-a')
+                            `[0] ${sep}` + join('packages', 'project-a')
                         ),
                     },
                 ],
