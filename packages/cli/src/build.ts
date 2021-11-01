@@ -146,12 +146,15 @@ export async function build(
             updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles, outputFiles);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
-            // report build diagnostics
-            reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
+
+            if (!watch) {
+                // report build diagnostics
+                reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
+            }
 
             const count = deletedFiles.size + affectedFiles.size + assets.size;
 
-            if (!changeOrigin || (changeOrigin && count)) {
+            if (count) {
                 log(
                     mode,
                     `[${new Date().toLocaleTimeString()}]`,
@@ -159,9 +162,15 @@ export async function build(
                         count,
                         isMultiPackagesProject ? identifier : undefined
                     ),
-                    levels.info
+                    changeOrigin ? undefined : levels.info
                 );
             }
+
+            return {
+                shouldReport: diagnostics,
+                diagnosticsMode,
+                diagnosticsMessages,
+            };
         },
     });
 

@@ -1,23 +1,7 @@
 import nodeFs from '@file-services/node';
 import type { IFileSystem, IWatchEvent } from '@file-services/types';
+import type { DirectoryProcessServiceOptions, HandleWatchModeResponse } from './types';
 import { directoryDeepChildren, DirectoryItem } from './walk-fs';
-
-export interface DirectoryProcessServiceOptions {
-    processFiles?(
-        watcher: DirectoryProcessService,
-        affectedFiles: Set<string>,
-        deletedFiles: Set<string>,
-        changeOrigin?: IWatchEvent
-    ): Promise<void> | void;
-    directoryFilter?(directoryPath: string): boolean;
-    fileFilter?(filePath: string): boolean;
-    onError?(error: Error): void;
-    autoResetInvalidations?: boolean;
-    watchMode?: boolean;
-    watchOptions?: {
-        skipInitialWatch?: boolean;
-    };
-}
 
 export class DirectoryProcessService {
     public invalidationMap = new Map<string, Set<string>>();
@@ -53,7 +37,7 @@ export class DirectoryProcessService {
             return;
         }
         try {
-            return this.options.processFiles?.(this, affectedFiles, new Set());
+            await this.options.processFiles?.(this, affectedFiles, new Set());
         } catch (error) {
             this.options.onError?.(error as Error);
         }
@@ -95,7 +79,10 @@ export class DirectoryProcessService {
         this.watchedDirectoryFiles.set(directoryPath, new Set());
         return this.fs.watchService.watchPath(directoryPath);
     }
-    public async handleWatchChange(files: Map<string, IWatchEvent>, originalEvent: IWatchEvent) {
+    public async handleWatchChange(
+        files: Map<string, IWatchEvent>,
+        originalEvent: IWatchEvent
+    ): Promise<HandleWatchModeResponse> {
         const affectedFiles = new Set<string>();
         const deletedFiles = new Set<string>();
 
@@ -148,15 +135,29 @@ export class DirectoryProcessService {
             }
         }
 
-        let hasChanges = false;
         if (affectedFiles.size || deletedFiles.size) {
-            await this.options.processFiles?.(this, affectedFiles, deletedFiles, originalEvent);
-            hasChanges = true;
-        }
+            const {
+                diagnosticsMessages = new Map(),
+                diagnosticMode,
+                shouldReport = true,
+            } = (await this.options.processFiles?.(
+                this,
+                affectedFiles,
+                deletedFiles,
+                originalEvent
+            )) || {};
 
-        return {
-            hasChanges,
-        };
+            return {
+                hasChanges: true,
+                diagnosticsMessages,
+                diagnosticMode,
+                shouldReport,
+            };
+        } else {
+            return {
+                hasChanges: false,
+            };
+        }
     }
     public getAffectedFiles(filePath: string, visited = new Set<string>()): Set<string> {
         if (visited.has(filePath)) {

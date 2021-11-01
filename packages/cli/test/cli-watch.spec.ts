@@ -703,5 +703,69 @@ describe('Stylable Cli Watch', () => {
 
             expect(matches?.length).to.eql(1);
         });
+
+        it('should report error on watch mode', async () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'stylable.config.js': `
+                exports.stcConfig = () => ({
+                    options: {
+                        outDir: './dist',
+                        outputSources: true,
+                    },
+                    projects: ['packages/*']
+                })`,
+                packages: {
+                    'project-a': {
+                        'package.json': JSON.stringify({ name: 'a', version: '0.0.0' }),
+                        'style.st.css': `
+                            .root{ color:red; }
+                        `,
+                    },
+                },
+            });
+
+            await run({
+                dirPath: tempDir.path,
+                args: ['-w'],
+                steps: [
+                    {
+                        msg: messages.START_WATCHING(),
+                        action() {
+                            writeToExistingFile(
+                                join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
+                                '.root{ color:yellow; {} }'
+                            );
+                        },
+                    },
+                    {
+                        msg: messages.FINISHED_PROCESSING(
+                            1,
+                            join(tempDir.path, 'packages', 'project-a')
+                        ),
+                    },
+                    {
+                        msg: '[error]: nesting of rules within rules is not supported',
+                        action() {
+                            writeToExistingFile(
+                                join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
+                                '.root{ color:blue; }'
+                            );
+                        },
+                    },
+                    {
+                        msg: messages.FINISHED_PROCESSING(
+                            1,
+                            join(tempDir.path, 'packages', 'project-a')
+                        ),
+                    },
+                ],
+            });
+
+            const files = loadDirSync(tempDir.path);
+            expect(files).to.contain({
+                'packages/project-a/dist/style.st.css': '.root{ color:blue; }',
+            });
+        });
     });
 });

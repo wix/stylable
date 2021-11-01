@@ -2,6 +2,7 @@ import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-service
 import type { StylableResolverCache } from '@stylable/core';
 import { Log, levels } from '../logger';
 import { messages } from '../messages';
+import { reportDiagnostics } from '../report-diagnostics';
 import { createWatchEvent, DirectoryProcessService } from './directory-process-service';
 
 interface RegisterMetaData {
@@ -56,22 +57,29 @@ export class DirectoriesHandlerService {
                     files.set(path, createWatchEvent(path, this.fileSystem));
                 }
 
-                const { hasChanges } = await directoryProcess.handleWatchChange(files, event);
+                const { hasChanges, diagnosticsMessages, shouldReport, diagnosticMode } =
+                    await directoryProcess.handleWatchChange(files, event);
 
                 if (hasChanges) {
-                    this.log(messages.BUILD_PROCESS_INFO(identifier));
-                }
+                    if (!foundChanges) {
+                        foundChanges = true;
 
-                foundChanges = foundChanges || hasChanges;
+                        this.log(levels.clear);
+                        this.log(
+                            messages.CHANGE_DETECTED(
+                                event.path.replace(this.options.rootDir ?? '', '')
+                            ),
+                            levels.info
+                        );
+                    }
+
+                    this.log(messages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
+
+                    reportDiagnostics(diagnosticsMessages!, shouldReport, diagnosticMode);
+                }
             }
 
             if (foundChanges) {
-                this.log(levels.clear);
-                this.log(
-                    messages.CHANGE_DETECTED(event.path.replace(this.options.rootDir ?? '', '')),
-                    levels.info
-                );
-
                 for (const file of files.values()) {
                     if (file.stats) {
                         filesChangesSummary.changed++;
