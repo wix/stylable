@@ -1,10 +1,10 @@
-import { STPart, CSSClass } from '@stylable/core/dist/features';
+import { STPart, CSSClass, CSSType } from '@stylable/core/dist/features';
 import { generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/st-part`, () => {
     describe(`meta`, () => {
-        it(`should collect part definitions`, () => {
+        it(`should collect class part definitions`, () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -26,6 +26,26 @@ describe(`features/st-part`, () => {
                 node: meta.ast.nodes[1],
                 symbol: CSSClass.getClass(meta, `b`),
             });
+        });
+        it(`should collect only type selector component part definitions (capital letter)`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: `
+                            span {}
+                            Comp {}
+                        `,
+                    },
+                },
+            });
+
+            expect(STPart.getPart(meta, `Comp`), `component`).to.eql({
+                node: meta.ast.nodes[1],
+                symbol: CSSType.getType(meta, `Comp`),
+            });
+            expect(STPart.getPart(meta, `span`), `native`).to.equal(undefined);
         });
         it(`should NOT have root class symbol by default`, () => {
             const { meta } = generateStylableResult({

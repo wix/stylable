@@ -4,12 +4,14 @@ export type { StylableSymbol } from './st-symbol';
 export * as CSSClass from './css-class';
 export type { ClassSymbol } from './css-class';
 
+export * as CSSType from './css-type';
+export type { ElementSymbol } from './css-type';
+
 export * as STPart from './st-part';
 export type { StylablePart } from './st-part';
 
 export {
     CSSVarSymbol,
-    ElementSymbol,
     ImportSymbol,
     Imported,
     KeyframesSymbol,

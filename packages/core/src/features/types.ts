@@ -1,4 +1,5 @@
 import type { ClassSymbol } from './css-class';
+import type { ElementSymbol } from './css-type';
 import type { MappedStates, MixinValue } from '../stylable-value-parsers';
 import type { SelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
@@ -15,12 +16,6 @@ export interface StylableDirectives {
 export interface RefedMixin {
     mixin: MixinValue;
     ref: ImportSymbol | ClassSymbol;
-}
-
-export interface ElementSymbol extends StylableDirectives {
-    _kind: 'element';
-    name: string;
-    alias?: ImportSymbol;
 }
 
 export interface ImportSymbol {

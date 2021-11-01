@@ -13,13 +13,12 @@ import type {
     CSSVarSymbol,
     ElementSymbol,
     Imported,
-    ImportSymbol,
     RefedMixin,
     StylableDirectives,
     VarSymbol,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
-import { STSymbol, CSSClass, STPart } from './features';
+import { STSymbol, CSSClass, CSSType, STPart } from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
@@ -58,9 +57,6 @@ const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
 
 export const processorWarnings = {
-    UNSCOPED_TYPE_SELECTOR(name: string) {
-        return `unscoped type selector "${name}" will affect all elements of the same type in the document`;
-    },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) {
         return `cannot define "${name}" inside a complex selector`;
     },
@@ -81,6 +77,7 @@ export const processorWarnings = {
     },
     ...STSymbol.diagnostics,
     ...CSSClass.diagnostics,
+    ...CSSType.diagnostics,
     ...STPart.diagnostics,
     REDECLARE_SYMBOL_KEYFRAMES(name: string) {
         return `redeclare keyframes symbol "${name}"`;
@@ -475,7 +472,8 @@ export class StylableProcessor {
 
         let locallyScoped = false;
         let simpleSelector: boolean;
-        walkSelector(selectorAst, (node, index, nodes, parents) => {
+        walkSelector(selectorAst, (node, ...nodeContext) => {
+            const [index, nodes, parents] = nodeContext;
             const type = node.type;
             if (type === 'selector' && !isInPseudoClassContext(parents)) {
                 locallyScoped = false;
@@ -527,7 +525,7 @@ export class StylableProcessor {
                     return walkSelector.skipNested;
                 }
             } else if (node.type === 'class') {
-                STPart.hooks.analyzeSelectorNode(this.meta, node, rule);
+                STPart.hooks.analyzeSelectorNode(this.meta, node, rule, nodeContext);
 
                 locallyScoped = CSSClass.validateClassScoping(this.meta, {
                     classSymbol: CSSClass.getClass(this.meta, node.value)!,
@@ -539,39 +537,16 @@ export class StylableProcessor {
                     rule,
                 });
             } else if (node.type === 'type') {
-                this.addElementSymbolOnce(node.value, rule);
-                /**
-                 * intent to deprecate: currently `value(param)` can be used
-                 * as a custom state value. Unless there is a reasonable
-                 * use case, this should be removed.
-                 */
-                if (
-                    node.nodes &&
-                    (parents.length < 2 ||
-                        parents[parents.length - 2].type !== `pseudo_class` ||
-                        node.value !== `value`)
-                ) {
-                    this.diagnostics.error(
-                        rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
-                        {
-                            word: stringifySelector(node),
-                        }
-                    );
-                }
-                if (locallyScoped === false && !inStScope) {
-                    if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
-                        this.diagnostics.warn(
-                            rule,
-                            processorWarnings.UNSCOPED_TYPE_SELECTOR(node.value),
-                            {
-                                word: node.value,
-                            }
-                        );
-                    } else {
-                        locallyScoped = true;
-                    }
-                }
+                STPart.hooks.analyzeSelectorNode(this.meta, node, rule, nodeContext);
+
+                locallyScoped = CSSType.validateTypeScoping(this.meta, {
+                    locallyScoped,
+                    inStScope,
+                    node,
+                    nodes,
+                    index,
+                    rule,
+                });
             } else if (node.type === `id`) {
                 if (node.nodes) {
                     this.diagnostics.error(
@@ -664,27 +639,6 @@ export class StylableProcessor {
             }
         }
         return false;
-    }
-
-    protected addElementSymbolOnce(name: string, rule: postcss.Rule) {
-        if (isCompRoot(name) && !this.meta.elements[name]) {
-            let alias = this.meta.mappedSymbols[name] as ImportSymbol | undefined;
-            if (alias && alias._kind !== 'import') {
-                this.checkRedeclareSymbol(name, rule);
-                alias = undefined;
-            }
-
-            this.meta.elements[name] = this.meta.mappedSymbols[name] = {
-                _kind: 'element',
-                name,
-                alias,
-            };
-
-            this.meta.simpleSelectors[name] = {
-                node: rule,
-                symbol: this.meta.elements[name],
-            };
-        }
     }
 
     protected addImportSymbols(importDef: Imported) {

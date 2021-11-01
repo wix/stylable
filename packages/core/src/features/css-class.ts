@@ -115,7 +115,7 @@ export function validateClassScoping(
 }
 
 // ToDo: support more complex cases (e.g. `:is`)
-function checkForScopedNodeAfter(
+export function checkForScopedNodeAfter(
     rule: postcss.Rule,
     meta: StylableMeta,
     nodes: ImmutableSelectorNode[],

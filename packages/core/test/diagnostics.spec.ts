@@ -94,15 +94,6 @@ describe('diagnostics: warnings and errors', () => {
             });
         });
         describe(`non spec functional selectors`, () => {
-            it(`should return error for element`, () => {
-                expectWarnings(`|.root $div()$| {}`, [
-                    {
-                        severity: `error`,
-                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`div`, `type`),
-                        file: `main.css`,
-                    },
-                ]);
-            });
             it(`should not return an error for value() under pseudo-class`, () => {
                 expectWarnings(`|.root :cls($value(abc)$)| {}`, []);
             });
@@ -1154,66 +1145,6 @@ describe('diagnostics: warnings and errors', () => {
                     |.x, $button$| {}
                 `,
                     [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'), file: 'main.css' }]
-                );
-            });
-
-            it('should not warn if same chunk is scoped', () => {
-                expectWarnings(
-                    `
-                    |$button$.root| {}
-                `,
-                    []
-                );
-            });
-
-            it('should not warn when using imported elements with scoping in the same chunk', () => {
-                expectWarnings(
-                    `
-                    :import {
-                        -st-from: "./blah.st.css";
-                        -st-named: Blah;
-                    }
-
-                    |$Blah$.root| {}
-                `,
-                    []
-                );
-            });
-
-            it('should warn when using imported element with no root scoping', () => {
-                expectWarnings(
-                    `
-                    :import {
-                        -st-from: "./blah.st.css";
-                        -st-default: Blah;
-                    }
-
-                    |$Blah$| {}
-                `,
-                    [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('Blah'), file: 'main.css' }]
-                );
-            });
-
-            it('should warn when using native elements without scoping', () => {
-                expectWarnings(
-                    `
-                    |$button$| {}
-                `,
-                    [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'), file: 'main.css' }]
-                );
-            });
-
-            it('should warn when using imported elements (classes) without scoping', () => {
-                expectWarnings(
-                    `
-                    :import {
-                        -st-from: "./blah.st.css";
-                        -st-named: blah;
-                    }
-
-                    |.$blah$| {}
-                `,
-                    [{ message: processorWarnings.UNSCOPED_CLASS('blah'), file: 'main.css' }]
                 );
             });
         });
