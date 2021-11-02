@@ -26,22 +26,26 @@ export type JsModule = {
 };
 
 export interface InvalidCachedModule {
+    kind: 'js' | 'css';
     value: null;
     error: unknown;
 }
 
-export interface BaseCachedModule<T> {
-    resolvedPath: string;
-    value: T;
-}
+export type CachedStylableMeta =
+    | InvalidCachedModule
+    | {
+          resolvedPath: string;
+          kind: 'css';
+          value: StylableMeta;
+      };
 
-export type CachedStylableMeta = (InvalidCachedModule | BaseCachedModule<StylableMeta>) & {
-    kind: 'css';
-};
-
-export type CachedJsModule = (InvalidCachedModule | BaseCachedModule<JsModule>) & {
-    kind: 'js';
-};
+export type CachedJsModule =
+    | InvalidCachedModule
+    | {
+          resolvedPath: string;
+          kind: 'js';
+          value: JsModule;
+      };
 
 export type CachedModuleEntity = CachedStylableMeta | CachedJsModule;
 export type CachedModule = CachedModuleEntity['value'];
