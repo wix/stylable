@@ -30,7 +30,6 @@ import {
     isSimpleSelector,
     isInPseudoClassContext,
     isRootValid,
-    isCompRoot,
     scopeNestedSelector,
     parseSelectorWithCache,
     stringifySelector,
@@ -167,7 +166,7 @@ export class StylableProcessor {
         this.dirContext = path.dirname(this.meta.source);
 
         this.handleAtRules(root);
-        
+
         const stubs = this.insertCustomSelectorsStubs();
 
         for (const node of root.nodes) {
@@ -296,7 +295,10 @@ export class StylableProcessor {
                             );
                         }
                     } else {
-                        this.diagnostics.error(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
+                        this.diagnostics.error(
+                            atRule,
+                            processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE()
+                        );
                     }
                     break;
                 case 'custom-selector': {
