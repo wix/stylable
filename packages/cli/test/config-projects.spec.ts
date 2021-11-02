@@ -141,7 +141,7 @@ describe('Stylable CLI config multiple projects', function () {
                 packages: {
                     'project-a': {
                         test: {
-                            'style.st.css': `.test: {color: gold}`,
+                            'style.st.css': `.test {color: gold}`,
                         },
                         src: {
                             'style.st.css': `
