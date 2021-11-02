@@ -1,4 +1,5 @@
 import { ImportSymbol, processorWarnings } from '@stylable/core';
+import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import * as chai from 'chai';
 
@@ -31,7 +32,7 @@ describe('Stylable @st-import', () => {
         );
 
         expect(result.diagnostics.reports.length).to.eql(1);
-        expect(result.diagnostics.reports[0].message).to.eql(processorWarnings.ST_IMPORT_STAR());
+        expect(result.diagnostics.reports[0].message).to.eql(parseImportMessages.ST_IMPORT_STAR());
     });
 
     it('warn on empty from', () => {
@@ -45,10 +46,10 @@ describe('Stylable @st-import', () => {
 
         expect(result.diagnostics.reports.length).to.eql(2);
         expect(result.diagnostics.reports[0].message).to.eql(
-            processorWarnings.ST_IMPORT_EMPTY_FROM()
+            parseImportMessages.ST_IMPORT_EMPTY_FROM()
         );
         expect(result.diagnostics.reports[1].message).to.eql(
-            processorWarnings.ST_IMPORT_EMPTY_FROM()
+            parseImportMessages.ST_IMPORT_EMPTY_FROM()
         );
     });
 
@@ -63,10 +64,10 @@ describe('Stylable @st-import', () => {
 
         expect(result.diagnostics.reports.length).to.eql(2);
         expect(result.diagnostics.reports[0].message).to.eql(
-            processorWarnings.INVALID_ST_IMPORT_FORMAT(['invalid missing source'])
+            parseImportMessages.INVALID_ST_IMPORT_FORMAT(['invalid missing source'])
         );
         expect(result.diagnostics.reports[1].message).to.eql(
-            processorWarnings.INVALID_ST_IMPORT_FORMAT([
+            parseImportMessages.INVALID_ST_IMPORT_FORMAT([
                 'invalid missing from',
                 'invalid missing source',
             ])

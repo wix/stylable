@@ -27,8 +27,10 @@ export {
     processNamespace,
     processorWarnings,
     validateScopingSelector,
-    parsePseudoImport,
 } from './stylable-processor';
+
+export { ensureStylableImports } from './stylable-imports-tools';
+
 export { StylableMeta, RESERVED_ROOT_NAME } from './stylable-meta';
 export {
     KeyFrameWithNode,

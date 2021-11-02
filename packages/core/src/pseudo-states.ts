@@ -107,7 +107,7 @@ function resolveStateType(
 
     const paramType = stateDefinition.nodes[0];
     const stateType: StateParsedValue = {
-        type: stateDefinition.nodes[0].value,
+        type: paramType.value,
         arguments: [],
         defaultValue: postcssValueParser
             .stringify(stateDefault as postcssValueParser.Node[])
@@ -182,60 +182,63 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
 // TRANSFORM
 
 /* @deprecated */
-export const validateStateDefinition = wrapFunctionForDeprecation(function(
-    decl: postcss.Declaration,
-    meta: StylableMeta,
-    resolver: StylableResolver,
-    diagnostics: Diagnostics
-) {
-    if (decl.parent && decl.parent.type !== 'root') {
-        const container = decl.parent;
-        if (container.type !== 'atrule') {
-            const parentRule = container as postcss.Rule;
-            const selectorAst = parseSelectorWithCache(parentRule.selector);
-            if (selectorAst.length && selectorAst.length === 1) {
-                const singleSelectorAst = selectorAst[0];
-                const selectorChunk = singleSelectorAst.nodes;
+export const validateStateDefinition = wrapFunctionForDeprecation(
+    function (
+        decl: postcss.Declaration,
+        meta: StylableMeta,
+        resolver: StylableResolver,
+        diagnostics: Diagnostics
+    ) {
+        if (decl.parent && decl.parent.type !== 'root') {
+            const container = decl.parent;
+            if (container.type !== 'atrule') {
+                const parentRule = container as postcss.Rule;
+                const selectorAst = parseSelectorWithCache(parentRule.selector);
+                if (selectorAst.length && selectorAst.length === 1) {
+                    const singleSelectorAst = selectorAst[0];
+                    const selectorChunk = singleSelectorAst.nodes;
 
-                if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
-                    const className = selectorChunk[0].value;
-                    const classMeta = meta.classes[className];
-                    const states = classMeta[valueMapping.states];
+                    if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
+                        const className = selectorChunk[0].value;
+                        const classMeta = meta.classes[className];
+                        const states = classMeta[valueMapping.states];
 
-                    if (classMeta && classMeta._kind === 'class' && states) {
-                        for (const stateName in states) {
-                            // TODO: Sort out types
-                            const state = states[stateName];
-                            if (state && typeof state === 'object') {
-                                const res = validateStateArgument(
-                                    state,
-                                    meta,
-                                    state.defaultValue || '',
-                                    resolver,
-                                    diagnostics,
-                                    parentRule,
-                                    true,
-                                    !!state.defaultValue
-                                );
-
-                                if (res.errors) {
-                                    res.errors.unshift(
-                                        `pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`
+                        if (classMeta && classMeta._kind === 'class' && states) {
+                            for (const stateName in states) {
+                                // TODO: Sort out types
+                                const state = states[stateName];
+                                if (state && typeof state === 'object') {
+                                    const res = validateStateArgument(
+                                        state,
+                                        meta,
+                                        state.defaultValue || '',
+                                        resolver,
+                                        diagnostics,
+                                        parentRule,
+                                        true,
+                                        !!state.defaultValue
                                     );
-                                    diagnostics.warn(decl, res.errors.join('\n'), {
-                                        word: decl.value,
-                                    });
+
+                                    if (res.errors) {
+                                        res.errors.unshift(
+                                            `pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`
+                                        );
+                                        diagnostics.warn(decl, res.errors.join('\n'), {
+                                            word: decl.value,
+                                        });
+                                    }
                                 }
                             }
+                        } else {
+                            // TODO: error state on non-class
                         }
-                    } else {
-                        // TODO: error state on non-class
                     }
                 }
             }
         }
-    }
-}, {name: `validateStateDefinition`});
+    },
+    { name: `validateStateDefinition` }
+);
 
 export function validateStateArgument(
     stateAst: StateParsedValue,

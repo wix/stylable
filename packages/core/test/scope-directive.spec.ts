@@ -655,7 +655,7 @@ describe('@st-scope', () => {
                 {
                     message: processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE(),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
         });

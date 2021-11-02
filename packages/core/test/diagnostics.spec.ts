@@ -16,6 +16,7 @@ import {
     rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
+import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
 
 describe('findTestLocations', () => {
     it('find single location 1', () => {
@@ -627,7 +628,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(),
+                            message: parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(),
                             file: 'main.css',
                         },
                     ]
@@ -658,7 +659,7 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config, [
                     {
-                        message: processorWarnings.ILLEGAL_PROP_IN_IMPORT('color'),
+                        message: parseImportMessages.ILLEGAL_PROP_IN_IMPORT('color'),
                         file: '/main.st.css',
                     },
                 ]);
@@ -673,7 +674,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.FROM_PROP_MISSING_IN_IMPORT(),
+                            message: parseImportMessages.FROM_PROP_MISSING_IN_IMPORT(),
                             file: 'main.st.css',
                         },
                     ]
@@ -691,7 +692,7 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             severity: 'error',
-                            message: processorWarnings.EMPTY_IMPORT_FROM(),
+                            message: parseImportMessages.EMPTY_IMPORT_FROM(),
                             file: 'main.st.css',
                         },
                     ]
@@ -707,7 +708,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-default: Comp;
                     }|
                 `,
-                    [{ message: processorWarnings.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
+                    [{ message: parseImportMessages.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
                 );
             });
 
