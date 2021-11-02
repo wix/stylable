@@ -36,7 +36,6 @@ import {
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
-import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import {
@@ -614,31 +613,6 @@ export class StylableProcessor {
             });
         }
         return symbol;
-    }
-
-    protected checkForScopedNodeAfter(
-        rule: postcss.Rule,
-        nodes: ImmutableSelectorNode[],
-        index: number
-    ) {
-        for (let i = index + 1; i < nodes.length; i++) {
-            const node = nodes[i];
-            if (!node) {
-                // ToDo: can this get here???
-                break;
-            }
-            if (node.type === 'combinator') {
-                break;
-            }
-            if (node.type === 'class') {
-                const name = node.value;
-                const classSymbol = CSSClass.addClass(this.meta, name, rule);
-                if (!classSymbol.alias) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     protected addImportSymbols(importDef: Imported) {
