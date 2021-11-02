@@ -5,6 +5,7 @@ import * as STSymbol from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
 import { stringifySelector } from '../helpers/selector';
+import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { ImmutableClass, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
@@ -54,6 +55,10 @@ export function getClass({ data }: StylableMeta, name: string): ClassSymbol | un
     return state[name];
 }
 
+export function getSymbols({ data }: StylableMeta): Record<string, ClassSymbol> {
+    return plugableRecord.getUnsafeAssure(data, dataKey);
+}
+
 export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule): ClassSymbol {
     const cssClassData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
     let classSymbol = cssClassData[name];
@@ -74,7 +79,9 @@ export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule):
             safeRedeclare: !!alias,
         });
         // deprecated
-        meta.classes[name] = classSymbol;
+        ignoreDeprecationWarn(() => {
+            meta.classes[name] = classSymbol;
+        });
     }
     return classSymbol;
 }

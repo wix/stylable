@@ -83,3 +83,7 @@ setFieldForDeprecation(StylableMeta.prototype, `elements`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
 });
+setFieldForDeprecation(StylableMeta.prototype, `classes`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+});

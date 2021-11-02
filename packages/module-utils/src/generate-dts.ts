@@ -7,6 +7,7 @@ import {
     StylableSymbol,
     valueMapping,
 } from '@stylable/core';
+import { CSSClass } from '@stylable/core/dist/features';
 
 const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
@@ -53,11 +54,11 @@ function collectLocalStates(cls: ClassSymbol) {
     return stateEntriesString;
 }
 
-function stringifyStates({ classes, namespace }: StylableMeta) {
+function stringifyStates(meta: StylableMeta) {
     let out = '';
-    for (const [name, symbol] of Object.entries(classes)) {
+    for (const [name, symbol] of Object.entries(CSSClass.getSymbols(meta))) {
         const states = collectLocalStates(symbol);
-        out += states ? `${SPACING}${asString(scope(name, namespace))}: { ${states}};\n` : '';
+        out += states ? `${SPACING}${asString(scope(name, meta.namespace))}: { ${states}};\n` : '';
     }
 
     return out;

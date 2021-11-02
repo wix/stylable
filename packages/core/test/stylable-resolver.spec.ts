@@ -11,7 +11,7 @@ import {
     StylableMeta,
     createDefaultResolver,
 } from '@stylable/core';
-import { CSSType } from '@stylable/core/dist/features';
+import { CSSClass, CSSType } from '@stylable/core/dist/features';
 
 function createResolveExtendsResults(
     fs: MinimalFS,
@@ -256,7 +256,7 @@ describe('stylable-resolver', () => {
         const btnMeta = fileProcessor.process('/button.st.css');
         const res = resolver.resolve(entryMeta.mappedSymbols.x);
 
-        expect(res!.symbol).to.eql(btnMeta.classes.root);
+        expect(res!.symbol).to.eql(CSSClass.getClass(btnMeta, `root`));
     });
 
     it('should resolve elements', () => {
@@ -291,7 +291,7 @@ describe('stylable-resolver', () => {
         const btn1 = entryMeta.mappedSymbols.ButtonX;
         const res1 = resolver.resolve(btn1);
 
-        expect(res!.symbol).to.eql(btnMeta.classes.root);
+        expect(res!.symbol).to.eql(CSSClass.getClass(btnMeta, `root`));
         expect(res1!.symbol).to.eql(CSSType.getType(btnMeta, `ButtonX`));
     });
 
@@ -330,7 +330,7 @@ describe('stylable-resolver', () => {
         const btn1 = entryMeta.mappedSymbols.ButtonX;
         const res1 = resolver.deepResolve(btn1);
 
-        expect(res1!.symbol).to.eql(btnXMeta.classes.root);
+        expect(res1!.symbol).to.eql(CSSClass.getClass(btnXMeta, `root`));
     });
 
     it('should handle circular "re-declare" (deepResolve)', () => {
@@ -353,7 +353,7 @@ describe('stylable-resolver', () => {
         const a = entryMeta.mappedSymbols.a;
         const res1 = resolver.deepResolve(a);
 
-        expect(res1!.symbol).to.eql(entryMeta.classes.a);
+        expect(res1!.symbol).to.eql(CSSClass.getClass(entryMeta, `a`));
     });
 
     it('should handle circular "re-declare" (resolveSymbolOrigin)', () => {
@@ -376,7 +376,7 @@ describe('stylable-resolver', () => {
         const a = entryMeta.mappedSymbols.a;
         const res1 = resolver.resolveSymbolOrigin(a, entryMeta);
 
-        expect(res1!.symbol).to.eql(entryMeta.classes.a);
+        expect(res1!.symbol).to.eql(CSSClass.getClass(entryMeta, `a`));
     });
 
     it('should resolve alias origin', () => {
@@ -424,8 +424,8 @@ describe('stylable-resolver', () => {
         const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
         const res2 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.b, entryMeta);
 
-        expect(res1!.symbol).to.eql(a1.classes.a);
-        expect(res2!.symbol).to.eql(a1.classes.b);
+        expect(res1!.symbol).to.eql(CSSClass.getClass(a1, `a`));
+        expect(res2!.symbol).to.eql(CSSClass.getClass(a1, `b`));
     });
 
     it('should not resolve extends on alias', () => {
@@ -452,7 +452,7 @@ describe('stylable-resolver', () => {
 
         const entryMeta = fileProcessor.process('/entry.st.css');
         const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
-        expect(res1!.symbol).to.eql(entryMeta.classes.a);
+        expect(res1!.symbol).to.eql(CSSClass.getClass(entryMeta, `a`));
     });
 
     it('should resolve 4th party according to context', () => {

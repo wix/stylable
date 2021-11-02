@@ -1,4 +1,5 @@
 import { CSSClass, STSymbol } from '@stylable/core/dist/features';
+import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import {
     generateStylableResult,
     expectWarningsFromTransform as expectWarnings,
@@ -28,6 +29,14 @@ describe(`features/css-class`, () => {
             expect(CSSClass.getClass(meta, `b`), `b`).to.contain({
                 _kind: `class`,
                 name: 'b',
+            });
+            // deprecation
+            expect(
+                ignoreDeprecationWarn(() => meta.classes),
+                `deprecated 'meta.classes'`
+            ).to.eql({
+                a: CSSClass.getClass(meta, `a`),
+                b: CSSClass.getClass(meta, `b`),
             });
         });
         it(`should have root class symbol by default`, () => {
@@ -95,6 +104,26 @@ describe(`features/css-class`, () => {
                 },
             });
             expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
+        });
+        it(`should return collected symbols`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: `
+                            .btn {}
+                            .gallery {}
+                        `,
+                    },
+                },
+            });
+
+            expect(CSSClass.getSymbols(meta)).to.eql({
+                root: CSSClass.getClass(meta, `root`),
+                btn: CSSClass.getClass(meta, `btn`),
+                gallery: CSSClass.getClass(meta, `gallery`),
+            });
         });
     });
     describe(`diagnostics`, () => {

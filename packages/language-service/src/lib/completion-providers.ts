@@ -20,7 +20,7 @@ import {
     valueMapping,
     VarSymbol,
 } from '@stylable/core';
-
+import { CSSClass } from '@stylable/core/dist/features';
 import type { IFileSystem } from '@file-services/types';
 import {
     classCompletion,
@@ -463,7 +463,7 @@ export const SelectorCompletionProvider: CompletionProvider = {
         if (!parentSelector && (lineChunkAtCursor === ':' || !lineChunkAtCursor.endsWith(':'))) {
             const comps: Completion[] = [];
             comps.push(
-                ...Object.keys(meta.classes)
+                ...Object.keys(CSSClass.getSymbols(meta))
                     .filter(
                         (c) => c !== 'root' && fakes.findIndex((f) => f.selector === '.' + c) === -1
                     )
@@ -531,7 +531,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
             const str = value.slice(spaces);
             const comps: string[][] = [[]];
             comps.push(
-                ...Object.keys(meta.classes)
+                ...Object.keys(CSSClass.getSymbols(meta))
                     .filter((s) => s.startsWith(str))
                     .map((s) => [s, 'Local file'])
             );
@@ -1016,7 +1016,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                 }
 
                 comps = comps.concat(
-                    Object.keys(res.meta.classes)
+                    Object.keys(CSSClass.getSymbols(res.meta))
                         .concat(
                             Object.keys(res.meta.customSelectors).map((s) => s.slice(':--'.length))
                         )
@@ -1059,7 +1059,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                     }
 
                     comps = comps.concat(
-                        Object.keys(res.meta.classes)
+                        Object.keys(CSSClass.getSymbols(res.meta))
                             .concat(
                                 Object.keys(res.meta.customSelectors).map((s) =>
                                     s.slice(':--'.length)

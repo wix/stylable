@@ -735,7 +735,7 @@ export class StylableTransformer {
                 string,
                 Array<CSSResolve<ClassSymbol | ElementSymbol>>
             > = {};
-            for (const className of Object.keys(meta.classes)) {
+            for (const [className, classSymbol] of Object.entries(CSSClass.getSymbols(meta))) {
                 resolvedClasses[className] = this.resolver.resolveExtends(
                     meta,
                     className,
@@ -766,7 +766,7 @@ export class StylableTransformer {
                                 );
                             }
                         } else {
-                            if (meta.classes[className] && meta.classes[className].alias) {
+                            if (classSymbol.alias) {
                                 meta.ast.walkRules(new RegExp('\\.' + className), (rule) => {
                                     this.diagnostics.error(
                                         rule,

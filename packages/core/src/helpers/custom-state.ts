@@ -5,6 +5,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver } from '../stylable-resolver';
 import { valueMapping } from '../stylable-value-parsers';
 import { validateStateArgument } from '../pseudo-states';
+import { CSSClass } from '../features';
 
 export function validateRuleStateDefinition(
     rule: postcss.Rule,
@@ -19,7 +20,7 @@ export function validateRuleStateDefinition(
         const selectorChunk = singleSelectorAst.nodes;
         if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
             const className = selectorChunk[0].value;
-            const classMeta = meta.classes[className];
+            const classMeta = CSSClass.getClass(meta, className)!;
             const states = classMeta[valueMapping.states];
 
             if (classMeta && classMeta._kind === 'class' && states) {

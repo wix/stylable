@@ -16,6 +16,7 @@ import type { StylableResolver } from './stylable-resolver';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
+import { CSSClass } from './features';
 import { stripQuotation } from './utils';
 import { reservedPseudoClasses } from './native-reserved-lists';
 import cssesc from 'cssesc';
@@ -200,7 +201,7 @@ export const validateStateDefinition = wrapFunctionForDeprecation(
 
                     if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
                         const className = selectorChunk[0].value;
-                        const classMeta = meta.classes[className];
+                        const classMeta = CSSClass.getClass(meta, className)!;
                         const states = classMeta[valueMapping.states];
 
                         if (classMeta && classMeta._kind === 'class' && states) {

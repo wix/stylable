@@ -3,6 +3,7 @@ import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
+import { CSSClass } from '@stylable/core/dist/features';
 
 chai.use(flatMatch);
 
@@ -274,7 +275,7 @@ describe('Stylable postcss process', () => {
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
 
-        expect(result.classes).to.flatMatch({
+        expect(CSSClass.getSymbols(result)).to.flatMatch({
             myclass: {
                 '-st-extends': {
                     _kind: 'import',
@@ -297,7 +298,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(result.classes).to.eql({
+        expect(CSSClass.getSymbols(result)).to.eql({
             root: {
                 _kind: 'class',
                 name: 'root',
@@ -319,7 +320,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(Object.keys(result.classes).length).to.eql(6);
+        expect(Object.keys(CSSClass.getSymbols(result)).length).to.eql(6);
     });
 
     it('collect classes in @media', () => {
@@ -336,7 +337,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(Object.keys(result.classes).length).to.eql(6);
+        expect(Object.keys(CSSClass.getSymbols(result)).length).to.eql(6);
     });
 
     it('collect @keyframes', () => {

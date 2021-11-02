@@ -20,6 +20,7 @@ import {
     valueMapping,
     JSResolve,
 } from '@stylable/core';
+import { CSSClass } from '@stylable/core/dist/features';
 import type {
     Location,
     ParameterInformation,
@@ -311,7 +312,7 @@ export class Provider {
         elementName: string,
         state: string
     ): CSSResolve | null {
-        const importedSymbol = origMeta.classes[elementName][valueMapping.extends];
+        const importedSymbol = CSSClass.getClass(origMeta, elementName)![valueMapping.extends];
         let res: CSSResolve | JSResolve | null = null;
 
         if (importedSymbol && importedSymbol._kind === 'import') {

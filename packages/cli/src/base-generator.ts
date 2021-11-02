@@ -1,5 +1,6 @@
 import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
+import { CSSClass } from '@stylable/core/dist/features';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { basename, relative } from 'path';
@@ -97,7 +98,7 @@ export class Generator {
 export function reExportsAllSymbols(filePath: string, generator: Generator): ReExports {
     const meta = generator.stylable.process(filePath);
     const rootExport = generator.filename2varname(filePath);
-    const classes = Object.keys(meta.classes)
+    const classes = Object.keys(CSSClass.getSymbols(meta))
         .filter((name) => name !== meta.root)
         .reduce<Record<string, string>>((acc, className) => {
             acc[className] = `${rootExport}__${className}`;

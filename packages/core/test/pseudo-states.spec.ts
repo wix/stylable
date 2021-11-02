@@ -12,6 +12,7 @@ import {
 } from '@stylable/core-test-kit';
 import { processorWarnings, valueMapping, nativePseudoClasses, pseudoStates } from '@stylable/core';
 import { reservedPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
+import { CSSClass } from '@stylable/core/dist/features';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -31,14 +32,14 @@ describe('pseudo-states', () => {
         describe(`reserved pseudo classes`, () => {
             reservedPseudoClasses.forEach((name) => {
                 it(`should NOT collect "${name}"`, () => {
-                    const { classes } = processSource(
+                    const meta = processSource(
                         `
                         .root {
                             -st-states: custom-only, ${name};
                         }`,
                         { from: 'path/to/style.css' }
                     );
-                    expect(classes).to.flatMatch({
+                    expect(CSSClass.getSymbols(meta)).to.flatMatch({
                         root: {
                             [valueMapping.states]: {
                                 'custom-only': null,
@@ -61,7 +62,7 @@ describe('pseudo-states', () => {
         });
         describe('boolean', () => {
             it('should collect state definitions as null (for boolean)', () => {
-                const { classes, diagnostics } = processSource(
+                const meta = processSource(
                     `
                     .root {
                         -st-states: state1, state2;
@@ -70,8 +71,8 @@ describe('pseudo-states', () => {
                     { from: 'path/to/style.css' }
                 );
 
-                expect(diagnostics.reports.length, 'no reports').to.eql(0);
-                expect(classes).to.flatMatch({
+                expect(meta.diagnostics.reports.length, 'no reports').to.eql(0);
+                expect(CSSClass.getSymbols(meta)).to.flatMatch({
                     root: {
                         [valueMapping.states]: {
                             state1: null,
@@ -93,7 +94,7 @@ describe('pseudo-states', () => {
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                expect(res.classes).to.containSubset({
+                expect(CSSClass.getSymbols(res)).to.containSubset({
                     root: {
                         [valueMapping.states]: {
                             state1: null,
@@ -187,7 +188,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -210,7 +211,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -232,7 +233,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -256,7 +257,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -285,7 +286,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -315,7 +316,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -348,7 +349,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -383,7 +384,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -408,7 +409,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -434,7 +435,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 size: {
@@ -461,7 +462,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 size: {
@@ -488,7 +489,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 category: {
@@ -510,7 +511,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.classes).to.containSubset({
+                    expect(CSSClass.getSymbols(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 category: {
@@ -536,7 +537,7 @@ describe('pseudo-states', () => {
                 );
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                expect(res.classes).to.flatMatch({
+                expect(CSSClass.getSymbols(res)).to.flatMatch({
                     root: {
                         [valueMapping.states]: {
                             state1: null, // boolean

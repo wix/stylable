@@ -1,5 +1,6 @@
 import { basename } from 'path';
 import { ClassSymbol, StylableMeta, valueMapping } from '@stylable/core';
+import { CSSClass } from '@stylable/core/dist/features';
 import { encode } from 'vlq';
 import {
     ClassesToken,
@@ -11,7 +12,7 @@ import {
 type LineMapping = Array<Array<number>>;
 
 function getClassSrcPosition(className: string, meta: StylableMeta): Position | undefined {
-    const cls = meta.classes[className];
+    const cls = CSSClass.getClass(meta, className);
     let res;
 
     if (cls) {
@@ -139,7 +140,10 @@ function createStateLineMapping(
     for (const stateToken of stateTokens) {
         let stateSourcePosition: Position | undefined;
 
-        const srcClassName = findDefiningClassName(stateToken, meta.classes[entryClassName]);
+        const srcClassName = findDefiningClassName(
+            stateToken,
+            CSSClass.getClass(meta, entryClassName)!
+        );
 
         meta.rawAst.walkRules(`.${srcClassName}`, (rule) => {
             return rule.walkDecls(valueMapping.states, (decl) => {
