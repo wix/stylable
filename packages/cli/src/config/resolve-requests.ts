@@ -11,21 +11,19 @@ export const resolveNpmRequests: ResolveRequests = (entities, { projectRoot }) =
 
     for (const entity of entities) {
         const { request } = entity;
-        const workspacePackages = sortPackagesByDepth(
-            resolveWorkspacePackages(projectRoot, [request])
-        );
+        const workspacePackages = resolveWorkspacePackages(projectRoot, [request]);
 
         if (!workspacePackages.length) {
             throw new Error(`Stylable CLI config can not resolve project request "${request}"`);
         }
 
         for (const pkg of workspacePackages) {
-            const previousEntity = entitiesMap.get(pkg.displayName);
+            const existingEntity = entitiesMap.get(pkg.displayName);
 
             // adding the npm package once to keep the original package order and to avoid duplicates
-            if (previousEntity) {
+            if (existingEntity) {
                 // validate duplicate requests, e.g. "packages/*" twice
-                if (previousEntity.request === request) {
+                if (existingEntity.request === request) {
                     throw new Error(
                         'Stylable CLI config can not have a duplicate project requests'
                     );
@@ -39,7 +37,7 @@ export const resolveNpmRequests: ResolveRequests = (entities, { projectRoot }) =
         }
     }
 
-    return Array.from(packages).map((pkg) => ({
+    return sortPackagesByDepth(Array.from(packages)).map((pkg) => ({
         projectRoot: pkg.directoryPath,
         options: entitiesMap.get(pkg.displayName)!.options,
     }));
