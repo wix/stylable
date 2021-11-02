@@ -1,4 +1,4 @@
-@st-import [jsColor] from "./js-function.js";
+@st-import [jsColor] from "./js-function";
 
 .root {
     font-size: 120px;
