@@ -43,7 +43,7 @@ export class StylableMeta {
     public transformDiagnostics: Diagnostics | null;
     public transformedScopes: Record<string, SelectorList> | null;
     public scopes: postcss.AtRule[];
-    public simpleSelectors: Record<string, StylablePart>;
+    public simpleSelectors: Record<string, StylablePart> = {};
     public mixins: RefedMixin[];
     // Generated during transform
     public outputAst?: postcss.Root;
@@ -70,10 +70,13 @@ export class StylableMeta {
         this.customSelectors = {};
         this.urls = [];
         this.scopes = [];
-        this.simpleSelectors = {};
         setFieldForDeprecation(this, `mixins`, { objectType: `stylableMeta` });
         this.mixins = [];
         this.transformDiagnostics = null;
         this.transformedScopes = null;
     }
 }
+setFieldForDeprecation(StylableMeta.prototype, `simpleSelectors`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+});

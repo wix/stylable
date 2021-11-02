@@ -4,6 +4,7 @@ import type { ElementSymbol } from './css-type';
 import * as CSSClass from './css-class';
 import * as CSSType from './css-type';
 import { plugableRecord } from '../helpers/plugable-record';
+import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { StylableMeta } from '../stylable-meta';
 import type { ImmutableClass, ImmutableType } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
@@ -47,7 +48,9 @@ export const hooks = createFeature({
                 symbol,
             };
             // deprecated
-            meta.simpleSelectors[name] = stPartData[name];
+            ignoreDeprecationWarn(() => {
+                meta.simpleSelectors[name] = stPartData[name];
+            });
         }
     },
 });

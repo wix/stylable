@@ -1,5 +1,6 @@
 import { extract, parseWithComments } from 'jest-docblock';
 import type { StylableMeta, StylableSymbol } from '@stylable/core';
+import { STPart } from '@stylable/core/dist/features';
 
 export interface CssDoc {
     description: string;
@@ -10,8 +11,7 @@ export function getCssDocsForSymbol(meta: StylableMeta, symbol: StylableSymbol):
     let commentNode;
 
     if (symbol._kind === 'class' || symbol._kind === 'element') {
-        commentNode =
-            meta.simpleSelectors[symbol.name] && meta.simpleSelectors[symbol.name].node.prev();
+        commentNode = STPart.getPart(meta, symbol.name)?.node.prev();
     } else if (symbol._kind === 'var') {
         commentNode = symbol.node.prev();
     }
