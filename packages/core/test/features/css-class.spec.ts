@@ -35,6 +35,7 @@ describe(`features/css-class`, () => {
                 ignoreDeprecationWarn(() => meta.classes),
                 `deprecated 'meta.classes'`
             ).to.eql({
+                root: CSSClass.getClass(meta, `root`),
                 a: CSSClass.getClass(meta, `a`),
                 b: CSSClass.getClass(meta, `b`),
             });
