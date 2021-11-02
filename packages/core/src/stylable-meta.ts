@@ -34,7 +34,7 @@ export class StylableMeta {
     public cssVars: Record<string, CSSVarSymbol>;
     public keyframes: postcss.AtRule[];
     public classes: Record<string, ClassSymbol> = {};
-    public elements: Record<string, ElementSymbol>;
+    public elements: Record<string, ElementSymbol> = {};
     public mappedSymbols: Record<string, StylableSymbol> = {};
     public mappedKeyframes: Record<string, KeyframesSymbol>;
     public customSelectors: Record<string, string>;
@@ -65,7 +65,6 @@ export class StylableMeta {
         this.vars = [];
         this.cssVars = {};
         this.keyframes = [];
-        this.elements = {};
         this.mappedKeyframes = {};
         this.customSelectors = {};
         this.urls = [];
@@ -77,6 +76,10 @@ export class StylableMeta {
     }
 }
 setFieldForDeprecation(StylableMeta.prototype, `simpleSelectors`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+});
+setFieldForDeprecation(StylableMeta.prototype, `elements`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
 });

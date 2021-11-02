@@ -6,6 +6,7 @@ import * as CSSClass from './css-class';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
 import { isCompRoot, stringifySelector } from '../helpers/selector';
+import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
@@ -65,6 +66,10 @@ export function getType({ data }: StylableMeta, name: string): ElementSymbol | u
     return state[name];
 }
 
+export function getSymbols({ data }: StylableMeta): Record<string, ElementSymbol> {
+    return plugableRecord.getUnsafeAssure(data, dataKey);
+}
+
 export function addType(meta: StylableMeta, name: string, rule?: postcss.Rule): ElementSymbol {
     const cssTypeData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
     let typeSymbol = cssTypeData[name];
@@ -85,7 +90,9 @@ export function addType(meta: StylableMeta, name: string, rule?: postcss.Rule): 
             safeRedeclare: !!alias,
         });
         // deprecated
-        meta.elements[name] = typeSymbol;
+        ignoreDeprecationWarn(() => {
+            meta.elements[name] = typeSymbol;
+        });
     }
     return typeSymbol;
 }

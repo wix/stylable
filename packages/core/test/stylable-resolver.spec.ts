@@ -11,6 +11,7 @@ import {
     StylableMeta,
     createDefaultResolver,
 } from '@stylable/core';
+import { CSSType } from '@stylable/core/dist/features';
 
 function createResolveExtendsResults(
     fs: MinimalFS,
@@ -291,7 +292,7 @@ describe('stylable-resolver', () => {
         const res1 = resolver.resolve(btn1);
 
         expect(res!.symbol).to.eql(btnMeta.classes.root);
-        expect(res1!.symbol).to.eql(btnMeta.elements.ButtonX);
+        expect(res1!.symbol).to.eql(CSSType.getType(btnMeta, `ButtonX`));
     });
 
     it('should resolve elements deep', () => {

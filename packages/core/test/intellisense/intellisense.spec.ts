@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { createTransformer } from '@stylable/core-test-kit';
 import { expandCustomSelectors } from '@stylable/core';
+import { CSSType } from '@stylable/core/dist/features';
 
 describe('Stylable intellisense selector meta data', () => {
     it('resolve single class element', () => {
@@ -568,7 +569,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: meta.elements.Comp,
+                        symbol: CSSType.getType(meta, `Comp`),
                         _kind: 'css',
                     },
                     {

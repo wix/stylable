@@ -10,6 +10,7 @@ import type {
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
+import { CSSClass, CSSType } from './features';
 
 export const resolverWarnings = {
     UNKNOWN_IMPORTED_FILE(path: string) {
@@ -280,11 +281,13 @@ export class StylableResolver {
             isElement: boolean
         ) => void
     ): Array<CSSResolve<ClassSymbol | ElementSymbol>> {
-        const bucket = isElement ? meta.elements : meta.classes;
+        const symbol = isElement
+            ? CSSType.getType(meta, className)
+            : CSSClass.getClass(meta, className);
 
         const customSelector = isElement ? null : meta.customSelectors[':--' + className];
 
-        if (!bucket[className] && !customSelector) {
+        if (!symbol && !customSelector) {
             return [];
         }
 
@@ -297,9 +300,13 @@ export class StylableResolver {
             }
         }
 
+        if (!symbol) {
+            return [];
+        }
+
         let current = {
             _kind: 'css' as const,
-            symbol: bucket[className],
+            symbol: symbol,
             meta,
         };
         const extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>> = [];

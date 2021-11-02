@@ -30,7 +30,7 @@ import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
-import { CSSClass } from './features';
+import { CSSClass, CSSType } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
@@ -785,7 +785,7 @@ export class StylableTransformer {
                 string,
                 Array<CSSResolve<ClassSymbol | ElementSymbol>>
             > = {};
-            for (const k of Object.keys(meta.elements)) {
+            for (const k of Object.keys(CSSType.getSymbols(meta))) {
                 resolvedElements[k] = this.resolver.resolveExtends(meta, k, true);
             }
             metaParts = { class: resolvedClasses, element: resolvedElements };

@@ -289,22 +289,6 @@ describe('Stylable postcss process', () => {
         });
     });
 
-    it('collect typed elements', () => {
-        const result = processSource(
-            `
-            Element {
-
-            }
-            div {
-
-            }
-        `,
-            { from: 'path/to/style.css' }
-        );
-
-        expect(Object.keys(result.elements).length).to.eql(1);
-    });
-
     it('always contain root class', () => {
         const result = processSource(
             `

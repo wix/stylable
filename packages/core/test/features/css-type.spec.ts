@@ -1,4 +1,5 @@
 import { CSSType, STSymbol } from '@stylable/core/dist/features';
+import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import {
     generateStylableResult,
     expectWarningsFromTransform as expectWarnings,
@@ -26,6 +27,11 @@ describe(`features/css-type`, () => {
                 name: 'Btn',
             });
             expect(CSSType.getType(meta, `span`), `div`).to.eql(undefined);
+            // deprecation
+            expect(
+                ignoreDeprecationWarn(() => meta.elements),
+                `deprecated 'meta.elements'`
+            ).to.eql({ Btn: CSSType.getType(meta, `Btn`) });
         });
         it(`should add to general symbols`, () => {
             const { meta } = generateStylableResult({
@@ -73,6 +79,25 @@ describe(`features/css-type`, () => {
                 },
             });
             expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
+        });
+        it(`should return collected symbols`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: `
+                            Btn {}
+                            Gallery {}
+                        `,
+                    },
+                },
+            });
+
+            expect(CSSType.getSymbols(meta)).to.eql({
+                Btn: CSSType.getType(meta, `Btn`),
+                Gallery: CSSType.getType(meta, `Gallery`),
+            });
         });
     });
     describe(`diagnostics`, () => {
