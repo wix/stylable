@@ -1,4 +1,5 @@
 import { STPart, CSSClass, CSSType } from '@stylable/core/dist/features';
+import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
@@ -26,6 +27,14 @@ describe(`features/st-part`, () => {
                 node: meta.ast.nodes[1],
                 symbol: CSSClass.getClass(meta, `b`),
             });
+            // deprecation
+            expect(
+                ignoreDeprecationWarn(() => meta.simpleSelectors),
+                `deprecated 'meta.simpleSelectors'`
+            ).to.eql({
+                a: STPart.getPart(meta, `a`),
+                b: STPart.getPart(meta, `b`),
+            });
         });
         it(`should collect only type selector component part definitions (capital letter)`, () => {
             const { meta } = generateStylableResult({
@@ -46,6 +55,13 @@ describe(`features/st-part`, () => {
                 symbol: CSSType.getType(meta, `Comp`),
             });
             expect(STPart.getPart(meta, `span`), `native`).to.equal(undefined);
+            // deprecation
+            expect(
+                ignoreDeprecationWarn(() => meta.simpleSelectors),
+                `deprecated 'meta.simpleSelectors'`
+            ).to.eql({
+                Comp: STPart.getPart(meta, `Comp`),
+            });
         });
         it(`should NOT have root class symbol by default`, () => {
             const { meta } = generateStylableResult({
