@@ -82,7 +82,7 @@ export function addType(meta: StylableMeta, name: string, rule?: postcss.Rule): 
             meta,
             symbol: typeSymbol,
             node: rule,
-            force: true,
+            ignoreRedeclare: !!alias,
         });
         // deprecated
         meta.elements[name] = typeSymbol;

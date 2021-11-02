@@ -21,6 +21,24 @@ describe(`features/st-symbol`, () => {
 
             expect(STSymbol.getSymbol(meta, `a`)).to.equal(symbol);
         });
+        it(`should override previous symbol`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: ``,
+                    },
+                },
+            });
+            const symbolA: StylableSymbol = { _kind: `class`, name: `a` };
+            const symbolB: StylableSymbol = { _kind: `element`, name: `a` };
+
+            STSymbol.addSymbol({ meta, symbol: symbolA });
+            STSymbol.addSymbol({ meta, symbol: symbolB });
+
+            expect(STSymbol.getSymbol(meta, `a`), `override`).to.equal(symbolB);
+        });
     });
     describe(`diagnostics`, () => {
         it(`should warn on node with re-declared symbol`, () => {
@@ -37,21 +55,21 @@ describe(`features/st-symbol`, () => {
             const ruleA = new postcss.Rule();
             const ruleB = new postcss.Rule();
 
-            STSymbol.addSymbol({ meta, symbol, node: ruleA});
-            STSymbol.addSymbol({ meta, symbol, node: ruleB});
-
+            STSymbol.addSymbol({ meta, symbol, node: ruleA });
+            STSymbol.addSymbol({ meta, symbol, node: ruleB });
+            // ToDo: warn on all declarations including the first
             expect(meta.diagnostics.reports).to.eql([
                 {
                     type: `warning`,
                     message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleB,
                     options: {
-                        word: `a`
-                    }
-                }
+                        word: `a`,
+                    },
+                },
             ]);
         });
-        it(`should NOT warn re-declared symbol with force=true or missing node`, () => {
+        it(`should NOT warn re-declared symbol with ignoreRedeclare=true or missing node`, () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -65,9 +83,10 @@ describe(`features/st-symbol`, () => {
             const ruleA = new postcss.Rule();
             const ruleB = new postcss.Rule();
 
-            STSymbol.addSymbol({ meta, symbol, node: ruleA});
-            STSymbol.addSymbol({ meta, symbol, node: ruleB, force: true});
-            STSymbol.addSymbol({ meta, symbol });
+            // first symbol
+            STSymbol.addSymbol({ meta, symbol, node: ruleA });
+            // override
+            STSymbol.addSymbol({ meta, symbol, node: ruleB, ignoreRedeclare: true });
 
             expect(meta.diagnostics.reports).to.eql([]);
         });

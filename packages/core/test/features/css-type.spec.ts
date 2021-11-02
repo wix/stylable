@@ -42,6 +42,38 @@ describe(`features/css-type`, () => {
 
             expect(CSSType.getType(meta, `Comp`)).to.equal(STSymbol.getSymbol(meta, `Comp`));
         });
+        it(`should mark type as import alias`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: `
+                            @st-import Imported from './other.st.css';
+                            .root Imported {}
+                        `,
+                    },
+                    '/other.st.css': {
+                        namespace: `other`,
+                        content: ``,
+                    },
+                },
+            });
+
+            // ToDo: replace with STImport.getImport() once import feature is ready
+            expect(CSSType.getType(meta, `Imported`), `symbol`).to.eql({
+                _kind: `element`,
+                name: 'Imported',
+                alias: {
+                    _kind: 'import',
+                    type: 'default',
+                    name: 'default',
+                    import: meta.imports[0],
+                    context: `/`,
+                },
+            });
+            expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
+        });
     });
     describe(`diagnostics`, () => {
         it(`should error on unsupported functional class`, () => {

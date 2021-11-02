@@ -41,24 +41,22 @@ export function addSymbol({
     meta,
     symbol,
     node,
-    force = false,
+    ignoreRedeclare = false,
 }: {
     meta: StylableMeta;
     symbol: StylableSymbol;
     node?: postcss.Node;
-    force?: boolean;
+    ignoreRedeclare?: boolean;
 }) {
     const stSymbolData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
     const name = symbol.name;
-    if (stSymbolData[name] && !force) {
-        if (node) {
-            meta.diagnostics.warn(node, diagnostics.REDECLARE_SYMBOL(name), {
-                word: name,
-            });
-        }
-    } else {
-        stSymbolData[name] = symbol;
-        // deprecated
-        meta.mappedSymbols[name] = symbol;
+    const existingSymbol = stSymbolData[name] || /*deprecated*/ meta.mappedSymbols[name];
+    if (existingSymbol && node && ignoreRedeclare) {
+        meta.diagnostics.warn(node, diagnostics.REDECLARE_SYMBOL(name), {
+            word: name,
+        });
     }
+    stSymbolData[name] = symbol;
+    // deprecated
+    meta.mappedSymbols[name] = symbol;
 }

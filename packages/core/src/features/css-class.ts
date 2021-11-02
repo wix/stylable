@@ -71,7 +71,7 @@ export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule):
             meta,
             symbol: classSymbol,
             node: rule,
-            force: true,
+            ignoreRedeclare: !!alias,
         });
         // deprecated
         meta.classes[name] = classSymbol;

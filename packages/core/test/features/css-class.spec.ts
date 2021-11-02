@@ -64,6 +64,38 @@ describe(`features/css-class`, () => {
                 STSymbol.getSymbol(meta, `root`)
             );
         });
+        it(`should mark class as import alias`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: `
+                            @st-import [imported] from './other.st.css';
+                            .root .imported {}
+                        `,
+                    },
+                    '/other.st.css': {
+                        namespace: `other`,
+                        content: `.imported {}`,
+                    },
+                },
+            });
+
+            // ToDo: replace with STImport.getImport() once import feature is ready
+            expect(CSSClass.getClass(meta, `imported`), `symbol`).to.eql({
+                _kind: `class`,
+                name: 'imported',
+                alias: {
+                    _kind: 'import',
+                    type: 'named',
+                    name: 'imported',
+                    import: meta.imports[0],
+                    context: `/`,
+                },
+            });
+            expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
+        });
     });
     describe(`diagnostics`, () => {
         it(`should error on unsupported functional class`, () => {
