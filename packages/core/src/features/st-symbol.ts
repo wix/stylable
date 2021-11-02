@@ -41,17 +41,17 @@ export function addSymbol({
     meta,
     symbol,
     node,
-    ignoreRedeclare = false,
+    safeRedeclare = false,
 }: {
     meta: StylableMeta;
     symbol: StylableSymbol;
     node?: postcss.Node;
-    ignoreRedeclare?: boolean;
+    safeRedeclare?: boolean;
 }) {
     const stSymbolData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
     const name = symbol.name;
     const existingSymbol = stSymbolData[name] || /*deprecated*/ meta.mappedSymbols[name];
-    if (existingSymbol && node && ignoreRedeclare) {
+    if (existingSymbol && node && !safeRedeclare) {
         meta.diagnostics.warn(node, diagnostics.REDECLARE_SYMBOL(name), {
             word: name,
         });

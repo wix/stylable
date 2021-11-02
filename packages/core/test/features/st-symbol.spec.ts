@@ -69,7 +69,7 @@ describe(`features/st-symbol`, () => {
                 },
             ]);
         });
-        it(`should NOT warn re-declared symbol with ignoreRedeclare=true or missing node`, () => {
+        it(`should NOT warn re-declared symbol with safeRedeclare=true or missing node`, () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -85,8 +85,10 @@ describe(`features/st-symbol`, () => {
 
             // first symbol
             STSymbol.addSymbol({ meta, symbol, node: ruleA });
-            // override
-            STSymbol.addSymbol({ meta, symbol, node: ruleB, ignoreRedeclare: true });
+            // override: no diagnostics
+            STSymbol.addSymbol({ meta, symbol, node: ruleB, safeRedeclare: true });
+            // missing node: no diagnostics
+            STSymbol.addSymbol({ meta, symbol });
 
             expect(meta.diagnostics.reports).to.eql([]);
         });
