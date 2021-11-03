@@ -87,10 +87,11 @@ export class StylableResolver {
         }
 
         let entity: CachedModuleEntity;
-        const resolvedPath = this.resolvePath(context, request);
-        if (resolvedPath.endsWith('.css')) {
+        
+        if (request.endsWith('.css')) {
             const kind = 'css';
             try {
+                const resolvedPath = this.resolvePath(context, request);
                 entity = { kind, value: this.fileProcessor.process(resolvedPath), resolvedPath };
             } catch (error) {
                 entity = { kind, value: null, error, request, context };
@@ -98,6 +99,7 @@ export class StylableResolver {
         } else {
             const kind = 'js';
             try {
+                const resolvedPath = this.resolvePath(context, request);
                 entity = { kind, value: this.requireModule(resolvedPath), resolvedPath };
             } catch (error) {
                 entity = { kind, value: null, error, request, context };
