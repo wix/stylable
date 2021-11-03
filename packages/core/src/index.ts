@@ -59,7 +59,6 @@ export {
 } from './stylable-utils';
 export {
     CSSResolve,
-    CachedModule,
     JSResolve,
     JsModule,
     StylableResolver,
