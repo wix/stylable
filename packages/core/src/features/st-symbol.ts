@@ -57,8 +57,7 @@ export function addSymbol({
 }) {
     const stSymbolData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
     const name = localName || symbol.name;
-    const existingSymbol =
-        stSymbolData[name] || /*deprecated*/ ignoreDeprecationWarn(() => meta.mappedSymbols[name]);
+    const existingSymbol = stSymbolData[name];
     if (existingSymbol && node && !safeRedeclare) {
         meta.diagnostics.warn(node, diagnostics.REDECLARE_SYMBOL(name), {
             word: name,
