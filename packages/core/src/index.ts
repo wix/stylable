@@ -95,7 +95,7 @@ export {
     valueMapping,
     valueParserWarnings,
 } from './stylable-value-parsers';
-export { StylableInfrastructure, createInfrastructure } from './create-infra-structure';
+export { createStylableFileProcessor } from './create-infra-structure';
 export { CreateProcessorOptions, Stylable, StylableConfig } from './stylable';
 export {
     CSSObject,

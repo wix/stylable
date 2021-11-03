@@ -10,6 +10,7 @@ import type {
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
+import type { ModuleResolver } from './types';
 
 export const resolverWarnings = {
     UNKNOWN_IMPORTED_FILE(path: string) {
@@ -54,7 +55,8 @@ const safePathDelimiter = ';:';
 export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
-        protected requireModule: (modulePath: string) => any,
+        protected requireModule: (resolvedPath: string) => any,
+        public resolvePath: ModuleResolver,
         protected cache?: StylableResolverCache
     ) {}
     private getModule({ context, from }: Imported): CachedModule {
@@ -63,15 +65,16 @@ export class StylableResolver {
             return this.cache.get(key)!;
         }
         let res;
+
         if (from.match(/\.css$/)) {
             try {
-                res = this.fileProcessor.process(from, false, context);
+                res = this.fileProcessor.process(this.resolvePath(context, from), false);
             } catch (e) {
                 res = null;
             }
         } else {
             try {
-                res = this.requireModule(this.fileProcessor.resolvePath(from, context));
+                res = this.requireModule(this.resolvePath(context, from));
             } catch {
                 res = null;
             }
@@ -383,8 +386,5 @@ export class StylableResolver {
                 }
             }
         }
-    }
-    public resolvePath(path: string, context?: string) {
-        return this.fileProcessor.resolvePath(path, context);
     }
 }

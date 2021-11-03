@@ -1,47 +1,21 @@
-import path from 'path';
-import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
+import { cachedProcessFile, CacheItem, MinimalFS } from './cached-process-file';
 import { cssParse, CssParser } from './parser';
-import { process, processNamespace } from './stylable-processor';
+import { processNamespace, StylableProcessor } from './stylable-processor';
 import type { StylableMeta } from './stylable-meta';
-import { timedCache, TimedCacheOptions } from './timed-cache';
-import { createDefaultResolver } from './module-resolver';
 import type { Diagnostics } from './diagnostics';
 
-export interface StylableInfrastructure {
-    fileProcessor: FileProcessor<StylableMeta>;
-    resolvePath: (context: string | undefined, path: string) => string;
-}
-
-export function createInfrastructure(
-    projectRoot: string,
+export function createStylableFileProcessor(
     fileSystem: MinimalFS,
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
-    resolveOptions: any = {},
     resolveNamespace?: typeof processNamespace,
-    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
-    resolveModule = createDefaultResolver(fileSystem, resolveOptions),
     cssParser: CssParser = cssParse,
+    cache?: Record<string, CacheItem<StylableMeta>>,
     createDiagnostics?: (from: string) => Diagnostics
-): StylableInfrastructure {
-    let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
-        return path.isAbsolute(moduleId) ? moduleId : resolveModule(context, moduleId);
-    };
-
-    if (timedCacheOptions) {
-        const cacheManager = timedCache(resolvePath, {
-            createKey: (args: string[]) => args.join(';'),
-            ...timedCacheOptions,
-        });
-        resolvePath = cacheManager.get;
-    }
-
-    const fileProcessor = cachedProcessFile<StylableMeta>(
+) {
+    return cachedProcessFile<StylableMeta>(
         (from, content) => {
-            const resolvedFrom = resolvePath(projectRoot, from);
-            return process(
-                cssParser(content, { from: resolvedFrom }),
-                createDiagnostics?.(resolvedFrom),
-                resolveNamespace
+            return new StylableProcessor(createDiagnostics?.(from), resolveNamespace).process(
+                cssParser(content, { from })
             );
         },
         {
@@ -61,15 +35,7 @@ export function createInfrastructure(
                 throw new Error(`not implemented`);
             },
         },
-        (path, context) => resolvePath(context || projectRoot, path)
+        onProcess && [onProcess],
+        cache
     );
-
-    if (onProcess) {
-        fileProcessor.postProcessors.push(onProcess);
-    }
-
-    return {
-        resolvePath,
-        fileProcessor,
-    };
 }

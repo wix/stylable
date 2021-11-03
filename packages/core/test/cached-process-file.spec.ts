@@ -21,13 +21,9 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            (_fullpath, content) => {
-                return content + '!';
-            },
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile((_fullpath, content) => {
+            return content + '!';
+        }, fs);
 
         expect(p.process(file)).to.equal('content!');
     });
@@ -52,15 +48,11 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            (fullpath, content) => {
-                const processed = { content, fullpath };
-                res = res ? res : processed;
-                return processed;
-            },
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile((fullpath, content) => {
+            const processed = { content, fullpath };
+            res = res ? res : processed;
+            return processed;
+        }, fs);
 
         expect(p.process(file)).to.equal(p.process(file));
     });
@@ -85,11 +77,7 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            () => null,
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile(() => null, fs);
         p.process(file);
         p.process(file);
         p.process(file);
@@ -117,14 +105,10 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            () => {
-                processCount++;
-                return null;
-            },
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile(() => {
+            processCount++;
+            return null;
+        }, fs);
 
         p.process(file);
         p.process(file);
@@ -154,14 +138,10 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            () => {
-                processCount++;
-                return null;
-            },
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile(() => {
+            processCount++;
+            return null;
+        }, fs);
 
         p.process(file);
         p.process(file);

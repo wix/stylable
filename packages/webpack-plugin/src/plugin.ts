@@ -252,6 +252,7 @@ export class StylableWebpackPlugin {
         if (this.stylable) {
             return;
         }
+        
         this.stylable = Stylable.create(
             this.options.stylableConfig(
                 {

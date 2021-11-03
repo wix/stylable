@@ -1,4 +1,4 @@
-import path from 'path';
+import path, { dirname } from 'path';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import type ts from 'typescript';
@@ -1497,7 +1497,8 @@ export const ValueCompletionProvider: CompletionProvider = {
             const importVars: any[] = [];
             meta.imports.forEach((imp) => {
                 try {
-                    stylable.fileProcessor.process(imp.from).vars.forEach((v: any) =>
+                    const resolvedPath = stylable.resolvePath(dirname( meta.source), imp.request)
+                    stylable.fileProcessor.process(resolvedPath).vars.forEach((v) =>
                         importVars.push({
                             name: v.name,
                             value: v.text,
