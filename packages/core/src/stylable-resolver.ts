@@ -68,7 +68,7 @@ export class StylableResolver {
 
         if (from.match(/\.css$/)) {
             try {
-                res = this.fileProcessor.process(this.resolvePath(context, from), false);
+                res = this.fileProcessor.process(this.resolvePath(context, from));
             } catch (e) {
                 res = null;
             }
