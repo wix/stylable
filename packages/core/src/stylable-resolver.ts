@@ -29,6 +29,8 @@ export interface InvalidCachedModule {
     kind: 'js' | 'css';
     value: null;
     error: unknown;
+    request: string;
+    context?: string;
 }
 
 export interface CachedStylableMeta {
@@ -92,7 +94,7 @@ export class StylableResolver {
                 const value = this.fileProcessor.process(resolvedPath, false, context);
                 entity = { kind, value, resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error };
+                entity = { kind, value: null, error, request, context };
             }
         } else {
             const kind = 'js';
@@ -102,7 +104,7 @@ export class StylableResolver {
                 const value = this.requireModule(resolvedPath);
                 entity = { kind, value, resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error };
+                entity = { kind, value: null, error, request, context };
             }
         }
 
