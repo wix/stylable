@@ -1,9 +1,6 @@
 import { CSSClass, STSymbol } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import {
-    generateStylableResult,
-    expectWarningsFromTransform as expectWarnings,
-} from '@stylable/core-test-kit';
+import { generateStylableResult, expectAnalyzeDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/css-class`, () => {
@@ -129,97 +126,54 @@ describe(`features/css-class`, () => {
     });
     describe(`diagnostics`, () => {
         it(`should error on unsupported functional class`, () => {
-            expectWarnings(
-                {
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `|.root $.abc()$| {}`,
-                        },
-                    },
-                },
+            expectAnalyzeDiagnostics(
+                `|$.abc()$| {}`,
                 [
                     {
-                        severity: `error`,
-                        message: CSSClass.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.abc`, `class`),
                         file: `/entry.st.css`,
+                        message: CSSClass.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.abc`, `class`),
+                        severity: `error`,
                     },
-                ]
+                ],
+                { partial: true }
             );
         });
         describe(`scoping`, () => {
             it(`should warn on unscoped class`, () => {
-                expectWarnings(
-                    {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    @st-import [importedPart] from "./imported.st.css";
-                                    |.$importedPart$|{}
-                                `,
-                            },
-                            '/imported.st.css': {
-                                namespace: 'imported',
-                                content: `.importedPart {}`,
-                            },
-                        },
-                    },
+                expectAnalyzeDiagnostics(
+                    `
+                    @st-import [importedPart] from "./imported.st.css";
+                    |.$importedPart$|{}
+                    `,
                     [
                         {
-                            severity: `warning`,
-                            message: CSSClass.diagnostics.UNSCOPED_CLASS(`importedPart`),
                             file: `/entry.st.css`,
+                            message: CSSClass.diagnostics.UNSCOPED_CLASS(`importedPart`),
+                            severity: `warning`,
                         },
                     ]
                 );
             });
             it(`should not warn if the selector is scoped before imported class`, () => {
-                expectWarnings(
-                    {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    @st-import [importedPart] from "./imported.st.css";
-                                    .local .importedPart {}
-                                `,
-                            },
-                            '/imported.st.css': {
-                                namespace: 'imported',
-                                content: `.importedPart {}`,
-                            },
-                        },
-                    },
+                expectAnalyzeDiagnostics(
+                    `
+                    @st-import [importedPart] from "./imported.st.css";
+                    .local .importedPart {}
+                    `,
                     []
                 );
             });
             it(`should not warn if a later part of the compound selector is scoped`, () => {
-                expectWarnings(
-                    {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    @st-import [importedPart] from "./imported.st.css";
-                                    .importedPart.local {}
-                                    .local.importedPart {}
-                                    /*
-                                    ToDo: consider to accept as scoped when local symbol exists
-                                    anywhere in the selector: ".importedPart .local div"
-                                    */
-                                `,
-                            },
-                            '/imported.st.css': {
-                                namespace: 'imported',
-                                content: `.importedPart {}`,
-                            },
-                        },
-                    },
+                expectAnalyzeDiagnostics(
+                    `
+                    @st-import [importedPart] from "./imported.st.css";
+                    .importedPart.local {}
+                    .local.importedPart {}
+                    /*
+                    ToDo: consider to accept as scoped when local symbol exists
+                    anywhere in the selector: ".importedPart .local div"
+                    */
+                    `,
                     []
                 );
             });

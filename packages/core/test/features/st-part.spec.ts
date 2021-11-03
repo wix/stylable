@@ -1,6 +1,6 @@
 import { STPart, CSSClass, CSSType } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import { generateStylableResult, expectWarningsFromTransform } from '@stylable/core-test-kit';
+import { generateStylableResult, expectTransformDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/st-part`, () => {
@@ -96,7 +96,7 @@ describe(`features/st-part`, () => {
     describe(`diagnostics`, () => {
         describe(`-st-extends`, () => {
             it(`should error on extended JS`, () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: `/main.css`,
                         files: {
@@ -126,7 +126,7 @@ describe(`features/st-part`, () => {
                 );
             });
             it(`should error on extended unknown named import`, () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: `/main.css`,
                         files: {
@@ -157,7 +157,7 @@ describe(`features/st-part`, () => {
                 );
             });
             it(`should error on extended symbols that are not a class`, () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: `/main.st.css`,
                         files: {
@@ -191,7 +191,7 @@ describe(`features/st-part`, () => {
                 );
             });
             it(`should error on extended unresolved alias`, () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: `/main.st.css`,
                         files: {

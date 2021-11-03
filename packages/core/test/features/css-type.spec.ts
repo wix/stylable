@@ -1,9 +1,6 @@
 import { CSSType, STSymbol } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import {
-    generateStylableResult,
-    expectWarningsFromTransform as expectWarnings,
-} from '@stylable/core-test-kit';
+import { generateStylableResult, expectAnalyzeDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/css-type`, () => {
@@ -102,106 +99,48 @@ describe(`features/css-type`, () => {
     });
     describe(`diagnostics`, () => {
         it(`should error on unsupported functional class`, () => {
-            expectWarnings(
-                {
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `|.root $div()$| {}`,
-                        },
-                    },
-                },
+            expectAnalyzeDiagnostics(
+                `|$div()$| {}`,
                 [
                     {
-                        severity: `error`,
-                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`div`, `type`),
                         file: `/entry.st.css`,
+                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`div`, `type`),
+                        severity: `error`,
                     },
-                ]
+                ],
+                { partial: true }
             );
         });
         describe(`scoping`, () => {
             it(`should warn on unscoped native type`, () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(`|$button$| {}`, [
                     {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    |$button$|{}
-                                `,
-                            },
-                        },
+                        file: `/entry.st.css`,
+                        message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`button`),
+                        severity: `warning`,
                     },
-                    [
-                        {
-                            severity: `warning`,
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`button`),
-                            file: `/entry.st.css`,
-                        },
-                    ]
-                );
+                ]);
             });
             it(`should warn on unscoped imported default type`, () => {
-                expectWarnings(
-                    {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    @st-import Imported from "./imported.st.css";
-                                    |$Imported$|{}
-                                `,
-                            },
-                            '/imported.st.css': {
-                                namespace: 'imported',
-                                content: ``,
-                            },
-                        },
-                    },
+                expectAnalyzeDiagnostics(
+                    `
+                    @st-import Imported from "./imported.st.css";
+                    |$Imported$|{}
+                    `,
                     [
                         {
-                            severity: `warning`,
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`Imported`),
                             file: `/entry.st.css`,
+                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`Imported`),
+                            severity: `warning`,
                         },
                     ]
                 );
             });
             it(`should not warn if the selector is scoped before imported class`, () => {
-                expectWarnings(
-                    {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    .local div {}
-                                `,
-                            },
-                        },
-                    },
-                    []
-                );
+                expectAnalyzeDiagnostics(`.local div {}`, []);
             });
             it(`should not warn if a later part of the compound selector is scoped`, () => {
-                expectWarnings(
-                    {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    div.local {}
-                                `,
-                            },
-                        },
-                    },
-                    []
-                );
+                expectAnalyzeDiagnostics(`div.local {}`, []);
             });
         });
     });
