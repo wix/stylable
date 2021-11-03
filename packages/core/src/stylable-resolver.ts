@@ -10,7 +10,7 @@ import type {
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
-import { CSSClass, CSSType } from './features';
+import { STSymbol, CSSClass, CSSType } from './features';
 
 export const resolverWarnings = {
     UNKNOWN_IMPORTED_FILE(path: string) {
@@ -93,9 +93,13 @@ export class StylableResolver {
 
         if (imported.from.match(/\.css$/)) {
             const meta = res as StylableMeta;
+            const symbol =
+                !name || subtype === `mappedSymbols`
+                    ? STSymbol.getSymbol(meta, name || meta.root)!
+                    : meta.mappedKeyframes[name];
             return {
                 _kind: 'css',
-                symbol: !name ? meta.mappedSymbols[meta.root] : meta[subtype][name],
+                symbol,
                 meta,
             };
         } else {

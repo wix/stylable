@@ -3,7 +3,7 @@ import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import { CSSClass } from '@stylable/core/dist/features';
+import { STSymbol, CSSClass } from '@stylable/core/dist/features';
 
 chai.use(flatMatch);
 
@@ -147,36 +147,36 @@ describe('Stylable postcss process', () => {
 
         expect(result.imports.length).to.eql(3);
 
-        expect(result.mappedSymbols.a).to.include({
+        expect(STSymbol.getSymbol(result, `a`)).to.include({
             _kind: 'import',
             type: 'named',
         });
 
-        expect(result.mappedSymbols.c).to.include({
+        expect(STSymbol.getSymbol(result, `c`)).to.include({
             _kind: 'import',
             type: 'named',
         });
 
-        expect(result.mappedSymbols.name).to.include({
+        expect(STSymbol.getSymbol(result, `name`)).to.include({
             _kind: 'import',
             type: 'default',
         });
 
-        expect((result.mappedSymbols.a as ImportSymbol).import).to.deep.include({
+        expect((STSymbol.getSymbol(result, `a`) as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
-        expect((result.mappedSymbols.c as ImportSymbol).import).to.deep.include({
+        expect((STSymbol.getSymbol(result, `c`) as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
-        expect((result.mappedSymbols.name as ImportSymbol).import).to.deep.include({
+        expect((STSymbol.getSymbol(result, `name`) as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
             request: '../some/global/path',
             defaultExport: 'name',
@@ -197,11 +197,11 @@ describe('Stylable postcss process', () => {
 
         expect(result.imports.length).to.eql(1);
 
-        expect(result.mappedSymbols.abs).to.deep.include({
+        expect(STSymbol.getSymbol(result, `abs`)).to.deep.include({
             _kind: 'import',
             type: 'named',
         });
-        expect((result.mappedSymbols.abs as ImportSymbol).import).to.include({
+        expect((STSymbol.getSymbol(result, `abs`) as ImportSymbol).import).to.include({
             context: '/path/to',
             defaultExport: '',
             from: '/abs/path',
@@ -303,7 +303,7 @@ describe('Stylable postcss process', () => {
                 _kind: 'class',
                 name: 'root',
                 '-st-root': true,
-                alias: undefined
+                alias: undefined,
             },
         });
     });

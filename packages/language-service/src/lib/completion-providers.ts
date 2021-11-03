@@ -20,7 +20,7 @@ import {
     valueMapping,
     VarSymbol,
 } from '@stylable/core';
-import { CSSClass } from '@stylable/core/dist/features';
+import { STSymbol, CSSClass } from '@stylable/core/dist/features';
 import type { IFileSystem } from '@file-services/types';
 import {
     classCompletion,
@@ -496,7 +496,7 @@ export const SelectorCompletionProvider: CompletionProvider = {
                         );
                     }
                     Object.keys(imp.named).forEach((exp) => {
-                        const res = stylable.resolver.resolve(meta.mappedSymbols[exp]);
+                        const res = stylable.resolver.resolve(STSymbol.getSymbol(meta, exp));
                         if (
                             res &&
                             res._kind === 'css' &&
@@ -548,7 +548,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
                 comps.push(
                     ...Object.keys(i.named)
                         .filter((s) => {
-                            const res = stylable.resolver.resolve(meta.mappedSymbols[s]);
+                            const res = stylable.resolver.resolve(STSymbol.getSymbol(meta, s));
                             return (
                                 res &&
                                 res._kind === 'css' &&
@@ -583,9 +583,10 @@ export const CssMixinCompletionProvider: CompletionProvider = {
     provide({ lineChunkAtCursor, meta, position, fullLineText }: ProviderOptions): Completion[] {
         if (lineChunkAtCursor.startsWith(valueMapping.mixin + ':')) {
             const { names, lastName } = getExistingNames(fullLineText, position);
-            return Object.keys(meta.mappedSymbols)
+            const symbols = STSymbol.getSymbols(meta);
+            return Object.keys(symbols)
                 .filter((ms) => {
-                    const importSymbol = meta.mappedSymbols[ms];
+                    const importSymbol = symbols[ms];
                     return (
                         (importSymbol._kind === 'import' &&
                             importSymbol.import.request.endsWith('.st.css')) ||
@@ -595,7 +596,7 @@ export const CssMixinCompletionProvider: CompletionProvider = {
                 .filter((ms) => ms.startsWith(lastName))
                 .filter((ms) => !names.includes(ms))
                 .map((ms) => {
-                    const importSymbol = meta.mappedSymbols[ms];
+                    const importSymbol = symbols[ms];
                     return cssMixinCompletion(
                         ms,
                         new ProviderRange(
@@ -643,11 +644,12 @@ export const CodeMixinCompletionProvider: CompletionProvider = {
             }
 
             const { lastName } = getExistingNames(fullLineText, position);
-            return Object.keys(meta.mappedSymbols)
-                .filter((ms) => meta.mappedSymbols[ms]._kind === 'import')
+            const symbols = STSymbol.getSymbols(meta);
+            return Object.keys(symbols)
+                .filter((ms) => symbols[ms]._kind === 'import')
                 .filter((ms) => ms.startsWith(lastName))
                 .filter((ms) => {
-                    const res = stylable.resolver.resolve(meta.mappedSymbols[ms]);
+                    const res = stylable.resolver.resolve(symbols[ms]);
                     return res && res._kind === 'js';
                 })
                 .filter((ms) => isMixin(ms, meta, fs, tsLangService))
@@ -684,12 +686,13 @@ export const FormatterCompletionProvider: CompletionProvider = {
             !lineChunkAtCursor.startsWith(valueMapping.mixin + ':')
         ) {
             const { lastName } = getExistingNames(fullLineText, position);
+            const symbols = STSymbol.getSymbols(meta);
             return (
-                Object.keys(meta.mappedSymbols)
-                    .filter((ms) => meta.mappedSymbols[ms]._kind === 'import')
+                Object.keys(symbols)
+                    .filter((ms) => symbols[ms]._kind === 'import')
                     .filter((ms) => ms.startsWith(lastName))
                     .filter((ms) => {
-                        const res = stylable.resolver.resolve(meta.mappedSymbols[ms]);
+                        const res = stylable.resolver.resolve(symbols[ms]);
                         return res && res._kind === 'js';
                     })
                     // .filter(ms => names.length === 0 || !~names.indexOf(ms))
@@ -1105,7 +1108,7 @@ function getNamedCSSImports(
     meta: StylableMeta
 ) {
     const namedSet = new Set(namedValues);
-    for (const [symbolName, symbol] of Object.entries(resolvedImport.mappedSymbols)) {
+    for (const [symbolName, symbol] of Object.entries(STSymbol.getSymbols(resolvedImport))) {
         if (symbol._kind === 'keyframes') {
             continue;
         }
@@ -1581,8 +1584,8 @@ function createCodeMixinCompletion(
     position: ProviderPosition,
     meta: StylableMeta
 ) {
-    const importSymbol = meta.mappedSymbols[name];
-    if (importSymbol._kind !== 'import') {
+    const importSymbol = STSymbol.getSymbol(meta, name);
+    if (!importSymbol || importSymbol._kind !== 'import') {
         throw new Error('expected import symbol');
     }
 
@@ -1602,7 +1605,7 @@ function isMixin(
     fs: IFileSystem,
     tsLangService: ExtendedTsLanguageService
 ) {
-    const importSymbol = meta.mappedSymbols[name];
+    const importSymbol = STSymbol.getSymbol(meta, name)!;
 
     if (importSymbol._kind === 'import') {
         if (importSymbol.import.request.endsWith('.ts')) {

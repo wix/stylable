@@ -371,7 +371,10 @@ export class StylableProcessor {
                             };
 
                             this.meta.cssVars[cssVar] = property;
-                            this.meta.mappedSymbols[cssVar] = property;
+                            STSymbol.addSymbol({
+                                meta: this.meta,
+                                symbol: property,
+                            });
                         } else {
                             this.diagnostics.warn(
                                 atRule,
@@ -575,15 +578,6 @@ export class StylableProcessor {
         }
     }
 
-    protected checkRedeclareSymbol(symbolName: string, node: postcss.Node) {
-        const symbol = this.meta.mappedSymbols[symbolName];
-        if (symbol) {
-            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL(symbolName), {
-                word: symbolName,
-            });
-        }
-    }
-
     protected checkRedeclareKeyframes(symbolName: string, node: postcss.Node) {
         const symbol = this.meta.mappedKeyframes[symbolName];
         if (symbol) {
@@ -597,24 +591,32 @@ export class StylableProcessor {
     protected addImportSymbols(importDef: Imported) {
         this.checkForInvalidAsUsage(importDef);
         if (importDef.defaultExport) {
-            this.checkRedeclareSymbol(importDef.defaultExport, importDef.rule);
-            this.meta.mappedSymbols[importDef.defaultExport] = {
-                _kind: 'import',
-                type: 'default',
-                name: 'default',
-                import: importDef,
-                context: this.dirContext,
-            };
+            STSymbol.addSymbol({
+                meta: this.meta,
+                localName: importDef.defaultExport,
+                symbol: {
+                    _kind: 'import',
+                    type: 'default',
+                    name: 'default',
+                    import: importDef,
+                    context: this.dirContext,
+                },
+                node: importDef.rule,
+            });
         }
         Object.keys(importDef.named).forEach((name) => {
-            this.checkRedeclareSymbol(name, importDef.rule);
-            this.meta.mappedSymbols[name] = {
-                _kind: 'import',
-                type: 'named',
-                name: importDef.named[name],
-                import: importDef,
-                context: this.dirContext,
-            };
+            STSymbol.addSymbol({
+                meta: this.meta,
+                localName: name,
+                symbol: {
+                    _kind: 'import',
+                    type: 'named',
+                    name: importDef.named[name],
+                    import: importDef,
+                    context: this.dirContext,
+                },
+                node: importDef.rule,
+            });
         });
         Object.keys(importDef.keyframes).forEach((name) => {
             if (!this.checkRedeclareKeyframes(name, importDef.rule)) {
@@ -632,7 +634,6 @@ export class StylableProcessor {
         rule.walkDecls((decl) => {
             this.collectUrls(decl);
             this.handleStFunctions(decl);
-            this.checkRedeclareSymbol(decl.prop, decl);
             let type = null;
 
             const prev = decl.prev() as postcss.Comment;
@@ -652,7 +653,11 @@ export class StylableProcessor {
                 valueType: type,
             };
             this.meta.vars.push(varSymbol);
-            this.meta.mappedSymbols[decl.prop] = varSymbol;
+            STSymbol.addSymbol({
+                meta: this.meta,
+                symbol: varSymbol,
+                node: decl,
+            });
         });
         rule.remove();
     }
@@ -685,8 +690,10 @@ export class StylableProcessor {
             isGlobal = true;
         }
 
-        if (node.type === 'atrule') {
-            this.checkRedeclareSymbol(varName, node);
+        if (node.type === 'atrule' && STSymbol.getSymbol(this.meta, varName)) {
+            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL(varName), {
+                word: varName,
+            });
         }
 
         this.addCSSVar(varName, node, isGlobal);
@@ -705,8 +712,11 @@ export class StylableProcessor {
                     global,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
-                if (!this.meta.mappedSymbols[varName]) {
-                    this.meta.mappedSymbols[varName] = cssVarSymbol;
+                if (!STSymbol.getSymbol(this.meta, varName)) {
+                    STSymbol.addSymbol({
+                        meta: this.meta,
+                        symbol: cssVarSymbol,
+                    });
                 }
             }
         } else {
@@ -742,7 +752,7 @@ export class StylableProcessor {
                 const parsed = parseExtends(decl.value);
                 const symbolName = parsed.types[0] && parsed.types[0].symbolName;
 
-                const extendsRefSymbol = this.meta.mappedSymbols[symbolName];
+                const extendsRefSymbol = STSymbol.getSymbol(this.meta, symbolName)!;
                 if (
                     (extendsRefSymbol &&
                         (extendsRefSymbol._kind === 'import' ||
@@ -775,7 +785,7 @@ export class StylableProcessor {
             SBTypesParsers[decl.prop](
                 decl,
                 (type) => {
-                    const symbol = this.meta.mappedSymbols[type];
+                    const symbol = STSymbol.getSymbol(this.meta, type);
                     return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
                         ? 'args'
                         : 'named';
@@ -783,7 +793,7 @@ export class StylableProcessor {
                 this.diagnostics,
                 false
             ).forEach((mixin) => {
-                const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
+                const mixinRefSymbol = STSymbol.getSymbol(this.meta, mixin.type);
                 if (
                     mixinRefSymbol &&
                     (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
@@ -857,7 +867,7 @@ export class StylableProcessor {
         value: any
     ) {
         const name = selector.replace('.', '');
-        const typedRule = this.meta.mappedSymbols[name] as ClassSymbol | ElementSymbol;
+        const typedRule = STSymbol.getSymbol(this.meta, name) as ClassSymbol | ElementSymbol;
         if (typedRule && typedRule[key]) {
             this.diagnostics.warn(node, processorWarnings.OVERRIDE_TYPED_RULE(key, name), {
                 word: name,

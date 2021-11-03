@@ -1,5 +1,6 @@
 import type { IFileSystem } from '@file-services/types';
 import { evalDeclarationValue, Stylable, valueMapping } from '@stylable/core';
+import { STSymbol } from '@stylable/core/dist/features';
 import type { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -33,7 +34,7 @@ export function resolveDocumentColors(
             let regexResult = valueRegex.exec(line);
             while (regexResult !== null) {
                 const result = regexResult[1];
-                const sym = meta.mappedSymbols[result.trim()];
+                const sym = STSymbol.getSymbol(meta, result.trim());
                 let color: Color | null = null;
                 if (sym && sym._kind === 'var') {
                     const doc = TextDocument.create(

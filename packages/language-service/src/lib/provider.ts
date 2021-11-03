@@ -20,7 +20,7 @@ import {
     valueMapping,
     JSResolve,
 } from '@stylable/core';
-import { CSSClass } from '@stylable/core/dist/features';
+import { STSymbol, CSSClass } from '@stylable/core/dist/features';
 import type {
     Location,
     ParameterInformation,
@@ -172,8 +172,10 @@ export class Provider {
                     })
                 );
             }
-        } else if (Object.keys(meta.mappedSymbols).find((sym) => sym === word.replace('.', ''))) {
-            const symbol = meta.mappedSymbols[word.replace('.', '')];
+        } else if (
+            Object.keys(STSymbol.getSymbols(meta)).find((sym) => sym === word.replace('.', ''))
+        ) {
+            const symbol = STSymbol.getSymbol(meta, word.replace('.', ''))!;
             switch (symbol._kind) {
                 case 'class': {
                     defs.push(
@@ -230,7 +232,7 @@ export class Provider {
                 }
             }
         } else if (
-            Object.values(meta.mappedSymbols).some((k) => {
+            Object.values(STSymbol.getSymbols(meta)).some((k) => {
                 if (k._kind === 'class') {
                     const symbolStates = k[valueMapping.states];
 
@@ -257,7 +259,7 @@ export class Provider {
                             (str: string) => !str.startsWith(':') || str.startsWith('::')
                         );
                         name = name!.replace('.', '').replace(/:/g, '');
-                        const localSymbol = callingMeta.mappedSymbols[name];
+                        const localSymbol = STSymbol.getSymbol(callingMeta, name);
                         if (
                             name === k.name ||
                             (!name.startsWith(name.charAt(0).toLowerCase()) && k.name === 'root')
@@ -319,7 +321,7 @@ export class Provider {
             res = this.stylable.resolver.resolveImport(importedSymbol);
         }
 
-        const localSymbol = origMeta.mappedSymbols[elementName];
+        const localSymbol = STSymbol.getSymbol(origMeta, elementName)!;
         if (
             res &&
             res._kind === 'css' &&
@@ -405,7 +407,7 @@ export class Provider {
             return null;
         }
 
-        const mappedSymbol = meta.mappedSymbols[mixin];
+        const mappedSymbol = STSymbol.getSymbol(meta, mixin);
 
         if (mappedSymbol && mappedSymbol._kind === 'import') {
             if (mappedSymbol.import.from.endsWith('.ts')) {
@@ -413,7 +415,7 @@ export class Provider {
                     mixin,
                     activeParam,
                     mappedSymbol.import.from,
-                    (meta.mappedSymbols[mixin]! as ImportSymbol).type === 'default',
+                    (STSymbol.getSymbol(meta, mixin)! as ImportSymbol).type === 'default',
                     paramInfo
                 );
             } else if (mappedSymbol.import.from.endsWith('.js')) {
@@ -1197,15 +1199,17 @@ function newFindRefs(
     } else {
         word = word.replace('.', '');
     }
-    if (!defMeta.mappedSymbols[word] && !word.startsWith(word.charAt(0).toLowerCase())) {
+    const defSymbols = STSymbol.getSymbols(defMeta);
+    if (!defSymbols[word] && !word.startsWith(word.charAt(0).toLowerCase())) {
         // Default import
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.process(stylesheetPath);
             let tmp = '';
+            const scannedSymbols = STSymbol.getSymbols(scannedMeta);
             if (
-                Object.keys(scannedMeta.mappedSymbols).some((k) => {
+                Object.keys(scannedSymbols).some((k) => {
                     tmp = k;
-                    const localSymbol = scannedMeta.mappedSymbols[k];
+                    const localSymbol = scannedSymbols[k];
                     return (
                         (localSymbol._kind === 'element' &&
                             localSymbol.alias &&
@@ -1218,14 +1222,14 @@ function newFindRefs(
                 refs = refs.concat(findRefs(tmp, defMeta, scannedMeta, callingMeta, stylable));
             }
         });
-    } else if (defMeta.mappedSymbols[word] && defMeta.mappedSymbols[word]._kind === 'var') {
+    } else if (defSymbols[word] && defSymbols[word]._kind === 'var') {
         // Variable
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.process(stylesheetPath);
+            const scannedSymbols = STSymbol.getSymbols(scannedMeta);
             if (
-                !scannedMeta.mappedSymbols[word] ||
-                (scannedMeta.mappedSymbols[word]._kind !== 'var' &&
-                    scannedMeta.mappedSymbols[word]._kind !== 'import')
+                !scannedSymbols[word] ||
+                (scannedSymbols[word]._kind !== 'var' && scannedSymbols[word]._kind !== 'import')
             ) {
                 return;
             }
@@ -1236,7 +1240,7 @@ function newFindRefs(
                 );
             } else {
                 // We're in a using file
-                const newSymb = stylable.resolver.deepResolve(scannedMeta.mappedSymbols[word]);
+                const newSymb = stylable.resolver.deepResolve(scannedSymbols[word]);
                 if (!newSymb || !newSymb.meta) {
                     return;
                 }
@@ -1248,9 +1252,8 @@ function newFindRefs(
             }
         });
     } else if (
-        defMeta.mappedSymbols[word] &&
-        (defMeta.mappedSymbols[word]._kind === 'class' ||
-            defMeta.mappedSymbols[word]._kind === 'import')
+        defSymbols[word] &&
+        (defSymbols[word]._kind === 'class' || defSymbols[word]._kind === 'import')
     ) {
         // Elements
         const trans = stylable.createTransformer();
@@ -1309,7 +1312,7 @@ function newFindRefs(
             });
         });
     } else if (
-        Object.values(defMeta.mappedSymbols).some((sym) => {
+        Object.values(defSymbols).some((sym) => {
             const symbolStates = sym._kind === 'class' && sym[valueMapping.states];
             // states
             return (
@@ -1789,7 +1792,7 @@ export function getDefSymbol(
     }
 
     const match = lineChunkAtCursor.match(directiveRegex);
-    const localSymbol = meta.mappedSymbols[word];
+    const localSymbol = STSymbol.getSymbol(meta, word);
     if (match && localSymbol) {
         // We're in an -st directive
         let imp;
@@ -1821,13 +1824,14 @@ export function getDefSymbol(
     const varRegex = new RegExp('value\\(\\s*' + word);
     if (varRegex.test(lineChunkAtCursor)) {
         // we're looking at a var usage
-        if (!meta.mappedSymbols[word]) {
+        const symbol = STSymbol.getSymbol(meta, word);
+        if (!symbol) {
             return { word, meta: null };
-        } else if (meta.mappedSymbols[word]._kind === 'var') {
+        } else if (symbol._kind === 'var') {
             // deepResolve doesn't do local symbols
             return { word, meta };
         }
-        const resolvedVar = stylable.resolver.deepResolve(meta.mappedSymbols[word]);
+        const resolvedVar = stylable.resolver.deepResolve(symbol);
         if (resolvedVar) {
             return { word, meta: resolvedVar.meta };
         } else {

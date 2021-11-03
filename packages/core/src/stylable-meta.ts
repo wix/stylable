@@ -87,3 +87,7 @@ setFieldForDeprecation(StylableMeta.prototype, `classes`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
 });
+setFieldForDeprecation(StylableMeta.prototype, `mappedSymbols`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+});

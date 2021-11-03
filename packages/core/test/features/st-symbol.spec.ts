@@ -1,4 +1,5 @@
 import { STSymbol, StylableSymbol } from '@stylable/core/dist/features';
+import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { generateStylableResult } from '@stylable/core-test-kit';
 import * as postcss from 'postcss';
 import { expect } from 'chai';
@@ -20,6 +21,14 @@ describe(`features/st-symbol`, () => {
             STSymbol.addSymbol({ meta, symbol });
 
             expect(STSymbol.getSymbol(meta, `a`)).to.equal(symbol);
+            // deprecation
+            expect(
+                ignoreDeprecationWarn(() => meta.mappedSymbols),
+                `deprecated 'meta.mappedSymbols'`
+            ).to.eql({
+                root: STSymbol.getSymbol(meta, `root`),
+                a: STSymbol.getSymbol(meta, `a`),
+            });
         });
         it(`should override previous symbol`, () => {
             const { meta } = generateStylableResult({
@@ -38,6 +47,52 @@ describe(`features/st-symbol`, () => {
             STSymbol.addSymbol({ meta, symbol: symbolB });
 
             expect(STSymbol.getSymbol(meta, `a`), `override`).to.equal(symbolB);
+        });
+        it(`should return collected symbols`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: `
+                            Btn {}
+                            Gallery {}
+                        `,
+                    },
+                },
+            });
+
+            expect(STSymbol.getSymbols(meta)).to.eql({
+                root: STSymbol.getSymbol(meta, `root`),
+                Btn: STSymbol.getSymbol(meta, `Btn`),
+                Gallery: STSymbol.getSymbol(meta, `Gallery`),
+            });
+        });
+        it(`should accept optional local name different then symbol name`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: ``,
+                    },
+                },
+            });
+
+            STSymbol.addSymbol({
+                meta,
+                localName: `localA`,
+                symbol: {
+                    _kind: `class`,
+                    name: `A`,
+                },
+            });
+
+            expect(STSymbol.getSymbol(meta, `localA`)).to.eql({
+                _kind: `class`,
+                name: `A`,
+            });
+            expect(STSymbol.getSymbol(meta, `A`)).to.eql(undefined);
         });
     });
     describe(`diagnostics`, () => {

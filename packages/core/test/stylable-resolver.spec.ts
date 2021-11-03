@@ -11,7 +11,7 @@ import {
     StylableMeta,
     createDefaultResolver,
 } from '@stylable/core';
-import { CSSClass, CSSType } from '@stylable/core/dist/features';
+import { STSymbol, CSSClass, CSSType } from '@stylable/core/dist/features';
 
 function createResolveExtendsResults(
     fs: MinimalFS,
@@ -254,7 +254,7 @@ describe('stylable-resolver', () => {
 
         const entryMeta = fileProcessor.process('/entry.st.css');
         const btnMeta = fileProcessor.process('/button.st.css');
-        const res = resolver.resolve(entryMeta.mappedSymbols.x);
+        const res = resolver.resolve(STSymbol.getSymbol(entryMeta, `x`));
 
         expect(res!.symbol).to.eql(CSSClass.getClass(btnMeta, `root`));
     });
@@ -285,10 +285,10 @@ describe('stylable-resolver', () => {
 
         const btnMeta = fileProcessor.process('/button.st.css');
         const entryMeta = fileProcessor.process('/entry.st.css');
-        const btn = entryMeta.mappedSymbols.Button;
+        const btn = STSymbol.getSymbol(entryMeta, `Button`);
         const res = resolver.resolve(btn);
 
-        const btn1 = entryMeta.mappedSymbols.ButtonX;
+        const btn1 = STSymbol.getSymbol(entryMeta, `ButtonX`);
         const res1 = resolver.resolve(btn1);
 
         expect(res!.symbol).to.eql(CSSClass.getClass(btnMeta, `root`));
@@ -327,7 +327,7 @@ describe('stylable-resolver', () => {
         const entryMeta = fileProcessor.process('/entry.st.css');
         const btnXMeta = fileProcessor.process('/button-x.st.css');
 
-        const btn1 = entryMeta.mappedSymbols.ButtonX;
+        const btn1 = STSymbol.getSymbol(entryMeta, `ButtonX`);
         const res1 = resolver.deepResolve(btn1);
 
         expect(res1!.symbol).to.eql(CSSClass.getClass(btnXMeta, `root`));
@@ -350,7 +350,7 @@ describe('stylable-resolver', () => {
 
         const entryMeta = fileProcessor.process('/entry.st.css');
 
-        const a = entryMeta.mappedSymbols.a;
+        const a = STSymbol.getSymbol(entryMeta, `a`);
         const res1 = resolver.deepResolve(a);
 
         expect(res1!.symbol).to.eql(CSSClass.getClass(entryMeta, `a`));
@@ -373,7 +373,7 @@ describe('stylable-resolver', () => {
 
         const entryMeta = fileProcessor.process('/entry.st.css');
 
-        const a = entryMeta.mappedSymbols.a;
+        const a = STSymbol.getSymbol(entryMeta, `a`);
         const res1 = resolver.resolveSymbolOrigin(a, entryMeta);
 
         expect(res1!.symbol).to.eql(CSSClass.getClass(entryMeta, `a`));
@@ -421,8 +421,8 @@ describe('stylable-resolver', () => {
         const entryMeta = fileProcessor.process('/entry.st.css');
         const a1 = fileProcessor.process('/a1.st.css');
 
-        const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
-        const res2 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.b, entryMeta);
+        const res1 = resolver.resolveSymbolOrigin(STSymbol.getSymbol(entryMeta, `a`), entryMeta);
+        const res2 = resolver.resolveSymbolOrigin(STSymbol.getSymbol(entryMeta, `b`), entryMeta);
 
         expect(res1!.symbol).to.eql(CSSClass.getClass(a1, `a`));
         expect(res2!.symbol).to.eql(CSSClass.getClass(a1, `b`));
@@ -451,7 +451,7 @@ describe('stylable-resolver', () => {
         });
 
         const entryMeta = fileProcessor.process('/entry.st.css');
-        const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
+        const res1 = resolver.resolveSymbolOrigin(STSymbol.getSymbol(entryMeta, `a`), entryMeta);
         expect(res1!.symbol).to.eql(CSSClass.getClass(entryMeta, `a`));
     });
 

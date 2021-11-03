@@ -30,7 +30,7 @@ import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
-import { CSSClass, CSSType } from './features';
+import { STSymbol, CSSClass, CSSType } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
@@ -314,7 +314,7 @@ export class StylableTransformer {
         for (const imported of meta.imports) {
             for (const symbolName of Object.keys(imported.named)) {
                 if (isCSSVarProp(symbolName)) {
-                    const importedVar = this.resolver.deepResolve(meta.mappedSymbols[symbolName]);
+                    const importedVar = this.resolver.deepResolve(STSymbol.getSymbol(meta, symbolName));
 
                     if (
                         importedVar &&
@@ -647,7 +647,7 @@ export class StylableTransformer {
                 });
             }
         } else if (node.type === `nesting`) {
-            const origin = originMeta.mappedSymbols[originMeta.root] as ClassSymbol;
+            const origin = STSymbol.getSymbol(originMeta, originMeta.root) as ClassSymbol;
             context.setCurrentAnchor({
                 name: origin.name,
                 type: 'class',

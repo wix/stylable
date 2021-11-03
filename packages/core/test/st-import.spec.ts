@@ -1,4 +1,5 @@
 import { ImportSymbol, processorWarnings } from '@stylable/core';
+import { STSymbol } from '@stylable/core/dist/features';
 import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import * as chai from 'chai';
@@ -87,48 +88,48 @@ describe('Stylable @st-import', () => {
 
         expect(result.imports.length).to.eql(4);
 
-        expect(result.mappedSymbols.a).to.include({
+        expect(STSymbol.getSymbol(result, `a`)).to.include({
             _kind: 'import',
             type: 'named',
         });
 
-        expect(result.mappedSymbols.c).to.include({
+        expect(STSymbol.getSymbol(result, `c`)).to.include({
             _kind: 'import',
             type: 'named',
         });
 
-        expect(result.mappedSymbols.name).to.include({
+        expect(STSymbol.getSymbol(result, `name`)).to.include({
             _kind: 'import',
             type: 'default',
         });
 
-        expect(result.mappedSymbols.t).to.include({
+        expect(STSymbol.getSymbol(result, `t`)).to.include({
             _kind: 'import',
             type: 'default',
         });
 
-        expect((result.mappedSymbols.a as ImportSymbol).import).to.deep.include({
+        expect((STSymbol.getSymbol(result, `a`) as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
-        expect((result.mappedSymbols.c as ImportSymbol).import).to.deep.include({
+        expect((STSymbol.getSymbol(result, `c`) as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
-        expect((result.mappedSymbols.name as ImportSymbol).import).to.deep.include({
+        expect((STSymbol.getSymbol(result, `name`) as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
             request: './some/global/path',
             defaultExport: 'name',
             named: {},
         });
 
-        expect((result.mappedSymbols.t1 as ImportSymbol).import).to.deep.include({
+        expect((STSymbol.getSymbol(result, `t1`) as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
             request: './some/external/path',
             defaultExport: 't',
@@ -144,12 +145,12 @@ describe('Stylable @st-import', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(result.mappedSymbols['t-x']).to.include({
+        expect(STSymbol.getSymbol(result, 't-x')).to.include({
             _kind: 'import',
             type: 'default',
         });
 
-        expect(result.mappedSymbols['-t1-x']).to.include({
+        expect(STSymbol.getSymbol(result, '-t1-x')).to.include({
             _kind: 'import',
             type: 'named',
         });
@@ -163,7 +164,7 @@ describe('Stylable @st-import', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(result.mappedSymbols.slide).to.include({
+        expect(STSymbol.getSymbol(result, `slide`)).to.include({
             _kind: 'import',
             type: 'named',
             name: 'slide',
