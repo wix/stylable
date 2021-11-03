@@ -30,7 +30,7 @@ export interface InvalidCachedModule {
     value: null;
     error: unknown;
     request: string;
-    context?: string;
+    context: string;
 }
 
 export interface CachedStylableMeta {
