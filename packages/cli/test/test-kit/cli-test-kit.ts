@@ -1,4 +1,12 @@
-import { readdirSync, readFileSync, statSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import {
+    readdirSync,
+    readFileSync,
+    statSync,
+    writeFileSync,
+    existsSync,
+    mkdirSync,
+    symlinkSync,
+} from 'fs';
 import { spawn, ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
 import { on } from 'events';
 import { join, relative } from 'path';
@@ -115,8 +123,14 @@ export interface Files {
     [filepath: string]: string;
 }
 
+export const smlinkDirSymbol = Symbol('smlink');
+
+export interface LinkedDirectory {
+    type: typeof smlinkDirSymbol;
+    smlinkDirPath: string;
+}
 export interface FilesStructure {
-    [filepath: string]: string | FilesStructure;
+    [filepath: string]: string | FilesStructure | LinkedDirectory;
 }
 
 export function loadDirSync(rootPath: string, dirPath: string = rootPath): Files {
@@ -138,12 +152,39 @@ export function loadDirSync(rootPath: string, dirPath: string = rootPath): Files
     }, {});
 }
 
-export function populateDirectorySync(rootDir: string, files: FilesStructure) {
+export function populateDirectorySync(
+    rootDir: string,
+    files: FilesStructure,
+    context: { smlinkFiles: Map<string, Set<string>> } = { smlinkFiles: new Map() }
+) {
     for (const [filePath, content] of Object.entries(files)) {
         if (typeof content === 'object') {
             const dirPath = join(rootDir, filePath);
-            mkdirSync(dirPath);
-            populateDirectorySync(dirPath, content);
+
+            if (content.type === smlinkDirSymbol) {
+                const existingPath = join(dirPath, content.smlinkDirPath as string);
+                try {
+                    symlinkSync(existingPath, dirPath);
+                } catch {
+                    if (!context.smlinkFiles.has(existingPath)) {
+                        context.smlinkFiles.set(existingPath, new Set());
+                    }
+
+                    context.smlinkFiles.get(existingPath)!.add(dirPath);
+                }
+            } else {
+                mkdirSync(dirPath);
+
+                if (context.smlinkFiles.has(dirPath)) {
+                    for (const linkedFile of context.smlinkFiles.get(dirPath)!) {
+                        symlinkSync(dirPath, linkedFile);
+                    }
+
+                    context.smlinkFiles.delete(dirPath);
+                }
+
+                populateDirectorySync(dirPath, content as FilesStructure, context);
+            }
         } else {
             writeFileSync(join(rootDir, filePath), content);
         }

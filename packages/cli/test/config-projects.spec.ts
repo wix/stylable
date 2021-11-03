@@ -1,6 +1,12 @@
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
+import { join } from 'path';
+import {
+    smlinkDirSymbol,
+    loadDirSync,
+    populateDirectorySync,
+    runCliSync,
+} from './test-kit/cli-test-kit';
 
 describe('Stylable CLI config multiple projects', function () {
     this.timeout(25000);
@@ -341,6 +347,67 @@ describe('Stylable CLI config multiple projects', function () {
                 .to.be.greaterThan(projectAIndex)
                 .and.greaterThan(projectCIndex)
                 .and.greaterThan(projectBIndex);
+        });
+
+        it('should resolve request from node_modules', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': JSON.stringify({
+                    name: 'workspace',
+                    version: '0.0.0',
+                    private: true,
+                }),
+                node_modules: {
+                    a: {
+                        type: smlinkDirSymbol,
+                        smlinkDirPath: join('..', '..', 'packages', 'project-a'),
+                    },
+                    b: {
+                        type: smlinkDirSymbol,
+                        smlinkDirPath: join('..', '..', 'packages', 'project-b'),
+                    },
+                },
+                packages: {
+                    'project-a': {
+                        'style.st.css': `
+                            @st-import B from "b/dist/style.st.css";
+    
+                            .root {
+                                -st-extends: B;
+                                color: gold;
+                            }
+                            `,
+                        'package.json': `{
+                                "name": "a", 
+                                "version": "0.0.0",
+                                "dependencies": {
+                                    "b": "0.0.0"
+                                }
+                            }`,
+                    },
+                    'project-b': {
+                        'style.st.css': `.root{color:red}`,
+                        'package.json': `{
+                                "name": "b", 
+                                "version": "0.0.0"
+                            }`,
+                    },
+                },
+                'stylable.config.js': `
+                    exports.stcConfig = () => ({ 
+                        options: { 
+                            outDir: './dist',
+                            outputSources: true,
+                            cjs: false,
+                        },
+                        projects: ['packages/*']
+                    })
+                    `,
+            });
+
+            const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(stderr, 'has cli error').not.to.match(/error/i);
+            expect(stdout, 'has diagnostic error').not.to.match(/error/i);
         });
     });
 
