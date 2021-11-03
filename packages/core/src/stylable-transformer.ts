@@ -139,6 +139,10 @@ export class StylableTransformer {
         this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {
+        // set main diagnostics to transform diagnostics
+        meta.analyzeDiagnostics = meta.diagnostics;
+        meta.diagnostics = this.diagnostics;
+        //
         const metaExports: StylableExports = {
             classes: {},
             vars: {},
@@ -150,8 +154,10 @@ export class StylableTransformer {
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast, meta);
-        meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
+        // save diagnostics (return analyze diagnostics to diagnostics field for now)
+        meta.transformDiagnostics = meta.diagnostics;
+        meta.diagnostics = meta.analyzeDiagnostics;
 
         return this.postProcessor ? this.postProcessor(result, this) : result;
     }

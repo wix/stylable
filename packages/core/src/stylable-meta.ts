@@ -40,7 +40,8 @@ export class StylableMeta {
     public customSelectors: Record<string, string>;
     public urls: string[];
     public parent?: StylableMeta;
-    public transformDiagnostics: Diagnostics | null;
+    public analyzeDiagnostics: Diagnostics | null = null;
+    public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null;
     public scopes: postcss.AtRule[];
     public simpleSelectors: Record<string, StylablePart> = {};
