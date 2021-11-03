@@ -81,7 +81,8 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
 
 export function expectWarningsFromTransform(
     config: Config,
-    expectedWarnings: Diagnostic[]
+    expectedWarnings: Diagnostic[],
+    { partial = false }: { partial?: boolean } = {}
 ): StylableResults {
     config.trimWS = false;
 
@@ -110,39 +111,81 @@ export function expectWarningsFromTransform(
         ).to.equal(diagnostics.reports.length);
     }
 
-    for (const [i, report] of diagnostics.reports.entries()) {
-        const expectedWarning = expectedWarnings[i];
-        if (!expectedWarning) {
-            continue;
+    if (partial) {
+        // ToDo: adding diagnostics numbered ids would really help
+        for (const expectedWarning of expectedWarnings) {
+            const path = expectedWarning.file;
+            let closest: Error | null = null;
+            let closestMatches = 0;
+            for (const report of diagnostics.reports.values()) {
+                let matches = 0;
+                try {
+                    expect(report.message).to.equal(expectedWarning.message);
+                    matches++;
+                    if (!expectedWarning.skipLocationCheck) {
+                        expect(report.node.source!.start).to.eql(locations[path].start);
+                        matches++;
+                    }
+                    if (locations[path].word !== null) {
+                        expect(report.options.word).to.eql(locations[path].word);
+                        matches++;
+                    }
+                    if (expectedWarning.severity) {
+                        expect(
+                            report.type,
+                            `${report.message}: severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
+                        ).to.equal(expectedWarning.severity);
+                        matches++;
+                    }
+                } catch (e) {
+                    if (matches >= closestMatches) {
+                        closest = e as Error;
+                        closestMatches = matches;
+                    }
+                    continue;
+                }
+                // expected matched!
+                closest = null;
+                break;
+            }
+            if (closest) {
+                throw closest;
+            }
         }
-        const path = expectedWarning.file;
+    } else {
+        for (const [i, report] of diagnostics.reports.entries()) {
+            const expectedWarning = expectedWarnings[i];
+            if (!expectedWarning) {
+                continue;
+            }
+            const path = expectedWarning.file;
 
-        expect(report.message).to.equal(expectedWarning.message);
+            expect(report.message).to.equal(expectedWarning.message);
 
-        if (!expectedWarning.skipLocationCheck) {
-            expect(report.node.source!.start).to.eql(locations[path].start);
+            if (!expectedWarning.skipLocationCheck) {
+                expect(report.node.source!.start).to.eql(locations[path].start);
+            }
+
+            if (locations[path].word !== null) {
+                expect(report.options.word).to.eql(locations[path].word);
+            }
+
+            if (expectedWarning.severity) {
+                expect(
+                    report.type,
+                    `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
+                ).to.equal(expectedWarning.severity);
+            }
         }
-
-        if (locations[path].word !== null) {
-            expect(report.options.word).to.eql(locations[path].word);
-        }
-
-        if (expectedWarning.severity) {
-            expect(
-                report.type,
-                `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
-            ).to.equal(expectedWarning.severity);
-        }
+        expect(
+            expectedWarnings.length,
+            `expected diagnostics: ${JSON.stringify(
+                expectedWarnings.map((d) => d.message),
+                null,
+                2
+            )}, but received ${JSON.stringify(warningMessages, null, 2)}`
+        ).to.equal(diagnostics.reports.length);
     }
-
-    expect(
-        expectedWarnings.length,
-        `expected diagnostics: ${JSON.stringify(
-            expectedWarnings.map((d) => d.message),
-            null,
-            2
-        )}, but received ${JSON.stringify(warningMessages, null, 2)}`
-    ).to.equal(diagnostics.reports.length);
 
     return result;
 }
