@@ -31,24 +31,19 @@ export interface InvalidCachedModule {
     error: unknown;
 }
 
-export type CachedStylableMeta =
-    | InvalidCachedModule
-    | {
-          resolvedPath: string;
-          kind: 'css';
-          value: StylableMeta;
-      };
+export interface CachedStylableMeta {
+    resolvedPath: string;
+    kind: 'css';
+    value: StylableMeta;
+}
 
-export type CachedJsModule =
-    | InvalidCachedModule
-    | {
-          resolvedPath: string;
-          kind: 'js';
-          value: JsModule;
-      };
+export interface CachedJsModule {
+    resolvedPath: string;
+    kind: 'js';
+    value: JsModule;
+}
 
-export type CachedModuleEntity = CachedStylableMeta | CachedJsModule;
-export type CachedModule = CachedModuleEntity['value'];
+export type CachedModuleEntity = InvalidCachedModule | CachedStylableMeta | CachedJsModule;
 export type StylableResolverCache = Map<string, CachedModuleEntity>;
 
 export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
