@@ -1,6 +1,6 @@
 import { STPart, CSSClass, CSSType } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import { generateStylableResult } from '@stylable/core-test-kit';
+import { generateStylableResult, expectWarningsFromTransform } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/st-part`, () => {
@@ -90,6 +90,135 @@ describe(`features/st-part`, () => {
             expect(STPart.getPart(meta, `root`)).to.eql({
                 node: meta.ast.nodes[0],
                 symbol: CSSClass.getClass(meta, `root`),
+            });
+        });
+    });
+    describe(`diagnostics`, () => {
+        describe(`-st-extends`, () => {
+            it(`should error on extended JS`, () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: `/main.css`,
+                        files: {
+                            '/main.css': {
+                                content: `
+                                    :import {
+                                        -st-from: './imported.js';
+                                        -st-default: special;
+                                    }
+                                    .myclass {
+                                        |-st-extends: $special$|
+                                    }
+                            `,
+                            },
+                            '/imported.js': {
+                                content: ``,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            file: `/main.css`,
+                            message: STPart.diagnostics.CANNOT_EXTEND_JS(),
+                            severity: `error`,
+                        },
+                    ]
+                );
+            });
+            it(`should error on extended unknown named import`, () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: `/main.css`,
+                        files: {
+                            '/main.css': {
+                                content: `
+                                    :import {
+                                        -st-from: './file.st.css';
+                                        -st-named: special;
+                                    }
+                                    .myclass {
+                                        |-st-extends: $special$;|
+                                    }
+                            `,
+                            },
+                            '/file.st.css': {
+                                content: ``,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            file: `/main.css`,
+                            message: STPart.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(`special`),
+                            severity: `error`,
+                        },
+                    ],
+                    { partial: true }
+                );
+            });
+            it(`should error on extended symbols that are not a class`, () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: `/main.st.css`,
+                        files: {
+                            '/main.st.css': {
+                                content: `
+                                    :import {
+                                        -st-from: './file.st.css';
+                                        -st-named: special;
+                                    }
+                                    .myclass {
+                                        |-st-extends: $special$|;
+                                    }
+                            `,
+                            },
+                            '/file.st.css': {
+                                content: `
+                                    :vars {
+                                        special: red;
+                                    }
+                            `,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            file: `/main.st.css`,
+                            message: STPart.diagnostics.IMPORT_ISNT_EXTENDABLE(),
+                            severity: `error`,
+                        },
+                    ]
+                );
+            });
+            it(`should error on extended unresolved alias`, () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: `/main.st.css`,
+                        files: {
+                            '/main.st.css': {
+                                namespace: `entry`,
+                                content: `
+                                    @st-import Imported [inner-class] from "./imported.st.css";
+        
+                                    .root .Imported{}
+                                    |.root .$inner-class$ {}|
+                            `,
+                            },
+                            '/imported.st.css': {
+                                namespace: `imported`,
+                                content: ``,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            message: STPart.diagnostics.UNKNOWN_IMPORT_ALIAS(`inner-class`),
+                            file: `/main.st.css`,
+                            severity: `error`,
+                        },
+                    ],
+                    { partial: true }
+                );
             });
         });
     });

@@ -25,12 +25,12 @@ import {
     CompoundSelector,
     splitCompoundSelectors,
 } from '@tokey/css-selector-parser';
-import { createWarningRule, isChildOfAtRule, findRule, getRuleScopeSelector } from './helpers/rule';
+import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
-import { STSymbol, CSSClass, CSSType } from './features';
+import { STSymbol, CSSClass, STPart } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
@@ -99,18 +99,7 @@ export const transformerWarnings = {
     UNKNOWN_PSEUDO_ELEMENT(name: string) {
         return `unknown pseudo element "${name}"`;
     },
-    IMPORT_ISNT_EXTENDABLE() {
-        return 'import is not extendable';
-    },
-    CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string) {
-        return `cannot extend unknown symbol "${name}"`;
-    },
-    CANNOT_EXTEND_JS() {
-        return 'JS import is not extendable';
-    },
-    UNKNOWN_IMPORT_ALIAS(name: string) {
-        return `cannot use alias for unknown import "${name}"`;
-    },
+    ...STPart.diagnostics,
 };
 
 export class StylableTransformer {
@@ -320,7 +309,9 @@ export class StylableTransformer {
         for (const imported of meta.imports) {
             for (const symbolName of Object.keys(imported.named)) {
                 if (isCSSVarProp(symbolName)) {
-                    const importedVar = this.resolver.deepResolve(STSymbol.getSymbol(meta, symbolName));
+                    const importedVar = this.resolver.deepResolve(
+                        STSymbol.getSymbol(meta, symbolName)
+                    );
 
                     if (
                         importedVar &&
@@ -737,64 +728,7 @@ export class StylableTransformer {
     private resolveMetaParts(meta: StylableMeta): MetaParts {
         let metaParts = this.metaParts.get(meta);
         if (!metaParts) {
-            const resolvedClasses: Record<
-                string,
-                Array<CSSResolve<ClassSymbol | ElementSymbol>>
-            > = {};
-            for (const [className, classSymbol] of Object.entries(CSSClass.getSymbols(meta))) {
-                resolvedClasses[className] = this.resolver.resolveExtends(
-                    meta,
-                    className,
-                    false,
-                    undefined,
-                    (res, extend) => {
-                        const decl = findRule(meta.ast, '.' + className);
-                        if (decl) {
-                            if (res && res._kind === 'js') {
-                                this.diagnostics.error(
-                                    decl,
-                                    transformerWarnings.CANNOT_EXTEND_JS(),
-                                    {
-                                        word: decl.value,
-                                    }
-                                );
-                            } else if (res && !res.symbol) {
-                                this.diagnostics.error(
-                                    decl,
-                                    transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name),
-                                    { word: decl.value }
-                                );
-                            } else {
-                                this.diagnostics.error(
-                                    decl,
-                                    transformerWarnings.IMPORT_ISNT_EXTENDABLE(),
-                                    { word: decl.value }
-                                );
-                            }
-                        } else {
-                            if (classSymbol.alias) {
-                                meta.ast.walkRules(new RegExp('\\.' + className), (rule) => {
-                                    this.diagnostics.error(
-                                        rule,
-                                        transformerWarnings.UNKNOWN_IMPORT_ALIAS(className),
-                                        { word: className }
-                                    );
-                                    return false;
-                                });
-                            }
-                        }
-                    }
-                );
-            }
-
-            const resolvedElements: Record<
-                string,
-                Array<CSSResolve<ClassSymbol | ElementSymbol>>
-            > = {};
-            for (const k of Object.keys(CSSType.getSymbols(meta))) {
-                resolvedElements[k] = this.resolver.resolveExtends(meta, k, true);
-            }
-            metaParts = { class: resolvedClasses, element: resolvedElements };
+            metaParts = STPart.resolveAll(meta, this.resolver);
             this.metaParts.set(meta, metaParts);
         }
         return metaParts;

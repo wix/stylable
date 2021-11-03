@@ -315,7 +315,10 @@ describe('diagnostics: warnings and errors', () => {
                     |:global(*) div .root|{}
                 `,
                     [
-                        { message: processorWarnings.UNSCOPED_TYPE_SELECTOR('div'), file: 'main.css' },
+                        {
+                            message: processorWarnings.UNSCOPED_TYPE_SELECTOR('div'),
+                            file: 'main.css',
+                        },
                         { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' },
                     ]
                 );
@@ -708,7 +711,12 @@ describe('diagnostics: warnings and errors', () => {
                         -st-default: Comp;
                     }|
                 `,
-                    [{ message: parseImportMessages.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
+                    [
+                        {
+                            message: parseImportMessages.MULTIPLE_FROM_IN_IMPORT(),
+                            file: 'main.st.css',
+                        },
+                    ]
                 );
             });
 
@@ -750,94 +758,6 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     ]
                 );
-            });
-
-            it('Only import of type class can be used to extend', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :import {
-                                -st-from: './file.st.css';
-                                -st-named: special;
-                            }
-                            .myclass {
-                                |-st-extends: $special$|;
-                            }
-                            `,
-                        },
-                        '/file.st.css': {
-                            content: `
-                                :vars {
-                                    special: red
-                                }
-                            `,
-                        },
-                    },
-                };
-                expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.IMPORT_ISNT_EXTENDABLE(), file: '/main.st.css' },
-                ]);
-            });
-            it('should warn if extends by js import', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import {
-                                -st-from: './imported.js';
-                                -st-default: special;
-                            }
-                            .myclass {
-                                |-st-extends: $special$|
-                            }
-                            `,
-                        },
-                        '/imported.js': {
-                            content: ``,
-                        },
-                    },
-                };
-                expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.CANNOT_EXTEND_JS(), file: '/main.css' },
-                ]);
-            });
-            it('should warn if named extends does not exist', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import {
-                                -st-from: './file.st.css';
-                                -st-named: special;
-                            }
-                            .myclass {
-                                |-st-extends: $special$;|
-                            }
-                            `,
-                        },
-                        '/file.st.css': {
-                            content: ``,
-                        },
-                    },
-                };
-                expectWarningsFromTransform(config, [
-                    {
-                        message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                            'special',
-                            './file.st.css'
-                        ),
-                        file: '/main.css',
-                        skipLocationCheck: true,
-                    },
-                    {
-                        message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'),
-                        file: '/main.css',
-                    },
-                ]);
             });
         });
 
@@ -919,21 +839,21 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
-                    {
-                        message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                            'momo',
-                            './import.st.css'
-                        ),
-                        file: '/main.st.css',
-                        skip: true,
-                        skipLocationCheck: true,
-                    },
-                    {
-                        message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('momo'),
-                        file: '/main.st.css',
-                    },
-                ]);
+                expectWarningsFromTransform(
+                    config,
+                    [
+                        {
+                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                                'momo',
+                                './import.st.css'
+                            ),
+                            file: '/main.st.css',
+                            skip: true,
+                            skipLocationCheck: true,
+                        },
+                    ],
+                    { partial: true }
+                );
             });
 
             it('should warn when import redeclare same symbol (in same block)', () => {
@@ -1136,7 +1056,12 @@ describe('diagnostics: warnings and errors', () => {
                     `
                     |:global(div) $button$| {}
                 `,
-                    [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'), file: 'main.css' }]
+                    [
+                        {
+                            message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'),
+                            file: 'main.css',
+                        },
+                    ]
                 );
             });
 
@@ -1145,7 +1070,12 @@ describe('diagnostics: warnings and errors', () => {
                     `
                     |.x, $button$| {}
                 `,
-                    [{ message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'), file: 'main.css' }]
+                    [
+                        {
+                            message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'),
+                            file: 'main.css',
+                        },
+                    ]
                 );
             });
         });
@@ -1170,46 +1100,6 @@ describe('diagnostics: warnings and errors', () => {
                     { message: processorWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
                 ]);
             });
-        });
-
-        it('should error on unresolved alias', () => {
-            const config = {
-                entry: '/main.st.css',
-                files: {
-                    '/main.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :import{
-                                -st-from: "./imported.st.css";
-                                -st-default: Imported;
-                                -st-named: inner-class;
-                            }
-
-                            .root .Imported{}
-                            |.root .$inner-class$ {}|
-                        `,
-                    },
-                    '/imported.st.css': {
-                        namespace: 'imported',
-                        content: `.root{}`,
-                    },
-                },
-            };
-            expectWarningsFromTransform(config, [
-                {
-                    message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                        'inner-class',
-                        './imported.st.css'
-                    ),
-                    file: '/main.st.css',
-                    skip: true,
-                    skipLocationCheck: true,
-                },
-                {
-                    message: transformerWarnings.UNKNOWN_IMPORT_ALIAS('inner-class'),
-                    file: '/main.st.css',
-                },
-            ]);
         });
 
         describe('imports', () => {
