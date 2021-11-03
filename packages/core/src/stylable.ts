@@ -19,8 +19,10 @@ export interface StylableConfig {
     projectRoot: string;
     fileSystem: MinimalFS;
     requireModule?: (path: string) => any;
+    /** @deprecated */
     delimiter?: string;
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
+    /** @deprecated */
     diagnostics?: Diagnostics;
     hooks?: TransformHooks;
     resolveOptions?: {
