@@ -8,10 +8,8 @@ import type { MinimalFS } from './cached-process-file';
 const resolverContext = {};
 
 export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any): ModuleResolver {
-    const extensions = [...new Set([...resolveOptions?.extensions, '.js'])];
     const eResolver = ResolverFactory.createResolver({
         ...resolveOptions,
-        extensions,
         useSyncFileSystemCalls: true,
         cache: false,
         fileSystem,

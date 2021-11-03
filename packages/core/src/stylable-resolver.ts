@@ -78,33 +78,33 @@ export class StylableResolver {
         protected requireModule: (modulePath: string) => any,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, request }: Imported): CachedModuleEntity {
-        const key = `${context}${safePathDelimiter}${request}`;
+    private getModule({ context, from }: Imported): CachedModuleEntity {
+        const key = `${context}${safePathDelimiter}${from}`;
         if (this.cache?.has(key)) {
             return this.cache.get(key)!;
         }
 
         let entity: CachedModuleEntity;
 
-        if (request.endsWith('.css')) {
+        if (from.endsWith('.css')) {
             const kind = 'css';
 
             try {
-                const resolvedPath = this.fileProcessor.resolvePath(request, context);
+                const resolvedPath = this.fileProcessor.resolvePath(from, context);
                 const value = this.fileProcessor.process(resolvedPath, false, context);
                 entity = { kind, value, resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error, request, context };
+                entity = { kind, value: null, error, request: from, context };
             }
         } else {
             const kind = 'js';
 
             try {
-                const resolvedPath = this.fileProcessor.resolvePath(request, context);
+                const resolvedPath = this.fileProcessor.resolvePath(from, context);
                 const value = this.requireModule(resolvedPath);
                 entity = { kind, value, resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error, request, context };
+                entity = { kind, value: null, error, request: from, context };
             }
         }
 
