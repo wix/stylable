@@ -59,7 +59,6 @@ export {
 } from './stylable-utils';
 export {
     CSSResolve,
-    CachedModule,
     JSResolve,
     JsModule,
     StylableResolver,
@@ -237,9 +236,7 @@ export const scopeSelector = wrapFunctionForDeprecation(deprecatedScopeSelector,
     name: `scopeSelector`,
 });
 /**@deprecated*/
-export const createSubsetAst = wrapFunctionForDeprecation(deprecatedCreateSubsetAst, {
-    name: `createSubsetAst`,
-});
+export const createSubsetAst = deprecatedCreateSubsetAst;
 /**@deprecated*/
 export const removeUnusedRules = wrapFunctionForDeprecation(deprecatedRemoveUnusedRules, {
     name: `removeUnusedRules`,
@@ -278,9 +275,7 @@ import {
     createSimpleSelectorChecker as deprecatedCreateSimpleSelectorChecker,
 } from './deprecated/deprecated-selector-utils';
 /**@deprecated*/
-export const matchSelectorTarget = wrapFunctionForDeprecation(deprecatedMatchSelectorTarget, {
-    name: `matchSelectorTarget`,
-});
+export const matchSelectorTarget = deprecatedMatchSelectorTarget;
 /**@deprecated*/
 export const fixChunkOrdering = wrapFunctionForDeprecation(deprecatedFixChunkOrdering, {
     name: `fixChunkOrdering`,
