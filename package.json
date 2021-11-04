@@ -10,7 +10,7 @@
     "watch": "yarn build -w",
     "lint": "eslint . -f codeframe",
     "pretest": "yarn build",
-    "test": "mocha \"./packages/*/dist/test/**/*.spec.js\" --parallel --retry 3 --timeout 10000",
+    "test": "mocha \"./packages/*/dist/test/**/*.spec.js\" --parallel --timeout 10000",
     "prettify": "npx prettier . --write"
   },
   "devDependencies": {
