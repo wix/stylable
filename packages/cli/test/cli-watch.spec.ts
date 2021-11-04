@@ -86,6 +86,7 @@ describe('Stylable Cli Watch', () => {
                             join(tempDir.path, 'deep.st.css'),
                             ':vars { color: green; }'
                         );
+                        return Promise.resolve()
                     },
                 },
                 {
