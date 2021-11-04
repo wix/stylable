@@ -1,28 +1,33 @@
 import { readdirSync, readFileSync, statSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { fork, ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
+import { fork, spawnSync, ChildProcess } from 'child_process';
 import { on } from 'events';
 import { join, relative } from 'path';
 import type { Readable } from 'stream';
 
 export function createCliTester() {
-    const cliProcesses: ChildProcessWithoutNullStreams[] = [];
+    const cliProcesses: ChildProcess[] = [];
 
     async function processCliOutput({
         dirPath,
         args,
         steps,
+        trace,
     }: {
         dirPath: string;
         args: string[];
         steps: Array<{ msg: string; action?: () => void }>;
+        trace?: boolean;
     }) {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
-        cliProcesses.push(cliProcess as any);
+        cliProcesses.push(cliProcess);
         const found = [];
         if (!cliProcess.stdout) {
             throw new Error('no stdout on cli process');
         }
         for await (const line of readLines(cliProcess.stdout)) {
+            if (trace) {
+                console.log('TRACE: ' + line);
+            }
             const step = steps[found.length];
 
             if (line.includes(step.msg)) {
