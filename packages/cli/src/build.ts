@@ -149,7 +149,7 @@ export async function build({
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
                 if (trace) {
-                    log(
+                    console.log(
                         'TRACE: ' +
                             JSON.stringify(
                                 {
@@ -209,7 +209,7 @@ export async function build({
             // rebuild
             buildFiles(affectedFiles);
             // rewire invalidations
-            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
+            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles, trace);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
             // report build diagnostics
@@ -310,19 +310,29 @@ function updateWatcherDependencies(
     stylable: Stylable,
     service: DirectoryProcessService,
     affectedFiles: Set<string>,
-    sourceFiles: Set<string>
+    sourceFiles: Set<string>,
+    trace?: boolean
 ) {
     const resolver = stylable.createResolver();
     for (const filePath of affectedFiles) {
         sourceFiles.add(filePath);
         const meta = stylable.process(filePath);
+        if (trace) {
+            console.log(`TRACE: adding dependencies for: ${meta.source}`);
+        }
         visitMetaCSSDependenciesBFS(
             meta,
             ({ source }) => {
+                if (trace) {
+                    console.log(`TRACE: dependency: ${source}`);
+                }
                 service.registerInvalidateOnChange(source, filePath);
             },
             resolver
         );
+        if (trace) {
+            console.log(`TRACE: finished adding dependencies`);
+        }
     }
 }
 
