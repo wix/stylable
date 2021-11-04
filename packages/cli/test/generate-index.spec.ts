@@ -222,7 +222,7 @@ describe('build index', () => {
                .b{}
             `,
         });
-
+        let cliError: unknown;
         const stylable = new Stylable('/', fs, () => ({}));
         try {
             await build({
@@ -236,9 +236,10 @@ describe('build index', () => {
                 log,
             });
         } catch (error) {
-            expect((error as Error)?.message).to.equal(
-                `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`
-            );
+            cliError = error;
         }
+        expect((cliError as Error)?.message).to.equal(
+            `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`
+        );
     });
 });
