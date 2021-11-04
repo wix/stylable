@@ -75,7 +75,7 @@ export async function build({
     extension,
     fs,
     stylable,
-    rootDir,
+    rootDir: rootDirPath,
     srcDir,
     outDir,
     log,
@@ -99,11 +99,13 @@ export async function build({
     diagnosticsMode,
 }: BuildOptions) {
     const { join, resolve } = fs;
-    rootDir = resolve(rootDir);
+    const rootDir = resolve(rootDirPath);
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);
     const nodeModules = join(rootDir, 'node_modules');
-
+    if (trace) {
+        console.log({ rootDir, rootDirPath, fullSrcDir, fullOutDir });
+    }
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
     const generator = new Generator(stylable, log);
