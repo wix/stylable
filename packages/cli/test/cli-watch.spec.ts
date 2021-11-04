@@ -58,7 +58,7 @@ describe('Stylable Cli Watch', () => {
         });
     });
 
-    it('should re-build derived files deep', async () => {
+    it.skip('should re-build derived files deep', async () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `
