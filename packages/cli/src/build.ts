@@ -137,7 +137,11 @@ export async function build({
             return filePath.endsWith(extension);
         },
         onError(error) {
-            console.error(error);
+            if (watch) {
+                console.error(error);
+            } else {
+                throw error;
+            }
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
