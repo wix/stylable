@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { spawn, ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
+import { fork, ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
 import { on } from 'events';
 import { join, relative } from 'path';
 import type { Readable } from 'stream';
@@ -19,7 +19,9 @@ export function createCliTester() {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess as any);
         const found = [];
-
+        if (!cliProcess.stdout) {
+            throw new Error('no stdout on cli process');
+        }
         for await (const line of readLines(cliProcess.stdout)) {
             const step = steps[found.length];
 
@@ -71,24 +73,24 @@ export function writeToExistingFile(filePath: string, content: string) {
     }
 }
 
+const stcPath = require.resolve('@stylable/cli/bin/stc.js');
+const formatPath = require.resolve('@stylable/cli/bin/stc-format.js');
+const codeModPath = require.resolve('@stylable/cli/bin/stc-codemod.js');
+
 export function runCli(cliArgs: string[] = [], cwd: string) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc.js');
-    return spawn('node', [cliPath, ...cliArgs], { cwd });
+    return fork(stcPath, cliArgs, { cwd, stdio: 'pipe' });
 }
 
 export function runCliSync(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
+    return spawnSync('node', [stcPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 export function runFormatCliSync(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc-format.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
+    return spawnSync('node', [formatPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 export function runCliCodeMod(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc-codemod.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
+    return spawnSync('node', [codeModPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 export interface Files {
