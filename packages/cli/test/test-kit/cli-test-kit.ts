@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync, existsSync, mkdirSy
 import { spawn, ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
 import { on } from 'events';
 import { join, relative } from 'path';
+import type { Readable } from 'stream';
 
 export function createCliTester() {
     const cliProcesses: ChildProcessWithoutNullStreams[] = [];
@@ -19,22 +20,18 @@ export function createCliTester() {
         cliProcesses.push(cliProcess as any);
         const found = [];
 
-        for await (const e of on(cliProcess.stdout as any, 'data')) {
-            const lines = e.toString().split('\n');
+        for await (const line of readLines(cliProcess.stdout)) {
+            const step = steps[found.length];
 
-            for (const line of lines) {
-                const step = steps[found.length];
+            if (line.includes(step.msg)) {
+                found.push(true);
 
-                if (line.includes(step.msg)) {
-                    found.push(true);
+                if (step.action) {
+                    step.action();
+                }
 
-                    if (step.action) {
-                        step.action();
-                    }
-
-                    if (steps.length === found.length) {
-                        return;
-                    }
+                if (steps.length === found.length) {
+                    return;
                 }
             }
         }
@@ -49,6 +46,21 @@ export function createCliTester() {
             cliProcesses.length = 0;
         },
     };
+}
+
+async function* readLines(readable: Readable) {
+    let buffer = '';
+    for await (const e of on(readable, 'data')) {
+        for (const char of e.toString()) {
+            if (char === '\n') {
+                yield buffer;
+                buffer = '';
+            } else {
+                buffer += char;
+            }
+        }
+    }
+    yield buffer;
 }
 
 export function writeToExistingFile(filePath: string, content: string) {
