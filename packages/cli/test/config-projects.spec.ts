@@ -369,7 +369,7 @@ describe('Stylable CLI config multiple projects', function () {
                 packages: {
                     'project-a': {
                         'style.st.css': `
-                            @st-import B from "b/dist/style.st.css";
+                            @st-import B from "${join('b', 'dist', 'style.st.css')}";
     
                             .root {
                                 -st-extends: B;
