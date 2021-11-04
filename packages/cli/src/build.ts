@@ -114,6 +114,7 @@ export async function build({
     const moduleFormats = getModuleFormats({ cjs, esm });
 
     const service = new DirectoryProcessService(fs, {
+        trace,
         watchMode: watch,
         autoResetInvalidations: true,
         directoryFilter(dirPath) {
