@@ -32,6 +32,8 @@ export interface BuildOptions {
     manifest?: string;
     /** log function */
     log: Log;
+    /** log function */
+    trace?: boolean;
     /** opt into build index file and specify the filepath for the generated index file */
     indexFile?: string;
     /** custom cli index generator class */
@@ -69,6 +71,7 @@ export interface BuildOptions {
 }
 
 export async function build({
+    trace,
     extension,
     fs,
     stylable,
@@ -145,6 +148,19 @@ export async function build({
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
+                if (trace) {
+                    log(
+                        'TRACE: ' +
+                            JSON.stringify(
+                                {
+                                    changeOrigin: changeOrigin.path,
+                                    affectedFiles: [...affectedFiles],
+                                },
+                                null,
+                                2
+                            )
+                    );
+                }
                 // watched file changed, invalidate cache
                 stylable.initCache();
                 // handle deleted files by removing their generated content

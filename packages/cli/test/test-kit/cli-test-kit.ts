@@ -18,6 +18,9 @@ export function createCliTester() {
         steps: Array<{ msg: string; action?: () => void }>;
         trace?: boolean;
     }) {
+        if (trace) {
+            args.push('--trace');
+        }
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess);
         const found = [];

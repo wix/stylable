@@ -29,6 +29,7 @@ export interface CliArguments {
     customGenerator: string | undefined;
     ext: string | undefined;
     require: string[];
+    trace: boolean | undefined;
     log: boolean | undefined;
     diagnostics: boolean | undefined;
     diagnosticsMode: string | undefined;
@@ -158,6 +159,11 @@ export function getCliArguments(): Arguments<CliArguments> {
         .option('log', {
             type: 'boolean',
             description: 'verbose log',
+            defaultDescription: 'false',
+        })
+        .option('trace', {
+            type: 'boolean',
+            description: 'debug trace',
             defaultDescription: 'false',
         })
         .option('diagnostics', {
