@@ -5,6 +5,7 @@ import type {
     Presets,
     ProcessProjectsOptions,
     ProjectEntryValue,
+    ProjectEntryValues,
     RawProjectEntity,
 } from '../types';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
@@ -29,7 +30,7 @@ export function processProjects(
             );
         }
     } else if (typeof projects === 'object') {
-        for (const entry of Object.entries<ProjectEntryValue>(projects)) {
+        for (const entry of Object.entries<ProjectEntryValues>(projects)) {
             entities.push(resolveProjectEntry(entry, defaultOptions, presets));
         }
     }
@@ -40,7 +41,7 @@ export function processProjects(
 }
 
 function resolveProjectEntry(
-    [request, value]: [string, ProjectEntryValue] | [string],
+    [request, value]: [string, ProjectEntryValues] | [string],
     configOptions: BuildOptions,
     availablePresets: Presets = {}
 ): RawProjectEntity {
@@ -68,7 +69,7 @@ function resolveProjectEntry(
         }),
     };
 
-    function normalizeEntry(entryValue: Exclude<ProjectEntryValue, Array<any>>) {
+    function normalizeEntry(entryValue: ProjectEntryValue) {
         if (typeof entryValue === 'string') {
             return [resolvePreset(entryValue, availablePresets)];
         } else if (typeof entryValue === 'object') {

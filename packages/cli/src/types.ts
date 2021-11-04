@@ -50,8 +50,8 @@ export interface SingleProjectConfig {
 export type Presets = Record<string, PartialBuildOptions>;
 
 export type Projects =
-    | Array<string | [string, ProjectEntryValue]>
-    | Record<string, ProjectEntryValue>;
+    | Array<string | [string, ProjectEntryValues]>
+    | Record<string, ProjectEntryValues>;
 
 export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
     presets?: Presets;
@@ -63,19 +63,14 @@ export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
 
 export type ProjectEntryValue =
     | string
-    | string[]
     | PartialBuildOptions
-    | PartialBuildOptions[]
     | {
           preset?: string;
           presets?: string[];
           options: PartialBuildOptions;
-      }
-    | {
-          preset?: string;
-          presets?: string[];
-          options: PartialBuildOptions;
-      }[];
+      };
+
+export type ProjectEntryValues = ProjectEntryValue | Array<ProjectEntryValue>;
 
 export interface ProcessProjectsOptions {
     defaultOptions?: BuildOptions;
