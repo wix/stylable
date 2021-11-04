@@ -619,6 +619,77 @@ describe('Stylable Cli Watch', () => {
             );
         });
 
+        it('should trigger build when changing js mixin', async () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'stylable.config.js': `
+                exports.stcConfig = () => ({
+                    options: {
+                        outDir: './dist',
+                        outputCSS: true,
+                        outputSources: true
+                    },
+                    projects: [
+                        'packages/*',
+                        ['packages/project-a', {
+                                srcDir: './src',
+                            }
+                        ]
+                    ]
+                })`,
+                packages: {
+                    'project-a': {
+                        'package.json': JSON.stringify({
+                            name: 'a',
+                            version: '0.0.0',
+                            dependencies: { b: '0.0.0' },
+                        }),
+                        src: {
+                            'style.st.css': `
+                            @st-import [color] from "../../project-b/mixin";
+                            .root{ color:value(color); }
+                        `,
+                        },
+                    },
+                    'project-b': {
+                        'package.json': JSON.stringify({
+                            name: 'b',
+                            version: '0.0.0',
+                        }),
+                        'mixin.js': `
+                            module.exports = {
+                                color: 'red'
+                            }
+                        `,
+                    },
+                },
+            });
+
+            await run({
+                dirPath: tempDir.path,
+                args: ['-w'],
+                steps: [
+                    {
+                        msg: messages.START_WATCHING(),
+                        action() {
+                            writeToExistingFile(
+                                join(tempDir.path, './packages/project-b/mixin.js'),
+                                `module.exports = {
+                                    color: 'blue'
+                                }`
+                            );
+                        },
+                    },
+                    {
+                        msg: messages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
+                    },
+                ],
+            });
+
+            const files = loadDirSync(tempDir.path);
+            expect(files['packages/project-a/dist/style.css']).to.include('color:blue');
+        });
+
         it('should not trigger circular build on assets', async () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,

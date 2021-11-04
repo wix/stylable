@@ -5,7 +5,8 @@ import type { StylableResolver } from './stylable-resolver';
 export function visitMetaCSSDependenciesBFS(
     meta: StylableMeta,
     onMetaDependency: (meta: StylableMeta, imported: Imported, depth: number) => void,
-    resolver: StylableResolver
+    resolver: StylableResolver,
+    onJsDependency?: (resolvedPath: string, imported: Imported) => void
 ): void {
     const visited = new Set<string>([meta.source]);
     const q = [[...meta.imports]];
@@ -19,10 +20,16 @@ export function visitMetaCSSDependenciesBFS(
         while (++index < items.length) {
             const imported = items[index];
             const res = resolver.resolveImported(imported, '');
+            // TODO: swipe the arguments once #2135 is merged
+            const resolvedPath = resolver.resolvePath(imported.from, imported.context);
+
             if (res?._kind === 'css' && !visited.has(res.meta.source)) {
                 visited.add(res.meta.source);
                 onMetaDependency(res.meta, imported, depth + 1);
                 q[depth + 1].push(...res.meta.imports);
+            } else if (res?._kind === 'js' && onJsDependency && !visited.has(resolvedPath)) {
+                visited.add(resolvedPath);
+                onJsDependency(resolvedPath, imported);
             }
         }
     }

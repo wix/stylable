@@ -54,6 +54,9 @@ async function main() {
                 projectRoot,
                 resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
                 resolverCache,
+                resolveOptions: {
+                    extensions: Object.keys(require.extensions),
+                },
             });
 
             const { service } = await build(optionsEntity, {

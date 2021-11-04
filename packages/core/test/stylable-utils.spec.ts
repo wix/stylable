@@ -82,7 +82,14 @@ describe('visitMetaCSSDependenciesBFS', () => {
                                 -st-default: D2;
                             }
 
-                            .root {}
+                            :import {
+                                -st-from: "./mixin";
+                                -st-named: color;
+                            }
+
+                            .root {
+                                color: value(color)
+                            }
                         `,
                 },
                 '/d1.1.st.css': {
@@ -93,7 +100,21 @@ describe('visitMetaCSSDependenciesBFS', () => {
                                 -st-default: D2;
                             }
 
-                            .root {}
+                            :import {
+                                -st-from: "./mixin";
+                                -st-named: color;
+                            }
+
+                            .root {
+                                color: value(color)
+                            }
+                        `,
+                },
+                '/mixin.js': {
+                    content: `
+                            module.exports = {
+                                color: 'red'
+                            }
                         `,
                 },
                 '/d2.st.css': {
@@ -113,13 +134,17 @@ describe('visitMetaCSSDependenciesBFS', () => {
             ({ source }, _, depth) => {
                 items.push({ source, depth });
             },
-            resolver
+            resolver,
+            (source) => {
+                items.push({ source, depth: -1 });
+            }
         );
 
         expect(items).to.eql([
             { source: '/d1.st.css', depth: 1 },
             { source: '/d1.1.st.css', depth: 1 },
             { source: '/d2.st.css', depth: 2 },
+            { source: '/mixin', depth: -1 },
         ]);
     });
 });

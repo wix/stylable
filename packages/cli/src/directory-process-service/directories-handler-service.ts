@@ -4,6 +4,7 @@ import { levels } from '../logger';
 import { messages } from '../messages';
 import { reportDiagnostics } from '../report-diagnostics';
 import { createWatchEvent, DirectoryProcessService } from './directory-process-service';
+import decache from 'decache';
 import type { DirectoriesHandlerServiceOptions, RegisterMetaData, Service } from './types';
 
 export class DirectoriesHandlerService {
@@ -96,16 +97,19 @@ export class DirectoriesHandlerService {
     }
 
     private invalidateCache(path: string) {
-        for (const [key, meta] of this.resolverCache) {
-            if (!meta) {
-                continue;
-            }
-
+        for (const [key, entity] of this.resolverCache) {
+            // TODO: remove the extension check when #2135 is merged
             if (
-                typeof meta.source === 'string' &&
-                (meta.source === path || this.options.outputFiles?.get(meta.source) === path)
+                !entity.value ||
+                path === entity.resolvedPath ||
+                path === this.options.outputFiles?.get(entity.resolvedPath) ||
+                path === `${entity.resolvedPath}.js`
             ) {
                 this.resolverCache.delete(key);
+
+                if (entity.kind === 'js') {
+                    decache(path);
+                }
             }
         }
     }

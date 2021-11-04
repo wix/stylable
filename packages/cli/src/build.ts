@@ -9,6 +9,7 @@ import { levels } from './logger';
 import { DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
 import { tryRun } from './build-tools';
 import { messages } from './messages';
+import { extname } from 'path';
 
 export async function build(
     {
@@ -276,7 +277,18 @@ function updateWatcherDependencies(
             ({ source }) => {
                 service.registerInvalidateOnChange(outputFiles.get(source) ?? source, filePath);
             },
-            resolver
+            resolver,
+            (resolvedPath) => {
+                // TODO: remove the extension additaion when #2135 is merged
+                if (!extname(resolvedPath)) {
+                    resolvedPath += '.js';
+                }
+
+                service.registerInvalidateOnChange(
+                    outputFiles.get(resolvedPath) ?? resolvedPath,
+                    filePath
+                );
+            }
         );
     }
 }
