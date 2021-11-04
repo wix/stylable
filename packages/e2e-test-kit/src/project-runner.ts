@@ -1,5 +1,5 @@
 import { join, normalize } from 'path';
-import playwright from 'playwright-core';
+import playwright, { BrowserContext } from 'playwright-core';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
@@ -74,12 +74,12 @@ export class ProjectRunner {
     public webpackConfig: webpack.Configuration;
     public port: number;
     public launchOptions: playwright.LaunchOptions;
-    public pages: playwright.Page[];
     public stats: webpack.Stats | null | undefined;
     public throwOnBuildError: boolean;
     public serverUrl: string;
     public server!: { close(): void } | null;
     public browser!: playwright.Browser | null;
+    private browserContexts: BrowserContext[] = [];
     public compiler!: webpack.Compiler | null;
     public watchingHandle!: ReturnType<webpack.Compiler['watch']> | null;
     public log: typeof console.log;
@@ -98,7 +98,6 @@ export class ProjectRunner {
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
         this.launchOptions = launchOptions;
-        this.pages = [];
         this.stats = undefined;
         this.throwOnBuildError = throwOnBuildError;
         this.log = log
@@ -196,8 +195,8 @@ export class ProjectRunner {
             this.browser = await playwright.chromium.launch(this.launchOptions);
         }
         const browserContext = await this.browser.newContext();
+        this.browserContexts.push(browserContext);
         const page = await browserContext.newPage();
-        this.pages.push(page);
 
         const responses: playwright.Response[] = [];
         page.on('response', (response) => {
@@ -303,10 +302,10 @@ export class ProjectRunner {
     }
 
     public async closeAllPages() {
-        for (const page of this.pages) {
-            await page.close();
+        for (const browserContext of this.browserContexts) {
+            await browserContext.close();
         }
-        this.pages.length = 0;
+        this.browserContexts.length = 0;
     }
 
     public async destroy() {
