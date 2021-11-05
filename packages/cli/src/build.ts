@@ -106,7 +106,7 @@ export async function build({
     const nodeModules = join(realRootDir, 'node_modules');
 
     if (rootDir !== realRootDir) {
-        log(`${rootDir}\n↳${realRootDir}`);
+        log(`rootDir is linked:\n${rootDir}\n↳${realRootDir}`);
     }
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
@@ -153,19 +153,6 @@ export async function build({
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
-                if (trace) {
-                    console.log(
-                        'TRACE: ' +
-                            JSON.stringify(
-                                {
-                                    changeOrigin: changeOrigin.path,
-                                    affectedFiles: [...affectedFiles],
-                                },
-                                null,
-                                2
-                            )
-                    );
-                }
                 // watched file changed, invalidate cache
                 stylable.initCache();
                 // handle deleted files by removing their generated content
@@ -214,7 +201,7 @@ export async function build({
             // rebuild
             buildFiles(affectedFiles);
             // rewire invalidations
-            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles, trace);
+            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
             // report build diagnostics
@@ -315,29 +302,19 @@ function updateWatcherDependencies(
     stylable: Stylable,
     service: DirectoryProcessService,
     affectedFiles: Set<string>,
-    sourceFiles: Set<string>,
-    trace?: boolean
+    sourceFiles: Set<string>
 ) {
     const resolver = stylable.createResolver();
     for (const filePath of affectedFiles) {
         sourceFiles.add(filePath);
         const meta = stylable.process(filePath);
-        if (trace) {
-            console.log(`TRACE: adding dependencies for: ${meta.source}`);
-        }
         visitMetaCSSDependenciesBFS(
             meta,
             ({ source }) => {
-                if (trace) {
-                    console.log(`TRACE: dependency: ${source}`);
-                }
                 service.registerInvalidateOnChange(source, filePath);
             },
             resolver
         );
-        if (trace) {
-            console.log(`TRACE: finished adding dependencies`);
-        }
     }
 }
 

@@ -33,7 +33,6 @@ describe('Stylable Cli Watch', () => {
                 .root{ color:green; }
             `,
         });
-        console.log('TEMP_DIR: ' + tempDir.path);
         await run({
             dirPath: tempDir.path,
             args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss'],
@@ -76,7 +75,6 @@ describe('Stylable Cli Watch', () => {
         });
 
         await run({
-            trace: true,
             dirPath: tempDir.path,
             args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
