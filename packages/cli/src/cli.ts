@@ -43,7 +43,6 @@ async function main() {
         });
 
         await build({
-            trace: argv.trace,
             watch,
             stylable,
             log,

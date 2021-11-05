@@ -32,8 +32,6 @@ export interface BuildOptions {
     manifest?: string;
     /** log function */
     log: Log;
-    /** log function */
-    trace?: boolean;
     /** opt into build index file and specify the filepath for the generated index file */
     indexFile?: string;
     /** custom cli index generator class */
@@ -71,7 +69,6 @@ export interface BuildOptions {
 }
 
 export async function build({
-    trace,
     extension,
     fs,
     stylable,
@@ -118,7 +115,6 @@ export async function build({
     const moduleFormats = getModuleFormats({ cjs, esm });
 
     const service = new DirectoryProcessService(fs, {
-        trace,
         watchMode: watch,
         autoResetInvalidations: true,
         directoryFilter(dirPath) {

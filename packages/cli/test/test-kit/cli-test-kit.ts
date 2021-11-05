@@ -11,16 +11,11 @@ export function createCliTester() {
         dirPath,
         args,
         steps,
-        trace,
     }: {
         dirPath: string;
         args: string[];
         steps: Array<{ msg: string; action?: () => void }>;
-        trace?: boolean;
     }) {
-        if (trace) {
-            args.push('--trace');
-        }
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess);
         const found = [];
@@ -28,9 +23,6 @@ export function createCliTester() {
             throw new Error('no stdout on cli process');
         }
         for await (const line of readLines(cliProcess.stdout)) {
-            if (trace) {
-                console.log('TRACE: ' + line);
-            }
             const step = steps[found.length];
 
             if (line.includes(step.msg)) {

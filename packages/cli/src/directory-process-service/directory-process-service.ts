@@ -13,7 +13,6 @@ export interface DirectoryProcessServiceOptions {
     onError?(error: Error): void;
     autoResetInvalidations?: boolean;
     watchMode?: boolean;
-    trace?: boolean;
 }
 
 export class DirectoryProcessService {
@@ -33,9 +32,6 @@ export class DirectoryProcessService {
         const items = directoryDeepChildren(this.fs, directoryPath, this.filterWatchItems);
         const affectedFiles = new Set<string>();
         for await (const item of items) {
-            if (this.options.trace) {
-                console.log('DirectoryItem' + JSON.stringify(item));
-            }
             if (item.type === 'directory') {
                 await this.watchPath(item.path);
             } else if (item.type === 'file') {
@@ -91,9 +87,6 @@ export class DirectoryProcessService {
         return this.fs.watchService.watchPath(directoryPath);
     }
     private async handleWatchChange(event: IWatchEvent) {
-        if (this.options.trace) {
-            console.log('IWatchEvent' + JSON.stringify(event));
-        }
         if (event.stats?.isDirectory()) {
             if (this.options.directoryFilter?.(event.path) ?? true) {
                 return this.init(event.path);
