@@ -98,13 +98,15 @@ export async function build({
     diagnostics,
     diagnosticsMode,
 }: BuildOptions) {
-    const { join, resolve } = fs;
+    const { join, resolve, realpathSync } = fs;
     const rootDir = resolve(rootDirPath);
-    const fullSrcDir = join(rootDir, srcDir);
-    const fullOutDir = join(rootDir, outDir);
-    const nodeModules = join(rootDir, 'node_modules');
-    if (trace) {
-        console.log({ rootDir, rootDirPath, fullSrcDir, fullOutDir });
+    const realRootDir = realpathSync(rootDir);
+    const fullSrcDir = join(realRootDir, srcDir);
+    const fullOutDir = join(realRootDir, outDir);
+    const nodeModules = join(realRootDir, 'node_modules');
+
+    if (rootDir !== realRootDir) {
+        log(`${rootDir}\n↳${realRootDir}`);
     }
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
@@ -120,7 +122,7 @@ export async function build({
         watchMode: watch,
         autoResetInvalidations: true,
         directoryFilter(dirPath) {
-            if (!dirPath.startsWith(rootDir)) {
+            if (!dirPath.startsWith(realRootDir)) {
                 return false;
             }
             if (dirPath.startsWith(nodeModules) || dirPath.includes('.git')) {
@@ -276,8 +278,8 @@ export async function build({
             generated.add(indexFilePath);
             generator.generateIndexFile(fs, indexFilePath);
         } else {
-            handleAssets(assets, rootDir, srcDir, outDir, fs);
-            generateManifest(rootDir, sourceFiles, manifest, stylable, mode, log, fs);
+            handleAssets(assets, realRootDir, srcDir, outDir, fs);
+            generateManifest(realRootDir, sourceFiles, manifest, stylable, mode, log, fs);
         }
     }
 }
