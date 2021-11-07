@@ -84,6 +84,65 @@ describe('cachedProcessFile', () => {
         expect(count).to.equal(1);
     });
 
+    it('should accept post processors used in process and processContent', () => {
+        const file = 'C:/file.txt';
+
+        const fs: MinimalFS = {
+            readFileSync(fullpath: string) {
+                return fullpath;
+            },
+            statSync() {
+                return {
+                    mtime: new Date(0),
+                };
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
+        };
+
+        const p = cachedProcessFile(() => 'Hello', fs, [
+            (content) => {
+                return content + '!post-processor';
+            },
+        ]);
+
+        const out = p.process(file);
+        expect(out).to.equal('Hello!post-processor');
+        expect(out).to.equal(p.processContent('Hello', file));
+    });
+
+    it('should accept cache', () => {
+        const file = 'C:/file.txt';
+        const mtime = new Date(0);
+        const fs: MinimalFS = {
+            readFileSync(fullpath: string) {
+                return fullpath;
+            },
+            statSync() {
+                return {
+                    mtime,
+                };
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
+        };
+
+        const p = cachedProcessFile(() => 'Hello', fs, [], {
+            [file]: {
+                value: 'FROM CACHE',
+                stat: { mtime },
+            },
+        });
+
+        const out = p.process(file);
+        expect(out).to.equal('FROM CACHE');
+        expect(p.processContent('Hello', file), 'process context should ignore cache').to.equal(
+            'Hello'
+        );
+    });
+
     it('read file if and reprocess if changed', () => {
         const file = 'C:/file.txt';
 
