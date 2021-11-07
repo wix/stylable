@@ -87,7 +87,7 @@ export class Stylable {
         public resolvePath: ModuleResolver = createDefaultResolver(fileSystem, resolveOptions),
         protected cssParser: CssParser = cssParse,
         protected resolverCache?: StylableResolverCache,
-        // TODO: add comment
+        // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
         protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>
     ) {
         this.fileProcessor = createStylableFileProcessor(
