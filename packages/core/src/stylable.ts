@@ -1,5 +1,5 @@
 import type { CacheItem, FileProcessor, MinimalFS } from './cached-process-file';
-import { createStylableFileProcessor } from './create-infra-structure';
+import { createStylableFileProcessor } from './create-stylable-processor';
 import { Diagnostics } from './diagnostics';
 import { CssParser, cssParse } from './parser';
 import { processNamespace, StylableProcessor } from './stylable-processor';
