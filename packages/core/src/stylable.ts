@@ -14,6 +14,7 @@ import {
 import type { TimedCacheOptions } from './timed-cache';
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
+import { warnOnce } from './helpers/deprecation';
 
 export interface StylableConfig {
     projectRoot: string;
@@ -150,7 +151,12 @@ export class Stylable {
         return transformer.transform(meta);
     }
     // TODO: Think about breaking here
-    public process(fullPath: string, _context?: never, ignoreCache?: boolean): StylableMeta {
+    public process(fullPath: string, ignoreCache = false): StylableMeta {
+        if (typeof ignoreCache === 'string') {
+            warnOnce(
+                'Stylable.process with context as second arguments is deprecated please resolve the fullPath with Stylable.resolvePath before using'
+            );
+        }
         return this.fileProcessor.process(fullPath, ignoreCache);
     }
 }
