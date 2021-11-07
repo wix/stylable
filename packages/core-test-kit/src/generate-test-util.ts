@@ -40,17 +40,14 @@ export type RequireType = (path: string) => any;
 
 export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = new Diagnostics()) {
     const { fs, requireModule } = createMinimalFS(config);
-    const fileProcessor = createStylableFileProcessor(
-        fs,
-        (meta, filePath) => {
+    const fileProcessor = createStylableFileProcessor({
+        fileSystem: fs,
+        onProcess: (meta, filePath) => {
             meta.namespace = config.files[filePath].namespace || meta.namespace;
             return meta;
         },
-        undefined,
-        undefined,
-        undefined,
-        () => diagnostics
-    );
+        createDiagnostics: () => diagnostics,
+    });
 
     const resolveModule = createDefaultResolver(fs, {});
     const resolvePath = (context: string | undefined = '/', moduleId: string) =>

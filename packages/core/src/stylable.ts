@@ -91,13 +91,13 @@ export class Stylable {
         // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
         protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>
     ) {
-        this.fileProcessor = createStylableFileProcessor(
+        this.fileProcessor = createStylableFileProcessor({
             fileSystem,
             onProcess,
-            this.resolveNamespace,
+            resolveNamespace: this.resolveNamespace,
             cssParser,
-            this.fileProcessorCache
-        );
+            cache: this.fileProcessorCache,
+        });
 
         this.resolver = this.createResolver();
     }
