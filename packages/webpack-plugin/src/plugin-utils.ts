@@ -363,32 +363,44 @@ export function getSortedModules(stylableModules: Map<NormalModule, BuildData | 
 }
 
 export function reportNamespaceCollision(
-    namespaceToFileMapping: Map<string, Set<string>>,
-    errors: Error[]
+    namespaceToFileMapping: Map<string, Set<NormalModule>>,
+    compilation: Compilation
 ) {
     for (const [namespace, resources] of namespaceToFileMapping) {
         if (resources.size > 1) {
-            errors.push(
-                new Error(
-                    `Duplicate namespace ${JSON.stringify(
-                        namespace
-                    )} found in multiple different resources:\n${Array.from(resources)
-                        .map((resource) => {
-                            return resource;
-                        })
-                        .join(
-                            '\n'
-                        )}\nThis issue indicates multiple versions of the same library in the compilation, or different paths importing the same stylesheet like: "esm" or "cjs".`
-                )
+            const resourcesReport = [...resources]
+                .map((module) => getModuleRequestPath(module, compilation))
+                .join('\n');
+
+            const error = new compilation.compiler.webpack.WebpackError(
+                `Duplicate namespace ${JSON.stringify(
+                    namespace
+                )} found in multiple different resources:\n${resourcesReport}\nThis issue indicates multiple versions of the same library in the compilation, or different paths importing the same stylesheet like: "esm" or "cjs".`
             );
+            error.hideStack = true;
+            compilation.errors.push(error);
         }
     }
+}
+
+function getModuleRequestPath(
+    module: NormalModule,
+    { requestShortener, moduleGraph }: Compilation
+) {
+    const path = [];
+    let current: Module | null = module;
+    while (current) {
+        const currentId = current.readableIdentifier(requestShortener);
+        path.unshift(currentId);
+        current = moduleGraph.getIssuer(current);
+    }
+    return path.map((p, i) => '  '.repeat(i) + p).join('\n') + ' <-- Duplicate';
 }
 
 export interface OptimizationMapping {
     usageMapping: Record<string, boolean>;
     namespaceMapping: Record<string, string>;
-    namespaceToFileMapping: Map<string, Set<string>>;
+    namespaceToFileMapping: Map<string, Set<NormalModule>>;
 }
 
 export function createOptimizationMapping(
@@ -401,16 +413,16 @@ export function createOptimizationMapping(
             acc.usageMapping[namespace] = isUsed ?? true;
             acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
             if (acc.namespaceToFileMapping.has(namespace)) {
-                acc.namespaceToFileMapping.get(namespace)!.add(module.resource);
+                acc.namespaceToFileMapping.get(namespace)!.add(module);
             } else {
-                acc.namespaceToFileMapping.set(namespace, new Set([module.resource]));
+                acc.namespaceToFileMapping.set(namespace, new Set([module]));
             }
             return acc;
         },
         {
             usageMapping: {},
             namespaceMapping: {},
-            namespaceToFileMapping: new Map<string, Set<string>>(),
+            namespaceToFileMapping: new Map<string, Set<NormalModule>>(),
         }
     );
 }
