@@ -21,8 +21,11 @@ describe(`(${project})`, () => {
     );
 
     it('renders css', async () => {
+        console.log('Test Started');
         const { page } = await projectRunner.openInBrowser();
+        console.log('Page opened');
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
+        console.log('Style elements found');
 
         expect(styleElements).to.eql([{ id: './src/index.st.css', depth: '1' }]);
     });
