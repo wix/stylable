@@ -21,6 +21,7 @@ export function setFieldForDeprecation(
         valueMaps[fieldName] = new WeakMap();
     }
     Object.defineProperty(object, fieldName, {
+        configurable: true,
         get() {
             warnOnce(`"${objectPrefix}${fieldName}" is deprecated${alternative}`);
             return fieldOnThis ? this[fieldOnThis] : valueMaps[fieldName].get(this);
