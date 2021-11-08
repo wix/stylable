@@ -15,11 +15,12 @@ describe(`(${project})`, () => {
             launchOptions: {
                 // headless: false
             },
+            watchMode: true,
+            useTempDir: true,
         },
         before,
         afterEach,
-        after,
-        true
+        after
     );
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
@@ -40,7 +41,7 @@ describe(`(${project})`, () => {
             'invalidate dependency',
             () => {
                 writeFileSync(
-                    join(projectRunner.projectDir, 'src', 'mixin-b.st.css'),
+                    join(projectRunner.testDir, 'src', 'mixin-b.st.css'),
                     '.b{ color: green; }'
                 );
             },
@@ -64,8 +65,8 @@ describe(`(${project})`, () => {
             'rename files with invalid dependencies',
             () => {
                 renameSync(
-                    join(projectRunner.projectDir, 'src', 'index.st.css'),
-                    join(projectRunner.projectDir, 'src', 'xxx.st.css')
+                    join(projectRunner.testDir, 'src', 'index.st.css'),
+                    join(projectRunner.testDir, 'src', 'xxx.st.css')
                 );
             },
             () => {

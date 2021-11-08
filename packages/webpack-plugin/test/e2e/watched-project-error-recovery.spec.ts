@@ -15,11 +15,12 @@ describe(`(${project})`, () => {
             launchOptions: {
                 // headless: false,
             },
+            watchMode: true,
+            useTempDir: true,
         },
         before,
         afterEach,
-        after,
-        true
+        after
     );
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
@@ -31,7 +32,7 @@ describe(`(${project})`, () => {
             'make a change',
             () => {
                 writeFileSync(
-                    join(projectRunner.projectDir, 'src', 'index.st.css'),
+                    join(projectRunner.testDir, 'src', 'index.st.css'),
                     '.root{ color: green; }'
                 );
             },
@@ -46,7 +47,7 @@ describe(`(${project})`, () => {
             'break the output',
             () => {
                 writeFileSync(
-                    join(projectRunner.projectDir, 'src', 'index.st.css'),
+                    join(projectRunner.testDir, 'src', 'index.st.css'),
                     '.root{ color:: blue; }'
                 );
             },
@@ -69,7 +70,7 @@ describe(`(${project})`, () => {
             'fix the output',
             () => {
                 writeFileSync(
-                    join(projectRunner.projectDir, 'src', 'index.st.css'),
+                    join(projectRunner.testDir, 'src', 'index.st.css'),
                     '.root{ color: blue; }'
                 );
             },

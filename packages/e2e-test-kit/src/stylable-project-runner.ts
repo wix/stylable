@@ -1,15 +1,19 @@
-import type webpack from 'webpack';
 import { ProjectRunner } from './project-runner';
 
 export class StylableProjectRunner extends ProjectRunner {
-    public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
-        const config = super.loadTestConfig(configName, webpackOptions);
+    protected loadWebpackConfig() {
+        const config = super.loadWebpackConfig();
         if (config.plugins) {
             const plugin = config.plugins.find(
-                (p: any) => p.constructor.name === 'StylableWebpackPlugin'
+                (plugin) => plugin.constructor.name === 'StylableWebpackPlugin'
             );
+
             if (plugin) {
-                plugin.userOptions.optimize = plugin.userOptions.optimize || {};
+                if ('userOptions' in plugin) {
+                    plugin.userOptions.optimize = plugin.userOptions.optimize || {};
+                } else {
+                    throw new Error('This is not a StylableWebpackPlugin');
+                }
             }
         }
         return config;

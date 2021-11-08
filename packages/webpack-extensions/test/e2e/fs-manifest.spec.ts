@@ -30,13 +30,10 @@ describe(`${project} - fs-manifest`, () => {
         const source = assets[manifestKey].source();
 
         const compContent = readFileSync(
-            join(projectRunner.projectDir, 'Button.comp.st.css'),
+            join(projectRunner.testDir, 'Button.comp.st.css'),
             'utf-8'
         );
-        const commonContent = readFileSync(
-            join(projectRunner.projectDir, 'common.st.css'),
-            'utf-8'
-        );
+        const commonContent = readFileSync(join(projectRunner.testDir, 'common.st.css'), 'utf-8');
         const commonHash = hashContent(commonContent);
         const compHash = hashContent(compContent);
 
