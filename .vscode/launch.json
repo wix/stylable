@@ -17,6 +17,7 @@
       "name": "Mocha Current",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": ["--timeout", "999999", "packages/*/dist/**/${fileBasenameNoExtension}.js"],
+      "runtimeArgs": ["--enable-source-maps"],
       "preLaunchTask": "npm: build",
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": ["<node_internals>/**"],
