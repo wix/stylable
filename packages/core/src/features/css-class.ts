@@ -79,16 +79,16 @@ export const hooks = createFeature({
 // API
 
 export function getClass({ data }: StylableMeta, name: string): ClassSymbol | undefined {
-    const state = plugableRecord.getUnsafeAssure(data, dataKey);
+    const state = plugableRecord.getUnsafe(data, dataKey);
     return state[name];
 }
 
 export function getSymbols({ data }: StylableMeta): Record<string, ClassSymbol> {
-    return plugableRecord.getUnsafeAssure(data, dataKey);
+    return plugableRecord.getUnsafe(data, dataKey);
 }
 
 export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule): ClassSymbol {
-    const cssClassData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
+    const cssClassData = plugableRecord.getUnsafe(meta.data, dataKey);
     let classSymbol = cssClassData[name];
     if (!classSymbol) {
         let alias = STSymbol.getSymbol(meta, name);

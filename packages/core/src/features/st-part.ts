@@ -46,7 +46,7 @@ export const hooks = createFeature({
         rule: postcss.Rule,
         nodeContext: SelectorNodeContext
     ): void {
-        const stPartData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
+        const stPartData = plugableRecord.getUnsafe(meta.data, dataKey);
         const name = node.value;
         if (node.type === `class`) {
             CSSClass.hooks.analyzeSelectorNode(meta, node, rule);
@@ -74,7 +74,7 @@ export const hooks = createFeature({
 // API
 
 export function getPart(meta: StylableMeta, name: string): StylablePart | undefined {
-    const state = plugableRecord.getUnsafeAssure(meta.data, dataKey);
+    const state = plugableRecord.getUnsafe(meta.data, dataKey);
     return state[name];
 }
 

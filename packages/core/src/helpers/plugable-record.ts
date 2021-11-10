@@ -20,7 +20,7 @@ export const plugableRecord = {
     }
     return map[key];
   },
-  getUnsafeAssure<K extends Key>(map: PlugableRecord, key: K): Val<K> {
+  getUnsafe<K extends Key>(map: PlugableRecord, key: K): Val<K> {
     return map[key];
   },
 }

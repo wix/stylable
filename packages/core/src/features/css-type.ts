@@ -82,16 +82,16 @@ export const hooks = createFeature({
 // API
 
 export function getType({ data }: StylableMeta, name: string): ElementSymbol | undefined {
-    const state = plugableRecord.getUnsafeAssure(data, dataKey);
+    const state = plugableRecord.getUnsafe(data, dataKey);
     return state[name];
 }
 
 export function getSymbols({ data }: StylableMeta): Record<string, ElementSymbol> {
-    return plugableRecord.getUnsafeAssure(data, dataKey);
+    return plugableRecord.getUnsafe(data, dataKey);
 }
 
 export function addType(meta: StylableMeta, name: string, rule?: postcss.Rule): ElementSymbol {
-    const cssTypeData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
+    const cssTypeData = plugableRecord.getUnsafe(meta.data, dataKey);
     let typeSymbol = cssTypeData[name];
     if (!typeSymbol && isCompRoot(name)) {
         let alias = STSymbol.getSymbol(meta, name);

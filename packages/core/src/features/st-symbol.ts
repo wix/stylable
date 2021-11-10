@@ -34,12 +34,12 @@ export const hooks = createFeature({
 // API
 
 export function getSymbol(meta: StylableMeta, name: string): StylableSymbol | undefined {
-    const state = plugableRecord.getUnsafeAssure(meta.data, dataKey);
+    const state = plugableRecord.getUnsafe(meta.data, dataKey);
     return state[name];
 }
 
 export function getSymbols(meta: StylableMeta): Record<string, StylableSymbol> {
-    return plugableRecord.getUnsafeAssure(meta.data, dataKey);
+    return plugableRecord.getUnsafe(meta.data, dataKey);
 }
 
 export function addSymbol({
@@ -55,7 +55,7 @@ export function addSymbol({
     safeRedeclare?: boolean;
     localName?: string;
 }) {
-    const stSymbolData = plugableRecord.getUnsafeAssure(meta.data, dataKey);
+    const stSymbolData = plugableRecord.getUnsafe(meta.data, dataKey);
     const name = localName || symbol.name;
     const existingSymbol = stSymbolData[name];
     if (existingSymbol && node && !safeRedeclare) {
@@ -71,6 +71,6 @@ export function addSymbol({
 }
 
 export function inheritSymbols(originMeta: StylableMeta, targetMeta: StylableMeta) {
-    const originData = plugableRecord.getUnsafeAssure(originMeta.data, dataKey);
+    const originData = plugableRecord.getUnsafe(originMeta.data, dataKey);
     plugableRecord.set(targetMeta.data, dataKey, Object.create(originData));
 }
