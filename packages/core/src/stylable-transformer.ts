@@ -14,9 +14,7 @@ import {
     parseSelectorWithCache,
     stringifySelector,
     flattenFunctionalSelector,
-    convertToClass,
 } from './helpers/selector';
-import { validateRuleStateDefinition } from './helpers/custom-state';
 import {
     SelectorNode,
     Selector,
@@ -30,13 +28,12 @@ import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
-import { STSymbol, CSSClass, STPart } from './features';
+import { STSymbol, STGlobal, CSSClass, STPart } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
 import { animationPropRegExp, valueMapping } from './stylable-value-parsers';
-import cssesc from 'cssesc';
-import { unescapeCSS } from './helpers/escape';
+import { unescapeCSS, namespaceEscape } from './helpers/escape';
 import { globalValue } from './utils';
 
 const { hasOwnProperty } = Object.prototype;
@@ -356,32 +353,17 @@ export class StylableTransformer {
 
         return prop;
     }
-    public addGlobalsToMeta(selectorAst: SelectorNode[], meta?: StylableMeta) {
-        if (!meta) {
-            return;
-        }
-
-        for (const ast of selectorAst) {
-            walkSelector(ast, (inner) => {
-                if (inner.type === 'class') {
-                    meta.globals[inner.value] = true;
-                }
-            });
-        }
-    }
     public transformGlobals(ast: postcss.Root, meta: StylableMeta) {
         ast.walkRules((r) => {
             const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
             walkSelector(selectorAst, (node) => {
                 if (node.type === 'pseudo_class' && node.value === 'global') {
-                    this.addGlobalsToMeta([node], meta);
+                    STGlobal.addGlobals(meta, [node]);
                     flattenFunctionalSelector(node);
                     return walkSelector.skipNested;
                 }
                 return;
             });
-            // this.addGlobalsToMeta([selectorAst], meta);
-
             r.selector = stringifySelector(selectorAst);
         });
     }
@@ -393,9 +375,6 @@ export class StylableTransformer {
     }
     public scope(name: string, namespace: string, delimiter: string = this.delimiter) {
         return namespace ? namespace + delimiter + name : name;
-    }
-    public scopeEscape(name: string, namespace: string, delimiter: string = this.delimiter) {
-        return namespace ? cssesc(namespace, { isIdentifier: true }) + delimiter + name : name;
     }
     public exportClasses(meta: StylableMeta) {
         const locals: Record<string, string> = {};
@@ -429,6 +408,7 @@ export class StylableTransformer {
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
         const context = new ScopeContext(
             originMeta,
+            this.resolver,
             parseSelectorWithCache(selector, { clone: true }),
             rule || postcss.rule({ selector })
         );
@@ -487,19 +467,9 @@ export class StylableTransformer {
         return outputAst;
     }
     private handleCompoundNode(context: ScopeContext) {
-        const { currentAnchor, metaParts, node, originMeta, transformGlobals } =
-            context as Required<ScopeContext>;
+        const { currentAnchor, metaParts, node, originMeta } = context as Required<ScopeContext>;
         if (node.type === 'class') {
-            const resolved = metaParts.class[node.value] || [
-                // used to scope classes from js mixins
-                { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name: node.value } },
-            ];
-            context.setCurrentAnchor({ name: node.value, type: 'class', resolved });
-            const { symbol, meta } = getOriginDefinition(resolved);
-            if (context.originMeta === meta && symbol[valueMapping.states]) {
-                validateRuleStateDefinition(context.rule, meta, this.resolver, this.diagnostics);
-            }
-            this.scopeClassNode(symbol, meta, node, originMeta);
+            CSSClass.hooks.transformSelectorNode(context as Required<ScopeContext>, node);
         } else if (node.type === 'type') {
             const resolved = metaParts.element[node.value] || [
                 // provides resolution for native elements
@@ -509,7 +479,7 @@ export class StylableTransformer {
             // native node does not resolve e.g. div
             if (resolved && resolved.length > 1) {
                 const { symbol, meta } = getOriginDefinition(resolved);
-                this.scopeClassNode(symbol, meta, node, originMeta);
+                CSSClass.namespaceClass(meta, symbol, node, originMeta);
             }
         } else if (node.type === 'pseudo_element') {
             if (node.value === ``) {
@@ -556,8 +526,7 @@ export class StylableTransformer {
                     // insert nested combinator before internal custom element
                     context.insertDescendantCombinatorBeforePseudoElement();
                 }
-                this.scopeClassNode(resolvedPart.symbol, resolvedPart.meta, node, originMeta);
-
+                CSSClass.namespaceClass(resolvedPart.meta, resolvedPart.symbol, node, originMeta);
                 break;
             }
 
@@ -607,10 +576,7 @@ export class StylableTransformer {
             // handle nested pseudo classes
             if (node.nodes && !foundCustomState) {
                 if (node.value === 'global') {
-                    // :global(.a) -> .a
-                    if (transformGlobals) {
-                        flattenFunctionalSelector(node);
-                    }
+                    // ignore `:st-global` since it is handled after the mixin transformation
                     return;
                 } else {
                     // pickup all nested selectors except nth initial selector
@@ -684,6 +650,7 @@ export class StylableTransformer {
         const hasSingleSelector = selectorList.length === 1;
         const internalContext = new ScopeContext(
             meta,
+            this.resolver,
             removeFirstRootInFirstCompound(selectorList, meta),
             context.rule
         );
@@ -713,18 +680,6 @@ export class StylableTransformer {
             );
         }
     }
-    private scopeClassNode(symbol: any, meta: StylableMeta, node: any, originMeta: any) {
-        if (symbol[valueMapping.global]) {
-            const globalMappedNodes = symbol[valueMapping.global];
-            flattenFunctionalSelector(node);
-            node.nodes = globalMappedNodes;
-            // ToDo: check if this is causes an issue with globals from an imported alias
-            this.addGlobalsToMeta(globalMappedNodes, originMeta);
-        } else {
-            convertToClass(node);
-            node.value = this.scopeEscape(symbol.name, meta.namespace);
-        }
-    }
     private resolveMetaParts(meta: StylableMeta): MetaParts {
         let metaParts = this.metaParts.get(meta);
         if (!metaParts) {
@@ -738,17 +693,17 @@ export class StylableTransformer {
         for (const [className, resolved] of Object.entries(metaParts.class)) {
             if (resolved.length > 1) {
                 meta.outputAst!.walkRules(
-                    '.' + this.scopeEscape(className, meta.namespace),
+                    '.' + namespaceEscape(className, meta.namespace),
                     (rule) => {
                         const a = resolved[0];
                         const b = resolved[resolved.length - 1];
                         rule.after(
                             createWarningRule(
                                 b.symbol.name,
-                                this.scopeEscape(b.symbol.name, b.meta.namespace),
+                                namespaceEscape(b.symbol.name, b.meta.namespace),
                                 basename(b.meta.source),
                                 a.symbol.name,
-                                this.scopeEscape(a.symbol.name, a.meta.namespace),
+                                namespaceEscape(a.symbol.name, a.meta.namespace),
                                 basename(a.meta.source),
                                 true
                             )
@@ -773,6 +728,7 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
 
         const context = new ScopeContext(
             meta,
+            transformer.resolver,
             parseSelectorWithCache(rule.selector, { clone: true }),
             rule
         );
@@ -858,11 +814,10 @@ interface ScopeAnchor {
     resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
 }
 
-class ScopeContext {
+export class ScopeContext {
     public additionalSelectors: Array<() => Selector> = [];
     public selectorIndex = -1;
     public elements: any[] = [];
-    public transformGlobals = false;
     public metaParts?: MetaParts;
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
@@ -870,6 +825,7 @@ class ScopeContext {
     public currentAnchor?: ScopeAnchor;
     constructor(
         public originMeta: StylableMeta,
+        public resolver: StylableResolver,
         public selectorAst: SelectorList,
         public rule: postcss.Rule
     ) {}
@@ -905,7 +861,7 @@ class ScopeContext {
         }
     }
     public createNestedContext(selectorAst: SelectorList) {
-        const ctx = new ScopeContext(this.originMeta, selectorAst, this.rule);
+        const ctx = new ScopeContext(this.originMeta, this.resolver, selectorAst, this.rule);
         Object.assign(ctx, this);
         ctx.selectorAst = selectorAst;
 

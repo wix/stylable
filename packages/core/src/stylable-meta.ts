@@ -16,11 +16,11 @@ import type { PlugableRecord } from './helpers/plugable-record';
 import { getSourcePath } from './stylable-utils';
 import { setFieldForDeprecation } from './helpers/deprecation';
 import { valueMapping } from './stylable-value-parsers';
-import { STSymbol, CSSClass, CSSType, STPart } from './features';
+import { STSymbol, STGlobal, CSSClass, CSSType, STPart } from './features';
 
 export const RESERVED_ROOT_NAME = 'root';
 
-const features = [STSymbol, CSSClass, CSSType, STPart];
+const features = [STSymbol, STGlobal, CSSClass, CSSType, STPart];
 
 export class StylableMeta {
     public data: PlugableRecord = {}; //ToDo: try flatten: extends PlugableRecord

@@ -1,6 +1,8 @@
 export * as STSymbol from './st-symbol';
 export type { StylableSymbol } from './st-symbol';
 
+export * as STGlobal from './st-global';
+
 export * as CSSClass from './css-class';
 export type { ClassSymbol } from './css-class';
 

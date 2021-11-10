@@ -2,11 +2,23 @@ import { createFeature } from './feature';
 import type { StylableDirectives, ImportSymbol } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
+import type { StylableSymbol } from './st-symbol';
+import * as STGlobal from './st-global';
 import { plugableRecord } from '../helpers/plugable-record';
+import { getOriginDefinition } from '../helpers/resolve';
+import { namespaceEscape } from '../helpers/escape';
+import { flattenFunctionalSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
-import { stringifySelector } from '../helpers/selector';
+import type { ScopeContext } from '../stylable-transformer';
+import { valueMapping } from '../stylable-value-parsers';
+import { validateRuleStateDefinition } from '../helpers/custom-state';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
-import type { ImmutableClass, ImmutableSelectorNode } from '@tokey/css-selector-parser';
+import type {
+    ImmutableClass,
+    Class,
+    FunctionalSelector,
+    ImmutableSelectorNode,
+} from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
 export interface ClassSymbol extends StylableDirectives {
@@ -46,6 +58,22 @@ export const hooks = createFeature({
         }
         addClass(meta, node.value, rule);
     },
+    transformSelectorNode<AST extends Class>(context: Required<ScopeContext>, node: AST): void {
+        const { originMeta, resolver } = context;
+        const resolved = context.metaParts.class[node.value] || [
+            // used to namespace classes from js mixins since js mixins
+            // are scoped in the context of the mixed-in stylesheet
+            // which might not have a definition for the mixed-in class
+            { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name: node.value } },
+        ];
+        context.setCurrentAnchor({ name: node.value, type: 'class', resolved });
+        const { symbol, meta } = getOriginDefinition(resolved);
+        if (context.originMeta === meta && symbol[valueMapping.states]) {
+            // ToDo: refactor out to transformer validation phase
+            validateRuleStateDefinition(context.rule, meta, resolver, originMeta.diagnostics);
+        }
+        namespaceClass(meta, symbol, node, originMeta);
+    },
 });
 
 // API
@@ -84,6 +112,27 @@ export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule):
         });
     }
     return classSymbol;
+}
+
+export function namespaceClass(
+    meta: StylableMeta,
+    symbol: StylableSymbol,
+    node: FunctionalSelector,
+    originMeta: StylableMeta
+) {
+    if (valueMapping.global in symbol) {
+        // change node to `-st-global` value
+        const flatNode = flattenFunctionalSelector(node);
+        const globalMappedNodes = symbol[valueMapping.global];
+        if (globalMappedNodes) {
+            flatNode.nodes = globalMappedNodes;
+            // ToDo: check if this is causes an issue with globals from an imported alias
+            STGlobal.addGlobals(originMeta, globalMappedNodes);
+        }
+    } else {
+        node = convertToClass(node);
+        node.value = namespaceEscape(symbol.name, meta.namespace);
+    }
 }
 
 export function validateClassScoping(

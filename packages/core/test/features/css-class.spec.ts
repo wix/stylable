@@ -1,6 +1,11 @@
 import { CSSClass, STSymbol } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import { generateStylableResult, expectAnalyzeDiagnostics } from '@stylable/core-test-kit';
+import {
+    generateStylableResult,
+    expectAnalyzeDiagnostics,
+    testInlineExpects,
+    generateStylableRoot,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/css-class`, () => {
@@ -123,6 +128,140 @@ describe(`features/css-class`, () => {
                 gallery: CSSClass.getClass(meta, `gallery`),
             });
         });
+    });
+    describe(`transform`, () => {
+        it('should namespace local classes', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @check .entry__a */
+                            .a {}
+                            /* @check .entry__b, .entry__c */
+                            .b, .c {}
+                            /* @check .entry__d .entry__e*/
+                            .d .e {}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
+        it('scope local root class', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @check .entry__root */
+                            .root {}
+                            /* @check .entry__root .entry__a */
+                            .root .a {}
+                            /* @check .entry__root .entry__b, .entry__c */
+                            .root .b, .c{}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
+        describe(`-st-global`, () => {
+            it('should replace class symbol', () => {
+                const result = generateStylableRoot({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                /* @check .x */
+                                .root {
+                                    -st-global: ".x";
+                                }
+                                /* @check .y*/
+                                .a {
+                                    -st-global: ".y";
+                                }
+                            `,
+                        },
+                    },
+                });
+    
+                testInlineExpects(result);
+            });
+            it('should replace with complex selector', () => {
+                const result = generateStylableRoot({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                /* @check .x.y */
+                                .root {
+                                    -st-global: ".x.y";
+                                }
+                                /* @check .z.zz */
+                                .a {
+                                    -st-global: ".z.zz";
+                                }
+                            `,
+                        },
+                    },
+                });
+    
+                testInlineExpects(result);
+            });
+            it(`should replace imported type`, () => {
+                const result = generateStylableRoot({
+                    entry: `/style.st.css`,
+                    files: {
+                        '/style.st.css': {
+                            namespace: 'ns',
+                            content: `
+                                :import {
+                                    -st-from: "./inner.st.css";
+                                    -st-default: Container;
+                                }
+                                /* @check .x */
+                                Container {}
+                            `,
+                        },
+                        '/inner.st.css': {
+                            namespace: 'ns1',
+                            content: `
+                                .root {
+                                    -st-global: ".x";
+                                }
+                            `,
+                        },
+                    },
+                });
+    
+                testInlineExpects(result);
+            });
+        });
+        describe(`escape`, () => {
+            it('should namespace and preserve local class', () => {
+                const result = generateStylableRoot({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry.1',
+                            content: `
+                                /* @check .entry\\.1__a\\. */
+                                .a\\. {}
+                            `,
+                        },
+                    },
+                });
+    
+                testInlineExpects(result);
+            });
+        })
     });
     describe(`diagnostics`, () => {
         it(`should error on unsupported functional class`, () => {
