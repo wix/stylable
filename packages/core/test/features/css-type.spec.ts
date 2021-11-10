@@ -1,6 +1,11 @@
 import { CSSType, STSymbol } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import { generateStylableResult, expectAnalyzeDiagnostics } from '@stylable/core-test-kit';
+import {
+    generateStylableResult,
+    expectAnalyzeDiagnostics,
+    generateStylableRoot,
+    testInlineExpects,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/css-type`, () => {
@@ -95,6 +100,35 @@ describe(`features/css-type`, () => {
                 Btn: CSSType.getType(meta, `Btn`),
                 Gallery: CSSType.getType(meta, `Gallery`),
             });
+        });
+    });
+    describe(`transform`, () => {
+        it(`should transform imported root or part element`, () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            @st-import Imported, [part as Part] from "./imported.st.css";
+
+                            /* @check .imported__root */
+                            Imported {}
+                            /* @check .imported__part */
+                            Part {}
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {}
+                            .part {}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
         });
     });
     describe(`diagnostics`, () => {

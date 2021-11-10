@@ -5,9 +5,11 @@ import * as STSymbol from './st-symbol';
 import * as CSSClass from './css-class';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
+import type { ScopeContext } from '../stylable-transformer';
 import { isCompRoot, stringifySelector } from '../helpers/selector';
+import { getOriginDefinition } from '../helpers/resolve';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
-import type { ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
+import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
 export interface ElementSymbol extends StylableDirectives {
@@ -56,6 +58,24 @@ export const hooks = createFeature({
             );
         }
         addType(meta, node.value, rule);
+    },
+    transformSelectorNode<AST extends Type>(context: Required<ScopeContext>, node: AST): void {
+        const resolved = context.metaParts.element[node.value] || [
+            // provides resolution for native elements
+            // that are not collected by parts
+            // or elements that are added by js mixin
+            {
+                _kind: 'css',
+                meta: context.originMeta,
+                symbol: { _kind: 'element', name: node.value },
+            },
+        ];
+        context.setCurrentAnchor({ name: node.value, type: 'element', resolved });
+        // native node does not resolve e.g. div
+        if (resolved && resolved.length > 1) {
+            const { symbol, meta } = getOriginDefinition(resolved);
+            CSSClass.namespaceClass(meta, symbol, node, context.originMeta);
+        }
     },
 });
 

@@ -28,7 +28,7 @@ import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
-import { STSymbol, STGlobal, CSSClass, STPart } from './features';
+import { STSymbol, STGlobal, CSSClass, CSSType, STPart } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
@@ -450,7 +450,7 @@ export class StylableTransformer {
                 for (const compoundNode of node.nodes) {
                     context.node = compoundNode;
                     // transform node
-                    this.handleCompoundNode(context);
+                    this.handleCompoundNode(context as Required<ScopeContext>);
                 }
             }
             if (selectorList.length - 1 > context.selectorIndex) {
@@ -466,21 +466,12 @@ export class StylableTransformer {
         context.additionalSelectors.forEach((addSelector) => outputAst.push(addSelector()));
         return outputAst;
     }
-    private handleCompoundNode(context: ScopeContext) {
-        const { currentAnchor, metaParts, node, originMeta } = context as Required<ScopeContext>;
+    private handleCompoundNode(context: Required<ScopeContext>) {
+        const { currentAnchor, metaParts, node, originMeta } = context;
         if (node.type === 'class') {
-            CSSClass.hooks.transformSelectorNode(context as Required<ScopeContext>, node);
+            CSSClass.hooks.transformSelectorNode(context, node);
         } else if (node.type === 'type') {
-            const resolved = metaParts.element[node.value] || [
-                // provides resolution for native elements
-                { _kind: 'css', meta: originMeta, symbol: { _kind: 'element', name: node.value } },
-            ];
-            context.setCurrentAnchor({ name: node.value, type: 'element', resolved });
-            // native node does not resolve e.g. div
-            if (resolved && resolved.length > 1) {
-                const { symbol, meta } = getOriginDefinition(resolved);
-                CSSClass.namespaceClass(meta, symbol, node, originMeta);
-            }
+            CSSType.hooks.transformSelectorNode(context, node);
         } else if (node.type === 'pseudo_element') {
             if (node.value === ``) {
                 // partial psuedo elemennt: `.x::`
