@@ -64,6 +64,8 @@ export class ProjectRunner {
     public compiler?: webpack.Compiler | null;
     public watchingHandle?: ReturnType<webpack.Compiler['watch']> | null;
     public doneListeners = new Set<() => void>();
+    private throwOnBuildError =
+        this.options.throwOnBuildError !== undefined ? this.options.throwOnBuildError : true;
     constructor(public options: Options) {}
     public run() {
         this.prepareTestDirectory();
@@ -74,14 +76,13 @@ export class ProjectRunner {
         const webpackConfig = this.loadWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
-        // compiler.run = compiler.run.bind(compiler);
         const run = () => {
             return new Promise<webpack.Stats | undefined>((res, rej) =>
                 compiler.run((err, stats) => (err ? rej(err) : res(stats)))
             );
         };
         this.stats = await run();
-        if (this.options.throwOnBuildError && this.stats?.hasErrors()) {
+        if (this.throwOnBuildError && this.stats?.hasErrors()) {
             throw new Error(this.stats.toString({ colors: true }));
         }
         this.log('Bundle Finished');
@@ -96,7 +97,7 @@ export class ProjectRunner {
 
         this.watchingHandle = compiler.watch({}, (err, stats) => {
             if (!this.stats) {
-                if (this.options.throwOnBuildError && stats?.hasErrors()) {
+                if (this.throwOnBuildError && stats?.hasErrors()) {
                     err = new Error(stats?.compilation.errors.join('\n'));
                 }
                 if (err) {
@@ -123,7 +124,7 @@ export class ProjectRunner {
     public waitForRecompile() {
         return new Promise<void>((res, rej) => {
             if (!this.compiler) {
-                return rej();
+                return rej(new Error('No compiler'));
             }
             const handler = () => {
                 this.doneListeners.delete(handler);
