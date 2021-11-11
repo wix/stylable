@@ -76,12 +76,7 @@ export class ProjectRunner {
         const webpackConfig = this.loadWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
-        const run = () => {
-            return new Promise<webpack.Stats | undefined>((res, rej) =>
-                compiler.run((err, stats) => (err ? rej(err) : res(stats)))
-            );
-        };
-        this.stats = await run();
+        this.stats = await promisify(compiler.run.bind(compiler))();
         if (this.throwOnBuildError && this.stats?.hasErrors()) {
             throw new Error(this.stats.toString({ colors: true }));
         }
