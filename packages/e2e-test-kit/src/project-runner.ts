@@ -147,7 +147,14 @@ export class ProjectRunner {
     }
     public async openInBrowser() {
         if (!this.browser) {
-            this.browser = await playwright.chromium.launch(this.options.launchOptions);
+            if (process.env.PLAYWRIGHT_SERVER) {
+                this.browser = await playwright.chromium.connect(
+                    process.env.PLAYWRIGHT_SERVER,
+                    this.options.launchOptions
+                );
+            } else {
+                this.browser = await playwright.chromium.launch(this.options.launchOptions);
+            }
         }
         if (!this.browserContext) {
             this.browserContext = await this.browser.newContext();
