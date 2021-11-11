@@ -63,6 +63,7 @@ export class ProjectRunner {
     public browser?: playwright.Browser | null;
     public compiler?: webpack.Compiler | null;
     public watchingHandle?: ReturnType<webpack.Compiler['watch']> | null;
+    public doneListeners = new Set<() => void>();
     constructor(public options: Options) {}
     public run() {
         this.prepareTestDirectory();
@@ -107,6 +108,10 @@ export class ProjectRunner {
             this.stats = stats;
         });
 
+        compiler.hooks.done.tap('waitForRecompile', () => {
+            this.doneListeners.forEach((listener) => listener());
+        });
+
         await firstCompile.promise;
         this.log('Finished Initial Compile');
     }
@@ -116,15 +121,15 @@ export class ProjectRunner {
         this.server = server;
     }
     public waitForRecompile() {
-        let done = false;
-        return new Promise<void>((res) => {
-            this.compiler?.hooks.afterDone.tap('waitForRecompile', () => {
-                if (done) {
-                    return;
-                }
-                done = true;
+        return new Promise<void>((res, rej) => {
+            if (!this.compiler) {
+                return rej();
+            }
+            const handler = () => {
+                this.doneListeners.delete(handler);
                 res();
-            });
+            };
+            this.doneListeners.add(handler);
         });
     }
     public async actAndWaitForRecompile(

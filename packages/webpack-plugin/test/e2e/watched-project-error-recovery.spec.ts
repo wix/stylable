@@ -52,8 +52,6 @@ describe(`(${project})`, () => {
                 );
             },
             async () => {
-                const { page } = await projectRunner.openInBrowser();
-
                 const e = projectRunner.getBuildErrorMessages();
 
                 expect(e.length, 'one error').to.equal(1);
@@ -61,6 +59,7 @@ describe(`(${project})`, () => {
                 expect(e[0].message).to.match(/CssSyntaxError/);
                 expect(e[0].message).to.match(/Double colon/);
 
+                const { page } = await projectRunner.openInBrowser();
                 const color = await page.evaluate(() => getComputedStyle(document.body).color);
                 expect(color).to.equal('rgb(0, 0, 0)');
             }
