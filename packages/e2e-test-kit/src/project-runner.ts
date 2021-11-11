@@ -55,7 +55,7 @@ export class ProjectRunner {
     public testDir!: string;
     public outputDir!: string;
     private tempPath?: string;
-    public browserContext?: playwright.BrowserContext;
+    public browserContexts: playwright.BrowserContext[] = [];
     public stats: webpack.Stats | null | undefined = undefined;
     public serverUrl = `http://localhost:${this.options.port}`;
     public log = this.options.log ? console.log.bind(console, '[ProjectRunner]') : () => void 0;
@@ -156,11 +156,11 @@ export class ProjectRunner {
                 this.browser = await playwright.chromium.launch(this.options.launchOptions);
             }
         }
-        if (!this.browserContext) {
-            this.browserContext = await this.browser.newContext();
-        }
 
-        const page = await this.browserContext.newPage();
+        const browserContext = await this.browser.newContext();
+        this.browserContexts.push(browserContext);
+
+        const page = await browserContext.newPage();
 
         const responses: playwright.Response[] = [];
         page.on('response', (response) => responses.push(response));
@@ -256,11 +256,11 @@ export class ProjectRunner {
         return chunkByName;
     }
     public async closeAllPages() {
-        if (this.browserContext) {
-            await this.browserContext.close();
-            this.browserContext = undefined;
-            this.log(`Browser Context closed`);
+        for (const browserContext of this.browserContexts) {
+            await browserContext.close();
         }
+        this.browserContexts.length = 0;
+        this.log(`Browser Context closed`);
     }
     public async destroy() {
         this.log(`Start Destroy Process`);
