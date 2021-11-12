@@ -85,11 +85,13 @@ export class ProjectRunner {
     public async watch() {
         this.log('Watch Start');
         const webpackConfig = this.loadWebpackConfig();
+        webpackConfig.watchOptions = {
+            aggregateTimeout: 20,
+        };
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
 
         const firstCompile = deferred<webpack.Stats>();
-
         this.watchingHandle = compiler.watch({}, (err, stats) => {
             if (!this.stats) {
                 if (this.throwOnBuildError && stats?.hasErrors()) {
@@ -104,7 +106,7 @@ export class ProjectRunner {
             this.stats = stats;
         });
 
-        compiler.hooks.done.tap('waitForRecompile', () => {
+        compiler.hooks.afterDone.tap('waitForRecompile', () => {
             this.doneListeners.forEach((listener) => listener());
         });
 
@@ -134,8 +136,9 @@ export class ProjectRunner {
         validate: () => Promise<void> | void = () => Promise.resolve()
     ) {
         try {
+            const recompile = this.waitForRecompile();
             await action();
-            await this.waitForRecompile();
+            await recompile;
             await validate();
         } catch (e) {
             if (e) {
