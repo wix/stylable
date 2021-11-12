@@ -46,7 +46,7 @@ describe(`(${project})`, () => {
                 );
             },
             async () => {
-                await page.reload();
+                const { page } = await projectRunner.openInBrowser();
                 const styleElements = await page.evaluate(
                     browserFunctions.getStyleElementsMetadata,
                     {
