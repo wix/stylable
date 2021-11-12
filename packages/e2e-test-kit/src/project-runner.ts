@@ -6,7 +6,7 @@ import { promisify } from 'util';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
 import { symlinkSync, existsSync, realpathSync } from 'fs';
-import { deferred, sleep } from 'promise-assist';
+import { deferred } from 'promise-assist';
 import { runServer } from './run-server';
 import { createTempDirectorySync } from 'create-temp-directory';
 
