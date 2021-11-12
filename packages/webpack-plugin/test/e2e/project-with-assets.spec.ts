@@ -37,7 +37,7 @@ describe(`(${project})`, () => {
     });
 
     it('load assets from url() declaration value (dev)', async () => {
-        const { responses } = await projectRunner.openInBrowser();
+        const { responses } = await projectRunner.openInBrowser({ captureResponses: true });
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
         expect(assetResponses.length, 'all expected assets has matching responses').to.equal(
@@ -68,7 +68,7 @@ describe(`(${project}) production mode`, () => {
     );
 
     it('load assets from url() declaration value (prod)', async () => {
-        const { responses } = await projectRunner.openInBrowser();
+        const { responses } = await projectRunner.openInBrowser({ captureResponses: true });
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
         expect(assetResponses.length, 'all expected assets has matching responses').to.equal(

@@ -33,7 +33,7 @@ describe(`(${project})`, () => {
 
     it('load assets from url() declaration value', async () => {
         const expectedAssets = ['asset1.png', 'asset2.png', 'asset.png', 'deep.png'];
-        const { responses } = await projectRunner.openInBrowser();
+        const { responses } = await projectRunner.openInBrowser({ captureResponses: true });
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
         expect(assetResponses.length, 'all expected assets has matching responses').to.equal(

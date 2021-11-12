@@ -145,7 +145,7 @@ export class ProjectRunner {
             throw e;
         }
     }
-    public async openInBrowser() {
+    public async openInBrowser({ captureResponses = false } = {}) {
         if (!this.browser) {
             if (process.env.PLAYWRIGHT_SERVER) {
                 this.browser = await playwright.chromium.connect(
@@ -163,8 +163,10 @@ export class ProjectRunner {
         const page = await browserContext.newPage();
 
         const responses: playwright.Response[] = [];
-        page.on('response', (response) => responses.push(response));
-        await page.goto(this.serverUrl, { waitUntil: 'networkidle' });
+        if (captureResponses) {
+            page.on('response', (response) => responses.push(response));
+        }
+        await page.goto(this.serverUrl, { waitUntil: captureResponses ? 'networkidle' : 'load' });
         return { page, responses };
     }
     public getBuildWarningMessages(): webpack.Compilation['warnings'] {
