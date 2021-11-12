@@ -85,32 +85,34 @@ export class ProjectRunner {
     public async watch() {
         this.log('Watch Start');
         const webpackConfig = this.loadWebpackConfig();
-        webpackConfig.watchOptions = {
-            aggregateTimeout: 20,
-        };
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
 
         const firstCompile = deferred<webpack.Stats>();
-        this.watchingHandle = compiler.watch({}, (err, stats) => {
-            if (!this.stats) {
-                if (this.throwOnBuildError && stats?.hasErrors()) {
-                    err = new Error(stats?.compilation.errors.join('\n'));
+        this.watchingHandle = compiler.watch(
+            {
+                aggregateTimeout: 1,
+            },
+            (err, stats) => {
+                if (!this.stats) {
+                    if (this.throwOnBuildError && stats?.hasErrors()) {
+                        err = new Error(stats?.compilation.errors.join('\n'));
+                    }
+                    if (err) {
+                        firstCompile.reject(err);
+                    } else {
+                        firstCompile.resolve(stats);
+                    }
                 }
-                if (err) {
-                    firstCompile.reject(err);
-                } else {
-                    firstCompile.resolve(stats);
-                }
+                this.stats = stats;
             }
-            this.stats = stats;
-        });
+        );
 
+        await firstCompile.promise;
         compiler.hooks.afterDone.tap('waitForRecompile', () => {
             this.doneListeners.forEach((listener) => listener());
         });
 
-        await firstCompile.promise;
         this.log('Finished Initial Compile');
     }
     public async serve() {
@@ -138,7 +140,6 @@ export class ProjectRunner {
         try {
             const recompile = this.waitForRecompile();
             await action();
-            await sleep(11);
             await recompile;
             await validate();
         } catch (e) {
