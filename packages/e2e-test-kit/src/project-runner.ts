@@ -134,9 +134,8 @@ export class ProjectRunner {
         validate: () => Promise<void> | void = () => Promise.resolve()
     ) {
         try {
-            const recompile = this.waitForRecompile();
             await action();
-            await recompile;
+            await this.waitForRecompile();
             await validate();
         } catch (e) {
             if (e) {
