@@ -6,7 +6,7 @@ import { promisify } from 'util';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
 import { symlinkSync, existsSync, realpathSync } from 'fs';
-import { deferred } from 'promise-assist';
+import { deferred, sleep } from 'promise-assist';
 import { runServer } from './run-server';
 import { createTempDirectorySync } from 'create-temp-directory';
 
@@ -138,6 +138,7 @@ export class ProjectRunner {
         try {
             const recompile = this.waitForRecompile();
             await action();
+            await sleep(11);
             await recompile;
             await validate();
         } catch (e) {
