@@ -1,1 +1,3 @@
-export * from './jest';
+import { createTransformer } from './jest';
+
+export default { createTransformer };
