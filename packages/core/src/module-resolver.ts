@@ -9,7 +9,7 @@ function bundleSafeRequireExtensions(): string[] {
     let extensions: string[];
     try {
         // we use eval here to avoid bundling warnings about require.extensions we always has fallback for browsers
-        extensions = eval('Object.keys((require && require.extensions) || {})') as string[];
+        extensions = Object.keys(require('module')._extensions);
     } catch (e) {
         extensions = [];
     }
