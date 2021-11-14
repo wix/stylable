@@ -150,7 +150,6 @@ export class Stylable {
         this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);
     }
-    // TODO: Think about breaking here
     public process(fullPath: string, ignoreCache = false): StylableMeta {
         if (typeof ignoreCache === 'string') {
             warnOnce(
