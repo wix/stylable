@@ -28,24 +28,26 @@ function getCacheKey(
     );
 }
 
-interface StylableJestConfig {
+export interface StylableJestConfig {
     stylable?: Partial<StylableConfig>;
 }
 
 export const createTransformer = (options?: StylableJestConfig) => {
+    const process = stylableModuleFactory(
+        {
+            fileSystem: fs,
+            requireModule: require,
+            projectRoot: '',
+            resolveNamespace,
+            ...options?.stylable,
+        },
+        // ensure the generated module points to our own @stylable/runtime copy
+        // this allows @stylable/jest to be used as part of a globally installed CLI
+        { runtimePath: stylableRuntimePath }
+    );
+
     return {
-        process: stylableModuleFactory(
-            {
-                fileSystem: fs,
-                requireModule: require,
-                projectRoot: '',
-                resolveNamespace,
-                ...options?.stylable,
-            },
-            // ensure the generated module points to our own @stylable/runtime copy
-            // this allows @stylable/jest to be used as part of a globally installed CLI
-            { runtimePath: stylableRuntimePath }
-        ),
+        process,
         getCacheKey,
         canInstrument: false,
     };
