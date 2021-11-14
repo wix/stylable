@@ -4,6 +4,7 @@ import { tryRun } from '../build-tools';
 import type {
     CliArguments,
     Configuration,
+    ConfigurationProvider,
     MultipleProjectsConfig,
     ProjectsConfigResult,
     ResolveProjectsContext,
@@ -58,14 +59,23 @@ export async function projectsConfig(argv: CliArguments): Promise<ProjectsConfig
 export function resolveConfigFile(context: string) {
     return loadStylableConfig(context, (config) =>
         tryRun(
-            () => (isSTCConfig(config) ? config.stcConfig() : undefined),
+            () =>
+                isSTCConfig(config)
+                    ? typeof config.stcConfig === 'function'
+                        ? config.stcConfig()
+                        : config.stcConfig
+                    : undefined,
             'Failed to evaluate "stcConfig"'
         )
     );
 }
 
-function isSTCConfig(config: any): config is { stcConfig: Configuration } {
-    return typeof config === 'object' && typeof config.stcConfig === 'function';
+function isSTCConfig(config: any): config is { stcConfig: Configuration | ConfigurationProvider } {
+    return (
+        typeof config === 'object' &&
+        config.stcConfig &&
+        (typeof config.stcConfig === 'function' || typeof config.stcConfig === 'object')
+    );
 }
 
 function isMultpleConfigProject(config: any): config is MultipleProjectsConfig {

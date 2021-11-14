@@ -14,7 +14,8 @@ export type PartialBuildOptions = Partial<BuildOptions>;
  *  }
  * })
  */
-export type Configuration = () => SingleProjectConfig | MultipleProjectsConfig;
+export type Configuration = SingleProjectConfig | MultipleProjectsConfig;
+export type ConfigurationProvider = () => Configuration;
 
 interface BaseProjectEntity {
     options: BuildOptions[];
