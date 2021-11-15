@@ -58,7 +58,7 @@ export function findTestLocations(css: string) {
     return { start, end, word, css: css.replace(/[|$]/gm, '') };
 }
 
-export function expectWarnings(
+export function expectAnalyzeDiagnostics(
     css: string,
     warnings: Diagnostic[],
     { partial = false }: { partial?: boolean } = {}
@@ -100,8 +100,6 @@ export function expectWarnings(
         );
     }
 }
-export const expectAnalyzeDiagnostics = expectWarnings;
-export const expectTransformDiagnostics = expectWarningsFromTransform;
 
 function matchPartialDiagnostics(
     expectedList: Diagnostic[],
@@ -150,7 +148,7 @@ function matchPartialDiagnostics(
     }
 }
 
-export function expectWarningsFromTransform(
+export function expectTransformDiagnostics(
     config: Config,
     expectedWarnings: Diagnostic[],
     { partial = false }: { partial?: boolean } = {}

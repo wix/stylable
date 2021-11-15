@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import {
-    expectWarnings,
-    expectWarningsFromTransform,
+    expectAnalyzeDiagnostics,
+    expectTransformDiagnostics,
     findTestLocations,
 } from '@stylable/core-test-kit';
 import {
@@ -50,7 +50,7 @@ describe('diagnostics: warnings and errors', () => {
     describe('syntax', () => {
         xdescribe('selectors', () => {
             it('should return warning for unidentified tag selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |Something| {
 
@@ -61,7 +61,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return warning for unterminated "."', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
 
@@ -72,7 +72,7 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
             it('should return warning for unterminated ":"', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
 
@@ -83,7 +83,7 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
             it('should return warning for className without rule area', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
 
@@ -96,10 +96,10 @@ describe('diagnostics: warnings and errors', () => {
         });
         describe(`non spec functional selectors`, () => {
             it(`should not return an error for value() under pseudo-class`, () => {
-                expectWarnings(`|.root :cls($value(abc)$)| {}`, []);
+                expectAnalyzeDiagnostics(`|.root :cls($value(abc)$)| {}`, []);
             });
             it(`should return error for id`, () => {
-                expectWarnings(`|.root $#abc()$| {}`, [
+                expectAnalyzeDiagnostics(`|.root $#abc()$| {}`, [
                     {
                         severity: `error`,
                         message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`),
@@ -108,7 +108,7 @@ describe('diagnostics: warnings and errors', () => {
                 ]);
             });
             it(`should return error for attribute`, () => {
-                expectWarnings(`|.root $[attr]()$| {}`, [
+                expectAnalyzeDiagnostics(`|.root $[attr]()$| {}`, [
                     {
                         severity: `error`,
                         message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(
@@ -120,7 +120,7 @@ describe('diagnostics: warnings and errors', () => {
                 ]);
             });
             it(`should return error for nesting`, () => {
-                expectWarnings(`|.root $&()$| {}`, [
+                expectAnalyzeDiagnostics(`|.root $&()$| {}`, [
                     {
                         severity: `error`,
                         message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`),
@@ -131,7 +131,7 @@ describe('diagnostics: warnings and errors', () => {
         });
         xdescribe('ruleset', () => {
             it('should return warning for unterminated ruleset', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
 
@@ -145,7 +145,7 @@ describe('diagnostics: warnings and errors', () => {
         });
         xdescribe('rules', () => {
             it('should return warning for unterminated rule', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
 
@@ -156,7 +156,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [{ message: ': expected', file: 'main.css' }]
                 );
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
 
@@ -170,7 +170,7 @@ describe('diagnostics: warnings and errors', () => {
                 // todo: add cases for any unterminated selectors (direct descendant, etc...)
             });
             it('should return warning for unknown rule', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
                         |hello|:yossi;
@@ -181,7 +181,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should warn when using illegal characters', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     <|{
 
@@ -192,7 +192,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return warning for unknown directive', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .gaga{
                         |-st-something|:true;
@@ -205,7 +205,7 @@ describe('diagnostics: warnings and errors', () => {
 
         describe('pseudo selectors', () => {
             xit('should return warning for native pseudo elements without selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |::before|{
 
@@ -234,7 +234,7 @@ describe('diagnostics: warnings and errors', () => {
                             },
                         },
                     };
-                    expectWarningsFromTransform(config, [
+                    expectTransformDiagnostics(config, [
                         {
                             message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn'),
                             file: '/main.css',
@@ -253,7 +253,7 @@ describe('diagnostics: warnings and errors', () => {
                             },
                         },
                     };
-                    expectWarningsFromTransform(config, []);
+                    expectTransformDiagnostics(config, []);
                 });
                 it('should not warn on vendor prefixed pseudo class', () => {
                     const config = {
@@ -267,7 +267,7 @@ describe('diagnostics: warnings and errors', () => {
                             },
                         },
                     };
-                    expectWarningsFromTransform(config, []);
+                    expectTransformDiagnostics(config, []);
                 });
                 nativePseudoElements.forEach((nativeElement) => {
                     it(`should not return a warning for native ${nativeElement} pseudo element`, () => {
@@ -282,7 +282,7 @@ describe('diagnostics: warnings and errors', () => {
                                 },
                             },
                         };
-                        expectWarningsFromTransform(config, []);
+                        expectTransformDiagnostics(config, []);
                     });
                 });
             });
@@ -292,7 +292,7 @@ describe('diagnostics: warnings and errors', () => {
     describe('structure', () => {
         describe('root', () => {
             it('should return warning for ".root" after a selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |.gaga .root|{}
                 `,
@@ -301,7 +301,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return warning for ".root" after global and local classes', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |:global(*) .x .root|{}
                 `,
@@ -310,7 +310,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return warning for ".root" after a global and element', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |:global(*) div .root|{}
                 `,
@@ -325,7 +325,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should not return warning for ".root" after a global selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :global(*) .root{}
                 `,
@@ -334,7 +334,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should not return warning for ".root" after a complex global selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :global(body[dir="rtl"] > header) .root {}
                 `,
@@ -345,7 +345,7 @@ describe('diagnostics: warnings and errors', () => {
 
         describe('-st-mixin', () => {
             it('should return warning for unknown mixin', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .gaga{
                         |-st-mixin: $myMixin$|;
@@ -356,7 +356,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return a warning for a CSS mixin using un-named params', () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: '/style.st.css',
                         files: {
@@ -403,7 +403,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
 
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
                             'my-mixin',
@@ -436,7 +436,7 @@ describe('diagnostics: warnings and errors', () => {
                 const mainPath = '/main.css';
                 const xPath = [`y from ${mainPath}`, `x from ${mainPath}`];
                 const yPath = [`x from ${mainPath}`, `y from ${mainPath}`];
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: mixinWarnings.CIRCULAR_MIXIN(xPath),
                         file: '/main.css',
@@ -474,7 +474,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: mixinWarnings.FAILED_TO_APPLY_MIXIN('bug in mixin'),
                         file: '/main.css',
@@ -505,7 +505,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
 
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     { message: mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' },
                 ]);
             });
@@ -530,7 +530,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     { message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' },
                 ]);
             });
@@ -549,7 +549,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' },
                 ]);
             });
@@ -575,7 +575,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' },
                 ]);
             });
@@ -583,7 +583,7 @@ describe('diagnostics: warnings and errors', () => {
 
         describe(':vars', () => {
             it('should return warning when defined in a complex selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                 |.gaga:vars|{
                     myColor:red;
@@ -605,7 +605,7 @@ describe('diagnostics: warnings and errors', () => {
 
         describe(':import', () => {
             it('should return warning when defined in a complex selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |.gaga:import|{
                         -st-from:"./file.st.css";
@@ -622,7 +622,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return warning when default import is defined with a lowercase first letter', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import{
                         -st-from:"./file.st.css";
@@ -660,7 +660,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: parseImportMessages.ILLEGAL_PROP_IN_IMPORT('color'),
                         file: '/main.st.css',
@@ -669,7 +669,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return a warning for import with missing "-st-from" declaration', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |:import{
                         -st-default:Comp;
@@ -685,7 +685,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return a warning for import with empty "-st-from" declaration', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import{
                         |-st-from: "   ";|
@@ -703,7 +703,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should return a warning for multiple "-st-from" declarations', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |:import{
                         -st-from: "a";
@@ -721,7 +721,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should warn on invalid custom property rename', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |:import{
                         -st-from: "./a.st.css";
@@ -740,7 +740,7 @@ describe('diagnostics: warnings and errors', () => {
 
         describe('-st-extends', () => {
             it('should return warning when defined under complex selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import{
                         -st-from:"./file";
@@ -763,7 +763,7 @@ describe('diagnostics: warnings and errors', () => {
 
         describe('override -st-* warnings', () => {
             it('should warn on typed class extend override', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import {
                         -st-from : './file.css';
@@ -806,7 +806,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 },
             };
-            expectWarningsFromTransform(config, [
+            expectTransformDiagnostics(config, [
                 { message: processorWarnings.OVERRIDE_MIXIN('-st-mixin'), file: '/main.css' },
             ]);
         });
@@ -839,7 +839,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     config,
                     [
                         {
@@ -857,7 +857,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should warn when import redeclare same symbol (in same block)', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |:import {
                         -st-from: './file.st.css';
@@ -870,7 +870,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should warn when import redeclare same symbol (in different block)', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import {
                         -st-from: './file.st.css';
@@ -886,7 +886,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should warn when import redeclare same symbol (in different block types)', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import {
                         -st-from: './file.st.css';
@@ -927,7 +927,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('myVar', './file.st.css'),
                         file: '/main.st.css',
@@ -946,7 +946,7 @@ describe('diagnostics: warnings and errors', () => {
     describe('selectors', () => {
         // TODO2: next phase
         xit('should not allow conflicting extends', () => {
-            expectWarnings(
+            expectAnalyzeDiagnostics(
                 `
                 :import {
                     -st-from: "./sheetA";
@@ -982,7 +982,7 @@ describe('diagnostics: warnings and errors', () => {
 
         describe('root scoping disabled', () => {
             it('should not warn when using native elements with root scoping', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root button {}
                 `,
@@ -991,7 +991,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should not warn when using native elements after scoping', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .class {}
                     .class button {}
@@ -1001,7 +1001,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should warn when using imported elements (classes) without scoping', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import {
                         -st-from: "./blah.st.css";
@@ -1015,7 +1015,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should not issue scoping diagnostics for a class scoped by a selector with ":not()" (regression)', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import {
                         -st-from: "./blah.st.css";
@@ -1032,7 +1032,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should not warn when using imported elements (classes) without scoping', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     :import {
                         -st-from: "./blah.st.css";
@@ -1052,7 +1052,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should warn regardless if using a global before the element', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |:global(div) $button$| {}
                 `,
@@ -1066,7 +1066,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
             it('should warn with multiple selector', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     |.x, $button$| {}
                 `,
@@ -1096,7 +1096,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     { message: processorWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
                 ]);
             });
@@ -1117,7 +1117,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
                         file: '/main.st.css',
@@ -1139,7 +1139,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     config,
 
                     [
@@ -1171,7 +1171,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     config,
 
                     [
@@ -1204,7 +1204,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     config,
 
                     [
@@ -1233,7 +1233,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
                         file: '/main.st.css',
@@ -1253,7 +1253,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     config,
 
                     [
@@ -1282,7 +1282,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     config,
 
                     [
@@ -1312,7 +1312,7 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     config,
 
                     [
