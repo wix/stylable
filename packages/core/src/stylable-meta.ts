@@ -39,7 +39,6 @@ export class StylableMeta {
     public customSelectors: Record<string, string>;
     public urls: string[];
     public parent?: StylableMeta;
-    public analyzeDiagnostics: Diagnostics | null = null;
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null;
     public scopes: postcss.AtRule[];

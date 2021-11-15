@@ -126,7 +126,7 @@ export class StylableTransformer {
     }
     public transform(meta: StylableMeta): StylableResults {
         // set main diagnostics to transform diagnostics
-        meta.analyzeDiagnostics = meta.diagnostics;
+        const analyzeDiagnostics = meta.diagnostics;
         meta.diagnostics = this.diagnostics;
         //
         const metaExports: StylableExports = {
@@ -141,9 +141,9 @@ export class StylableTransformer {
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast, meta);
         const result = { meta, exports: metaExports };
-        // save diagnostics (return analyze diagnostics to diagnostics field for now)
+        // save diagnostics (analyzeDiagnostics is on the main `meta.diagnostics` for now)
         meta.transformDiagnostics = meta.diagnostics;
-        meta.diagnostics = meta.analyzeDiagnostics;
+        meta.diagnostics = analyzeDiagnostics;
 
         return this.postProcessor ? this.postProcessor(result, this) : result;
     }
