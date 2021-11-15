@@ -136,7 +136,7 @@ export function isCSSVarProp(value: string) {
 }
 
 export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symbolName: string) {
-    const importedVar = resolver.deepResolve(STSymbol.getSymbol(meta, symbolName));
+    const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
     if (
         importedVar &&
         importedVar._kind === 'css' &&

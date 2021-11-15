@@ -160,7 +160,7 @@ interface ExtensionApi<Value, Args> {
 
 export function resolveCustomValues(meta: StylableMeta, resolver: StylableResolver) {
     const customValues = { ...stTypes };
-    for (const [symbolName, symbol] of Object.entries(STSymbol.getSymbols(meta))) {
+    for (const [symbolName, symbol] of Object.entries(STSymbol.getAll(meta))) {
         if (symbol._kind !== 'import') {
             continue;
         }

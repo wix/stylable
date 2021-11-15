@@ -19,21 +19,21 @@ describe(`features/st-part`, () => {
                 },
             });
 
-            expect(STPart.getPart(meta, `a`), `a`).to.eql({
+            expect(STPart.get(meta, `a`), `a`).to.eql({
                 node: meta.ast.nodes[0],
-                symbol: CSSClass.getClass(meta, `a`),
+                symbol: CSSClass.get(meta, `a`),
             });
-            expect(STPart.getPart(meta, `b`), `b`).to.eql({
+            expect(STPart.get(meta, `b`), `b`).to.eql({
                 node: meta.ast.nodes[1],
-                symbol: CSSClass.getClass(meta, `b`),
+                symbol: CSSClass.get(meta, `b`),
             });
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.simpleSelectors),
                 `deprecated 'meta.simpleSelectors'`
             ).to.eql({
-                a: STPart.getPart(meta, `a`),
-                b: STPart.getPart(meta, `b`),
+                a: STPart.get(meta, `a`),
+                b: STPart.get(meta, `b`),
             });
         });
         it(`should collect only type selector component part definitions (capital letter)`, () => {
@@ -50,17 +50,17 @@ describe(`features/st-part`, () => {
                 },
             });
 
-            expect(STPart.getPart(meta, `Comp`), `component`).to.eql({
+            expect(STPart.get(meta, `Comp`), `component`).to.eql({
                 node: meta.ast.nodes[1],
-                symbol: CSSType.getType(meta, `Comp`),
+                symbol: CSSType.get(meta, `Comp`),
             });
-            expect(STPart.getPart(meta, `span`), `native`).to.equal(undefined);
+            expect(STPart.get(meta, `span`), `native`).to.equal(undefined);
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.simpleSelectors),
                 `deprecated 'meta.simpleSelectors'`
             ).to.eql({
-                Comp: STPart.getPart(meta, `Comp`),
+                Comp: STPart.get(meta, `Comp`),
             });
         });
         it(`should NOT have root class symbol by default`, () => {
@@ -74,7 +74,7 @@ describe(`features/st-part`, () => {
                 },
             });
 
-            expect(STPart.getPart(meta, `root`)).to.equal(undefined);
+            expect(STPart.get(meta, `root`)).to.equal(undefined);
         });
         it(`should collect defined root class`, () => {
             const { meta } = generateStylableResult({
@@ -87,9 +87,9 @@ describe(`features/st-part`, () => {
                 },
             });
 
-            expect(STPart.getPart(meta, `root`)).to.eql({
+            expect(STPart.get(meta, `root`)).to.eql({
                 node: meta.ast.nodes[0],
-                symbol: CSSClass.getClass(meta, `root`),
+                symbol: CSSClass.get(meta, `root`),
             });
         });
     });

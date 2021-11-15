@@ -24,11 +24,11 @@ describe(`features/css-class`, () => {
                 },
             });
 
-            expect(CSSClass.getClass(meta, `a`), `a`).to.contain({
+            expect(CSSClass.get(meta, `a`), `a`).to.contain({
                 _kind: `class`,
                 name: 'a',
             });
-            expect(CSSClass.getClass(meta, `b`), `b`).to.contain({
+            expect(CSSClass.get(meta, `b`), `b`).to.contain({
                 _kind: `class`,
                 name: 'b',
             });
@@ -37,9 +37,9 @@ describe(`features/css-class`, () => {
                 ignoreDeprecationWarn(() => meta.classes),
                 `deprecated 'meta.classes'`
             ).to.eql({
-                root: CSSClass.getClass(meta, `root`),
-                a: CSSClass.getClass(meta, `a`),
-                b: CSSClass.getClass(meta, `b`),
+                root: CSSClass.get(meta, `root`),
+                a: CSSClass.get(meta, `a`),
+                b: CSSClass.get(meta, `b`),
             });
         });
         it(`should have root class symbol by default`, () => {
@@ -53,7 +53,7 @@ describe(`features/css-class`, () => {
                 },
             });
 
-            expect(CSSClass.getClass(meta, `root`)).to.contain({
+            expect(CSSClass.get(meta, `root`)).to.contain({
                 _kind: `class`,
                 name: 'root',
             });
@@ -71,10 +71,8 @@ describe(`features/css-class`, () => {
                 },
             });
 
-            expect(CSSClass.getClass(meta, `a`), `a`).to.equal(STSymbol.getSymbol(meta, `a`));
-            expect(CSSClass.getClass(meta, `root`), `root`).to.equal(
-                STSymbol.getSymbol(meta, `root`)
-            );
+            expect(CSSClass.get(meta, `a`), `a`).to.equal(STSymbol.get(meta, `a`));
+            expect(CSSClass.get(meta, `root`), `root`).to.equal(STSymbol.get(meta, `root`));
         });
         it(`should mark class as import alias`, () => {
             const { meta } = generateStylableResult({
@@ -95,7 +93,7 @@ describe(`features/css-class`, () => {
             });
 
             // ToDo: replace with STImport.getImport() once import feature is ready
-            expect(CSSClass.getClass(meta, `imported`), `symbol`).to.eql({
+            expect(CSSClass.get(meta, `imported`), `symbol`).to.eql({
                 _kind: `class`,
                 name: 'imported',
                 alias: {
@@ -122,10 +120,10 @@ describe(`features/css-class`, () => {
                 },
             });
 
-            expect(CSSClass.getSymbols(meta)).to.eql({
-                root: CSSClass.getClass(meta, `root`),
-                btn: CSSClass.getClass(meta, `btn`),
-                gallery: CSSClass.getClass(meta, `gallery`),
+            expect(CSSClass.getAll(meta)).to.eql({
+                root: CSSClass.get(meta, `root`),
+                btn: CSSClass.get(meta, `btn`),
+                gallery: CSSClass.get(meta, `gallery`),
             });
         });
     });

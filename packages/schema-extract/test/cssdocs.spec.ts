@@ -17,7 +17,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.getSymbol(meta, `root`)!);
+        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `root`)!);
 
         expect(cssDoc).to.eql(null);
     });
@@ -38,7 +38,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.getSymbol(meta, `root`)!);
+        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `root`)!);
 
         expect(cssDoc).to.eql({ description: 'this is my description', tags: {} });
     });
@@ -63,7 +63,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.getSymbol(meta, `root`)!);
+        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `root`)!);
 
         expect(cssDoc).to.eql({
             description: '',
@@ -93,7 +93,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.getSymbol(meta, `root`)!);
+        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `root`)!);
 
         expect(cssDoc).to.eql({
             description: 'this is a description text',
@@ -118,7 +118,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.getSymbol(meta, `Part`)!);
+        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `Part`)!);
 
         expect(cssDoc).to.eql({
             description: 'this is a description text',
@@ -144,7 +144,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.getSymbol(meta, `myVar`)!);
+        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `myVar`)!);
 
         expect(cssDoc).to.eql({
             description: 'this is a var description text',
@@ -173,7 +173,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.getSymbol(meta, `myVar`)!);
+        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `myVar`)!);
 
         expect(cssDoc).to.eql({
             description: 'this is a var description text',

@@ -20,14 +20,14 @@ describe(`features/st-symbol`, () => {
 
             STSymbol.addSymbol({ meta, symbol });
 
-            expect(STSymbol.getSymbol(meta, `a`)).to.equal(symbol);
+            expect(STSymbol.get(meta, `a`)).to.equal(symbol);
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.mappedSymbols),
                 `deprecated 'meta.mappedSymbols'`
             ).to.eql({
-                root: STSymbol.getSymbol(meta, `root`),
-                a: STSymbol.getSymbol(meta, `a`),
+                root: STSymbol.get(meta, `root`),
+                a: STSymbol.get(meta, `a`),
             });
         });
         it(`should override previous symbol`, () => {
@@ -46,7 +46,7 @@ describe(`features/st-symbol`, () => {
             STSymbol.addSymbol({ meta, symbol: symbolA });
             STSymbol.addSymbol({ meta, symbol: symbolB });
 
-            expect(STSymbol.getSymbol(meta, `a`), `override`).to.equal(symbolB);
+            expect(STSymbol.get(meta, `a`), `override`).to.equal(symbolB);
         });
         it(`should return collected symbols`, () => {
             const { meta } = generateStylableResult({
@@ -62,10 +62,10 @@ describe(`features/st-symbol`, () => {
                 },
             });
 
-            expect(STSymbol.getSymbols(meta)).to.eql({
-                root: STSymbol.getSymbol(meta, `root`),
-                Btn: STSymbol.getSymbol(meta, `Btn`),
-                Gallery: STSymbol.getSymbol(meta, `Gallery`),
+            expect(STSymbol.getAll(meta)).to.eql({
+                root: STSymbol.get(meta, `root`),
+                Btn: STSymbol.get(meta, `Btn`),
+                Gallery: STSymbol.get(meta, `Gallery`),
             });
         });
         it(`should accept optional local name different then symbol name`, () => {
@@ -88,11 +88,11 @@ describe(`features/st-symbol`, () => {
                 },
             });
 
-            expect(STSymbol.getSymbol(meta, `localA`)).to.eql({
+            expect(STSymbol.get(meta, `localA`)).to.eql({
                 _kind: `class`,
                 name: `A`,
             });
-            expect(STSymbol.getSymbol(meta, `A`)).to.eql(undefined);
+            expect(STSymbol.get(meta, `A`)).to.eql(undefined);
         });
     });
     describe(`diagnostics`, () => {

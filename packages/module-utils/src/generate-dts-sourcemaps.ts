@@ -12,7 +12,7 @@ import {
 type LineMapping = Array<Array<number>>;
 
 function getClassSrcPosition(className: string, meta: StylableMeta): Position | undefined {
-    const cls = CSSClass.getClass(meta, className);
+    const cls = CSSClass.get(meta, className);
     let res;
 
     if (cls) {
@@ -140,10 +140,7 @@ function createStateLineMapping(
     for (const stateToken of stateTokens) {
         let stateSourcePosition: Position | undefined;
 
-        const srcClassName = findDefiningClassName(
-            stateToken,
-            CSSClass.getClass(meta, entryClassName)!
-        );
+        const srcClassName = findDefiningClassName(stateToken, CSSClass.get(meta, entryClassName)!);
 
         meta.rawAst.walkRules(`.${srcClassName}`, (rule) => {
             return rule.walkDecls(valueMapping.states, (decl) => {

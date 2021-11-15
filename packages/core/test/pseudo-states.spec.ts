@@ -39,7 +39,7 @@ describe('pseudo-states', () => {
                         }`,
                         { from: 'path/to/style.css' }
                     );
-                    expect(CSSClass.getSymbols(meta)).to.flatMatch({
+                    expect(CSSClass.getAll(meta)).to.flatMatch({
                         root: {
                             [valueMapping.states]: {
                                 'custom-only': null,
@@ -72,7 +72,7 @@ describe('pseudo-states', () => {
                 );
 
                 expect(meta.diagnostics.reports.length, 'no reports').to.eql(0);
-                expect(CSSClass.getSymbols(meta)).to.flatMatch({
+                expect(CSSClass.getAll(meta)).to.flatMatch({
                     root: {
                         [valueMapping.states]: {
                             state1: null,
@@ -94,7 +94,7 @@ describe('pseudo-states', () => {
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                expect(CSSClass.getSymbols(res)).to.containSubset({
+                expect(CSSClass.getAll(res)).to.containSubset({
                     root: {
                         [valueMapping.states]: {
                             state1: null,
@@ -188,7 +188,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -211,7 +211,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -233,7 +233,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -257,7 +257,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -286,7 +286,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -316,7 +316,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -349,7 +349,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -384,7 +384,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -409,7 +409,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -435,7 +435,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 size: {
@@ -462,7 +462,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 size: {
@@ -489,7 +489,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 category: {
@@ -511,7 +511,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(CSSClass.getSymbols(res)).to.containSubset({
+                    expect(CSSClass.getAll(res)).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 category: {
@@ -537,7 +537,7 @@ describe('pseudo-states', () => {
                 );
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                expect(CSSClass.getSymbols(res)).to.flatMatch({
+                expect(CSSClass.getAll(res)).to.flatMatch({
                     root: {
                         [valueMapping.states]: {
                             state1: null, // boolean

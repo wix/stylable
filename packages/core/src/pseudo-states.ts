@@ -201,7 +201,7 @@ export const validateStateDefinition = wrapFunctionForDeprecation(
 
                     if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
                         const className = selectorChunk[0].value;
-                        const classMeta = CSSClass.getClass(meta, className)!;
+                        const classMeta = CSSClass.get(meta, className)!;
                         const states = classMeta[valueMapping.states];
 
                         if (classMeta && classMeta._kind === 'class' && states) {

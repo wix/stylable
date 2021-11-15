@@ -63,7 +63,7 @@ export function appendMixin(
         return;
     }
 
-    const local = STSymbol.getSymbol(meta, mix.mixin.type);
+    const local = STSymbol.get(meta, mix.mixin.type);
     if (local && (local._kind === 'class' || local._kind === 'element')) {
         handleLocalClassMixin(
             reParseMixinNamedArgs(mix, rule, transformer.diagnostics),
@@ -343,7 +343,7 @@ function createInheritedMeta(resolvedClass: CSSResolve) {
 
     STSymbol.inheritSymbols(resolvedClass.meta, mixinMeta);
 
-    const symbols = STSymbol.getSymbols(mixinMeta);
+    const symbols = STSymbol.getAll(mixinMeta);
     symbols[resolvedClass.meta.root] = symbols[resolvedClass.symbol.name];
     // ToDo: check if this works: symbols[resolvedClass.meta.root] = resolvedClass.symbol;
     return mixinMeta;

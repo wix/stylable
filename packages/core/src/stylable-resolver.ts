@@ -128,7 +128,7 @@ export class StylableResolver {
             const { value: meta } = res;
             const symbol =
                 !name || subtype === `mappedSymbols`
-                    ? STSymbol.getSymbol(meta, name || meta.root)!
+                    ? STSymbol.get(meta, name || meta.root)!
                     : meta.mappedKeyframes[name];
             return {
                 _kind: 'css',
@@ -318,9 +318,8 @@ export class StylableResolver {
             isElement: boolean
         ) => void
     ): Array<CSSResolve<ClassSymbol | ElementSymbol>> {
-        const symbol = isElement
-            ? CSSType.getType(meta, className)
-            : CSSClass.getClass(meta, className);
+        const feature = isElement ? CSSType : CSSClass;
+        const symbol = feature.get(meta, className);
 
         const customSelector = isElement ? null : meta.customSelectors[':--' + className];
 

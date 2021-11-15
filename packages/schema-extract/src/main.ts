@@ -46,12 +46,12 @@ export function generateSchema(
         namespace: meta.namespace,
     };
 
-    for (const entry of Object.keys(STSymbol.getSymbols(meta))) {
+    for (const entry of Object.keys(STSymbol.getAll(meta))) {
         if (!schema.properties) {
             schema.properties = {};
         }
 
-        const symbol = STSymbol.getSymbol(meta, entry)!;
+        const symbol = STSymbol.get(meta, entry)!;
 
         if (typeof schema.properties[entry] === 'boolean') {
             continue;

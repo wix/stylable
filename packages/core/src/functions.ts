@@ -125,7 +125,7 @@ export function processDeclarationValue(
                                 parsedNode
                             );
                         }
-                        const varSymbol = STSymbol.getSymbol(meta, varName);
+                        const varSymbol = STSymbol.get(meta, varName);
                         if (varSymbol && varSymbol._kind === 'var') {
                             const resolved = processDeclarationValue(
                                 resolver,
@@ -273,7 +273,7 @@ export function processDeclarationValue(
                     // preserve native format function quotation
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
                 } else {
-                    const formatter = resolver.deepResolve(STSymbol.getSymbol(meta, value));
+                    const formatter = resolver.deepResolve(STSymbol.get(meta, value));
                     if (formatter && formatter._kind === 'js') {
                         const formatterArgs = getFormatterArgs(parsedNode);
                         try {

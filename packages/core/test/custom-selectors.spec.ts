@@ -30,7 +30,7 @@ describe('@custom-selector', () => {
 
         const [rule] = meta.ast.nodes as [postcss.Rule];
         expect(rule.selector).to.equal('.root > .icon, .class');
-        expect(CSSClass.getClass(meta, `icon`)).to.contain({ _kind: 'class', name: 'icon' });
+        expect(CSSClass.get(meta, `icon`)).to.contain({ _kind: 'class', name: 'icon' });
     });
 
     it('expand custom-selector before process (reflect on ast when not written)', () => {
@@ -42,7 +42,7 @@ describe('@custom-selector', () => {
             { from }
         );
 
-        expect(CSSClass.getClass(meta, `icon`)).to.contain({ _kind: 'class', name: 'icon' });
+        expect(CSSClass.get(meta, `icon`)).to.contain({ _kind: 'class', name: 'icon' });
     });
 
     it('expand pseudo-element custom-selector in the owner context', () => {

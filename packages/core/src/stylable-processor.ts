@@ -509,7 +509,7 @@ export class StylableProcessor {
                 STPart.hooks.analyzeSelectorNode(this.meta, node, rule, nodeContext);
 
                 locallyScoped = CSSClass.validateClassScoping(this.meta, {
-                    classSymbol: CSSClass.getClass(this.meta, node.value)!,
+                    classSymbol: CSSClass.get(this.meta, node.value)!,
                     locallyScoped,
                     inStScope,
                     node,
@@ -690,7 +690,7 @@ export class StylableProcessor {
             isGlobal = true;
         }
 
-        if (node.type === 'atrule' && STSymbol.getSymbol(this.meta, varName)) {
+        if (node.type === 'atrule' && STSymbol.get(this.meta, varName)) {
             this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL(varName), {
                 word: varName,
             });
@@ -712,7 +712,7 @@ export class StylableProcessor {
                     global,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
-                if (!STSymbol.getSymbol(this.meta, varName)) {
+                if (!STSymbol.get(this.meta, varName)) {
                     STSymbol.addSymbol({
                         meta: this.meta,
                         symbol: cssVarSymbol,
@@ -752,7 +752,7 @@ export class StylableProcessor {
                 const parsed = parseExtends(decl.value);
                 const symbolName = parsed.types[0] && parsed.types[0].symbolName;
 
-                const extendsRefSymbol = STSymbol.getSymbol(this.meta, symbolName)!;
+                const extendsRefSymbol = STSymbol.get(this.meta, symbolName)!;
                 if (
                     (extendsRefSymbol &&
                         (extendsRefSymbol._kind === 'import' ||
@@ -785,7 +785,7 @@ export class StylableProcessor {
             SBTypesParsers[decl.prop](
                 decl,
                 (type) => {
-                    const symbol = STSymbol.getSymbol(this.meta, type);
+                    const symbol = STSymbol.get(this.meta, type);
                     return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
                         ? 'args'
                         : 'named';
@@ -793,7 +793,7 @@ export class StylableProcessor {
                 this.diagnostics,
                 false
             ).forEach((mixin) => {
-                const mixinRefSymbol = STSymbol.getSymbol(this.meta, mixin.type);
+                const mixinRefSymbol = STSymbol.get(this.meta, mixin.type);
                 if (
                     mixinRefSymbol &&
                     (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
@@ -854,7 +854,7 @@ export class StylableProcessor {
 
     protected setClassGlobalMapping(decl: postcss.Declaration, rule: postcss.Rule) {
         const name = rule.selector.replace('.', '');
-        const classSymbol = CSSClass.getClass(this.meta, name);
+        const classSymbol = CSSClass.get(this.meta, name);
         if (classSymbol) {
             classSymbol[valueMapping.global] = parseGlobal(decl, this.diagnostics);
         }
@@ -867,7 +867,7 @@ export class StylableProcessor {
         value: any
     ) {
         const name = selector.replace('.', '');
-        const typedRule = STSymbol.getSymbol(this.meta, name) as ClassSymbol | ElementSymbol;
+        const typedRule = STSymbol.get(this.meta, name) as ClassSymbol | ElementSymbol;
         if (typedRule && typedRule[key]) {
             this.diagnostics.warn(node, processorWarnings.OVERRIDE_TYPED_RULE(key, name), {
                 word: name,

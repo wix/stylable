@@ -54,8 +54,8 @@ export const hooks = createFeature({
             CSSType.hooks.analyzeSelectorNode(meta, node, rule, nodeContext);
         }
         if (!stPartData[name]) {
-            const symbol =
-                node.type === `class` ? CSSClass.getClass(meta, name) : CSSType.getType(meta, name);
+            const feature = node.type === `class` ? CSSClass : CSSType;
+            const symbol = feature.get(meta, name);
             if (!symbol) {
                 return;
             }
@@ -73,14 +73,14 @@ export const hooks = createFeature({
 
 // API
 
-export function getPart(meta: StylableMeta, name: string): StylablePart | undefined {
+export function get(meta: StylableMeta, name: string): StylablePart | undefined {
     const state = plugableRecord.getUnsafe(meta.data, dataKey);
     return state[name];
 }
 
 export function resolveAll(meta: StylableMeta, resolver: StylableResolver) {
     const resolvedClasses: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> = {};
-    for (const [className, classSymbol] of Object.entries(CSSClass.getSymbols(meta))) {
+    for (const [className, classSymbol] of Object.entries(CSSClass.getAll(meta))) {
         resolvedClasses[className] = resolver.resolveExtends(
             meta,
             className,
@@ -122,7 +122,7 @@ export function resolveAll(meta: StylableMeta, resolver: StylableResolver) {
     }
 
     const resolvedElements: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> = {};
-    for (const k of Object.keys(CSSType.getSymbols(meta))) {
+    for (const k of Object.keys(CSSType.getAll(meta))) {
         resolvedElements[k] = resolver.resolveExtends(meta, k, true);
     }
     return { class: resolvedClasses, element: resolvedElements };

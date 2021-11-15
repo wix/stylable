@@ -173,9 +173,9 @@ export class Provider {
                 );
             }
         } else if (
-            Object.keys(STSymbol.getSymbols(meta)).find((sym) => sym === word.replace('.', ''))
+            Object.keys(STSymbol.getAll(meta)).find((sym) => sym === word.replace('.', ''))
         ) {
-            const symbol = STSymbol.getSymbol(meta, word.replace('.', ''))!;
+            const symbol = STSymbol.get(meta, word.replace('.', ''))!;
             switch (symbol._kind) {
                 case 'class': {
                     defs.push(
@@ -232,7 +232,7 @@ export class Provider {
                 }
             }
         } else if (
-            Object.values(STSymbol.getSymbols(meta)).some((k) => {
+            Object.values(STSymbol.getAll(meta)).some((k) => {
                 if (k._kind === 'class') {
                     const symbolStates = k[valueMapping.states];
 
@@ -259,7 +259,7 @@ export class Provider {
                             (str: string) => !str.startsWith(':') || str.startsWith('::')
                         );
                         name = name!.replace('.', '').replace(/:/g, '');
-                        const localSymbol = STSymbol.getSymbol(callingMeta, name);
+                        const localSymbol = STSymbol.get(callingMeta, name);
                         if (
                             name === k.name ||
                             (!name.startsWith(name.charAt(0).toLowerCase()) && k.name === 'root')
@@ -314,14 +314,14 @@ export class Provider {
         elementName: string,
         state: string
     ): CSSResolve | null {
-        const importedSymbol = CSSClass.getClass(origMeta, elementName)![valueMapping.extends];
+        const importedSymbol = CSSClass.get(origMeta, elementName)![valueMapping.extends];
         let res: CSSResolve | JSResolve | null = null;
 
         if (importedSymbol && importedSymbol._kind === 'import') {
             res = this.stylable.resolver.resolveImport(importedSymbol);
         }
 
-        const localSymbol = STSymbol.getSymbol(origMeta, elementName)!;
+        const localSymbol = STSymbol.get(origMeta, elementName)!;
         if (
             res &&
             res._kind === 'css' &&
@@ -407,7 +407,7 @@ export class Provider {
             return null;
         }
 
-        const mappedSymbol = STSymbol.getSymbol(meta, mixin);
+        const mappedSymbol = STSymbol.get(meta, mixin);
 
         if (mappedSymbol && mappedSymbol._kind === 'import') {
             if (mappedSymbol.import.from.endsWith('.ts')) {
@@ -415,7 +415,7 @@ export class Provider {
                     mixin,
                     activeParam,
                     mappedSymbol.import.from,
-                    (STSymbol.getSymbol(meta, mixin)! as ImportSymbol).type === 'default',
+                    (STSymbol.get(meta, mixin)! as ImportSymbol).type === 'default',
                     paramInfo
                 );
             } else if (mappedSymbol.import.from.endsWith('.js')) {
@@ -1199,13 +1199,13 @@ function newFindRefs(
     } else {
         word = word.replace('.', '');
     }
-    const defSymbols = STSymbol.getSymbols(defMeta);
+    const defSymbols = STSymbol.getAll(defMeta);
     if (!defSymbols[word] && !word.startsWith(word.charAt(0).toLowerCase())) {
         // Default import
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.process(stylesheetPath);
             let tmp = '';
-            const scannedSymbols = STSymbol.getSymbols(scannedMeta);
+            const scannedSymbols = STSymbol.getAll(scannedMeta);
             if (
                 Object.keys(scannedSymbols).some((k) => {
                     tmp = k;
@@ -1226,7 +1226,7 @@ function newFindRefs(
         // Variable
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.process(stylesheetPath);
-            const scannedSymbols = STSymbol.getSymbols(scannedMeta);
+            const scannedSymbols = STSymbol.getAll(scannedMeta);
             if (
                 !scannedSymbols[word] ||
                 (scannedSymbols[word]._kind !== 'var' && scannedSymbols[word]._kind !== 'import')
@@ -1792,7 +1792,7 @@ export function getDefSymbol(
     }
 
     const match = lineChunkAtCursor.match(directiveRegex);
-    const localSymbol = STSymbol.getSymbol(meta, word);
+    const localSymbol = STSymbol.get(meta, word);
     if (match && localSymbol) {
         // We're in an -st directive
         let imp;
@@ -1824,7 +1824,7 @@ export function getDefSymbol(
     const varRegex = new RegExp('value\\(\\s*' + word);
     if (varRegex.test(lineChunkAtCursor)) {
         // we're looking at a var usage
-        const symbol = STSymbol.getSymbol(meta, word);
+        const symbol = STSymbol.get(meta, word);
         if (!symbol) {
             return { word, meta: null };
         } else if (symbol._kind === 'var') {

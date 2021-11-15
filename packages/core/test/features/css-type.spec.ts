@@ -24,16 +24,16 @@ describe(`features/css-type`, () => {
                 },
             });
 
-            expect(CSSType.getType(meta, `Btn`), `Btn`).to.contain({
+            expect(CSSType.get(meta, `Btn`), `Btn`).to.contain({
                 _kind: `element`,
                 name: 'Btn',
             });
-            expect(CSSType.getType(meta, `div`), `div`).to.eql(undefined);
+            expect(CSSType.get(meta, `div`), `div`).to.eql(undefined);
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.elements),
                 `deprecated 'meta.elements'`
-            ).to.eql({ Btn: CSSType.getType(meta, `Btn`) });
+            ).to.eql({ Btn: CSSType.get(meta, `Btn`) });
         });
         it(`should add to general symbols`, () => {
             const { meta } = generateStylableResult({
@@ -48,7 +48,7 @@ describe(`features/css-type`, () => {
                 },
             });
 
-            expect(CSSType.getType(meta, `Comp`)).to.equal(STSymbol.getSymbol(meta, `Comp`));
+            expect(CSSType.get(meta, `Comp`)).to.equal(STSymbol.get(meta, `Comp`));
         });
         it(`should mark type as import alias`, () => {
             const { meta } = generateStylableResult({
@@ -69,7 +69,7 @@ describe(`features/css-type`, () => {
             });
 
             // ToDo: replace with STImport.getImport() once import feature is ready
-            expect(CSSType.getType(meta, `Imported`), `symbol`).to.eql({
+            expect(CSSType.get(meta, `Imported`), `symbol`).to.eql({
                 _kind: `element`,
                 name: 'Imported',
                 alias: {
@@ -96,9 +96,9 @@ describe(`features/css-type`, () => {
                 },
             });
 
-            expect(CSSType.getSymbols(meta)).to.eql({
-                Btn: CSSType.getType(meta, `Btn`),
-                Gallery: CSSType.getType(meta, `Gallery`),
+            expect(CSSType.getAll(meta)).to.eql({
+                Btn: CSSType.get(meta, `Btn`),
+                Gallery: CSSType.get(meta, `Gallery`),
             });
         });
     });

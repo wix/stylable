@@ -33,12 +33,12 @@ export const hooks = createFeature({
 
 // API
 
-export function getSymbol(meta: StylableMeta, name: string): StylableSymbol | undefined {
+export function get(meta: StylableMeta, name: string): StylableSymbol | undefined {
     const state = plugableRecord.getUnsafe(meta.data, dataKey);
     return state[name];
 }
 
-export function getSymbols(meta: StylableMeta): Record<string, StylableSymbol> {
+export function getAll(meta: StylableMeta): Record<string, StylableSymbol> {
     return plugableRecord.getUnsafe(meta.data, dataKey);
 }
 

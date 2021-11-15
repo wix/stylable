@@ -179,7 +179,7 @@ export class CssService {
 
                     const src = this.fs.readFileSync(filePath, 'utf8');
                     const meta = createMeta(src, filePath).meta;
-                    if (meta && Object.keys(STSymbol.getSymbols(meta)).some((ms) => ms === prop)) {
+                    if (meta && Object.keys(STSymbol.getAll(meta)).some((ms) => ms === prop)) {
                         return false;
                     }
                 }

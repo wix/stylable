@@ -56,7 +56,7 @@ function collectLocalStates(cls: ClassSymbol) {
 
 function stringifyStates(meta: StylableMeta) {
     let out = '';
-    for (const [name, symbol] of Object.entries(CSSClass.getSymbols(meta))) {
+    for (const [name, symbol] of Object.entries(CSSClass.getAll(meta))) {
         const states = collectLocalStates(symbol);
         out += states ? `${SPACING}${asString(scope(name, meta.namespace))}: { ${states}};\n` : '';
     }

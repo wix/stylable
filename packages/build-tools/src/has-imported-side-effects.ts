@@ -8,7 +8,7 @@ export function hasImportedSideEffects(stylable: Stylable, meta: StylableMeta, i
     }
 
     //compose usage
-    for (const localSymbol of Object.values(CSSClass.getSymbols(meta))) {
+    for (const localSymbol of Object.values(CSSClass.getAll(meta))) {
         if (
             localSymbol['-st-extends'] &&
             localSymbol['-st-extends']._kind === 'import' &&

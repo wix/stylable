@@ -78,12 +78,12 @@ export const hooks = createFeature({
 
 // API
 
-export function getClass({ data }: StylableMeta, name: string): ClassSymbol | undefined {
+export function get({ data }: StylableMeta, name: string): ClassSymbol | undefined {
     const state = plugableRecord.getUnsafe(data, dataKey);
     return state[name];
 }
 
-export function getSymbols({ data }: StylableMeta): Record<string, ClassSymbol> {
+export function getAll({ data }: StylableMeta): Record<string, ClassSymbol> {
     return plugableRecord.getUnsafe(data, dataKey);
 }
 
@@ -91,7 +91,7 @@ export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule):
     const cssClassData = plugableRecord.getUnsafe(meta.data, dataKey);
     let classSymbol = cssClassData[name];
     if (!classSymbol) {
-        let alias = STSymbol.getSymbol(meta, name);
+        let alias = STSymbol.get(meta, name);
         if (alias && alias._kind !== 'import') {
             alias = undefined;
         }
