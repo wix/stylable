@@ -601,6 +601,11 @@ export class StylableTransformer {
                 });
             }
         } else if (node.type === `nesting`) {
+            /**
+             * although it is always assumed to be class symbol, the get is done from 
+             * the general `st-symbol` feature because the actual symbol can 
+             * be a type-element symbol that is actually an imported root in a mixin
+             */
             const origin = STSymbol.getSymbol(originMeta, originMeta.root) as ClassSymbol;
             context.setCurrentAnchor({
                 name: origin.name,

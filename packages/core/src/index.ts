@@ -6,6 +6,10 @@ export {
     cachedProcessFile,
     processFn,
 } from './cached-process-file';
+import type { StylablePart } from './features';
+/**@deprecated*/
+type SimpleSelector = StylablePart;
+export { SimpleSelector };
 export type {
     CSSVarSymbol,
     ClassSymbol,
@@ -14,7 +18,6 @@ export type {
     Imported,
     KeyframesSymbol,
     RefedMixin,
-    StylablePart as SimpleSelector, // deprecated
     StylableDirectives,
     StylableSymbol,
     VarSymbol,

@@ -23,8 +23,7 @@ export const RESERVED_ROOT_NAME = 'root';
 const features = [STSymbol, STGlobal, CSSClass, CSSType, STPart];
 
 export class StylableMeta {
-    public data: PlugableRecord = {}; //ToDo: try flatten: extends PlugableRecord
-    //
+    public data: PlugableRecord = {};
     public rawAst: postcss.Root;
     public root: 'root';
     public source: string;

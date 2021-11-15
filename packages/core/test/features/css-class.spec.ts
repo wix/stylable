@@ -190,7 +190,7 @@ describe(`features/css-class`, () => {
                         },
                     },
                 });
-    
+
                 testInlineExpects(result);
             });
             it('should replace with complex selector', () => {
@@ -212,35 +212,39 @@ describe(`features/css-class`, () => {
                         },
                     },
                 });
-    
+
                 testInlineExpects(result);
             });
-            it(`should replace imported type`, () => {
+            it(`should replace imported class`, () => {
                 const result = generateStylableRoot({
                     entry: `/style.st.css`,
                     files: {
                         '/style.st.css': {
                             namespace: 'ns',
                             content: `
-                                :import {
-                                    -st-from: "./inner.st.css";
-                                    -st-default: Container;
-                                }
-                                /* @check .x */
-                                Container {}
+                                @st-import [root as iRoot, part as iPart] from "./inner.st.css";
+
+                                /* @check .r */
+                                .iRoot {}
+
+                                /* @check .p */
+                                .iPart {}
                             `,
                         },
                         '/inner.st.css': {
                             namespace: 'ns1',
                             content: `
                                 .root {
-                                    -st-global: ".x";
+                                    -st-global: ".r";
+                                }
+                                .part {
+                                    -st-global: ".p"
                                 }
                             `,
                         },
                     },
                 });
-    
+
                 testInlineExpects(result);
             });
         });
@@ -258,10 +262,10 @@ describe(`features/css-class`, () => {
                         },
                     },
                 });
-    
+
                 testInlineExpects(result);
             });
-        })
+        });
     });
     describe(`diagnostics`, () => {
         it(`should error on unsupported functional class`, () => {
@@ -303,15 +307,15 @@ describe(`features/css-class`, () => {
                 );
             });
             it(`should not warn if a later part of the compound selector is scoped`, () => {
+                /*
+                ToDo: consider to accept as scoped when local symbol exists
+                anywhere in the selector: ".importedPart .local div"
+                */
                 expectAnalyzeDiagnostics(
                     `
                     @st-import [importedPart] from "./imported.st.css";
                     .importedPart.local {}
                     .local.importedPart {}
-                    /*
-                    ToDo: consider to accept as scoped when local symbol exists
-                    anywhere in the selector: ".importedPart .local div"
-                    */
                     `,
                     []
                 );

@@ -28,7 +28,7 @@ describe(`features/css-type`, () => {
                 _kind: `element`,
                 name: 'Btn',
             });
-            expect(CSSType.getType(meta, `span`), `div`).to.eql(undefined);
+            expect(CSSType.getType(meta, `div`), `div`).to.eql(undefined);
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.elements),
@@ -129,6 +129,34 @@ describe(`features/css-type`, () => {
             });
 
             testInlineExpects(result);
+        });
+        describe(`-st-global`, () => {
+            it(`should replace imported type`, () => {
+                const result = generateStylableRoot({
+                    entry: `/style.st.css`,
+                    files: {
+                        '/style.st.css': {
+                            namespace: 'ns',
+                            content: `
+                                @st-import Container from "./inner.st.css";
+                                
+                                /* @check .x */
+                                Container {}
+                            `,
+                        },
+                        '/inner.st.css': {
+                            namespace: 'ns1',
+                            content: `
+                                .root {
+                                    -st-global: ".x";
+                                }
+                            `,
+                        },
+                    },
+                });
+
+                testInlineExpects(result);
+            });
         });
     });
     describe(`diagnostics`, () => {

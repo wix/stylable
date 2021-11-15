@@ -7,7 +7,7 @@ import * as STGlobal from './st-global';
 import { plugableRecord } from '../helpers/plugable-record';
 import { getOriginDefinition } from '../helpers/resolve';
 import { namespaceEscape } from '../helpers/escape';
-import { flattenFunctionalSelector, convertToClass, stringifySelector } from '../helpers/selector';
+import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
 import type { ScopeContext } from '../stylable-transformer';
 import { valueMapping } from '../stylable-value-parsers';
@@ -16,7 +16,7 @@ import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type {
     ImmutableClass,
     Class,
-    FunctionalSelector,
+    SelectorNode,
     ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
@@ -117,18 +117,16 @@ export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule):
 export function namespaceClass(
     meta: StylableMeta,
     symbol: StylableSymbol,
-    node: FunctionalSelector,
+    node: SelectorNode, // ToDo: check this is the correct type, should this be inline selector?
     originMeta: StylableMeta
 ) {
-    if (valueMapping.global in symbol) {
+    if (valueMapping.global in symbol && symbol[valueMapping.global]) {
         // change node to `-st-global` value
-        const flatNode = flattenFunctionalSelector(node);
-        const globalMappedNodes = symbol[valueMapping.global];
-        if (globalMappedNodes) {
-            flatNode.nodes = globalMappedNodes;
-            // ToDo: check if this is causes an issue with globals from an imported alias
-            STGlobal.addGlobals(originMeta, globalMappedNodes);
-        }
+        const flatNode = convertToSelector(node);
+        const globalMappedNodes = symbol[valueMapping.global]!;
+        flatNode.nodes = globalMappedNodes;
+        // ToDo: check if this is causes an issue with globals from an imported alias
+        STGlobal.addGlobals(originMeta, globalMappedNodes);
     } else {
         node = convertToClass(node);
         node.value = namespaceEscape(symbol.name, meta.namespace);
