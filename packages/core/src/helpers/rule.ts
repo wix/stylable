@@ -119,10 +119,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     return mixinRoot as T;
 }
 
-function replaceTargetWithNesting(
-    selectorNode: Selector,
-    prefixType: ImmutableSelectorNode
-) {
+function replaceTargetWithNesting(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
     walkSelector(selectorNode, (node) => {
         if (matchTypeAndValue(node, prefixType)) {
             convertToSelector(node).nodes = [

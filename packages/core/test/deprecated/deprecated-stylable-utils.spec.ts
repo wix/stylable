@@ -1,5 +1,8 @@
 import { expect } from 'chai';
-import { createSubsetAst, scopeSelector } from '@stylable/core/dist/deprecated/deprecated-stylable-utils';
+import {
+    createSubsetAst,
+    scopeSelector,
+} from '@stylable/core/dist/deprecated/deprecated-stylable-utils';
 import { cssParse } from '@stylable/core';
 
 describe('deprecated/selector-utils', () => {
