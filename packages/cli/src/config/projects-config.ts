@@ -78,7 +78,7 @@ function isSTCConfig(config: any): config is { stcConfig: Configuration | Config
     );
 }
 
-function isMultpleConfigProject(config: any): config is MultipleProjectsConfig {
+function isMultpleConfigProject(config: any): config is MultipleProjectsConfig<string> {
     return Boolean(config?.projects);
 }
 

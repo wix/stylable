@@ -6,6 +6,7 @@ export {
     ConfigurationProvider,
     STCConfig,
     ResolveRequests,
+    typedConfiguration,
 } from './types';
 export { DirectoryProcessService } from './directory-process-service/directory-process-service';
 export type { DirectoryProcessServiceOptions } from './directory-process-service/types';
