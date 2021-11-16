@@ -3,6 +3,7 @@ import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
+import { reservedPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
 
 chai.use(flatMatch);
 
@@ -303,6 +304,31 @@ describe('Stylable postcss process', () => {
         );
 
         expect(Object.keys(result.elements).length).to.eql(1);
+    });
+
+    it('should not collect typed elements or classes in unknown functional selectors', () => {
+        const result = processSource(
+            `
+            :unknown(Unknown.unknown) {}
+            ${reservedPseudoClasses.map((name) =>
+                name.startsWith(`nth`)
+                    ? `:${name}(5n, El-${name}.cls-${name}) {}`
+                    : `:${name}(El-${name}.cls-${name}) {}`
+            )}
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        expect(Object.keys(result.elements)).to.not.include(`Unknown`);
+        expect(Object.keys(result.classes)).to.not.include(`unknown`);
+        expect(Object.keys(result.elements)).to.not.include(`El-global`);
+        expect(Object.keys(result.classes)).to.not.include(`cls-global`);
+
+        const allWithoutGlobal = reservedPseudoClasses.filter((name) => name !== `global`);
+        const expectedElements = allWithoutGlobal.map((name) => `El-${name}`);
+        const expectedClasses = allWithoutGlobal.map((name) => `cls-${name}`);
+        expect(Object.keys(result.elements)).to.include.members(expectedElements);
+        expect(Object.keys(result.classes)).to.include.members(expectedClasses);
     });
 
     it('always contain root class', () => {
