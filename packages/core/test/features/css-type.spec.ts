@@ -29,6 +29,9 @@ describe(`features/css-type`, () => {
                 name: 'Btn',
             });
             expect(CSSType.get(meta, `div`), `div`).to.eql(undefined);
+            expect(meta.getTypeElement(`a`), `meta.getTypeElement`).to.equal(
+                CSSType.get(meta, `a`)
+            );
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.elements),
@@ -100,6 +103,9 @@ describe(`features/css-type`, () => {
                 Btn: CSSType.get(meta, `Btn`),
                 Gallery: CSSType.get(meta, `Gallery`),
             });
+            expect(meta.getAllTypeElements(), `meta.getAllTypeElements`).to.eql(
+                CSSType.getAll(meta)
+            );
         });
     });
     describe(`transform`, () => {

@@ -21,6 +21,7 @@ describe(`features/st-symbol`, () => {
             STSymbol.addSymbol({ meta, symbol });
 
             expect(STSymbol.get(meta, `a`)).to.equal(symbol);
+            expect(meta.getSymbol(`a`), `meta.getSymbol`).to.equal(STSymbol.get(meta, `a`));
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.mappedSymbols),
@@ -67,6 +68,7 @@ describe(`features/st-symbol`, () => {
                 Btn: STSymbol.get(meta, `Btn`),
                 Gallery: STSymbol.get(meta, `Gallery`),
             });
+            expect(meta.getAllSymbols(), `meta.getAllSymbols`).to.eql(STSymbol.getAll(meta));
         });
         it(`should accept optional local name different then symbol name`, () => {
             const { meta } = generateStylableResult({

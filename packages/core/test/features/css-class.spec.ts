@@ -32,6 +32,7 @@ describe(`features/css-class`, () => {
                 _kind: `class`,
                 name: 'b',
             });
+            expect(meta.getClass(`a`), `meta.getClass`).to.equal(CSSClass.get(meta, `a`));
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.classes),
@@ -125,6 +126,7 @@ describe(`features/css-class`, () => {
                 btn: CSSClass.get(meta, `btn`),
                 gallery: CSSClass.get(meta, `gallery`),
             });
+            expect(meta.getAllClasses(), `meta.getAllClasses`).to.eql(CSSClass.getAll(meta));
         });
     });
     describe(`transform`, () => {

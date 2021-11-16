@@ -73,6 +73,24 @@ export class StylableMeta {
         this.transformDiagnostics = null;
         this.transformedScopes = null;
     }
+    getSymbol(name: string) {
+        return STSymbol.get(this, name);
+    }
+    getAllSymbols() {
+        return STSymbol.getAll(this);
+    }
+    getClass(name: string) {
+        return CSSClass.get(this, name);
+    }
+    getAllClasses() {
+        return CSSClass.getAll(this);
+    }
+    getTypeElement(name: string) {
+        return CSSType.get(this, name);
+    }
+    getAllTypeElements() {
+        return CSSType.getAll(this);
+    }
 }
 setFieldForDeprecation(StylableMeta.prototype, `simpleSelectors`, {
     objectType: `stylableMeta`,
@@ -81,12 +99,15 @@ setFieldForDeprecation(StylableMeta.prototype, `simpleSelectors`, {
 setFieldForDeprecation(StylableMeta.prototype, `elements`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
+    pleaseUse: `meta.getAllTypeElements() or meta.getTypeElement(name)`,
 });
 setFieldForDeprecation(StylableMeta.prototype, `classes`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
+    pleaseUse: `meta.getAllClasses() or meta.getClass(name)`,
 });
 setFieldForDeprecation(StylableMeta.prototype, `mappedSymbols`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
+    pleaseUse: `meta.getAllSymbols() or meta.getSymbol(name)`,
 });
