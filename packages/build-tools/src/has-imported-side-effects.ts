@@ -1,5 +1,4 @@
 import type { Imported, Stylable, StylableMeta } from '@stylable/core';
-import { CSSClass } from '@stylable/core/dist/features';
 
 export function hasImportedSideEffects(stylable: Stylable, meta: StylableMeta, imported: Imported) {
     //keyframes
@@ -8,7 +7,7 @@ export function hasImportedSideEffects(stylable: Stylable, meta: StylableMeta, i
     }
 
     //compose usage
-    for (const localSymbol of Object.values(CSSClass.getAll(meta))) {
+    for (const localSymbol of Object.values(meta.getAllClasses())) {
         if (
             localSymbol['-st-extends'] &&
             localSymbol['-st-extends']._kind === 'import' &&

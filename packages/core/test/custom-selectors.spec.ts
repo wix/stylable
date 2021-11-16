@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
-import { CSSClass } from '@stylable/core/dist/features';
 
 describe('@custom-selector', () => {
     it('collect custom-selectors', () => {
@@ -30,7 +29,7 @@ describe('@custom-selector', () => {
 
         const [rule] = meta.ast.nodes as [postcss.Rule];
         expect(rule.selector).to.equal('.root > .icon, .class');
-        expect(CSSClass.get(meta, `icon`)).to.contain({ _kind: 'class', name: 'icon' });
+        expect(meta.getClass(`icon`)).to.contain({ _kind: 'class', name: 'icon' });
     });
 
     it('expand custom-selector before process (reflect on ast when not written)', () => {
@@ -42,7 +41,7 @@ describe('@custom-selector', () => {
             { from }
         );
 
-        expect(CSSClass.get(meta, `icon`)).to.contain({ _kind: 'class', name: 'icon' });
+        expect(meta.getClass(`icon`)).to.contain({ _kind: 'class', name: 'icon' });
     });
 
     it('expand pseudo-element custom-selector in the owner context', () => {

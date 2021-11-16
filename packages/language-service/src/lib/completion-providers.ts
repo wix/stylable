@@ -20,7 +20,6 @@ import {
     valueMapping,
     VarSymbol,
 } from '@stylable/core';
-import { STSymbol, CSSClass } from '@stylable/core/dist/features';
 import type { IFileSystem } from '@file-services/types';
 import {
     classCompletion,
@@ -463,7 +462,7 @@ export const SelectorCompletionProvider: CompletionProvider = {
         if (!parentSelector && (lineChunkAtCursor === ':' || !lineChunkAtCursor.endsWith(':'))) {
             const comps: Completion[] = [];
             comps.push(
-                ...Object.keys(CSSClass.getAll(meta))
+                ...Object.keys(meta.getAllClasses())
                     .filter(
                         (c) => c !== 'root' && fakes.findIndex((f) => f.selector === '.' + c) === -1
                     )
@@ -496,7 +495,7 @@ export const SelectorCompletionProvider: CompletionProvider = {
                         );
                     }
                     Object.keys(imp.named).forEach((exp) => {
-                        const res = stylable.resolver.resolve(STSymbol.get(meta, exp));
+                        const res = stylable.resolver.resolve(meta.getSymbol(exp));
                         if (
                             res &&
                             res._kind === 'css' &&
@@ -531,7 +530,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
             const str = value.slice(spaces);
             const comps: string[][] = [[]];
             comps.push(
-                ...Object.keys(CSSClass.getAll(meta))
+                ...Object.keys(meta.getAllClasses())
                     .filter((s) => s.startsWith(str))
                     .map((s) => [s, 'Local file'])
             );
@@ -548,7 +547,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
                 comps.push(
                     ...Object.keys(i.named)
                         .filter((s) => {
-                            const res = stylable.resolver.resolve(STSymbol.get(meta, s));
+                            const res = stylable.resolver.resolve(meta.getSymbol(s));
                             return (
                                 res &&
                                 res._kind === 'css' &&
@@ -583,7 +582,7 @@ export const CssMixinCompletionProvider: CompletionProvider = {
     provide({ lineChunkAtCursor, meta, position, fullLineText }: ProviderOptions): Completion[] {
         if (lineChunkAtCursor.startsWith(valueMapping.mixin + ':')) {
             const { names, lastName } = getExistingNames(fullLineText, position);
-            const symbols = STSymbol.getAll(meta);
+            const symbols = meta.getAllSymbols();
             return Object.keys(symbols)
                 .filter((ms) => {
                     const importSymbol = symbols[ms];
@@ -644,7 +643,7 @@ export const CodeMixinCompletionProvider: CompletionProvider = {
             }
 
             const { lastName } = getExistingNames(fullLineText, position);
-            const symbols = STSymbol.getAll(meta);
+            const symbols = meta.getAllSymbols();
             return Object.keys(symbols)
                 .filter((ms) => symbols[ms]._kind === 'import')
                 .filter((ms) => ms.startsWith(lastName))
@@ -686,7 +685,7 @@ export const FormatterCompletionProvider: CompletionProvider = {
             !lineChunkAtCursor.startsWith(valueMapping.mixin + ':')
         ) {
             const { lastName } = getExistingNames(fullLineText, position);
-            const symbols = STSymbol.getAll(meta);
+            const symbols = meta.getAllSymbols();
             return (
                 Object.keys(symbols)
                     .filter((ms) => symbols[ms]._kind === 'import')
@@ -1019,7 +1018,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                 }
 
                 comps = comps.concat(
-                    Object.keys(CSSClass.getAll(res.meta))
+                    Object.keys(res.meta.getAllClasses())
                         .concat(
                             Object.keys(res.meta.customSelectors).map((s) => s.slice(':--'.length))
                         )
@@ -1062,7 +1061,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                     }
 
                     comps = comps.concat(
-                        Object.keys(CSSClass.getAll(res.meta))
+                        Object.keys(res.meta.getAllClasses())
                             .concat(
                                 Object.keys(res.meta.customSelectors).map((s) =>
                                     s.slice(':--'.length)
@@ -1108,7 +1107,7 @@ function getNamedCSSImports(
     meta: StylableMeta
 ) {
     const namedSet = new Set(namedValues);
-    for (const [symbolName, symbol] of Object.entries(STSymbol.getAll(resolvedImport))) {
+    for (const [symbolName, symbol] of Object.entries(resolvedImport.getAllSymbols())) {
         if (symbol._kind === 'keyframes') {
             continue;
         }
@@ -1584,7 +1583,7 @@ function createCodeMixinCompletion(
     position: ProviderPosition,
     meta: StylableMeta
 ) {
-    const importSymbol = STSymbol.get(meta, name);
+    const importSymbol = meta.getSymbol(name);
     if (!importSymbol || importSymbol._kind !== 'import') {
         throw new Error('expected import symbol');
     }
@@ -1605,7 +1604,7 @@ function isMixin(
     fs: IFileSystem,
     tsLangService: ExtendedTsLanguageService
 ) {
-    const importSymbol = STSymbol.get(meta, name)!;
+    const importSymbol = meta.getSymbol(name)!;
 
     if (importSymbol._kind === 'import') {
         if (importSymbol.import.request.endsWith('.ts')) {

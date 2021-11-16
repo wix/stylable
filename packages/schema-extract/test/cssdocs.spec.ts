@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { STSymbol } from '@stylable/core/dist/features';
 import { generateStylableResult } from '@stylable/core-test-kit';
 import { getCssDocsForSymbol } from '@stylable/schema-extract';
 
@@ -17,7 +16,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `root`)!);
+        const cssDoc = getCssDocsForSymbol(meta, meta.getSymbol(`root`)!);
 
         expect(cssDoc).to.eql(null);
     });
@@ -38,7 +37,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `root`)!);
+        const cssDoc = getCssDocsForSymbol(meta, meta.getSymbol(`root`)!);
 
         expect(cssDoc).to.eql({ description: 'this is my description', tags: {} });
     });
@@ -63,7 +62,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `root`)!);
+        const cssDoc = getCssDocsForSymbol(meta, meta.getSymbol(`root`)!);
 
         expect(cssDoc).to.eql({
             description: '',
@@ -93,7 +92,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `root`)!);
+        const cssDoc = getCssDocsForSymbol(meta, meta.getSymbol(`root`)!);
 
         expect(cssDoc).to.eql({
             description: 'this is a description text',
@@ -118,7 +117,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `Part`)!);
+        const cssDoc = getCssDocsForSymbol(meta, meta.getSymbol(`Part`)!);
 
         expect(cssDoc).to.eql({
             description: 'this is a description text',
@@ -144,7 +143,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `myVar`)!);
+        const cssDoc = getCssDocsForSymbol(meta, meta.getSymbol(`myVar`)!);
 
         expect(cssDoc).to.eql({
             description: 'this is a var description text',
@@ -173,7 +172,7 @@ describe('cssDocs comments metadata', () => {
             },
         });
 
-        const cssDoc = getCssDocsForSymbol(meta, STSymbol.get(meta, `myVar`)!);
+        const cssDoc = getCssDocsForSymbol(meta, meta.getSymbol(`myVar`)!);
 
         expect(cssDoc).to.eql({
             description: 'this is a var description text',

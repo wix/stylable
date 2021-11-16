@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { createTransformer } from '@stylable/core-test-kit';
 import { expandCustomSelectors } from '@stylable/core';
-import { CSSClass, CSSType } from '@stylable/core/dist/features';
 
 describe('Stylable intellisense selector meta data', () => {
     it('resolve single class element', () => {
@@ -29,7 +28,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `a`),
+                        symbol: meta.getClass(`a`),
                         _kind: 'css',
                     },
                 ],
@@ -62,7 +61,7 @@ describe('Stylable intellisense selector meta data', () => {
                     resolved: [
                         {
                             meta,
-                            symbol: CSSClass.get(meta, `a`),
+                            symbol: meta.getClass(`a`),
                             _kind: 'css',
                         },
                     ],
@@ -75,7 +74,7 @@ describe('Stylable intellisense selector meta data', () => {
                     resolved: [
                         {
                             meta,
-                            symbol: CSSClass.get(meta, `b`),
+                            symbol: meta.getClass(`b`),
                             _kind: 'css',
                         },
                     ],
@@ -119,12 +118,12 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `a`),
+                        symbol: meta.getClass(`a`),
                         _kind: 'css',
                     },
                     {
                         meta: otherMeta,
-                        symbol: CSSClass.get(otherMeta, `root`),
+                        symbol: otherMeta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -135,7 +134,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: otherMeta,
-                        symbol: CSSClass.get(otherMeta, `c`),
+                        symbol: otherMeta.getClass(`c`),
                         _kind: 'css',
                     },
                 ],
@@ -165,7 +164,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `a`),
+                        symbol: meta.getClass(`a`),
                         _kind: 'css',
                     },
                 ],
@@ -198,7 +197,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `root`),
+                        symbol: meta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -209,7 +208,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `part`),
+                        symbol: meta.getClass(`part`),
                         _kind: 'css',
                     },
                 ],
@@ -245,7 +244,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `root`),
+                        symbol: meta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -281,7 +280,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `a`),
+                        symbol: meta.getClass(`a`),
                         _kind: 'css',
                     },
                 ],
@@ -309,7 +308,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `a`),
+                        symbol: meta.getClass(`a`),
                         _kind: 'css',
                     },
                 ],
@@ -356,12 +355,12 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `a`),
+                        symbol: meta.getClass(`a`),
                         _kind: 'css',
                     },
                     {
                         meta: otherMeta,
-                        symbol: CSSClass.get(otherMeta, `c`),
+                        symbol: otherMeta.getClass(`c`),
                         _kind: 'css',
                     },
                 ],
@@ -402,7 +401,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `lala`),
+                        symbol: meta.getClass(`lala`),
                         _kind: 'css',
                     },
                 ],
@@ -451,12 +450,12 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `x`),
+                        symbol: meta.getClass(`x`),
                         _kind: 'css',
                     },
                     {
                         meta: otherMeta,
-                        symbol: CSSClass.get(otherMeta, `root`),
+                        symbol: otherMeta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -467,7 +466,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: otherMeta,
-                        symbol: CSSClass.get(otherMeta, `lala`),
+                        symbol: otherMeta.getClass(`lala`),
                         _kind: 'css',
                     },
                 ],
@@ -514,12 +513,12 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `x`),
+                        symbol: meta.getClass(`x`),
                         _kind: 'css',
                     },
                     {
                         meta: otherMeta,
-                        symbol: CSSClass.get(otherMeta, `root`),
+                        symbol: otherMeta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -569,12 +568,12 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSType.get(meta, `Comp`),
+                        symbol: meta.getTypeElement(`Comp`),
                         _kind: 'css',
                     },
                     {
                         meta: otherMeta,
-                        symbol: CSSClass.get(otherMeta, `root`),
+                        symbol: otherMeta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -670,12 +669,12 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta,
-                        symbol: CSSClass.get(meta, `gaga`),
+                        symbol: meta.getClass(`gaga`),
                         _kind: 'css',
                     },
                     {
                         meta: recursive2,
-                        symbol: CSSClass.get(recursive2, `root`),
+                        symbol: recursive2.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -686,12 +685,12 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: recursive2,
-                        symbol: CSSClass.get(recursive2, `bobo`),
+                        symbol: recursive2.getClass(`bobo`),
                         _kind: 'css',
                     },
                     {
                         meta: recursive1,
-                        symbol: CSSClass.get(recursive1, `root`),
+                        symbol: recursive1.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -702,17 +701,17 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: recursive1,
-                        symbol: CSSClass.get(recursive1, `momo`),
+                        symbol: recursive1.getClass(`momo`),
                         _kind: 'css',
                     },
                     {
                         meta: recursive0,
-                        symbol: CSSClass.get(recursive0, `root`),
+                        symbol: recursive0.getClass(`root`),
                         _kind: 'css',
                     },
                     {
                         meta: last,
-                        symbol: CSSClass.get(last, `root`),
+                        symbol: last.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -777,17 +776,17 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: entryMeta,
-                        symbol: CSSClass.get(entryMeta, `root`),
+                        symbol: entryMeta.getClass(`root`),
                         _kind: 'css',
                     },
                     {
                         meta: midMeta,
-                        symbol: CSSClass.get(midMeta, `root`),
+                        symbol: midMeta.getClass(`root`),
                         _kind: 'css',
                     },
                     {
                         meta: baseMeta,
-                        symbol: CSSClass.get(baseMeta, `root`),
+                        symbol: baseMeta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -798,7 +797,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: baseMeta,
-                        symbol: CSSClass.get(baseMeta, `base`),
+                        symbol: baseMeta.getClass(`base`),
                         _kind: 'css',
                     },
                 ],
@@ -811,17 +810,17 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: entryMeta,
-                        symbol: CSSClass.get(entryMeta, `root`),
+                        symbol: entryMeta.getClass(`root`),
                         _kind: 'css',
                     },
                     {
                         meta: midMeta,
-                        symbol: CSSClass.get(midMeta, `root`),
+                        symbol: midMeta.getClass(`root`),
                         _kind: 'css',
                     },
                     {
                         meta: baseMeta,
-                        symbol: CSSClass.get(baseMeta, `root`),
+                        symbol: baseMeta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -832,12 +831,12 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: midMeta,
-                        symbol: CSSClass.get(midMeta, `mid`),
+                        symbol: midMeta.getClass(`mid`),
                         _kind: 'css',
                     },
                     {
                         meta: baseMeta,
-                        symbol: CSSClass.get(baseMeta, `root`),
+                        symbol: baseMeta.getClass(`root`),
                         _kind: 'css',
                     },
                 ],
@@ -848,7 +847,7 @@ describe('Stylable intellisense selector meta data', () => {
                 resolved: [
                     {
                         meta: baseMeta,
-                        symbol: CSSClass.get(baseMeta, `base`),
+                        symbol: baseMeta.getClass(`base`),
                         _kind: 'css',
                     },
                 ],

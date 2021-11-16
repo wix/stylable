@@ -1,5 +1,4 @@
 import type { IFileSystem } from '@file-services/types';
-import { STSymbol } from '@stylable/core/dist/features';
 import path from 'path';
 import type * as postcss from 'postcss';
 import { getCSSLanguageService, HoverSettings, Stylesheet } from 'vscode-css-languageservice';
@@ -179,7 +178,7 @@ export class CssService {
 
                     const src = this.fs.readFileSync(filePath, 'utf8');
                     const meta = createMeta(src, filePath).meta;
-                    if (meta && Object.keys(STSymbol.getAll(meta)).some((ms) => ms === prop)) {
+                    if (meta && Object.keys(meta.getAllSymbols()).some((ms) => ms === prop)) {
                         return false;
                     }
                 }

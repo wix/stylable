@@ -10,7 +10,6 @@ import {
     valueMapping,
     VarSymbol,
 } from '@stylable/core';
-import { STSymbol } from '@stylable/core/dist/features';
 import { getCssDocsForSymbol } from './cssdocs';
 import {
     MinimalPath,
@@ -46,12 +45,12 @@ export function generateSchema(
         namespace: meta.namespace,
     };
 
-    for (const entry of Object.keys(STSymbol.getAll(meta))) {
+    for (const entry of Object.keys(meta.getAllSymbols())) {
         if (!schema.properties) {
             schema.properties = {};
         }
 
-        const symbol = STSymbol.get(meta, entry)!;
+        const symbol = meta.getSymbol(entry)!;
 
         if (typeof schema.properties[entry] === 'boolean') {
             continue;
