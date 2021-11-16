@@ -10,8 +10,8 @@ import type {
 } from '../types';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 
-export function processProjects(
-    { projects, presets }: MultipleProjectsConfig,
+export function processProjects<T extends string>(
+    { projects, presets }: MultipleProjectsConfig<T>,
     { defaultOptions = createDefaultOptions() }: ProcessProjectsOptions = {}
 ) {
     const entities: RawProjectEntity[] = [];
@@ -30,7 +30,7 @@ export function processProjects(
             );
         }
     } else if (typeof projects === 'object') {
-        for (const entry of Object.entries<ProjectEntryValues>(projects)) {
+        for (const entry of Object.entries<ProjectEntryValues<T>>(projects)) {
             entities.push(resolveProjectEntry(entry, defaultOptions, presets));
         }
     }
@@ -40,8 +40,8 @@ export function processProjects(
     };
 }
 
-function resolveProjectEntry(
-    [request, value]: [string, ProjectEntryValues] | [string],
+function resolveProjectEntry<T extends string>(
+    [request, value]: [string, ProjectEntryValues<T>] | [string],
     configOptions: BuildOptions,
     availablePresets: Presets = {}
 ): RawProjectEntity {
@@ -69,7 +69,7 @@ function resolveProjectEntry(
         }),
     };
 
-    function normalizeEntry(entryValue: ProjectEntryValue) {
+    function normalizeEntry(entryValue: ProjectEntryValue<T>) {
         if (typeof entryValue === 'string') {
             return [resolvePreset(entryValue, availablePresets)];
         } else if (typeof entryValue === 'object') {
@@ -98,7 +98,7 @@ function resolveProjectEntry(
 
 function resolvePreset(
     presetName: string,
-    availablePresets: NonNullable<MultipleProjectsConfig['presets']>
+    availablePresets: NonNullable<MultipleProjectsConfig<string>['presets']>
 ): BuildOptions | PartialBuildOptions {
     const preset = availablePresets[presetName];
 
