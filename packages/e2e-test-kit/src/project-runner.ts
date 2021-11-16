@@ -1,13 +1,14 @@
+// if you move this file change #1.
 import { join, normalize } from 'path';
 import playwright from 'playwright-core';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
-import { mkdtempSync, rmdirSync, symlinkSync, existsSync } from 'fs';
+import { symlinkSync, existsSync, realpathSync } from 'fs';
 import { deferred } from 'promise-assist';
 import { runServer } from './run-server';
-import { tmpdir } from 'os';
+import { createTempDirectorySync } from 'create-temp-directory';
 
 export interface Options {
     projectDir: string;
@@ -17,6 +18,9 @@ export interface Options {
     throwOnBuildError?: boolean;
     configName?: string;
     log?: boolean;
+    watchMode?: boolean;
+    useTempDir?: boolean;
+    tempDirPath?: string;
 }
 
 type MochaHook = import('mocha').HookFunction;
@@ -28,34 +32,13 @@ export class ProjectRunner {
         runnerOptions: Options,
         before: MochaHook,
         afterEach: MochaHook,
-        after: MochaHook,
-        watch = false,
-        watchedDir = ''
+        after: MochaHook
     ) {
-        const disposeAfterEach: Set<() => void> = new Set();
-        if (watch) {
-            const projectToCopy = runnerOptions.projectDir;
-            if (watchedDir && existsSync(watchedDir)) {
-                rmdirSync(watchedDir, { recursive: true });
-            }
-            const tempPath = watchedDir || mkdtempSync(join(tmpdir(), 'local-test'));
-            const removeTemp = () => rmdirSync(tempPath, { recursive: true });
-            const projectPath = join(tempPath, 'project');
-            disposeAfterEach.add(removeTemp);
-            nodeFs.copyDirectorySync(projectToCopy, projectPath);
-            symlinkSync(
-                join(__dirname, '../../../node_modules'),
-                join(tempPath, 'node_modules'),
-                'junction'
-            );
-            runnerOptions.projectDir = projectPath;
-        }
-
         const projectRunner = new this(runnerOptions);
 
         before('bundle and serve project', async function () {
             this.timeout(40000);
-            watch ? await projectRunner.watch() : await projectRunner.bundle();
+            await projectRunner.run();
             await projectRunner.serve();
         });
 
@@ -69,63 +52,31 @@ export class ProjectRunner {
 
         return projectRunner;
     }
-    public projectDir: string;
-    public outputDir: string;
-    public webpackConfig: webpack.Configuration;
-    public port: number;
-    public launchOptions: playwright.LaunchOptions;
-    public pages: playwright.Page[];
-    public stats: webpack.Stats | null | undefined;
-    public throwOnBuildError: boolean;
-    public serverUrl: string;
-    public server!: { close(): void } | null;
-    public browser!: playwright.Browser | null;
-    public compiler!: webpack.Compiler | null;
-    public watchingHandle!: ReturnType<webpack.Compiler['watch']> | null;
-    public log: typeof console.log;
-    constructor({
-        projectDir,
-        port = 3000,
-        launchOptions = {},
-        throwOnBuildError = true,
-        webpackOptions,
-        configName = 'webpack.config',
-        log = false,
-    }: Options) {
-        this.projectDir = projectDir;
-        this.outputDir = webpackOptions?.output?.path ?? join(this.projectDir, 'dist');
-        this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
-        this.port = port;
-        this.serverUrl = `http://localhost:${this.port}`;
-        this.launchOptions = launchOptions;
-        this.pages = [];
-        this.stats = undefined;
-        this.throwOnBuildError = throwOnBuildError;
-        this.log = log
-            ? console.log.bind(console, '[ProjectRunner]')
-            : () => {
-                  /*noop*/
-              };
-    }
-    public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
-        const config = require(join(this.projectDir, configName || 'webpack.config'));
-        return {
-            ...(config.default || config),
-            ...webpackOptions,
-        };
+    public testDir!: string;
+    public outputDir!: string;
+    private tempPath?: string;
+    public browserContexts: playwright.BrowserContext[] = [];
+    public stats: webpack.Stats | null | undefined = undefined;
+    public serverUrl = `http://localhost:${this.options.port}`;
+    public log = this.options.log ? console.log.bind(console, '[ProjectRunner]') : () => void 0;
+    public server?: { close(): void } | null;
+    public browser?: playwright.Browser | null;
+    public compiler?: webpack.Compiler | null;
+    public watchingHandle?: ReturnType<webpack.Compiler['watch']> | null;
+    public doneListeners = new Set<() => void>();
+    private throwOnBuildError =
+        this.options.throwOnBuildError !== undefined ? this.options.throwOnBuildError : true;
+    constructor(public options: Options) {}
+    public run() {
+        this.prepareTestDirectory();
+        return this.options.watchMode ? this.watch() : this.bundle();
     }
     public async bundle() {
         this.log('Bundle Start');
-        const webpackConfig = this.getWebpackConfig();
+        const webpackConfig = this.loadWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
-        // compiler.run = compiler.run.bind(compiler);
-        const run = () => {
-            return new Promise<webpack.Stats | undefined>((res, rej) =>
-                compiler.run((err, stats) => (err ? rej(err) : res(stats)))
-            );
-        };
-        this.stats = await run();
+        this.stats = await promisify(compiler.run.bind(compiler))();
         if (this.throwOnBuildError && this.stats?.hasErrors()) {
             throw new Error(this.stats.toString({ colors: true }));
         }
@@ -133,45 +84,52 @@ export class ProjectRunner {
     }
     public async watch() {
         this.log('Watch Start');
-        const webpackConfig = this.getWebpackConfig();
+        const webpackConfig = this.loadWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
 
         const firstCompile = deferred<webpack.Stats>();
-
-        this.watchingHandle = compiler.watch({}, (err, stats) => {
-            if (!this.stats) {
-                if (this.throwOnBuildError && stats?.hasErrors()) {
-                    err = new Error(stats?.compilation.errors.join('\n'));
+        this.watchingHandle = compiler.watch(
+            {
+                aggregateTimeout: 1,
+            },
+            (err, stats) => {
+                if (!this.stats) {
+                    if (this.throwOnBuildError && stats?.hasErrors()) {
+                        err = new Error(stats?.compilation.errors.join('\n'));
+                    }
+                    if (err) {
+                        firstCompile.reject(err);
+                    } else {
+                        firstCompile.resolve(stats);
+                    }
                 }
-                if (err) {
-                    firstCompile.reject(err);
-                } else {
-                    firstCompile.resolve(stats);
-                }
+                this.stats = stats;
             }
-            this.stats = stats;
-        });
+        );
 
         await firstCompile.promise;
+        compiler.hooks.afterDone.tap('waitForRecompile', () => {
+            this.doneListeners.forEach((listener) => listener());
+        });
+
         this.log('Finished Initial Compile');
     }
-
     public async serve() {
-        const { server, serverUrl } = await runServer(this.outputDir, this.port, this.log);
+        const { server, serverUrl } = await runServer(this.outputDir, this.options.port, this.log);
         this.serverUrl = serverUrl;
         this.server = server;
     }
     public waitForRecompile() {
-        let done = false;
-        return new Promise<void>((res) => {
-            this.compiler?.hooks.afterDone.tap('waitForRecompile', () => {
-                if (done) {
-                    return;
-                }
-                done = true;
+        return new Promise<void>((res, rej) => {
+            if (!this.compiler) {
+                return rej(new Error('No compiler'));
+            }
+            const handler = () => {
+                this.doneListeners.delete(handler);
                 res();
-            });
+            };
+            this.doneListeners.add(handler);
         });
     }
     public async actAndWaitForRecompile(
@@ -191,30 +149,36 @@ export class ProjectRunner {
             throw e;
         }
     }
-    public async openInBrowser() {
+    public async openInBrowser({ captureResponses = false } = {}) {
         if (!this.browser) {
-            this.browser = await playwright.chromium.launch(this.launchOptions);
+            if (process.env.PLAYWRIGHT_SERVER) {
+                this.browser = await playwright.chromium.connect(
+                    process.env.PLAYWRIGHT_SERVER,
+                    this.options.launchOptions
+                );
+            } else {
+                this.browser = await playwright.chromium.launch(this.options.launchOptions);
+            }
         }
+
         const browserContext = await this.browser.newContext();
+        this.browserContexts.push(browserContext);
+
         const page = await browserContext.newPage();
-        this.pages.push(page);
 
         const responses: playwright.Response[] = [];
-        page.on('response', (response) => {
-            responses.push(response);
-        });
-        await page.goto(this.serverUrl, { waitUntil: 'networkidle' });
+        if (captureResponses) {
+            page.on('response', (response) => responses.push(response));
+        }
+        await page.goto(this.serverUrl, { waitUntil: captureResponses ? 'networkidle' : 'load' });
         return { page, responses };
     }
-
     public getBuildWarningMessages(): webpack.Compilation['warnings'] {
         return this.stats!.compilation.warnings.slice();
     }
-
     public getBuildErrorMessages(): webpack.Compilation['errors'] {
         return this.stats!.compilation.errors.slice();
     }
-
     public getBuildErrorMessagesDeep() {
         function getErrors(compilations: webpack.Compilation[]) {
             return compilations.reduce((errors, compilation) => {
@@ -237,14 +201,12 @@ export class ProjectRunner {
 
         return getWarnings([this.stats!.compilation]);
     }
-
     public getBuildAsset(assetPath: string) {
         return nodeFs.readFileSync(
             join(this.stats?.compilation.options.output.path || '', normalize(assetPath)),
             'utf-8'
         );
     }
-
     public getBuildAssets(): Assets {
         return Object.keys(this.stats!.compilation.assets).reduce<Assets>((acc, assetPath) => {
             acc[assetPath] = {
@@ -262,7 +224,6 @@ export class ProjectRunner {
             return acc;
         }, {});
     }
-
     public evalAssetModule(source: string, publicPath = ''): any {
         const _module = { exports: {} };
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
@@ -282,8 +243,7 @@ export class ProjectRunner {
         );
         return _module.exports;
     }
-
-    getChunksModulesNames() {
+    public getChunksModulesNames() {
         const compilation = this.stats!.compilation;
         const chunkByName: Record<string, string[]> = {};
         compilation.chunks.forEach((chunk) => {
@@ -301,16 +261,17 @@ export class ProjectRunner {
         });
         return chunkByName;
     }
-
     public async closeAllPages() {
-        for (const page of this.pages) {
-            await page.close();
+        for (const browserContext of this.browserContexts) {
+            await browserContext.close();
         }
-        this.pages.length = 0;
+        this.browserContexts.length = 0;
+        this.log(`Browser Context closed`);
     }
-
     public async destroy() {
         this.log(`Start Destroy Process`);
+
+        await this.closeAllPages();
 
         if (this.browser) {
             await this.browser.close();
@@ -335,15 +296,47 @@ export class ProjectRunner {
             this.log(`Compiler closed`);
         }
         await rimraf(this.outputDir);
+        if (this.tempPath) {
+            await rimraf(this.tempPath);
+        }
         this.log(`Finished Destroy`);
     }
-
-    private getWebpackConfig() {
-        const webpackConfig = this.webpackConfig;
-        webpackConfig.output = {
-            ...webpackConfig.output,
-            path: this.outputDir,
+    protected loadWebpackConfig(): webpack.Configuration {
+        const config = require(join(this.testDir, this.options.configName || 'webpack.config'));
+        const loadedConfig = config.default || config;
+        return {
+            ...loadedConfig,
+            ...this.options.webpackOptions,
+            output: {
+                ...loadedConfig?.output,
+                ...this.options.webpackOptions?.output,
+                path: this.outputDir,
+            },
         };
-        return webpackConfig;
+    }
+    private prepareTestDirectory() {
+        this.log('Prepare Test Directory');
+        const { useTempDir, tempDirPath, projectDir } = this.options;
+
+        if (tempDirPath && existsSync(tempDirPath)) {
+            rimrafCallback.sync(tempDirPath);
+        }
+
+        if (useTempDir) {
+            const tempPath = realpathSync(tempDirPath || createTempDirectorySync('s-t-r').path);
+            const tempProjectPath = join(tempPath, 'project');
+            nodeFs.copyDirectorySync(projectDir, tempProjectPath);
+            symlinkSync(
+                join(__dirname, '../../../node_modules'), // #1
+                join(tempPath, 'node_modules'),
+                'junction'
+            );
+            this.tempPath = tempPath;
+            this.testDir = tempProjectPath;
+        } else {
+            this.testDir = realpathSync(projectDir);
+        }
+
+        this.outputDir = this.options.webpackOptions?.output?.path ?? join(this.testDir, 'dist');
     }
 }

@@ -187,6 +187,18 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
     }
 }
 
+export function parseStylableImport(
+    node: AtRule | Rule,
+    context: string,
+    diagnostics: Diagnostics
+) {
+    if (node.type === 'atrule') {
+        return parseStImport(node, context, diagnostics);
+    } else {
+        return parsePseudoImport(node, context, diagnostics);
+    }
+}
+
 export function parseStImport(atRule: AtRule, context: string, diagnostics: Diagnostics) {
     const importObj: Imported = {
         defaultExport: '',
