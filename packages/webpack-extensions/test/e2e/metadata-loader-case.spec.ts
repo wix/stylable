@@ -28,8 +28,8 @@ describe(`(${project})`, () => {
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
         const getMetadataFromLibraryBundle = new Function(bundleContent + '\nreturn metadata;');
 
-        const compContent = readFileSync(join(projectRunner.projectDir, 'comp.st.css'), 'utf-8');
-        const indexContent = readFileSync(join(projectRunner.projectDir, 'index.st.css'), 'utf-8');
+        const compContent = readFileSync(join(projectRunner.testDir, 'comp.st.css'), 'utf-8');
+        const indexContent = readFileSync(join(projectRunner.testDir, 'index.st.css'), 'utf-8');
         const indexHash = hashContent(indexContent);
         const compHash = hashContent(compContent);
         const stylesheetMapping = {

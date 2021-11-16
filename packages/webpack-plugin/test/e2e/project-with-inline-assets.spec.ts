@@ -1,6 +1,6 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 
 const project = 'project-with-inline-assets';
 const projectDir = dirname(
@@ -13,6 +13,9 @@ describe(`(${project})`, () => {
             projectDir,
             launchOptions: {
                 // headless: false,
+            },
+            webpackOptions: {
+                output: { path: join(projectDir, 'dist2') },
             },
         },
         before,
@@ -27,7 +30,7 @@ describe(`(${project})`, () => {
         expect(styleElements).to.eql([{ id: './src/assets/assets.st.css', depth: '1' }]);
     });
 
-    it('load assets from url() declaration value', async () => {
+    it('load assets from url() declaration value (dev)', async () => {
         const { page } = await projectRunner.openInBrowser();
 
         const { bg } = await page.evaluate(() => {
@@ -51,6 +54,7 @@ describe(`(${project}) production mode`, () => {
             },
             webpackOptions: {
                 mode: 'production',
+                output: { path: join(projectDir, 'dist3') },
             },
         },
         before,
@@ -58,7 +62,7 @@ describe(`(${project}) production mode`, () => {
         after
     );
 
-    it('load assets from url() declaration value', async () => {
+    it('load assets from url() declaration value (prod)', async () => {
         const { page } = await projectRunner.openInBrowser();
         const { bg } = await page.evaluate(() => {
             return {
