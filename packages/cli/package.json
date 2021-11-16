@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "4.8.1",
+  "version": "4.8.2",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "dist/index.js",
   "bin": {
@@ -12,7 +12,7 @@
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 25000"
   },
   "dependencies": {
-    "@file-services/node": "^5.4.0",
+    "@file-services/node": "^5.4.3",
     "@file-services/types": "^5.4.0",
     "@stylable/code-formatter": "^4.8.1",
     "@stylable/core": "^4.8.1",

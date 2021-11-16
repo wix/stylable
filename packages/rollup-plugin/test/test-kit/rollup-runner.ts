@@ -83,7 +83,10 @@ export function rollupRunner({
             return serverUrl;
         },
         async open(url: string, launchOptions?: playwright.LaunchOptions) {
-            const browser = await playwright.chromium.launch(launchOptions);
+            const browser = process.env.PLAYWRIGHT_SERVER
+                ? await playwright.chromium.connect(process.env.PLAYWRIGHT_SERVER, launchOptions)
+                : await playwright.chromium.launch(launchOptions);
+
             const browserContext = await browser.newContext();
             const page = await browserContext.newPage();
 
