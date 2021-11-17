@@ -23,24 +23,24 @@ const features = [STSymbol, STGlobal, CSSClass, CSSType];
 
 export class StylableMeta {
     public data: PlugableRecord = {};
-    public rawAst: postcss.Root;
-    public root: 'root';
-    public source: string;
-    public namespace: string;
-    public imports: Imported[];
-    public vars: VarSymbol[];
-    public cssVars: Record<string, CSSVarSymbol>;
-    public keyframes: postcss.AtRule[];
+    public rawAst: postcss.Root = this.ast.clone();
+    public root: 'root' = RESERVED_ROOT_NAME;
+    public source: string = getSourcePath(this.ast, this.diagnostics);
+    public namespace = '';
+    public imports: Imported[] = [];
+    public vars: VarSymbol[] = [];
+    public cssVars: Record<string, CSSVarSymbol> = {};
+    public keyframes: postcss.AtRule[] = [];
     public classes: Record<string, ClassSymbol> = {};
     public elements: Record<string, ElementSymbol> = {};
     public mappedSymbols: Record<string, StylableSymbol> = {};
-    public mappedKeyframes: Record<string, KeyframesSymbol>;
-    public customSelectors: Record<string, string>;
-    public urls: string[];
+    public mappedKeyframes: Record<string, KeyframesSymbol> = {};
+    public customSelectors: Record<string, string> = {};
+    public urls: string[] = [];
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null = null;
-    public transformedScopes: Record<string, SelectorList> | null;
-    public scopes: postcss.AtRule[];
+    public transformedScopes: Record<string, SelectorList> | null = null;
+    public scopes: postcss.AtRule[] = [];
     public mixins: RefedMixin[];
     // Generated during transform
     public outputAst?: postcss.Root;
@@ -53,23 +53,9 @@ export class StylableMeta {
         // set default root
         const rootSymbol = CSSClass.addClass(this, RESERVED_ROOT_NAME);
         rootSymbol[valueMapping.root] = true;
-        //
-        this.rawAst = ast.clone();
-        this.source = getSourcePath(ast, diagnostics);
-        this.root = RESERVED_ROOT_NAME;
-        this.namespace = '';
-        this.imports = [];
-        this.vars = [];
-        this.cssVars = {};
-        this.keyframes = [];
-        this.mappedKeyframes = {};
-        this.customSelectors = {};
-        this.urls = [];
-        this.scopes = [];
+
         setFieldForDeprecation(this, `mixins`, { objectType: `stylableMeta` });
         this.mixins = [];
-        this.transformDiagnostics = null;
-        this.transformedScopes = null;
     }
     getSymbol(name: string) {
         return STSymbol.get(this, name);
