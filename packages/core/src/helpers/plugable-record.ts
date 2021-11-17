@@ -5,8 +5,8 @@ export type Key<T = unknown> = symbol & { [type]: T };
 export type Val<K extends Key> = K[typeof type];
 
 export const plugableRecord = {
-    key<T>() {
-        return Symbol() as Key<T>;
+    key<T>(desc: string) {
+        return Symbol(desc) as Key<T>;
     },
     set<K extends Key>(map: PlugableRecord, key: K, value: Val<K>) {
         map[key] = value;

@@ -6,7 +6,6 @@ import type {
     Imported,
     KeyframesSymbol,
     RefedMixin,
-    StylablePart,
     StylableSymbol,
     VarSymbol,
 } from './features';
@@ -16,11 +15,11 @@ import type { PlugableRecord } from './helpers/plugable-record';
 import { getSourcePath } from './stylable-utils';
 import { setFieldForDeprecation } from './helpers/deprecation';
 import { valueMapping } from './stylable-value-parsers';
-import { STSymbol, STGlobal, CSSClass, CSSType, STPart } from './features';
+import { STSymbol, STGlobal, CSSClass, CSSType } from './features';
 
 export const RESERVED_ROOT_NAME = 'root';
 
-const features = [STSymbol, STGlobal, CSSClass, CSSType, STPart];
+const features = [STSymbol, STGlobal, CSSClass, CSSType];
 
 export class StylableMeta {
     public data: PlugableRecord = {};
@@ -42,7 +41,6 @@ export class StylableMeta {
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null;
     public scopes: postcss.AtRule[];
-    public simpleSelectors: Record<string, StylablePart> = {};
     public mixins: RefedMixin[];
     // Generated during transform
     public outputAst?: postcss.Root;
@@ -92,10 +90,6 @@ export class StylableMeta {
         return CSSType.getAll(this);
     }
 }
-setFieldForDeprecation(StylableMeta.prototype, `simpleSelectors`, {
-    objectType: `stylableMeta`,
-    valueOnThis: true,
-});
 setFieldForDeprecation(StylableMeta.prototype, `elements`, {
     objectType: `stylableMeta`,
     valueOnThis: true,

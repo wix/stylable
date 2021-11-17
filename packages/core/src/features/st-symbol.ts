@@ -15,7 +15,7 @@ export type StylableSymbol =
     | CSSVarSymbol
     | KeyframesSymbol;
 
-const dataKey = plugableRecord.key<Record<string, StylableSymbol>>();
+const dataKey = plugableRecord.key<Record<string, StylableSymbol>>('mappedSymbols');
 
 export const diagnostics = {
     REDECLARE_SYMBOL(name: string) {

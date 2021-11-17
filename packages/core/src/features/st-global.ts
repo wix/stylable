@@ -4,7 +4,7 @@ import { walkSelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
 import type { SelectorNode } from '@tokey/css-selector-parser';
 
-const dataKey = plugableRecord.key<Record<string, true>>();
+const dataKey = plugableRecord.key<Record<string, true>>('globals');
 
 // HOOKS
 

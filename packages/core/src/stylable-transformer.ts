@@ -28,7 +28,7 @@ import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import type { ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
-import { STSymbol, STGlobal, CSSClass, CSSType, STPart } from './features';
+import { STSymbol, STGlobal, CSSClass, CSSType } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
@@ -375,7 +375,7 @@ export class StylableTransformer {
     }
     public exportClasses(meta: StylableMeta) {
         const locals: Record<string, string> = {};
-        const metaParts = this.resolveMetaParts(meta);
+        const metaParts = this.getMetaParts(meta);
         for (const [localName, resolved] of Object.entries(metaParts.class)) {
             const exportedClasses = this.getPartExports(resolved);
             locals[localName] = unescapeCSS(exportedClasses.join(' '));
@@ -422,7 +422,7 @@ export class StylableTransformer {
         // group compound selectors: .a.b .c:hover, a .c:hover -> [[[.a.b], [.c:hover]], [[.a], [.c:hover]]]
         const selectorList = groupCompoundSelectors(selectorAst);
         // resolve meta classes and elements
-        context.metaParts = this.resolveMetaParts(originMeta);
+        context.metaParts = this.getMetaParts(originMeta);
         // set stylesheet root as the global anchor
         if (!context.currentAnchor) {
             context.initRootAnchor({
@@ -499,7 +499,7 @@ export class StylableTransformer {
                     continue;
                 }
 
-                resolved = this.resolveMetaParts(meta).class[node.value];
+                resolved = this.getMetaParts(meta).class[node.value];
 
                 // first definition of a part in the extends/alias chain
                 context.setCurrentAnchor({
@@ -673,16 +673,16 @@ export class StylableTransformer {
             );
         }
     }
-    private resolveMetaParts(meta: StylableMeta): MetaParts {
+    private getMetaParts(meta: StylableMeta): MetaParts {
         let metaParts = this.metaParts.get(meta);
         if (!metaParts) {
-            metaParts = STPart.resolveAll(meta, this.resolver);
+            metaParts = this.resolver.resolveParts(meta, meta.diagnostics);
             this.metaParts.set(meta, metaParts);
         }
         return metaParts;
     }
     private addDevRules(meta: StylableMeta) {
-        const metaParts = this.resolveMetaParts(meta);
+        const metaParts = this.getMetaParts(meta);
         for (const [className, resolved] of Object.entries(metaParts.class)) {
             if (resolved.length > 1) {
                 meta.outputAst!.walkRules(

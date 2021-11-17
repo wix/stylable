@@ -5,6 +5,7 @@ import {
     expectAnalyzeDiagnostics,
     testInlineExpects,
     generateStylableRoot,
+    expectTransformDiagnostics,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
@@ -318,6 +319,133 @@ describe(`features/css-class`, () => {
                     .local.importedPart {}
                     `,
                     []
+                );
+            });
+        });
+        describe(`-st-extends`, () => {
+            it(`should error on extended JS`, () => {
+                expectTransformDiagnostics(
+                    {
+                        entry: `/main.css`,
+                        files: {
+                            '/main.css': {
+                                content: `
+                                    :import {
+                                        -st-from: './imported.js';
+                                        -st-default: special;
+                                    }
+                                    .myclass {
+                                        |-st-extends: $special$|
+                                    }
+                            `,
+                            },
+                            '/imported.js': {
+                                content: ``,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            file: `/main.css`,
+                            message: CSSClass.diagnostics.CANNOT_EXTEND_JS(),
+                            severity: `error`,
+                        },
+                    ]
+                );
+            });
+            it(`should error on extended unknown named import`, () => {
+                expectTransformDiagnostics(
+                    {
+                        entry: `/main.css`,
+                        files: {
+                            '/main.css': {
+                                content: `
+                                    :import {
+                                        -st-from: './file.st.css';
+                                        -st-named: special;
+                                    }
+                                    .myclass {
+                                        |-st-extends: $special$;|
+                                    }
+                            `,
+                            },
+                            '/file.st.css': {
+                                content: ``,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            file: `/main.css`,
+                            message: CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(`special`),
+                            severity: `error`,
+                        },
+                    ],
+                    { partial: true }
+                );
+            });
+            it(`should error on extended symbols that are not a class`, () => {
+                expectTransformDiagnostics(
+                    {
+                        entry: `/main.st.css`,
+                        files: {
+                            '/main.st.css': {
+                                content: `
+                                    :import {
+                                        -st-from: './file.st.css';
+                                        -st-named: special;
+                                    }
+                                    .myclass {
+                                        |-st-extends: $special$|;
+                                    }
+                            `,
+                            },
+                            '/file.st.css': {
+                                content: `
+                                    :vars {
+                                        special: red;
+                                    }
+                            `,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            file: `/main.st.css`,
+                            message: CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(),
+                            severity: `error`,
+                        },
+                    ]
+                );
+            });
+            it(`should error on extended unresolved alias`, () => {
+                expectTransformDiagnostics(
+                    {
+                        entry: `/main.st.css`,
+                        files: {
+                            '/main.st.css': {
+                                namespace: `entry`,
+                                content: `
+                                    @st-import Imported [inner-class] from "./imported.st.css";
+        
+                                    .root .Imported{}
+                                    |.root .$inner-class$ {}|
+                            `,
+                            },
+                            '/imported.st.css': {
+                                namespace: `imported`,
+                                content: ``,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            message: CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(`inner-class`),
+                            file: `/main.st.css`,
+                            severity: `error`,
+                        },
+                    ],
+                    { partial: true }
                 );
             });
         });

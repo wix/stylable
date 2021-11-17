@@ -1,16 +1,17 @@
 import type { FileProcessor } from './cached-process-file';
 import type { Diagnostics } from './diagnostics';
 import type { StylableMeta } from './stylable-meta';
-import type {
+import {
     ImportSymbol,
     ClassSymbol,
     ElementSymbol,
     Imported,
     StylableSymbol,
+    CSSClass,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
-import { STSymbol, CSSClass, CSSType } from './features';
+import { findRule } from './helpers/rule';
 
 export const resolverWarnings = {
     UNKNOWN_IMPORTED_FILE(path: string) {
@@ -54,12 +55,22 @@ export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
     symbol: T;
     meta: StylableMeta;
 }
+export type CSSResolvePath = Array<CSSResolve<ClassSymbol | ElementSymbol>>;
 
 export interface JSResolve {
     _kind: 'js';
     symbol: any;
     meta: null;
 }
+
+export type ReportError = (
+    res: CSSResolve | JSResolve | null,
+    extend: ImportSymbol | ClassSymbol | ElementSymbol,
+    extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
+    meta: StylableMeta,
+    name: string,
+    isElement: boolean
+) => void;
 
 export function isInPath(
     extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
@@ -128,7 +139,7 @@ export class StylableResolver {
             const { value: meta } = res;
             const symbol =
                 !name || subtype === `mappedSymbols`
-                    ? STSymbol.get(meta, name || meta.root)!
+                    ? meta.getSymbol(name || meta.root)!
                     : meta.mappedKeyframes[name];
             return {
                 _kind: 'css',
@@ -304,24 +315,65 @@ export class StylableResolver {
     public resolveElement(meta: StylableMeta, symbol: StylableSymbol) {
         return this.resolveName(meta, symbol, true);
     }
+    public resolveParts(meta: StylableMeta, diagnostics: Diagnostics) {
+        const resolvedClasses: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> = {};
+        for (const [className, classSymbol] of Object.entries(meta.getAllClasses())) {
+            resolvedClasses[className] = this.resolveExtends(
+                meta,
+                className,
+                false,
+                undefined,
+                (res, extend) => {
+                    const decl = findRule(meta.ast, '.' + className);
+                    if (decl) {
+                        // ToDo: move to STExtends
+                        if (res && res._kind === 'js') {
+                            diagnostics.error(decl, CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
+                                word: decl.value,
+                            });
+                        } else if (res && !res.symbol) {
+                            diagnostics.error(
+                                decl,
+                                CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name),
+                                { word: decl.value }
+                            );
+                        } else {
+                            diagnostics.error(decl, CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
+                                word: decl.value,
+                            });
+                        }
+                    } else {
+                        if (classSymbol.alias) {
+                            meta.ast.walkRules(new RegExp('\\.' + className), (rule) => {
+                                diagnostics.error(
+                                    rule,
+                                    CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(className),
+                                    { word: className }
+                                );
+                                return false;
+                            });
+                        }
+                    }
+                }
+            );
+        }
+
+        const resolvedElements: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> = {};
+        for (const k of Object.keys(meta.getAllTypeElements())) {
+            resolvedElements[k] = this.resolveExtends(meta, k, true);
+        }
+        return { class: resolvedClasses, element: resolvedElements };
+    }
     public resolveExtends(
         meta: StylableMeta,
-        className: string,
+        name: string,
         isElement = false,
         transformer?: StylableTransformer,
-        reportError?: (
-            res: CSSResolve | JSResolve | null,
-            extend: ImportSymbol | ClassSymbol | ElementSymbol,
-            extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
-            meta: StylableMeta,
-            className: string,
-            isElement: boolean
-        ) => void
-    ): Array<CSSResolve<ClassSymbol | ElementSymbol>> {
-        const feature = isElement ? CSSType : CSSClass;
-        const symbol = feature.get(meta, className);
+        reportError?: ReportError
+    ): CSSResolvePath {
+        const symbol = isElement ? meta.getTypeElement(name) : meta.getClass(name);
 
-        const customSelector = isElement ? null : meta.customSelectors[':--' + className];
+        const customSelector = isElement ? null : meta.customSelectors[':--' + name];
 
         if (!symbol && !customSelector) {
             return [];
@@ -373,7 +425,7 @@ export class StylableResolver {
                         };
                     } else {
                         if (reportError) {
-                            reportError(res, parent, extendPath, meta, className, isElement);
+                            reportError(res, parent, extendPath, meta, name, isElement);
                         }
                         break;
                     }

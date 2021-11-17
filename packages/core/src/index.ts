@@ -6,10 +6,6 @@ export {
     cachedProcessFile,
     processFn,
 } from './cached-process-file';
-import type { StylablePart } from './features';
-/**@deprecated*/
-type SimpleSelector = StylablePart;
-export { SimpleSelector };
 export type {
     CSSVarSymbol,
     ClassSymbol,

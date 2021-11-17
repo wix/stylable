@@ -28,12 +28,25 @@ export interface ClassSymbol extends StylableDirectives {
     scoped?: string; // ToDo: check if in use
 }
 
-const dataKey = plugableRecord.key<Record<string, ClassSymbol>>();
+const dataKey = plugableRecord.key<Record<string, ClassSymbol>>('classes');
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
     UNSCOPED_CLASS(name: string) {
         return `unscoped class "${name}" will affect all elements of the same type in the document`;
+    },
+    // -st-extends
+    IMPORT_ISNT_EXTENDABLE() {
+        return 'import is not extendable';
+    },
+    CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string) {
+        return `cannot extend unknown symbol "${name}"`;
+    },
+    CANNOT_EXTEND_JS() {
+        return 'JS import is not extendable';
+    },
+    UNKNOWN_IMPORT_ALIAS(name: string) {
+        return `cannot use alias for unknown import "${name}"`;
     },
 };
 

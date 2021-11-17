@@ -181,7 +181,7 @@ export function findRule(
     root.walkRules(selector, (rule) => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
         const isSimplePerSelector = isSimpleSelector(rule.selector);
-        // This will assume that a selector that contains .a, .b:hover is simple! (for backward comptibility)
+        // This will assume that a selector that contains .a, .b:hover is simple! (for backward compatibility)
         const isSimple = isSimplePerSelector.reduce((acc, { isSimple }) => {
             return !isSimple ? false : acc;
         }, true);

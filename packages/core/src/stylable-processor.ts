@@ -17,7 +17,7 @@ import type {
     VarSymbol,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
-import { STSymbol, CSSClass, CSSType, STPart } from './features';
+import { STSymbol, CSSClass, CSSType } from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
@@ -502,7 +502,6 @@ export class StylableProcessor {
                 }
             } else if (node.type === 'class') {
                 CSSClass.hooks.analyzeSelectorNode(this.meta, node, rule);
-                STPart.hooks.analyzeSelectorNode(this.meta, node, rule);
 
                 locallyScoped = CSSClass.validateClassScoping(this.meta, {
                     classSymbol: CSSClass.get(this.meta, node.value)!,
@@ -515,7 +514,6 @@ export class StylableProcessor {
                 });
             } else if (node.type === 'type') {
                 CSSType.hooks.analyzeSelectorNode(this.meta, node, rule, nodeContext);
-                STPart.hooks.analyzeSelectorNode(this.meta, node, rule);
 
                 locallyScoped = CSSType.validateTypeScoping(this.meta, {
                     locallyScoped,

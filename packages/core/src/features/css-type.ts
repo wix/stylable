@@ -18,7 +18,7 @@ export interface ElementSymbol extends StylableDirectives {
     alias?: ImportSymbol;
 }
 
-const dataKey = plugableRecord.key<Record<string, ElementSymbol>>();
+const dataKey = plugableRecord.key<Record<string, ElementSymbol>>('elements');
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,

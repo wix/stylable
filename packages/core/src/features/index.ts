@@ -9,10 +9,7 @@ export type { ClassSymbol } from './css-class';
 export * as CSSType from './css-type';
 export type { ElementSymbol } from './css-type';
 
-export * as STPart from './st-part';
-export type { StylablePart } from './st-part';
-
-export {
+export type {
     CSSVarSymbol,
     ImportSymbol,
     Imported,
