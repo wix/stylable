@@ -387,9 +387,15 @@ function getModuleRequestPath(
     module: NormalModule,
     { requestShortener, moduleGraph }: Compilation
 ) {
+    const visited = new Set<Module>();
     const path = [];
     let current: Module | null = module;
     while (current) {
+        if (visited.has(current)) {
+            path.unshift(current.readableIdentifier(requestShortener) + '<-- Circular');
+            break;
+        }
+        visited.add(current);
         const currentId = current.readableIdentifier(requestShortener);
         path.unshift(currentId);
         current = moduleGraph.getIssuer(current);
