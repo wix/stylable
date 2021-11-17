@@ -27,10 +27,10 @@ describe(`(${project})`, () => {
         const { message } = errors[0];
         expect(message).to.includes('Duplicate namespace');
         expect(message).to.includes(
-            './src/index.js\n  ./src/index.st.css\n    ./node_modules/lib1/index.st.css <-- Duplicate'
+            './src/index.js\n  ./src/index.st.css <-- Duplicate'
         );
         expect(message).to.includes(
-            './src/index.js\n  ./src/index.st.css\n    ./node_modules/lib2/index.st.css <-- Duplicate'
+            './src/index.js\n  ./src/same-index.st.css <-- Duplicate'
         );
     });
 });
