@@ -46,16 +46,19 @@ function createStylable(
     loader: LoaderContext<any>,
     resolveNamespace: (namespace: string, filePath: string) => string
 ): Stylable {
+    if (!loader._compiler) {
+        throw new Error('Stylable metadata loader requires a compiler instance');
+    }
     return Stylable.create({
         projectRoot: loader.rootContext,
         fileSystem: loader.fs as unknown as MinimalFS,
-        mode: loader._compiler!.options.mode === 'development' ? 'development' : 'production',
+        mode: loader._compiler.options.mode === 'development' ? 'development' : 'production',
         resolveOptions: {
-            ...loader._compiler!.options.resolve,
+            ...loader._compiler.options.resolve,
             extensions: [],
         },
         resolveNamespace,
-        resolverCache: createStylableResolverCacheMap(loader._compiler!),
+        resolverCache: createStylableResolverCacheMap(loader._compiler),
     });
 }
 
