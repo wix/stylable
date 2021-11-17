@@ -52,7 +52,7 @@ export const nativePseudoClasses = [
 
 /**
  * list names of functional pseudo classes
- * - cannot be override by custom states
+ * - cannot be overridden by custom states
  * - might contain nested selectors
  */
 export const reservedPseudoClasses = [
