@@ -67,10 +67,6 @@ export const processorWarnings = {
     STATE_DEFINITION_IN_COMPLEX() {
         return 'cannot define pseudo states inside complex selectors';
     },
-    ...STSymbol.diagnostics,
-    ...CSSClass.diagnostics,
-    ...CSSType.diagnostics,
-    ...STPart.diagnostics,
     REDECLARE_SYMBOL_KEYFRAMES(name: string) {
         return `redeclare keyframes symbol "${name}"`;
     },
@@ -143,7 +139,6 @@ export const processorWarnings = {
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
     },
-    ...generalDiagnostics,
     DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
         return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`;
     },
@@ -506,7 +501,8 @@ export class StylableProcessor {
                     return walkSelector.skipNested;
                 }
             } else if (node.type === 'class') {
-                STPart.hooks.analyzeSelectorNode(this.meta, node, rule, nodeContext);
+                CSSClass.hooks.analyzeSelectorNode(this.meta, node, rule);
+                STPart.hooks.analyzeSelectorNode(this.meta, node, rule);
 
                 locallyScoped = CSSClass.validateClassScoping(this.meta, {
                     classSymbol: CSSClass.get(this.meta, node.value)!,
@@ -518,7 +514,8 @@ export class StylableProcessor {
                     rule,
                 });
             } else if (node.type === 'type') {
-                STPart.hooks.analyzeSelectorNode(this.meta, node, rule, nodeContext);
+                CSSType.hooks.analyzeSelectorNode(this.meta, node, rule, nodeContext);
+                STPart.hooks.analyzeSelectorNode(this.meta, node, rule);
 
                 locallyScoped = CSSType.validateTypeScoping(this.meta, {
                     locallyScoped,
@@ -532,7 +529,7 @@ export class StylableProcessor {
                 if (node.nodes) {
                     this.diagnostics.error(
                         rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
                         {
                             word: stringifySelector(node),
                         }
@@ -542,7 +539,7 @@ export class StylableProcessor {
                 if (node.nodes) {
                     this.diagnostics.error(
                         rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[${node.value}]`,
                             `attribute`
                         ),
@@ -555,7 +552,7 @@ export class StylableProcessor {
                 if (node.nodes) {
                     this.diagnostics.error(
                         rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
                         {
                             word: stringifySelector(node),
                         }
@@ -691,7 +688,7 @@ export class StylableProcessor {
         }
 
         if (node.type === 'atrule' && STSymbol.get(this.meta, varName)) {
-            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL(varName), {
+            this.diagnostics.warn(node, STSymbol.diagnostics.REDECLARE_SYMBOL(varName), {
                 word: varName,
             });
         }

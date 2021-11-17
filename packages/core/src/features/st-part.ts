@@ -1,4 +1,4 @@
-import { createFeature, SelectorNodeContext } from './feature';
+import { createFeature } from './feature';
 import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import * as CSSClass from './css-class';
@@ -43,16 +43,10 @@ export const hooks = createFeature({
     analyzeSelectorNode<AST extends ImmutableClass | ImmutableType>(
         meta: StylableMeta,
         node: AST,
-        rule: postcss.Rule,
-        nodeContext: SelectorNodeContext
+        rule: postcss.Rule
     ): void {
         const stPartData = plugableRecord.getUnsafe(meta.data, dataKey);
         const name = node.value;
-        if (node.type === `class`) {
-            CSSClass.hooks.analyzeSelectorNode(meta, node, rule);
-        } else {
-            CSSType.hooks.analyzeSelectorNode(meta, node, rule, nodeContext);
-        }
         if (!stPartData[name]) {
             const feature = node.type === `class` ? CSSClass : CSSType;
             const symbol = feature.get(meta, name);

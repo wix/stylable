@@ -1,8 +1,8 @@
-import { processorWarnings } from '@stylable/core';
 import { expectTransformDiagnostics, generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { atPropertyValidationWarnings } from '@stylable/core/dist/validate-at-property';
+import { STSymbol } from '@stylable/core/dist/features';
 
 describe('@property support', () => {
     it('should transform @property definition', () => {
@@ -129,7 +129,7 @@ describe('@property support', () => {
         expectTransformDiagnostics(config, [
             {
                 file: '/entry.st.css',
-                message: processorWarnings.REDECLARE_SYMBOL('--my-var'),
+                message: STSymbol.diagnostics.REDECLARE_SYMBOL('--my-var'),
             },
         ]);
     });

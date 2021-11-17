@@ -342,7 +342,7 @@ export class StylableResolver {
 
         let current = {
             _kind: 'css' as const,
-            symbol: symbol,
+            symbol,
             meta,
         };
         const extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>> = [];
