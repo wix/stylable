@@ -11,7 +11,6 @@ import {
     TransformerOptions,
     TransformHooks,
 } from './stylable-transformer';
-import type { TimedCacheOptions } from './timed-cache';
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
 import { warnOnce } from './helpers/deprecation';
@@ -34,8 +33,6 @@ export interface StylableConfig {
     optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
-    /** @deprecated use resolverCache instead */
-    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
     resolveModule?: ModuleResolver;
     cssParser?: CssParser;
     resolverCache?: StylableResolverCache;
@@ -63,7 +60,6 @@ export class Stylable {
             config.optimizer,
             config.mode,
             config.resolveNamespace,
-            config.timedCacheOptions,
             config.resolveModule,
             config.cssParser,
             config.resolverCache,
@@ -84,7 +80,6 @@ export class Stylable {
         public optimizer?: IStylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
         public resolveNamespace?: typeof processNamespace,
-        protected timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
         public resolvePath: ModuleResolver = createDefaultResolver(fileSystem, resolveOptions),
         protected cssParser: CssParser = cssParse,
         protected resolverCache?: StylableResolverCache,
