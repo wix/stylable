@@ -5,7 +5,7 @@ import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { murmurhash3_32_gc } from './murmurhash';
-import { reservedKeyFrames } from './native-reserved-lists';
+import { reservedKeyFrames, knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
 import type {
     ClassSymbol,
@@ -503,7 +503,7 @@ export class StylableProcessor {
                             )
                         );
                     }
-                } else if (node.value === `global`) {
+                } else if (!knownPseudoClassesWithNestedSelectors.includes(node.value)) {
                     return walkSelector.skipNested;
                 }
             } else if (node.type === 'class') {

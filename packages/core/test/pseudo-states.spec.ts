@@ -11,7 +11,7 @@ import {
     testInlineExpects,
 } from '@stylable/core-test-kit';
 import { processorWarnings, valueMapping, nativePseudoClasses, pseudoStates } from '@stylable/core';
-import { reservedPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
+import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -29,7 +29,7 @@ describe('pseudo-states', () => {
         // What does it do?
         // Works in the scope of a single file, collecting state definitions for later usage
         describe(`reserved pseudo classes`, () => {
-            reservedPseudoClasses.forEach((name) => {
+            reservedFunctionalPseudoClasses.forEach((name) => {
                 it(`should NOT collect "${name}"`, () => {
                     const { classes } = processSource(
                         `
