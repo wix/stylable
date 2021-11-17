@@ -20,10 +20,10 @@ export function validateRuleStateDefinition(
         const selectorChunk = singleSelectorAst.nodes;
         if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
             const className = selectorChunk[0].value;
-            const classMeta = CSSClass.get(meta, className)!;
-            const states = classMeta[valueMapping.states];
+            const classMeta = CSSClass.get(meta, className);
+            const states = classMeta?.[valueMapping.states];
 
-            if (classMeta && classMeta._kind === 'class' && states) {
+            if (states && classMeta._kind === 'class') {
                 for (const stateName in states) {
                     // TODO: Sort out types
                     const state = states[stateName];
