@@ -51,21 +51,38 @@ export const nativePseudoClasses = [
 ];
 
 /**
- * list names of pseudo classes that cannot be override by custom states
- * // [breaking] ToDo: add names of general pseudo classes that are not specific to elements
- * // like: root, only-child, nth-of-type, nth-last-child, nth-last-of-type, only-of-type...
+ * list names of functional pseudo classes
+ * - cannot be overridden by custom states
+ * - might contain nested selectors
  */
-export const reservedPseudoClasses = [
+export const reservedFunctionalPseudoClasses = [
     `not`,
     `any`,
     `matches`,
     `is`,
     `where`,
     `has`,
+    `host`,
+    `host-context`,
+    `nth-child`,
+    `nth-last-child`,
+    `nth-of-type`,
+    `nth-last-of-type`,
     // not native
     `global`,
     `local`,
 ];
+export const knownPseudoClassesWithNestedSelectors = reservedFunctionalPseudoClasses.filter(name => {
+    switch(name) {
+        case `global`:
+        case `local`:
+        case `nth-of-type`:
+        case `nth-last-of-type`:
+            return false;
+
+    }
+    return true;
+});
 
 export const nativePseudoElements = [
     'after',

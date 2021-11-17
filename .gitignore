@@ -10,6 +10,7 @@ cjs
 
 # alternative test project dists
 **/test/**/dist2
+**/test/**/dist3
 **/test/**/dist-prod
 
 # Dependency directories

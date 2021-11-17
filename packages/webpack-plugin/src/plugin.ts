@@ -421,7 +421,7 @@ export class StylableWebpackPlugin {
                 createOptimizationMapping(sortedModules, optimizer);
 
             if (!this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE) {
-                reportNamespaceCollision(namespaceToFileMapping, compilation.errors);
+                reportNamespaceCollision(namespaceToFileMapping, compilation);
             }
 
             for (const module of sortedModules) {

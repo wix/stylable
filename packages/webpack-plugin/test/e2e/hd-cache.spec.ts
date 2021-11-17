@@ -15,16 +15,16 @@ describe(`(${project})`, () => {
             launchOptions: {
                 // headless: false,
             },
+            watchMode: true,
+            useTempDir: true,
         },
         before,
         afterEach,
-        after,
-        true
-        // ,join(projectDir, '../temp-dist')
+        after
     );
     it('renders css', async () => {
         await projectRunner.actAndWaitForRecompile('include box component', () => {
-            const indexPath = join(projectRunner.projectDir, 'src', 'index.js');
+            const indexPath = join(projectRunner.testDir, 'src', 'index.js');
             const indexSource = readFileSync(indexPath, 'utf8');
             writeFileSync(indexPath, commentAndUnCommentLines(indexSource));
         });

@@ -3,6 +3,7 @@ import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
+import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
 
 chai.use(flatMatch);
 
@@ -287,6 +288,41 @@ describe('Stylable postcss process', () => {
                 },
             },
         });
+    });
+
+    it('should not collect typed elements or classes in unknown functional selectors', () => {
+        const result = processSource(
+            `
+            :unknown(Unknown.unknown) {}
+            :global(Global.global) {}
+            :nth-of-type(5n, NthOfType.nth-of-type) {}
+            :nth-last-of-type(5n, NthLastOfType.nth-last-of-type) {}
+            ${knownPseudoClassesWithNestedSelectors
+                .map((name) =>
+                    name.startsWith(`nth`)
+                        ? `:${name}(5n, El-${name}.cls-${name}) {}`
+                        : `:${name}(El-${name}.cls-${name}) {}`
+                )
+                .join(``)}
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        // unknown pseudo-class
+        expect(result.getSymbol(`Unknown`)).to.equal(undefined);
+        expect(result.getClass(`unknown`)).to.equal(undefined);
+        // native with ignored or no nested classes
+        expect(result.getSymbol(`Global`)).to.equal(undefined);
+        expect(result.getClass(`global`)).to.equal(undefined);
+        expect(result.getSymbol(`NthOfType`)).to.equal(undefined);
+        expect(result.getClass(`nth-of-type`)).to.equal(undefined);
+        expect(result.getSymbol(`NthLastOfType`)).to.equal(undefined);
+        expect(result.getClass(`nth-last-of-type`)).to.equal(undefined);
+        // known function pseudo-classes with nested selectors
+        for (const name of knownPseudoClassesWithNestedSelectors) {
+            expect(result.getSymbol(`El-${name}`)).to.not.equal(undefined);
+            expect(result.getClass(`cls-${name}`)).to.not.equal(undefined);
+        }
     });
 
     it('always contain root class', () => {
