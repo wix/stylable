@@ -96,7 +96,6 @@ export const transformerWarnings = {
     UNKNOWN_PSEUDO_ELEMENT(name: string) {
         return `unknown pseudo element "${name}"`;
     },
-    ...STPart.diagnostics,
 };
 
 export class StylableTransformer {
