@@ -12,6 +12,7 @@ import {
 } from '@stylable/core-test-kit';
 import { processorWarnings, valueMapping, nativePseudoClasses, pseudoStates } from '@stylable/core';
 import { reservedPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
+import { CSSType } from '@stylable/core/dist/features';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -2308,7 +2309,7 @@ describe('pseudo-states', () => {
                 [
                     // skipping root scoping warning
                     {
-                        message: processorWarnings.UNSCOPED_TYPE_SELECTOR('MyElement'),
+                        message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('MyElement'),
                         file: 'main.css',
                         skip: true,
                     },

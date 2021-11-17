@@ -6,6 +6,7 @@ import {
     processSource,
 } from '@stylable/core-test-kit';
 import { processorWarnings, resolverWarnings } from '@stylable/core';
+import { STSymbol } from '@stylable/core/dist/features';
 
 describe('css custom-properties (vars)', () => {
     describe('process', () => {
@@ -1045,11 +1046,11 @@ describe('css custom-properties (vars)', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.REDECLARE_SYMBOL('--myVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--myVar'),
                     file: '/entry.st.css',
                 },
                 {
-                    message: processorWarnings.REDECLARE_SYMBOL('--mySecondVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--mySecondVar'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },
@@ -1110,12 +1111,12 @@ describe('css custom-properties (vars)', () => {
                     severity: 'info',
                 },
                 {
-                    message: processorWarnings.REDECLARE_SYMBOL('--myVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--myVar'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },
                 {
-                    message: processorWarnings.REDECLARE_SYMBOL('--mySecondVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--mySecondVar'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },

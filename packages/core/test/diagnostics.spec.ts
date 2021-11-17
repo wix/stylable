@@ -17,6 +17,7 @@ import {
     valueParserWarnings,
 } from '@stylable/core';
 import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
+import { CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
 
 describe('findTestLocations', () => {
     it('find single location 1', () => {
@@ -102,7 +103,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectAnalyzeDiagnostics(`|.root $#abc()$| {}`, [
                     {
                         severity: `error`,
-                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`),
+                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`),
                         file: `main.css`,
                     },
                 ]);
@@ -111,7 +112,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectAnalyzeDiagnostics(`|.root $[attr]()$| {}`, [
                     {
                         severity: `error`,
-                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(
+                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[attr]`,
                             `attribute`
                         ),
@@ -123,7 +124,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectAnalyzeDiagnostics(`|.root $&()$| {}`, [
                     {
                         severity: `error`,
-                        message: processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`),
+                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`),
                         file: `main.css`,
                     },
                 ]);
@@ -316,7 +317,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.UNSCOPED_TYPE_SELECTOR('div'),
+                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('div'),
                             file: 'main.css',
                         },
                         { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' },
@@ -865,7 +866,12 @@ describe('diagnostics: warnings and errors', () => {
                         -st-named: $Name$;
                     }
                 `,
-                    [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]
+                    [
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
+                            file: 'main.st.css',
+                        },
+                    ]
                 );
             });
 
@@ -881,7 +887,12 @@ describe('diagnostics: warnings and errors', () => {
                         -st-default: $Name$;
                     }
                 `,
-                    [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]
+                    [
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
+                            file: 'main.st.css',
+                        },
+                    ]
                 );
             });
 
@@ -896,7 +907,12 @@ describe('diagnostics: warnings and errors', () => {
                         |$Name$: red;
                     }
                 `,
-                    [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]
+                    [
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
+                            file: 'main.st.css',
+                        },
+                    ]
                 );
             });
         });
@@ -1010,7 +1026,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     |.$Blah$| {}
                 `,
-                    [{ message: processorWarnings.UNSCOPED_CLASS('Blah'), file: 'main.css' }]
+                    [{ message: CSSClass.diagnostics.UNSCOPED_CLASS('Blah'), file: 'main.css' }]
                 );
             });
 
@@ -1058,7 +1074,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'),
+                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('button'),
                             file: 'main.css',
                         },
                     ]
@@ -1072,7 +1088,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.UNSCOPED_TYPE_SELECTOR('button'),
+                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('button'),
                             file: 'main.css',
                         },
                     ]
