@@ -55,7 +55,7 @@ export const nativePseudoClasses = [
  * - cannot be overridden by custom states
  * - might contain nested selectors
  */
-export const reservedPseudoClasses = [
+export const reservedFunctionalPseudoClasses = [
     `not`,
     `any`,
     `matches`,
@@ -72,6 +72,17 @@ export const reservedPseudoClasses = [
     `global`,
     `local`,
 ];
+export const knownPseudoClassesWithNestedSelectors = reservedFunctionalPseudoClasses.filter(name => {
+    switch(name) {
+        case `global`:
+        case `local`:
+        case `nth-of-type`:
+        case `nth-last-of-type`:
+            return false;
+
+    }
+    return true;
+});
 
 export const nativePseudoElements = [
     'after',

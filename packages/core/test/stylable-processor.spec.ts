@@ -3,7 +3,7 @@ import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import { reservedPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
+import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
 
 chai.use(flatMatch);
 
@@ -310,23 +310,33 @@ describe('Stylable postcss process', () => {
         const result = processSource(
             `
             :unknown(Unknown.unknown) {}
-            ${reservedPseudoClasses.map((name) =>
-                name.startsWith(`nth`)
-                    ? `:${name}(5n, El-${name}.cls-${name}) {}`
-                    : `:${name}(El-${name}.cls-${name}) {}`
-            ).join(``)}
+            :global(Global.global) {}
+            :nth-of-type(5n, NthOfType.nth-of-type) {}
+            :nth-last-of-type(5n, NthLastOfType.nth-last-of-type) {}
+            ${knownPseudoClassesWithNestedSelectors
+                .map((name) =>
+                    name.startsWith(`nth`)
+                        ? `:${name}(5n, El-${name}.cls-${name}) {}`
+                        : `:${name}(El-${name}.cls-${name}) {}`
+                )
+                .join(``)}
         `,
             { from: 'path/to/style.css' }
         );
 
+        // unknown pseudo-class
         expect(Object.keys(result.elements)).to.not.include(`Unknown`);
         expect(Object.keys(result.classes)).to.not.include(`unknown`);
-        expect(Object.keys(result.elements)).to.not.include(`El-global`);
-        expect(Object.keys(result.classes)).to.not.include(`cls-global`);
-
-        const allWithoutGlobal = reservedPseudoClasses.filter((name) => name !== `global`);
-        const expectedElements = allWithoutGlobal.map((name) => `El-${name}`);
-        const expectedClasses = allWithoutGlobal.map((name) => `cls-${name}`);
+        // native with ignored or no nested classes
+        expect(Object.keys(result.elements)).to.not.include(`Global`);
+        expect(Object.keys(result.classes)).to.not.include(`global`);
+        expect(Object.keys(result.elements)).to.not.include(`NthOfType`);
+        expect(Object.keys(result.classes)).to.not.include(`nth-of-type`);
+        expect(Object.keys(result.elements)).to.not.include(`NthLastOfType`);
+        expect(Object.keys(result.classes)).to.not.include(`nth-last-of-type`);
+        // known function pseudo-classes with nested selectors
+        const expectedElements = knownPseudoClassesWithNestedSelectors.map((name) => `El-${name}`);
+        const expectedClasses = knownPseudoClassesWithNestedSelectors.map((name) => `cls-${name}`);
         expect(Object.keys(result.elements)).to.include.members(expectedElements);
         expect(Object.keys(result.classes)).to.include.members(expectedClasses);
     });
