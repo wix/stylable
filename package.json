@@ -7,9 +7,9 @@
   "scripts": {
     "clean": "rimraf ./packages/*/{dist,cjs,esm}",
     "build": "tsc --build",
-    "watch": "yarn build -w",
+    "watch": "npm run build -- -w",
     "lint": "eslint .",
-    "pretest": "yarn build",
+    "pretest": "npm run build",
     "test": "mocha \"./packages/*/dist/test/**/*.spec.js\" --parallel --timeout 10000",
     "prettify": "npx prettier . --write"
   },
