@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "4.8.1",
+  "version": "4.8.3",
   "description": "CSS for Components",
   "main": "dist/index.js",
   "scripts": {
