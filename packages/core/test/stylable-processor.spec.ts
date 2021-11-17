@@ -314,7 +314,7 @@ describe('Stylable postcss process', () => {
                 name.startsWith(`nth`)
                     ? `:${name}(5n, El-${name}.cls-${name}) {}`
                     : `:${name}(El-${name}.cls-${name}) {}`
-            )}
+            ).join(``)}
         `,
             { from: 'path/to/style.css' }
         );
