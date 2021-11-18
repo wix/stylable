@@ -1,7 +1,5 @@
-import { classes } from './index.st.css';
-import { classes as lib1Classes } from 'lib1';
-import { classes as lib2Classes } from 'lib2';
+import { classes as a } from './index.st.css';
+import { classes as b } from './same-index.st.css';
 
-document.documentElement.classList.add(classes.root);
-document.documentElement.classList.add(lib1Classes.root);
-document.documentElement.classList.add(lib2Classes.root);
+document.documentElement.classList.add(a.root);
+document.documentElement.classList.add(b.root);
