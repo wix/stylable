@@ -6,8 +6,7 @@ export function visitMetaCSSDependenciesBFS(
     meta: StylableMeta,
     onMetaDependency: (meta: StylableMeta, imported: Imported, depth: number) => void,
     resolver: StylableResolver,
-    onJsDependency?: (resolvedPath: string, imported: Imported) => void,
-    onError?: (error: unknown) => void
+    onJsDependency?: (resolvedPath: string, imported: Imported) => void
 ): void {
     const visited = new Set<string>([meta.source]);
     const q = [[...meta.imports]];
@@ -21,26 +20,18 @@ export function visitMetaCSSDependenciesBFS(
         while (++index < items.length) {
             const imported = items[index];
             const res = resolver.resolveImported(imported, '');
-            let resolvedPath: string | undefined;
-
-            try {
-                resolvedPath = resolver.resolvePath(imported.context, imported.request);
-            } catch (error) {
-                onError?.(error);
-            }
 
             if (res?._kind === 'css' && !visited.has(res.meta.source)) {
                 visited.add(res.meta.source);
                 onMetaDependency(res.meta, imported, depth + 1);
                 q[depth + 1].push(...res.meta.imports);
-            } else if (
-                res?._kind === 'js' &&
-                onJsDependency &&
-                resolvedPath &&
-                !visited.has(resolvedPath)
-            ) {
-                visited.add(resolvedPath);
-                onJsDependency(resolvedPath, imported);
+            } else if (res?._kind === 'js' && onJsDependency) {
+                const resolvedPath = resolver.resolvePath(imported.context, imported.request);
+
+                if (!visited.has(resolvedPath)) {
+                    visited.add(resolvedPath);
+                    onJsDependency(resolvedPath, imported);
+                }
             }
         }
     }
