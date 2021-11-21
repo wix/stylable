@@ -9,20 +9,50 @@ export type SelectorNodeContext = [
     parents: ImmutableSelectorNode[]
 ];
 
-export interface FeatureHooks {
+export interface AnalyzeContext {
+    meta: StylableMeta;
+}
+export interface TransformContext {
+    meta: StylableMeta;
+}
+
+export interface NodeTypes {
+    SELECTOR: any;
+    IMMUTABLE_SELECTOR: any;
+}
+
+export interface FeatureHooks<T extends NodeTypes> {
     analyzeInit: (meta: StylableMeta) => void;
     analyzeSelectorNode: (
-        meta: StylableMeta,
-        node: any,
-        rule: postcss.Rule,
-        context: SelectorNodeContext
+        options: AnalyzeContext & {
+            node: T['IMMUTABLE_SELECTOR'];
+            rule: postcss.Rule;
+            walkContext: SelectorNodeContext;
+        }
     ) => void;
     transformSelectorNode: (
-        transformContext: Required<ScopeContext>,
-        node: any,
-        resolved: any
+        options: TransformContext & {
+            node: T['SELECTOR'];
+            selectorContext: Required<ScopeContext>;
+        }
     ) => void;
 }
-export function createFeature<HOOKS extends Partial<FeatureHooks>>(hooks: HOOKS) {
-    return hooks;
+const defaultHooks: FeatureHooks<NodeTypes> = {
+    analyzeInit() {
+        /**/
+    },
+    analyzeSelectorNode() {
+        /**/
+    },
+    transformSelectorNode() {
+        /**/
+    },
+};
+export function createFeature<T extends NodeTypes>(
+    hooks: Partial<FeatureHooks<T>>
+): FeatureHooks<T> {
+    return {
+        ...defaultHooks,
+        ...hooks,
+    };
 }

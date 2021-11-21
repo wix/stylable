@@ -501,7 +501,12 @@ export class StylableProcessor {
                     return walkSelector.skipNested;
                 }
             } else if (node.type === 'class') {
-                CSSClass.hooks.analyzeSelectorNode(this.meta, node, rule);
+                CSSClass.hooks.analyzeSelectorNode({
+                    meta: this.meta,
+                    node,
+                    rule,
+                    walkContext: nodeContext,
+                });
 
                 locallyScoped = CSSClass.validateClassScoping(this.meta, {
                     classSymbol: CSSClass.get(this.meta, node.value)!,
@@ -513,7 +518,12 @@ export class StylableProcessor {
                     rule,
                 });
             } else if (node.type === 'type') {
-                CSSType.hooks.analyzeSelectorNode(this.meta, node, rule, nodeContext);
+                CSSType.hooks.analyzeSelectorNode({
+                    meta: this.meta,
+                    node,
+                    rule,
+                    walkContext: nodeContext,
+                });
 
                 locallyScoped = CSSType.validateTypeScoping(this.meta, {
                     locallyScoped,

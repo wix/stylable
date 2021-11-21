@@ -469,9 +469,17 @@ export class StylableTransformer {
     private handleCompoundNode(context: Required<ScopeContext>) {
         const { currentAnchor, metaParts, node, originMeta } = context;
         if (node.type === 'class') {
-            CSSClass.hooks.transformSelectorNode(context, node);
+            CSSClass.hooks.transformSelectorNode({
+                meta: originMeta,
+                selectorContext: context,
+                node,
+            });
         } else if (node.type === 'type') {
-            CSSType.hooks.transformSelectorNode(context, node);
+            CSSType.hooks.transformSelectorNode({
+                meta: originMeta,
+                selectorContext: context,
+                node,
+            });
         } else if (node.type === 'pseudo_element') {
             if (node.value === ``) {
                 // partial psuedo elemennt: `.x::`

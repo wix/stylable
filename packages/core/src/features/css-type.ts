@@ -1,11 +1,10 @@
-import { createFeature, SelectorNodeContext } from './feature';
+import { createFeature } from './feature';
 import type { StylableDirectives, ImportSymbol } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import * as CSSClass from './css-class';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
-import type { ScopeContext } from '../stylable-transformer';
 import { isCompRoot, stringifySelector } from '../helpers/selector';
 import { getOriginDefinition } from '../helpers/resolve';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
@@ -29,16 +28,14 @@ export const diagnostics = {
 
 // HOOKS
 
-export const hooks = createFeature({
+export const hooks = createFeature<{
+    SELECTOR: Type;
+    IMMUTABLE_SELECTOR: ImmutableType;
+}>({
     analyzeInit({ data }) {
         plugableRecord.set(data, dataKey, {});
     },
-    analyzeSelectorNode<AST extends ImmutableType>(
-        meta: StylableMeta,
-        node: AST,
-        rule: postcss.Rule,
-        [_index, _nodes, parents]: SelectorNodeContext
-    ): void {
+    analyzeSelectorNode({ meta, node, rule, walkContext: [_index, _nodes, parents] }): void {
         /**
          * intent to deprecate: currently `value(param)` can be used
          * as a custom state value. Unless there is a reasonable
@@ -59,22 +56,22 @@ export const hooks = createFeature({
         }
         addType(meta, node.value, rule);
     },
-    transformSelectorNode<AST extends Type>(context: Required<ScopeContext>, node: AST): void {
-        const resolved = context.metaParts.element[node.value] || [
+    transformSelectorNode({ meta, node, selectorContext }): void {
+        const resolved = selectorContext.metaParts.element[node.value] || [
             // provides resolution for native elements
             // that are not collected by parts
             // or elements that are added by js mixin
             {
                 _kind: 'css',
-                meta: context.originMeta,
+                meta,
                 symbol: { _kind: 'element', name: node.value },
             },
         ];
-        context.setCurrentAnchor({ name: node.value, type: 'element', resolved });
+        selectorContext.setCurrentAnchor({ name: node.value, type: 'element', resolved });
         // native node does not resolve e.g. div
         if (resolved && resolved.length > 1) {
             const { symbol, meta } = getOriginDefinition(resolved);
-            CSSClass.namespaceClass(meta, symbol, node, context.originMeta);
+            CSSClass.namespaceClass(meta, symbol, node, selectorContext.originMeta);
         }
     },
 });

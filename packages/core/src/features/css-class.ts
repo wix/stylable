@@ -9,7 +9,6 @@ import { getOriginDefinition } from '../helpers/resolve';
 import { namespaceEscape } from '../helpers/escape';
 import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
-import type { ScopeContext } from '../stylable-transformer';
 import { valueMapping } from '../stylable-value-parsers';
 import { validateRuleStateDefinition } from '../helpers/custom-state';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
@@ -52,15 +51,11 @@ export const diagnostics = {
 
 // HOOKS
 
-export const hooks = createFeature({
+export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: ImmutableClass }>({
     analyzeInit({ data }) {
         plugableRecord.set(data, dataKey, {});
     },
-    analyzeSelectorNode<AST extends ImmutableClass>(
-        meta: StylableMeta,
-        node: AST,
-        rule: postcss.Rule
-    ): void {
+    analyzeSelectorNode({ meta, node, rule }): void {
         if (node.nodes) {
             // error on functional class
             meta.diagnostics.error(
@@ -71,19 +66,24 @@ export const hooks = createFeature({
         }
         addClass(meta, node.value, rule);
     },
-    transformSelectorNode<AST extends Class>(context: Required<ScopeContext>, node: AST): void {
-        const { originMeta, resolver } = context;
-        const resolved = context.metaParts.class[node.value] || [
+    transformSelectorNode({ selectorContext, node }) {
+        const { originMeta, resolver } = selectorContext;
+        const resolved = selectorContext.metaParts.class[node.value] || [
             // used to namespace classes from js mixins since js mixins
             // are scoped in the context of the mixed-in stylesheet
             // which might not have a definition for the mixed-in class
             { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name: node.value } },
         ];
-        context.setCurrentAnchor({ name: node.value, type: 'class', resolved });
+        selectorContext.setCurrentAnchor({ name: node.value, type: 'class', resolved });
         const { symbol, meta } = getOriginDefinition(resolved);
-        if (context.originMeta === meta && symbol[valueMapping.states]) {
+        if (selectorContext.originMeta === meta && symbol[valueMapping.states]) {
             // ToDo: refactor out to transformer validation phase
-            validateRuleStateDefinition(context.rule, meta, resolver, originMeta.diagnostics);
+            validateRuleStateDefinition(
+                selectorContext.rule,
+                meta,
+                resolver,
+                originMeta.diagnostics
+            );
         }
         namespaceClass(meta, symbol, node, originMeta);
     },
