@@ -72,7 +72,7 @@ export async function build({
     extension,
     fs,
     stylable,
-    rootDir,
+    rootDir: rootDirPath,
     srcDir,
     outDir,
     log,
@@ -95,12 +95,16 @@ export async function build({
     diagnostics,
     diagnosticsMode,
 }: BuildOptions) {
-    const { join, resolve } = fs;
-    rootDir = resolve(rootDir);
-    const fullSrcDir = join(rootDir, srcDir);
-    const fullOutDir = join(rootDir, outDir);
-    const nodeModules = join(rootDir, 'node_modules');
+    const { join, resolve, realpathSync } = fs;
+    const rootDir = resolve(rootDirPath);
+    const realRootDir = realpathSync(rootDir);
+    const fullSrcDir = join(realRootDir, srcDir);
+    const fullOutDir = join(realRootDir, outDir);
+    const nodeModules = join(realRootDir, 'node_modules');
 
+    if (rootDir !== realRootDir) {
+        log(`rootDir is linked:\n${rootDir}\n↳${realRootDir}`);
+    }
     validateConfiguration(outputSources, fullOutDir, fullSrcDir);
     const mode = watch ? '[Watch]' : '[Build]';
     const generator = new Generator(stylable, log);
@@ -114,7 +118,7 @@ export async function build({
         watchMode: watch,
         autoResetInvalidations: true,
         directoryFilter(dirPath) {
-            if (!dirPath.startsWith(rootDir)) {
+            if (!dirPath.startsWith(realRootDir)) {
                 return false;
             }
             if (dirPath.startsWith(nodeModules) || dirPath.includes('.git')) {
@@ -137,7 +141,11 @@ export async function build({
             return filePath.endsWith(extension);
         },
         onError(error) {
-            console.error(error);
+            if (watch) {
+                console.error(error);
+            } else {
+                throw error;
+            }
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
@@ -253,8 +261,8 @@ export async function build({
             generated.add(indexFilePath);
             generator.generateIndexFile(fs, indexFilePath);
         } else {
-            handleAssets(assets, rootDir, srcDir, outDir, fs);
-            generateManifest(rootDir, sourceFiles, manifest, stylable, mode, log, fs);
+            handleAssets(assets, realRootDir, srcDir, outDir, fs);
+            generateManifest(realRootDir, sourceFiles, manifest, stylable, mode, log, fs);
         }
     }
 }
