@@ -9,7 +9,8 @@ import {
     StylableMeta,
     StylableResolver,
     StylableTransformer,
-    createInfrastructure,
+    createStylableFileProcessor,
+    createDefaultResolver,
 } from '@stylable/core';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
@@ -37,32 +38,24 @@ export interface Config {
 
 export type RequireType = (path: string) => any;
 
-export function generateInfra(
-    config: InfraConfig,
-    diagnostics: Diagnostics = new Diagnostics()
-): {
-    resolver: StylableResolver;
-    requireModule: RequireType;
-    fileProcessor: FileProcessor<StylableMeta>;
-} {
+export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = new Diagnostics()) {
     const { fs, requireModule } = createMinimalFS(config);
-    const { fileProcessor } = createInfrastructure(
-        '/',
-        fs,
-        (meta, filePath) => {
+    const fileProcessor = createStylableFileProcessor({
+        fileSystem: fs,
+        onProcess: (meta, filePath) => {
             meta.namespace = config.files[filePath].namespace || meta.namespace;
             return meta;
         },
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        () => diagnostics
-    );
-    const resolver = new StylableResolver(fileProcessor, requireModule);
+        createDiagnostics: () => diagnostics,
+    });
 
-    return { resolver, requireModule, fileProcessor };
+    const resolveModule = createDefaultResolver(fs, {});
+    const resolvePath = (context: string | undefined = '/', moduleId: string) =>
+        resolveModule(context, moduleId);
+
+    const resolver = new StylableResolver(fileProcessor, requireModule, resolvePath);
+
+    return { resolver, requireModule, fileProcessor, resolvePath };
 }
 
 export function createTransformer(
@@ -71,10 +64,11 @@ export function createTransformer(
     replaceValueHook?: replaceValueHook,
     postProcessor?: postProcessor
 ): StylableTransformer {
-    const { requireModule, fileProcessor } = generateInfra(config, diagnostics);
+    const { requireModule, fileProcessor, resolvePath } = generateInfra(config, diagnostics);
 
     return new StylableTransformer({
         fileProcessor,
+        moduleResolver: resolvePath,
         requireModule,
         diagnostics,
         keepValues: false,

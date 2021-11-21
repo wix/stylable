@@ -8,6 +8,7 @@ module.exports.baseConfig = () => {
                 path: require.resolve('@file-services/path'),
             },
             fallback: {
+                // used only by schema-extract jest-docblock
                 os: false,
             },
         },

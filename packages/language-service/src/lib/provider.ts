@@ -1,4 +1,4 @@
-import path from 'path';
+import path, { dirname } from 'path';
 import ts from 'typescript';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
@@ -7,7 +7,6 @@ import type { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
     CSSResolve,
-    Diagnostics,
     expandCustomSelectors,
     ImportSymbol,
     process as stylableProcess,
@@ -16,7 +15,6 @@ import {
     StateParsedValue,
     Stylable,
     StylableMeta,
-    StylableTransformer,
     valueMapping,
     JSResolve,
 } from '@stylable/core';
@@ -158,7 +156,7 @@ export class Provider {
         let maybeRequestPath;
 
         try {
-            maybeRequestPath = this.stylable.resolver.resolvePath(word, fs.dirname(meta.source));
+            maybeRequestPath = this.stylable.resolver.resolvePath(fs.dirname(meta.source), word);
         } catch {
             // todo: figure out proper logging
         }
@@ -210,7 +208,10 @@ export class Provider {
                         filePath = resolved.meta.source;
                     } else {
                         try {
-                            filePath = this.stylable.resolvePath(undefined, symbol.import.from);
+                            filePath = this.stylable.resolvePath(
+                                dirname(meta.source),
+                                symbol.import.request
+                            );
                         } catch {
                             // todo: figure out proper logging
                         }
@@ -281,19 +282,17 @@ export class Provider {
                 return false;
             })
         ) {
-            defs.push(
-                new ProviderLocation(
-                    meta.source,
-                    this.findWord(
-                        (
-                            temp as any
-                        ) /* This is here because typescript does not recognize size effects during the if statement */
-                            .name,
-                        fs.readFileSync(stateMeta!.source, 'utf8'),
-                        position
+            if (temp) {
+                /* This is here because typescript does not recognize size effects during the if statement */
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                const name = (temp as any).name;
+                defs.push(
+                    new ProviderLocation(
+                        meta.source,
+                        this.findWord(name, fs.readFileSync(stateMeta!.source, 'utf8'), position)
                     )
-                )
-            );
+                );
+            }
         } else if (Object.keys(meta.customSelectors).find((sym) => sym === ':--' + word)) {
             defs.push(
                 new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
@@ -425,8 +424,10 @@ export class Provider {
                         paramInfo
                     );
                 } else {
-                    const importPath = mappedSymbol.import.from;
-                    const resolvedPath = this.stylable.resolvePath(undefined, importPath);
+                    const resolvedPath = this.stylable.resolvePath(
+                        dirname(meta.source),
+                        mappedSymbol.import.request
+                    );
                     const fileExists = fs.fileExistsSync(resolvedPath);
 
                     return fileExists
@@ -676,13 +677,7 @@ export class Provider {
         let stateDef = null as StateParsedValue | string | null;
 
         if (word) {
-            const transformer = new StylableTransformer({
-                diagnostics: new Diagnostics(),
-                fileProcessor: this.stylable.fileProcessor,
-                requireModule: () => {
-                    throw new Error('Not implemented, why are we here');
-                },
-            });
+            const transformer = this.stylable.createTransformer();
             const resolvedElements = transformer.resolveSelectorElements(meta, line);
             resolvedElements[0][0].resolved.forEach((el) => {
                 const symbolStates = (el.symbol as ClassSymbol)[valueMapping.states];
@@ -732,13 +727,7 @@ export class Provider {
         cursorPosInLine: number,
         fs: IFileSystem
     ): ProviderOptions {
-        const transformer = new StylableTransformer({
-            diagnostics: new Diagnostics(),
-            fileProcessor: this.stylable.fileProcessor,
-            requireModule: () => {
-                throw new Error('Not implemented, why are we here');
-            },
-        });
+        const transformer = this.stylable.createTransformer();
 
         const path = pathFromPosition(meta.rawAst, {
             line: position.line + 1,
@@ -1836,13 +1825,7 @@ export function getDefSymbol(
         }
     }
 
-    const transformer = new StylableTransformer({
-        diagnostics: new Diagnostics(),
-        fileProcessor: stylable.fileProcessor,
-        requireModule: () => {
-            throw new Error('Not implemented, why are we here');
-        },
-    });
+    const transformer = stylable.createTransformer();
 
     const expandedLine: string = expandCustomSelectors(
         postcss.rule({ selector: lineChunkAtCursor }),

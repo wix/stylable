@@ -35,6 +35,7 @@ import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
 import { animationPropRegExp, valueMapping } from './stylable-value-parsers';
 import { unescapeCSS, namespaceEscape } from './helpers/escape';
 import { globalValue } from './utils';
+import type { ModuleResolver } from './types';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -82,6 +83,7 @@ type EnvMode = 'production' | 'development';
 
 export interface TransformerOptions {
     fileProcessor: FileProcessor<StylableMeta>;
+    moduleResolver: ModuleResolver;
     requireModule: (modulePath: string) => any;
     diagnostics: Diagnostics;
     delimiter?: string;
@@ -119,6 +121,7 @@ export class StylableTransformer {
         this.resolver = new StylableResolver(
             options.fileProcessor,
             options.requireModule,
+            options.moduleResolver,
             options.resolverCache
         );
         this.mode = options.mode || 'production';

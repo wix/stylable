@@ -1,4 +1,4 @@
-import path from 'path';
+import path, { dirname } from 'path';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import type ts from 'typescript';
@@ -825,19 +825,28 @@ export const NamedCompletionProvider: CompletionProvider & {
     },
 
     resolveImport(importName: string, stylable: Stylable, meta: StylableMeta): StylableMeta | null {
-        let resolvedImport: StylableMeta | null = null;
-        if (importName && importName.endsWith('.st.css')) {
-            try {
-                resolvedImport = stylable.fileProcessor.process(
-                    meta.imports.find((i) => i.request === importName)!.from
-                );
-            } catch {
-                /**/
-            }
-        }
-        return resolvedImport;
+        return maybeResolveImport(importName, stylable, meta);
     },
 };
+
+function maybeResolveImport(
+    importName: string,
+    stylable: Stylable,
+    meta: StylableMeta
+): StylableMeta | null {
+    let resolvedImport: StylableMeta | null = null;
+    if (importName && importName.endsWith('.st.css')) {
+        try {
+            const imported = meta.imports.find((i) => i.request === importName)!;
+            resolvedImport = stylable.fileProcessor.process(
+                stylable.resolvePath(imported.context, imported.request)
+            );
+        } catch {
+            /**/
+        }
+    }
+    return resolvedImport;
+}
 
 export const StImportNamedCompletionProvider: CompletionProvider & {
     resolveImport: (
@@ -945,17 +954,7 @@ export const StImportNamedCompletionProvider: CompletionProvider & {
     },
 
     resolveImport(importName: string, stylable: Stylable, meta: StylableMeta): StylableMeta | null {
-        let resolvedImport: StylableMeta | null = null;
-        if (importName && importName.endsWith('.st.css')) {
-            try {
-                resolvedImport = stylable.fileProcessor.process(
-                    meta.imports.find((i) => i.request === importName)!.from
-                );
-            } catch {
-                /**/
-            }
-        }
-        return resolvedImport;
+        return maybeResolveImport(importName, stylable, meta);
     },
 };
 
@@ -1499,7 +1498,8 @@ export const ValueCompletionProvider: CompletionProvider = {
             const importVars: any[] = [];
             meta.imports.forEach((imp) => {
                 try {
-                    stylable.fileProcessor.process(imp.from).vars.forEach((v: any) =>
+                    const resolvedPath = stylable.resolvePath(dirname(meta.source), imp.request);
+                    stylable.fileProcessor.process(resolvedPath).vars.forEach((v) =>
                         importVars.push({
                             name: v.name,
                             value: v.text,

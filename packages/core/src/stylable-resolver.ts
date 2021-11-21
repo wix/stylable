@@ -12,6 +12,7 @@ import {
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { findRule } from './helpers/rule';
+import type { ModuleResolver } from './types';
 
 export const resolverWarnings = {
     UNKNOWN_IMPORTED_FILE(path: string) {
@@ -87,36 +88,33 @@ const safePathDelimiter = ';:';
 export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
-        protected requireModule: (modulePath: string) => any,
+        protected requireModule: (resolvedPath: string) => any,
+        public resolvePath: ModuleResolver,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, from }: Imported): CachedModuleEntity {
-        const key = `${context}${safePathDelimiter}${from}`;
+    private getModule({ context, request }: Imported): CachedModuleEntity {
+        const key = `${context}${safePathDelimiter}${request}`;
         if (this.cache?.has(key)) {
             return this.cache.get(key)!;
         }
 
         let entity: CachedModuleEntity;
 
-        if (from.endsWith('.css')) {
+        if (request.endsWith('.css')) {
             const kind = 'css';
-
             try {
-                const resolvedPath = this.fileProcessor.resolvePath(from, context);
-                const value = this.fileProcessor.process(resolvedPath, false, context);
-                entity = { kind, value, resolvedPath };
+                const resolvedPath = this.resolvePath(context, request);
+                entity = { kind, value: this.fileProcessor.process(resolvedPath), resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error, request: from, context };
+                entity = { kind, value: null, error, request, context };
             }
         } else {
             const kind = 'js';
-
             try {
-                const resolvedPath = this.fileProcessor.resolvePath(from, context);
-                const value = this.requireModule(resolvedPath);
-                entity = { kind, value, resolvedPath };
+                const resolvedPath = this.resolvePath(context, request);
+                entity = { kind, value: this.requireModule(resolvedPath), resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error, request: from, context };
+                entity = { kind, value: null, error, request, context };
             }
         }
 
@@ -478,8 +476,5 @@ export class StylableResolver {
                 }
             }
         }
-    }
-    public resolvePath(path: string, context?: string) {
-        return this.fileProcessor.resolvePath(path, context);
     }
 }

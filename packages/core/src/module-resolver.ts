@@ -5,11 +5,27 @@ import ResolverFactory from 'enhanced-resolve/lib/ResolverFactory';
 import type { ModuleResolver } from './types';
 import type { MinimalFS } from './cached-process-file';
 
+function bundleSafeRequireExtensions(): string[] {
+    let extensions: string[];
+    try {
+        // we use eval here to avoid bundling warnings about require.extensions we always has fallback for browsers
+        extensions = Object.keys(require('module')._extensions);
+    } catch (e) {
+        extensions = [];
+    }
+    return extensions.length ? extensions : ['.js', '.json'];
+}
+
 const resolverContext = {};
 
 export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any): ModuleResolver {
+    const extensions =
+        resolveOptions.extensions && resolveOptions.extensions.length
+            ? resolveOptions.extensions
+            : bundleSafeRequireExtensions();
     const eResolver = ResolverFactory.createResolver({
         ...resolveOptions,
+        extensions,
         useSyncFileSystemCalls: true,
         cache: false,
         fileSystem,

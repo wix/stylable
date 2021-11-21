@@ -64,7 +64,10 @@ export class StylableManifestPlugin {
                     (compiler.inputFileSystem as any).readFileSync(filePath).toString(),
             },
             mode: compiler.options.mode === 'development' ? 'development' : 'production',
-            resolveOptions: compiler.options.resolve as any /* make stylable types better */,
+            resolveOptions: {
+                ...compiler.options.resolve,
+                extensions: [],
+            },
             resolverCache: new Map(),
             resolveNamespace: this.options.resolveNamespace,
         });

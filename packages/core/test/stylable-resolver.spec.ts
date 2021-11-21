@@ -19,15 +19,17 @@ function createResolveExtendsResults(
     isElement = false
 ) {
     const moduleResolver = createDefaultResolver(fs, {});
-    const processFile = cachedProcessFile<StylableMeta>(
-        (fullpath, content) => {
-            return process(cssParse(content, { from: fullpath }));
-        },
-        fs,
-        (request, context = '/') => moduleResolver(context, request)
+
+    const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
+        return process(cssParse(content, { from: fullpath }));
+    }, fs);
+
+    const resolver = new StylableResolver(
+        processFile,
+        (module: string) => module && '',
+        (context = '/', request: string) => moduleResolver(context, request)
     );
 
-    const resolver = new StylableResolver(processFile, (module: string) => module && '');
     return resolver.resolveExtends(
         processFile.process(fileToProcess),
         classNameToLookup,
@@ -255,7 +257,7 @@ describe('stylable-resolver', () => {
         const btnMeta = fileProcessor.process('/button.st.css');
         const res = resolver.resolve(entryMeta.getSymbol(`x`));
 
-        expect(res!.symbol).to.eql(btnMeta.getClass(`root`));
+        expect(res?.symbol).to.eql(btnMeta.getClass(`root`));
     });
 
     it('should resolve elements', () => {
@@ -290,8 +292,8 @@ describe('stylable-resolver', () => {
         const btn1 = entryMeta.getSymbol(`ButtonX`);
         const res1 = resolver.resolve(btn1);
 
-        expect(res!.symbol).to.eql(btnMeta.getClass(`root`));
-        expect(res1!.symbol).to.eql(btnMeta.getTypeElement(`ButtonX`));
+        expect(res?.symbol).to.eql(btnMeta.getClass(`root`));
+        expect(res1?.symbol).to.eql(btnMeta.getTypeElement(`ButtonX`));
     });
 
     it('should resolve elements deep', () => {
@@ -329,7 +331,7 @@ describe('stylable-resolver', () => {
         const btn1 = entryMeta.getSymbol(`ButtonX`);
         const res1 = resolver.deepResolve(btn1);
 
-        expect(res1!.symbol).to.eql(btnXMeta.getClass(`root`));
+        expect(res1?.symbol).to.eql(btnXMeta.getClass(`root`));
     });
 
     it('should handle circular "re-declare" (deepResolve)', () => {
@@ -352,7 +354,7 @@ describe('stylable-resolver', () => {
         const a = entryMeta.getSymbol(`a`);
         const res1 = resolver.deepResolve(a);
 
-        expect(res1!.symbol).to.eql(entryMeta.getClass(`a`));
+        expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 
     it('should handle circular "re-declare" (resolveSymbolOrigin)', () => {
@@ -375,7 +377,7 @@ describe('stylable-resolver', () => {
         const a = entryMeta.getSymbol(`a`);
         const res1 = resolver.resolveSymbolOrigin(a, entryMeta);
 
-        expect(res1!.symbol).to.eql(entryMeta.getClass(`a`));
+        expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 
     it('should resolve alias origin', () => {
@@ -423,8 +425,8 @@ describe('stylable-resolver', () => {
         const res1 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`a`), entryMeta);
         const res2 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`b`), entryMeta);
 
-        expect(res1!.symbol).to.eql(a1.getClass(`a`));
-        expect(res2!.symbol).to.eql(a1.getClass(`b`));
+        expect(res1?.symbol).to.eql(a1.getClass(`a`));
+        expect(res2?.symbol).to.eql(a1.getClass(`b`));
     });
 
     it('should not resolve extends on alias', () => {
@@ -451,7 +453,7 @@ describe('stylable-resolver', () => {
 
         const entryMeta = fileProcessor.process('/entry.st.css');
         const res1 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`a`), entryMeta);
-        expect(res1!.symbol).to.eql(entryMeta.getClass(`a`));
+        expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 
     it('should resolve 4th party according to context', () => {

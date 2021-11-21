@@ -95,7 +95,7 @@ export {
     valueMapping,
     valueParserWarnings,
 } from './stylable-value-parsers';
-export { StylableInfrastructure, createInfrastructure } from './create-infra-structure';
+export { createStylableFileProcessor } from './create-stylable-processor';
 export { CreateProcessorOptions, Stylable, StylableConfig } from './stylable';
 export {
     CSSObject,
@@ -159,7 +159,6 @@ export { createDefaultResolver } from './module-resolver';
 export { DiagnosticsMode, EmitDiagnosticsContext, emitDiagnostics } from './report-diagnostic';
 export { visitMetaCSSDependenciesBFS } from './visit-meta-css-dependencies';
 export { murmurhash3_32_gc } from './murmurhash';
-export { TimedCacheOptions, timedCache } from './timed-cache';
 import {
     booleanStateDelimiter,
     createBooleanStateClassName,

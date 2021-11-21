@@ -1,0 +1,3 @@
+export = {
+    _extensions: {},
+};

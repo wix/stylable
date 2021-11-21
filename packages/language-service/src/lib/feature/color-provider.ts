@@ -1,5 +1,6 @@
 import type { IFileSystem } from '@file-services/types';
 import { evalDeclarationValue, Stylable, valueMapping } from '@stylable/core';
+import { dirname } from 'path';
 import type { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -46,7 +47,9 @@ export function resolveDocumentColors(
                     );
                     color = cssService.findColor(doc);
                 } else if (sym && sym._kind === 'import' && sym.type === 'named') {
-                    const impMeta = processor.process(sym.import.from);
+                    const impMeta = processor.process(
+                        stylable.resolvePath(dirname(meta.source), sym.import.request)
+                    );
                     const relevantVar = impMeta.vars.find((v) => v.name === sym.name);
                     if (relevantVar) {
                         const doc = TextDocument.create(
@@ -107,14 +110,14 @@ export function getColorPresentation(
 ): ColorPresentation[] {
     const src = document.getText();
     const res = fixAndProcess(src, new ProviderPosition(0, 0), params.textDocument.uri);
-    const meta = res.processed.meta!;
+    const meta = res.processed.meta;
 
     const wordStart = new ProviderPosition(
         params.range.start.line + 1,
         params.range.start.character + 1
     );
     let noPicker = false;
-    meta.rawAst.walkDecls(valueMapping.named, (node) => {
+    meta?.rawAst.walkDecls(valueMapping.named, (node) => {
         if (
             node &&
             ((wordStart.line === node.source!.start!.line &&

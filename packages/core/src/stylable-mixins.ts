@@ -160,11 +160,10 @@ function handleJSMixin(
     });
 
     transformer.transformAst(mixinRoot, meta, undefined, variableOverride, [], true);
-
-    const mixinPath = (mix.ref as ImportSymbol).import.from;
+    const mixinPath = (mix.ref as ImportSymbol).import.request;
     fixRelativeUrls(
         mixinRoot,
-        transformer.fileProcessor.resolvePath(mixinPath, dirname(meta.source)),
+        transformer.resolver.resolvePath(dirname(meta.source), mixinPath),
         meta.source
     );
 

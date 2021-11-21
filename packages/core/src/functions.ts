@@ -265,7 +265,7 @@ export function processDeclarationValue(
                         url.value = assureRelativeUrlPrefix(
                             relative(
                                 sourceDir,
-                                resolver.resolvePath(url.value.slice(1), sourceDir)
+                                resolver.resolvePath(sourceDir, url.value.slice(1))
                             ).replace(/\\/gm, '/')
                         );
                     }
