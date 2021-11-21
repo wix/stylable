@@ -3,6 +3,7 @@ import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
+import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
 
 chai.use(flatMatch);
 
@@ -303,6 +304,41 @@ describe('Stylable postcss process', () => {
         );
 
         expect(Object.keys(result.elements).length).to.eql(1);
+    });
+
+    it('should not collect typed elements or classes in unknown functional selectors', () => {
+        const result = processSource(
+            `
+            :unknown(Unknown.unknown) {}
+            :global(Global.global) {}
+            :nth-of-type(5n, NthOfType.nth-of-type) {}
+            :nth-last-of-type(5n, NthLastOfType.nth-last-of-type) {}
+            ${knownPseudoClassesWithNestedSelectors
+                .map((name) =>
+                    name.startsWith(`nth`)
+                        ? `:${name}(5n, El-${name}.cls-${name}) {}`
+                        : `:${name}(El-${name}.cls-${name}) {}`
+                )
+                .join(``)}
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        // unknown pseudo-class
+        expect(Object.keys(result.elements)).to.not.include(`Unknown`);
+        expect(Object.keys(result.classes)).to.not.include(`unknown`);
+        // native with ignored or no nested classes
+        expect(Object.keys(result.elements)).to.not.include(`Global`);
+        expect(Object.keys(result.classes)).to.not.include(`global`);
+        expect(Object.keys(result.elements)).to.not.include(`NthOfType`);
+        expect(Object.keys(result.classes)).to.not.include(`nth-of-type`);
+        expect(Object.keys(result.elements)).to.not.include(`NthLastOfType`);
+        expect(Object.keys(result.classes)).to.not.include(`nth-last-of-type`);
+        // known function pseudo-classes with nested selectors
+        const expectedElements = knownPseudoClassesWithNestedSelectors.map((name) => `El-${name}`);
+        const expectedClasses = knownPseudoClassesWithNestedSelectors.map((name) => `cls-${name}`);
+        expect(Object.keys(result.elements)).to.include.members(expectedElements);
+        expect(Object.keys(result.classes)).to.include.members(expectedClasses);
     });
 
     it('always contain root class', () => {

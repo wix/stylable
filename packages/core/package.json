@@ -1,11 +1,14 @@
 {
   "name": "@stylable/core",
-  "version": "4.8.1",
+  "version": "4.8.3",
   "description": "CSS for Components",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha ./dist/test/**/*.spec.js",
     "start": "mocha-play ./dist/test/**/*.spec.js -c ./webpack.config.js -w"
+  },
+  "browser": {
+    "module": "./dist/module-with-extensions.js"
   },
   "dependencies": {
     "@tokey/css-selector-parser": "^0.5.1",

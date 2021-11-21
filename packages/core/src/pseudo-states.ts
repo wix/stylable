@@ -17,7 +17,7 @@ import { groupValues, listOptions, MappedStates } from './stylable-value-parsers
 import { valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
-import { reservedPseudoClasses } from './native-reserved-lists';
+import { reservedFunctionalPseudoClasses } from './native-reserved-lists';
 import cssesc from 'cssesc';
 
 export const stateMiddleDelimiter = '-';
@@ -61,7 +61,7 @@ export function processPseudoStates(
             diagnostics.error(decl, stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
                 word: stateDefinition.value,
             });
-        } else if (reservedPseudoClasses.includes(stateDefinition.value)) {
+        } else if (reservedFunctionalPseudoClasses.includes(stateDefinition.value)) {
             diagnostics.warn(decl, stateErrors.RESERVED_NATIVE_STATE(stateDefinition.value), {
                 word: stateDefinition.value,
             });

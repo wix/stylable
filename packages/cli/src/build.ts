@@ -35,17 +35,20 @@ export async function build(
         diagnosticsMode,
     }: BuildOptions,
     {
+        projectRoot: _projectRoot,
+        rootDir: _rootDir,
+        identifier = _projectRoot,
         watch,
         fs,
         stylable,
-        rootDir,
-        projectRoot,
         log,
         outputFiles = new Map(),
-        identifier = projectRoot,
     }: BuildMetaData
 ) {
-    const { resolve, join } = fs;
+
+    const { resolve, join ,realpathSync } = fs;
+    const projectRoot = realpathSync(_projectRoot)
+    const rootDir = realpathSync(_rootDir)
     const fullSrcDir = join(projectRoot, srcDir);
     const fullOutDir = join(projectRoot, outDir);
     const nodeModules = join(projectRoot, 'node_modules');
@@ -92,7 +95,11 @@ export async function build(
             return filePath.endsWith(extension);
         },
         onError(error) {
-            console.error(error);
+            if (watch) {
+                console.error(error);
+            } else {
+                throw error;
+            }
         },
         processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {

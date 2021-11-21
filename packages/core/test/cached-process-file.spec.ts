@@ -21,13 +21,9 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            (_fullpath, content) => {
-                return content + '!';
-            },
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile((_fullpath, content) => {
+            return content + '!';
+        }, fs);
 
         expect(p.process(file)).to.equal('content!');
     });
@@ -52,15 +48,11 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            (fullpath, content) => {
-                const processed = { content, fullpath };
-                res = res ? res : processed;
-                return processed;
-            },
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile((fullpath, content) => {
+            const processed = { content, fullpath };
+            res = res ? res : processed;
+            return processed;
+        }, fs);
 
         expect(p.process(file)).to.equal(p.process(file));
     });
@@ -85,15 +77,70 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            () => null,
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile(() => null, fs);
         p.process(file);
         p.process(file);
         p.process(file);
         expect(count).to.equal(1);
+    });
+
+    it('should accept post processors used in process and processContent', () => {
+        const file = 'C:/file.txt';
+
+        const fs: MinimalFS = {
+            readFileSync(fullpath: string) {
+                return fullpath;
+            },
+            statSync() {
+                return {
+                    mtime: new Date(0),
+                };
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
+        };
+
+        const p = cachedProcessFile(() => 'Hello', fs, [
+            (content) => {
+                return content + '!post-processor';
+            },
+        ]);
+
+        const out = p.process(file);
+        expect(out).to.equal('Hello!post-processor');
+        expect(out).to.equal(p.processContent('Hello', file));
+    });
+
+    it('should accept cache', () => {
+        const file = 'C:/file.txt';
+        const mtime = new Date(0);
+        const fs: MinimalFS = {
+            readFileSync(fullpath: string) {
+                return fullpath;
+            },
+            statSync() {
+                return {
+                    mtime,
+                };
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
+        };
+
+        const p = cachedProcessFile(() => 'Hello', fs, [], {
+            [file]: {
+                value: 'FROM CACHE',
+                stat: { mtime },
+            },
+        });
+
+        const out = p.process(file);
+        expect(out).to.equal('FROM CACHE');
+        expect(p.processContent('Hello', file), 'process context should ignore cache').to.equal(
+            'Hello'
+        );
     });
 
     it('read file if and reprocess if changed', () => {
@@ -117,14 +164,10 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            () => {
-                processCount++;
-                return null;
-            },
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile(() => {
+            processCount++;
+            return null;
+        }, fs);
 
         p.process(file);
         p.process(file);
@@ -154,14 +197,10 @@ describe('cachedProcessFile', () => {
             },
         };
 
-        const p = cachedProcessFile(
-            () => {
-                processCount++;
-                return null;
-            },
-            fs,
-            (x) => x
-        );
+        const p = cachedProcessFile(() => {
+            processCount++;
+            return null;
+        }, fs);
 
         p.process(file);
         p.process(file);

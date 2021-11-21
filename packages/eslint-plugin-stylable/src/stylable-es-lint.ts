@@ -62,7 +62,7 @@ export default createRule({
                 const fileName = context.getFilename();
                 const dirName = path.dirname(fileName);
                 const fullPath = moduleResolver(dirName, importRequest);
-                const meta = stylable.process(fullPath, dirName);
+                const meta = stylable.process(fullPath);
                 const { exports } = stylable.transform(meta);
 
                 if (exposeDiagnosticsReports) {

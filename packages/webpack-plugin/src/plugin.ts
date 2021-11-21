@@ -253,6 +253,7 @@ export class StylableWebpackPlugin {
         if (this.stylable) {
             return;
         }
+
         this.stylable = Stylable.create(
             this.options.stylableConfig(
                 {
@@ -263,7 +264,10 @@ export class StylableWebpackPlugin {
                      */
                     fileSystem: getTopLevelInputFilesystem(compiler),
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
-                    resolveOptions: compiler.options.resolve as any,
+                    resolveOptions: {
+                        ...compiler.options.resolve,
+                        extensions: [], // use Stylable's default extensions
+                    },
                     resolveNamespace: packageNamespaceFactory(
                         findConfig,
                         require,
@@ -421,7 +425,7 @@ export class StylableWebpackPlugin {
                 createOptimizationMapping(sortedModules, optimizer);
 
             if (!this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE) {
-                reportNamespaceCollision(namespaceToFileMapping, compilation.errors);
+                reportNamespaceCollision(namespaceToFileMapping, compilation);
             }
 
             for (const module of sortedModules) {

@@ -8,47 +8,43 @@ export interface CacheItem<T> {
 export interface MinimalFS {
     statSync: (fullpath: string) => { mtime: Date };
     readFileSync: (fullpath: string, encoding: 'utf8') => string;
-    readlinkSync(path: string): string;
+    readlinkSync: (fullpath: string) => string;
 }
 
 export interface FileProcessor<T> {
-    process: (fullpath: string, ignoreCache?: boolean, context?: string) => T;
+    process: (fullpath: string, ignoreCache?: boolean) => T;
     add: (fullpath: string, value: T) => void;
     processContent: (content: string, fullpath: string) => T;
     cache: Record<string, CacheItem<T>>;
     postProcessors: Array<(value: T, path: string) => T>;
-    resolvePath: (path: string, context?: string) => string;
 }
 
 export function cachedProcessFile<T = any>(
     processor: processFn<T>,
     fs: MinimalFS,
-    resolvePath: (path: string, context?: string) => string
+    postProcessors: Array<(value: T, path: string) => T> = [],
+    cache: { [key: string]: CacheItem<T> } = {}
 ): FileProcessor<T> {
-    const cache: { [key: string]: CacheItem<T> } = {};
-    const postProcessors: Array<(value: T, path: string) => T> = [];
-
-    function process(fullpath: string, ignoreCache = false, context?: string) {
-        const resolvedPath = resolvePath(fullpath, context);
-        const stat = fs.statSync(resolvedPath);
-        const cached = cache[resolvedPath];
+    function process(fullpath: string, ignoreCache = false) {
+        const stat = fs.statSync(fullpath);
+        const cached = cache[fullpath];
         if (
             ignoreCache ||
             !cached ||
             (cached && cached.stat.mtime.valueOf() !== stat.mtime.valueOf())
         ) {
-            const content = fs.readFileSync(resolvedPath, 'utf8');
-            const value = processContent(content, resolvedPath);
-
-            cache[resolvedPath] = { value, stat: { mtime: stat.mtime } };
+            const content = fs.readFileSync(fullpath, 'utf8');
+            const value = processContent(content, fullpath);
+            cache[fullpath] = { value, stat: { mtime: stat.mtime } };
         }
-        return cache[resolvedPath].value;
+        return cache[fullpath].value;
     }
 
     function processContent(content: string, filePath: string): T {
-        return postProcessors.reduce<T>((value, postProcessor) => {
-            return postProcessor(value, filePath);
-        }, processor(filePath, content));
+        return postProcessors.reduce<T>(
+            (value, postProcessor) => postProcessor(value, filePath),
+            processor(filePath, content)
+        );
     }
 
     function add(fullpath: string, value: T) {
@@ -72,6 +68,5 @@ export function cachedProcessFile<T = any>(
         cache,
         process,
         add,
-        resolvePath,
     };
 }

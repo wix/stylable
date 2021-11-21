@@ -734,7 +734,6 @@ describe('Stylable Cli Watch', () => {
             const { output } = await run({
                 dirPath: tempDir.path,
                 args: ['-w'],
-                resolveStepsDelay: 700,
                 steps: [
                     {
                         msg: messages.START_WATCHING(),
@@ -759,6 +758,11 @@ describe('Stylable Cli Watch', () => {
                             1,
                             `[0] ${sep}` + join('packages', 'project-a')
                         ),
+                        action() {
+                            return {
+                                sleep: 500
+                            }
+                        }
                     },
                 ],
             });
