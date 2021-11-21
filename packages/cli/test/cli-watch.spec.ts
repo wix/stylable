@@ -33,7 +33,6 @@ describe('Stylable Cli Watch', () => {
                 .root{ color:green; }
             `,
         });
-
         await run({
             dirPath: tempDir.path,
             args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss'],
@@ -89,7 +88,7 @@ describe('Stylable Cli Watch', () => {
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: messages.FINISHED_PROCESSING + ' 3',
                 },
             ],
         });

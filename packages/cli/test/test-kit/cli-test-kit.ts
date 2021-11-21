@@ -1,10 +1,11 @@
 import { readdirSync, readFileSync, statSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { spawn, ChildProcessWithoutNullStreams, spawnSync } from 'child_process';
+import { fork, spawnSync, ChildProcess } from 'child_process';
 import { on } from 'events';
 import { join, relative } from 'path';
+import type { Readable } from 'stream';
 
 export function createCliTester() {
-    const cliProcesses: ChildProcessWithoutNullStreams[] = [];
+    const cliProcesses: ChildProcess[] = [];
 
     async function processCliOutput({
         dirPath,
@@ -16,25 +17,23 @@ export function createCliTester() {
         steps: Array<{ msg: string; action?: () => void }>;
     }) {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
-        cliProcesses.push(cliProcess as any);
+        cliProcesses.push(cliProcess);
         const found = [];
+        if (!cliProcess.stdout) {
+            throw new Error('no stdout on cli process');
+        }
+        for await (const line of readLines(cliProcess.stdout)) {
+            const step = steps[found.length];
 
-        for await (const e of on(cliProcess.stdout as any, 'data')) {
-            const lines = e.toString().split('\n');
+            if (line.includes(step.msg)) {
+                found.push(true);
 
-            for (const line of lines) {
-                const step = steps[found.length];
+                if (step.action) {
+                    step.action();
+                }
 
-                if (line.includes(step.msg)) {
-                    found.push(true);
-
-                    if (step.action) {
-                        step.action();
-                    }
-
-                    if (steps.length === found.length) {
-                        return;
-                    }
+                if (steps.length === found.length) {
+                    return;
                 }
             }
         }
@@ -51,6 +50,21 @@ export function createCliTester() {
     };
 }
 
+async function* readLines(readable: Readable) {
+    let buffer = '';
+    for await (const e of on(readable, 'data')) {
+        for (const char of e.toString()) {
+            if (char === '\n') {
+                yield buffer;
+                buffer = '';
+            } else {
+                buffer += char;
+            }
+        }
+    }
+    yield buffer;
+}
+
 export function writeToExistingFile(filePath: string, content: string) {
     if (existsSync(filePath)) {
         writeFileSync(filePath, content);
@@ -59,24 +73,24 @@ export function writeToExistingFile(filePath: string, content: string) {
     }
 }
 
+const stcPath = require.resolve('@stylable/cli/bin/stc.js');
+const formatPath = require.resolve('@stylable/cli/bin/stc-format.js');
+const codeModPath = require.resolve('@stylable/cli/bin/stc-codemod.js');
+
 export function runCli(cliArgs: string[] = [], cwd: string) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc.js');
-    return spawn('node', [cliPath, ...cliArgs], { cwd });
+    return fork(stcPath, cliArgs, { cwd, stdio: 'pipe' });
 }
 
 export function runCliSync(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
+    return spawnSync('node', [stcPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 export function runFormatCliSync(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc-format.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
+    return spawnSync('node', [formatPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 export function runCliCodeMod(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/bin/stc-codemod.js');
-    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
+    return spawnSync('node', [codeModPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 export interface Files {
