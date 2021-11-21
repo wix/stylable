@@ -4,7 +4,7 @@ import { Diagnostics } from './diagnostics';
 import { CssParser, cssParse } from './parser';
 import { processNamespace, StylableProcessor } from './stylable-processor';
 import type { StylableMeta } from './stylable-meta';
-import { StylableResolverCache, StylableResolver } from './stylable-resolver';
+import { StylableResolverCache, StylableResolver, CachedModuleEntity } from './stylable-resolver';
 import {
     StylableResults,
     StylableTransformer,
@@ -96,9 +96,21 @@ export class Stylable {
 
         this.resolver = this.createResolver();
     }
-    public initCache() {
-        this.resolverCache = new Map();
-        this.resolver = this.createResolver();
+    public initCache({
+        filter,
+    }: { filter?: (key: string, entity: CachedModuleEntity) => boolean } = {}) {
+        if (filter && this.resolverCache) {
+            for (const [key, cacheEntity] of this.resolverCache) {
+                const keep = filter(key, cacheEntity);
+
+                if (!keep) {
+                    this.resolverCache.delete(key);
+                }
+            }
+        } else {
+            this.resolverCache = new Map();
+            this.resolver = this.createResolver();
+        }
     }
     public createResolver({
         requireModule = this.requireModule,
