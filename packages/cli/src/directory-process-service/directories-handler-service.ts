@@ -98,12 +98,10 @@ export class DirectoriesHandlerService {
 
     private invalidateCache(path: string) {
         for (const [key, entity] of this.resolverCache) {
-            // TODO: remove the extension check when #2135 is merged
             if (
                 !entity.value ||
                 path === entity.resolvedPath ||
-                path === this.options.outputFiles?.get(entity.resolvedPath) ||
-                path === `${entity.resolvedPath}.js`
+                path === this.options.outputFiles?.get(entity.resolvedPath)
             ) {
                 this.resolverCache.delete(key);
 

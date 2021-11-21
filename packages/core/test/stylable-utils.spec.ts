@@ -144,7 +144,7 @@ describe('visitMetaCSSDependenciesBFS', () => {
             { source: '/d1.st.css', depth: 1 },
             { source: '/d1.1.st.css', depth: 1 },
             { source: '/d2.st.css', depth: 2 },
-            { source: '/mixin', depth: -1 },
+            { source: '/mixin.js', depth: -1 },
         ]);
     });
 });

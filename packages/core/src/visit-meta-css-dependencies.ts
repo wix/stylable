@@ -20,8 +20,7 @@ export function visitMetaCSSDependenciesBFS(
         while (++index < items.length) {
             const imported = items[index];
             const res = resolver.resolveImported(imported, '');
-            // TODO: swipe the arguments once #2135 is merged
-            const resolvedPath = resolver.resolvePath(imported.from, imported.context);
+            const resolvedPath = resolver.resolvePath(imported.context, imported.request);
 
             if (res?._kind === 'css' && !visited.has(res.meta.source)) {
                 visited.add(res.meta.source);

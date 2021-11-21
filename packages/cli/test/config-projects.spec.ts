@@ -213,16 +213,18 @@ describe('Stylable CLI config multiple projects', function () {
                 }),
                 packages: {
                     'project-a': {
-                        'style.st.css': `
-                            @st-import B from "../project-b/dist/style.st.css";
-    
+                        src: {
+                            'style.st.css': `
+                            @st-import B from "../../project-b/dist/style.st.css";
+
                             .root {
                                 -st-extends: B;
                                 color: gold;
                             }
-    
+
                             .foo {}
-                            `,
+                    `,
+                        },
                         'package.json': `{
                                 "name": "a", 
                                 "version": "0.0.0",
@@ -232,21 +234,25 @@ describe('Stylable CLI config multiple projects', function () {
                             }`,
                     },
                     'project-b': {
-                        'style.st.css': `.root{color:red}`,
+                        src: {
+                            'style.st.css': `.root{color:red}`,
+                        },
                         'package.json': `{
                                 "name": "b", 
                                 "version": "0.0.0"
                             }`,
                     },
                     'project-c': {
-                        'style.st.css': `
-                            @st-import [foo] from "../project-a/dist/style.st.css";
+                        src: {
+                            'style.st.css': `
+                            @st-import [foo] from "../../project-a/dist/style.st.css";
     
                             .root {
                                 -st-extends: foo;
                                 color: gold;
                             }
                             `,
+                        },
                         'package.json': `{
                                 "name": "c", 
                                 "version": "0.0.0",
@@ -260,6 +266,7 @@ describe('Stylable CLI config multiple projects', function () {
                     exports.stcConfig = () => ({ 
                         options: { 
                             outDir: './dist',
+                            srcDir: './src',
                             outputSources: true,
                             cjs: false,
                         },

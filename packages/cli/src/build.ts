@@ -9,7 +9,6 @@ import { levels } from './logger';
 import { DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
 import { tryRun } from './build-tools';
 import { messages } from './messages';
-import { extname } from 'path';
 
 export async function build(
     {
@@ -45,10 +44,9 @@ export async function build(
         outputFiles = new Map(),
     }: BuildMetaData
 ) {
-
-    const { resolve, join ,realpathSync } = fs;
-    const projectRoot = realpathSync(_projectRoot)
-    const rootDir = realpathSync(_rootDir)
+    const { resolve, join, realpathSync } = fs;
+    const projectRoot = realpathSync(_projectRoot);
+    const rootDir = realpathSync(_rootDir);
     const fullSrcDir = join(projectRoot, srcDir);
     const fullOutDir = join(projectRoot, outDir);
     const nodeModules = join(projectRoot, 'node_modules');
@@ -286,11 +284,6 @@ function updateWatcherDependencies(
             },
             resolver,
             (resolvedPath) => {
-                // TODO: remove the extension additaion when #2135 is merged
-                if (!extname(resolvedPath)) {
-                    resolvedPath += '.js';
-                }
-
                 service.registerInvalidateOnChange(
                     outputFiles.get(resolvedPath) ?? resolvedPath,
                     filePath
