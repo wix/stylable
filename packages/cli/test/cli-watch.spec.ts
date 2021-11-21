@@ -3,6 +3,7 @@ import { join, sep } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { messages } from '@stylable/cli/dist/messages';
+import { resolverWarnings } from '@stylable/core/dist/stylable-resolver';
 import {
     createCliTester,
     loadDirSync,
@@ -274,6 +275,30 @@ describe('Stylable Cli Watch', () => {
             expect(files).to.include({
                 'package.json': '{"name": "test", "version": "0.0.0"}',
                 'style-renamed.st.css': '.root{ color: red }',
+            });
+        });
+
+        it('should report diagnostics on initial build and then start watching', async () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `
+                    @st-import Module from './does-not-exist.st.css';
+                    
+                    .root{ color: red }
+                `,
+            });
+
+            await run({
+                dirPath: tempDir.path,
+                args: ['--outDir', './dist', '-w', '--cjs', '--css'],
+                steps: [
+                    {
+                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    },
+                    {
+                        msg: messages.START_WATCHING(),
+                    },
+                ],
             });
         });
 
@@ -760,9 +785,9 @@ describe('Stylable Cli Watch', () => {
                         ),
                         action() {
                             return {
-                                sleep: 500
-                            }
-                        }
+                                sleep: 500,
+                            };
+                        },
                     },
                 ],
             });

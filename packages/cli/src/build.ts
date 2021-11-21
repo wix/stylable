@@ -153,7 +153,7 @@ export async function build(
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
 
-            if (!watch) {
+            if (!changeOrigin) {
                 // report build diagnostics
                 reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
             }
