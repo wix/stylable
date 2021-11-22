@@ -52,6 +52,10 @@ export async function build(
     const nodeModules = join(projectRoot, 'node_modules');
     const isMultiPackagesProject = projectRoot !== rootDir;
 
+    if (projectRoot !== _projectRoot) {
+        log(`projectRoot is linked:\n${_projectRoot}\n↳${projectRoot}`);
+    }
+
     const mode = watch ? '[Watch]' : '[Build]';
     const generator = new Generator(stylable, log);
     const generated = new Set<string>();
