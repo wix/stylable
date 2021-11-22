@@ -1,4 +1,4 @@
-import { createFeature } from './feature';
+import { createFeature, FeatureContext } from './feature';
 import type { StylableDirectives, ImportSymbol } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
@@ -35,7 +35,7 @@ export const hooks = createFeature<{
     analyzeInit({ data }) {
         plugableRecord.set(data, dataKey, {});
     },
-    analyzeSelectorNode({ meta, node, rule, walkContext: [_index, _nodes, parents] }): void {
+    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes, parents] }): void {
         /**
          * intent to deprecate: currently `value(param)` can be used
          * as a custom state value. Unless there is a reasonable
@@ -48,22 +48,22 @@ export const hooks = createFeature<{
                 node.value !== `value`)
         ) {
             // error on functional type
-            meta.diagnostics.error(
+            context.diagnostics.error(
                 rule,
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
                 { word: stringifySelector(node) }
             );
         }
-        addType(meta, node.value, rule);
+        addType(context, node.value, rule);
     },
-    transformSelectorNode({ meta, node, selectorContext }): void {
+    transformSelectorNode({ context, node, selectorContext }): void {
         const resolved = selectorContext.metaParts.element[node.value] || [
             // provides resolution for native elements
             // that are not collected by parts
             // or elements that are added by js mixin
             {
                 _kind: 'css',
-                meta,
+                meta: context.meta,
                 symbol: { _kind: 'element', name: node.value },
             },
         ];
@@ -87,11 +87,11 @@ export function getAll({ data }: StylableMeta): Record<string, ElementSymbol> {
     return plugableRecord.getUnsafe(data, dataKey);
 }
 
-export function addType(meta: StylableMeta, name: string, rule?: postcss.Rule): ElementSymbol {
-    const cssTypeData = plugableRecord.getUnsafe(meta.data, dataKey);
+export function addType(context: FeatureContext, name: string, rule?: postcss.Rule): ElementSymbol {
+    const cssTypeData = plugableRecord.getUnsafe(context.meta.data, dataKey);
     let typeSymbol = cssTypeData[name];
     if (!typeSymbol && isCompRoot(name)) {
-        let alias = STSymbol.get(meta, name);
+        let alias = STSymbol.get(context.meta, name);
         if (alias && alias._kind !== 'import') {
             alias = undefined;
         }
@@ -101,40 +101,39 @@ export function addType(meta: StylableMeta, name: string, rule?: postcss.Rule): 
             alias,
         };
         STSymbol.addSymbol({
-            meta,
+            context,
             symbol: typeSymbol,
             node: rule,
             safeRedeclare: !!alias,
         });
         // deprecated
         ignoreDeprecationWarn(() => {
-            meta.elements[name] = typeSymbol;
+            context.meta.elements[name] = typeSymbol;
         });
     }
     return typeSymbol;
 }
 
-export function validateTypeScoping(
-    meta: StylableMeta,
-    {
-        locallyScoped,
-        inStScope,
-        node,
-        nodes,
-        index,
-        rule,
-    }: {
-        locallyScoped: boolean;
-        inStScope: boolean;
-        node: ImmutableType;
-        nodes: ImmutableSelectorNode[];
-        index: number;
-        rule: postcss.Rule;
-    }
-): boolean {
+export function validateTypeScoping({
+    context,
+    locallyScoped,
+    inStScope,
+    node,
+    nodes,
+    index,
+    rule,
+}: {
+    context: FeatureContext;
+    locallyScoped: boolean;
+    inStScope: boolean;
+    node: ImmutableType;
+    nodes: ImmutableSelectorNode[];
+    index: number;
+    rule: postcss.Rule;
+}): boolean {
     if (locallyScoped === false && !inStScope) {
-        if (CSSClass.checkForScopedNodeAfter(rule, meta, nodes, index) === false) {
-            meta.diagnostics.warn(rule, diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+        if (CSSClass.checkForScopedNodeAfter(context, rule, nodes, index) === false) {
+            context.diagnostics.warn(rule, diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
                 word: node.value,
             });
             return false;

@@ -1,4 +1,4 @@
-import { createFeature } from './feature';
+import { FeatureContext, createFeature } from './feature';
 import type { ImportSymbol, VarSymbol, CSSVarSymbol, KeyframesSymbol } from './types';
 import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
@@ -43,30 +43,30 @@ export function getAll(meta: StylableMeta): Record<string, StylableSymbol> {
 }
 
 export function addSymbol({
-    meta,
+    context,
     symbol,
     node,
     safeRedeclare = false,
     localName,
 }: {
-    meta: StylableMeta;
+    context: FeatureContext;
     symbol: StylableSymbol;
     node?: postcss.Node;
     safeRedeclare?: boolean;
     localName?: string;
 }) {
-    const stSymbolData = plugableRecord.getUnsafe(meta.data, dataKey);
+    const stSymbolData = plugableRecord.getUnsafe(context.meta.data, dataKey);
     const name = localName || symbol.name;
     const existingSymbol = stSymbolData[name];
     if (existingSymbol && node && !safeRedeclare) {
-        meta.diagnostics.warn(node, diagnostics.REDECLARE_SYMBOL(name), {
+        context.diagnostics.warn(node, diagnostics.REDECLARE_SYMBOL(name), {
             word: name,
         });
     }
     stSymbolData[name] = symbol;
     // deprecated
     ignoreDeprecationWarn(() => {
-        meta.mappedSymbols[name] = symbol;
+        context.meta.mappedSymbols[name] = symbol;
     });
 }
 

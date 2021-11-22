@@ -8,6 +8,7 @@ import type {
     RefedMixin,
     StylableSymbol,
     VarSymbol,
+    FeatureContext,
 } from './features';
 import type { Diagnostics } from './diagnostics';
 import type { SelectorList } from '@tokey/css-selector-parser';
@@ -47,11 +48,12 @@ export class StylableMeta {
     public globals: Record<string, boolean> = {};
     constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
         // initiate features
+        const context: FeatureContext = { meta: this, diagnostics: diagnostics };
         for (const { hooks } of features) {
             hooks.analyzeInit(this);
         }
         // set default root
-        const rootSymbol = CSSClass.addClass(this, RESERVED_ROOT_NAME);
+        const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
         rootSymbol[valueMapping.root] = true;
 
         setFieldForDeprecation(this, `mixins`, { objectType: `stylableMeta` });

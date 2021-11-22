@@ -1,3 +1,5 @@
+export type { FeatureContext } from './feature';
+
 export * as STSymbol from './st-symbol';
 export type { StylableSymbol } from './st-symbol';
 

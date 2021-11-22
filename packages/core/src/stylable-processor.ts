@@ -17,7 +17,7 @@ import type {
     VarSymbol,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
-import { STSymbol, CSSClass, CSSType } from './features';
+import { FeatureContext, STSymbol, CSSClass, CSSType } from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
@@ -147,12 +147,12 @@ export const processorWarnings = {
     },
 };
 
-export class StylableProcessor {
-    protected meta!: StylableMeta;
+export class StylableProcessor implements FeatureContext {
+    public meta!: StylableMeta;
     protected dirContext!: string;
 
     constructor(
-        protected diagnostics = new Diagnostics(),
+        public diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
     ) {}
     public process(root: postcss.Root): StylableMeta {
@@ -367,7 +367,7 @@ export class StylableProcessor {
 
                             this.meta.cssVars[cssVar] = property;
                             STSymbol.addSymbol({
-                                meta: this.meta,
+                                context: this,
                                 symbol: property,
                             });
                         } else {
@@ -502,13 +502,14 @@ export class StylableProcessor {
                 }
             } else if (node.type === 'class') {
                 CSSClass.hooks.analyzeSelectorNode({
-                    meta: this.meta,
+                    context: this,
                     node,
                     rule,
                     walkContext: nodeContext,
                 });
 
-                locallyScoped = CSSClass.validateClassScoping(this.meta, {
+                locallyScoped = CSSClass.validateClassScoping({
+                    context: this,
                     classSymbol: CSSClass.get(this.meta, node.value)!,
                     locallyScoped,
                     inStScope,
@@ -519,13 +520,14 @@ export class StylableProcessor {
                 });
             } else if (node.type === 'type') {
                 CSSType.hooks.analyzeSelectorNode({
-                    meta: this.meta,
+                    context: this,
                     node,
                     rule,
                     walkContext: nodeContext,
                 });
 
-                locallyScoped = CSSType.validateTypeScoping(this.meta, {
+                locallyScoped = CSSType.validateTypeScoping({
+                    context: this,
                     locallyScoped,
                     inStScope,
                     node,
@@ -597,7 +599,7 @@ export class StylableProcessor {
         this.checkForInvalidAsUsage(importDef);
         if (importDef.defaultExport) {
             STSymbol.addSymbol({
-                meta: this.meta,
+                context: this,
                 localName: importDef.defaultExport,
                 symbol: {
                     _kind: 'import',
@@ -611,7 +613,7 @@ export class StylableProcessor {
         }
         Object.keys(importDef.named).forEach((name) => {
             STSymbol.addSymbol({
-                meta: this.meta,
+                context: this,
                 localName: name,
                 symbol: {
                     _kind: 'import',
@@ -659,7 +661,7 @@ export class StylableProcessor {
             };
             this.meta.vars.push(varSymbol);
             STSymbol.addSymbol({
-                meta: this.meta,
+                context: this,
                 symbol: varSymbol,
                 node: decl,
             });
@@ -719,7 +721,7 @@ export class StylableProcessor {
                 this.meta.cssVars[varName] = cssVarSymbol;
                 if (!STSymbol.get(this.meta, varName)) {
                     STSymbol.addSymbol({
-                        meta: this.meta,
+                        context: this,
                         symbol: cssVarSymbol,
                     });
                 }

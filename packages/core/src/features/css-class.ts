@@ -1,4 +1,4 @@
-import { createFeature } from './feature';
+import { createFeature, FeatureContext } from './feature';
 import type { StylableDirectives, ImportSymbol } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
@@ -55,18 +55,20 @@ export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: Immuta
     analyzeInit({ data }) {
         plugableRecord.set(data, dataKey, {});
     },
-    analyzeSelectorNode({ meta, node, rule }): void {
+    analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
             // error on functional class
-            meta.diagnostics.error(
+            context.diagnostics.error(
                 rule,
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `class`),
-                { word: stringifySelector(node) }
+                {
+                    word: stringifySelector(node),
+                }
             );
         }
-        addClass(meta, node.value, rule);
+        addClass(context, node.value, rule);
     },
-    transformSelectorNode({ selectorContext, node }) {
+    transformSelectorNode({ context, selectorContext, node }) {
         const { originMeta, resolver } = selectorContext;
         const resolved = selectorContext.metaParts.class[node.value] || [
             // used to namespace classes from js mixins since js mixins
@@ -80,9 +82,9 @@ export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: Immuta
             // ToDo: refactor out to transformer validation phase
             validateRuleStateDefinition(
                 selectorContext.rule,
-                meta,
+                context.meta,
                 resolver,
-                originMeta.diagnostics
+                context.diagnostics
             );
         }
         namespaceClass(meta, symbol, node, originMeta);
@@ -100,11 +102,11 @@ export function getAll({ data }: StylableMeta): Record<string, ClassSymbol> {
     return plugableRecord.getUnsafe(data, dataKey);
 }
 
-export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule): ClassSymbol {
-    const cssClassData = plugableRecord.getUnsafe(meta.data, dataKey);
+export function addClass(context: FeatureContext, name: string, rule?: postcss.Rule): ClassSymbol {
+    const cssClassData = plugableRecord.getUnsafe(context.meta.data, dataKey);
     let classSymbol = cssClassData[name];
     if (!classSymbol) {
-        let alias = STSymbol.get(meta, name);
+        let alias = STSymbol.get(context.meta, name);
         if (alias && alias._kind !== 'import') {
             alias = undefined;
         }
@@ -114,14 +116,14 @@ export function addClass(meta: StylableMeta, name: string, rule?: postcss.Rule):
             alias,
         };
         STSymbol.addSymbol({
-            meta,
+            context,
             symbol: classSymbol,
             node: rule,
             safeRedeclare: !!alias,
         });
         // deprecated
         ignoreDeprecationWarn(() => {
-            meta.classes[name] = classSymbol;
+            context.meta.classes[name] = classSymbol;
         });
     }
     return classSymbol;
@@ -146,31 +148,30 @@ export function namespaceClass(
     }
 }
 
-export function validateClassScoping(
-    meta: StylableMeta,
-    {
-        classSymbol,
-        locallyScoped,
-        inStScope,
-        node,
-        nodes,
-        index,
-        rule,
-    }: {
-        classSymbol: ClassSymbol;
-        locallyScoped: boolean;
-        inStScope: boolean;
-        node: ImmutableClass;
-        nodes: ImmutableSelectorNode[];
-        index: number;
-        rule: postcss.Rule;
-    }
-): boolean {
+export function validateClassScoping({
+    context,
+    classSymbol,
+    locallyScoped,
+    inStScope,
+    node,
+    nodes,
+    index,
+    rule,
+}: {
+    context: FeatureContext;
+    classSymbol: ClassSymbol;
+    locallyScoped: boolean;
+    inStScope: boolean;
+    node: ImmutableClass;
+    nodes: ImmutableSelectorNode[];
+    index: number;
+    rule: postcss.Rule;
+}): boolean {
     if (!classSymbol.alias) {
         return true;
     } else if (locallyScoped === false && !inStScope) {
-        if (checkForScopedNodeAfter(rule, meta, nodes, index) === false) {
-            meta.diagnostics.warn(rule, diagnostics.UNSCOPED_CLASS(node.value), {
+        if (checkForScopedNodeAfter(context, rule, nodes, index) === false) {
+            context.diagnostics.warn(rule, diagnostics.UNSCOPED_CLASS(node.value), {
                 word: node.value,
             });
             return false;
@@ -183,8 +184,8 @@ export function validateClassScoping(
 
 // ToDo: support more complex cases (e.g. `:is`)
 export function checkForScopedNodeAfter(
+    context: FeatureContext,
     rule: postcss.Rule,
-    meta: StylableMeta,
     nodes: ImmutableSelectorNode[],
     index: number
 ) {
@@ -199,7 +200,7 @@ export function checkForScopedNodeAfter(
         }
         if (node.type === 'class') {
             const name = node.value;
-            const classSymbol = addClass(meta, name, rule);
+            const classSymbol = addClass(context, name, rule);
             if (classSymbol && !classSymbol.alias) {
                 return true;
             }

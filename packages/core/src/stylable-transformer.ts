@@ -127,10 +127,6 @@ export class StylableTransformer {
         this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {
-        // set main diagnostics to transform diagnostics
-        const analyzeDiagnostics = meta.diagnostics;
-        meta.diagnostics = this.diagnostics;
-        //
         const metaExports: StylableExports = {
             classes: {},
             vars: {},
@@ -142,10 +138,8 @@ export class StylableTransformer {
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast, meta);
+        meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
-        // save diagnostics (analyzeDiagnostics is on the main `meta.diagnostics` for now)
-        meta.transformDiagnostics = meta.diagnostics;
-        meta.diagnostics = analyzeDiagnostics;
 
         return this.postProcessor ? this.postProcessor(result, this) : result;
     }
@@ -470,13 +464,13 @@ export class StylableTransformer {
         const { currentAnchor, metaParts, node, originMeta } = context;
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({
-                meta: originMeta,
+                context: { meta: originMeta, diagnostics: this.diagnostics },
                 selectorContext: context,
                 node,
             });
         } else if (node.type === 'type') {
             CSSType.hooks.transformSelectorNode({
-                meta: originMeta,
+                context: { meta: originMeta, diagnostics: this.diagnostics },
                 selectorContext: context,
                 node,
             });

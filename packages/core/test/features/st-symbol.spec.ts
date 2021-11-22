@@ -1,5 +1,6 @@
 import { STSymbol, StylableSymbol } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
+import { Diagnostics } from '@stylable/core/dist/diagnostics';
 import { generateStylableResult } from '@stylable/core-test-kit';
 import * as postcss from 'postcss';
 import { expect } from 'chai';
@@ -17,8 +18,9 @@ describe(`features/st-symbol`, () => {
                 },
             });
             const symbol: StylableSymbol = { _kind: `class`, name: `a` };
+            const context = { meta, diagnostics: new Diagnostics() };
 
-            STSymbol.addSymbol({ meta, symbol });
+            STSymbol.addSymbol({ context, symbol });
 
             expect(STSymbol.get(meta, `a`)).to.equal(symbol);
             expect(meta.getSymbol(`a`), `meta.getSymbol`).to.equal(STSymbol.get(meta, `a`));
@@ -43,9 +45,10 @@ describe(`features/st-symbol`, () => {
             });
             const symbolA: StylableSymbol = { _kind: `class`, name: `a` };
             const symbolB: StylableSymbol = { _kind: `element`, name: `a` };
+            const context = { meta, diagnostics: new Diagnostics() };
 
-            STSymbol.addSymbol({ meta, symbol: symbolA });
-            STSymbol.addSymbol({ meta, symbol: symbolB });
+            STSymbol.addSymbol({ context, symbol: symbolA });
+            STSymbol.addSymbol({ context, symbol: symbolB });
 
             expect(STSymbol.get(meta, `a`), `override`).to.equal(symbolB);
         });
@@ -80,9 +83,10 @@ describe(`features/st-symbol`, () => {
                     },
                 },
             });
+            const context = { meta, diagnostics: new Diagnostics() };
 
             STSymbol.addSymbol({
-                meta,
+                context,
                 localName: `localA`,
                 symbol: {
                     _kind: `class`,
@@ -111,11 +115,12 @@ describe(`features/st-symbol`, () => {
             const symbol: StylableSymbol = { _kind: `class`, name: `a` };
             const ruleA = new postcss.Rule();
             const ruleB = new postcss.Rule();
+            const context = { meta, diagnostics: new Diagnostics() };
 
-            STSymbol.addSymbol({ meta, symbol, node: ruleA });
-            STSymbol.addSymbol({ meta, symbol, node: ruleB });
+            STSymbol.addSymbol({ context, symbol, node: ruleA });
+            STSymbol.addSymbol({ context, symbol, node: ruleB });
             // ToDo: warn on all declarations including the first
-            expect(meta.diagnostics.reports).to.eql([
+            expect(context.diagnostics.reports).to.eql([
                 {
                     type: `warning`,
                     message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
@@ -139,15 +144,16 @@ describe(`features/st-symbol`, () => {
             const symbol: StylableSymbol = { _kind: `class`, name: `a` };
             const ruleA = new postcss.Rule();
             const ruleB = new postcss.Rule();
+            const context = { meta, diagnostics: new Diagnostics() };
 
             // first symbol
-            STSymbol.addSymbol({ meta, symbol, node: ruleA });
+            STSymbol.addSymbol({ context, symbol, node: ruleA });
             // override: no diagnostics
-            STSymbol.addSymbol({ meta, symbol, node: ruleB, safeRedeclare: true });
+            STSymbol.addSymbol({ context, symbol, node: ruleB, safeRedeclare: true });
             // missing node: no diagnostics
-            STSymbol.addSymbol({ meta, symbol });
+            STSymbol.addSymbol({ context, symbol });
 
-            expect(meta.diagnostics.reports).to.eql([]);
+            expect(context.diagnostics.reports).to.eql([]);
         });
     });
 });

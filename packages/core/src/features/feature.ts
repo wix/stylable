@@ -2,6 +2,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { ScopeContext } from '../stylable-transformer';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
+import type { Diagnostics } from '../diagnostics';
 
 export type SelectorNodeContext = [
     index: number,
@@ -9,11 +10,9 @@ export type SelectorNodeContext = [
     parents: ImmutableSelectorNode[]
 ];
 
-export interface AnalyzeContext {
+export interface FeatureContext {
     meta: StylableMeta;
-}
-export interface TransformContext {
-    meta: StylableMeta;
+    diagnostics: Diagnostics;
 }
 
 export interface NodeTypes {
@@ -23,19 +22,17 @@ export interface NodeTypes {
 
 export interface FeatureHooks<T extends NodeTypes> {
     analyzeInit: (meta: StylableMeta) => void;
-    analyzeSelectorNode: (
-        options: AnalyzeContext & {
-            node: T['IMMUTABLE_SELECTOR'];
-            rule: postcss.Rule;
-            walkContext: SelectorNodeContext;
-        }
-    ) => void;
-    transformSelectorNode: (
-        options: TransformContext & {
-            node: T['SELECTOR'];
-            selectorContext: Required<ScopeContext>;
-        }
-    ) => void;
+    analyzeSelectorNode: (options: {
+        context: FeatureContext;
+        node: T['IMMUTABLE_SELECTOR'];
+        rule: postcss.Rule;
+        walkContext: SelectorNodeContext;
+    }) => void;
+    transformSelectorNode: (options: {
+        context: FeatureContext;
+        node: T['SELECTOR'];
+        selectorContext: Required<ScopeContext>;
+    }) => void;
 }
 const defaultHooks: FeatureHooks<NodeTypes> = {
     analyzeInit() {
