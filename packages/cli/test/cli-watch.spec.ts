@@ -1,4 +1,4 @@
-import { writeFileSync, unlinkSync, rmdirSync, renameSync } from 'fs';
+import { writeFileSync, unlinkSync, rmdirSync, renameSync, realpathSync } from 'fs';
 import { join, sep } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
@@ -18,6 +18,8 @@ describe('Stylable Cli Watch', () => {
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
         tempDir = await createTempDirectory();
+        // TODO: indicates about issue in the directory process event that does not handles smlinks.
+        tempDir.path = realpathSync(tempDir.path);
     });
     afterEach(async () => {
         cleanup();
