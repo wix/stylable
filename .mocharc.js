@@ -9,7 +9,7 @@ module.exports = {
 function getRequire() {
     let launchedPath;
     const root = dirname(require.resolve('./package.json'));
-    const packagesSet = new Set();
+    const packagesSet = new Set([root]);
     const packages = [
         'webpack-plugin',
         'rollup-plugin',
@@ -30,7 +30,7 @@ function getRequire() {
         launchedPath = process.cwd();
     }
 
-    return packagesSet.has(launchedPath) || root === launchedPath
+    return packagesSet.has(launchedPath)
         ? { require: require.resolve('@stylable/e2e-test-kit/dist/browser-server.js') }
         : {};
 }
