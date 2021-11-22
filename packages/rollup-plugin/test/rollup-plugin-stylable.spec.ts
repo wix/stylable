@@ -31,6 +31,7 @@ describe('StylableRollupPlugin', function () {
             inlineAssets(_, buffer) {
                 return buffer.byteLength < 1024 * 5;
             },
+            dts: true,
         },
     });
 
@@ -41,6 +42,8 @@ describe('StylableRollupPlugin', function () {
 
         const url = await serve();
         let page = await open(url);
+
+        expect(nodeFs.readdirSync(projectDir)).to.include('index.d.ts');
 
         const { body, part } = await page.evaluate(getElementsStyles);
 

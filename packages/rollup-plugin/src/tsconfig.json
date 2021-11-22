@@ -7,6 +7,7 @@
     { "path": "../../build-tools/src" },
     { "path": "../../runtime/src" },
     { "path": "../../core/src" },
-    { "path": "../../optimizer/src" }
+    { "path": "../../optimizer/src" },
+    { "path": "../../module-utils/src" }
   ]
 }

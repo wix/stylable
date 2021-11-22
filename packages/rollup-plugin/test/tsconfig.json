@@ -7,6 +7,7 @@
   "references": [
     { "path": "../../core/src" },
     { "path": "../../optimizer/src" },
+    { "path": "../../module-utils/src" },
     { "path": "../src" }
   ]
 }

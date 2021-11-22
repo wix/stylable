@@ -15,6 +15,7 @@ import {
 } from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
+import { generateDTSContent } from '@stylable/module-utils';
 import decache from 'decache';
 import {
     emitAssets,
@@ -32,6 +33,7 @@ export interface StylableRollupPluginOptions {
     mode?: 'development' | 'production';
     diagnosticsMode?: DiagnosticsMode;
     resolveNamespace?: typeof resolveNamespaceNode;
+    dts?: boolean;
 }
 
 const requireModuleCache = new Set<string>();
@@ -56,6 +58,7 @@ export function stylableRollupPlugin({
     diagnosticsMode = 'strict',
     mode = getDefaultMode(),
     resolveNamespace = resolveNamespaceNode,
+    dts = false,
 }: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
@@ -103,6 +106,11 @@ export function stylableRollupPlugin({
                 }
             }
             extracted.set(id, { css });
+
+            if (dts) {
+                const dtsContent = generateDTSContent({ meta, exports });
+                fs.writeFileSync(id.replace('.st.css', '.d.ts'), dtsContent);
+            }
 
             visitMetaCSSDependenciesBFS(
                 meta,
