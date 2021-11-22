@@ -1,4 +1,5 @@
-const { dirname, resolve } = require('path');
+const findConfig = require('find-config');
+const { dirname } = require('path');
 
 module.exports = {
     colors: true,
@@ -22,10 +23,8 @@ function getRequire() {
         packagesSet.add(dirname(require.resolve(`@stylable/${package}/package.json`)));
     }
 
-    if (process.env.LAUNCHED_FILE_RELATIVE_PATH) {
-        launchedPath = dirname(
-            resolve(process.env.WORKSPACE_FOLDER, process.env.LAUNCHED_FILE_RELATIVE_PATH)
-        );
+    if (process.env.FILE) {
+        launchedPath = dirname(findConfig('./package.json', { cwd: process.env.FILE }));
     } else {
         launchedPath = process.cwd();
     }
