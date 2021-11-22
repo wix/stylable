@@ -26,6 +26,7 @@ async function main() {
     const { rootDir, projects } = await projectsConfig(argv);
     const fileSystem = nodeFs;
     const resolverCache: StylableResolverCache = new Map();
+    const fileProcessorCache = {};
     const outputFiles = new Map<string, string>();
     const isMultipleProjects = projects.length > 1;
     const directoriesHandler = new DirectoriesHandlerService(fileSystem, {
@@ -54,9 +55,7 @@ async function main() {
                 projectRoot,
                 resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
                 resolverCache,
-                resolveOptions: {
-                    extensions: Object.keys(require.extensions),
-                },
+                fileProcessorCache,
             });
 
             const { service } = await build(optionsEntity, {
