@@ -36,6 +36,9 @@ export class BuildsHandler {
 
     public start() {
         this.listener = async (event) => {
+            // TODO: indicates about issue in the directory process event that does not handle smlinks.
+            event.path = this.fileSystem.realpathSync(event.path);
+
             this.invalidateCache(event.path);
 
             let foundChanges = false;

@@ -18,8 +18,6 @@ describe('Stylable Cli Watch', () => {
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
         tempDir = await createTempDirectory();
-        // TODO: indicates about issue in the directory process event that does not handle smlinks.
-        tempDir.path = realpathSync(tempDir.path);
     });
     afterEach(async () => {
         cleanup();
