@@ -1,5 +1,6 @@
 import type { IFileSystem } from '@file-services/types';
-import type { Stylable } from '@stylable/core';
+import type { Stylable, StylableResolverCache } from '@stylable/core';
+import type { DirectoryProcessService } from '.';
 import type { Generator as BaseGenerator } from './base-generator';
 import type { Log } from './logger';
 
@@ -184,4 +185,20 @@ export interface BuildMetaData {
     log: Log;
     /** output file to source file map */
     outputFiles?: Map<string, string>;
+}
+
+export interface DirectoriesHandlerServiceOptions {
+    log?: Log;
+    resolverCache?: StylableResolverCache;
+    outputFiles?: Map<string, string>;
+    rootDir?: string;
+}
+
+export interface RegisterMetaData {
+    identifier: string;
+    stylable: Stylable;
+}
+
+export interface Service extends RegisterMetaData {
+    directoryProcess: DirectoryProcessService;
 }

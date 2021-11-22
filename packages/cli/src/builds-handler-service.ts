@@ -1,13 +1,16 @@
 import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
 import type { StylableResolverCache } from '@stylable/core';
-import { levels } from '../logger';
-import { messages } from '../messages';
-import { reportDiagnostics } from '../report-diagnostics';
-import { createWatchEvent, DirectoryProcessService } from './directory-process-service';
+import { levels } from './logger';
+import { messages } from './messages';
+import { reportDiagnostics } from './report-diagnostics';
+import {
+    createWatchEvent,
+    DirectoryProcessService,
+} from './directory-process-service/directory-process-service';
 import decache from 'decache';
 import type { DirectoriesHandlerServiceOptions, RegisterMetaData, Service } from './types';
 
-export class DirectoriesHandlerService {
+export class BuildsHandler {
     private services = new Set<Service>();
     private listener: WatchEventListener | undefined;
     private resolverCache: StylableResolverCache = new Map();
@@ -20,10 +23,14 @@ export class DirectoriesHandlerService {
         }
     }
 
-    public register(directoryProcess: DirectoryProcessService, { identifier }: RegisterMetaData) {
+    public register(
+        directoryProcess: DirectoryProcessService,
+        { identifier, stylable }: RegisterMetaData
+    ) {
         this.services.add({
             identifier,
             directoryProcess,
+            stylable,
         });
     }
 
@@ -43,10 +50,11 @@ export class DirectoriesHandlerService {
                     files.set(path, createWatchEvent(path, this.fileSystem));
                 }
 
-                const { hasChanges, diagnosticsMessages, shouldReport, diagnosticMode } =
-                    await directoryProcess.handleWatchChange(files, event);
+                const response = await directoryProcess.handleWatchChange(files, event);
 
-                if (hasChanges) {
+                if (response.hasChanges) {
+                    const { diagnosticsMessages, diagnosticMode, shouldReport } = response;
+
                     if (!foundChanges) {
                         foundChanges = true;
 
@@ -61,7 +69,7 @@ export class DirectoriesHandlerService {
 
                     this.log(messages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
 
-                    reportDiagnostics(diagnosticsMessages!, shouldReport, diagnosticMode);
+                    reportDiagnostics(diagnosticsMessages, shouldReport, diagnosticMode);
                 }
             }
 

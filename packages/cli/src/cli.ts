@@ -5,7 +5,7 @@ import { build } from './build';
 import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
 import { getCliArguments } from './config/resolve-options';
-import { DirectoriesHandlerService } from './directory-process-service/directories-handler-service';
+import { BuildsHandler } from './builds-handler-service';
 import { messages } from './messages';
 
 async function main() {
@@ -29,7 +29,7 @@ async function main() {
     const fileProcessorCache = {};
     const outputFiles = new Map<string, string>();
     const isMultipleProjects = projects.length > 1;
-    const directoriesHandler = new DirectoriesHandlerService(fileSystem, {
+    const buildsHandler = new BuildsHandler(fileSystem, {
         log,
         resolverCache,
         outputFiles,
@@ -69,14 +69,14 @@ async function main() {
                 identifier,
             });
 
-            directoriesHandler.register(service, { identifier });
+            buildsHandler.register(service, { identifier, stylable });
         }
     }
 
     if (watch) {
         log(messages.START_WATCHING(), levels.info);
 
-        directoriesHandler.start();
+        buildsHandler.start();
     }
 }
 
