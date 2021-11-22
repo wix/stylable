@@ -23,6 +23,7 @@ function getRequire() {
         packagesSet.add(dirname(require.resolve(`@stylable/${package}/package.json`)));
     }
 
+    // we get this env variable from ./.vscode/launch.json (f5 - Mocha Current)
     if (process.env.FILE) {
         launchedPath = dirname(findConfig('./package.json', { cwd: process.env.FILE }));
     } else {
