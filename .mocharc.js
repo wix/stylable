@@ -1,4 +1,4 @@
-const { dirname } = require('path');
+const { dirname, resolve } = require('path');
 
 module.exports = {
     colors: true,
@@ -7,6 +7,9 @@ module.exports = {
 };
 
 function getRequire() {
+    let launchedPath;
+    const root = dirname(require.resolve('./package.json'));
+    const packagesSet = new Set();
     const packages = [
         'webpack-plugin',
         'rollup-plugin',
@@ -14,12 +17,20 @@ function getRequire() {
         'custom-value',
         'experimental-loader',
     ];
-    const root = dirname(require.resolve('./package.json'));
-    const packagesSet = new Set([root]);
+
     for (const package of packages) {
         packagesSet.add(dirname(require.resolve(`@stylable/${package}/package.json`)));
     }
-    return packagesSet.has(process.cwd())
+
+    if (process.env.LAUNCHED_FILE_RELATIVE_PATH) {
+        launchedPath = dirname(
+            resolve(process.env.WORKSPACE_FOLDER, process.env.LAUNCHED_FILE_RELATIVE_PATH)
+        );
+    } else {
+        launchedPath = process.cwd();
+    }
+
+    return packagesSet.has(launchedPath) || root === launchedPath
         ? { require: require.resolve('@stylable/e2e-test-kit/dist/browser-server.js') }
         : {};
 }
