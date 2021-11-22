@@ -1,4 +1,4 @@
-import { writeFileSync, unlinkSync, rmdirSync, renameSync, realpathSync } from 'fs';
+import { writeFileSync, unlinkSync, rmdirSync, renameSync } from 'fs';
 import { join, sep } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
