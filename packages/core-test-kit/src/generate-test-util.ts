@@ -11,9 +11,13 @@ import {
     StylableTransformer,
     createStylableFileProcessor,
     createDefaultResolver,
+    Stylable,
+    StylableConfig,
 } from '@stylable/core';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
+import { createMemoryFs } from '@file-services/memory';
+import type { IDirectoryContents } from '@file-services/types';
 
 export interface File {
     content: string;
@@ -110,4 +114,23 @@ export function generateStylableRoot(config: Config) {
 
 export function generateStylableExports(config: Config) {
     return generateStylableResult(config).exports;
+}
+
+export function generateStyleableEnvironment(
+    content: IDirectoryContents,
+    stylableConfig: Partial<StylableConfig> = {}
+) {
+    const fs = createMemoryFs(content);
+
+    const stylable = Stylable.create({
+        fileSystem: fs,
+        projectRoot: '/',
+        resolveNamespace: (ns) => ns,
+        ...stylableConfig,
+    });
+
+    return {
+        stylable,
+        fs,
+    };
 }
