@@ -5,7 +5,7 @@ import { build } from './build';
 import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
 import { getCliArguments } from './config/resolve-options';
-import { BuildsHandler } from './builds-handler-service';
+import { BuildsHandler } from './builds-handler';
 import { messages } from './messages';
 
 async function main() {
