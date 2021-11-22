@@ -6,7 +6,7 @@ import {
     DiagnosticsMode,
 } from '@stylable/core';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
-import { StylableOptimizer } from '@stylable/optimizer';
+import { StylableOptimizer, IStylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
 import { dirname, relative } from 'path';
 import type { Compilation, Compiler, NormalModule, WebpackError } from 'webpack';
@@ -96,7 +96,7 @@ export interface StylableWebpackPluginOptions {
     /**
      * Provide custom StylableOptimizer
      */
-    optimizer?: StylableOptimizer;
+    optimizer?: IStylableOptimizer;
     /**
      * A function to override Stylable instance default configuration options
      */
