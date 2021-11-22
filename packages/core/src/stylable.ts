@@ -4,14 +4,14 @@ import { Diagnostics } from './diagnostics';
 import { CssParser, cssParse } from './parser';
 import { processNamespace, StylableProcessor } from './stylable-processor';
 import type { StylableMeta } from './stylable-meta';
-import { StylableResolverCache, StylableResolver, CachedModuleEntity } from './stylable-resolver';
+import { StylableResolverCache, StylableResolver } from './stylable-resolver';
 import {
     StylableResults,
     StylableTransformer,
     TransformerOptions,
     TransformHooks,
 } from './stylable-transformer';
-import type { IStylableOptimizer, ModuleResolver } from './types';
+import type { InitCacheParams, IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
 import { warnOnce } from './helpers/deprecation';
 
@@ -96,9 +96,7 @@ export class Stylable {
 
         this.resolver = this.createResolver();
     }
-    public initCache({
-        filter,
-    }: { filter?: (key: string, entity: CachedModuleEntity) => boolean } = {}) {
+    public initCache({ filter }: InitCacheParams = {}) {
         if (filter && this.resolverCache) {
             for (const [key, cacheEntity] of this.resolverCache) {
                 const keep = filter(key, cacheEntity);

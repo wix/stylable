@@ -1,6 +1,7 @@
 import type * as postcss from 'postcss';
 import type { Box } from './custom-values';
 import type { StylableMeta } from './stylable-meta';
+import type { CachedModuleEntity } from './stylable-resolver';
 import type { StylableExports, StylableResults } from './stylable-transformer';
 
 export type PartialObject<T> = Partial<T> & object;
@@ -83,3 +84,8 @@ export interface IStylableNamespaceOptimizer {
 }
 
 export type ModuleResolver = (directoryPath: string, request: string) => string;
+
+export interface InitCacheParams {
+    /* Keeps cache entities that meet the condition specified in a callback function. Return `true` to keep the iterated entity. */
+    filter?(key: string, entity: CachedModuleEntity): boolean;
+}
