@@ -136,7 +136,7 @@ export function stylableRollupPlugin({
                 isStylableModule: (module) => module.endsWith(ST_CSS),
                 getModulePathNoExt: (module) => {
                     if (module.endsWith(ST_CSS)) {
-                        return module.replace(/\.st\.css$/, '');
+                        return module.replace(/(\.st\.css$)|(\.stcss$)/i, '');
                     }
                     const { dir, name } = parse(module);
                     return join(dir, name);

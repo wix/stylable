@@ -23,7 +23,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.st\.css$/i,
+        test: /(\.st\.css$)|(\.stcss$)/i,
         use: [
           stylableLoaders.runtime(),
           MiniCssExtractPlugin.loader,
@@ -71,7 +71,7 @@ When building Stylable for consumption in a server-side renderer build, you may 
 
 ```js
 {
-  test: /\.st\.css$/i,
+  test: /(\.st\.css$)|(\.stcss$)/i,
   use: [
     stylableLoaders.transform({ exportsOnly: true }),
   ],

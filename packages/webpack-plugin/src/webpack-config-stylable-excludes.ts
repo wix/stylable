@@ -1,7 +1,8 @@
 import type { Configuration, RuleSetRule } from 'webpack';
 
 export function applyWebpackConfigStylableExcludes(webpackConfig: Configuration) {
-    safelyWalkJSON(webpackConfig.module ?? {}, insertStCssExclude(/\.st\.css$/));
+    // only exclude .st.css since .stcss is not conflict with .css
+    safelyWalkJSON(webpackConfig.module ?? {}, insertStCssExclude(/\.st\.css$/i));
 }
 
 function insertStCssExclude(stRegex: RegExp) {

@@ -13,7 +13,7 @@ export interface Options {
 
 const HOOK_EXTENSION = '.css';
 
-const defaultStylableMatcher = (filename: string) => !!filename.match(/\.st\.css$/);
+const defaultStylableMatcher = (filename: string) => !!filename.match(/(\.st\.css$)|(\.stcss$)/i);
 
 export function attachHook({
     matcher,

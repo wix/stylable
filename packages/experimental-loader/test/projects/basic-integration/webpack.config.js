@@ -17,7 +17,7 @@ module.exports = {
                 type: 'asset/resource',
             },
             {
-                test: /\.st\.css$/i,
+                test: /(\.st\.css$)|(\.stcss$)/i,
                 use: [
                     stylableLoaders.runtime(),
                     MiniCssExtractPlugin.loader,

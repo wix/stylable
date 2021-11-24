@@ -191,7 +191,7 @@ export function injectLoader(compiler: Compiler) {
         compiler.options.module.rules = [];
     }
     compiler.options.module.rules.unshift({
-        test: /\.st\.css$/,
+        test: /(\.st\.css$)|(\.stcss$)/,
         loader: require.resolve('./loader'),
         sideEffects: true,
     });
@@ -452,7 +452,7 @@ export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthConte
             ),
         getModulePathNoExt: (module) => {
             if (isStylableModule(module)) {
-                return module.resource.replace(/\.st\.css/g, '');
+                return module.resource.replace(/(\.st\.css$)|(\.stcss$)/g, '');
             }
             const { dir, name } = parse((module as NormalModule)?.resource || '');
             return join(dir, name);

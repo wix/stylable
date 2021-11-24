@@ -179,7 +179,7 @@ export class StylableMetadataPlugin {
             }
 
             variants.forEach((name: string) => {
-                if (!name.match(/\.st\.css/)) {
+                if (!name.match(/(\.st\.css$)|(\.stcss$)/i)) {
                     return;
                 }
                 const variantPath = join(variantsDir, name);

@@ -9,7 +9,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.st\.css$/i,
+                test: /(\.st\.css$)|(\.stcss$)/i,
                 use: [
                     stylableLoaders.transform({
                         exportsOnly: true,
