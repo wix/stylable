@@ -1,10 +1,10 @@
-import { generateStyleableEnvironment } from '@stylable/core-test-kit';
+import { generateStylableEnvironment } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe('Stylable', () => {
     describe('Cache', () => {
         it('should invalidate cache', () => {
-            const { fs, stylable } = generateStyleableEnvironment({
+            const { fs, stylable } = generateStylableEnvironment({
                 'foo.st.css': '.foo {}',
                 'entry.st.css': `
                   @st-import [foo] from './foo.st.css';
@@ -42,7 +42,7 @@ describe('Stylable', () => {
 
         it('should clear cache only for filtered items', () => {
             const resolverCache = new Map();
-            const { fs, stylable } = generateStyleableEnvironment(
+            const { fs, stylable } = generateStylableEnvironment(
                 {
                     'foo.st.css': '.foo {}',
                     'bar.st.css': '.bar {}',

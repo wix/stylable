@@ -116,7 +116,7 @@ export function generateStylableExports(config: Config) {
     return generateStylableResult(config).exports;
 }
 
-export function generateStyleableEnvironment(
+export function generateStylableEnvironment(
     content: IDirectoryContents,
     stylableConfig: Partial<StylableConfig> = {}
 ) {
