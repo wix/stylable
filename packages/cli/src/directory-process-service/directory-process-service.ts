@@ -135,12 +135,12 @@ export class DirectoryProcessService {
             }
         }
 
-        if (affectedFiles.size || deletedFiles.size) {
+        if (this.options.processFiles && (affectedFiles.size || deletedFiles.size)) {
             const {
                 diagnosticsMessages = new Map(),
                 diagnosticMode,
                 shouldReport = true,
-            } = (await this.options.processFiles?.(
+            } = (await this.options.processFiles(
                 this,
                 affectedFiles,
                 deletedFiles,

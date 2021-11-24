@@ -46,7 +46,13 @@ export class BuildsHandler {
             };
 
             for (const { directoryProcess, identifier } of this.services) {
-                for (const path of directoryProcess.getAffectedFiles(event.path)) {
+                const affectedFiles = directoryProcess.getAffectedFiles(event.path);
+
+                if (!affectedFiles.size) {
+                    continue;
+                }
+
+                for (const path of affectedFiles) {
                     files.set(path, createWatchEvent(path, this.fileSystem));
                 }
 
@@ -100,7 +106,7 @@ export class BuildsHandler {
         if (this.listener) {
             this.fileSystem.watchService.removeGlobalListener(this.listener);
         } else {
-            throw new Error('Directories Handler never started');
+            throw new Error('Builds Handler never started');
         }
     }
 
