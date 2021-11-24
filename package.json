@@ -59,7 +59,6 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "express": "^4.17.1",
     "file-loader": "^6.2.0",
-    "find-config": "^1.0.0",
     "html-webpack-plugin": "^5.5.0",
     "jsdom": "^18.1.0",
     "mini-css-extract-plugin": "^2.4.5",

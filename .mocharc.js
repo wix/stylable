@@ -1,4 +1,4 @@
-const findConfig = require('find-config');
+const { nodeFs } = require('@file-services/node');
 const { dirname } = require('path');
 
 module.exports = {
@@ -25,7 +25,7 @@ function getRequire() {
 
     // we get this env variable from ./.vscode/launch.json (f5 - Mocha Current)
     if (process.env.FILE) {
-        launchedPath = dirname(findConfig('./package.json', { cwd: process.env.FILE }));
+        launchedPath = dirname(nodeFs.findClosestFileSync(process.env.FILE, './package.json'));
     } else {
         launchedPath = process.cwd();
     }
