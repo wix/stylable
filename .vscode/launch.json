@@ -21,7 +21,10 @@
       "preLaunchTask": "npm: build",
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": ["<node_internals>/**"],
-      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "env": {
+        "FILE": "${file}"
+      }
     },
     {
       "type": "node",
