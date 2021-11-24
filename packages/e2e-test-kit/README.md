@@ -8,7 +8,7 @@
 
 Used to setup an E2E test project with `@stylable/webpack-plugin` and `playwright`. This allows testing an entire project setup, including stylable configuration, webpack configuration and the process of transpiling the project, performing your tests against a running browser.
 
-You can find a set of example configuration setups [here](./packages/webpack-plugin/test/e2e).
+You can find a set of example configuration setups [here](/packages/webpack-plugin/test/e2e).
 
 ### `getStyleElementsMetadata`
 
