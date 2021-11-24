@@ -40,19 +40,13 @@ export class BuildsHandler {
 
             let foundChanges = false;
             const files = new Map<string, IWatchEvent>();
-            const filesChangesSummary = {
-                changed: 0,
-                deleted: 0,
-            };
 
             for (const { directoryProcess, identifier } of this.services) {
-                const affectedFiles = directoryProcess.getAffectedFiles(event.path);
+                for (const path of directoryProcess.getAffectedFiles(event.path)) {
+                    if (files.has(path)) {
+                        continue;
+                    }
 
-                if (!affectedFiles.size) {
-                    continue;
-                }
-
-                for (const path of affectedFiles) {
                     files.set(path, createWatchEvent(path, this.fileSystem));
                 }
 
@@ -64,12 +58,10 @@ export class BuildsHandler {
                     if (!foundChanges) {
                         foundChanges = true;
 
-                        this.log(levels.clear);
                         this.log(
                             messages.CHANGE_DETECTED(
                                 event.path.replace(this.options.rootDir ?? '', '')
-                            ),
-                            levels.info
+                            )
                         );
                     }
 
@@ -80,22 +72,14 @@ export class BuildsHandler {
             }
 
             if (foundChanges) {
-                for (const file of files.values()) {
-                    if (file.stats) {
-                        filesChangesSummary.changed++;
-                    } else {
-                        filesChangesSummary.deleted++;
-                    }
-                }
+                const { changed, deleted } = this.filesStats(files);
 
+                this.log(levels.clear);
                 this.log(
-                    messages.WATCH_SUMMARY(
-                        filesChangesSummary.changed,
-                        filesChangesSummary.deleted
-                    ),
+                    messages.WATCH_SUMMARY(changed, deleted),
+                    messages.CONTINUE_WATCH(),
                     levels.info
                 );
-                this.log(messages.CONTINUE_WATCH(), levels.info);
             }
         };
 
@@ -128,5 +112,22 @@ export class BuildsHandler {
 
     private log(...messages: any[]) {
         this.options.log?.(`[${new Date().toLocaleTimeString()}]`, ...messages);
+    }
+
+    private filesStats(files: Map<string, IWatchEvent>) {
+        const filesChangesSummary = {
+            changed: 0,
+            deleted: 0,
+        };
+
+        for (const file of files.values()) {
+            if (file.stats) {
+                filesChangesSummary.changed++;
+            } else {
+                filesChangesSummary.deleted++;
+            }
+        }
+
+        return filesChangesSummary;
     }
 }
