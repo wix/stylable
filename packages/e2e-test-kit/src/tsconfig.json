@@ -3,5 +3,9 @@
   "compilerOptions": {
     "outDir": "../dist"
   },
-  "references": [{ "path": "../../runtime/src" }]
+  "references": [
+    { "path": "../../runtime/src" },
+    { "path": "../../core/src" },
+    { "path": "../../module-utils/src" }
+  ]
 }
