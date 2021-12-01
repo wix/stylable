@@ -1,7 +1,7 @@
 export {
     Diagnostic,
-    expectWarnings,
-    expectWarningsFromTransform,
+    expectAnalyzeDiagnostics,
+    expectTransformDiagnostics,
     findTestLocations,
     shouldReportNoDiagnostics,
 } from './diagnostics';

@@ -5,12 +5,7 @@ import {
     StylableResults,
     pseudoStates,
 } from '@stylable/core';
-import {
-    parseCssSelector,
-    stringifySelectorAst,
-    Selector,
-    walk,
-} from '@tokey/css-selector-parser';
+import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
 import csso from 'csso';
 import postcss, { Declaration, Root, Rule, Node, Comment, Container } from 'postcss';
 import { NameMapper } from './name-mapper';

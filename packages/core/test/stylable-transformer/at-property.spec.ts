@@ -1,8 +1,8 @@
-import { processorWarnings } from '@stylable/core';
-import { expectWarningsFromTransform, generateStylableResult } from '@stylable/core-test-kit';
+import { expectTransformDiagnostics, generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { atPropertyValidationWarnings } from '@stylable/core/dist/validate-at-property';
+import { STSymbol } from '@stylable/core/dist/features';
 
 describe('@property support', () => {
     it('should transform @property definition', () => {
@@ -62,7 +62,7 @@ describe('@property support', () => {
             },
         };
 
-        const result = expectWarningsFromTransform(config, []);
+        const result = expectTransformDiagnostics(config, []);
 
         const { nodes } = result.meta.outputAst!;
         const atProperty = nodes[0] as postcss.AtRule;
@@ -126,10 +126,10 @@ describe('@property support', () => {
             },
         };
 
-        expectWarningsFromTransform(config, [
+        expectTransformDiagnostics(config, [
             {
                 file: '/entry.st.css',
-                message: processorWarnings.REDECLARE_SYMBOL('--my-var'),
+                message: STSymbol.diagnostics.REDECLARE_SYMBOL('--my-var'),
             },
         ]);
     });
@@ -169,7 +169,7 @@ describe('@property support', () => {
                 },
             };
 
-            const result = expectWarningsFromTransform(config, [
+            const result = expectTransformDiagnostics(config, [
                 {
                     file: '/entry.st.css',
                     message: atPropertyValidationWarnings.INVALID_DESCRIPTOR_TYPE('atrule'),
@@ -200,7 +200,7 @@ describe('@property support', () => {
                 },
             };
 
-            const result = expectWarningsFromTransform(config, [
+            const result = expectTransformDiagnostics(config, [
                 {
                     file: '/entry.st.css',
                     message: atPropertyValidationWarnings.INVALID_DESCRIPTOR_NAME('initialValue'),
@@ -227,7 +227,7 @@ describe('@property support', () => {
                 },
             };
 
-            const result = expectWarningsFromTransform(config, [
+            const result = expectTransformDiagnostics(config, [
                 {
                     file: '/entry.st.css',
                     message: atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('syntax'),
@@ -254,7 +254,7 @@ describe('@property support', () => {
                 },
             };
 
-            const result = expectWarningsFromTransform(config, [
+            const result = expectTransformDiagnostics(config, [
                 {
                     file: '/entry.st.css',
                     message: atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('inherits'),
@@ -281,7 +281,7 @@ describe('@property support', () => {
                 },
             };
 
-            const result = expectWarningsFromTransform(config, [
+            const result = expectTransformDiagnostics(config, [
                 {
                     file: '/entry.st.css',
                     message:
@@ -309,7 +309,7 @@ describe('@property support', () => {
                 },
             };
 
-            const result = expectWarningsFromTransform(config, []);
+            const result = expectTransformDiagnostics(config, []);
 
             expect(result.meta.outputAst!.nodes).to.have.length(1);
         });

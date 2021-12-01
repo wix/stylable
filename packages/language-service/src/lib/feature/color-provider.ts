@@ -34,7 +34,7 @@ export function resolveDocumentColors(
             let regexResult = valueRegex.exec(line);
             while (regexResult !== null) {
                 const result = regexResult[1];
-                const sym = meta.mappedSymbols[result.trim()];
+                const sym = meta.getSymbol(result.trim());
                 let color: Color | null = null;
                 if (sym && sym._kind === 'var') {
                     const doc = TextDocument.create(

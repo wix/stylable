@@ -4,6 +4,7 @@ import type { StylableMeta } from './stylable-meta';
 import type { StylableResolver } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
 import type { ParsedValue } from './types';
+import { STSymbol } from './features';
 
 export interface Box<Type extends string, Value> {
     type: Type;
@@ -159,7 +160,7 @@ interface ExtensionApi<Value, Args> {
 
 export function resolveCustomValues(meta: StylableMeta, resolver: StylableResolver) {
     const customValues = { ...stTypes };
-    for (const [symbolName, symbol] of Object.entries(meta.mappedSymbols)) {
+    for (const [symbolName, symbol] of Object.entries(STSymbol.getAll(meta))) {
         if (symbol._kind !== 'import') {
             continue;
         }

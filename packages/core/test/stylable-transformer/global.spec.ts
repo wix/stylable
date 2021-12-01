@@ -1,5 +1,5 @@
 import {
-    expectWarningsFromTransform,
+    expectTransformDiagnostics,
     generateStylableExports,
     generateStylableResult,
     generateStylableRoot,
@@ -199,7 +199,7 @@ describe('Stylable postcss transform (Global)', () => {
             };
 
             testInlineExpects(generateStylableRoot(config));
-            expectWarningsFromTransform(config, []);
+            expectTransformDiagnostics(config, []);
         });
 
         it('should import global keyframe (alias)', () => {
@@ -231,7 +231,7 @@ describe('Stylable postcss transform (Global)', () => {
             };
 
             testInlineExpects(generateStylableRoot(config));
-            expectWarningsFromTransform(config, []);
+            expectTransformDiagnostics(config, []);
         });
 
         it('should export global keyframe', () => {

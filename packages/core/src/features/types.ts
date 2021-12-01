@@ -1,16 +1,10 @@
+import type { ClassSymbol } from './css-class';
+import type { ElementSymbol } from './css-type';
 import type { MappedStates, MixinValue } from '../stylable-value-parsers';
 import type { SelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
-export interface Imported {
-    from: string;
-    defaultExport: string;
-    named: Record<string, string>;
-    keyframes: Record<string, string>;
-    rule: postcss.Rule | postcss.AtRule;
-    request: string;
-    context: string;
-}
+// ToDo: distribute types to features
 
 export interface StylableDirectives {
     '-st-root'?: boolean;
@@ -19,17 +13,9 @@ export interface StylableDirectives {
     '-st-global'?: SelectorNode[];
 }
 
-export interface ClassSymbol extends StylableDirectives {
-    _kind: 'class';
-    name: string;
-    alias?: ImportSymbol;
-    scoped?: string;
-}
-
-export interface ElementSymbol extends StylableDirectives {
-    _kind: 'element';
-    name: string;
-    alias?: ImportSymbol;
+export interface RefedMixin {
+    mixin: MixinValue;
+    ref: ImportSymbol | ClassSymbol;
 }
 
 export interface ImportSymbol {
@@ -37,6 +23,16 @@ export interface ImportSymbol {
     type: 'named' | 'default';
     name: string;
     import: Imported;
+    context: string;
+}
+
+export interface Imported {
+    from: string;
+    defaultExport: string;
+    named: Record<string, string>;
+    keyframes: Record<string, string>;
+    rule: postcss.Rule | postcss.AtRule;
+    request: string;
     context: string;
 }
 
@@ -61,22 +57,4 @@ export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
     global: boolean;
-}
-
-export type StylableSymbol =
-    | ImportSymbol
-    | VarSymbol
-    | ClassSymbol
-    | ElementSymbol
-    | CSSVarSymbol
-    | KeyframesSymbol;
-
-export interface RefedMixin {
-    mixin: MixinValue;
-    ref: ImportSymbol | ClassSymbol;
-}
-
-export interface SimpleSelector {
-    symbol: ClassSymbol | ElementSymbol;
-    node: postcss.Rule | postcss.Root;
 }

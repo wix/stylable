@@ -17,6 +17,7 @@ import {
 } from './stylable-value-parsers';
 import type { ParsedValue } from './types';
 import { stripQuotation } from './utils';
+import { STSymbol } from './features';
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
@@ -124,7 +125,7 @@ export function processDeclarationValue(
                                 parsedNode
                             );
                         }
-                        const varSymbol = meta.mappedSymbols[varName];
+                        const varSymbol = STSymbol.get(meta, varName);
                         if (varSymbol && varSymbol._kind === 'var') {
                             const resolved = processDeclarationValue(
                                 resolver,
@@ -272,7 +273,7 @@ export function processDeclarationValue(
                     // preserve native format function quotation
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
                 } else {
-                    const formatter = resolver.deepResolve(meta.mappedSymbols[value]);
+                    const formatter = resolver.deepResolve(STSymbol.get(meta, value));
                     if (formatter && formatter._kind === 'js') {
                         const formatterArgs = getFormatterArgs(parsedNode);
                         try {

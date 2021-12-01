@@ -5,7 +5,7 @@ import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
 import { fixRelativeUrls } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
-import type { RefedMixin, ImportSymbol } from './features';
+import { RefedMixin, ImportSymbol, STSymbol } from './features';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import type { CSSResolve } from './stylable-resolver';
 import type { StylableTransformer } from './stylable-transformer';
@@ -63,7 +63,7 @@ export function appendMixin(
         return;
     }
 
-    const local = meta.mappedSymbols[mix.mixin.type];
+    const local = STSymbol.get(meta, mix.mixin.type);
     if (local && (local._kind === 'class' || local._kind === 'element')) {
         handleLocalClassMixin(
             reParseMixinNamedArgs(mix, rule, transformer.diagnostics),
@@ -339,9 +339,12 @@ function handleLocalClassMixin(
 function createInheritedMeta(resolvedClass: CSSResolve) {
     const mixinMeta: StylableMeta = Object.create(resolvedClass.meta);
     mixinMeta.parent = resolvedClass.meta;
-    mixinMeta.mappedSymbols = Object.create(resolvedClass.meta.mappedSymbols);
-    mixinMeta.mappedSymbols[resolvedClass.meta.root] =
-        resolvedClass.meta.mappedSymbols[resolvedClass.symbol.name];
+
+    STSymbol.inheritSymbols(resolvedClass.meta, mixinMeta);
+
+    const symbols = STSymbol.getAll(mixinMeta);
+    symbols[resolvedClass.meta.root] = symbols[resolvedClass.symbol.name];
+    // ToDo: check if this works: symbols[resolvedClass.meta.root] = resolvedClass.symbol;
     return mixinMeta;
 }
 

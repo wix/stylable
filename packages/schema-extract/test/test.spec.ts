@@ -34,7 +34,7 @@ describe('Stylable JSON Schema Extractor', () => {
         it('schema with a element', () => {
             const res = extractSchema('Comp{}', '/entry.st.css', '/', path);
 
-            expect(res.properties!.Comp).to.eql({
+            expect(res.properties.Comp).to.eql({
                 $ref: stylableElement,
             });
         });
@@ -42,7 +42,7 @@ describe('Stylable JSON Schema Extractor', () => {
         it('schema with a var', () => {
             const res = extractSchema(':vars { myVar: red; }', '/entry.st.css', '/', path);
 
-            expect(res.properties!.myVar).to.eql({
+            expect(res.properties.myVar).to.eql({
                 $ref: stylableVar,
             });
         });
@@ -50,7 +50,7 @@ describe('Stylable JSON Schema Extractor', () => {
         it('schema with a css var', () => {
             const res = extractSchema('.root { --myVar: red; }', '/entry.st.css', '/', path);
 
-            expect(res.properties!['--myVar']).to.eql({
+            expect(res.properties['--myVar']).to.eql({
                 $ref: stylableCssVar,
             });
         });

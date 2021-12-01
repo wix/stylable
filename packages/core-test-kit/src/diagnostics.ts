@@ -19,6 +19,13 @@ export interface Diagnostic {
     skip?: boolean;
 }
 
+export interface Location {
+    start?: Position;
+    end?: Position;
+    word: string | null;
+    css: string;
+}
+
 export function findTestLocations(css: string) {
     let line = 1;
     let column = 1;
@@ -51,49 +58,104 @@ export function findTestLocations(css: string) {
     return { start, end, word, css: css.replace(/[|$]/gm, '') };
 }
 
-export function expectWarnings(css: string, warnings: Diagnostic[]) {
+export function expectAnalyzeDiagnostics(
+    css: string,
+    warnings: Diagnostic[],
+    { partial = false }: { partial?: boolean } = {}
+) {
     const source = findTestLocations(css);
     const root = safeParse(source.css);
     const res = process(root);
 
-    res.diagnostics.reports.forEach((report, i) => {
-        const expectedWarning = warnings[i];
-        if (!expectedWarning || expectedWarning.skip) {
-            return;
+    if (partial) {
+        if (warnings.length === 0) {
+            expect(res.diagnostics.reports.length, 'no diagnostics expected').to.equal(0);
         }
+        matchPartialDiagnostics(warnings, res.diagnostics, {
+            '/entry.st.css': source,
+        });
+    } else {
+        res.diagnostics.reports.forEach((report, i) => {
+            const expectedWarning = warnings[i];
+            if (!expectedWarning || expectedWarning.skip) {
+                return;
+            }
 
-        expect(report.message).to.equal(expectedWarning.message);
-        expect(report.node.source!.start, 'start').to.eql(source.start);
-        if (source.word !== null) {
-            expect(report.options.word).to.equal(source.word);
-        }
+            expect(report.message).to.equal(expectedWarning.message);
+            expect(report.node.source!.start, 'start').to.eql(source.start);
+            if (source.word !== null) {
+                expect(report.options.word).to.equal(source.word);
+            }
 
-        if (expectedWarning.severity) {
-            expect(
-                report.type,
-                `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.type}"`
-            ).to.equal(expectedWarning.severity);
-        }
-    });
+            if (expectedWarning.severity) {
+                expect(
+                    report.type,
+                    `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.type}"`
+                ).to.equal(expectedWarning.severity);
+            }
+        });
 
-    expect(res.diagnostics.reports.length, 'diagnostics reports match').to.equal(warnings.length);
+        expect(res.diagnostics.reports.length, 'diagnostics reports match').to.equal(
+            warnings.length
+        );
+    }
 }
 
-export function expectWarningsFromTransform(
+function matchPartialDiagnostics(
+    expectedList: Diagnostic[],
+    diagnostics: Diagnostics,
+    locations: Record<string, Location>
+) {
+    // ToDo: adding diagnostics numbered ids would really help
+    for (const expectedWarning of expectedList) {
+        const path = expectedWarning.file;
+        let closest: Error | null = null;
+        let closestMatches = 0;
+        for (const report of diagnostics.reports.values()) {
+            let matches = 0;
+            try {
+                expect(report.message).to.equal(expectedWarning.message);
+                matches++;
+                if (!expectedWarning.skipLocationCheck) {
+                    expect(report.node.source!.start).to.eql(locations[path].start);
+                    matches++;
+                }
+                if (locations[path].word !== null) {
+                    expect(report.options.word).to.eql(locations[path].word);
+                    matches++;
+                }
+                if (expectedWarning.severity) {
+                    expect(
+                        report.type,
+                        `${report.message}: severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
+                    ).to.equal(expectedWarning.severity);
+                    matches++;
+                }
+            } catch (e) {
+                if (matches >= closestMatches) {
+                    closest = e as Error;
+                    closestMatches = matches;
+                }
+                continue;
+            }
+            // expected matched!
+            closest = null;
+            break;
+        }
+        if (closest) {
+            throw closest;
+        }
+    }
+}
+
+export function expectTransformDiagnostics(
     config: Config,
-    expectedWarnings: Diagnostic[]
+    expectedWarnings: Diagnostic[],
+    { partial = false }: { partial?: boolean } = {}
 ): StylableResults {
     config.trimWS = false;
 
-    const locations: Record<
-        string,
-        {
-            start?: Position;
-            end?: Position;
-            word: string | null;
-            css: string;
-        }
-    > = {};
+    const locations: Record<string, Location> = {};
     for (const path in config.files) {
         const source = findTestLocations(deindent(config.files[path].content).trim());
         config.files[path].content = source.css;
@@ -110,39 +172,42 @@ export function expectWarningsFromTransform(
         ).to.equal(diagnostics.reports.length);
     }
 
-    for (const [i, report] of diagnostics.reports.entries()) {
-        const expectedWarning = expectedWarnings[i];
-        if (!expectedWarning) {
-            continue;
-        }
-        const path = expectedWarning.file;
+    if (partial) {
+        matchPartialDiagnostics(expectedWarnings, diagnostics, locations);
+    } else {
+        for (const [i, report] of diagnostics.reports.entries()) {
+            const expectedWarning = expectedWarnings[i];
+            if (!expectedWarning) {
+                continue;
+            }
+            const path = expectedWarning.file;
 
-        expect(report.message).to.equal(expectedWarning.message);
+            expect(report.message).to.equal(expectedWarning.message);
 
-        if (!expectedWarning.skipLocationCheck) {
-            expect(report.node.source!.start).to.eql(locations[path].start);
-        }
+            if (!expectedWarning.skipLocationCheck) {
+                expect(report.node.source!.start).to.eql(locations[path].start);
+            }
 
-        if (locations[path].word !== null) {
-            expect(report.options.word).to.eql(locations[path].word);
-        }
+            if (locations[path].word !== null) {
+                expect(report.options.word).to.eql(locations[path].word);
+            }
 
-        if (expectedWarning.severity) {
-            expect(
-                report.type,
-                `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
-            ).to.equal(expectedWarning.severity);
+            if (expectedWarning.severity) {
+                expect(
+                    report.type,
+                    `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
+                ).to.equal(expectedWarning.severity);
+            }
         }
+        expect(
+            expectedWarnings.length,
+            `expected diagnostics: ${JSON.stringify(
+                expectedWarnings.map((d) => d.message),
+                null,
+                2
+            )}, but received ${JSON.stringify(warningMessages, null, 2)}`
+        ).to.equal(diagnostics.reports.length);
     }
-
-    expect(
-        expectedWarnings.length,
-        `expected diagnostics: ${JSON.stringify(
-            expectedWarnings.map((d) => d.message),
-            null,
-            2
-        )}, but received ${JSON.stringify(warningMessages, null, 2)}`
-    ).to.equal(diagnostics.reports.length);
 
     return result;
 }
