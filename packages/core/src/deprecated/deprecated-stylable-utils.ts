@@ -7,7 +7,7 @@ import {
     isNodeMatch,
 } from './deprecated-selector-utils';
 import type { SRule } from './postcss-ast-extension';
-import type { Imported } from '../features';
+import { STSymbol, Imported } from '../features';
 import type { StylableMeta } from '../stylable-meta';
 import { valueMapping } from '../stylable-value-parsers';
 import cloneDeep from 'lodash.clonedeep';
@@ -187,7 +187,7 @@ export function removeUnusedRules(
                 if (symbols.includes(node.name)) {
                     return (shouldOutput = false);
                 }
-                const symbol = meta.mappedSymbols[node.name];
+                const symbol = STSymbol.get(meta, node.name);
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
                     let extend = symbol[valueMapping.extends] || symbol.alias;
                     extend = extend && extend._kind !== 'import' ? extend.alias || extend : extend;

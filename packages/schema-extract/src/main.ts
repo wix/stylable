@@ -43,15 +43,10 @@ export function generateSchema(
         $id: `/${path.relative(basePath, filePath).replace(/\\/g, '/')}`,
         $ref: 'stylable/module',
         namespace: meta.namespace,
+        properties: {},
     };
 
-    for (const entry of Object.keys(meta.mappedSymbols)) {
-        if (!schema.properties) {
-            schema.properties = {};
-        }
-
-        const symbol = meta.mappedSymbols[entry];
-
+    for (const [entry, symbol] of Object.entries(meta.getAllSymbols())) {
         if (typeof schema.properties[entry] === 'boolean') {
             continue;
         } else {

@@ -1,5 +1,5 @@
 import { functionWarnings, nativeFunctionsDic, processorWarnings } from '@stylable/core';
-import { expectWarningsFromTransform, generateStylableRoot } from '@stylable/core-test-kit';
+import { expectTransformDiagnostics, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 
@@ -680,7 +680,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
     describe('diagnostics', () => {
         describe('deprecation', () => {
             it('should return a warning when using deprecated "stMap" syntax', () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: '/style.st.css',
                         files: {
@@ -708,7 +708,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should return a warning when using deprecated "stArray" syntax', () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: '/style.st.css',
                         files: {
@@ -751,7 +751,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 };
 
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
                             'stArray',
@@ -772,7 +772,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
         describe('value()', () => {
             it('should return a warning when passing more than one argument to a value() function', () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: '/style.st.css',
                         files: {
@@ -799,7 +799,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should return a warning when trying to access unknown custom-value entries', () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: '/style.st.css',
                         files: {
@@ -832,7 +832,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should return multiple warnings for unknown custom-value keys and too many arguments in a simple var', () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: '/style.st.css',
                         files: {
@@ -869,7 +869,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should return a warning when passing more than one argument to custom value with working fallback', () => {
-                const { meta } = expectWarningsFromTransform(
+                const { meta } = expectTransformDiagnostics(
                     {
                         entry: '/style.st.css',
                         files: {
@@ -907,7 +907,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should return warning for unknown var on transform', () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: '/style.st.css',
                         files: {
@@ -946,7 +946,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: functionWarnings.CANNOT_USE_AS_VALUE('class', 'my-class'),
                         file: '/main.st.css',
@@ -974,7 +974,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: functionWarnings.CANNOT_USE_AS_VALUE('stylesheet', 'Comp'),
                         file: '/main.st.css',
@@ -1002,7 +1002,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         },
                     },
                 };
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: functionWarnings.CANNOT_USE_JS_AS_VALUE('my-mixin'),
                         file: '/main.st.css',
@@ -1029,7 +1029,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 };
                 const mainPath = '/main.st.css';
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: functionWarnings.CYCLIC_VALUE([
                             `${mainPath}: a`,
@@ -1059,7 +1059,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 };
 
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     { message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' },
                 ]);
             });
@@ -1092,7 +1092,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 };
 
-                expectWarningsFromTransform(config, [
+                expectTransformDiagnostics(config, [
                     {
                         message: functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
                             'fail(a, red, c)',
@@ -1104,7 +1104,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should handle empty functions', () => {
-                expectWarningsFromTransform(
+                expectTransformDiagnostics(
                     {
                         entry: `/style.st.css`,
                         files: {
@@ -1141,7 +1141,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             },
                         },
                     };
-                    expectWarningsFromTransform(config, []);
+                    expectTransformDiagnostics(config, []);
                 });
             });
         });

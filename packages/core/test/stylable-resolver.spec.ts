@@ -255,9 +255,9 @@ describe('stylable-resolver', () => {
 
         const entryMeta = fileProcessor.process('/entry.st.css');
         const btnMeta = fileProcessor.process('/button.st.css');
-        const res = resolver.resolve(entryMeta.mappedSymbols.x);
+        const res = resolver.resolve(entryMeta.getSymbol(`x`));
 
-        expect(res?.symbol).to.eql(btnMeta.classes.root);
+        expect(res?.symbol).to.eql(btnMeta.getClass(`root`));
     });
 
     it('should resolve elements', () => {
@@ -286,14 +286,14 @@ describe('stylable-resolver', () => {
 
         const btnMeta = fileProcessor.process('/button.st.css');
         const entryMeta = fileProcessor.process('/entry.st.css');
-        const btn = entryMeta.mappedSymbols.Button;
+        const btn = entryMeta.getSymbol(`Button`);
         const res = resolver.resolve(btn);
 
-        const btn1 = entryMeta.mappedSymbols.ButtonX;
+        const btn1 = entryMeta.getSymbol(`ButtonX`);
         const res1 = resolver.resolve(btn1);
 
-        expect(res?.symbol).to.eql(btnMeta.classes.root);
-        expect(res1?.symbol).to.eql(btnMeta.elements.ButtonX);
+        expect(res?.symbol).to.eql(btnMeta.getClass(`root`));
+        expect(res1?.symbol).to.eql(btnMeta.getTypeElement(`ButtonX`));
     });
 
     it('should resolve elements deep', () => {
@@ -328,10 +328,10 @@ describe('stylable-resolver', () => {
         const entryMeta = fileProcessor.process('/entry.st.css');
         const btnXMeta = fileProcessor.process('/button-x.st.css');
 
-        const btn1 = entryMeta.mappedSymbols.ButtonX;
+        const btn1 = entryMeta.getSymbol(`ButtonX`);
         const res1 = resolver.deepResolve(btn1);
 
-        expect(res1?.symbol).to.eql(btnXMeta.classes.root);
+        expect(res1?.symbol).to.eql(btnXMeta.getClass(`root`));
     });
 
     it('should handle circular "re-declare" (deepResolve)', () => {
@@ -351,10 +351,10 @@ describe('stylable-resolver', () => {
 
         const entryMeta = fileProcessor.process('/entry.st.css');
 
-        const a = entryMeta.mappedSymbols.a;
+        const a = entryMeta.getSymbol(`a`);
         const res1 = resolver.deepResolve(a);
 
-        expect(res1?.symbol).to.eql(entryMeta.classes.a);
+        expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 
     it('should handle circular "re-declare" (resolveSymbolOrigin)', () => {
@@ -374,10 +374,10 @@ describe('stylable-resolver', () => {
 
         const entryMeta = fileProcessor.process('/entry.st.css');
 
-        const a = entryMeta.mappedSymbols.a;
+        const a = entryMeta.getSymbol(`a`);
         const res1 = resolver.resolveSymbolOrigin(a, entryMeta);
 
-        expect(res1?.symbol).to.eql(entryMeta.classes.a);
+        expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 
     it('should resolve alias origin', () => {
@@ -422,11 +422,11 @@ describe('stylable-resolver', () => {
         const entryMeta = fileProcessor.process('/entry.st.css');
         const a1 = fileProcessor.process('/a1.st.css');
 
-        const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
-        const res2 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.b, entryMeta);
+        const res1 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`a`), entryMeta);
+        const res2 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`b`), entryMeta);
 
-        expect(res1?.symbol).to.eql(a1.classes.a);
-        expect(res2?.symbol).to.eql(a1.classes.b);
+        expect(res1?.symbol).to.eql(a1.getClass(`a`));
+        expect(res2?.symbol).to.eql(a1.getClass(`b`));
     });
 
     it('should not resolve extends on alias', () => {
@@ -452,8 +452,8 @@ describe('stylable-resolver', () => {
         });
 
         const entryMeta = fileProcessor.process('/entry.st.css');
-        const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
-        expect(res1?.symbol).to.eql(entryMeta.classes.a);
+        const res1 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`a`), entryMeta);
+        expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 
     it('should resolve 4th party according to context', () => {

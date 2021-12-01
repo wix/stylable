@@ -125,7 +125,8 @@ function separateStateChunks(selectorList: SelectorList) {
                 chunks.push({ cause: node, before: ``, nodes: [], states: [] });
             } else if (
                 node.type === 'pseudo_class' &&
-                (!DOMLocationBasedPseudoClasses.has(node.value) && node.value !== 'not')
+                !DOMLocationBasedPseudoClasses.has(node.value) &&
+                node.value !== 'not'
             ) {
                 const chunks = selectors[selectors.length - 1];
                 const current = chunks[chunks.length - 1];

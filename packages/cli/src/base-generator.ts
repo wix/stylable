@@ -97,7 +97,7 @@ export class Generator {
 export function reExportsAllSymbols(filePath: string, generator: Generator): ReExports {
     const meta = generator.stylable.process(filePath);
     const rootExport = generator.filename2varname(filePath);
-    const classes = Object.keys(meta.classes)
+    const classes = Object.keys(meta.getAllClasses())
         .filter((name) => name !== meta.root)
         .reduce<Record<string, string>>((acc, className) => {
             acc[className] = `${rootExport}__${className}`;

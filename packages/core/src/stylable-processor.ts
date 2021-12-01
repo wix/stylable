@@ -12,11 +12,12 @@ import type {
     CSSVarSymbol,
     ElementSymbol,
     Imported,
-    ImportSymbol,
     RefedMixin,
     StylableDirectives,
     VarSymbol,
 } from './features';
+import { generalDiagnostics } from './features/diagnostics';
+import { FeatureContext, STSymbol, CSSClass, CSSType } from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
@@ -29,12 +30,10 @@ import {
     isSimpleSelector,
     isInPseudoClassContext,
     isRootValid,
-    isCompRoot,
     scopeNestedSelector,
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
-import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import {
@@ -56,12 +55,6 @@ const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
 
 export const processorWarnings = {
-    UNSCOPED_CLASS(name: string) {
-        return `unscoped class "${name}" will affect all elements of the same type in the document`;
-    },
-    UNSCOPED_TYPE_SELECTOR(name: string) {
-        return `unscoped type selector "${name}" will affect all elements of the same type in the document`;
-    },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) {
         return `cannot define "${name}" inside a complex selector`;
     },
@@ -73,9 +66,6 @@ export const processorWarnings = {
     },
     STATE_DEFINITION_IN_COMPLEX() {
         return 'cannot define pseudo states inside complex selectors';
-    },
-    REDECLARE_SYMBOL(name: string) {
-        return `redeclare symbol "${name}"`;
     },
     REDECLARE_SYMBOL_KEYFRAMES(name: string) {
         return `redeclare keyframes symbol "${name}"`;
@@ -149,9 +139,6 @@ export const processorWarnings = {
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
     },
-    INVALID_FUNCTIONAL_SELECTOR(selector: string, type: string) {
-        return `"${selector}" ${type} is not functional`;
-    },
     DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
         return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`;
     },
@@ -160,12 +147,12 @@ export const processorWarnings = {
     },
 };
 
-export class StylableProcessor {
-    protected meta!: StylableMeta;
+export class StylableProcessor implements FeatureContext {
+    public meta!: StylableMeta;
     protected dirContext!: string;
 
     constructor(
-        protected diagnostics = new Diagnostics(),
+        public diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
     ) {}
     public process(root: postcss.Root): StylableMeta {
@@ -174,7 +161,7 @@ export class StylableProcessor {
         this.dirContext = path.dirname(this.meta.source);
 
         this.handleAtRules(root);
-        
+
         const stubs = this.insertCustomSelectorsStubs();
 
         for (const node of root.nodes) {
@@ -303,7 +290,10 @@ export class StylableProcessor {
                             );
                         }
                     } else {
-                        this.diagnostics.error(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
+                        this.diagnostics.error(
+                            atRule,
+                            processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE()
+                        );
                     }
                     break;
                 case 'custom-selector': {
@@ -376,7 +366,10 @@ export class StylableProcessor {
                             };
 
                             this.meta.cssVars[cssVar] = property;
-                            this.meta.mappedSymbols[cssVar] = property;
+                            STSymbol.addSymbol({
+                                context: this,
+                                symbol: property,
+                            });
                         } else {
                             this.diagnostics.warn(
                                 atRule,
@@ -455,7 +448,8 @@ export class StylableProcessor {
 
         let locallyScoped = false;
         let simpleSelector: boolean;
-        walkSelector(selectorAst, (node, index, nodes, parents) => {
+        walkSelector(selectorAst, (node, ...nodeContext) => {
+            const [index, nodes, parents] = nodeContext;
             const type = node.type;
             if (type === 'selector' && !isInPseudoClassContext(parents)) {
                 locallyScoped = false;
@@ -507,72 +501,45 @@ export class StylableProcessor {
                     return walkSelector.skipNested;
                 }
             } else if (node.type === 'class') {
-                this.addClassSymbolOnce(node.value, rule);
-                if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `class`),
-                        {
-                            word: stringifySelector(node),
-                        }
-                    );
-                }
-                if (this.meta.classes[node.value]) {
-                    if (!this.meta.classes[node.value].alias) {
-                        locallyScoped = true;
-                    } else if (locallyScoped === false && !inStScope) {
-                        if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
-                            this.diagnostics.warn(
-                                rule,
-                                processorWarnings.UNSCOPED_CLASS(node.value),
-                                {
-                                    word: node.value,
-                                }
-                            );
-                        } else {
-                            locallyScoped = true;
-                        }
-                    }
-                }
+                CSSClass.hooks.analyzeSelectorNode({
+                    context: this,
+                    node,
+                    rule,
+                    walkContext: nodeContext,
+                });
+
+                locallyScoped = CSSClass.validateClassScoping({
+                    context: this,
+                    classSymbol: CSSClass.get(this.meta, node.value)!,
+                    locallyScoped,
+                    inStScope,
+                    node,
+                    nodes,
+                    index,
+                    rule,
+                });
             } else if (node.type === 'type') {
-                this.addElementSymbolOnce(node.value, rule);
-                /**
-                 * intent to deprecate: currently `value(param)` can be used
-                 * as a custom state value. Unless there is a reasonable
-                 * use case, this should be removed.
-                 */
-                if (
-                    node.nodes &&
-                    (parents.length < 2 ||
-                        parents[parents.length - 2].type !== `pseudo_class` ||
-                        node.value !== `value`)
-                ) {
-                    this.diagnostics.error(
-                        rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
-                        {
-                            word: stringifySelector(node),
-                        }
-                    );
-                }
-                if (locallyScoped === false && !inStScope) {
-                    if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
-                        this.diagnostics.warn(
-                            rule,
-                            processorWarnings.UNSCOPED_TYPE_SELECTOR(node.value),
-                            {
-                                word: node.value,
-                            }
-                        );
-                    } else {
-                        locallyScoped = true;
-                    }
-                }
+                CSSType.hooks.analyzeSelectorNode({
+                    context: this,
+                    node,
+                    rule,
+                    walkContext: nodeContext,
+                });
+
+                locallyScoped = CSSType.validateTypeScoping({
+                    context: this,
+                    locallyScoped,
+                    inStScope,
+                    node,
+                    nodes,
+                    index,
+                    rule,
+                });
             } else if (node.type === `id`) {
                 if (node.nodes) {
                     this.diagnostics.error(
                         rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
                         {
                             word: stringifySelector(node),
                         }
@@ -582,7 +549,7 @@ export class StylableProcessor {
                 if (node.nodes) {
                     this.diagnostics.error(
                         rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[${node.value}]`,
                             `attribute`
                         ),
@@ -595,7 +562,7 @@ export class StylableProcessor {
                 if (node.nodes) {
                     this.diagnostics.error(
                         rule,
-                        processorWarnings.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
                         {
                             word: stringifySelector(node),
                         }
@@ -618,15 +585,6 @@ export class StylableProcessor {
         }
     }
 
-    protected checkRedeclareSymbol(symbolName: string, node: postcss.Node) {
-        const symbol = this.meta.mappedSymbols[symbolName];
-        if (symbol) {
-            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL(symbolName), {
-                word: symbolName,
-            });
-        }
-    }
-
     protected checkRedeclareKeyframes(symbolName: string, node: postcss.Node) {
         const symbol = this.meta.mappedKeyframes[symbolName];
         if (symbol) {
@@ -637,102 +595,35 @@ export class StylableProcessor {
         return symbol;
     }
 
-    protected checkForScopedNodeAfter(
-        rule: postcss.Rule,
-        nodes: ImmutableSelectorNode[],
-        index: number
-    ) {
-        for (let i = index + 1; i < nodes.length; i++) {
-            const element = nodes[i];
-            if (!element) {
-                // ToDo: can this get here???
-                break;
-            }
-            if (element.type === 'combinator') {
-                break;
-            }
-            if (element.type === 'class') {
-                this.addClassSymbolOnce(element.value, rule);
-
-                if (this.meta.classes[element.value]) {
-                    if (!this.meta.classes[element.value].alias) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    protected addElementSymbolOnce(name: string, rule: postcss.Rule) {
-        if (isCompRoot(name) && !this.meta.elements[name]) {
-            let alias = this.meta.mappedSymbols[name] as ImportSymbol | undefined;
-            if (alias && alias._kind !== 'import') {
-                this.checkRedeclareSymbol(name, rule);
-                alias = undefined;
-            }
-
-            this.meta.elements[name] = this.meta.mappedSymbols[name] = {
-                _kind: 'element',
-                name,
-                alias,
-            };
-
-            this.meta.simpleSelectors[name] = {
-                node: rule,
-                symbol: this.meta.elements[name],
-            };
-        }
-    }
-
-    protected addClassSymbolOnce(name: string, rule: postcss.Rule) {
-        if (!this.meta.classes[name]) {
-            let alias = this.meta.mappedSymbols[name] as ImportSymbol | undefined;
-            if (alias && alias._kind !== 'import') {
-                this.checkRedeclareSymbol(name, rule);
-                alias = undefined;
-            }
-
-            this.meta.classes[name] = this.meta.mappedSymbols[name] = {
-                _kind: 'class',
-                name,
-                alias,
-            };
-
-            this.meta.simpleSelectors[name] = {
-                node: rule,
-                symbol: this.meta.mappedSymbols[name] as ClassSymbol,
-            };
-        } else if (name === this.meta.root && !this.meta.simpleSelectors[name]) {
-            // special handling for registering "root" node comments
-            this.meta.simpleSelectors[name] = {
-                node: rule,
-                symbol: this.meta.classes[name],
-            };
-        }
-    }
-
     protected addImportSymbols(importDef: Imported) {
         this.checkForInvalidAsUsage(importDef);
         if (importDef.defaultExport) {
-            this.checkRedeclareSymbol(importDef.defaultExport, importDef.rule);
-            this.meta.mappedSymbols[importDef.defaultExport] = {
-                _kind: 'import',
-                type: 'default',
-                name: 'default',
-                import: importDef,
-                context: this.dirContext,
-            };
+            STSymbol.addSymbol({
+                context: this,
+                localName: importDef.defaultExport,
+                symbol: {
+                    _kind: 'import',
+                    type: 'default',
+                    name: 'default',
+                    import: importDef,
+                    context: this.dirContext,
+                },
+                node: importDef.rule,
+            });
         }
         Object.keys(importDef.named).forEach((name) => {
-            this.checkRedeclareSymbol(name, importDef.rule);
-            this.meta.mappedSymbols[name] = {
-                _kind: 'import',
-                type: 'named',
-                name: importDef.named[name],
-                import: importDef,
-                context: this.dirContext,
-            };
+            STSymbol.addSymbol({
+                context: this,
+                localName: name,
+                symbol: {
+                    _kind: 'import',
+                    type: 'named',
+                    name: importDef.named[name],
+                    import: importDef,
+                    context: this.dirContext,
+                },
+                node: importDef.rule,
+            });
         });
         Object.keys(importDef.keyframes).forEach((name) => {
             if (!this.checkRedeclareKeyframes(name, importDef.rule)) {
@@ -750,7 +641,6 @@ export class StylableProcessor {
         rule.walkDecls((decl) => {
             this.collectUrls(decl);
             this.handleStFunctions(decl);
-            this.checkRedeclareSymbol(decl.prop, decl);
             let type = null;
 
             const prev = decl.prev() as postcss.Comment;
@@ -770,7 +660,11 @@ export class StylableProcessor {
                 valueType: type,
             };
             this.meta.vars.push(varSymbol);
-            this.meta.mappedSymbols[decl.prop] = varSymbol;
+            STSymbol.addSymbol({
+                context: this,
+                symbol: varSymbol,
+                node: decl,
+            });
         });
         rule.remove();
     }
@@ -803,8 +697,10 @@ export class StylableProcessor {
             isGlobal = true;
         }
 
-        if (node.type === 'atrule') {
-            this.checkRedeclareSymbol(varName, node);
+        if (node.type === 'atrule' && STSymbol.get(this.meta, varName)) {
+            this.diagnostics.warn(node, STSymbol.diagnostics.REDECLARE_SYMBOL(varName), {
+                word: varName,
+            });
         }
 
         this.addCSSVar(varName, node, isGlobal);
@@ -823,8 +719,11 @@ export class StylableProcessor {
                     global,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
-                if (!this.meta.mappedSymbols[varName]) {
-                    this.meta.mappedSymbols[varName] = cssVarSymbol;
+                if (!STSymbol.get(this.meta, varName)) {
+                    STSymbol.addSymbol({
+                        context: this,
+                        symbol: cssVarSymbol,
+                    });
                 }
             }
         } else {
@@ -860,7 +759,7 @@ export class StylableProcessor {
                 const parsed = parseExtends(decl.value);
                 const symbolName = parsed.types[0] && parsed.types[0].symbolName;
 
-                const extendsRefSymbol = this.meta.mappedSymbols[symbolName];
+                const extendsRefSymbol = STSymbol.get(this.meta, symbolName)!;
                 if (
                     (extendsRefSymbol &&
                         (extendsRefSymbol._kind === 'import' ||
@@ -893,7 +792,7 @@ export class StylableProcessor {
             SBTypesParsers[decl.prop](
                 decl,
                 (type) => {
-                    const symbol = this.meta.mappedSymbols[type];
+                    const symbol = STSymbol.get(this.meta, type);
                     return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
                         ? 'args'
                         : 'named';
@@ -901,7 +800,7 @@ export class StylableProcessor {
                 this.diagnostics,
                 false
             ).forEach((mixin) => {
-                const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
+                const mixinRefSymbol = STSymbol.get(this.meta, mixin.type);
                 if (
                     mixinRefSymbol &&
                     (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
@@ -962,9 +861,9 @@ export class StylableProcessor {
 
     protected setClassGlobalMapping(decl: postcss.Declaration, rule: postcss.Rule) {
         const name = rule.selector.replace('.', '');
-        const typedRule = this.meta.classes[name];
-        if (typedRule) {
-            typedRule[valueMapping.global] = parseGlobal(decl, this.diagnostics);
+        const classSymbol = CSSClass.get(this.meta, name);
+        if (classSymbol) {
+            classSymbol[valueMapping.global] = parseGlobal(decl, this.diagnostics);
         }
     }
 
@@ -975,7 +874,7 @@ export class StylableProcessor {
         value: any
     ) {
         const name = selector.replace('.', '');
-        const typedRule = this.meta.mappedSymbols[name] as ClassSymbol | ElementSymbol;
+        const typedRule = STSymbol.get(this.meta, name) as ClassSymbol | ElementSymbol;
         if (typedRule && typedRule[key]) {
             this.diagnostics.warn(node, processorWarnings.OVERRIDE_TYPED_RULE(key, name), {
                 word: name,

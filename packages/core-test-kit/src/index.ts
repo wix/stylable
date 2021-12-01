@@ -1,7 +1,7 @@
 export {
     Diagnostic,
-    expectWarnings,
-    expectWarningsFromTransform,
+    expectAnalyzeDiagnostics,
+    expectTransformDiagnostics,
     findTestLocations,
     shouldReportNoDiagnostics,
 } from './diagnostics';
@@ -17,6 +17,7 @@ export {
     generateStylableResult,
     generateStylableRoot,
     processSource,
+    generateStylableEnvironment,
 } from './generate-test-util';
 export { flatMatch } from './matchers/flat-match';
 export { matchCSSMatchers } from './matchers/match-css';
