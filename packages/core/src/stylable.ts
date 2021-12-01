@@ -4,14 +4,14 @@ import { Diagnostics } from './diagnostics';
 import { CssParser, cssParse } from './parser';
 import { processNamespace, StylableProcessor } from './stylable-processor';
 import type { StylableMeta } from './stylable-meta';
-import { StylableResolverCache, StylableResolver } from './stylable-resolver';
+import { StylableResolverCache, StylableResolver, CachedModuleEntity } from './stylable-resolver';
 import {
     StylableResults,
     StylableTransformer,
     TransformerOptions,
     TransformHooks,
 } from './stylable-transformer';
-import type { InitCacheParams, IStylableOptimizer, ModuleResolver } from './types';
+import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
 import { warnOnce } from './helpers/deprecation';
 
@@ -37,6 +37,11 @@ export interface StylableConfig {
     cssParser?: CssParser;
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
+}
+
+interface InitCacheParams {
+    /* Keeps cache entities that meet the condition specified in a callback function. Return `true` to keep the iterated entity. */
+    filter?(key: string, entity: CachedModuleEntity): boolean;
 }
 
 export type CreateProcessorOptions = Pick<StylableConfig, 'resolveNamespace'>;
