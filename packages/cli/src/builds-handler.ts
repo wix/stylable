@@ -1,5 +1,5 @@
 import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
-import type { StylableResolverCache } from '@stylable/core';
+import { Stylable, StylableResolverCache } from '@stylable/core';
 import { levels } from './logger';
 import { messages } from './messages';
 import { reportDiagnostics } from './report-diagnostics';
@@ -95,19 +95,28 @@ export class BuildsHandler {
     }
 
     private invalidateCache(path: string) {
-        for (const [key, entity] of this.resolverCache) {
-            if (
-                !entity.value ||
-                path === entity.resolvedPath ||
-                path === this.options.outputFiles?.get(entity.resolvedPath)
-            ) {
-                this.resolverCache.delete(key);
+        Stylable.prototype.initCache.call(
+            { resolverCache: this.resolverCache },
+            {
+                filter: (_, entity) => {
+                    if (!entity.value) {
+                        return false;
+                    } else if (
+                        entity.value &&
+                        (entity.resolvedPath === path ||
+                            this.options.outputFiles?.get(entity.resolvedPath) === path)
+                    ) {
+                        if (entity.kind === 'js') {
+                            decache(path);
+                        }
 
-                if (entity.kind === 'js') {
-                    decache(path);
-                }
+                        return false;
+                    } else {
+                        return true;
+                    }
+                },
             }
-        }
+        );
     }
 
     private log(...messages: any[]) {
