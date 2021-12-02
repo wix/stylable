@@ -21,7 +21,7 @@ export interface NodeTypes {
 }
 
 export interface FeatureHooks<T extends NodeTypes> {
-    analyzeInit: (meta: StylableMeta) => void;
+    analyzeInit: (context: FeatureContext) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
         node: T['IMMUTABLE_SELECTOR'];

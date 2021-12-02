@@ -26,8 +26,8 @@ export const diagnostics = {
 // HOOKS
 
 export const hooks = createFeature({
-    analyzeInit({ data }) {
-        plugableRecord.set(data, dataKey, {});
+    analyzeInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, {});
     },
 });
 

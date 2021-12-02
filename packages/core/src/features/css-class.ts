@@ -52,8 +52,8 @@ export const diagnostics = {
 // HOOKS
 
 export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: ImmutableClass }>({
-    analyzeInit({ data }) {
-        plugableRecord.set(data, dataKey, {});
+    analyzeInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, {});
     },
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {

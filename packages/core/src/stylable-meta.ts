@@ -48,9 +48,9 @@ export class StylableMeta {
     public globals: Record<string, boolean> = {};
     constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
         // initiate features
-        const context: FeatureContext = { meta: this, diagnostics: diagnostics };
+        const context: FeatureContext = { meta: this, diagnostics };
         for (const { hooks } of features) {
-            hooks.analyzeInit(this);
+            hooks.analyzeInit(context);
         }
         // set default root
         const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
