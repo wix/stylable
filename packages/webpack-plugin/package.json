@@ -16,7 +16,7 @@
     "@stylable/node": "^4.8.3",
     "@stylable/optimizer": "^4.8.3",
     "@stylable/runtime": "^4.8.3",
-    "decache": "^4.6.0",
+    "decache": "^4.6.1",
     "find-config": "^1.0.0",
     "lodash.clonedeep": "^4.5.0"
   },
