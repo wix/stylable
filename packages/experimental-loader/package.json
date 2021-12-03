@@ -10,7 +10,7 @@
     "@stylable/optimizer": "^4.8.3",
     "@stylable/runtime": "^4.8.3",
     "css-loader": "^6.5.1",
-    "decache": "^4.6.0",
+    "decache": "^4.6.1",
     "loader-utils": "^3.2.0"
   },
   "files": [
