@@ -15,30 +15,26 @@ import type { Readable } from 'stream';
 interface ProcessCliOutputParams {
     dirPath: string;
     args: string[];
-    steps: Array<{ msg: string; action?: () => void | ActionResult }>;
-}
-
-interface ProcessCliOutputResult {
-    output: string;
-}
-
-interface ActionResult {
-    sleep?: number;
+    steps: Array<{
+        msg: string;
+        action?: () => void | {
+            sleep?: number;
+        };
+    }>;
 }
 
 export function createCliTester() {
     const cliProcesses: ChildProcess[] = [];
 
-    async function processCliOutput({
-        dirPath,
-        args,
-        steps,
-    }: ProcessCliOutputParams): Promise<ProcessCliOutputResult> {
+    async function processCliOutput({ dirPath, args, steps }: ProcessCliOutputParams): Promise<{
+        output: string;
+    }> {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess);
 
         const found = [];
         const lines: string[] = [];
+        let output = '';
 
         if (!cliProcess.stdout) {
             throw new Error('no stdout on cli process');
@@ -46,6 +42,7 @@ export function createCliTester() {
         for await (const line of readLines(cliProcess.stdout)) {
             const step = steps[found.length];
             lines.push(line);
+            output += `\n${line}`;
 
             if (line.includes(step.msg)) {
                 found.push(true);
@@ -59,16 +56,12 @@ export function createCliTester() {
                 }
 
                 if (steps.length === found.length) {
-                    return {
-                        output: lines.join('\n'),
-                    };
+                    return { output };
                 }
             }
         }
 
-        return {
-            output: lines.join('\n'),
-        };
+        return { output };
     }
 
     return {
