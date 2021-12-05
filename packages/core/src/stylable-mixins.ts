@@ -338,6 +338,7 @@ function handleLocalClassMixin(
 
 function createInheritedMeta(resolvedClass: CSSResolve) {
     const mixinMeta: StylableMeta = Object.create(resolvedClass.meta);
+    mixinMeta.data = Object.create(mixinMeta.data);
     mixinMeta.parent = resolvedClass.meta;
 
     STSymbol.inheritSymbols(resolvedClass.meta, mixinMeta);
