@@ -63,7 +63,6 @@ export {
     StylableResolver,
     StylableResolverCache,
     isInPath,
-    resolverWarnings,
 } from './stylable-resolver';
 export { Diagnostic, DiagnosticOptions, DiagnosticType, Diagnostics } from './diagnostics';
 export { File, MinimalFSSetup, createMinimalFS } from './memory-minimal-fs';

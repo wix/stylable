@@ -77,6 +77,9 @@ export class StylableMeta {
     getAllTypeElements() {
         return CSSType.getAll(this);
     }
+    getImportStatements() {
+        return STImport.getImportStatements(this);
+    }
 }
 setFieldForDeprecation(StylableMeta.prototype, `elements`, {
     objectType: `stylableMeta`,

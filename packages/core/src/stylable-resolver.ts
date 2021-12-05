@@ -8,20 +8,12 @@ import {
     Imported,
     StylableSymbol,
     CSSClass,
+    STImport,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { findRule } from './helpers/rule';
 import type { ModuleResolver } from './types';
-
-export const resolverWarnings = {
-    UNKNOWN_IMPORTED_FILE(path: string) {
-        return `cannot resolve imported file: "${path}"`;
-    },
-    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) {
-        return `cannot resolve imported symbol "${name}" from stylesheet "${path}"`;
-    },
-};
 
 export type JsModule = {
     default?: unknown;
@@ -451,7 +443,7 @@ export class StylableResolver {
 
                 diagnostics.warn(
                     fromDecl || importObj.rule,
-                    resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.request),
+                    STImport.diagnostics.UNKNOWN_IMPORTED_FILE(importObj.request),
                     { word: importObj.request }
                 );
             } else if (resolvedImport._kind === 'css') {
@@ -469,7 +461,10 @@ export class StylableResolver {
 
                         diagnostics.warn(
                             namedDecl || importObj.rule,
-                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
+                            STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                                origName,
+                                importObj.request
+                            ),
                             { word: origName }
                         );
                     }

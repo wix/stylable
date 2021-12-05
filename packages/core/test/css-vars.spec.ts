@@ -5,8 +5,8 @@ import {
     generateStylableResult,
     processSource,
 } from '@stylable/core-test-kit';
-import { processorWarnings, resolverWarnings } from '@stylable/core';
-import { STSymbol } from '@stylable/core/dist/features';
+import { processorWarnings } from '@stylable/core';
+import { STSymbol, STImport } from '@stylable/core/dist/features';
 
 describe('css custom-properties (vars)', () => {
     describe('process', () => {
@@ -918,7 +918,7 @@ describe('css custom-properties (vars)', () => {
 
             expectTransformDiagnostics(config, [
                 {
-                    message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                    message: STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
                         '--unknownVar',
                         './imported.st.css'
                     ),

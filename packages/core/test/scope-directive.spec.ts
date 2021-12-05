@@ -13,7 +13,6 @@ import {
     transformerWarnings,
     getRuleScopeSelector,
 } from '@stylable/core';
-import { STImport } from '@stylable/core/dist/features';
 
 use(flatMatch);
 
@@ -600,36 +599,6 @@ describe('@st-scope', () => {
             const { meta } = expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.NO_VARS_DEF_IN_ST_SCOPE(),
-                    file: '/entry.st.css',
-                    severity: 'warning',
-                },
-            ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__root .entry__part');
-        });
-
-        it('should warn about import usage inside a scope', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        @st-scope .root {
-                            |:import {
-                                -st-from: "imported.st.css";
-                                -st-default: Comp;
-                            }|
-
-                            .part {}
-                        }
-                    `,
-                    },
-                },
-            };
-
-            const { meta } = expectTransformDiagnostics(config, [
-                {
-                    message: STImport.diagnostics.NO_PSEUDO_IMPORT_IN_NESTED_SCOPE(),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },

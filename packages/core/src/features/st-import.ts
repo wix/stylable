@@ -3,14 +3,15 @@ import { generalDiagnostics } from './diagnostics';
 import type { Imported } from './types';
 import * as STSymbol from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
-import { parseStImport, parsePseudoImport } from '../stylable-imports-tools';
+import { parseStImport, parsePseudoImport, parseImportMessages } from '../stylable-imports-tools';
 import { isCSSVarProp } from '../stylable-utils';
+import type { StylableMeta } from '../stylable-meta';
 import { rootValueMapping } from '../stylable-value-parsers';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
-const dataKey = plugableRecord.key<Record<string, any>>('import');
+const dataKey = plugableRecord.key<Imported[]>('import');
 
 export const diagnostics = {
     NO_ST_IMPORT_IN_NESTED_SCOPE() {
@@ -23,6 +24,13 @@ export const diagnostics = {
         return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
     },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
+    ...parseImportMessages,
+    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) {
+        return `cannot resolve imported symbol "${name}" from stylesheet "${path}"`;
+    },
+    UNKNOWN_IMPORTED_FILE(path: string) {
+        return `cannot resolve imported file: "${path}"`;
+    },
 };
 
 // HOOKS
@@ -32,7 +40,8 @@ export const hooks = createFeature<{
     IMMUTABLE_SELECTOR: ImmutablePseudoClass;
 }>({
     analyzeInit(context) {
-        plugableRecord.set(context.meta.data, dataKey, {});
+        const imports: Imported[] = [];
+        plugableRecord.set(context.meta.data, dataKey, imports);
         // analyze imports first
         const remove: Array<postcss.Rule | postcss.AtRule> = [];
         const dirContext = path.dirname(context.meta.source);
@@ -55,6 +64,7 @@ export const hooks = createFeature<{
                 const stImport = isStImport
                     ? parseStImport(node, dirContext, context.diagnostics)
                     : parsePseudoImport(node, dirContext, context.diagnostics);
+                imports.push(stImport);
                 context.meta.imports.push(stImport);
                 addImportSymbols(stImport, context, dirContext);
             }
@@ -77,6 +87,13 @@ export const hooks = createFeature<{
 });
 
 // API
+
+export function getImportStatements({ data }: StylableMeta): Imported[] {
+    const state = plugableRecord.getUnsafe(data, dataKey);
+    return [...state];
+}
+
+// internal
 
 function addImportSymbols(importDef: Imported, context: FeatureContext, dirContext: string) {
     checkForInvalidAsUsage(importDef, context);
