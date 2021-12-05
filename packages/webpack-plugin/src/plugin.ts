@@ -4,6 +4,7 @@ import {
     packageNamespaceFactory,
     OptimizeConfig,
     DiagnosticsMode,
+    IStylableOptimizer,
 } from '@stylable/core';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -96,7 +97,7 @@ export interface StylableWebpackPluginOptions {
     /**
      * Provide custom StylableOptimizer
      */
-    optimizer?: StylableOptimizer;
+    optimizer?: IStylableOptimizer;
     /**
      * A function to override Stylable instance default configuration options
      */
