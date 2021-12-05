@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import {
+    generateStylableEnvironment,
     generateStylableResult,
     generateStylableRoot,
     matchAllRulesAndDeclarations,
@@ -1187,6 +1188,39 @@ describe('CSS Mixins', () => {
             ],
             ''
         );
+    });
+
+    it('should maintain mapped symbols when performing a local mixin (regression)', () => {
+        const { stylable } = generateStylableEnvironment({
+            '/entry.st.css': `
+                    @st-import Comp from "./inner.st.css";
+
+                    Comp::inner {}
+                `,
+            '/inner.st.css': `
+                    .inner {}
+
+                    .mixin {
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        top: 0px;
+                        left: 0px;
+                        z-index: 1;
+                    }
+
+                    .mixTarget {
+                        -st-mixin: mixin;
+                    }
+
+                `,
+        });
+
+        const { meta } = stylable.transform(stylable.process('/inner.st.css'));
+        const { meta: entryMeta } = stylable.transform(stylable.process('/entry.st.css'));
+
+        expect(meta.getAllSymbols()).to.have.keys('root', 'inner', 'mixin', 'mixTarget');
+        expect(entryMeta.transformDiagnostics!.reports.length).to.equal(0);
     });
 
     describe('url() handling', () => {
