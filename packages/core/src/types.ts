@@ -45,6 +45,7 @@ export interface IStylableOptimizer {
         delimiter?: string
     ): void;
     getNamespace(namespace: string): string;
+    getClassName(className: string): string;
     optimizeAst(
         config: OptimizeConfig,
         outputAst: postcss.Root,
@@ -53,7 +54,7 @@ export interface IStylableOptimizer {
         jsExports: StylableExports,
         globals: Record<string, boolean>
     ): void;
-    removeStylableDirectives(root: postcss.Root, shouldComment: boolean): void;
+    removeStylableDirectives(root: postcss.Root, shouldComment?: boolean): void;
 }
 
 export interface IStylableClassNameOptimizer {
