@@ -78,12 +78,7 @@ export {
     STYLABLE_VALUE_MATCHER,
     TypedClass,
     animationPropRegExp,
-    getFormatterArgs,
-    getNamedArgs,
-    getStringValue,
     globalValueRegExp,
-    groupValues,
-    listOptions,
     mixinDeclRegExp,
     paramMapping,
     rootValueMapping,
@@ -171,6 +166,8 @@ import {
     stateWithParamDelimiter,
     validateStateArgument,
     validateStateDefinition,
+    groupValues,
+    listOptions,
 } from './pseudo-states';
 export const pseudoStates = {
     booleanStateDelimiter,
@@ -184,8 +181,11 @@ export const pseudoStates = {
     stateWithParamDelimiter,
     validateStateArgument,
     validateStateDefinition,
+    groupValues,
+    listOptions,
 };
 export { getRuleScopeSelector } from './helpers/rule';
+export { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
 
 // *** deprecated ***
 
