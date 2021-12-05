@@ -1009,10 +1009,10 @@ describe('css custom-properties (vars)', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                            @property st-global(--myVar);
+                            |@property st-global(--myVar)|;
                             @property st-global(--mySecondVar);
 
-                            |@st-import [--myVar] from "./st-imported.st.css"|;
+                            @st-import [--myVar] from "./st-imported.st.css";
 
                             :import {
                                 -st-from: "./imported.st.css";
@@ -1126,8 +1126,8 @@ describe('css custom-properties (vars)', () => {
             const firstDecl = rule.nodes[0] as postcss.Declaration;
             const secondDecl = rule.nodes[1] as postcss.Declaration;
 
-            expect(firstDecl.value).to.equal('var(--st-imported-myVar)');
-            expect(secondDecl.value).to.equal('var(--imported-mySecondVar)');
+            expect(firstDecl.value).to.equal('var(--myVar)');
+            expect(secondDecl.value).to.equal('var(--mySecondVar)');
         });
     });
 });

@@ -3,6 +3,8 @@ export type { FeatureContext } from './feature';
 export * as STSymbol from './st-symbol';
 export type { StylableSymbol } from './st-symbol';
 
+export * as STImport from './st-import';
+
 export * as STGlobal from './st-global';
 
 export * as CSSClass from './css-class';

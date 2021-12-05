@@ -17,7 +17,8 @@ import {
     valueParserWarnings,
 } from '@stylable/core';
 import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
-import { CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
+import { STImport, CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
+import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
 describe('findTestLocations', () => {
     it('find single location 1', () => {
@@ -594,7 +595,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     [
                         {
-                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                            message: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
                                 rootValueMapping.vars
                             ),
                             file: 'main.css',
@@ -615,7 +616,8 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'),
+                            message:
+                                STImport.diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'),
                             file: 'main.css',
                         },
                     ]
@@ -731,7 +733,10 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.INVALID_CUSTOM_PROPERTY_AS_VALUE('--x', 'z'),
+                            message: STImport.diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(
+                                '--x',
+                                'z'
+                            ),
                             file: 'main.st.css',
                         },
                     ]
@@ -754,7 +759,7 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message:
-                                processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'),
+                                generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'),
                             file: 'main.css',
                         },
                     ]

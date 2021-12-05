@@ -1,5 +1,6 @@
-import { ImportSymbol, processorWarnings } from '@stylable/core';
+import type { ImportSymbol } from '@stylable/core';
 import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
+import { STImport } from '@stylable/core/dist/features';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import * as chai from 'chai';
 
@@ -19,7 +20,7 @@ describe('Stylable @st-import', () => {
 
         expect(result.diagnostics.reports.length).to.eql(1);
         expect(result.diagnostics.reports[0].message).to.eql(
-            processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE()
+            STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE()
         );
     });
 

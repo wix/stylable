@@ -13,6 +13,7 @@ import {
     transformerWarnings,
     getRuleScopeSelector,
 } from '@stylable/core';
+import { STImport } from '@stylable/core/dist/features';
 
 use(flatMatch);
 
@@ -628,7 +629,7 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.NO_IMPORT_IN_ST_SCOPE(),
+                    message: STImport.diagnostics.NO_PSEUDO_IMPORT_IN_NESTED_SCOPE(),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
