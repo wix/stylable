@@ -302,6 +302,11 @@ describe('Stylable Cli Watch', () => {
                     },
                 ],
             });
+
+            const files = loadDirSync(tempDir.path);
+            expect(Object.keys(files)).to.include([
+                ['dist/style.css', 'dist/style.st.css.js', 'package.json', 'style.st.css'],
+            ]);
         });
 
         // it.only('should handle renames of folders', async () => {
