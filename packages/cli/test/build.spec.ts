@@ -8,6 +8,7 @@ import {
 } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
+import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
 
 const log = () => {
     /**/
@@ -151,6 +152,7 @@ describe('build stand alone', () => {
     });
 
     it('should report errors originating from stylable (process + transform)', async () => {
+        const identifier = 'build-identifier';
         const fs = createMemoryFs({
             '/comp.st.css': `
                 :import {
@@ -166,13 +168,15 @@ describe('build stand alone', () => {
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
+        const diagnosticsManager = new DiagnosticsManager();
 
-        const { diagnosticsMessages } = await build(
+        await build(
             {
                 extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 cjs: true,
+                diagnostics: true,
             },
             {
                 fs,
@@ -180,9 +184,11 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
+                diagnosticsManager,
+                identifier,
             }
         );
-        const messages = diagnosticsMessages.get('/comp.st.css')!;
+        const messages = diagnosticsManager.get(identifier, '/comp.st.css')!.diangostics;
 
         expect(messages[0].message).to.contain(
             processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp')

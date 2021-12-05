@@ -1,6 +1,6 @@
 import nodeFs from '@file-services/node';
 import type { IFileSystem, IWatchEvent } from '@file-services/types';
-import type { DirectoryProcessServiceOptions, HandleWatchModeResponse } from './types';
+import type { DirectoryProcessServiceOptions } from './types';
 import { directoryDeepChildren, DirectoryItem } from './walk-fs';
 
 export class DirectoryProcessService {
@@ -82,7 +82,7 @@ export class DirectoryProcessService {
     public async handleWatchChange(
         files: Map<string, IWatchEvent>,
         originalEvent: IWatchEvent
-    ): Promise<HandleWatchModeResponse> {
+    ): Promise<{ hasChanges: boolean }> {
         const affectedFiles = new Set<string>();
         const deletedFiles = new Set<string>();
 
@@ -136,22 +136,10 @@ export class DirectoryProcessService {
         }
 
         if (this.options.processFiles && (affectedFiles.size || deletedFiles.size)) {
-            const {
-                diagnosticsMessages = new Map(),
-                diagnosticMode,
-                shouldReport = true,
-            } = (await this.options.processFiles(
-                this,
-                affectedFiles,
-                deletedFiles,
-                originalEvent
-            )) || {};
+            await this.options.processFiles(this, affectedFiles, deletedFiles, originalEvent);
 
             return {
                 hasChanges: true,
-                diagnosticsMessages,
-                diagnosticMode,
-                shouldReport,
             };
         } else {
             return {

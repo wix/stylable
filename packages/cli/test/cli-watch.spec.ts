@@ -304,9 +304,53 @@ describe('Stylable Cli Watch', () => {
             });
 
             const files = loadDirSync(tempDir.path);
-            expect(Object.keys(files)).to.include([
-                ['dist/style.css', 'dist/style.st.css.js', 'package.json', 'style.st.css'],
+            expect(Object.keys(files)).to.eql([
+                'dist/style.css',
+                'dist/style.st.css.js',
+                'package.json',
+                'style.st.css',
             ]);
+        });
+
+        it('should keep diagnostics when not fixed in second iteration', async () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `
+                    @st-import Module from './does-not-exist.st.css';
+                    
+                    .root{ color: red; }
+                `,
+            });
+
+            await run({
+                dirPath: tempDir.path,
+                args: ['--outDir', './dist', '-w', '--cjs', '--css'],
+                steps: [
+                    {
+                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    },
+                    {
+                        msg: messages.START_WATCHING(),
+                        action() {
+                            writeToExistingFile(
+                                join(tempDir.path, 'style.st.css'),
+                                ` 
+                                /* The import stays so it should get reported again */
+                                @st-import Module from './does-not-exist.st.css';
+                    
+                                .root{ color: blue; }
+                                `
+                            );
+                        },
+                    },
+                    {
+                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    },
+                ],
+            });
+
+            const files = loadDirSync(tempDir.path);
+            expect(files['style.st.css']).to.include('.root{ color: blue; }');
         });
 
         // it.only('should handle renames of folders', async () => {
@@ -873,6 +917,131 @@ describe('Stylable Cli Watch', () => {
             expect(files).to.contain({
                 'packages/project-a/dist/style.st.css': '.root{ color:blue; }',
             });
+        });
+
+        it('should keep diagnostics when a project depends on another project output', async () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'stylable.config.js': `
+                exports.stcConfig = () => ({
+                    presets: {
+                        pkg: {
+                            srcDir: './src',
+                            outDir: './dist',
+                            outputSources: true,
+                        },
+                        index: {
+                            srcDir: './dist',
+                            indexFile: './index.st.css',
+                        }
+                    },
+                    options: {
+                        cjs: false,
+                    },
+                    projects: {
+                        'packages/project-a': ['pkg', 'index']
+                    }
+                })`,
+                packages: {
+                    'project-a': {
+                        'package.json': JSON.stringify({ name: 'a', version: '0.0.0' }),
+                        src: {
+                            'style.st.css': `
+                            .root{ color:red; }
+                        `,
+                        },
+                    },
+                },
+            });
+
+            await run({
+                dirPath: tempDir.path,
+                args: ['-w'],
+                steps: [
+                    {
+                        msg: messages.START_WATCHING(),
+                        action() {
+                            writeToExistingFile(
+                                join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
+                                `
+                                @st-import Module from './does-not-exist.st.css';
+
+                                .root{ -st-extends: Module; color:blue; }
+                                `
+                            );
+                        },
+                    },
+                    {
+                        msg: messages.FINISHED_PROCESSING(
+                            1,
+                            `[1] ${sep + join('packages', 'project-a')}`
+                        ),
+                    },
+                    {
+                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    },
+                ],
+            });
+
+            const files = loadDirSync(tempDir.path);
+            expect(files['packages/project-a/dist/style.st.css']).to.include('color:blue;');
+        });
+
+        it('should not have duplicate diagnostics between shared dependency', async () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'stylable.config.js': `
+                exports.stcConfig = () => ({
+                    options: {
+                        srcDir: './src',
+                        outDir: './dist',
+                        outputSources: true,
+                    },
+                    projects: ['packages/*']
+                })`,
+                packages: {
+                    'project-a': {
+                        'package.json': JSON.stringify({ name: 'a', version: '0.0.0' }),
+                        src: {
+                            'style.st.css': `
+                            @st-import Module from './does-not-exist.st.css';
+
+                            .root{ -st-extends: Module; color:blue; }
+                        `,
+                        },
+                    },
+                    'project-b': {
+                        'package.json': JSON.stringify({
+                            name: 'b',
+                            version: '0.0.0',
+                        }),
+                        src: {
+                            'style.st.css': `
+                            @st-import Amodule from '../../project-a/dist/style.st.css';
+
+                            .root{ -st-extends: Amodule ; color:red; }
+                        `,
+                        },
+                    },
+                },
+            });
+
+            const { output } = await run({
+                dirPath: tempDir.path,
+                args: ['-w'],
+                steps: [
+                    {
+                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    },
+                    {
+                        msg: messages.START_WATCHING(),
+                    },
+                ],
+            });
+
+            expect(
+                output.match(resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'))
+            ).to.lengthOf(1);
         });
     });
 });

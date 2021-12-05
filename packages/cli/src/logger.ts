@@ -1,5 +1,3 @@
-import readline from 'readline';
-
 export const levels = {
     debug: Symbol('debug'),
     info: Symbol('info'),
@@ -10,10 +8,7 @@ export function createLogger(prefix: string, shouldLog: boolean) {
     return function log(...messages: any[]) {
         const clear = messages[messages.length - 1] === levels.clear;
         if (clear) {
-            const blank = '\n'.repeat(process.stdout.rows);
-            console.log(blank);
-            readline.cursorTo(process.stdout, 0, 0);
-            readline.clearScreenDown(process.stdout);
+            console.clear();
             return;
         }
 

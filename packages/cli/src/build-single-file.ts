@@ -1,14 +1,14 @@
-import { isAsset, Stylable } from '@stylable/core';
+import { isAsset, Stylable, StylableResults } from '@stylable/core';
 import {
     createModuleSource,
     generateDTSContent,
     generateDTSSourceMap,
 } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
+import { ensureDirectory, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
-import type { DiagnosticMessages } from './report-diagnostics';
+import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -24,11 +24,13 @@ export interface BuildCommonOptions {
     mode?: string;
     dts?: boolean;
     dtsSourceMap?: boolean;
+    diagnosticsMode?: DiagnosticsMode;
 }
 
 export interface BuildFileOptions extends BuildCommonOptions {
+    identifier?: string;
     stylable: Stylable;
-    diagnosticsMessages: DiagnosticMessages;
+    diagnosticsManager: DiagnosticsManager;
     projectAssets: Set<string>;
     includeCSSInJS?: boolean;
     useNamespaceReference?: boolean;
@@ -41,6 +43,7 @@ export function buildSingleFile({
     fullOutDir,
     filePath,
     fullSrcDir,
+    identifier = fullSrcDir,
     log,
     fs,
     moduleFormats,
@@ -52,7 +55,6 @@ export function buildSingleFile({
     // build specific
     stylable,
     includeCSSInJS = false,
-    diagnosticsMessages,
     projectAssets,
     useNamespaceReference = false,
     injectCSSRequest = false,
@@ -60,6 +62,8 @@ export function buildSingleFile({
     minify = false,
     dts = false,
     dtsSourceMap,
+    diagnosticsMode = 'loose',
+    diagnosticsManager = new DiagnosticsManager(),
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
@@ -93,7 +97,9 @@ export function buildSingleFile({
             {}
         );
     }
-    handleDiagnostics(res, diagnosticsMessages, filePath);
+
+    setFileDiagnostics(res, identifier, filePath, diagnosticsManager, diagnosticsMode);
+
     // st.css
     if (outputSources) {
         if (outSrcPath === filePath) {
@@ -242,4 +248,28 @@ export function removeBuildProducts({
     }
 
     log(mode, `removed: [${outputLogs.join(', ')}]`);
+}
+
+export function setFileDiagnostics(
+    res: StylableResults,
+    identifier: string,
+    filePath: string,
+    diagnosticsManager: DiagnosticsManager,
+    diagnosticMode: DiagnosticsMode
+) {
+    const reports = res.meta.transformDiagnostics
+        ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
+        : res.meta.diagnostics.reports;
+    if (reports.length) {
+        diagnosticsManager.set(identifier, filePath, {
+            diagnosticMode,
+            diangostics: reports.map((report) => {
+                const err = report.node.error(report.message, report.options);
+                return {
+                    type: report.type,
+                    message: `${report.message}\n${err.showSourceCode()}`,
+                };
+            }),
+        });
+    }
 }

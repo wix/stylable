@@ -1,7 +1,7 @@
 import type { IFileSystem } from '@file-services/types';
-import type { Stylable, StylableResolverCache } from '@stylable/core';
-import type { DirectoryProcessService } from '.';
+import type { Stylable } from '@stylable/core';
 import type { Generator as BaseGenerator } from './base-generator';
+import type { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { Log } from './logger';
 
 export type PartialBuildOptions = Partial<BuildOptions>;
@@ -165,7 +165,7 @@ export interface BuildOptions {
     /** should emit diagnostics */
     diagnostics?: boolean;
     /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
-    diagnosticsMode?: 'strict' | 'loose';
+    diagnosticsMode?: DiagnosticsMode;
 }
 
 export interface BuildMetaData {
@@ -185,20 +185,6 @@ export interface BuildMetaData {
     log: Log;
     /** output file to source file map */
     outputFiles?: Map<string, string>;
-}
-
-export interface DirectoriesHandlerServiceOptions {
-    log?: Log;
-    resolverCache?: StylableResolverCache;
-    outputFiles?: Map<string, string>;
-    rootDir?: string;
-}
-
-export interface RegisterMetaData {
-    identifier: string;
-    stylable: Stylable;
-}
-
-export interface Service extends RegisterMetaData {
-    directoryProcess: DirectoryProcessService;
+    /** stores and report diagnostics */
+    diagnosticsManager?: DiagnosticsManager;
 }

@@ -1,25 +1,47 @@
 import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
 import { Stylable, StylableResolverCache } from '@stylable/core';
-import { levels } from './logger';
-import { messages } from './messages';
-import { reportDiagnostics } from './report-diagnostics';
+import decache from 'decache';
 import {
     createWatchEvent,
     DirectoryProcessService,
 } from './directory-process-service/directory-process-service';
-import decache from 'decache';
-import type { DirectoriesHandlerServiceOptions, RegisterMetaData, Service } from './types';
+import { levels, Log } from './logger';
+import { messages } from './messages';
+import { DiagnosticsManager } from './diagnostics-manager';
+
+export interface DirectoriesHandlerServiceOptions {
+    log?: Log;
+    resolverCache?: StylableResolverCache;
+    outputFiles?: Map<string, string>;
+    rootDir?: string;
+    diagnosticsManager?: DiagnosticsManager;
+}
+
+export interface RegisterMetaData {
+    identifier: string;
+    stylable: Stylable;
+}
+
+export interface Service extends RegisterMetaData {
+    directoryProcess: DirectoryProcessService;
+}
 
 export class BuildsHandler {
     private services = new Set<Service>();
     private listener: WatchEventListener | undefined;
     private resolverCache: StylableResolverCache = new Map();
+    private diagnosticsManager = new DiagnosticsManager();
+
     constructor(
         private fileSystem: IFileSystem,
         private options: DirectoriesHandlerServiceOptions = {}
     ) {
         if (this.options.resolverCache) {
             this.resolverCache = this.options.resolverCache;
+        }
+
+        if (this.options.diagnosticsManager) {
+            this.diagnosticsManager = this.options.diagnosticsManager;
         }
     }
 
@@ -50,11 +72,9 @@ export class BuildsHandler {
                     files.set(path, createWatchEvent(path, this.fileSystem));
                 }
 
-                const response = await directoryProcess.handleWatchChange(files, event);
+                const { hasChanges } = await directoryProcess.handleWatchChange(files, event);
 
-                if (response.hasChanges) {
-                    const { diagnosticsMessages, diagnosticMode, shouldReport } = response;
-
+                if (hasChanges) {
                     if (!foundChanges) {
                         foundChanges = true;
 
@@ -66,8 +86,6 @@ export class BuildsHandler {
                     }
 
                     this.log(messages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
-
-                    reportDiagnostics(diagnosticsMessages, shouldReport, diagnosticMode);
                 }
             }
 
@@ -80,6 +98,7 @@ export class BuildsHandler {
                     messages.CONTINUE_WATCH(),
                     levels.info
                 );
+                this.diagnosticsManager.report();
             }
         };
 
@@ -88,6 +107,7 @@ export class BuildsHandler {
 
     public stop() {
         if (this.listener) {
+            this.diagnosticsManager.clear();
             this.fileSystem.watchService.removeGlobalListener(this.listener);
         } else {
             throw new Error('Builds Handler never started');

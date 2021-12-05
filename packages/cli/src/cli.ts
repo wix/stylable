@@ -7,6 +7,7 @@ import { projectsConfig } from './config/projects-config';
 import { getCliArguments } from './config/resolve-options';
 import { BuildsHandler } from './builds-handler';
 import { messages } from './messages';
+import { DiagnosticsManager } from './diagnostics-manager';
 
 async function main() {
     const argv = getCliArguments();
@@ -29,11 +30,13 @@ async function main() {
     const fileProcessorCache = {};
     const outputFiles = new Map<string, string>();
     const isMultipleProjects = projects.length > 1;
+    const diagnosticsManager = new DiagnosticsManager();
     const buildsHandler = new BuildsHandler(fileSystem, {
         log,
         resolverCache,
         outputFiles,
         rootDir,
+        diagnosticsManager,
     });
 
     for (const { projectRoot, options } of projects) {
@@ -67,11 +70,14 @@ async function main() {
                 projectRoot,
                 outputFiles,
                 identifier,
+                diagnosticsManager,
             });
 
             buildsHandler.register(service, { identifier, stylable });
         }
     }
+
+    diagnosticsManager.report();
 
     if (watch) {
         log(messages.START_WATCHING(), levels.info);

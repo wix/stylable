@@ -6,7 +6,7 @@ import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { levels } from './logger';
-import { DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
+import { DiagnosticsManager } from './diagnostics-manager';
 import { tryRun } from './build-tools';
 import { messages } from './messages';
 
@@ -42,6 +42,7 @@ export async function build(
         stylable,
         log,
         outputFiles = new Map(),
+        diagnosticsManager = new DiagnosticsManager(),
     }: BuildMetaData
 ) {
     const { resolve, join, realpathSync } = fs;
@@ -61,7 +62,6 @@ export async function build(
     const generated = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
-    const diagnosticsMessages: DiagnosticMessages = new Map();
     const moduleFormats = getModuleFormats({ cjs, esm });
 
     const service = new DirectoryProcessService(fs, {
@@ -114,7 +114,7 @@ export async function build(
                         } else if (!sourceFiles.has(deletedFile)) {
                             continue;
                         }
-                        diagnosticsMessages.delete(deletedFile);
+                        diagnosticsManager.delete(identifier, deletedFile);
                         sourceFiles.delete(deletedFile);
                         generator.removeEntryFromIndex(deletedFile, fullOutDir);
                         removeBuildProducts({
@@ -135,11 +135,16 @@ export async function build(
                 }
             }
 
-            // add files that contains errors for retry
-            for (const filePath of diagnosticsMessages.keys()) {
-                affectedFiles.add(filePath);
+            const diagnosedFiles = Array.from(diagnosticsManager.get(identifier)?.keys() || []);
+
+            if (diagnosedFiles.length) {
+                // add files that contains errors for retry
+                for (const filePath of diagnosedFiles) {
+                    affectedFiles.add(filePath);
+                }
+
+                diagnosticsManager.delete(identifier);
             }
-            diagnosticsMessages.clear();
 
             // remove assets from the affected files (handled in buildAggregatedEntities)
             for (const filePath of affectedFiles) {
@@ -157,9 +162,8 @@ export async function build(
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
 
-            if (!changeOrigin) {
-                // report build diagnostics
-                reportDiagnostics(diagnosticsMessages, diagnostics, diagnosticsMode);
+            if (!diagnostics) {
+                diagnosticsManager.delete(identifier);
             }
 
             const count = deletedFiles.size + affectedFiles.size + assets.size;
@@ -172,15 +176,9 @@ export async function build(
                         count,
                         isMultiPackagesProject ? identifier : undefined
                     ),
-                    changeOrigin ? undefined : levels.info
+                    changeOrigin ? '' : levels.info
                 );
             }
-
-            return {
-                shouldReport: diagnostics,
-                diagnosticsMode,
-                diagnosticsMessages,
-            };
         },
     });
 
@@ -194,7 +192,7 @@ export async function build(
         );
     }
 
-    return { service, diagnosticsMessages };
+    return { service };
 
     function buildFiles(filesToBuild: Set<string>) {
         for (const filePath of filesToBuild) {
@@ -208,7 +206,9 @@ export async function build(
                     log,
                     fs,
                     stylable,
-                    diagnosticsMessages,
+                    diagnosticsManager,
+                    diagnosticsMode,
+                    identifier,
                     projectAssets: assets,
                     moduleFormats: moduleFormats || [],
                     includeCSSInJS,
