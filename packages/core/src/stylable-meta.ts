@@ -28,12 +28,16 @@ export class StylableMeta {
     public root: 'root' = RESERVED_ROOT_NAME;
     public source: string = getSourcePath(this.ast, this.diagnostics);
     public namespace = '';
+    /** @deprecated use meta.getImportStatements() */
     public imports: Imported[] = [];
     public vars: VarSymbol[] = [];
     public cssVars: Record<string, CSSVarSymbol> = {};
     public keyframes: postcss.AtRule[] = [];
+    /** @deprecated use meta.getAllClasses() or meta.getClass(name) */
     public classes: Record<string, ClassSymbol> = {};
+    /** @deprecated use meta.getAllTypeElements() or meta.getTypeElement(name) */
     public elements: Record<string, ElementSymbol> = {};
+    /** @deprecated use meta.getAllSymbols() or meta.getSymbol(name) */
     public mappedSymbols: Record<string, StylableSymbol> = {};
     public mappedKeyframes: Record<string, KeyframesSymbol> = {};
     public customSelectors: Record<string, string> = {};
