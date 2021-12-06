@@ -33,7 +33,6 @@ export function createCliTester() {
         cliProcesses.push(cliProcess);
 
         const found = [];
-        const lines: string[] = [];
         let output = '';
 
         if (!cliProcess.stdout) {
@@ -41,7 +40,6 @@ export function createCliTester() {
         }
         for await (const line of readLines(cliProcess.stdout)) {
             const step = steps[found.length];
-            lines.push(line);
             output += `\n${line}`;
 
             if (line.includes(step.msg)) {
