@@ -1,4 +1,4 @@
-import { createFeature, FeatureContext } from './feature';
+import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import { generalDiagnostics } from './diagnostics';
 import type { Imported } from './types';
 import * as STSymbol from './st-symbol';
@@ -6,7 +6,7 @@ import { plugableRecord } from '../helpers/plugable-record';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../stylable-imports-tools';
 import { isCSSVarProp } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
-import { rootValueMapping } from '../stylable-value-parsers';
+import { rootValueMapping, valueMapping } from '../stylable-value-parsers';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
@@ -84,6 +84,9 @@ export const hooks = createFeature<{
             );
         }
     },
+    transformInit({ context }) {
+        validateImports(context);
+    },
 });
 
 // API
@@ -145,6 +148,46 @@ function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {
                 importDef.rule,
                 diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local)
             );
+        }
+    }
+}
+
+function validateImports(context: FeatureTransformContext) {
+    for (const importObj of context.meta.imports) {
+        const resolvedImport = context.resolver.resolveImported(importObj, '');
+
+        if (!resolvedImport) {
+            // warn about unknown imported files
+            const fromDecl =
+                importObj.rule.nodes &&
+                importObj.rule.nodes.find(
+                    (decl) => decl.type === 'decl' && decl.prop === valueMapping.from
+                );
+
+            context.diagnostics.warn(
+                fromDecl || importObj.rule,
+                diagnostics.UNKNOWN_IMPORTED_FILE(importObj.request),
+                { word: importObj.request }
+            );
+        } else if (resolvedImport._kind === 'css') {
+            // warn about unknown named imported symbols
+            for (const name in importObj.named) {
+                const origName = importObj.named[name];
+                const resolvedSymbol = context.resolver.resolveImported(importObj, origName);
+                if (resolvedSymbol === null || !resolvedSymbol.symbol) {
+                    const namedDecl =
+                        importObj.rule.nodes &&
+                        importObj.rule.nodes.find(
+                            (decl) => decl.type === 'decl' && decl.prop === valueMapping.named
+                        );
+
+                    context.diagnostics.warn(
+                        namedDecl || importObj.rule,
+                        diagnostics.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
+                        { word: origName }
+                    );
+                }
+            }
         }
     }
 }

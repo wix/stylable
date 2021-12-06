@@ -8,7 +8,6 @@ import {
     Imported,
     StylableSymbol,
     CSSClass,
-    STImport,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
@@ -428,48 +427,5 @@ export class StylableResolver {
         }
 
         return extendPath;
-    }
-    public validateImports(meta: StylableMeta, diagnostics: Diagnostics) {
-        for (const importObj of meta.imports) {
-            const resolvedImport = this.resolveImported(importObj, '');
-
-            if (!resolvedImport) {
-                // warn about unknown imported files
-                const fromDecl =
-                    importObj.rule.nodes &&
-                    importObj.rule.nodes.find(
-                        (decl) => decl.type === 'decl' && decl.prop === valueMapping.from
-                    );
-
-                diagnostics.warn(
-                    fromDecl || importObj.rule,
-                    STImport.diagnostics.UNKNOWN_IMPORTED_FILE(importObj.request),
-                    { word: importObj.request }
-                );
-            } else if (resolvedImport._kind === 'css') {
-                // warn about unknown named imported symbols
-                for (const name in importObj.named) {
-                    const origName = importObj.named[name];
-                    const resolvedSymbol = this.resolveImported(importObj, origName);
-
-                    if (resolvedSymbol === null || !resolvedSymbol.symbol) {
-                        const namedDecl =
-                            importObj.rule.nodes &&
-                            importObj.rule.nodes.find(
-                                (decl) => decl.type === 'decl' && decl.prop === valueMapping.named
-                            );
-
-                        diagnostics.warn(
-                            namedDecl || importObj.rule,
-                            STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                                origName,
-                                importObj.request
-                            ),
-                            { word: origName }
-                        );
-                    }
-                }
-            }
-        }
     }
 }

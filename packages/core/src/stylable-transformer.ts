@@ -26,7 +26,7 @@ import {
 import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
-import type { ClassSymbol, ElementSymbol } from './features';
+import { STImport, ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
 import { STSymbol, STGlobal, CSSClass, CSSType } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
@@ -134,7 +134,12 @@ export class StylableTransformer {
             keyframes: {},
         };
         const ast = this.resetTransformProperties(meta);
-        this.resolver.validateImports(meta, this.diagnostics);
+        const context = {
+            meta,
+            diagnostics: this.diagnostics,
+            resolver: this.resolver,
+        };
+        STImport.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast, meta);
@@ -464,13 +469,21 @@ export class StylableTransformer {
         const { currentAnchor, metaParts, node, originMeta } = context;
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({
-                context: { meta: originMeta, diagnostics: this.diagnostics },
+                context: {
+                    meta: originMeta,
+                    diagnostics: this.diagnostics,
+                    resolver: this.resolver,
+                },
                 selectorContext: context,
                 node,
             });
         } else if (node.type === 'type') {
             CSSType.hooks.transformSelectorNode({
-                context: { meta: originMeta, diagnostics: this.diagnostics },
+                context: {
+                    meta: originMeta,
+                    diagnostics: this.diagnostics,
+                    resolver: this.resolver,
+                },
                 selectorContext: context,
                 node,
             });

@@ -1,5 +1,6 @@
 import type { StylableMeta } from '../stylable-meta';
 import type { ScopeContext } from '../stylable-transformer';
+import type { StylableResolver } from '../stylable-resolver';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type { Diagnostics } from '../diagnostics';
@@ -13,6 +14,9 @@ export type SelectorNodeContext = [
 export interface FeatureContext {
     meta: StylableMeta;
     diagnostics: Diagnostics;
+}
+export interface FeatureTransformContext extends FeatureContext {
+    resolver: StylableResolver;
 }
 
 export interface NodeTypes {
@@ -28,8 +32,9 @@ export interface FeatureHooks<T extends NodeTypes> {
         rule: postcss.Rule;
         walkContext: SelectorNodeContext;
     }) => void;
+    transformInit: (options: { context: FeatureTransformContext }) => void;
     transformSelectorNode: (options: {
-        context: FeatureContext;
+        context: FeatureTransformContext;
         node: T['SELECTOR'];
         selectorContext: Required<ScopeContext>;
     }) => void;
@@ -39,6 +44,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
         /**/
     },
     analyzeSelectorNode() {
+        /**/
+    },
+    transformInit() {
         /**/
     },
     transformSelectorNode() {
