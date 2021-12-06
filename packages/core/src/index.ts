@@ -27,7 +27,7 @@ export {
     validateScopingSelector,
 } from './stylable-processor';
 
-export { ensureStylableImports, parseStylableImport } from './stylable-imports-tools';
+export { ensureStylableImports, parseStylableImport } from './helpers/import';
 
 export { StylableMeta, RESERVED_ROOT_NAME } from './stylable-meta';
 export {

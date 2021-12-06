@@ -1,11 +1,11 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
-import { Diagnostics } from './diagnostics';
-import type { Imported } from './features';
+import { Diagnostics } from '../diagnostics';
+import type { Imported } from '../features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
-import { rootValueMapping, SBTypesParsers, valueMapping } from './stylable-value-parsers';
-import { stripQuotation } from './utils';
-import { isCompRoot } from './helpers/selector';
+import { rootValueMapping, SBTypesParsers, valueMapping } from '../stylable-value-parsers';
+import { stripQuotation } from '../utils';
+import { isCompRoot } from './selector';
 
 const parseNamed = SBTypesParsers[valueMapping.named];
 

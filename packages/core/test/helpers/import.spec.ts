@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { parse } from 'postcss';
 import { Diagnostics, ensureStylableImports } from '@stylable/core';
-import { ensureImportsMessages } from '@stylable/core/dist/stylable-imports-tools';
+import { ensureImportsMessages } from '@stylable/core/dist/helpers/import';
 
 describe('ensureStylableImports', () => {
     describe('all modes', () => {

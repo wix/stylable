@@ -4,7 +4,7 @@ import type { Imported, ImportSymbol } from './types';
 import * as STSymbol from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
-import { parseStImport, parsePseudoImport, parseImportMessages } from '../stylable-imports-tools';
+import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
 import { isCSSVarProp } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
 import { rootValueMapping, valueMapping } from '../stylable-value-parsers';
