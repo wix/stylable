@@ -1002,7 +1002,7 @@ describe('css custom-properties (vars)', () => {
             ]);
         });
 
-        it.only('clashing imported css var', () => {
+        it('should override import with local definition @property', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
@@ -1049,12 +1049,11 @@ describe('css custom-properties (vars)', () => {
             const firstDecl = rule.nodes[0] as postcss.Declaration;
             const secondDecl = rule.nodes[1] as postcss.Declaration;
 
-            // ToDo: should be overridden by local (--before/--after)
-            expect(firstDecl.value).to.equal('var(--imported-before)');
-            expect(secondDecl.value).to.equal('var(--imported-after)');
+            expect(firstDecl.value).to.equal('var(--before)');
+            expect(secondDecl.value).to.equal('var(--after)');
         });
 
-        it.only('clashing imported and global css var (deprecated)', () => {
+        it('should override import with local @st-global-custom-property (deprecated)', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {

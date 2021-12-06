@@ -631,10 +631,13 @@ export class StylableProcessor implements FeatureContext {
                     global,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
-                if (!STSymbol.get(this.meta, varName)) {
+                const prevSymbol = STSymbol.get(this.meta, varName);
+                const override = node.type === `atrule` || !prevSymbol;
+                if (override) {
                     STSymbol.addSymbol({
                         context: this,
                         symbol: cssVarSymbol,
+                        safeRedeclare: true,
                     });
                 }
             }
