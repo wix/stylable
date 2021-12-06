@@ -1,6 +1,6 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import { generalDiagnostics } from './diagnostics';
-import type { Imported } from './types';
+import type { Imported, ImportSymbol } from './types';
 import * as STSymbol from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
@@ -99,6 +99,21 @@ export function getImportStatements({ data }: StylableMeta): Imported[] {
     return [...state];
 }
 
+export function createImportSymbol(
+    importDef: Imported,
+    type: `default` | `named`,
+    name: string,
+    dirContext: string
+): ImportSymbol {
+    return {
+        _kind: 'import',
+        type: type === 'default' ? `default` : `named`,
+        name: type === `default` ? name : importDef.named[name],
+        import: importDef,
+        context: dirContext,
+    };
+}
+
 // internal
 
 function addImportSymbols(importDef: Imported, context: FeatureContext, dirContext: string) {
@@ -107,13 +122,7 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
         STSymbol.addSymbol({
             context,
             localName: importDef.defaultExport,
-            symbol: {
-                _kind: 'import',
-                type: 'default',
-                name: 'default',
-                import: importDef,
-                context: dirContext,
-            },
+            symbol: createImportSymbol(importDef, `default`, `default`, dirContext),
             node: importDef.rule,
         });
     }
@@ -121,13 +130,7 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
         STSymbol.addSymbol({
             context,
             localName: name,
-            symbol: {
-                _kind: 'import',
-                type: 'named',
-                name: importDef.named[name],
-                import: importDef,
-                context: dirContext,
-            },
+            symbol: createImportSymbol(importDef, `named`, name, dirContext),
             node: importDef.rule,
         });
     });
