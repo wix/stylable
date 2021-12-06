@@ -48,7 +48,7 @@ export function createCliTester() {
                 if (step.action) {
                     const { sleep } = step.action() || {};
 
-                    if (sleep) {
+                    if (typeof sleep === 'number') {
                         await new Promise((res) => setTimeout(res, sleep));
                     }
                 }
