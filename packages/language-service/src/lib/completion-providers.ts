@@ -482,7 +482,8 @@ export const SelectorCompletionProvider: CompletionProvider = {
                     )
                 )
             );
-            const moreComps = meta.imports
+            const moreComps = meta
+                .getImportStatements()
                 .filter((imp) => imp.request.endsWith('st.css'))
                 .reduce((acc: Completion[], imp) => {
                     if (acc.every((comp) => comp.label !== imp.defaultExport)) {
@@ -534,7 +535,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
                     .filter((s) => s.startsWith(str))
                     .map((s) => [s, 'Local file'])
             );
-            meta.imports.forEach((i) => {
+            meta.getImportStatements().forEach((i) => {
                 if (
                     i.defaultExport &&
                     i.defaultExport.startsWith(str) &&
@@ -543,7 +544,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
                     comps.push([i.defaultExport, i.request]);
                 }
             });
-            meta.imports.forEach((i) =>
+            meta.getImportStatements().forEach((i) =>
                 comps.push(
                     ...Object.keys(i.named)
                         .filter((s) => {
@@ -631,9 +632,9 @@ export const CodeMixinCompletionProvider: CompletionProvider = {
         stylable,
     }: ProviderOptions): Completion[] {
         if (
-            meta.imports.some(
-                (imp) => imp.request.endsWith('.ts') || imp.request.endsWith('.js')
-            ) &&
+            meta
+                .getImportStatements()
+                .some((imp) => imp.request.endsWith('.ts') || imp.request.endsWith('.js')) &&
             !fullLineText.trim().startsWith(valueMapping.from) &&
             parentSelector &&
             lineChunkAtCursor.startsWith(valueMapping.mixin + ':')
@@ -673,9 +674,9 @@ export const FormatterCompletionProvider: CompletionProvider = {
         stylable,
     }: ProviderOptions): Completion[] {
         if (
-            meta.imports.some(
-                (imp) => imp.request.endsWith('.ts') || imp.request.endsWith('.js')
-            ) &&
+            meta
+                .getImportStatements()
+                .some((imp) => imp.request.endsWith('.ts') || imp.request.endsWith('.js')) &&
             !fullLineText.trim().startsWith(valueMapping.from) &&
             !fullLineText.trim().startsWith(valueMapping.extends) &&
             !fullLineText.trim().startsWith(valueMapping.named) &&
@@ -837,7 +838,7 @@ function maybeResolveImport(
     let resolvedImport: StylableMeta | null = null;
     if (importName && importName.endsWith('.st.css')) {
         try {
-            const imported = meta.imports.find((i) => i.request === importName)!;
+            const imported = meta.getImportStatements().find((i) => i.request === importName)!;
             resolvedImport = stylable.fileProcessor.process(
                 stylable.resolvePath(imported.context, imported.request)
             );
@@ -1496,7 +1497,7 @@ export const ValueCompletionProvider: CompletionProvider = {
             });
 
             const importVars: any[] = [];
-            meta.imports.forEach((imp) => {
+            meta.getImportStatements().forEach((imp) => {
                 try {
                     const resolvedPath = stylable.resolvePath(dirname(meta.source), imp.request);
                     stylable.fileProcessor.process(resolvedPath).vars.forEach((v) =>
@@ -1515,7 +1516,9 @@ export const ValueCompletionProvider: CompletionProvider = {
             importVars.forEach((v) => {
                 if (
                     v.name.startsWith(inner) &&
-                    meta.imports.some((imp) => Object.keys(imp.named).some((key) => key === v.name))
+                    meta
+                        .getImportStatements()
+                        .some((imp) => Object.keys(imp.named).some((key) => key === v.name))
                 ) {
                     const value = evalDeclarationValue(stylable.resolver, v.value, meta, v.node);
                     comps.push(

@@ -3,6 +3,7 @@ import { generalDiagnostics } from './diagnostics';
 import type { Imported } from './types';
 import * as STSymbol from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
+import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../stylable-imports-tools';
 import { isCSSVarProp } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
@@ -65,7 +66,9 @@ export const hooks = createFeature<{
                     ? parseStImport(node, dirContext, context.diagnostics)
                     : parsePseudoImport(node, dirContext, context.diagnostics);
                 imports.push(stImport);
-                context.meta.imports.push(stImport);
+                ignoreDeprecationWarn(() => {
+                    context.meta.imports.push(stImport);
+                });
                 addImportSymbols(stImport, context, dirContext);
             }
             remove.push(node);
@@ -153,7 +156,8 @@ function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {
 }
 
 function validateImports(context: FeatureTransformContext) {
-    for (const importObj of context.meta.imports) {
+    const imports = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    for (const importObj of imports) {
         const resolvedImport = context.resolver.resolveImported(importObj, '');
 
         if (!resolvedImport) {

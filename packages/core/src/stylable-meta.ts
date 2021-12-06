@@ -96,3 +96,8 @@ setFieldForDeprecation(StylableMeta.prototype, `mappedSymbols`, {
     valueOnThis: true,
     pleaseUse: `meta.getAllSymbols() or meta.getSymbol(name)`,
 });
+setFieldForDeprecation(StylableMeta.prototype, `imports`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+    pleaseUse: `meta.getImportStatements()`,
+});

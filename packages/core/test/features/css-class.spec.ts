@@ -102,7 +102,7 @@ describe(`features/css-class`, () => {
                     _kind: 'import',
                     type: 'named',
                     name: 'imported',
-                    import: meta.imports[0],
+                    import: meta.getImportStatements()[0],
                     context: `/`,
                 },
             });

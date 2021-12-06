@@ -79,7 +79,7 @@ describe(`features/css-type`, () => {
                     _kind: 'import',
                     type: 'default',
                     name: 'default',
-                    import: meta.imports[0],
+                    import: meta.getImportStatements()[0],
                     context: `/`,
                 },
             });

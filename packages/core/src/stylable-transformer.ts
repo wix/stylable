@@ -304,7 +304,7 @@ export class StylableTransformer {
         const cssVarsMapping: Record<string, string> = {};
 
         // imported vars
-        for (const imported of meta.imports) {
+        for (const imported of meta.getImportStatements()) {
             for (const symbolName of Object.keys(imported.named)) {
                 if (isCSSVarProp(symbolName)) {
                     const importedVar = this.resolver.deepResolve(STSymbol.get(meta, symbolName));

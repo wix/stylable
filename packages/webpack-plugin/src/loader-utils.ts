@@ -15,7 +15,7 @@ export function getImports(
     const urls = processUrlDependencies(meta, projectRoot, assetFilter);
     const imports: string[] = [];
     const unusedImports: string[] = [];
-    for (const imported of meta.imports) {
+    for (const imported of meta.getImportStatements()) {
         if (imported.request.endsWith('.st.css')) {
             /**
              * We want to include Stylable files that have effects on other files as regular imports
