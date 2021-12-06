@@ -3,14 +3,14 @@ import { Diagnostic, DiagnosticMessages, reportDiagnostics } from './report-diag
 export type DiagnosticsMode = 'strict' | 'loose';
 
 interface ProcessDiagnostics {
-    diangostics: Diagnostic[];
-    diagnosticMode?: DiagnosticsMode | undefined;
+    diagnostics: Diagnostic[];
+    diagnosticsMode?: DiagnosticsMode | undefined;
 }
 
-type DiangosticsStore = Map<string, Map<string, ProcessDiagnostics>>;
+type diagnosticsStore = Map<string, Map<string, ProcessDiagnostics>>;
 
 export class DiagnosticsManager {
-    protected store!: DiangosticsStore;
+    protected store!: diagnosticsStore;
 
     constructor() {
         this.clear();
@@ -25,13 +25,13 @@ export class DiagnosticsManager {
 
         for (const [
             filepath,
-            { diangostics, diagnosticMode: currentMode },
+            { diagnostics, diagnosticsMode: currentMode },
         ] of existingDiagnostics) {
             if (diagnosticMode !== 'strict') {
                 diagnosticMode = currentMode || diagnosticMode;
             }
 
-            diagnosticMessages.set(filepath, diangostics);
+            diagnosticMessages.set(filepath, diagnostics);
         }
 
         reportDiagnostics(diagnosticMessages, true, diagnosticMode);
@@ -40,15 +40,15 @@ export class DiagnosticsManager {
     public set(
         identifier: string,
         filepath?: string,
-        existingDiagnostic?: ProcessDiagnostics
+        processDiagnostics?: ProcessDiagnostics
     ): void {
-        if (this.store.has(identifier) && filepath && existingDiagnostic) {
-            this.store.get(identifier)!.set(filepath, existingDiagnostic);
+        if (this.store.has(identifier) && filepath && processDiagnostics) {
+            this.store.get(identifier)!.set(filepath, processDiagnostics);
         } else {
             this.store.set(
                 identifier,
                 new Map(
-                    filepath && existingDiagnostic ? [[filepath, existingDiagnostic]] : undefined
+                    filepath && processDiagnostics ? [[filepath, processDiagnostics]] : undefined
                 )
             );
         }

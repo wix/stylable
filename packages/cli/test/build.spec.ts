@@ -188,7 +188,7 @@ describe('build stand alone', () => {
                 identifier,
             }
         );
-        const messages = diagnosticsManager.get(identifier, '/comp.st.css')!.diangostics;
+        const messages = diagnosticsManager.get(identifier, '/comp.st.css')!.diagnostics;
 
         expect(messages[0].message).to.contain(
             processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp')

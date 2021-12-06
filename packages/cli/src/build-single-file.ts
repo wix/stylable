@@ -9,6 +9,7 @@ import { ensureDirectory, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
 import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
+import type { Diagnostic } from './report-diagnostics';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -98,7 +99,13 @@ export function buildSingleFile({
         );
     }
 
-    setFileDiagnostics(res, identifier, filePath, diagnosticsManager, diagnosticsMode);
+    const diagnostics = getAllDiagnostics(res);
+    if (diagnostics.length) {
+        diagnosticsManager.set(identifier, filePath, {
+            diagnosticsMode,
+            diagnostics,
+        });
+    }
 
     // st.css
     if (outputSources) {
@@ -250,26 +257,16 @@ export function removeBuildProducts({
     log(mode, `removed: [${outputLogs.join(', ')}]`);
 }
 
-export function setFileDiagnostics(
-    res: StylableResults,
-    identifier: string,
-    filePath: string,
-    diagnosticsManager: DiagnosticsManager,
-    diagnosticMode: DiagnosticsMode
-) {
-    const reports = res.meta.transformDiagnostics
+export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
+    const diagnostics = res.meta.transformDiagnostics
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
-    if (reports.length) {
-        diagnosticsManager.set(identifier, filePath, {
-            diagnosticMode,
-            diangostics: reports.map((report) => {
-                const err = report.node.error(report.message, report.options);
-                return {
-                    type: report.type,
-                    message: `${report.message}\n${err.showSourceCode()}`,
-                };
-            }),
-        });
-    }
+
+    return diagnostics.map((diagnostic) => {
+        const err = diagnostic.node.error(diagnostic.message, diagnostic.options);
+        return {
+            type: diagnostic.type,
+            message: `${diagnostic.message}\n${err.showSourceCode()}`,
+        };
+    });
 }
