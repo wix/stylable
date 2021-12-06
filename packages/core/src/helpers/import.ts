@@ -214,9 +214,18 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
     if (imports && imports.star) {
         diagnostics.error(atRule, parseImportMessages.ST_IMPORT_STAR());
     } else {
-        importObj.defaultExport = imports.defaultName || '';
         setImportObjectFrom(imports.from || '', context, importObj);
 
+        importObj.defaultExport = imports.defaultName || '';
+        if (
+            importObj.defaultExport &&
+            !isCompRoot(importObj.defaultExport) &&
+            importObj.from.match(/\.css$/)
+        ) {
+            diagnostics.warn(atRule, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                word: importObj.defaultExport,
+            });
+        }
         if (imports.tagged?.keyframes) {
             // importObj.keyframes = imports.tagged?.keyframes;
             for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
@@ -228,7 +237,6 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
                 importObj.named[impAsName] = impName;
             }
         }
-
         if (imports.errors.length) {
             diagnostics.error(atRule, parseImportMessages.INVALID_ST_IMPORT_FORMAT(imports.errors));
         } else if (!imports.from?.trim()) {
@@ -269,7 +277,6 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
             }
             case valueMapping.default:
                 importObj.defaultExport = decl.value;
-
                 if (!isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
                     diagnostics.warn(decl, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
                         word: importObj.defaultExport,

@@ -205,15 +205,17 @@ describe(`features/st-import`, () => {
                 { partial: true }
             );
         });
-        it.skip('should warn on default import with a lowercase first letter', () => {
-            // ToDo: copy functionality
+        it('should warn on default lowercase import from css file', () => {
             expectAnalyzeDiagnostics(
                 `
-                @st-import |comp| from "./file.st.css";
+                |@st-import $sheetError$ from "./a.st.css"|;
+                @st-import SheetStartWithCapital from "./b.st.css";
+                @st-import otherModuleDontCare from "./c.js";
             `,
                 [
                     {
                         message: STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE(),
+                        severity: `warning`,
                         file: 'main.css',
                     },
                 ]
@@ -606,12 +608,20 @@ describe(`features/st-import`, () => {
                     ]
                 );
             });
-            it('should warn on default import with a lowercase first letter', () => {
+            it('should warn on default lowercase import from css file', () => {
                 expectAnalyzeDiagnostics(
                     `
                     :import{
-                        -st-from:"./file.st.css";
-                        |-st-default: $comp$;|
+                        -st-from:"./a.st.css";
+                        |-st-default: $sheetError$;|
+                    }
+                    :import{
+                        -st-from:"./b.st.css";
+                        -st-default: SheetStartWithCapital;
+                    }
+                    :import{
+                        -st-from:"./c.js";
+                        -st-default: otherModuleDontCare;
                     }
                 `,
                     [
