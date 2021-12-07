@@ -25,9 +25,9 @@ describe(`(${project})`, () => {
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
         const getMetadataFromLibraryBundle = new Function(bundleContent + '\n return metadata;');
 
-        const compXContent = readFileSync(join(projectRunner.testDir, 'comp-x.st.css'), 'utf-8');
-        const compContent = readFileSync(join(projectRunner.testDir, 'comp.st.css'), 'utf-8');
-        const indexContent = readFileSync(join(projectRunner.testDir, 'index.st.css'), 'utf-8');
+        const compXContent = readFileSync(join(projectRunner.projectDir, 'comp-x.st.css'), 'utf-8');
+        const compContent = readFileSync(join(projectRunner.projectDir, 'comp.st.css'), 'utf-8');
+        const indexContent = readFileSync(join(projectRunner.projectDir, 'index.st.css'), 'utf-8');
         const indexHash = hashContent(indexContent);
         const compHash = hashContent(compContent);
         const compXHash = hashContent(compXContent);
