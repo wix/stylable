@@ -32,7 +32,7 @@ export const hooks = createFeature<{
     SELECTOR: Type;
     IMMUTABLE_SELECTOR: ImmutableType;
 }>({
-    analyzeInit({ meta }) {
+    metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, {});
     },
     analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes, parents] }): void {

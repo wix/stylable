@@ -25,6 +25,7 @@ export interface NodeTypes {
 }
 
 export interface FeatureHooks<T extends NodeTypes> {
+    metaInit: (context: FeatureContext) => void;
     analyzeInit: (context: FeatureContext) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
@@ -40,6 +41,9 @@ export interface FeatureHooks<T extends NodeTypes> {
     }) => void;
 }
 const defaultHooks: FeatureHooks<NodeTypes> = {
+    metaInit() {
+        /**/
+    },
     analyzeInit() {
         /**/
     },

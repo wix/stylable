@@ -40,10 +40,11 @@ export const hooks = createFeature<{
     SELECTOR: PseudoClass;
     IMMUTABLE_SELECTOR: ImmutablePseudoClass;
 }>({
+    metaInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, []);
+    },
     analyzeInit(context) {
-        const imports: Imported[] = [];
-        plugableRecord.set(context.meta.data, dataKey, imports);
-        // analyze imports first
+        const imports = plugableRecord.getUnsafe(context.meta.data, dataKey);
         const remove: Array<postcss.Rule | postcss.AtRule> = [];
         const dirContext = path.dirname(context.meta.source);
         context.meta.ast.walk((node) => {

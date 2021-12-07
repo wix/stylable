@@ -144,6 +144,8 @@ export class StylableProcessor implements FeatureContext {
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics);
 
+        STImport.hooks.analyzeInit(this);
+
         this.dirContext = path.dirname(this.meta.source);
 
         this.handleAtRules(root);

@@ -54,7 +54,7 @@ export class StylableMeta {
         // initiate features
         const context: FeatureContext = { meta: this, diagnostics };
         for (const { hooks } of features) {
-            hooks.analyzeInit(context);
+            hooks.metaInit(context);
         }
         // set default root
         const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
