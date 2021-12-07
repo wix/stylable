@@ -9,6 +9,7 @@ import {
     convertToInvalid,
 } from './helpers/selector';
 import { wrapFunctionForDeprecation } from './helpers/deprecation';
+import { groupValues, listOptions } from './helpers/value';
 import type { PseudoClass } from '@tokey/css-selector-parser';
 import { StateResult, systemValidators } from './state-validators';
 import type { StylableMeta } from './stylable-meta';
@@ -19,7 +20,6 @@ import { CSSClass } from './features';
 import { stripQuotation } from './utils';
 import { reservedFunctionalPseudoClasses } from './native-reserved-lists';
 import cssesc from 'cssesc';
-import type { Node as ValueNode } from 'postcss-value-parser';
 
 export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
@@ -390,41 +390,4 @@ export function resolveStateParam(param: string, escape = false) {
     )}`;
     // adding/removing initial `s` to indicate that it's not the first param of the identifier
     return escape ? cssesc(`s` + result, { isIdentifier: true }).slice(1) : result;
-}
-
-export function listOptions(node: any) {
-    return groupValues(node.nodes)
-        .map((nodes: any) =>
-            postcssValueParser.stringify(nodes, (n: any) => {
-                if (n.type === 'div') {
-                    return null;
-                } else if (n.type === 'string') {
-                    return n.value;
-                } else {
-                    return undefined;
-                }
-            })
-        )
-        .filter((x: string) => typeof x === 'string');
-}
-
-export function groupValues(nodes: ValueNode[], divType = 'div') {
-    const grouped: ValueNode[][] = [];
-    let current: ValueNode[] = [];
-
-    nodes.forEach((n: any) => {
-        if (n.type === divType) {
-            grouped.push(current);
-            current = [];
-        } else {
-            current.push(n);
-        }
-    });
-
-    const last = grouped[grouped.length - 1];
-
-    if ((last && last !== current && current.length) || (!last && current.length)) {
-        grouped.push(current);
-    }
-    return grouped;
 }

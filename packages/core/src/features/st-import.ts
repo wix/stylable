@@ -12,9 +12,10 @@ import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
-const dataKey = plugableRecord.key<Imported[]>('import');
+const dataKey = plugableRecord.key<Imported[]>('imports');
 
 export const diagnostics = {
+    ...parseImportMessages,
     NO_ST_IMPORT_IN_NESTED_SCOPE() {
         return `cannot use "@st-import" inside of nested scope`;
     },
@@ -25,7 +26,6 @@ export const diagnostics = {
         return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
     },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
-    ...parseImportMessages,
     UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) {
         return `cannot resolve imported symbol "${name}" from stylesheet "${path}"`;
     },
@@ -94,9 +94,9 @@ export const hooks = createFeature<{
 
 // API
 
-export function getImportStatements({ data }: StylableMeta): Imported[] {
+export function getImportStatements({ data }: StylableMeta): ReadonlyArray<Imported> {
     const state = plugableRecord.getUnsafe(data, dataKey);
-    return [...state];
+    return state;
 }
 
 export function createImportSymbol(

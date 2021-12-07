@@ -1,6 +1,6 @@
 import type { ParsedValue } from '../types';
 import type { ReportWarning } from '../stylable-value-parsers';
-import postcssValueParser from 'postcss-value-parser';
+import postcssValueParser, {type Node as ValueNode} from 'postcss-value-parser';
 
 export function getNamedArgs(node: ParsedValue) {
     const args: ParsedValue[][] = [];
@@ -85,4 +85,41 @@ export function getStringValue(nodes: ParsedValue | ParsedValue[]): string {
             return undefined;
         }
     });
+}
+
+export function listOptions(node: any) {
+    return groupValues(node.nodes)
+        .map((nodes: any) =>
+            postcssValueParser.stringify(nodes, (n: any) => {
+                if (n.type === 'div') {
+                    return null;
+                } else if (n.type === 'string') {
+                    return n.value;
+                } else {
+                    return undefined;
+                }
+            })
+        )
+        .filter((x: string) => typeof x === 'string');
+}
+
+export function groupValues(nodes: ValueNode[], divType = 'div') {
+    const grouped: ValueNode[][] = [];
+    let current: ValueNode[] = [];
+
+    nodes.forEach((n: any) => {
+        if (n.type === divType) {
+            grouped.push(current);
+            current = [];
+        } else {
+            current.push(n);
+        }
+    });
+
+    const last = grouped[grouped.length - 1];
+
+    if ((last && last !== current && current.length) || (!last && current.length)) {
+        grouped.push(current);
+    }
+    return grouped;
 }

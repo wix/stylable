@@ -220,7 +220,7 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
         if (
             importObj.defaultExport &&
             !isCompRoot(importObj.defaultExport) &&
-            importObj.from.match(/\.css$/)
+            importObj.from.endsWith(`.css`)
         ) {
             diagnostics.warn(atRule, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
                 word: importObj.defaultExport,
@@ -277,7 +277,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
             }
             case valueMapping.default:
                 importObj.defaultExport = decl.value;
-                if (!isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
+                if (!isCompRoot(importObj.defaultExport) && importObj.from.endsWith(`.css`)) {
                     diagnostics.warn(decl, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
                         word: importObj.defaultExport,
                     });

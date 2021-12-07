@@ -515,6 +515,32 @@ describe(`features/st-import`, () => {
                     name: `c-origin`,
                 });
             });
+            it(`should add imported keyframes symbols`, () => {
+                const { meta } = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: `entry`,
+                            content: `
+                            :import {
+                                -st-from: "./path";
+                                -st-named: keyframes(a, b-origin as b-local);
+                            }`,
+                        },
+                    },
+                });
+
+                expect(meta.mappedKeyframes.a, `named`).to.include({
+                    _kind: 'keyframes',
+                    name: 'a',
+                });
+                expect(meta.mappedKeyframes[`b-local`], `mapped`).to.include({
+                    _kind: 'keyframes',
+                    name: 'b-origin',
+                    alias: 'b-local',
+                    import: meta.getImportStatements()[0],
+                });
+            });
         });
         describe(`transform`, () => {
             it('should remove :import from output', () => {

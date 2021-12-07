@@ -134,12 +134,13 @@ export class StylableTransformer {
             keyframes: {},
         };
         const ast = this.resetTransformProperties(meta);
-        const context = {
-            meta,
-            diagnostics: this.diagnostics,
-            resolver: this.resolver,
-        };
-        STImport.hooks.transformInit({ context });
+        STImport.hooks.transformInit({
+            context: {
+                meta,
+                diagnostics: this.diagnostics,
+                resolver: this.resolver,
+            },
+        });
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast, meta);

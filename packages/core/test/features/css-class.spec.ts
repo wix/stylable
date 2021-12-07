@@ -94,7 +94,6 @@ describe(`features/css-class`, () => {
                 },
             });
 
-            // ToDo: replace with STImport.getImport() once import feature is ready
             const importDef = meta.getImportStatements()[0];
             expect(CSSClass.get(meta, `imported`), `symbol`).to.eql({
                 _kind: `class`,

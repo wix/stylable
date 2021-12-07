@@ -165,8 +165,6 @@ import {
     stateWithParamDelimiter,
     validateStateArgument,
     validateStateDefinition,
-    groupValues,
-    listOptions,
 } from './pseudo-states';
 export const pseudoStates = {
     booleanStateDelimiter,
@@ -180,11 +178,15 @@ export const pseudoStates = {
     stateWithParamDelimiter,
     validateStateArgument,
     validateStateDefinition,
-    groupValues,
-    listOptions,
 };
 export { getRuleScopeSelector } from './helpers/rule';
-export { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
+export {
+    getFormatterArgs,
+    getNamedArgs,
+    getStringValue,
+    groupValues,
+    listOptions,
+} from './helpers/value';
 
 // *** deprecated ***
 
