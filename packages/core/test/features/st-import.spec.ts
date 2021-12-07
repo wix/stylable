@@ -268,8 +268,7 @@ describe(`features/st-import`, () => {
                             severity: `error`,
                             skipLocationCheck: true,
                         },
-                    ],
-                    { partial: true }
+                    ]
                 );
             });
         });
