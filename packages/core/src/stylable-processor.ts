@@ -211,6 +211,13 @@ export class StylableProcessor implements FeatureContext {
 
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
+                case 'st-import': {
+                    STImport.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                    });
+                    break;
+                }
                 case 'namespace': {
                     const match = atRule.params.match(/["'](.*?)['"]/);
                     if (match) {

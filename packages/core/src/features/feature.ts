@@ -27,6 +27,7 @@ export interface NodeTypes {
 export interface FeatureHooks<T extends NodeTypes> {
     metaInit: (context: FeatureContext) => void;
     analyzeInit: (context: FeatureContext) => void;
+    analyzeAtRule: (options: { context: FeatureContext; atRule: postcss.AtRule }) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
         node: T['IMMUTABLE_SELECTOR'];
@@ -45,6 +46,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
         /**/
     },
     analyzeInit() {
+        /**/
+    },
+    analyzeAtRule() {
         /**/
     },
     analyzeSelectorNode() {

@@ -134,7 +134,27 @@ describe(`features/st-import`, () => {
                 },
             });
 
-            expect(meta.outputAst?.nodes.length).to.equal(1);
+            expect(meta.outputAst!.nodes.length).to.equal(1);
+            expect(meta.outputAst!.toString()).to.not.contain('@st-import');
+        });
+        it('should remove nested @st-import from output', () => {
+            const { meta } = generateStylableResult({
+                entry: `/main.st.css`,
+                files: {
+                    '/main.st.css': {
+                        content: `
+                            div {
+                                @st-import Name from "./other.st.css";
+                            }
+                        `,
+                    },
+                    '/other.st.css': {
+                        content: ``,
+                    },
+                },
+            });
+
+            expect(meta.outputAst!.toString()).to.not.contain('@st-import');
         });
         it('should hoist @st-import', () => {
             const { meta } = generateStylableResult({
@@ -562,6 +582,28 @@ describe(`features/st-import`, () => {
                 });
 
                 expect(meta.outputAst?.nodes.length).to.equal(1);
+            });
+            it('should remove nested :import from output', () => {
+                const { meta } = generateStylableResult({
+                    entry: `/main.st.css`,
+                    files: {
+                        '/main.st.css': {
+                            content: `
+                                div {
+                                    :import{
+                                        -st-from: "./other.st.css";
+                                        -st-default: Name;
+                                    }
+                                }
+                            `,
+                        },
+                        '/other.st.css': {
+                            content: ``,
+                        },
+                    },
+                });
+
+                expect(meta.outputAst!.toString()).to.not.contain(':import');
             });
             it('should hoist :import', () => {
                 const { meta } = generateStylableResult({

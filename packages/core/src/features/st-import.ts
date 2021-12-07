@@ -45,48 +45,52 @@ export const hooks = createFeature<{
     },
     analyzeInit(context) {
         const imports = plugableRecord.getUnsafe(context.meta.data, dataKey);
-        const remove: Array<postcss.Rule | postcss.AtRule> = [];
         const dirContext = path.dirname(context.meta.source);
-        context.meta.ast.walk((node) => {
+        // collect shallow imports
+        for (const node of context.meta.ast.nodes) {
             const isImportDef =
                 (node.type === `atrule` && node.name === `st-import`) ||
                 (node.type === `rule` && node.selector === `:import`);
             if (!isImportDef) {
-                return;
+                continue;
             }
-            const isStImport = node.type === `atrule`;
-            if (node.parent?.type !== `root`) {
-                context.diagnostics.warn(
-                    node,
-                    isStImport
-                        ? diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE()
-                        : diagnostics.NO_PSEUDO_IMPORT_IN_NESTED_SCOPE()
-                );
-            } else {
-                const stImport = isStImport
+            const stImport =
+                node.type === `atrule`
                     ? parseStImport(node, dirContext, context.diagnostics)
                     : parsePseudoImport(node, dirContext, context.diagnostics);
-                imports.push(stImport);
-                ignoreDeprecationWarn(() => {
-                    context.meta.imports.push(stImport);
-                });
-                addImportSymbols(stImport, context, dirContext);
-            }
-            remove.push(node);
-        });
-        // remove imports - ToDo: move to transform phase
-        for (const node of remove) {
-            node.remove();
+            imports.push(stImport);
+            ignoreDeprecationWarn(() => {
+                context.meta.imports.push(stImport);
+            });
+            addImportSymbols(stImport, context, dirContext);
         }
     },
+    analyzeAtRule({ context, atRule }) {
+        if (atRule.name !== `st-import`) {
+            return;
+        }
+        if (atRule.parent?.type !== `root`) {
+            context.diagnostics.warn(atRule, diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE());
+        }
+        // remove `@st-import` at rules - ToDo: move to transformer
+        atRule.remove();
+    },
     analyzeSelectorNode({ context, rule, node }) {
-        // forbid `:import` pseudo-class as part of multiple selectors
-        if (rule.selector !== `:import` && node.value === `import`) {
+        if (node.value !== `import`) {
+            return;
+        }
+        if (rule.selector !== `:import`) {
             context.diagnostics.warn(
                 rule,
                 diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.import)
             );
+            return;
         }
+        if (rule.parent?.type !== `root`) {
+            context.diagnostics.warn(rule, diagnostics.NO_PSEUDO_IMPORT_IN_NESTED_SCOPE());
+        }
+        // remove rules with `:import` selector - ToDo: move to transformer
+        rule.remove();
     },
     transformInit({ context }) {
         validateImports(context);
