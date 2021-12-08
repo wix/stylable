@@ -64,6 +64,11 @@ export function rewriteImports(
                             );
                         }
                     });
+                } else if (rawRule.type === 'atrule') {
+                    rawRule.params = rawRule.params.replace(
+                        stImport.fromRelative,
+                        `/${ensureHash(resolved.meta, hashes)}.st.css`
+                    );
                 } else {
                     throw new Error('Unknown import rule ' + rawRule.toString());
                 }

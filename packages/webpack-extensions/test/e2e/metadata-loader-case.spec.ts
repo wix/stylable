@@ -25,12 +25,17 @@ describe(`(${project})`, () => {
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
         const getMetadataFromLibraryBundle = new Function(bundleContent + '\n return metadata;');
 
+        const compXContent = readFileSync(join(projectRunner.projectDir, 'comp-x.st.css'), 'utf-8');
         const compContent = readFileSync(join(projectRunner.projectDir, 'comp.st.css'), 'utf-8');
         const indexContent = readFileSync(join(projectRunner.projectDir, 'index.st.css'), 'utf-8');
         const indexHash = hashContent(indexContent);
         const compHash = hashContent(compContent);
+        const compXHash = hashContent(compXContent);
         const stylesheetMapping = {
-            [`/${indexHash}.st.css`]: indexContent.replace('./comp.st.css', `/${compHash}.st.css`),
+            [`/${indexHash}.st.css`]: indexContent
+                .replace('./comp.st.css', `/${compHash}.st.css`)
+                .replace('./comp-x.st.css', `/${compXHash}.st.css`),
+            [`/${compXHash}.st.css`]: compXContent,
             [`/${compHash}.st.css`]: compContent,
         };
         const metadata = getMetadataFromLibraryBundle().default;
@@ -45,5 +50,6 @@ describe(`(${project})`, () => {
 
         expect(metadata.namespaceMapping[`/${indexHash}.st.css`]).to.match(/index\d+/);
         expect(metadata.namespaceMapping[`/${compHash}.st.css`]).to.match(/comp\d+/);
+        expect(metadata.namespaceMapping[`/${compXHash}.st.css`]).to.match(/compx\d+/);
     });
 });

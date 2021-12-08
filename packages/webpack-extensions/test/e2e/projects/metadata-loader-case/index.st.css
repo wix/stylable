@@ -1,3 +1,4 @@
+@st-import CompX from "./comp-x.st.css";
 
 :import {
     -st-from: "./comp.st.css";
@@ -7,4 +8,9 @@
 .root {
     -st-extends: Comp;
     color: green;
+}
+
+.part {
+    -st-extends: CompX;
+    color: purple;
 }
