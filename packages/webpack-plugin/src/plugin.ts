@@ -255,6 +255,13 @@ export class StylableWebpackPlugin {
             return;
         }
 
+        const resolverOptions = {
+            ...compiler.options.resolve,
+            aliasFields:
+                compiler.options.resolve.byDependency?.esm?.aliasFields ||
+                compiler.options.resolve.aliasFields,
+        };
+
         this.stylable = Stylable.create(
             this.options.stylableConfig(
                 {
@@ -266,7 +273,7 @@ export class StylableWebpackPlugin {
                     fileSystem: getTopLevelInputFilesystem(compiler),
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
                     resolveOptions: {
-                        ...compiler.options.resolve,
+                        ...resolverOptions,
                         extensions: [], // use Stylable's default extensions
                     },
                     resolveNamespace: packageNamespaceFactory(
