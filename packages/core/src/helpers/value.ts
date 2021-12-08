@@ -1,6 +1,7 @@
 import type { ParsedValue } from '../types';
 import type { ReportWarning } from '../stylable-value-parsers';
-import postcssValueParser, {type Node as ValueNode} from 'postcss-value-parser';
+import postcssValueParser from 'postcss-value-parser';
+import type { Node as ValueNode } from 'postcss-value-parser';
 
 export function getNamedArgs(node: ParsedValue) {
     const args: ParsedValue[][] = [];
