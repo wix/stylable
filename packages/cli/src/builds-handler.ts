@@ -1,5 +1,5 @@
 import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
-import { Stylable, StylableResolverCache } from '@stylable/core';
+import type { Stylable, StylableResolverCache } from '@stylable/core';
 import decache from 'decache';
 import {
     createWatchEvent,
@@ -28,9 +28,50 @@ export interface Service extends RegisterMetaData {
 
 export class BuildsHandler {
     private services = new Set<Service>();
-    private listener: WatchEventListener | undefined;
     private resolverCache: StylableResolverCache = new Map();
     private diagnosticsManager = new DiagnosticsManager();
+    private listener: WatchEventListener = async (event) => {
+        this.invalidateCache(event.path);
+
+        let foundChanges = false;
+        const files = new Map<string, IWatchEvent>();
+
+        for (const { directoryProcess, identifier } of this.services) {
+            for (const path of directoryProcess.getAffectedFiles(event.path)) {
+                if (files.has(path)) {
+                    continue;
+                }
+
+                files.set(path, createWatchEvent(path, this.fileSystem));
+            }
+
+            const { hasChanges } = await directoryProcess.handleWatchChange(files, event);
+
+            if (hasChanges) {
+                if (!foundChanges) {
+                    foundChanges = true;
+
+                    this.log(
+                        messages.CHANGE_DETECTED(event.path.replace(this.options.rootDir ?? '', ''))
+                    );
+                }
+
+                this.log(messages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
+            }
+        }
+
+        if (foundChanges) {
+            const { changed, deleted } = this.filesStats(files);
+
+            this.log(levels.clear);
+            this.log(
+                messages.WATCH_SUMMARY(changed, deleted),
+                messages.CONTINUE_WATCH(),
+                levels.info
+            );
+            this.diagnosticsManager.report();
+        }
+    };
 
     constructor(
         private fileSystem: IFileSystem,
@@ -57,51 +98,6 @@ export class BuildsHandler {
     }
 
     public start() {
-        this.listener = async (event) => {
-            this.invalidateCache(event.path);
-
-            let foundChanges = false;
-            const files = new Map<string, IWatchEvent>();
-
-            for (const { directoryProcess, identifier } of this.services) {
-                for (const path of directoryProcess.getAffectedFiles(event.path)) {
-                    if (files.has(path)) {
-                        continue;
-                    }
-
-                    files.set(path, createWatchEvent(path, this.fileSystem));
-                }
-
-                const { hasChanges } = await directoryProcess.handleWatchChange(files, event);
-
-                if (hasChanges) {
-                    if (!foundChanges) {
-                        foundChanges = true;
-
-                        this.log(
-                            messages.CHANGE_DETECTED(
-                                event.path.replace(this.options.rootDir ?? '', '')
-                            )
-                        );
-                    }
-
-                    this.log(messages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
-                }
-            }
-
-            if (foundChanges) {
-                const { changed, deleted } = this.filesStats(files);
-
-                this.log(levels.clear);
-                this.log(
-                    messages.WATCH_SUMMARY(changed, deleted),
-                    messages.CONTINUE_WATCH(),
-                    levels.info
-                );
-                this.diagnosticsManager.report();
-            }
-        };
-
         this.fileSystem.watchService.addGlobalListener(this.listener);
     }
 
@@ -114,33 +110,26 @@ export class BuildsHandler {
         }
     }
 
-    private invalidateCache(path: string) {
-        Stylable.prototype.initCache.call(
-            { resolverCache: this.resolverCache },
-            {
-                filter: (_, entity) => {
-                    if (!entity.value) {
-                        return false;
-                    } else if (
-                        entity.value &&
-                        (entity.resolvedPath === path ||
-                            this.options.outputFiles?.get(entity.resolvedPath) === path)
-                    ) {
-                        if (entity.kind === 'js') {
-                            decache(path);
-                        }
+    private invalidateCache(filePath: string) {
+        for (const [key, entity] of this.resolverCache) {
+            if (
+                !entity.value ||
+                entity.resolvedPath === filePath ||
+                this.options.outputFiles?.get(entity.resolvedPath) === filePath
+            ) {
+                if (entity.kind === 'js') {
+                    decache(filePath);
+                }
 
-                        return false;
-                    } else {
-                        return true;
-                    }
-                },
+                this.resolverCache.delete(key);
             }
-        );
+        }
     }
 
     private log(...messages: any[]) {
-        this.options.log?.(`[${new Date().toLocaleTimeString()}]`, ...messages);
+        const logger = this.options.log || console.log;
+
+        logger(`[${new Date().toLocaleTimeString()}]`, ...messages);
     }
 
     private filesStats(files: Map<string, IWatchEvent>) {
