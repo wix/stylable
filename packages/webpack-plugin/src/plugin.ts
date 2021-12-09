@@ -42,6 +42,7 @@ import type {
     EntryPoint,
     LoaderData,
     NormalModuleFactory,
+    ResolveOptionsWebpackOptions,
     StylableBuildMeta,
     StylableLoaderContext,
 } from './types';
@@ -255,7 +256,7 @@ export class StylableWebpackPlugin {
             return;
         }
 
-        const resolverOptions = {
+        const resolverOptions: ResolveOptionsWebpackOptions = {
             ...compiler.options.resolve,
             aliasFields:
                 compiler.options.resolve.byDependency?.esm?.aliasFields ||

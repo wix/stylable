@@ -37,6 +37,7 @@ export interface StylableLoaderContext extends LoaderContext<{}> {
 type MapType<T> = T extends Map<any, infer U> ? U : never;
 
 export type WebpackCreateHash = Compiler['webpack']['util']['createHash'];
+export type ResolveOptionsWebpackOptions = Compiler['options']['resolve'];
 export type RuntimeTemplate = Compilation['runtimeTemplate'];
 export type WebpackOutputOptions = RuntimeTemplate['outputOptions'];
 export type CompilationParams = Parameters<Compiler['newCompilation']>[0];
