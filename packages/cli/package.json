@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "3.13.0",
+  "version": "3.13.2",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -14,10 +14,10 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^3.13.0",
-    "@stylable/module-utils": "^3.13.0",
-    "@stylable/node": "^3.13.0",
-    "@stylable/optimizer": "^3.13.0",
+    "@stylable/core": "^3.13.2",
+    "@stylable/module-utils": "^3.13.2",
+    "@stylable/node": "^3.13.2",
+    "@stylable/optimizer": "^3.13.2",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
     "yargs": "^16.2.0"
