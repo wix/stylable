@@ -29,7 +29,7 @@ describe(`(${project})`, () => {
         }));
         /*
             Expecting the backgroundColor to be green 
-            makes sure that the ems style button is rendered
+            makes sure that the esm style button is rendered
         */
         expect(backgroundColor).to.equal('rgb(0, 128, 0)');
         /* 
