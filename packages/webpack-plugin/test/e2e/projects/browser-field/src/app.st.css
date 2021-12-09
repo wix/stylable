@@ -3,9 +3,6 @@
     -st-named: Button;
 }
 
-.root {
-    -st-extends: Button;
-
-    /* cjs = red, esm = green, here = gold */
-    background-color: gold; 
+Button {
+    font-size: 35px;
 }
