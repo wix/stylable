@@ -71,15 +71,15 @@ export const hooks = createFeature<{
             if (!isImportDef) {
                 continue;
             }
-            const stImport =
+            const parsedImport =
                 node.type === `atrule`
                     ? parseStImport(node, dirContext, context.diagnostics)
                     : parsePseudoImport(node, dirContext, context.diagnostics);
-            imports.push(stImport);
+            imports.push(parsedImport);
             ignoreDeprecationWarn(() => {
-                context.meta.imports.push(stImport);
+                context.meta.imports.push(parsedImport);
             });
-            addImportSymbols(stImport, context, dirContext);
+            addImportSymbols(parsedImport, context, dirContext);
         }
     },
     analyzeAtRule({ context, atRule }) {

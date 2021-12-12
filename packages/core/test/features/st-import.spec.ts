@@ -29,7 +29,10 @@ describe(`features/st-import`, () => {
                 },
             });
 
-            expect(STImport.getImportStatements(meta), `internal`).to.containSubset([
+            expect(
+                STImport.getImportStatements(meta),
+                `STImport.getImportStatements(meta)`
+            ).to.containSubset([
                 {
                     request: `./no/import`,
                     defaultExport: ``,
@@ -56,7 +59,9 @@ describe(`features/st-import`, () => {
                     named: {},
                 },
             ]);
-            expect(meta.getImportStatements(), `public`).to.eql(STImport.getImportStatements(meta));
+            expect(meta.getImportStatements(), `meta.getImportStatements()`).to.eql(
+                STImport.getImportStatements(meta)
+            );
             // deprecation
             expect(
                 ignoreDeprecationWarn(() => meta.imports),
@@ -76,17 +81,17 @@ describe(`features/st-import`, () => {
                 },
             });
 
-            expect(meta.getSymbol(`a`), `default`).to.contain({
+            expect(meta.getSymbol(`a`), `default import`).to.contain({
                 _kind: `import`,
                 type: 'default',
                 name: `default`,
             });
-            expect(meta.getSymbol(`b`), `named`).to.contain({
+            expect(meta.getSymbol(`b`), `named import`).to.contain({
                 _kind: `import`,
                 type: 'named',
                 name: `b`,
             });
-            expect(meta.getSymbol(`c-local`), `mapped`).to.contain({
+            expect(meta.getSymbol(`c-local`), `mapped import`).to.contain({
                 _kind: `import`,
                 type: 'named',
                 name: `c-origin`,
@@ -205,7 +210,7 @@ describe(`features/st-import`, () => {
         it('should warn on empty from', () => {
             expectAnalyzeDiagnostics(
                 `
-                @st-import X from "";
+                |@st-import X from ""|;
                 @st-import Y from " ";
             `,
                 [
@@ -213,7 +218,6 @@ describe(`features/st-import`, () => {
                         file: `/entry.st.css`,
                         message: STImport.diagnostics.ST_IMPORT_EMPTY_FROM(),
                         severity: `error`,
-                        skipLocationCheck: true,
                     },
                     {
                         file: `/entry.st.css`,
@@ -221,8 +225,7 @@ describe(`features/st-import`, () => {
                         severity: `error`,
                         skipLocationCheck: true,
                     },
-                ],
-                { partial: true }
+                ]
             );
         });
         it('should warn on default lowercase import from css file', () => {
@@ -371,17 +374,13 @@ describe(`features/st-import`, () => {
                 );
             });
             it(`should warn on unknown imported symbol`, () => {
-                // ToDo: should check without actual usage
                 expectTransformDiagnostics(
                     {
                         entry: `/main.st.css`,
                         files: {
                             '/main.st.css': {
                                 content: `
-                                |@st-import [unknown] from "./import.st.css"|;
-                                .myClass {
-                                    -st-extends: unknown;
-                                }
+                                |@st-import [$unknown$] from "./import.st.css"|;
                             `,
                             },
                             '/import.st.css': {
@@ -398,8 +397,7 @@ describe(`features/st-import`, () => {
                             severity: `warning`,
                             file: `/main.st.css`,
                         },
-                    ],
-                    { partial: true }
+                    ]
                 );
             });
             it(`should warn on unknown imported symbol with alias`, () => {
@@ -410,7 +408,7 @@ describe(`features/st-import`, () => {
                             '/main.st.css': {
                                 namespace: `entry`,
                                 content: `
-                                    |@st-import [$Missing$ as LocalMissing] from "./imported.st.css"|;
+                                    |@st-import [$missing$ as localMissing] from "./imported.st.css"|;
                                 `,
                             },
                             '/imported.st.css': {
@@ -421,7 +419,7 @@ describe(`features/st-import`, () => {
                     [
                         {
                             message: STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                                'Missing',
+                                'missing',
                                 './imported.st.css'
                             ),
                             severity: `warning`,
@@ -582,6 +580,7 @@ describe(`features/st-import`, () => {
                 });
 
                 expect(meta.outputAst?.nodes.length).to.equal(1);
+                expect(meta.outputAst!.toString()).to.not.contain(':import');
             });
             it('should remove nested :import from output', () => {
                 const { meta } = generateStylableResult({
@@ -654,8 +653,7 @@ describe(`features/st-import`, () => {
                             severity: `warning`,
                             skipLocationCheck: true,
                         },
-                    ],
-                    { partial: true }
+                    ]
                 );
             });
             it('should error on empty "-st-from" declaration', () => {
@@ -762,6 +760,42 @@ describe(`features/st-import`, () => {
                             -st-from: "a";
                             -st-from: "b";
                             -st-default: Comp;
+                        }|
+                    `,
+                        [
+                            {
+                                message: STImport.diagnostics.MULTIPLE_FROM_IN_IMPORT(),
+                                file: 'main.st.css',
+                            },
+                        ]
+                    );
+                });
+                it.skip('should warn on multiple "-st-default" declarations', () => {
+                    // Todo: add this diagnostic and test
+                    expectAnalyzeDiagnostics(
+                        `
+                        |:import{
+                            -st-from: "a";
+                            -st-default: Comp;
+                            -st-default: Comp;
+                        }|
+                        `,
+                        [
+                            {
+                                message: STImport.diagnostics.MULTIPLE_FROM_IN_IMPORT(),
+                                file: 'main.st.css',
+                            },
+                        ]
+                    );
+                });
+                it.skip('should warn on multiple "-st-named" declarations', () => {
+                    // Todo: add this diagnostic and test
+                    expectAnalyzeDiagnostics(
+                        `
+                        |:import{
+                            -st-from: "a";
+                            -st-named: comp;
+                            -st-named: comp;
                         }|
                     `,
                         [
@@ -893,7 +927,7 @@ describe(`features/st-import`, () => {
                                     content: `
                                         :import{
                                             -st-from: "./imported.st.css";
-                                            |-st-named: $Missing$;|
+                                            |-st-named: $missing$;|
                                         }
                                     `,
                                 },
@@ -905,7 +939,7 @@ describe(`features/st-import`, () => {
                         [
                             {
                                 message: STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                                    `Missing`,
+                                    `missing`,
                                     `./imported.st.css`
                                 ),
                                 severity: `warning`,
@@ -924,7 +958,7 @@ describe(`features/st-import`, () => {
                                     content: `
                                         :import{
                                             -st-from: "./imported.st.css";
-                                            |-st-named: $Missing$ as LocalMissing;|
+                                            |-st-named: $missing$ as localMissing;|
                                         }
                                     `,
                                 },
@@ -936,7 +970,7 @@ describe(`features/st-import`, () => {
                         [
                             {
                                 message: STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                                    `Missing`,
+                                    `missing`,
                                     `./imported.st.css`
                                 ),
                                 file: `/main.st.css`,
