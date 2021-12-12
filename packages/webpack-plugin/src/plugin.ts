@@ -42,6 +42,7 @@ import type {
     EntryPoint,
     LoaderData,
     NormalModuleFactory,
+    ResolveOptionsWebpackOptions,
     StylableBuildMeta,
     StylableLoaderContext,
 } from './types';
@@ -255,6 +256,13 @@ export class StylableWebpackPlugin {
             return;
         }
 
+        const resolverOptions: ResolveOptionsWebpackOptions = {
+            ...compiler.options.resolve,
+            aliasFields:
+                compiler.options.resolve.byDependency?.esm?.aliasFields ||
+                compiler.options.resolve.aliasFields,
+        };
+
         this.stylable = Stylable.create(
             this.options.stylableConfig(
                 {
@@ -266,7 +274,7 @@ export class StylableWebpackPlugin {
                     fileSystem: getTopLevelInputFilesystem(compiler),
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
                     resolveOptions: {
-                        ...compiler.options.resolve,
+                        ...resolverOptions,
                         extensions: [], // use Stylable's default extensions
                     },
                     resolveNamespace: packageNamespaceFactory(

@@ -1,6 +1,6 @@
 {
   "name": "@stylable/language-service",
-  "version": "4.9.1",
+  "version": "4.9.2",
   "description": "Stylable Language Services - syntax highlighting, completions, hinting and more for the Stylable CSS preprocessor.",
   "main": "dist/index.js",
   "scripts": {
@@ -13,8 +13,8 @@
   "dependencies": {
     "@file-services/types": "^5.4.0",
     "@file-services/typescript": "^5.4.3",
-    "@stylable/code-formatter": "^4.9.1",
-    "@stylable/core": "^4.9.1",
+    "@stylable/code-formatter": "^4.9.2",
+    "@stylable/core": "^4.9.2",
     "css-selector-tokenizer": "^0.8.0",
     "postcss": "^8.4.4",
     "postcss-value-parser": "^4.2.0",
