@@ -1,9 +1,5 @@
 import type * as postcss from 'postcss';
-import postcssValueParser, {
-    ParsedValue as PostCSSParsedValue,
-    FunctionNode,
-    WordNode,
-} from 'postcss-value-parser';
+import postcssValueParser, { FunctionNode, WordNode } from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelectorWithCache } from './helpers/selector';
@@ -16,12 +12,6 @@ export const valueParserWarnings = {
     },
     CSS_MIXIN_FORCE_NAMED_PARAMS() {
         return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")';
-    },
-    INVALID_NAMED_IMPORT_AS(name: string) {
-        return `Invalid named import "as" with name "${name}"`;
-    },
-    INVALID_NESTED_KEYFRAMES(name: string) {
-        return `Invalid nested keyframes import "${name}"`;
     },
 };
 
@@ -146,24 +136,6 @@ export const SBTypesParsers = {
             types,
         };
     },
-    '-st-named'(
-        value: string,
-        node: postcss.Declaration | postcss.AtRule,
-        diagnostics: Diagnostics
-    ) {
-        const namedMap: Record<string, string> = {};
-        const keyframesMap: Record<string, string> = {};
-        if (value) {
-            handleNamedTokens(
-                postcssValueParser(value),
-                { namedMap, keyframesMap },
-                'namedMap',
-                node,
-                diagnostics
-            );
-        }
-        return { namedMap, keyframesMap };
-    },
     '-st-mixin'(
         mixinNode: postcss.Declaration,
         strategy: (type: string) => 'named' | 'args',
@@ -214,54 +186,6 @@ export const SBTypesParsers = {
         });
     },
 };
-
-function handleNamedTokens(
-    tokens: PostCSSParsedValue | FunctionNode,
-    buckets: { namedMap: Record<string, string>; keyframesMap: Record<string, string> },
-    key: keyof typeof buckets = 'namedMap',
-    node: postcss.Declaration | postcss.AtRule,
-    diagnostics: Diagnostics
-) {
-    const { nodes } = tokens;
-    for (let i = 0; i < nodes.length; i++) {
-        const token = nodes[i];
-        if (token.type === 'word') {
-            const space = nodes[i + 1];
-            const as = nodes[i + 2];
-            const spaceAfter = nodes[i + 3];
-            const asName = nodes[i + 4];
-            if (isImportAs(space, as)) {
-                if (spaceAfter?.type === 'space' && asName?.type === 'word') {
-                    buckets[key][asName.value] = token.value;
-                    i += 4; //ignore next 4 tokens
-                } else {
-                    i += !asName ? 3 : 2;
-                    diagnostics.warn(
-                        node,
-                        valueParserWarnings.INVALID_NAMED_IMPORT_AS(token.value)
-                    );
-                    continue;
-                }
-            } else {
-                buckets[key][token.value] = token.value;
-            }
-        } else if (token.type === 'function' && token.value === 'keyframes') {
-            if (key === 'keyframesMap') {
-                diagnostics.warn(
-                    node,
-                    valueParserWarnings.INVALID_NESTED_KEYFRAMES(
-                        postcssValueParser.stringify(token)
-                    )
-                );
-            }
-            handleNamedTokens(token, buckets, 'keyframesMap', node, diagnostics);
-        }
-    }
-}
-
-function isImportAs(space: ParsedValue, as: ParsedValue) {
-    return space?.type === 'space' && as?.type === 'word' && as?.value === 'as';
-}
 
 export const strategies = {
     named: (node: any, reportWarning?: ReportWarning) => {
