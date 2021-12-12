@@ -1,11 +1,12 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import {
-    expectWarningsFromTransform,
+    expectTransformDiagnostics,
     generateStylableResult,
     processSource,
 } from '@stylable/core-test-kit';
 import { processorWarnings, resolverWarnings } from '@stylable/core';
+import { STSymbol } from '@stylable/core/dist/features';
 
 describe('css custom-properties (vars)', () => {
     describe('process', () => {
@@ -673,7 +674,7 @@ describe('css custom-properties (vars)', () => {
                     },
                 };
 
-                const res = expectWarningsFromTransform(config, [
+                const res = expectTransformDiagnostics(config, [
                     {
                         file: '/entry.st.css',
                         message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
@@ -830,7 +831,7 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            const res = expectWarningsFromTransform(config, [
+            const res = expectTransformDiagnostics(config, [
                 {
                     file: '/entry.st.css',
                     message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
@@ -857,7 +858,7 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            const res = expectWarningsFromTransform(config, [
+            const res = expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'),
                     file: '/entry.st.css',
@@ -883,7 +884,7 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            const res = expectWarningsFromTransform(config, [
+            const res = expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.ILLEGAL_CSS_VAR_ARGS('--value illegalHere, red'),
                     file: '/entry.st.css',
@@ -915,7 +916,7 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            expectWarningsFromTransform(config, [
+            expectTransformDiagnostics(config, [
                 {
                     message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
                         '--unknownVar',
@@ -939,7 +940,7 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            expectWarningsFromTransform(config, [
+            expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'),
                     file: '/entry.st.css',
@@ -960,7 +961,7 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            expectWarningsFromTransform(config, [
+            expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     file: '/entry.st.css',
@@ -987,7 +988,7 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            expectWarningsFromTransform(config, [
+            expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     file: '/entry.st.css',
@@ -1043,13 +1044,13 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            const { meta } = expectWarningsFromTransform(config, [
+            const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.REDECLARE_SYMBOL('--myVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--myVar'),
                     file: '/entry.st.css',
                 },
                 {
-                    message: processorWarnings.REDECLARE_SYMBOL('--mySecondVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--mySecondVar'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },
@@ -1103,19 +1104,19 @@ describe('css custom-properties (vars)', () => {
                 },
             };
 
-            const { meta } = expectWarningsFromTransform(config, [
+            const { meta } = expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     file: '/entry.st.css',
                     severity: 'info',
                 },
                 {
-                    message: processorWarnings.REDECLARE_SYMBOL('--myVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--myVar'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },
                 {
-                    message: processorWarnings.REDECLARE_SYMBOL('--mySecondVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--mySecondVar'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },

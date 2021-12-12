@@ -147,36 +147,36 @@ describe('Stylable postcss process', () => {
 
         expect(result.imports.length).to.eql(3);
 
-        expect(result.mappedSymbols.a).to.include({
+        expect(result.getSymbol(`a`)).to.include({
             _kind: 'import',
             type: 'named',
         });
 
-        expect(result.mappedSymbols.c).to.include({
+        expect(result.getSymbol(`c`)).to.include({
             _kind: 'import',
             type: 'named',
         });
 
-        expect(result.mappedSymbols.name).to.include({
+        expect(result.getSymbol(`name`)).to.include({
             _kind: 'import',
             type: 'default',
         });
 
-        expect((result.mappedSymbols.a as ImportSymbol).import).to.deep.include({
+        expect((result.getSymbol(`a`) as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
-        expect((result.mappedSymbols.c as ImportSymbol).import).to.deep.include({
+        expect((result.getSymbol(`c`) as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
-        expect((result.mappedSymbols.name as ImportSymbol).import).to.deep.include({
+        expect((result.getSymbol(`name`) as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
             request: '../some/global/path',
             defaultExport: 'name',
@@ -197,11 +197,11 @@ describe('Stylable postcss process', () => {
 
         expect(result.imports.length).to.eql(1);
 
-        expect(result.mappedSymbols.abs).to.deep.include({
+        expect(result.getSymbol(`abs`)).to.deep.include({
             _kind: 'import',
             type: 'named',
         });
-        expect((result.mappedSymbols.abs as ImportSymbol).import).to.include({
+        expect((result.getSymbol(`abs`) as ImportSymbol).import).to.include({
             context: '/path/to',
             defaultExport: '',
             from: '/abs/path',
@@ -275,7 +275,7 @@ describe('Stylable postcss process', () => {
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
 
-        expect(result.classes).to.flatMatch({
+        expect(result.getAllClasses()).to.flatMatch({
             myclass: {
                 '-st-extends': {
                     _kind: 'import',
@@ -288,22 +288,6 @@ describe('Stylable postcss process', () => {
                 },
             },
         });
-    });
-
-    it('collect typed elements', () => {
-        const result = processSource(
-            `
-            Element {
-
-            }
-            div {
-
-            }
-        `,
-            { from: 'path/to/style.css' }
-        );
-
-        expect(Object.keys(result.elements).length).to.eql(1);
     });
 
     it('should not collect typed elements or classes in unknown functional selectors', () => {
@@ -325,20 +309,20 @@ describe('Stylable postcss process', () => {
         );
 
         // unknown pseudo-class
-        expect(Object.keys(result.elements)).to.not.include(`Unknown`);
-        expect(Object.keys(result.classes)).to.not.include(`unknown`);
+        expect(result.getSymbol(`Unknown`)).to.equal(undefined);
+        expect(result.getClass(`unknown`)).to.equal(undefined);
         // native with ignored or no nested classes
-        expect(Object.keys(result.elements)).to.not.include(`Global`);
-        expect(Object.keys(result.classes)).to.not.include(`global`);
-        expect(Object.keys(result.elements)).to.not.include(`NthOfType`);
-        expect(Object.keys(result.classes)).to.not.include(`nth-of-type`);
-        expect(Object.keys(result.elements)).to.not.include(`NthLastOfType`);
-        expect(Object.keys(result.classes)).to.not.include(`nth-last-of-type`);
+        expect(result.getSymbol(`Global`)).to.equal(undefined);
+        expect(result.getClass(`global`)).to.equal(undefined);
+        expect(result.getSymbol(`NthOfType`)).to.equal(undefined);
+        expect(result.getClass(`nth-of-type`)).to.equal(undefined);
+        expect(result.getSymbol(`NthLastOfType`)).to.equal(undefined);
+        expect(result.getClass(`nth-last-of-type`)).to.equal(undefined);
         // known function pseudo-classes with nested selectors
-        const expectedElements = knownPseudoClassesWithNestedSelectors.map((name) => `El-${name}`);
-        const expectedClasses = knownPseudoClassesWithNestedSelectors.map((name) => `cls-${name}`);
-        expect(Object.keys(result.elements)).to.include.members(expectedElements);
-        expect(Object.keys(result.classes)).to.include.members(expectedClasses);
+        for (const name of knownPseudoClassesWithNestedSelectors) {
+            expect(result.getSymbol(`El-${name}`)).to.not.equal(undefined);
+            expect(result.getClass(`cls-${name}`)).to.not.equal(undefined);
+        }
     });
 
     it('always contain root class', () => {
@@ -349,11 +333,12 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(result.classes).to.eql({
+        expect(result.getAllClasses()).to.eql({
             root: {
                 _kind: 'class',
                 name: 'root',
                 '-st-root': true,
+                alias: undefined,
             },
         });
     });
@@ -370,7 +355,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(Object.keys(result.classes).length).to.eql(6);
+        expect(Object.keys(result.getAllClasses()).length).to.eql(6);
     });
 
     it('collect classes in @media', () => {
@@ -387,7 +372,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        expect(Object.keys(result.classes).length).to.eql(6);
+        expect(Object.keys(result.getAllClasses()).length).to.eql(6);
     });
 
     it('collect @keyframes', () => {

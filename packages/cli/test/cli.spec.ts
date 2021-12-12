@@ -5,6 +5,7 @@ import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
 import { processorWarnings } from '@stylable/core';
+import { STSymbol } from '@stylable/core/dist/features';
 
 describe('Stylable Cli', function () {
     this.timeout(25000);
@@ -346,7 +347,7 @@ describe('Stylable Cli', function () {
 
             expect(status).to.equal(1);
             expect(
-                stdout.match(new RegExp(processorWarnings.REDECLARE_SYMBOL('x'), 'g'))
+                stdout.match(new RegExp(STSymbol.diagnostics.REDECLARE_SYMBOL('x'), 'g'))
             ).to.have.length(1);
         });
     });

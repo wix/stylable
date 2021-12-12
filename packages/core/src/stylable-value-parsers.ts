@@ -122,7 +122,7 @@ export const SBTypesParsers = {
         const ast = postcssValueParser(value);
         const types: ExtendsValue[] = [];
 
-        ast.walk((node: any) => {
+        ast.walk((node) => {
             if (node.type === 'function') {
                 const args = getNamedArgs(node);
 
@@ -271,7 +271,11 @@ export function getNamedArgs(node: ParsedValue) {
             if (node.type === 'div') {
                 args.push([]);
             } else {
-                const { sourceIndex: _sourceIndex, ...clone } = node;
+                const {
+                    sourceIndex: _sourceIndex,
+                    sourceEndIndex: _sourceEndIndex,
+                    ...clone
+                } = node;
                 args[args.length - 1].push(clone);
             }
         });

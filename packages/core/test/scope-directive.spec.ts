@@ -1,13 +1,18 @@
 import { expect, use } from 'chai';
 import type { AtRule, Declaration, Rule } from 'postcss';
 import {
-    expectWarningsFromTransform,
+    expectTransformDiagnostics,
     flatMatch,
     generateStylableResult,
     processSource,
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
-import { processorWarnings, SRule, transformerWarnings, getRuleScopeSelector } from '@stylable/core';
+import {
+    processorWarnings,
+    SRule,
+    transformerWarnings,
+    getRuleScopeSelector,
+} from '@stylable/core';
 
 use(flatMatch);
 
@@ -45,7 +50,9 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
             const rule = meta.ast.nodes[0] as SRule;
             expect(getRuleScopeSelector(rule)).to.equal('.root');
-            expect(getRuleScopeSelector(rule.clone()), 'clone rules preserve stScope').to.equal('.root');
+            expect(getRuleScopeSelector(rule.clone()), 'clone rules preserve stScope').to.equal(
+                '.root'
+            );
         });
 
         it('should parse "@st-scope" directives with a new class', () => {
@@ -502,7 +509,7 @@ describe('@st-scope', () => {
                 },
             };
 
-            const { meta } = expectWarningsFromTransform(config, [
+            const { meta } = expectTransformDiagnostics(config, [
                 {
                     message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
@@ -528,7 +535,7 @@ describe('@st-scope', () => {
                 },
             };
 
-            const { meta } = expectWarningsFromTransform(config, [
+            const { meta } = expectTransformDiagnostics(config, [
                 {
                     message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
@@ -560,7 +567,7 @@ describe('@st-scope', () => {
                 },
             };
 
-            const { meta } = expectWarningsFromTransform(config, [
+            const { meta } = expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.MISSING_SCOPING_PARAM(),
                     file: '/entry.st.css',
@@ -589,7 +596,7 @@ describe('@st-scope', () => {
                 },
             };
 
-            const { meta } = expectWarningsFromTransform(config, [
+            const { meta } = expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.NO_VARS_DEF_IN_ST_SCOPE(),
                     file: '/entry.st.css',
@@ -619,7 +626,7 @@ describe('@st-scope', () => {
                 },
             };
 
-            const { meta } = expectWarningsFromTransform(config, [
+            const { meta } = expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.NO_IMPORT_IN_ST_SCOPE(),
                     file: '/entry.st.css',
@@ -651,7 +658,7 @@ describe('@st-scope', () => {
                 },
             };
 
-            expectWarningsFromTransform(config, [
+            expectTransformDiagnostics(config, [
                 {
                     message: processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE(),
                     file: '/entry.st.css',

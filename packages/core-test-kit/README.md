@@ -17,8 +17,8 @@ An assortment of `Chai` matchers used by Stylable.
 
 A collection of tools used for testing Stylable diagnostics messages (warnings and errors).
 
-- `expectWarnings` - processes a Stylable input and checks for diagnostics during processing
-- `expectWarningsFromTransform` - checks for diagnostics after a full transformation
+- `expectAnalyzeDiagnostics` - processes a Stylable input and checks for diagnostics during processing
+- `expectTransformDiagnostics` - checks for diagnostics after a full transformation
 - `shouldReportNoDiagnostics` - helper to check no diagnostics were reported
 
 ### Testing infrastructure

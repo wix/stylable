@@ -53,11 +53,11 @@ function collectLocalStates(cls: ClassSymbol) {
     return stateEntriesString;
 }
 
-function stringifyStates({ classes, namespace }: StylableMeta) {
+function stringifyStates(meta: StylableMeta) {
     let out = '';
-    for (const [name, symbol] of Object.entries(classes)) {
+    for (const [name, symbol] of Object.entries(meta.getAllClasses())) {
         const states = collectLocalStates(symbol);
-        out += states ? `${SPACING}${asString(scope(name, namespace))}: { ${states}};\n` : '';
+        out += states ? `${SPACING}${asString(scope(name, meta.namespace))}: { ${states}};\n` : '';
     }
 
     return out;

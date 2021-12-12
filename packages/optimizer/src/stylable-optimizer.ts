@@ -5,12 +5,7 @@ import {
     StylableResults,
     pseudoStates,
 } from '@stylable/core';
-import {
-    parseCssSelector,
-    stringifySelectorAst,
-    Selector,
-    walk,
-} from '@tokey/css-selector-parser';
+import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
 import csso from 'csso';
 import postcss, { Declaration, Root, Rule, Node, Comment, Container } from 'postcss';
 import { NameMapper } from './name-mapper';
@@ -80,56 +75,6 @@ export class StylableOptimizer implements IStylableOptimizer {
             config.shortNamespaces,
             config.classNameOptimizations
         );
-    }
-
-    public rewriteSelector(
-        selector: string,
-        usageMapping: Record<string, boolean>,
-        globals: Record<string, boolean> = {},
-        shortNamespaces: boolean,
-        classNamespaceOptimizations: boolean,
-        delimiter: string
-    ) {
-        const ast = parseCssSelector(selector);
-
-        const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
-        walk(ast, (node) => {
-            if (node.type === 'class' && !globals[node.value]) {
-                const possibleStateNamespace = node.value.match(stateRegexp);
-                let isState;
-                if (possibleStateNamespace) {
-                    if (possibleStateNamespace[1] in usageMapping) {
-                        isState = true;
-                        if (shortNamespaces) {
-                            node.value = node.value.replace(
-                                stateRegexp,
-                                `${this.getNamespace(
-                                    possibleStateNamespace[1]
-                                )}${booleanStateDelimiter}`
-                            );
-                        }
-                    }
-                }
-
-                if (!isState) {
-                    if (classNamespaceOptimizations) {
-                        node.value = this.getClassName(node.value);
-                    } else if (shortNamespaces) {
-                        const namespaceMatch = node.value.match(namespaceRegexp);
-                        if (!namespaceMatch) {
-                            throw new Error(
-                                `Stylable class dose not have proper namespace ${node.value}`
-                            );
-                        }
-                        node.value = node.value.replace(
-                            namespaceRegexp,
-                            `${this.getNamespace(namespaceMatch[1])}${delimiter}`
-                        );
-                    }
-                }
-            }
-        });
-        return stringifySelectorAst(ast);
     }
 
     public optimizeAstAndExports(
@@ -207,6 +152,57 @@ export class StylableOptimizer implements IStylableOptimizer {
                   }
         );
     }
+
+    protected rewriteSelector(
+        selector: string,
+        usageMapping: Record<string, boolean>,
+        globals: Record<string, boolean> = {},
+        shortNamespaces: boolean,
+        classNamespaceOptimizations: boolean,
+        delimiter: string
+    ) {
+        const ast = parseCssSelector(selector);
+
+        const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
+        walk(ast, (node) => {
+            if (node.type === 'class' && !globals[node.value]) {
+                const possibleStateNamespace = node.value.match(stateRegexp);
+                let isState;
+                if (possibleStateNamespace) {
+                    if (possibleStateNamespace[1] in usageMapping) {
+                        isState = true;
+                        if (shortNamespaces) {
+                            node.value = node.value.replace(
+                                stateRegexp,
+                                `${this.getNamespace(
+                                    possibleStateNamespace[1]
+                                )}${booleanStateDelimiter}`
+                            );
+                        }
+                    }
+                }
+
+                if (!isState) {
+                    if (classNamespaceOptimizations) {
+                        node.value = this.getClassName(node.value);
+                    } else if (shortNamespaces) {
+                        const namespaceMatch = node.value.match(namespaceRegexp);
+                        if (!namespaceMatch) {
+                            throw new Error(
+                                `Stylable class dose not have proper namespace ${node.value}`
+                            );
+                        }
+                        node.value = node.value.replace(
+                            namespaceRegexp,
+                            `${this.getNamespace(namespaceMatch[1])}${delimiter}`
+                        );
+                    }
+                }
+            }
+        });
+        return stringifySelectorAst(ast);
+    }
+
     private removeEmptyNodes(root: Root) {
         removeEmptyNodes(root);
     }

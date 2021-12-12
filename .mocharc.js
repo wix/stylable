@@ -1,3 +1,4 @@
+const { nodeFs } = require('@file-services/node');
 const { dirname } = require('path');
 
 module.exports = {
@@ -7,6 +8,9 @@ module.exports = {
 };
 
 function getRequire() {
+    let launchedPath;
+    const root = dirname(require.resolve('./package.json'));
+    const packagesSet = new Set([root]);
     const packages = [
         'webpack-plugin',
         'rollup-plugin',
@@ -14,12 +18,19 @@ function getRequire() {
         'custom-value',
         'experimental-loader',
     ];
-    const root = dirname(require.resolve('./package.json'));
-    const packagesSet = new Set([root]);
+
     for (const package of packages) {
         packagesSet.add(dirname(require.resolve(`@stylable/${package}/package.json`)));
     }
-    return packagesSet.has(process.cwd())
+
+    // we get this env variable from ./.vscode/launch.json (f5 - Mocha Current)
+    if (process.env.FILE) {
+        launchedPath = dirname(nodeFs.findClosestFileSync(process.env.FILE, 'package.json'));
+    } else {
+        launchedPath = process.cwd();
+    }
+
+    return packagesSet.has(launchedPath)
         ? { require: require.resolve('@stylable/e2e-test-kit/dist/browser-server.js') }
         : {};
 }

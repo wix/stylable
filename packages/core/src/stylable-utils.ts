@@ -2,7 +2,7 @@ import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
-import type { Imported, ImportSymbol, StylableSymbol } from './features';
+import { STSymbol, Imported, ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
 import type { StylableMeta } from './stylable-meta';
@@ -136,7 +136,7 @@ export function isCSSVarProp(value: string) {
 }
 
 export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symbolName: string) {
-    const importedVar = resolver.deepResolve(meta.mappedSymbols[symbolName]);
+    const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
     if (
         importedVar &&
         importedVar._kind === 'css' &&

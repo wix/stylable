@@ -13,7 +13,7 @@ export function isStylableModuleSchema(schema: any): schema is StylableModuleSch
 export interface StylableModuleSchema extends JSONSchema7 {
     namespace: string;
     moduleDependencies?: string[];
-    properties?: {
+    properties: {
         [key: string]: boolean | StylableSymbolSchema;
     };
 }

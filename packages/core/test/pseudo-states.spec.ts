@@ -4,14 +4,15 @@ import {
     flatMatch,
     mediaQuery,
     styleRules,
-    expectWarnings,
-    expectWarningsFromTransform,
+    expectAnalyzeDiagnostics,
+    expectTransformDiagnostics,
     generateStylableResult,
     processSource,
     testInlineExpects,
 } from '@stylable/core-test-kit';
 import { processorWarnings, valueMapping, nativePseudoClasses, pseudoStates } from '@stylable/core';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
+import { CSSType } from '@stylable/core/dist/features';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -31,21 +32,21 @@ describe('pseudo-states', () => {
         describe(`reserved pseudo classes`, () => {
             reservedFunctionalPseudoClasses.forEach((name) => {
                 it(`should NOT collect "${name}"`, () => {
-                    const { classes } = processSource(
+                    const meta = processSource(
                         `
                         .root {
                             -st-states: custom-only, ${name};
                         }`,
                         { from: 'path/to/style.css' }
                     );
-                    expect(classes).to.flatMatch({
+                    expect(meta.getAllClasses()).to.flatMatch({
                         root: {
                             [valueMapping.states]: {
                                 'custom-only': null,
                             },
                         },
                     });
-                    expectWarnings(
+                    expectAnalyzeDiagnostics(
                         `.root{
                             |-st-states: $${name}$|;
                         }`,
@@ -61,7 +62,7 @@ describe('pseudo-states', () => {
         });
         describe('boolean', () => {
             it('should collect state definitions as null (for boolean)', () => {
-                const { classes, diagnostics } = processSource(
+                const meta = processSource(
                     `
                     .root {
                         -st-states: state1, state2;
@@ -70,8 +71,8 @@ describe('pseudo-states', () => {
                     { from: 'path/to/style.css' }
                 );
 
-                expect(diagnostics.reports.length, 'no reports').to.eql(0);
-                expect(classes).to.flatMatch({
+                expect(meta.diagnostics.reports.length, 'no reports').to.eql(0);
+                expect(meta.getAllClasses()).to.flatMatch({
                     root: {
                         [valueMapping.states]: {
                             state1: null,
@@ -93,7 +94,7 @@ describe('pseudo-states', () => {
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                expect(res.classes).to.containSubset({
+                expect(res.getAllClasses()).to.containSubset({
                     root: {
                         [valueMapping.states]: {
                             state1: null,
@@ -105,7 +106,7 @@ describe('pseudo-states', () => {
 
         describe('advanced type', () => {
             it('should warn when a state receives more than a single state type', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
                         |-st-states: $state1(string, number(x))$|;
@@ -124,7 +125,7 @@ describe('pseudo-states', () => {
             });
 
             it('should warn when a state function receives no arguments', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .root{
                         |-st-states: $state1()$|;
@@ -140,7 +141,7 @@ describe('pseudo-states', () => {
             });
 
             it('should warn when a validator function receives more than a single argument', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .my-class {
                         |-st-states: $state1( string( contains(one, two) ) )$|;
@@ -159,7 +160,7 @@ describe('pseudo-states', () => {
             });
 
             it('should warn when encountering an unknown type', () => {
-                expectWarnings(
+                expectAnalyzeDiagnostics(
                     `
                     .my-class {
                         |-st-states: state1( $unknown$ )|;
@@ -187,7 +188,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -210,7 +211,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -232,7 +233,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -256,7 +257,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -285,7 +286,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -315,7 +316,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -348,7 +349,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -383,7 +384,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -408,7 +409,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 state1: {
@@ -434,7 +435,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 size: {
@@ -461,7 +462,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 size: {
@@ -488,7 +489,7 @@ describe('pseudo-states', () => {
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 category: {
@@ -510,7 +511,7 @@ describe('pseudo-states', () => {
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.classes).to.containSubset({
+                    expect(res.getAllClasses()).to.containSubset({
                         root: {
                             [valueMapping.states]: {
                                 category: {
@@ -536,7 +537,7 @@ describe('pseudo-states', () => {
                 );
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                expect(res.classes).to.flatMatch({
+                expect(res.getAllClasses()).to.flatMatch({
                     root: {
                         [valueMapping.states]: {
                             state1: null, // boolean
@@ -592,7 +593,7 @@ describe('pseudo-states', () => {
                     },
                 };
 
-                const res = expectWarningsFromTransform(config, []);
+                const res = expectTransformDiagnostics(config, []);
 
                 expect(res).to.have.styleRules({
                     1: '.entry__my-class.entry--state1 {}',
@@ -722,7 +723,7 @@ describe('pseudo-states', () => {
                     },
                 });
 
-                // const res = expectWarningsFromTransform(config, [{
+                // const res = expectTransformDiagnostics(config, [{
                 //     message: [
                 //         'pseudo-state "state1" expected a definition of a single type, but received none'
                 //     ].join('\n'),
@@ -980,7 +981,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, [
+                        const res = expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "failingParameter" failed validation:',
@@ -1064,7 +1065,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, [
+                        const res = expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "wrongState" failed validation:',
@@ -1119,7 +1120,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, [
+                        const res = expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "user" failed validation:',
@@ -1149,7 +1150,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, []);
+                        const res = expectTransformDiagnostics(config, []);
                         expect(res).to.have.styleRules({
                             1: '.entry__my-class.entry---state1-7-hello\\!\\! {}',
                         });
@@ -1171,7 +1172,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, [
+                        const res = expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "user" failed validation:',
@@ -1201,7 +1202,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, []);
+                        const res = expectTransformDiagnostics(config, []);
                         expect(res).to.have.styleRules({
                             1: '.entry__my-class.entry---state1-3-abc {}',
                         });
@@ -1223,7 +1224,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, [
+                        const res = expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "user" failed validation:',
@@ -1253,7 +1254,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        expectWarningsFromTransform(config, [
+                        expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" default value "" failed validation:',
@@ -1307,7 +1308,7 @@ describe('pseudo-states', () => {
                         },
                     };
 
-                    expectWarningsFromTransform(config, [
+                    expectTransformDiagnostics(config, [
                         {
                             message: [
                                 'pseudo-state "state1" default value "defaultBlah" failed validation:',
@@ -1334,7 +1335,7 @@ describe('pseudo-states', () => {
                         },
                     };
 
-                    const res = expectWarningsFromTransform(config, [
+                    const res = expectTransformDiagnostics(config, [
                         {
                             message: [
                                 'pseudo-state "state1" with parameter "blah" failed validation:',
@@ -1363,7 +1364,7 @@ describe('pseudo-states', () => {
                         },
                     };
 
-                    expectWarningsFromTransform(config, [
+                    expectTransformDiagnostics(config, [
                         {
                             message: [
                                 'pseudo-state "state1" default value "" failed validation:',
@@ -1416,7 +1417,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, [
+                        const res = expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "1" failed validation:',
@@ -1446,7 +1447,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, [
+                        const res = expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "42" failed validation:',
@@ -1476,7 +1477,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, [
+                        const res = expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "42" failed validation:',
@@ -1506,7 +1507,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, []);
+                        const res = expectTransformDiagnostics(config, []);
                         expect(res).to.have.styleRules({
                             1: '.entry__my-class.entry---state1-2-40 {}',
                         });
@@ -1528,7 +1529,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, []);
+                        const res = expectTransformDiagnostics(config, []);
                         expect(res).to.have.styleRules({
                             1: '.entry__my-class.entry---state1-1-3 {}',
                         });
@@ -1550,7 +1551,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        const res = expectWarningsFromTransform(config, []);
+                        const res = expectTransformDiagnostics(config, []);
                         expect(res).to.have.styleRules({
                             1: '.entry__my-class.entry---state1-1-3 {}',
                         });
@@ -1575,7 +1576,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        expectWarningsFromTransform(config, [
+                        expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "size" default value "" failed validation:',
@@ -1601,7 +1602,7 @@ describe('pseudo-states', () => {
                             },
                         };
 
-                        expectWarningsFromTransform(config, [
+                        expectTransformDiagnostics(config, [
                             {
                                 message: [
                                     'pseudo-state "size" default value "huge" failed validation:',
@@ -1683,7 +1684,7 @@ describe('pseudo-states', () => {
                         },
                     };
 
-                    const res = expectWarningsFromTransform(config, [
+                    const res = expectTransformDiagnostics(config, [
                         {
                             message: [
                                 'pseudo-state "size" with parameter "huge" failed validation:',
@@ -1768,7 +1769,7 @@ describe('pseudo-states', () => {
                         },
                     };
 
-                    const res = expectWarningsFromTransform(config, [
+                    const res = expectTransformDiagnostics(config, [
                         {
                             message: [
                                 'pseudo-state "category" with parameter "one two" failed validation:',
@@ -2191,7 +2192,7 @@ describe('pseudo-states', () => {
     describe('diagnostics', () => {
         // TODO: Add warning implementation
         xit('should return warning for state without selector', () => {
-            expectWarnings(
+            expectAnalyzeDiagnostics(
                 `
                 |:hover|{
 
@@ -2222,7 +2223,7 @@ describe('pseudo-states', () => {
                 },
             };
 
-            const res = expectWarningsFromTransform(config, [
+            const res = expectTransformDiagnostics(config, [
                 {
                     message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
@@ -2251,7 +2252,7 @@ describe('pseudo-states', () => {
                 },
             };
 
-            const res = expectWarningsFromTransform(config, [
+            const res = expectTransformDiagnostics(config, [
                 {
                     message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
@@ -2275,7 +2276,7 @@ describe('pseudo-states', () => {
                 },
             };
 
-            const res = expectWarningsFromTransform(config, [
+            const res = expectTransformDiagnostics(config, [
                 { message: stateErrors.UNKNOWN_STATE_USAGE('unknownState'), file: '/entry.st.css' },
             ]);
             expect(res, 'keep unknown state').to.have.styleRules([`.entry__root:unknownState{}`]);
@@ -2283,7 +2284,7 @@ describe('pseudo-states', () => {
 
         it('should warn when defining states in complex selector', () => {
             // TODO: add more complex scenarios
-            expectWarnings(
+            expectAnalyzeDiagnostics(
                 `
                 .gaga:hover {
                     |-st-states|:shmover;
@@ -2299,7 +2300,7 @@ describe('pseudo-states', () => {
         });
 
         it('should warn when defining a state inside a type selector', () => {
-            expectWarnings(
+            expectAnalyzeDiagnostics(
                 `
                 MyElement {
                     |-st-states|:shmover;
@@ -2308,7 +2309,7 @@ describe('pseudo-states', () => {
                 [
                     // skipping root scoping warning
                     {
-                        message: processorWarnings.UNSCOPED_TYPE_SELECTOR('MyElement'),
+                        message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('MyElement'),
                         file: 'main.css',
                         skip: true,
                     },
@@ -2321,7 +2322,7 @@ describe('pseudo-states', () => {
         });
 
         it('should warn when overriding class states', () => {
-            expectWarnings(
+            expectAnalyzeDiagnostics(
                 `
                 .root {
                     -st-states: mystate;
@@ -2335,7 +2336,7 @@ describe('pseudo-states', () => {
         });
 
         it('should warn when defining a state starting with a "-"', () => {
-            expectWarnings(
+            expectAnalyzeDiagnostics(
                 `
                 .root {
                     |-st-states: $-someState$|;

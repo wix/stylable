@@ -20,21 +20,27 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('renders css', async () => {
+    it('renders esm button with override', async () => {
         const { page } = await projectRunner.openInBrowser();
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
+        const { backgroundColor, fontSize } = await page.$eval('button', (el: HTMLElement) => ({
+            fontSize: getComputedStyle(el).fontSize,
+            backgroundColor: getComputedStyle(el).backgroundColor,
+        }));
+        /*
+            Expecting the backgroundColor to be green 
+            makes sure that the esm style button is rendered
+        */
+        expect(backgroundColor).to.equal('rgb(0, 128, 0)');
+        /* 
+           Expecting the font-size override is working 
+           makes sure that Stylable resolves stylesheets with the "browser" field configuration
+        */
+        expect(fontSize).to.equal('35px');
 
         expect(styleElements).to.eql([
             { id: './node_modules/test-components/esm/button.st.css', depth: '1' },
             { id: './src/app.st.css', depth: '3' },
         ]);
-    });
-
-    it('override 3rd party', async () => {
-        const { page } = await projectRunner.openInBrowser();
-        const backgroundColor = await page.evaluate(() => {
-            return getComputedStyle((window as any).btn).backgroundColor;
-        });
-        expect(backgroundColor).to.eql('rgb(255, 215, 0)');
     });
 });
