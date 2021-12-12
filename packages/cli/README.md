@@ -33,13 +33,13 @@ After installing `@stylable/cli`, the `stc` command will be available, running `
 | `--cjs`                   |        | output commonjs modules (`.js`)                                                        | `true`           |
 | `--esm`                   |        | output esm modules (`.mjs`)                                                            | `false`          |
 | `--css`                   |        | output transpiled css files (`.css`)                                                   | `false`          |
-| `--stcss`                 |        | output stylable source files (`.st.css`)                                               | `false`          |
-| `--dts`                   |        | output definition files for the stylable source files (`.st.css.d.ts`)                 | `false`          |
-| `--dtsSourceMap`          |        | output source-maps for the definitions of stylable source files (`.st.css.d.ts.map`)   | `true` if `--dts` is true, otherwise `false` |
+| `--stcss`                 |        | output stylable source files (`.st.css/.stcss`)                                        | `false`          |
+| `--dts`                   |        | output definition files for the stylable source files (`.st.css.d.ts/.stcss.d.ts`)     | `false`          |
+| `--dtsSourceMap`          |        | output source-maps for the definitions of stylable source files (`.st.css.d.ts.map/.stcss.d.ts.map`)   | `true` if `--dts` is true, otherwise `false` |
 | `--watch`                 |  `w`   | enable watch mode                                                                      | `false`          |
 | `--useNamespaceReference` | `unsr` | mark output stylable source files with relative path for namespacing purposes (\*)     | `false`          |
 | `--customGenerator`       |        | path of a custom index file generator                                                  | -                |
-| `--ext`                   |        | extension of stylable css files                                                        | `.st.css`        |
+| `--ext`                   |        | extension of stylable css files                                                        | `.st.css,.stcss`        |
 | `--cssInJs`               |        | output transpiled css into the js module                                               | `false`          |
 | `--cssFilename`           |        | pattern of the generated css file                                                      | `[filename].css` |
 | `--injectCSSRequest`      | `icr`  | add a static import for the generated css in the js module output                      | `false`          |

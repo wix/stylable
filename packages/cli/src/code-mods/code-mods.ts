@@ -8,12 +8,11 @@ import type { Diagnostic } from '@stylable/core';
 export interface CodeModsOptions {
     fs: FileSystem;
     rootDir: string;
-    extension: string;
     mods: Set<{ id: string; apply: CodeMod }>;
     log: Log;
 }
 
-export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions) {
+export function codeMods({ fs, rootDir, mods, log }: CodeModsOptions) {
     if (mods.size === 0) {
         return log('No codemods to apply provided. Bail execution.');
     }
@@ -23,7 +22,7 @@ export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions)
         join,
         relative,
         rootDir,
-        extension,
+        '.st.css',
         new Set<string>(['node_modules', '.git'])
     );
 

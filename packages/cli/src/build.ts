@@ -46,9 +46,9 @@ export interface BuildOptions {
     includeCSSInJS?: boolean;
     /** should output build css for each source file */
     outputCSS?: boolean;
-    /** should output source .st.css file to dist */
+    /** should output source .st.css/.stcss file to dist */
     outputSources?: boolean;
-    /** should add namespace reference to the .st.css copy  */
+    /** should add namespace reference to the .st.css/.stcss copy  */
     useNamespaceReference?: boolean;
     /** should inject css import in the JS module for the generated css from outputCSS */
     injectCSSRequest?: boolean;
@@ -58,7 +58,7 @@ export interface BuildOptions {
     minify?: boolean;
     /** should generate .d.ts definitions for every stylesheet */
     dts?: boolean;
-    /** should generate .d.ts.map files for every .d.ts mapping back to the source .st.css */
+    /** should generate .d.ts.map files for every .d.ts mapping back to the source file */
     dtsSourceMap?: boolean;
     /** enable watch mode */
     watch?: boolean;

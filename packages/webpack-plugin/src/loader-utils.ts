@@ -16,7 +16,7 @@ export function getImports(
     const imports: string[] = [];
     const unusedImports: string[] = [];
     for (const imported of meta.imports) {
-        if (imported.request.endsWith('.st.css')) {
+        if (imported.request.endsWith('.st.css') || imported.request.endsWith('.stcss')) {
             /**
              * We want to include Stylable files that have effects on other files as regular imports
              * and other ones as unused for depth calculation

@@ -28,6 +28,7 @@ export interface MetadataOptions {
     mode?: 'json' | 'cjs' | 'amd:static' | 'amd:factory';
 }
 
+const stylableExtRegexp = /(\.st\.css$)|(\.stcss$)/i;
 export class StylableMetadataPlugin {
     constructor(private options: MetadataOptions) {}
     public apply(compiler: Compiler) {
@@ -179,7 +180,7 @@ export class StylableMetadataPlugin {
             }
 
             variants.forEach((name: string) => {
-                if (!name.match(/(\.st\.css$)|(\.stcss$)/i)) {
+                if (!name.match(stylableExtRegexp)) {
                     return;
                 }
                 const variantPath = join(variantsDir, name);
@@ -200,7 +201,10 @@ export class StylableMetadataPlugin {
                 }
                 builder.addSource(variantPath, content, {
                     namespace:
-                        name.replace(/\\/g, '/').replace(/\//g, '_').replace('.st.css', '') +
+                        name
+                            .replace(/\\/g, '/')
+                            .replace(/\//g, '_')
+                            .replace(stylableExtRegexp, '') +
                         '-' +
                         namespace,
                     variant: true,

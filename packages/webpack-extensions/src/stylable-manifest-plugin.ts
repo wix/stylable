@@ -32,10 +32,13 @@ const defaultOptions: Options = {
     exposeNamespaceMapping: true,
     generateCSSVarsExports: false,
     filterComponents(resourcePath) {
-        return resourcePath.endsWith('.comp.st.css');
+        return resourcePath.endsWith('.comp.st.css') || resourcePath.endsWith('.comp.stcss');
     },
     getCompId(resourcePath) {
-        return basename(resourcePath).replace(/\.comp\.st\.css$/, '');
+        const compExtRegexp = resourcePath.endsWith('.st.css')
+            ? /\.comp\.st\.css$/
+            : /.comp\.stcss$/;
+        return basename(resourcePath).replace(compExtRegexp, '');
     },
     getOutputFileName(contentHash) {
         return `stylable.manifest.${contentHash}.json`;

@@ -72,24 +72,24 @@ export function getCliArguments(): Arguments<CliArguments> {
         })
         .option('stcss', {
             type: 'boolean',
-            description: 'output stylable sources (.st.css)',
+            description: 'output stylable sources (.st.css/.stcss)',
             defaultDescription: String(defaults.outputSources),
         })
         .option('dts', {
             type: 'boolean',
-            description: 'output stylable definition files for sources (.st.css.d.ts)',
+            description: 'output stylable definition files for sources (.st.css.d.ts/.stcss.d.ts)',
             defaultDescription: String(defaults.dts),
         })
         .option('dtsSourceMap', {
             type: 'boolean',
             description:
-                'output source maps for stylable definition files for sources (.st.css.d.ts.map)',
+                'output source maps for stylable definition files for sources (.st.css.d.ts.map/.stcss.d.ts.map)',
             defaultDescription: 'true if "--dts" option is enabled, otherwise false',
         })
         .option('useNamespaceReference', {
             type: 'boolean',
             description:
-                'mark output .st.css files in outDir (cjs, esm) with the relative path to the matching output source file to use for its namespace',
+                'mark output Stylable files in outDir (cjs, esm) with the relative path to the matching output source file to use for its namespace',
             alias: 'unsr',
         })
         .option('namespaceResolver', {

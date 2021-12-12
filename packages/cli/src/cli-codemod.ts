@@ -66,7 +66,6 @@ if (loadedMods.size !== mods.length + external.length) {
     process.exitCode = 1;
 } else {
     codeMods({
-        extension: '.st.css',
         fs,
         log,
         mods: loadedMods,

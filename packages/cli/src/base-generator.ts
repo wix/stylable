@@ -1,7 +1,7 @@
 import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
-import camelcase from 'lodash.camelcase';
-import upperfirst from 'lodash.upperfirst';
+import camelCase from 'lodash.camelcase';
+import upperFirst from 'lodash.upperfirst';
 import { basename, relative } from 'path';
 import { normalizeRelative, ensureDirectory, tryRun } from './build-tools';
 import type { Log } from './logger';
@@ -54,9 +54,8 @@ export class Generator {
     }
 
     public filename2varname(filePath: string) {
-        const varname = basename(basename(filePath, '.css'), '.st') // remove prefixes and .st.css ext
-            .replace(/^\d+/, ''); // remove leading numbers
-        return upperfirst(camelcase(varname));
+        const ext = filePath.endsWith('.stcss') ? '.stcss' : '.st.css';
+        return upperFirst(camelCase(basename(filePath, ext).replace(/^\d+/, '')));
     }
 
     protected generateIndexSource(_indexFileTargetPath: string) {

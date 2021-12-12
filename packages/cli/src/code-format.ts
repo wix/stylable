@@ -118,18 +118,18 @@ for (const request of requires) {
     }
 }
 
-function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css') {
+function readDirectoryDeep(dirPath: string) {
     const files = nodeFs.readdirSync(dirPath, 'utf-8');
     let res: string[] = [];
 
     for (const item of files) {
-        const currentlFilePath = join(dirPath, item);
-        const itemStat = nodeFs.statSync(join(currentlFilePath));
+        const currentFilePath = join(dirPath, item);
+        const itemStat = nodeFs.statSync(join(currentFilePath));
 
-        if (itemStat.isFile() && item.endsWith(fileSuffixFilter)) {
-            res.push(currentlFilePath);
+        if (itemStat.isFile() && (item.endsWith('.st.css') || item.endsWith('.stcss'))) {
+            res.push(currentFilePath);
         } else if (itemStat.isDirectory()) {
-            res = res.concat(readDirectoryDeep(currentlFilePath));
+            res = res.concat(readDirectoryDeep(currentFilePath));
         }
     }
 
@@ -172,10 +172,10 @@ if (debug) {
 const formatPathStats = nodeFs.statSync(target);
 
 if (formatPathStats.isFile()) {
-    if (target.endsWith('.st.css')) {
+    if (target.endsWith('.st.css') || target.endsWith('.stcss')) {
         formatStylesheet(target);
     } else {
-        throw new Error('cannot format file, not a Stylable stylesheet (.st.css)');
+        throw new Error('cannot format file, not a Stylable stylesheet extension');
     }
 } else if (formatPathStats.isDirectory()) {
     const stylesheets = readDirectoryDeep(target);
@@ -185,7 +185,7 @@ if (formatPathStats.isFile()) {
             formatStylesheet(stylesheet);
         }
     } else {
-        throw new Error('cannot find any Stylable stylesheets (.st.css) in directory: ' + target);
+        throw new Error('cannot find any Stylable stylesheets in directory: ' + target);
     }
 }
 

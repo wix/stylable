@@ -66,8 +66,9 @@ export function buildSingleFile({
     const outPath = outSrcPath + '.js';
     const fileDirectory = dirname(filePath);
     const outDirPath = dirname(outPath);
+    const ext = outSrcPath.endsWith('.stcss') ? '.stcss' : '.st.css';
     const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
-        filename: basename(outSrcPath, '.st.css'),
+        filename: basename(outSrcPath, ext),
     });
     const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
     const outputLogs: string[] = [];
@@ -108,7 +109,7 @@ export function buildSingleFile({
             content = srcNamespaceAnnotation + content;
         }
         generated.add(outSrcPath);
-        outputLogs.push(`.st.css source`);
+        outputLogs.push(`Stylable source file`);
         tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
     }
     // st.css.js
@@ -197,8 +198,9 @@ export function removeBuildProducts({
 }: BuildCommonOptions) {
     const { basename, dirname, join } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
+    const ext = outSrcPath.endsWith('.stcss') ? '.stcss' : '.st.css';
     const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
-        filename: basename(outSrcPath, '.st.css'),
+        filename: basename(outSrcPath, ext),
     });
     const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
     const outputLogs: string[] = [];
@@ -210,7 +212,7 @@ export function removeBuildProducts({
             throw new Error(`Attempt to remove source file ${outSrcPath}`);
         }
         generated.delete(outSrcPath);
-        outputLogs.push(`.st.css source`);
+        outputLogs.push(`Stylable source file`);
         tryRun(() => fs.unlinkSync(outSrcPath), `Unlink File Error: ${outSrcPath}`);
     }
     // st.css.js
