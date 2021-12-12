@@ -4,6 +4,7 @@ export * as STSymbol from './st-symbol';
 export type { StylableSymbol } from './st-symbol';
 
 export * as STImport from './st-import';
+export type { ImportSymbol, Imported } from './st-import';
 
 export * as STGlobal from './st-global';
 
@@ -15,8 +16,6 @@ export type { ElementSymbol } from './css-type';
 
 export type {
     CSSVarSymbol,
-    ImportSymbol,
-    Imported,
     KeyframesSymbol,
     RefedMixin,
     StylableDirectives,

@@ -1,6 +1,5 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import { generalDiagnostics } from './diagnostics';
-import type { Imported, ImportSymbol } from './types';
 import * as STSymbol from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
@@ -11,6 +10,24 @@ import { rootValueMapping, valueMapping } from '../stylable-value-parsers';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
+
+export interface ImportSymbol {
+    _kind: 'import';
+    type: 'named' | 'default';
+    name: string;
+    import: Imported;
+    context: string;
+}
+
+export interface Imported {
+    from: string;
+    defaultExport: string;
+    named: Record<string, string>;
+    keyframes: Record<string, string>;
+    rule: postcss.Rule | postcss.AtRule;
+    request: string;
+    context: string;
+}
 
 const dataKey = plugableRecord.key<Imported[]>('imports');
 
