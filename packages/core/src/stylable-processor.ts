@@ -135,7 +135,6 @@ export const processorWarnings = {
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
-    protected dirContext!: string;
 
     constructor(
         public diagnostics = new Diagnostics(),
@@ -145,8 +144,6 @@ export class StylableProcessor implements FeatureContext {
         this.meta = new StylableMeta(root, this.diagnostics);
 
         STImport.hooks.analyzeInit(this);
-
-        this.dirContext = path.dirname(this.meta.source);
 
         this.handleAtRules(root);
 
