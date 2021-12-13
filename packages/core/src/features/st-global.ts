@@ -9,8 +9,8 @@ const dataKey = plugableRecord.key<Record<string, true>>('globals');
 // HOOKS
 
 export const hooks = createFeature({
-    analyzeInit({ data }) {
-        plugableRecord.set(data, dataKey, {});
+    metaInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, {});
     },
 });
 

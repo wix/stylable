@@ -1,5 +1,6 @@
 import { FeatureContext, createFeature } from './feature';
-import type { ImportSymbol, VarSymbol, CSSVarSymbol, KeyframesSymbol } from './types';
+import type { VarSymbol, CSSVarSymbol, KeyframesSymbol } from './types';
+import type { ImportSymbol } from './st-import';
 import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import { plugableRecord } from '../helpers/plugable-record';
@@ -26,8 +27,8 @@ export const diagnostics = {
 // HOOKS
 
 export const hooks = createFeature({
-    analyzeInit({ data }) {
-        plugableRecord.set(data, dataKey, {});
+    metaInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, {});
     },
 });
 

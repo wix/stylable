@@ -5,8 +5,8 @@ import {
     generateStylableResult,
     processSource,
 } from '@stylable/core-test-kit';
-import { processorWarnings, resolverWarnings } from '@stylable/core';
-import { STSymbol } from '@stylable/core/dist/features';
+import { processorWarnings } from '@stylable/core';
+import { STSymbol, STImport } from '@stylable/core/dist/features';
 
 describe('css custom-properties (vars)', () => {
     describe('process', () => {
@@ -918,7 +918,7 @@ describe('css custom-properties (vars)', () => {
 
             expectTransformDiagnostics(config, [
                 {
-                    message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                    message: STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
                         '--unknownVar',
                         './imported.st.css'
                     ),
@@ -1002,26 +1002,22 @@ describe('css custom-properties (vars)', () => {
             ]);
         });
 
-        it('clashing imported and global css var', () => {
+        it('should override import with local definition @property', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                            @property st-global(--myVar);
-                            @property st-global(--mySecondVar);
+                            |@property st-global(--before)|;
 
-                            |@st-import [--myVar] from "./st-imported.st.css"|;
+                            @st-import [--before, --after] from "./imported.st.css";
 
-                            :import {
-                                -st-from: "./imported.st.css";
-                                -st-named: --mySecondVar;
-                            }
+                            @property st-global(--after);
 
                             .root {
-                                prop1: var(--myVar);
-                                prop2: var(--mySecondVar);
+                                prop1: var(--before);
+                                prop2: var(--after);
                             }
                             `,
                     },
@@ -1029,15 +1025,8 @@ describe('css custom-properties (vars)', () => {
                         namespace: 'imported',
                         content: `
                             .root {
-                                --mySecondVar: red;
-                            }
-                            `,
-                    },
-                    '/st-imported.st.css': {
-                        namespace: 'st-imported',
-                        content: `
-                            .root {
-                                --myVar: red;
+                                --before: red;
+                                --after: red;
                             }
                             `,
                     },
@@ -1046,11 +1035,11 @@ describe('css custom-properties (vars)', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--myVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--before'),
                     file: '/entry.st.css',
                 },
                 {
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--mySecondVar'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--after'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },
@@ -1060,28 +1049,26 @@ describe('css custom-properties (vars)', () => {
             const firstDecl = rule.nodes[0] as postcss.Declaration;
             const secondDecl = rule.nodes[1] as postcss.Declaration;
 
-            expect(firstDecl.value).to.equal('var(--st-imported-myVar)');
-            expect(secondDecl.value).to.equal('var(--imported-mySecondVar)');
+            expect(firstDecl.value).to.equal('var(--before)');
+            expect(secondDecl.value).to.equal('var(--after)');
         });
 
-        it('clashing imported and global css var (deprecated)', () => {
+        it('should override import with local @st-global-custom-property (deprecated)', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                            |@st-global-custom-property --myVar, --mySecondVar|;
-                            @st-import [--myVar] from "./st-imported.st.css";
+                            |@st-global-custom-property --before|;
+                            
+                            @st-import [--before, --after] from "./imported.st.css";
 
-                            :import {
-                                -st-from: "./imported.st.css";
-                                -st-named: --mySecondVar;
-                            }
+                            |@st-global-custom-property --after|;
 
                             .root {
-                                prop1: var(--myVar);
-                                prop2: var(--mySecondVar);
+                                prop1: var(--before);
+                                prop2: var(--after);
                             }
                             `,
                     },
@@ -1089,45 +1076,36 @@ describe('css custom-properties (vars)', () => {
                         namespace: 'imported',
                         content: `
                             .root {
-                                --mySecondVar: red;
-                            }
-                            `,
-                    },
-                    '/st-imported.st.css': {
-                        namespace: 'st-imported',
-                        content: `
-                            .root {
-                                --myVar: red;
+                                --before: red;
+                                --after: red;
                             }
                             `,
                     },
                 },
             };
 
-            const { meta } = expectTransformDiagnostics(config, [
-                {
-                    message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
-                    file: '/entry.st.css',
-                    severity: 'info',
-                },
-                {
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--myVar'),
-                    file: '/entry.st.css',
-                    skipLocationCheck: true,
-                },
-                {
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('--mySecondVar'),
-                    file: '/entry.st.css',
-                    skipLocationCheck: true,
-                },
-            ]);
+            const { meta } = expectTransformDiagnostics(
+                config,
+                [
+                    {
+                        message: STSymbol.diagnostics.REDECLARE_SYMBOL('--before'),
+                        file: '/entry.st.css',
+                    },
+                    {
+                        message: STSymbol.diagnostics.REDECLARE_SYMBOL('--after'),
+                        file: '/entry.st.css',
+                        skipLocationCheck: true,
+                    },
+                ],
+                { partial: true }
+            );
 
             const rule = meta.outputAst!.nodes[0] as postcss.Rule;
             const firstDecl = rule.nodes[0] as postcss.Declaration;
             const secondDecl = rule.nodes[1] as postcss.Declaration;
 
-            expect(firstDecl.value).to.equal('var(--st-imported-myVar)');
-            expect(secondDecl.value).to.equal('var(--imported-mySecondVar)');
+            expect(firstDecl.value).to.equal('var(--before)');
+            expect(secondDecl.value).to.equal('var(--after)');
         });
     });
 });

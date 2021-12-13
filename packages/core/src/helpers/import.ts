@@ -1,13 +1,17 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
-import { Diagnostics } from './diagnostics';
-import type { Imported } from './features';
+import { Diagnostics } from '../diagnostics';
+import type { Imported } from '../features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
-import { rootValueMapping, SBTypesParsers, valueMapping } from './stylable-value-parsers';
-import { stripQuotation } from './utils';
-import { isCompRoot } from './helpers/selector';
-
-const parseNamed = SBTypesParsers[valueMapping.named];
+import { rootValueMapping, valueMapping } from '../stylable-value-parsers';
+import { stripQuotation } from '../utils';
+import { isCompRoot } from './selector';
+import type { ParsedValue } from '../types';
+import type * as postcss from 'postcss';
+import postcssValueParser, {
+    ParsedValue as PostCSSParsedValue,
+    FunctionNode,
+} from 'postcss-value-parser';
 
 export const parseImportMessages = {
     ST_IMPORT_STAR() {
@@ -35,6 +39,12 @@ export const parseImportMessages = {
     },
     FROM_PROP_MISSING_IN_IMPORT() {
         return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
+    },
+    INVALID_NAMED_IMPORT_AS(name: string) {
+        return `Invalid named import "as" with name "${name}"`;
+    },
+    INVALID_NESTED_KEYFRAMES(name: string) {
+        return `Invalid nested keyframes import "${name}"`;
     },
 };
 
@@ -214,9 +224,18 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
     if (imports && imports.star) {
         diagnostics.error(atRule, parseImportMessages.ST_IMPORT_STAR());
     } else {
-        importObj.defaultExport = imports.defaultName || '';
         setImportObjectFrom(imports.from || '', context, importObj);
 
+        importObj.defaultExport = imports.defaultName || '';
+        if (
+            importObj.defaultExport &&
+            !isCompRoot(importObj.defaultExport) &&
+            importObj.from.endsWith(`.css`)
+        ) {
+            diagnostics.warn(atRule, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                word: importObj.defaultExport,
+            });
+        }
         if (imports.tagged?.keyframes) {
             // importObj.keyframes = imports.tagged?.keyframes;
             for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
@@ -228,7 +247,6 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
                 importObj.named[impAsName] = impName;
             }
         }
-
         if (imports.errors.length) {
             diagnostics.error(atRule, parseImportMessages.INVALID_ST_IMPORT_FORMAT(imports.errors));
         } else if (!imports.from?.trim()) {
@@ -269,8 +287,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
             }
             case valueMapping.default:
                 importObj.defaultExport = decl.value;
-
-                if (!isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
+                if (!isCompRoot(importObj.defaultExport) && importObj.from.endsWith(`.css`)) {
                     diagnostics.warn(decl, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
                         word: importObj.defaultExport,
                     });
@@ -278,7 +295,11 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                 break;
             case valueMapping.named:
                 {
-                    const { keyframesMap, namedMap } = parseNamed(decl.value, decl, diagnostics);
+                    const { keyframesMap, namedMap } = parsePseudoImportNamed(
+                        decl.value,
+                        decl,
+                        diagnostics
+                    );
                     importObj.named = namedMap;
                     importObj.keyframes = keyframesMap;
                 }
@@ -295,6 +316,25 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
         diagnostics.error(rule, parseImportMessages.FROM_PROP_MISSING_IN_IMPORT());
     }
     return importObj;
+}
+
+export function parsePseudoImportNamed(
+    value: string,
+    node: postcss.Declaration | postcss.AtRule,
+    diagnostics: Diagnostics
+) {
+    const namedMap: Record<string, string> = {};
+    const keyframesMap: Record<string, string> = {};
+    if (value) {
+        handleNamedTokens(
+            postcssValueParser(value),
+            { namedMap, keyframesMap },
+            'namedMap',
+            node,
+            diagnostics
+        );
+    }
+    return { namedMap, keyframesMap };
 }
 
 function createPseudoImportProps(
@@ -445,4 +485,52 @@ function processImports(
             handled.add(patch);
         }
     }
+}
+
+function handleNamedTokens(
+    tokens: PostCSSParsedValue | FunctionNode,
+    buckets: { namedMap: Record<string, string>; keyframesMap: Record<string, string> },
+    key: keyof typeof buckets = 'namedMap',
+    node: postcss.Declaration | postcss.AtRule,
+    diagnostics: Diagnostics
+) {
+    const { nodes } = tokens;
+    for (let i = 0; i < nodes.length; i++) {
+        const token = nodes[i];
+        if (token.type === 'word') {
+            const space = nodes[i + 1];
+            const as = nodes[i + 2];
+            const spaceAfter = nodes[i + 3];
+            const asName = nodes[i + 4];
+            if (isImportAs(space, as)) {
+                if (spaceAfter?.type === 'space' && asName?.type === 'word') {
+                    buckets[key][asName.value] = token.value;
+                    i += 4; //ignore next 4 tokens
+                } else {
+                    i += !asName ? 3 : 2;
+                    diagnostics.warn(
+                        node,
+                        parseImportMessages.INVALID_NAMED_IMPORT_AS(token.value)
+                    );
+                    continue;
+                }
+            } else {
+                buckets[key][token.value] = token.value;
+            }
+        } else if (token.type === 'function' && token.value === 'keyframes') {
+            if (key === 'keyframesMap') {
+                diagnostics.warn(
+                    node,
+                    parseImportMessages.INVALID_NESTED_KEYFRAMES(
+                        postcssValueParser.stringify(token)
+                    )
+                );
+            }
+            handleNamedTokens(token, buckets, 'keyframesMap', node, diagnostics);
+        }
+    }
+}
+
+function isImportAs(space: ParsedValue, as: ParsedValue) {
+    return space?.type === 'space' && as?.type === 'word' && as?.value === 'as';
 }

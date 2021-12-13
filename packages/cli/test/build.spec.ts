@@ -1,13 +1,8 @@
 import { expect } from 'chai';
-import {
-    Stylable,
-    functionWarnings,
-    processorWarnings,
-    resolverWarnings,
-    murmurhash3_32_gc,
-} from '@stylable/core';
+import { Stylable, functionWarnings, processorWarnings, murmurhash3_32_gc } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
+import { STImport } from '@stylable/core/dist/features';
 
 const log = () => {
     /**/
@@ -168,7 +163,7 @@ describe('build stand alone', () => {
             processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp')
         );
         expect(messages[1].message).to.contain(
-            resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
+            STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
         );
         expect(messages[2].message).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
     });

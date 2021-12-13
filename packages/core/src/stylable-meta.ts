@@ -16,11 +16,11 @@ import type { PlugableRecord } from './helpers/plugable-record';
 import { getSourcePath } from './stylable-utils';
 import { setFieldForDeprecation } from './helpers/deprecation';
 import { valueMapping } from './stylable-value-parsers';
-import { STSymbol, STGlobal, CSSClass, CSSType } from './features';
+import { STSymbol, STImport, STGlobal, CSSClass, CSSType } from './features';
 
 export const RESERVED_ROOT_NAME = 'root';
 
-const features = [STSymbol, STGlobal, CSSClass, CSSType];
+const features = [STSymbol, STImport, STGlobal, CSSClass, CSSType];
 
 export class StylableMeta {
     public data: PlugableRecord = {};
@@ -28,12 +28,16 @@ export class StylableMeta {
     public root: 'root' = RESERVED_ROOT_NAME;
     public source: string = getSourcePath(this.ast, this.diagnostics);
     public namespace = '';
+    /** @deprecated use meta.getImportStatements() */
     public imports: Imported[] = [];
     public vars: VarSymbol[] = [];
     public cssVars: Record<string, CSSVarSymbol> = {};
     public keyframes: postcss.AtRule[] = [];
+    /** @deprecated use meta.getAllClasses() or meta.getClass(name) */
     public classes: Record<string, ClassSymbol> = {};
+    /** @deprecated use meta.getAllTypeElements() or meta.getTypeElement(name) */
     public elements: Record<string, ElementSymbol> = {};
+    /** @deprecated use meta.getAllSymbols() or meta.getSymbol(name) */
     public mappedSymbols: Record<string, StylableSymbol> = {};
     public mappedKeyframes: Record<string, KeyframesSymbol> = {};
     public customSelectors: Record<string, string> = {};
@@ -48,9 +52,9 @@ export class StylableMeta {
     public globals: Record<string, boolean> = {};
     constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
         // initiate features
-        const context: FeatureContext = { meta: this, diagnostics: diagnostics };
+        const context: FeatureContext = { meta: this, diagnostics };
         for (const { hooks } of features) {
-            hooks.analyzeInit(this);
+            hooks.metaInit(context);
         }
         // set default root
         const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
@@ -77,6 +81,9 @@ export class StylableMeta {
     getAllTypeElements() {
         return CSSType.getAll(this);
     }
+    getImportStatements() {
+        return STImport.getImportStatements(this);
+    }
 }
 setFieldForDeprecation(StylableMeta.prototype, `elements`, {
     objectType: `stylableMeta`,
@@ -92,4 +99,9 @@ setFieldForDeprecation(StylableMeta.prototype, `mappedSymbols`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
     pleaseUse: `meta.getAllSymbols() or meta.getSymbol(name)`,
+});
+setFieldForDeprecation(StylableMeta.prototype, `imports`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+    pleaseUse: `meta.getImportStatements()`,
 });

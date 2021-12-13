@@ -11,13 +11,12 @@ import type {
     ClassSymbol,
     CSSVarSymbol,
     ElementSymbol,
-    Imported,
     RefedMixin,
     StylableDirectives,
     VarSymbol,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
-import { FeatureContext, STSymbol, CSSClass, CSSType } from './features';
+import { FeatureContext, STSymbol, STImport, CSSClass, CSSType } from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
@@ -47,7 +46,6 @@ import {
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
 import { validateAtProperty } from './validate-at-property';
-import { parsePseudoImport, parseStImport } from './stylable-imports-tools';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseStates = SBTypesParsers[valueMapping.states];
@@ -55,9 +53,6 @@ const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
 
 export const processorWarnings = {
-    FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) {
-        return `cannot define "${name}" inside a complex selector`;
-    },
     ROOT_AFTER_SPACING() {
         return '".root" class cannot be used after native elements or selectors external to the stylesheet';
     },
@@ -100,12 +95,6 @@ export const processorWarnings = {
     NO_VARS_DEF_IN_ST_SCOPE() {
         return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`;
     },
-    NO_IMPORT_IN_ST_SCOPE() {
-        return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`;
-    },
-    NO_ST_IMPORT_IN_NESTED_SCOPE() {
-        return `cannot use "@st-import" inside of nested scope`;
-    },
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
     },
@@ -130,9 +119,6 @@ export const processorWarnings = {
     ILLEGAL_CSS_VAR_ARGS(name: string) {
         return `custom property "${name}" usage (var()) must receive comma separated values`;
     },
-    INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
-        return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
-    },
     INVALID_NAMESPACE_REFERENCE() {
         return 'st-namespace-reference dose not have any value';
     },
@@ -149,7 +135,6 @@ export const processorWarnings = {
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
-    protected dirContext!: string;
 
     constructor(
         public diagnostics = new Diagnostics(),
@@ -158,19 +143,11 @@ export class StylableProcessor implements FeatureContext {
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics);
 
-        this.dirContext = path.dirname(this.meta.source);
+        STImport.hooks.analyzeInit(this);
 
         this.handleAtRules(root);
 
         const stubs = this.insertCustomSelectorsStubs();
-
-        for (const node of root.nodes) {
-            if (node.type === 'rule' && node.selector === rootValueMapping.import) {
-                const imported = parsePseudoImport(node, this.dirContext, this.diagnostics);
-                this.meta.imports.push(imported);
-                this.addImportSymbols(imported);
-            }
-        }
 
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
@@ -231,6 +208,13 @@ export class StylableProcessor implements FeatureContext {
 
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
+                case 'st-import': {
+                    STImport.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                    });
+                    break;
+                }
                 case 'namespace': {
                     const match = atRule.params.match(/["'](.*?)['"]/);
                     if (match) {
@@ -312,21 +296,6 @@ export class StylableProcessor implements FeatureContext {
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
                     break;
-                case 'st-import': {
-                    if (atRule.parent?.type !== 'root') {
-                        this.diagnostics.warn(
-                            atRule,
-                            processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE()
-                        );
-                        atRule.remove();
-                    } else {
-                        const stImport = parseStImport(atRule, this.dirContext, this.diagnostics);
-                        atRule.remove();
-                        this.meta.imports.push(stImport);
-                        this.addImportSymbols(stImport);
-                    }
-                    break;
-                }
                 case 'property': {
                     this.addCSSVarDefinition(atRule);
                     validateAtProperty(atRule, this.diagnostics);
@@ -369,6 +338,7 @@ export class StylableProcessor implements FeatureContext {
                             STSymbol.addSymbol({
                                 context: this,
                                 symbol: property,
+                                node: atRule,
                             });
                         } else {
                             this.diagnostics.warn(
@@ -460,22 +430,12 @@ export class StylableProcessor implements FeatureContext {
 
             if (node.type === 'pseudo_class') {
                 if (node.value === 'import') {
-                    if (rule.selector === rootValueMapping.import) {
-                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
-                            this.diagnostics.warn(rule, processorWarnings.NO_IMPORT_IN_ST_SCOPE());
-                            rule.remove();
-                            return walkSelector.stopAll;
-                        }
-                        rule.remove();
-                        return walkSelector.stopAll;
-                    } else {
-                        this.diagnostics.warn(
-                            rule,
-                            processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                rootValueMapping.import
-                            )
-                        );
-                    }
+                    STImport.hooks.analyzeSelectorNode({
+                        context: this,
+                        node,
+                        rule,
+                        walkContext: nodeContext,
+                    });
                 } else if (node.value === 'vars') {
                     if (rule.selector === rootValueMapping.vars) {
                         if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
@@ -492,7 +452,7 @@ export class StylableProcessor implements FeatureContext {
                     } else {
                         this.diagnostics.warn(
                             rule,
-                            processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                            generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
                                 rootValueMapping.vars
                             )
                         );
@@ -595,48 +555,6 @@ export class StylableProcessor implements FeatureContext {
         return symbol;
     }
 
-    protected addImportSymbols(importDef: Imported) {
-        this.checkForInvalidAsUsage(importDef);
-        if (importDef.defaultExport) {
-            STSymbol.addSymbol({
-                context: this,
-                localName: importDef.defaultExport,
-                symbol: {
-                    _kind: 'import',
-                    type: 'default',
-                    name: 'default',
-                    import: importDef,
-                    context: this.dirContext,
-                },
-                node: importDef.rule,
-            });
-        }
-        Object.keys(importDef.named).forEach((name) => {
-            STSymbol.addSymbol({
-                context: this,
-                localName: name,
-                symbol: {
-                    _kind: 'import',
-                    type: 'named',
-                    name: importDef.named[name],
-                    import: importDef,
-                    context: this.dirContext,
-                },
-                node: importDef.rule,
-            });
-        });
-        Object.keys(importDef.keyframes).forEach((name) => {
-            if (!this.checkRedeclareKeyframes(name, importDef.rule)) {
-                this.meta.mappedKeyframes[name] = {
-                    _kind: 'keyframes',
-                    alias: name,
-                    name: importDef.keyframes[name],
-                    import: importDef,
-                };
-            }
-        });
-    }
-
     protected addVarSymbols(rule: postcss.Rule) {
         rule.walkDecls((decl) => {
             this.collectUrls(decl);
@@ -719,10 +637,13 @@ export class StylableProcessor implements FeatureContext {
                     global,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
-                if (!STSymbol.get(this.meta, varName)) {
+                const prevSymbol = STSymbol.get(this.meta, varName);
+                const override = node.type === `atrule` || !prevSymbol;
+                if (override) {
                     STSymbol.addSymbol({
                         context: this,
                         symbol: cssVarSymbol,
+                        safeRedeclare: true,
                     });
                 }
             }
@@ -904,16 +825,6 @@ export class StylableProcessor implements FeatureContext {
         }
 
         atRule.replaceWith(atRule.nodes || []);
-    }
-    private checkForInvalidAsUsage(importDef: Imported) {
-        for (const [local, imported] of Object.entries(importDef.named)) {
-            if (isCSSVarProp(imported) && !isCSSVarProp(local)) {
-                this.diagnostics.warn(
-                    importDef.rule,
-                    processorWarnings.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local)
-                );
-            }
-        }
     }
 }
 

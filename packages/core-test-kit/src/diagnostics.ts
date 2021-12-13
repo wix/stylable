@@ -82,7 +82,9 @@ export function expectAnalyzeDiagnostics(
             }
 
             expect(report.message).to.equal(expectedWarning.message);
-            expect(report.node.source!.start, 'start').to.eql(source.start);
+            if (!expectedWarning.skipLocationCheck) {
+                expect(report.node.source!.start, 'start').to.eql(source.start);
+            }
             if (source.word !== null) {
                 expect(report.options.word).to.equal(source.word);
             }

@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
-import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
+import { processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
 
@@ -125,87 +125,6 @@ describe('Stylable postcss process', () => {
         );
 
         expect(result.namespace).to.eql(processNamespace('style', from));
-    });
-
-    it('collect :import', () => {
-        const result = processSource(
-            `
-            :import {
-                -st-from: "./some/path";
-            }
-            :import {
-                -st-from: "./some/other/path";
-                -st-named: a,b as c;
-            }
-            :import {
-                -st-from: "../some/global/path";
-                -st-default: name;
-            }
-        `,
-            { from: 'path/to/style.css' }
-        );
-
-        expect(result.imports.length).to.eql(3);
-
-        expect(result.getSymbol(`a`)).to.include({
-            _kind: 'import',
-            type: 'named',
-        });
-
-        expect(result.getSymbol(`c`)).to.include({
-            _kind: 'import',
-            type: 'named',
-        });
-
-        expect(result.getSymbol(`name`)).to.include({
-            _kind: 'import',
-            type: 'default',
-        });
-
-        expect((result.getSymbol(`a`) as ImportSymbol).import).to.deep.include({
-            // from: '/path/to/some/other/path',
-            request: './some/other/path',
-            defaultExport: '',
-            named: { a: 'a', c: 'b' },
-        });
-
-        expect((result.getSymbol(`c`) as ImportSymbol).import).to.deep.include({
-            // from: '/path/to/some/other/path',
-            request: './some/other/path',
-            defaultExport: '',
-            named: { a: 'a', c: 'b' },
-        });
-
-        expect((result.getSymbol(`name`) as ImportSymbol).import).to.deep.include({
-            // from: '/path/some/global/path',
-            request: '../some/global/path',
-            defaultExport: 'name',
-            named: {},
-        });
-    });
-
-    it('collect :import with absolute paths', () => {
-        const result = processSource(
-            `
-            :import {
-                -st-from: "/abs/path";
-                -st-named: abs;
-            }
-        `,
-            { from: '/path/to/style.css' }
-        );
-
-        expect(result.imports.length).to.eql(1);
-
-        expect(result.getSymbol(`abs`)).to.deep.include({
-            _kind: 'import',
-            type: 'named',
-        });
-        expect((result.getSymbol(`abs`) as ImportSymbol).import).to.include({
-            context: '/path/to',
-            defaultExport: '',
-            from: '/abs/path',
-        });
     });
 
     it('collect :vars', () => {

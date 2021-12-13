@@ -1,8 +1,9 @@
 import { createFeature, FeatureContext } from './feature';
-import type { StylableDirectives, ImportSymbol } from './types';
+import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
+import type { ImportSymbol } from './st-import';
 import * as STGlobal from './st-global';
 import { plugableRecord } from '../helpers/plugable-record';
 import { getOriginDefinition } from '../helpers/resolve';
@@ -52,8 +53,8 @@ export const diagnostics = {
 // HOOKS
 
 export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: ImmutableClass }>({
-    analyzeInit({ data }) {
-        plugableRecord.set(data, dataKey, {});
+    metaInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, {});
     },
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
