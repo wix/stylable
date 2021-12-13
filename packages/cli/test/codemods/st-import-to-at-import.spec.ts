@@ -1,4 +1,4 @@
-import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
+import { parseImportMessages } from '@stylable/core/dist/helpers/import';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { populateDirectorySync, loadDirSync } from '../test-kit/cli-test-kit';

@@ -1,7 +1,8 @@
 import { createFeature, FeatureContext } from './feature';
-import type { StylableDirectives, ImportSymbol } from './types';
+import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
+import type { ImportSymbol } from './st-import';
 import * as CSSClass from './css-class';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
@@ -32,8 +33,8 @@ export const hooks = createFeature<{
     SELECTOR: Type;
     IMMUTABLE_SELECTOR: ImmutableType;
 }>({
-    analyzeInit({ data }) {
-        plugableRecord.set(data, dataKey, {});
+    metaInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, {});
     },
     analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes, parents] }): void {
         /**

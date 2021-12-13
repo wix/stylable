@@ -27,7 +27,7 @@ export {
     validateScopingSelector,
 } from './stylable-processor';
 
-export { ensureStylableImports, parseStylableImport } from './stylable-imports-tools';
+export { ensureStylableImports, parseStylableImport } from './helpers/import';
 
 export { StylableMeta, RESERVED_ROOT_NAME } from './stylable-meta';
 export {
@@ -63,7 +63,6 @@ export {
     StylableResolver,
     StylableResolverCache,
     isInPath,
-    resolverWarnings,
 } from './stylable-resolver';
 export { Diagnostic, DiagnosticOptions, DiagnosticType, Diagnostics } from './diagnostics';
 export { File, MinimalFSSetup, createMinimalFS } from './memory-minimal-fs';
@@ -78,12 +77,7 @@ export {
     STYLABLE_VALUE_MATCHER,
     TypedClass,
     animationPropRegExp,
-    getFormatterArgs,
-    getNamedArgs,
-    getStringValue,
     globalValueRegExp,
-    groupValues,
-    listOptions,
     mixinDeclRegExp,
     paramMapping,
     rootValueMapping,
@@ -186,6 +180,13 @@ export const pseudoStates = {
     validateStateDefinition,
 };
 export { getRuleScopeSelector } from './helpers/rule';
+export {
+    getFormatterArgs,
+    getNamedArgs,
+    getStringValue,
+    groupValues,
+    listOptions,
+} from './helpers/value';
 
 // *** deprecated ***
 

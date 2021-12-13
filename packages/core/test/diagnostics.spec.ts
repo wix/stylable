@@ -9,15 +9,14 @@ import {
     mixinWarnings,
     valueMapping,
     processorWarnings,
-    resolverWarnings,
     transformerWarnings,
     nativePseudoElements,
     reservedKeyFrames,
     rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
-import { parseImportMessages } from '@stylable/core/dist/stylable-imports-tools';
-import { CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
+import { STImport, CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
+import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
 describe('findTestLocations', () => {
     it('find single location 1', () => {
@@ -406,7 +405,7 @@ describe('diagnostics: warnings and errors', () => {
 
                 expectTransformDiagnostics(config, [
                     {
-                        message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                        message: STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
                             'my-mixin',
                             './imported.st.css'
                         ),
@@ -594,145 +593,10 @@ describe('diagnostics: warnings and errors', () => {
 
                     [
                         {
-                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                            message: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
                                 rootValueMapping.vars
                             ),
                             file: 'main.css',
-                        },
-                    ]
-                );
-            });
-        });
-
-        describe(':import', () => {
-            it('should return warning when defined in a complex selector', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |.gaga:import|{
-                        -st-from:"./file.st.css";
-                        -st-default:Comp;
-                    }
-                `,
-                    [
-                        {
-                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'),
-                            file: 'main.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should return warning when default import is defined with a lowercase first letter', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    :import{
-                        -st-from:"./file.st.css";
-                        |-st-default: $comp$;|
-                    }
-                `,
-                    [
-                        {
-                            message: parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(),
-                            file: 'main.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should return a warning for non import rules inside imports', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :import{
-                                -st-from:"./imported.st.css";
-                                -st-default:Comp;
-                                |$color$:red;|
-                            }
-                            `,
-                        },
-                        '/imported.st.css': {
-                            content: `
-                            .root{
-                                color: green;
-                            }
-                            `,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    {
-                        message: parseImportMessages.ILLEGAL_PROP_IN_IMPORT('color'),
-                        file: '/main.st.css',
-                    },
-                ]);
-            });
-
-            it('should return a warning for import with missing "-st-from" declaration', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |:import{
-                        -st-default:Comp;
-                    }|
-                `,
-                    [
-                        {
-                            message: parseImportMessages.FROM_PROP_MISSING_IN_IMPORT(),
-                            file: 'main.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should return a warning for import with empty "-st-from" declaration', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    :import{
-                        |-st-from: "   ";|
-                        -st-default: Comp;
-                    }
-                `,
-                    [
-                        {
-                            severity: 'error',
-                            message: parseImportMessages.EMPTY_IMPORT_FROM(),
-                            file: 'main.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should return a warning for multiple "-st-from" declarations', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |:import{
-                        -st-from: "a";
-                        -st-from: "b";
-                        -st-default: Comp;
-                    }|
-                `,
-                    [
-                        {
-                            message: parseImportMessages.MULTIPLE_FROM_IN_IMPORT(),
-                            file: 'main.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should warn on invalid custom property rename', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |:import{
-                        -st-from: "./a.st.css";
-                        -st-named: --x as z;
-                    }|
-                `,
-                    [
-                        {
-                            message: processorWarnings.INVALID_CUSTOM_PROPERTY_AS_VALUE('--x', 'z'),
-                            file: 'main.st.css',
                         },
                     ]
                 );
@@ -754,7 +618,7 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message:
-                                processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'),
+                                generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'),
                             file: 'main.css',
                         },
                     ]
@@ -813,89 +677,6 @@ describe('diagnostics: warnings and errors', () => {
         });
 
         describe('from import', () => {
-            it('should warn for unknown import', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :import{
-                                -st-from:"./import.st.css";
-                                -st-named: shlomo, momo;
-                            }
-                            .myClass {
-                                -st-extends: shlomo;
-                            }
-                            .myClass1 {
-                                |-st-extends: $momo$;|
-                            }
-                          `,
-                        },
-                        '/import.st.css': {
-                            content: `
-                                .shlomo {
-                                    color: red
-                                }
-                            `,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(
-                    config,
-                    [
-                        {
-                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                                'momo',
-                                './import.st.css'
-                            ),
-                            file: '/main.st.css',
-                            skip: true,
-                            skipLocationCheck: true,
-                        },
-                    ],
-                    { partial: true }
-                );
-            });
-
-            it('should warn when import redeclare same symbol (in same block)', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |:import {
-                        -st-from: './file.st.css';
-                        -st-default: Name;
-                        -st-named: $Name$;
-                    }
-                `,
-                    [
-                        {
-                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
-                            file: 'main.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should warn when import redeclare same symbol (in different block)', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    :import {
-                        -st-from: './file.st.css';
-                        -st-default: Name;
-                    }
-                    |:import {
-                        -st-from: './file.st.css';
-                        -st-default: $Name$;
-                    }
-                `,
-                    [
-                        {
-                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
-                            file: 'main.st.css',
-                        },
-                    ]
-                );
-            });
-
             it('should warn when import redeclare same symbol (in different block types)', () => {
                 expectAnalyzeDiagnostics(
                     `
@@ -945,7 +726,10 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectTransformDiagnostics(config, [
                     {
-                        message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('myVar', './file.st.css'),
+                        message: STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                            'myVar',
+                            './file.st.css'
+                        ),
                         file: '/main.st.css',
                         skip: true,
                         skipLocationCheck: true,
@@ -1115,232 +899,6 @@ describe('diagnostics: warnings and errors', () => {
                 expectTransformDiagnostics(config, [
                     { message: processorWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
                 ]);
-            });
-        });
-
-        describe('imports', () => {
-            it('should error on unresolved file', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                :import{
-                                    |-st-from: "$./missing.st.css$";|
-                                }
-                            `,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    {
-                        message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
-                        file: '/main.st.css',
-                    },
-                ]);
-            });
-
-            it('should error on unresolved file from third party', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                :import{
-                                    |-st-from: "$missing-package/index.st.css$";|
-                                }
-                            `,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(
-                    config,
-
-                    [
-                        {
-                            message: resolverWarnings.UNKNOWN_IMPORTED_FILE(
-                                'missing-package/index.st.css'
-                            ),
-                            file: '/main.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should error on unresolved named symbol', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                :import{
-                                    -st-from: "./imported.st.css";
-                                    |-st-named: $Missing$;|
-                                }
-                            `,
-                        },
-                        '/imported.st.css': {
-                            content: `.root{}`,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(
-                    config,
-
-                    [
-                        {
-                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                                'Missing',
-                                './imported.st.css'
-                            ),
-                            file: '/main.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should error on unresolved named symbol with alias', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                :import{
-                                    -st-from: "./imported.st.css";
-                                    |-st-named: $Missing$ as LocalMissing;|
-                                }
-                            `,
-                        },
-                        '/imported.st.css': {
-                            content: `.root{}`,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(
-                    config,
-
-                    [
-                        {
-                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                                'Missing',
-                                './imported.st.css'
-                            ),
-                            file: '/main.st.css',
-                        },
-                    ]
-                );
-            });
-        });
-
-        describe('@st-import', () => {
-            it('should error on unresolved file', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                |@st-import "$./missing.st.css$";|
-                            `,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    {
-                        message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
-                        file: '/main.st.css',
-                    },
-                ]);
-            });
-
-            it('should error on unresolved file from third party', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                |@st-import "$missing-package/index.st.css$";|
-                            `,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(
-                    config,
-
-                    [
-                        {
-                            message: resolverWarnings.UNKNOWN_IMPORTED_FILE(
-                                'missing-package/index.st.css'
-                            ),
-                            file: '/main.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should error on unresolved named symbol', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                |@st-import [$Missing$] from "./imported.st.css";|
-                            `,
-                        },
-                        '/imported.st.css': {
-                            content: `.root{}`,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(
-                    config,
-
-                    [
-                        {
-                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                                'Missing',
-                                './imported.st.css'
-                            ),
-                            file: '/main.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should error on unresolved named symbol with alias', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                |@st-import [$Missing$ as LocalMissing] from "./imported.st.css"|;
-                            `,
-                        },
-                        '/imported.st.css': {
-                            content: `.root{}`,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(
-                    config,
-
-                    [
-                        {
-                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                                'Missing',
-                                './imported.st.css'
-                            ),
-                            file: '/main.st.css',
-                        },
-                    ]
-                );
             });
         });
     });

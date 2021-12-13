@@ -1,4 +1,4 @@
-import { CSSType, STSymbol } from '@stylable/core/dist/features';
+import { STImport, CSSType, STSymbol } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import {
     generateStylableResult,
@@ -71,17 +71,11 @@ describe(`features/css-type`, () => {
                 },
             });
 
-            // ToDo: replace with STImport.getImport() once import feature is ready
+            const importDef = meta.getImportStatements()[0];
             expect(CSSType.get(meta, `Imported`), `symbol`).to.eql({
                 _kind: `element`,
                 name: 'Imported',
-                alias: {
-                    _kind: 'import',
-                    type: 'default',
-                    name: 'default',
-                    import: meta.imports[0],
-                    context: `/`,
-                },
+                alias: STImport.createImportSymbol(importDef, `default`, `default`, `/`),
             });
             expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
         });

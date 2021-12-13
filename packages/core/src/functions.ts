@@ -9,12 +9,8 @@ import type { StylableMeta } from './stylable-meta';
 import type { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { isCSSVarProp } from './stylable-utils';
-import {
-    getFormatterArgs,
-    getStringValue,
-    strategies,
-    valueMapping,
-} from './stylable-value-parsers';
+import { strategies, valueMapping } from './stylable-value-parsers';
+import { getFormatterArgs, getStringValue } from './helpers/value';
 import type { ParsedValue } from './types';
 import { stripQuotation } from './utils';
 import { STSymbol } from './features';

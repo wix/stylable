@@ -119,7 +119,7 @@ export function collectDependenciesDeep(
     const imports: ResolvedImport[] = [];
     out.set(meta, imports);
 
-    for (const stImport of meta.imports) {
+    for (const stImport of meta.getImportStatements()) {
         const resolved = stylable.resolver.resolveImported(stImport, '');
         imports.push({ stImport, resolved });
         if (resolved && resolved._kind === 'css') {

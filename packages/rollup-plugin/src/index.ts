@@ -97,7 +97,7 @@ export function stylableRollupPlugin({
             const assetsIds = emitAssets(this, stylable, meta, emittedAssets, inlineAssets);
             const css = generateCssString(meta, minify, stylable, assetsIds);
             const moduleImports = [];
-            for (const imported of meta.imports) {
+            for (const imported of meta.getImportStatements()) {
                 if (hasImportedSideEffects(stylable, meta, imported)) {
                     moduleImports.push(`import ${JSON.stringify(imported.request)};`);
                 }

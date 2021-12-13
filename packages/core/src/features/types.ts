@@ -1,3 +1,4 @@
+import type { ImportSymbol, Imported } from './st-import';
 import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import type { MappedStates, MixinValue } from '../stylable-value-parsers';
@@ -16,24 +17,6 @@ export interface StylableDirectives {
 export interface RefedMixin {
     mixin: MixinValue;
     ref: ImportSymbol | ClassSymbol;
-}
-
-export interface ImportSymbol {
-    _kind: 'import';
-    type: 'named' | 'default';
-    name: string;
-    import: Imported;
-    context: string;
-}
-
-export interface Imported {
-    from: string;
-    defaultExport: string;
-    named: Record<string, string>;
-    keyframes: Record<string, string>;
-    rule: postcss.Rule | postcss.AtRule;
-    request: string;
-    context: string;
 }
 
 export interface VarSymbol {

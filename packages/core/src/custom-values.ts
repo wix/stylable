@@ -2,7 +2,7 @@ import cloneDeepWith from 'lodash.clonedeepwith';
 import postcssValueParser from 'postcss-value-parser';
 import type { StylableMeta } from './stylable-meta';
 import type { StylableResolver } from './stylable-resolver';
-import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
+import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
 import type { ParsedValue } from './types';
 import { STSymbol } from './features';
 
