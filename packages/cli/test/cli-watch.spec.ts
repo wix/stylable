@@ -3,7 +3,7 @@ import { join, sep } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { messages } from '@stylable/cli/dist/messages';
-import { resolverWarnings } from '@stylable/core/dist/stylable-resolver';
+import { STImport } from '@stylable/core/dist/features';
 import {
     createCliTester,
     loadDirSync,
@@ -295,7 +295,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs', '--css'],
                 steps: [
                     {
-                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                        msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
                     },
                     {
                         msg: messages.START_WATCHING(),
@@ -327,7 +327,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['--outDir', './dist', '-w', '--cjs', '--css'],
                 steps: [
                     {
-                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                        msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
                     },
                     {
                         msg: messages.START_WATCHING(),
@@ -344,7 +344,7 @@ describe('Stylable Cli Watch', () => {
                         },
                     },
                     {
-                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                        msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
                     },
                 ],
             });
@@ -978,7 +978,7 @@ describe('Stylable Cli Watch', () => {
                         ),
                     },
                     {
-                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                        msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
                     },
                 ],
             });
@@ -1031,7 +1031,7 @@ describe('Stylable Cli Watch', () => {
                 args: ['-w'],
                 steps: [
                     {
-                        msg: resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                        msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
                     },
                     {
                         msg: messages.START_WATCHING(),
@@ -1040,7 +1040,7 @@ describe('Stylable Cli Watch', () => {
             });
 
             expect(
-                output.match(resolverWarnings.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'))
+                output.match(STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'))
             ).to.lengthOf(1);
         });
     });
