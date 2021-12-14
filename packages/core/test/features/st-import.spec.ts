@@ -318,7 +318,7 @@ describe(`features/st-import`, () => {
             it(`should warn within a single import symbol`, () => {
                 expectAnalyzeDiagnostics(
                     `
-                    |@st-import Name, [$Name$] from "./file.st.css"|;
+                    |@st-import $Name$, [Name] from "./file.st.css"|;
                 `,
                     [
                         {
@@ -326,20 +326,32 @@ describe(`features/st-import`, () => {
                             severity: `warning`,
                             file: `main.st.css`,
                         },
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
+                            severity: `warning`,
+                            file: `main.st.css`,
+                            skipLocationCheck: true,
+                        },
                     ]
                 );
             });
             it(`should warn between multiple import statements`, () => {
                 expectAnalyzeDiagnostics(
                     `
-                    @st-import Name from "./file.st.css";
                     |@st-import $Name$ from "./file.st.css"|;
+                    @st-import Name from "./file.st.css";
                 `,
                     [
                         {
                             message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
                             severity: `warning`,
                             file: `main.st.css`,
+                        },
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
+                            severity: `warning`,
+                            file: `main.st.css`,
+                            skipLocationCheck: true,
                         },
                     ]
                 );
@@ -873,9 +885,9 @@ describe(`features/st-import`, () => {
                         `
                         |:import {
                             -st-from: './file.st.css';
-                            -st-default: Name;
-                            -st-named: $Name$;
-                        }
+                            -st-default: $Name$;
+                            -st-named: Name;
+                        }|
                     `,
                         [
                             {
@@ -883,19 +895,25 @@ describe(`features/st-import`, () => {
                                 severity: `warning`,
                                 file: `main.st.css`,
                             },
+                            {
+                                message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
+                                severity: `warning`,
+                                file: `main.st.css`,
+                                skipLocationCheck: true,
+                            },
                         ]
                     );
                 });
                 it(`should warn on redeclare import between multiple import statements`, () => {
                     expectAnalyzeDiagnostics(
                         `
-                        :import {
-                            -st-from: './file.st.css';
-                            -st-default: Name;
-                        }
                         |:import {
                             -st-from: './file.st.css';
                             -st-default: $Name$;
+                        }|
+                        :import {
+                            -st-from: './file.st.css';
+                            -st-default: Name;
                         }
                     `,
                         [
@@ -903,6 +921,12 @@ describe(`features/st-import`, () => {
                                 message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
                                 severity: `warning`,
                                 file: 'main.st.css',
+                            },
+                            {
+                                message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
+                                severity: `warning`,
+                                file: 'main.st.css',
+                                skipLocationCheck: true,
                             },
                         ]
                     );

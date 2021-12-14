@@ -146,12 +146,6 @@ export function addSymbol({
     const name = localName || symbol.name;
     const typeTable = byType[symbol._kind];
     const nsName = NAMESPACES[symbol._kind];
-    const existingSymbol = byNS[nsName].find(({ name: existingName }) => name === existingName);
-    if (existingSymbol && node && !safeRedeclare) {
-        context.diagnostics.warn(node, diagnostics.REDECLARE_SYMBOL(name), {
-            word: name,
-        });
-    }
     byNS[nsName].push({ name, symbol, ast: node, safeRedeclare });
     byNSFlat[nsName][name] = symbol;
     typeTable[name] = symbol;
@@ -159,6 +153,31 @@ export function addSymbol({
     ignoreDeprecationWarn(() => {
         context.meta.mappedSymbols[name] = symbol;
     });
+}
+
+export function reportRedeclare(context: FeatureContext) {
+    const { byNS } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    for (const symbols of Object.values(byNS)) {
+        const flat: Record<string, SymbolDeclaration[]> = {};
+        const collisions: Set<string> = new Set();
+        for (const symbolDecl of symbols) {
+            const { name, safeRedeclare } = symbolDecl;
+            flat[name] = flat[name] || [];
+            if (!safeRedeclare && flat[name].length) {
+                collisions.add(name);
+            }
+            flat[name].push(symbolDecl);
+        }
+        for (const name of collisions) {
+            for (const { safeRedeclare, ast } of flat[name]) {
+                if (!safeRedeclare && ast) {
+                    context.diagnostics.warn(ast, diagnostics.REDECLARE_SYMBOL(name), {
+                        word: name,
+                    });
+                }
+            }
+        }
+    }
 }
 
 /* inheritSymbols/forceSetSymbol are used for creating a copy meta with mixin root */

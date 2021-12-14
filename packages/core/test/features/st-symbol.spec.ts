@@ -187,8 +187,17 @@ describe(`features/st-symbol`, () => {
 
             STSymbol.addSymbol({ context, symbol, node: ruleA });
             STSymbol.addSymbol({ context, symbol, node: ruleB });
-            // ToDo: warn on all declarations including the first
+            STSymbol.reportRedeclare(context);
+
             expect(context.diagnostics.reports).to.eql([
+                {
+                    type: `warning`,
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
+                    node: ruleA,
+                    options: {
+                        word: `a`,
+                    },
+                },
                 {
                     type: `warning`,
                     message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
@@ -199,7 +208,7 @@ describe(`features/st-symbol`, () => {
                 },
             ]);
         });
-        it(`should NOT warn re-declared symbol with safeRedeclare=true or missing node`, () => {
+        it(`should NOT warn re-declared symbol with safeRedeclare=true`, () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -218,8 +227,8 @@ describe(`features/st-symbol`, () => {
             STSymbol.addSymbol({ context, symbol, node: ruleA });
             // override: no diagnostics
             STSymbol.addSymbol({ context, symbol, node: ruleB, safeRedeclare: true });
-            // missing node: no diagnostics
-            STSymbol.addSymbol({ context, symbol });
+            // collect reports
+            STSymbol.reportRedeclare(context);
 
             expect(context.diagnostics.reports).to.eql([]);
         });

@@ -184,6 +184,8 @@ export class StylableProcessor implements FeatureContext {
 
         this.meta.scopes.forEach((scope) => this.handleScope(scope));
 
+        STSymbol.reportRedeclare(this);
+
         return this.meta;
     }
 
