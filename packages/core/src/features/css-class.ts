@@ -5,7 +5,6 @@ import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import * as STGlobal from './st-global';
-import { plugableRecord } from '../helpers/plugable-record';
 import { getOriginDefinition } from '../helpers/resolve';
 import { namespaceEscape } from '../helpers/escape';
 import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
@@ -27,8 +26,6 @@ export interface ClassSymbol extends StylableDirectives {
     alias?: ImportSymbol;
     scoped?: string; // ToDo: check if in use
 }
-
-const dataKey = plugableRecord.key<Record<string, ClassSymbol>>('classes');
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
@@ -53,9 +50,6 @@ export const diagnostics = {
 // HOOKS
 
 export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: ImmutableClass }>({
-    metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, {});
-    },
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
             // error on functional class
@@ -94,40 +88,36 @@ export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: Immuta
 
 // API
 
-export function get({ data }: StylableMeta, name: string): ClassSymbol | undefined {
-    const state = plugableRecord.getUnsafe(data, dataKey);
-    return state[name];
+export function get(meta: StylableMeta, name: string): ClassSymbol | undefined {
+    return STSymbol.get(meta, name, `class`);
 }
 
-export function getAll({ data }: StylableMeta): Record<string, ClassSymbol> {
-    return plugableRecord.getUnsafe(data, dataKey);
+export function getAll(meta: StylableMeta): Record<string, ClassSymbol> {
+    return STSymbol.getAllByType(meta, `class`);
 }
 
 export function addClass(context: FeatureContext, name: string, rule?: postcss.Rule): ClassSymbol {
-    const cssClassData = plugableRecord.getUnsafe(context.meta.data, dataKey);
-    let classSymbol = cssClassData[name];
-    if (!classSymbol) {
+    if (!STSymbol.get(context.meta, name, `class`)) {
         let alias = STSymbol.get(context.meta, name);
         if (alias && alias._kind !== 'import') {
             alias = undefined;
         }
-        classSymbol = cssClassData[name] = {
-            _kind: 'class',
-            name,
-            alias,
-        };
         STSymbol.addSymbol({
             context,
-            symbol: classSymbol,
+            symbol: {
+                _kind: 'class',
+                name,
+                alias,
+            },
             node: rule,
             safeRedeclare: !!alias,
         });
         // deprecated
         ignoreDeprecationWarn(() => {
-            context.meta.classes[name] = classSymbol;
+            context.meta.classes[name] = STSymbol.get(context.meta, name, `class`)!;
         });
     }
-    return classSymbol;
+    return STSymbol.get(context.meta, name, `class`)!;
 }
 
 export function namespaceClass(

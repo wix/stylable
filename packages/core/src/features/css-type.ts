@@ -4,7 +4,6 @@ import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import * as CSSClass from './css-class';
-import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
 import { isCompRoot, stringifySelector } from '../helpers/selector';
 import { getOriginDefinition } from '../helpers/resolve';
@@ -17,8 +16,6 @@ export interface ElementSymbol extends StylableDirectives {
     name: string;
     alias?: ImportSymbol;
 }
-
-const dataKey = plugableRecord.key<Record<string, ElementSymbol>>('elements');
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
@@ -33,9 +30,6 @@ export const hooks = createFeature<{
     SELECTOR: Type;
     IMMUTABLE_SELECTOR: ImmutableType;
 }>({
-    metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, {});
-    },
     analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes, parents] }): void {
         /**
          * intent to deprecate: currently `value(param)` can be used
@@ -79,40 +73,37 @@ export const hooks = createFeature<{
 
 // API
 
-export function get({ data }: StylableMeta, name: string): ElementSymbol | undefined {
-    const state = plugableRecord.getUnsafe(data, dataKey);
-    return state[name];
+export function get(meta: StylableMeta, name: string): ElementSymbol | undefined {
+    return STSymbol.get(meta, name, `element`);
 }
 
-export function getAll({ data }: StylableMeta): Record<string, ElementSymbol> {
-    return plugableRecord.getUnsafe(data, dataKey);
+export function getAll(meta: StylableMeta): Record<string, ElementSymbol> {
+    return STSymbol.getAllByType(meta, `element`);
 }
 
 export function addType(context: FeatureContext, name: string, rule?: postcss.Rule): ElementSymbol {
-    const cssTypeData = plugableRecord.getUnsafe(context.meta.data, dataKey);
-    let typeSymbol = cssTypeData[name];
+    const typeSymbol = STSymbol.get(context.meta, name, `element`);
     if (!typeSymbol && isCompRoot(name)) {
         let alias = STSymbol.get(context.meta, name);
         if (alias && alias._kind !== 'import') {
             alias = undefined;
         }
-        typeSymbol = cssTypeData[name] = {
-            _kind: 'element',
-            name,
-            alias,
-        };
         STSymbol.addSymbol({
             context,
-            symbol: typeSymbol,
+            symbol: {
+                _kind: 'element',
+                name,
+                alias,
+            },
             node: rule,
             safeRedeclare: !!alias,
         });
         // deprecated
         ignoreDeprecationWarn(() => {
-            context.meta.elements[name] = typeSymbol;
+            context.meta.elements[name] = STSymbol.get(context.meta, name, `element`)!;
         });
     }
-    return typeSymbol;
+    return STSymbol.get(context.meta, name, `element`)!;
 }
 
 export function validateTypeScoping({
