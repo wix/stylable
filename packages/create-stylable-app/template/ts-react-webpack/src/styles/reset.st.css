@@ -1,0 +1,36 @@
+/* Remove all the styles of the "User-Agent-Stylesheet", except for the 'display' property */
+:global(*:where(:not(iframe, canvas, img, svg, video):not(svg *))) {
+    all: unset;
+    display: revert;
+}
+
+/* Preferred box-sizing value */
+:global(*),
+:global(*::before),
+:global(*::after) {
+    box-sizing: border-box;
+}
+
+/*
+  Remove list styles (bullets/numbers)
+  in case you use it with normalize.css
+*/
+:global(ol),
+:global(ul) {
+    list-style: none;
+}
+
+/* For images to not be able to exceed their container */
+:global(img) {
+    max-width: 100%;
+}
+
+/* Removes spacing between cells in tables */
+:global(table) {
+    border-collapse: collapse;
+}
+
+/* Revert the 'white-space' property for textarea elements on Safari */
+:global(textarea) {
+    white-space: revert;
+}

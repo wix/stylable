@@ -6,11 +6,11 @@
 
 The following scripts are available:
 
-`npm run build` - Build the application in production mode into a folder named `dist`. This folder can be served using any HTTP server. Uses [rollup](https://github.com/rollup/rollup).
+`npm run build` - Build the application in production mode into a folder named `dist`. This folder can be served using any HTTP server. Uses [webpack](https://github.com/webpack/webpack).
 
 `npm run serve` - Statically serve the `dist` folder. Uses [serve](https://github.com/zeit/serve).
 
-`npm start` - Start the application in **development** mode (and open the web browser). Uses [rollup-plugin-serve](https://github.com/thgh/rollup-plugin-serve).
+`npm start` - Start the application in **development** mode (and open the web browser). Uses [webpack-dev-server](https://github.com/webpack/webpack-dev-server).
 
 `npm run clean` - Delete the `dist` folder. Uses [rimraf](https://github.com/isaacs/rimraf).
 
