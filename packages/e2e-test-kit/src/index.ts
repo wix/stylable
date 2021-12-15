@@ -15,7 +15,7 @@ export {
     runFormatCliSync,
     writeToExistingFile,
     escapeRegExp,
-    smlinkDirSymbol,
+    smlinkSymbol,
 } from './cli-test-kit';
 export { runServer } from './run-server';
 export { DTSKit } from './dts-kit';

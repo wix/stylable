@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { join } from 'path';
 import {
-    smlinkDirSymbol,
+    smlinkSymbol,
     loadDirSync,
     populateDirectorySync,
     runCliSync,
@@ -365,12 +365,12 @@ describe('Stylable CLI config multiple projects', function () {
                 }),
                 node_modules: {
                     a: {
-                        type: smlinkDirSymbol,
-                        smlinkDirPath: join('..', '..', 'packages', 'project-a'),
+                        type: smlinkSymbol,
+                        path: join('..', '..', 'packages', 'project-a'),
                     },
                     b: {
-                        type: smlinkDirSymbol,
-                        smlinkDirPath: join('..', '..', 'packages', 'project-b'),
+                        type: smlinkSymbol,
+                        path: join('..', '..', 'packages', 'project-b'),
                     },
                 },
                 packages: {
