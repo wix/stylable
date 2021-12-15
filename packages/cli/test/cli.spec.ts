@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
-import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
+import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
 import { processorWarnings } from '@stylable/core';
 import { STSymbol } from '@stylable/core/dist/features';
 

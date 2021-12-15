@@ -6,7 +6,7 @@ import {
     loadDirSync,
     populateDirectorySync,
     runCliSync,
-} from './test-kit/cli-test-kit';
+} from '@stylable/e2e-test-kit';
 
 describe('Stylable CLI config multiple projects', function () {
     this.timeout(25000);

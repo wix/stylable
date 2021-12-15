@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
+import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
 
 describe('Stylable CLI config presets', function () {
     this.timeout(25000);

@@ -6,12 +6,12 @@ import { messages } from '@stylable/cli/dist/messages';
 import { STImport } from '@stylable/core/dist/features';
 import {
     createCliTester,
+    escapeRegExp,
     loadDirSync,
     populateDirectorySync,
     runCliSync,
     writeToExistingFile,
-    escapeRegExp,
-} from './test-kit/cli-test-kit';
+} from '@stylable/e2e-test-kit';
 
 describe('Stylable Cli Watch', () => {
     let tempDir: ITempDirectory;
