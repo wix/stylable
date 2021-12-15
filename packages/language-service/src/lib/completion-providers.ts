@@ -1108,9 +1108,6 @@ function getNamedCSSImports(
 ) {
     const namedSet = new Set(namedValues);
     for (const [symbolName, symbol] of Object.entries(resolvedImport.getAllSymbols())) {
-        if (symbol._kind === 'keyframes') {
-            continue;
-        }
         if (symbol._kind === 'import') {
             if (symbol.name.startsWith('--')) {
                 const importedVar = stylable.createResolver({}).deepResolve(symbol);

@@ -19,14 +19,14 @@ export type StylableSymbol =
     | CSSVarSymbol
     | KeyframesSymbol;
 // the namespace that each symbol exists on
-const NAMESPACES: Record<SymbolTypes, `main` | `keyframes`> = {
+const NAMESPACES = {
     import: `main`,
     class: `main`,
     cssVar: `main`,
     element: `main`,
     keyframes: `keyframes`,
     var: `main`,
-};
+} as const;
 // state structure
 function createState(clone?: State): State {
     return {
@@ -51,34 +51,37 @@ function createState(clone?: State): State {
 
 // internal types
 type SymbolTypes = StylableSymbol['_kind'];
-type Namespaces = typeof NAMESPACES;
-interface SymbolDeclaration<K = Namespaces[SymbolTypes]> {
+type filterSymbols<T extends SymbolTypes> = Extract<StylableSymbol, { _kind: T }>;
+type SymbolMap = {
+    [K in SymbolTypes]: filterSymbols<K>;
+};
+type SymbolTypeToNamespace = typeof NAMESPACES;
+type FilterByNamespace<NS extends Namespaces, T extends SymbolTypes = SymbolTypes> = T extends any
+    ? SymbolTypeToNamespace[T] extends NS
+        ? T
+        : never
+    : never;
+type NamespaceToSymbolType = {
+    [NS in SymbolTypeToNamespace[SymbolTypes]]: FilterByNamespace<NS>;
+};
+type Namespaces = keyof NamespaceToSymbolType;
+interface SymbolDeclaration<NS = Namespaces> {
     name: string;
-    symbol: Extract<
-        StylableSymbol,
-        {
-            _kind: SymbolTypes extends any
-                ? Namespaces[SymbolTypes] extends K
-                    ? SymbolTypes
-                    : any
-                : any;
-        }
+    symbol: filterSymbols<
+        SymbolTypes extends any ? (Namespaces extends NS ? SymbolTypes : any) : any
     >;
     ast: postcss.Node | undefined;
     safeRedeclare: boolean; // ToDo: change to action: `def` | `ref` | `final`?
 }
 interface State {
     byNS: {
-        [K in Namespaces[SymbolTypes]]: SymbolDeclaration<K>[];
+        [NS in Namespaces]: SymbolDeclaration<NS>[];
     };
     byNSFlat: {
-        [K in Namespaces[SymbolTypes]]: Record<
-            string,
-            StylableSymbol // ToDo: filter only relevant types to ns
-        >;
+        [NS in Namespaces]: Record<string, filterSymbols<NamespaceToSymbolType[NS]>>;
     };
     byType: {
-        [K in SymbolTypes]: Record<string, Extract<StylableSymbol, { _kind: K }>>;
+        [T in keyof SymbolMap]: Record<string, SymbolMap[T]>;
     };
 }
 
@@ -99,26 +102,17 @@ export const hooks = createFeature({
 });
 
 // API
-
-export function get<T extends SymbolTypes>(
-    meta: StylableMeta,
-    name: string,
-    type?: T
-): Extract<StylableSymbol, { _kind: T }> | undefined {
+export function get<T extends keyof SymbolMap>(meta: StylableMeta, name: string, type?: T) {
     const { byNSFlat, byType } = plugableRecord.getUnsafe(meta.data, dataKey);
-    if (type) {
-        return byType[type][name] as any; // ToDo: try improve types
-    }
-    const nsName = type ? NAMESPACES[type] : `main`;
-    return byNSFlat[nsName][name] as any;
+    return (type ? byType[type][name] : byNSFlat['main'][name]) as filterSymbols<T> | undefined;
 }
 
-export function getAll(
+export function getAll<NS extends keyof NamespaceToSymbolType = `main`>(
     meta: StylableMeta,
-    ns: Namespaces[SymbolTypes] = `main`
-): Record<string, StylableSymbol> {
+    ns?: NS
+) {
     const { byNSFlat } = plugableRecord.getUnsafe(meta.data, dataKey);
-    return byNSFlat[ns];
+    return byNSFlat[ns || `main`] as State['byNSFlat'][NS];
 }
 
 export function getAllByType<T extends SymbolTypes>(
@@ -191,7 +185,7 @@ export function forceSetSymbol({
     localName,
 }: {
     meta: StylableMeta;
-    symbol: StylableSymbol;
+    symbol: filterSymbols<NamespaceToSymbolType['main']>;
     localName?: string;
 }) {
     const { byNS, byNSFlat, byType } = plugableRecord.getUnsafe(meta.data, dataKey);

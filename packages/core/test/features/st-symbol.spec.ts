@@ -4,6 +4,9 @@ import {
     ClassSymbol,
     ElementSymbol,
     CSSVarSymbol,
+    VarSymbol,
+    ImportSymbol,
+    KeyframesSymbol,
 } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { Diagnostics } from '@stylable/core/dist/diagnostics';
@@ -131,15 +134,27 @@ describe(`features/st-symbol`, () => {
             STSymbol.addSymbol({ context, symbol: typeSymbol });
             STSymbol.addSymbol({ context, symbol: keyframesSymbol });
 
-            expect(STSymbol.getAll(meta), `default to main ns`).to.eql({
+            const fromDefault = STSymbol.getAll(meta);
+            const fromMain = STSymbol.getAll(meta, `main`);
+            const fromKeyframes = STSymbol.getAll(meta, `keyframes`);
+            expect(fromDefault, `default to main ns`).to.eql({
                 root: STSymbol.get(meta, `root`),
                 a: STSymbol.get(meta, `a`),
                 b: STSymbol.get(meta, `b`),
             });
-            expect(STSymbol.getAll(meta, `main`), `main`).to.eql(STSymbol.getAll(meta));
-            expect(STSymbol.getAll(meta, `keyframes`), `keyframes`).to.eql({
+            expect(fromMain, `main`).to.eql(STSymbol.getAll(meta));
+            expect(fromKeyframes, `keyframes`).to.eql({
                 c: STSymbol.get(meta, `c`, `keyframes`),
             });
+            type mainNSSymbols =
+                | ClassSymbol
+                | VarSymbol
+                | ImportSymbol
+                | ElementSymbol
+                | CSSVarSymbol;
+            expectType<TypeEqual<Record<string, mainNSSymbols>, typeof fromDefault>>(true);
+            expectType<TypeEqual<Record<string, mainNSSymbols>, typeof fromMain>>(true);
+            expectType<TypeEqual<Record<string, KeyframesSymbol>, typeof fromKeyframes>>(true);
         });
         it(`should accept optional local name different then symbol name`, () => {
             const { meta } = generateStylableResult({
