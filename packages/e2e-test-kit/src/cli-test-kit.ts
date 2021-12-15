@@ -66,7 +66,7 @@ export function createCliTester() {
         run: processCliOutput,
         cleanup() {
             for (const cliProcess of cliProcesses) {
-                cliProcess.kill('SIGINT');
+                cliProcess.kill();
             }
             cliProcesses.length = 0;
         },

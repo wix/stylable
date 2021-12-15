@@ -83,6 +83,10 @@ async function main() {
         log(messages.START_WATCHING(), levels.info);
 
         buildsHandler.start();
+
+        process.on('SIGTERM', () => {
+            buildsHandler.stop();
+        });
     }
 }
 
