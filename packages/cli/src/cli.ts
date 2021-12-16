@@ -9,6 +9,9 @@ import { BuildsHandler } from './builds-handler';
 import { messages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
+// TODO: remove this when memory leak fixed
+process.on('warning', (e) => console.warn(e.stack));
+
 async function main() {
     const argv = getCliArguments();
     const log = createLogger('[Stylable]', argv.log ?? false);
