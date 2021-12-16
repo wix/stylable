@@ -38,6 +38,10 @@ export function createCliTester() {
         if (!cliProcess.stdout) {
             throw new Error('no stdout on cli process');
         }
+
+        // TODO: remove this, this is just to see the logs in the CI
+        cliProcess.stdout.pipe(process.stdout);
+
         for await (const line of readLines(cliProcess.stdout)) {
             const step = steps[found.length];
             output += `\n${line}`;
