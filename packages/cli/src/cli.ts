@@ -10,7 +10,7 @@ import { messages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
 // TODO: remove this when memory leak fixed
-process.on('warning', (e) => console.warn(e.stack));
+process.on('warning', (e) => console.warn('CLI STACK', e.stack));
 
 async function main() {
     const argv = getCliArguments();

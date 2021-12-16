@@ -23,6 +23,8 @@ interface ProcessCliOutputParams {
     }>;
 }
 
+process.on('warning', (e) => console.warn('TEST RUNNER STACK', e.stack));
+
 export function createCliTester() {
     const cliProcesses: ChildProcess[] = [];
 
