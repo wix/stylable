@@ -293,9 +293,11 @@ describe('Stylable CLI config presets', function () {
                 presets: {
                   'a': {
                     outputSources: true,
+                    cjs: true
                   },
                   'b': {
                     esm: true,
+                    cjs: true
                   }
                 },
                 options: { 
@@ -327,6 +329,7 @@ describe('Stylable CLI config presets', function () {
 
         expect(Object.keys(dirContent)).not.to.include.members([
             'packages/project-a/dist/style.st.css.js',
+            'packages/project-b/dist/style.st.css.js',
         ]);
     });
 
