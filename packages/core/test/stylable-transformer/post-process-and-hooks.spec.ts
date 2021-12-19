@@ -22,10 +22,10 @@ describe('post-process-and-hooks', () => {
                     },
                 },
             },
-            undefined,
-            undefined,
-            (res) => {
-                return { ...res, postProcessed: true };
+            {
+                postProcessor: (res) => {
+                    return { ...res, postProcessed: true };
+                },
             }
         );
 
@@ -58,12 +58,13 @@ describe('post-process-and-hooks', () => {
                     },
                 },
             },
-            undefined,
-            (_resolved, fn) => {
-                if (typeof fn !== 'string') {
-                    return `hooked_${fn.name}(${fn.args})`;
-                }
-                return '';
+            {
+                replaceValueHook: (_resolved, fn) => {
+                    if (typeof fn !== 'string') {
+                        return `hooked_${fn.name}(${fn.args})`;
+                    }
+                    return '';
+                },
             }
         );
 
@@ -93,9 +94,10 @@ describe('post-process-and-hooks', () => {
                     },
                 },
             },
-            undefined,
-            (resolved, name, isLocal) => {
-                return `__VALUE__${valueCallCount++} ${resolved}-${name}-${isLocal}`;
+            {
+                replaceValueHook: (resolved, name, isLocal) => {
+                    return `__VALUE__${valueCallCount++} ${resolved}-${name}-${isLocal}`;
+                },
             }
         );
 
@@ -163,15 +165,16 @@ describe('post-process-and-hooks', () => {
                     },
                 },
             },
-            undefined,
-            (resolved, name, isLocal, path) => {
-                const m = expected[index];
-                expect(
-                    [resolved, name, isLocal, path],
-                    [resolved, name, isLocal, path].join(',')
-                ).to.eqls(m);
-                index++;
-                return isLocal && path.length === 0 ? `[${name}]` : resolved;
+            {
+                replaceValueHook: (resolved, name, isLocal, path) => {
+                    const m = expected[index];
+                    expect(
+                        [resolved, name, isLocal, path],
+                        [resolved, name, isLocal, path].join(',')
+                    ).to.eqls(m);
+                    index++;
+                    return isLocal && path.length === 0 ? `[${name}]` : resolved;
+                },
             }
         );
 
