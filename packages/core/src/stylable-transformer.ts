@@ -122,7 +122,7 @@ export class StylableTransformer {
             options.fileProcessor,
             options.requireModule,
             options.moduleResolver,
-            options.resolverCache
+            options.resolverCache || new Map()
         );
         this.mode = options.mode || 'production';
     }
