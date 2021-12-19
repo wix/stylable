@@ -23,7 +23,7 @@ yarn add @stylable/cli -D
 
 After installing `@stylable/cli`, the `stc` command will be available, running `stc --help` will provide a brief description for the options available.
 
-`stc` accepts [CLI arguments](#cli-arguments) or from the [configuration file](#configuration-file).
+`stc` accepts [CLI arguments](#cli-arguments) or Stylable [configuration file](#configuration-file).
 
 ### CLI Arguments
 
@@ -169,7 +169,7 @@ $ stc --srcDir="./src" --outDir="./dist"
 
 ## Multiple Projects
 
-Projects allow you to share `stc` configuration and manage your Stylable project in one place with predictable and controlled build order with caching optimizations.
+Projects allow you to share `stc` configuration and manage your Stylable projects in one place with predictable and controlled build order with caching optimizations.
 
 ```ts
 export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
@@ -181,7 +181,7 @@ export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
 }
 ```
 
-> Example for simple monorepo with stylable packages
+> Example for simple monorepo with Stylable packages
 ```js
 const { typedConfiguration } = require('@stylable/cli');
 
@@ -200,12 +200,12 @@ exports.stcConfig = typedConfiguration({
 
 ### Options
 
-Same as for a [single project](#configuration-file) `options` is the top-level `BuildOptions` and default like in the example above.
+Like for [single project](#configuration-file) `options` is the top-level `BuildOptions` and is the default options for each project.
 
 ### Projects
 
 **Projects** is a generic term that refers to the set of requests with defined single or multiple `BuildOptions`.\
-This set of requests is being processed and then evaluated as a map of `projectRoot` (directory path) to a group of `BuildOptions`.
+This set of requests is being processed and then evaluated as a map of `projectRoot` (directory path) to a set of `BuildOptions`.
 
 By default, the request is a path to a package, and in order to make the correct topological sort, the dependency needs to be specified in each package `package.json`
 
@@ -227,7 +227,7 @@ As said, the value of the request can be resolved to a single `BuildOptions`, bu
 }
 ```
 
-> The full specification for defining Projects
+> The full types specification for defining Projects
 ```ts
 export type Projects =
     | Array<string | [string, ProjectEntryValues]>
