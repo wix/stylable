@@ -17,8 +17,12 @@ export class DirectoryProcessService {
         });
     }
     public async dispose() {
+        for (const path of this.watchedDirectoryFiles.keys()) {
+            await this.fs.watchService.unwatchPath(path);
+        }
+
         this.invalidationMap.clear();
-        await this.fs.watchService.unwatchAllPaths();
+        this.watchedDirectoryFiles.clear();
     }
     public async init(directoryPath: string) {
         await this.watchPath(directoryPath);
