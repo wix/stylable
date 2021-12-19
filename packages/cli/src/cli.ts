@@ -5,7 +5,7 @@ import { build } from './build';
 import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
 import { getCliArguments } from './config/resolve-options';
-import { BuildsHandler } from './builds-handler';
+import { WatchHandler } from './watch-handler';
 import { messages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
@@ -34,7 +34,7 @@ async function main() {
     const outputFiles = new Map<string, string>();
     const isMultipleProjects = projects.length > 1;
     const diagnosticsManager = new DiagnosticsManager();
-    const buildsHandler = new BuildsHandler(fileSystem, {
+    const watchHandler = new WatchHandler(fileSystem, {
         log,
         resolverCache,
         outputFiles,
@@ -76,7 +76,7 @@ async function main() {
                 diagnosticsManager,
             });
 
-            buildsHandler.register(service, { identifier, stylable });
+            watchHandler.register({ service, identifier, stylable });
         }
     }
 
@@ -85,10 +85,10 @@ async function main() {
     if (watch) {
         log(messages.START_WATCHING(), levels.info);
 
-        buildsHandler.start();
+        watchHandler.start();
 
         process.on('SIGTERM', () => {
-            buildsHandler.stop();
+            void watchHandler.stop();
         });
     }
 }

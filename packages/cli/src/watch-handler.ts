@@ -9,7 +9,7 @@ import { levels, Log } from './logger';
 import { messages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
-export interface DirectoriesHandlerServiceOptions {
+export interface WatchHandlerOptions {
     log?: Log;
     resolverCache?: StylableResolverCache;
     outputFiles?: Map<string, string>;
@@ -17,17 +17,14 @@ export interface DirectoriesHandlerServiceOptions {
     diagnosticsManager?: DiagnosticsManager;
 }
 
-export interface RegisterMetaData {
+export interface Process {
+    service: DirectoryProcessService;
     identifier: string;
     stylable: Stylable;
 }
 
-export interface Service extends RegisterMetaData {
-    directoryProcess: DirectoryProcessService;
-}
-
-export class BuildsHandler {
-    private services = new Set<Service>();
+export class WatchHandler {
+    private processes = new Set<Process>();
     private resolverCache: StylableResolverCache = new Map();
     private diagnosticsManager = new DiagnosticsManager();
     private listener: WatchEventListener = async (event) => {
@@ -36,8 +33,8 @@ export class BuildsHandler {
         let foundChanges = false;
         const files = new Map<string, IWatchEvent>();
 
-        for (const { directoryProcess, identifier } of this.services) {
-            for (const path of directoryProcess.getAffectedFiles(event.path)) {
+        for (const { service, identifier } of this.processes) {
+            for (const path of service.getAffectedFiles(event.path)) {
                 if (files.has(path)) {
                     continue;
                 }
@@ -45,7 +42,7 @@ export class BuildsHandler {
                 files.set(path, createWatchEvent(path, this.fileSystem));
             }
 
-            const { hasChanges } = await directoryProcess.handleWatchChange(files, event);
+            const { hasChanges } = await service.handleWatchChange(files, event);
 
             if (hasChanges) {
                 if (!foundChanges) {
@@ -61,7 +58,7 @@ export class BuildsHandler {
         }
 
         if (foundChanges) {
-            const { changed, deleted } = this.filesStats(files);
+            const { changed, deleted } = filesStats(files);
 
             this.log(levels.clear);
             this.log(
@@ -73,10 +70,7 @@ export class BuildsHandler {
         }
     };
 
-    constructor(
-        private fileSystem: IFileSystem,
-        private options: DirectoriesHandlerServiceOptions = {}
-    ) {
+    constructor(private fileSystem: IFileSystem, private options: WatchHandlerOptions = {}) {
         if (this.options.resolverCache) {
             this.resolverCache = this.options.resolverCache;
         }
@@ -86,28 +80,23 @@ export class BuildsHandler {
         }
     }
 
-    public register(
-        directoryProcess: DirectoryProcessService,
-        { identifier, stylable }: RegisterMetaData
-    ) {
-        this.services.add({
-            identifier,
-            directoryProcess,
-            stylable,
-        });
+    public register(process: Process) {
+        this.processes.add(process);
     }
 
     public start() {
         this.fileSystem.watchService.addGlobalListener(this.listener);
     }
 
-    public stop() {
-        if (this.listener) {
-            this.diagnosticsManager.clear();
-            this.fileSystem.watchService.removeGlobalListener(this.listener);
-        } else {
-            throw new Error('Builds Handler never started');
+    public async stop() {
+        this.diagnosticsManager.clear();
+        this.fileSystem.watchService.removeGlobalListener(this.listener);
+
+        for (const { service } of this.processes) {
+            await service.dispose();
         }
+
+        this.processes.clear();
     }
 
     private invalidateCache(filePath: string) {
@@ -131,21 +120,21 @@ export class BuildsHandler {
 
         logger(`[${new Date().toLocaleTimeString()}]`, ...messages);
     }
+}
 
-    private filesStats(files: Map<string, IWatchEvent>) {
-        const filesChangesSummary = {
-            changed: 0,
-            deleted: 0,
-        };
+function filesStats(files: Map<string, IWatchEvent>) {
+    const filesChangesSummary = {
+        changed: 0,
+        deleted: 0,
+    };
 
-        for (const file of files.values()) {
-            if (file.stats) {
-                filesChangesSummary.changed++;
-            } else {
-                filesChangesSummary.deleted++;
-            }
+    for (const file of files.values()) {
+        if (file.stats) {
+            filesChangesSummary.changed++;
+        } else {
+            filesChangesSummary.deleted++;
         }
-
-        return filesChangesSummary;
     }
+
+    return filesChangesSummary;
 }
