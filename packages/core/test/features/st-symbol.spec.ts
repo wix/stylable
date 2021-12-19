@@ -247,5 +247,32 @@ describe(`features/st-symbol`, () => {
 
             expect(context.diagnostics.reports).to.eql([]);
         });
+        it(`should warn on root declaration`, () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: `entry`,
+                        content: ``,
+                    },
+                },
+            });
+            const symbol: StylableSymbol = { _kind: `class`, name: `root` };
+            const rule = new postcss.Rule();
+            const context = { meta, diagnostics: new Diagnostics() };
+
+            STSymbol.addSymbol({ context, symbol, node: rule });
+
+            expect(context.diagnostics.reports).to.eql([
+                {
+                    type: `warning`,
+                    message: STSymbol.diagnostics.REDECLARE_ROOT(),
+                    node: rule,
+                    options: {
+                        word: `root`,
+                    },
+                },
+            ]);
+        });
     });
 });

@@ -71,7 +71,7 @@ interface SymbolDeclaration<NS = Namespaces> {
         SymbolTypes extends any ? (Namespaces extends NS ? SymbolTypes : any) : any
     >;
     ast: postcss.Node | undefined;
-    safeRedeclare: boolean; // ToDo: change to action: `def` | `ref` | `final`?
+    safeRedeclare: boolean;
 }
 interface State {
     byNS: {
@@ -90,6 +90,9 @@ const dataKey = plugableRecord.key<State>('mappedSymbols');
 export const diagnostics = {
     REDECLARE_SYMBOL(name: string) {
         return `redeclare symbol "${name}"`;
+    },
+    REDECLARE_ROOT() {
+        return `root is used for the stylesheet and cannot be overridden`;
     },
 };
 
@@ -140,6 +143,10 @@ export function addSymbol({
     const name = localName || symbol.name;
     const typeTable = byType[symbol._kind];
     const nsName = NAMESPACES[symbol._kind];
+    if (node && name === `root` && nsName === `main` && byNSFlat[nsName][name]) {
+        context.diagnostics.warn(node, diagnostics.REDECLARE_ROOT(), { word: `root` });
+        return;
+    }
     byNS[nsName].push({ name, symbol, ast: node, safeRedeclare });
     byNSFlat[nsName][name] = symbol;
     typeTable[name] = symbol;

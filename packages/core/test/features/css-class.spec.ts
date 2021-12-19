@@ -157,8 +157,7 @@ describe(`features/css-class`, () => {
                     '-st-root': true,
                     alias: undefined,
                 });
-                // ToDo: make root final - not overridable:
-                // expect(STSymbol.get(meta, `root`), `general`).to.equal(CSSClass.get(meta, `root`));
+                expect(STSymbol.get(meta, `root`), `general`).to.equal(CSSClass.get(meta, `root`));
             });
         });
     });
