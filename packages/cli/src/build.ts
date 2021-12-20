@@ -176,8 +176,7 @@ export async function build(
                     messages.FINISHED_PROCESSING(
                         count,
                         isMultiPackagesProject ? identifier : undefined
-                    ),
-                    changeOrigin ? '' : levels.info
+                    )
                 );
             }
         },
@@ -188,8 +187,8 @@ export async function build(
     if (sourceFiles.size === 0) {
         log(
             mode,
-            messages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined),
-            levels.info
+            `[${new Date().toLocaleTimeString()}]`,
+            messages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined)
         );
     }
 
