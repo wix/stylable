@@ -23,8 +23,6 @@ interface ProcessCliOutputParams {
     }>;
 }
 
-process.on('warning', (e) => console.warn('TEST RUNNER STACK', e.stack));
-
 export function createCliTester() {
     const cliProcesses: ChildProcess[] = [];
 
@@ -42,9 +40,6 @@ export function createCliTester() {
         }
 
         for await (const line of readLines(cliProcess.stdout)) {
-            // TODO: remove this, this is just to see the logs in the CI
-            console.log(line);
-
             const step = steps[found.length];
             output += `\n${line}`;
 
