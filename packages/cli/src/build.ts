@@ -5,7 +5,6 @@ import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
-import { levels } from './logger';
 import { DiagnosticsManager } from './diagnostics-manager';
 import { tryRun } from './build-tools';
 import { messages } from './messages';
