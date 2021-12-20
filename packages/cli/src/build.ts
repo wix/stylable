@@ -146,10 +146,11 @@ export async function build(
                 diagnosticsManager.delete(identifier);
             }
 
-            // remove assets from the affected files (handled in buildAggregatedEntities)
             for (const filePath of affectedFiles) {
+                // map st output file path to src file path
                 outputFiles.set(resolve(filePath.replace(fullSrcDir, fullOutDir)), filePath);
 
+                // remove assets from the affected files (handled in buildAggregatedEntities)
                 if (assets.has(filePath)) {
                     affectedFiles.delete(filePath);
                 }
