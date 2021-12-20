@@ -281,7 +281,7 @@ describe('Stylable CLI config multiple projects', function () {
             expect(stdout, 'has diagnostic error').not.to.match(/error/i);
         });
 
-        it.only('should prioritize build order by projects specification', () => {
+        it('should prioritize build order by projects specification', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': JSON.stringify({
                     name: 'workspace',
