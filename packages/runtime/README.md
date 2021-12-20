@@ -31,7 +31,7 @@ import {
 |`classes`|an object mapping exported classes from their source name to their scoped name |
 |`vars`|an object mapping exported css custom properties (vars) from their source name to their scoped name |
 |`stVars`|an object mapping build time Stylable variables to their build time values (these cannot be overriden in runtime) |
-|`stVarskeyframes`|an object mapping exported keyframes from their source name to their scoped name |
+|`keyframes`|an object mapping exported keyframes from their source name to their scoped name |
 |`cssStates`|utility function that maps an object representing states and their values to a string with all required classes |
 
 #### Style utility function
