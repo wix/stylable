@@ -281,7 +281,7 @@ describe('Stylable CLI config multiple projects', function () {
             expect(stdout, 'has diagnostic error').not.to.match(/error/i);
         });
 
-        it('should prioritize build order by projects specification', () => {
+        it.only('should prioritize build order by projects specification', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': JSON.stringify({
                     name: 'workspace',
@@ -341,7 +341,7 @@ describe('Stylable CLI config multiple projects', function () {
                     `,
             });
 
-            const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+            const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path, '--log']);
 
             const projectDIndex = stdout.indexOf('project-d');
             const projectAIndex = stdout.indexOf('project-a');
