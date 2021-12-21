@@ -1,13 +1,14 @@
 import type { BuildMetaData, BuildOptions } from './types';
-import { Stylable, visitMetaCSSDependenciesBFS } from '@stylable/core';
+import { visitMetaCSSDependenciesBFS } from '@stylable/core';
 import { Generator as BaseGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { DiagnosticsManager } from './diagnostics-manager';
+import type { Diagnostic } from './report-diagnostics';
 import { tryRun } from './build-tools';
-import { processMessages } from './messages';
+import { errorMessages, processMessages } from './messages';
 
 export async function build(
     {
@@ -102,7 +103,7 @@ export async function build(
                 throw error;
             }
         },
-        processFiles(service, affectedFiles, deletedFiles, changeOrigin) {
+        processFiles(_, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
                 // handle deleted files by removing their generated content
                 if (deletedFiles.size) {
@@ -122,7 +123,7 @@ export async function build(
                             filePath: deletedFile,
                             log,
                             fs,
-                            moduleFormats: moduleFormats || [],
+                            moduleFormats,
                             outputCSS,
                             outputCSSNameTemplate,
                             outputSources,
@@ -158,7 +159,7 @@ export async function build(
             // rebuild
             buildFiles(affectedFiles);
             // rewire invalidations
-            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles, outputFiles);
+            updateWatcherDependencies(affectedFiles);
             // rebuild assets from aggregated content: index files and assets
             buildAggregatedEntities();
 
@@ -195,35 +196,82 @@ export async function build(
 
     function buildFiles(filesToBuild: Set<string>) {
         for (const filePath of filesToBuild) {
-            if (indexFile) {
-                generator.generateFileIndexEntry(filePath, fullOutDir);
-            } else {
-                buildSingleFile({
-                    fullOutDir,
-                    filePath,
-                    fullSrcDir,
-                    log,
-                    fs,
-                    stylable,
-                    diagnosticsManager,
-                    diagnosticsMode,
-                    identifier,
-                    projectAssets: assets,
-                    moduleFormats: moduleFormats || [],
-                    includeCSSInJS,
-                    outputCSS,
-                    outputCSSNameTemplate,
-                    outputSources,
-                    useNamespaceReference,
-                    injectCSSRequest,
-                    optimize,
-                    dts,
-                    dtsSourceMap,
-                    minify,
-                    generated,
-                });
+            try {
+                if (indexFile) {
+                    generator.generateFileIndexEntry(filePath, fullOutDir);
+                } else {
+                    buildSingleFile({
+                        fullOutDir,
+                        filePath,
+                        fullSrcDir,
+                        log,
+                        fs,
+                        stylable,
+                        diagnosticsManager,
+                        diagnosticsMode,
+                        identifier,
+                        projectAssets: assets,
+                        moduleFormats,
+                        includeCSSInJS,
+                        outputCSS,
+                        outputCSSNameTemplate,
+                        outputSources,
+                        useNamespaceReference,
+                        injectCSSRequest,
+                        optimize,
+                        dts,
+                        dtsSourceMap,
+                        minify,
+                        generated,
+                    });
+                }
+            } catch (error: any) {
+                setFileErrorDiagnostic(filePath, error);
             }
         }
+    }
+
+    function updateWatcherDependencies(affectedFiles: Set<string>) {
+        const resolver = stylable.createResolver();
+        for (const filePath of affectedFiles) {
+            try {
+                sourceFiles.add(filePath);
+                const meta = tryRun(
+                    () => stylable.process(filePath),
+                    errorMessages.STYLABLE_PROCESS(filePath)
+                );
+                visitMetaCSSDependenciesBFS(
+                    meta,
+                    ({ source }) => {
+                        service.registerInvalidateOnChange(
+                            outputFiles.get(source) ?? source,
+                            filePath
+                        );
+                    },
+                    resolver,
+                    (resolvedPath) => {
+                        service.registerInvalidateOnChange(
+                            outputFiles.get(resolvedPath) ?? resolvedPath,
+                            filePath
+                        );
+                    }
+                );
+            } catch (error: any) {
+                setFileErrorDiagnostic(filePath, error);
+            }
+        }
+    }
+
+    function setFileErrorDiagnostic(filePath: string, error: Error) {
+        const diangostic: Diagnostic = {
+            type: 'error',
+            message: error.message,
+        };
+
+        diagnosticsManager.set(identifier, filePath, {
+            diagnosticsMode,
+            diagnostics: [diangostic],
+        });
     }
 
     function buildAggregatedEntities() {
@@ -267,33 +315,6 @@ export function createGenerator(
 
         return generatorModule.Generator;
     }, `Could not resolve custom generator from "${absoluteGeneratorPath}"`);
-}
-
-function updateWatcherDependencies(
-    stylable: Stylable,
-    service: DirectoryProcessService,
-    affectedFiles: Set<string>,
-    sourceFiles: Set<string>,
-    outputFiles: Map<string, string>
-) {
-    const resolver = stylable.createResolver();
-    for (const filePath of affectedFiles) {
-        sourceFiles.add(filePath);
-        const meta = stylable.process(filePath);
-        visitMetaCSSDependenciesBFS(
-            meta,
-            ({ source }) => {
-                service.registerInvalidateOnChange(outputFiles.get(source) ?? source, filePath);
-            },
-            resolver,
-            (resolvedPath) => {
-                service.registerInvalidateOnChange(
-                    outputFiles.get(resolvedPath) ?? resolvedPath,
-                    filePath
-                );
-            }
-        );
-    }
 }
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean | undefined }) {

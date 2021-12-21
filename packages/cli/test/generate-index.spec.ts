@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { Stylable } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
+import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
 
 const log = () => {
     /**/
@@ -252,28 +253,29 @@ describe('build index', () => {
                .b{}
             `,
         });
-        let cliError: unknown;
+
         const stylable = new Stylable('/', fs, () => ({}));
-        try {
-            await build(
-                {
-                    extension: '.st.css',
-                    outDir: '.',
-                    srcDir: '.',
-                    indexFile: 'index.st.css',
-                },
-                {
-                    fs,
-                    stylable,
-                    rootDir: '/',
-                    projectRoot: '/',
-                    log,
-                }
-            );
-        } catch (error) {
-            cliError = error;
-        }
-        expect((cliError as Error)?.message).to.equal(
+        const diagnosticsManager = new DiagnosticsManager();
+
+        await build(
+            {
+                extension: '.st.css',
+                outDir: '.',
+                srcDir: '.',
+                indexFile: 'index.st.css',
+                diagnostics: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+                diagnosticsManager,
+            }
+        );
+
+        expect(diagnosticsManager.get('/', '/a/comp.st.css')?.diagnostics[0].message).to.equal(
             `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`
         );
     });

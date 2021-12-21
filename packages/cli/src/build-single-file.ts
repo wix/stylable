@@ -10,6 +10,7 @@ import { nameTemplate } from './name-template';
 import type { Log } from './logger';
 import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { Diagnostic } from './report-diagnostics';
+import { errorMessages } from './messages';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -83,7 +84,10 @@ export function buildSingleFile({
         () => fs.readFileSync(filePath).toString(),
         `Read File Error: ${filePath}`
     );
-    const res = stylable.transform(content, filePath);
+    const res = tryRun(
+        () => stylable.transform(content, filePath),
+        errorMessages.STYLABLE_PROCESS(filePath)
+    );
     const optimizer = new StylableOptimizer();
     if (optimize) {
         optimizer.optimize(

@@ -23,3 +23,9 @@ export const processMessages = {
         return `Found ${changes} changes and ${deleted} deletions.`;
     },
 };
+
+export const errorMessages = {
+    STYLABLE_PROCESS(filePath: string) {
+        return `Stylable failed to process "${filePath}"`;
+    },
+};
