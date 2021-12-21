@@ -11,11 +11,10 @@ import {
     processorWarnings,
     transformerWarnings,
     nativePseudoElements,
-    reservedKeyFrames,
     rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
-import { STImport, CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
+import { STImport, CSSClass, CSSType, STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
 describe('findTestLocations', () => {
@@ -888,7 +887,7 @@ describe('diagnostics: warnings and errors', () => {
 
     describe('transforms', () => {
         it('should not allow @keyframe of reserved words', () => {
-            reservedKeyFrames.map((key) => {
+            CSSKeyframes.reservedKeyFrames.map((key) => {
                 const config = {
                     entry: '/main.css',
                     files: {

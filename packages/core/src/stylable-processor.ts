@@ -5,7 +5,7 @@ import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { murmurhash3_32_gc } from './murmurhash';
-import { reservedKeyFrames, knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
+import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
 import type {
     ClassSymbol,
@@ -16,7 +16,14 @@ import type {
     VarSymbol,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
-import { FeatureContext, STSymbol, STImport, CSSClass, CSSType } from './features';
+import {
+    FeatureContext,
+    STSymbol,
+    STImport,
+    CSSClass,
+    CSSType,
+    CSSKeyframes,
+} from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
@@ -251,7 +258,7 @@ export class StylableProcessor implements FeatureContext {
                                 );
                             }
 
-                            if (reservedKeyFrames.includes(name)) {
+                            if (CSSKeyframes.reservedKeyFrames.includes(name)) {
                                 this.diagnostics.error(
                                     atRule,
                                     processorWarnings.KEYFRAME_NAME_RESERVED(name),
