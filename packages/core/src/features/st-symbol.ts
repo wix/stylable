@@ -200,5 +200,4 @@ export function forceSetSymbol({
     byNS.main.push({ name, symbol, safeRedeclare: false, ast: undefined });
     byNSFlat.main[name] = symbol;
     byType[symbol._kind][name] = symbol;
-    // ToDo: maybe override type record according to symbol._kind
 }
