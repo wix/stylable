@@ -46,7 +46,6 @@ import {
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
 import { validateAtProperty } from './validate-at-property';
-export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
@@ -183,6 +182,8 @@ export class StylableProcessor implements FeatureContext {
         stubs.forEach((s) => s && s.remove());
 
         this.meta.scopes.forEach((scope) => this.handleScope(scope));
+
+        STSymbol.reportRedeclare(this);
 
         return this.meta;
     }

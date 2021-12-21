@@ -53,32 +53,6 @@ describe(`features/css-type`, () => {
 
             expect(CSSType.get(meta, `Comp`)).to.equal(STSymbol.get(meta, `Comp`));
         });
-        it(`should mark type as import alias`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            @st-import Imported from './other.st.css';
-                            .root Imported {}
-                        `,
-                    },
-                    '/other.st.css': {
-                        namespace: `other`,
-                        content: ``,
-                    },
-                },
-            });
-
-            const importDef = meta.getImportStatements()[0];
-            expect(CSSType.get(meta, `Imported`), `symbol`).to.eql({
-                _kind: `element`,
-                name: 'Imported',
-                alias: STImport.createImportSymbol(importDef, `default`, `default`, `/`),
-            });
-            expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
-        });
         it(`should return collected symbols`, () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
@@ -100,6 +74,46 @@ describe(`features/css-type`, () => {
             expect(meta.getAllTypeElements(), `meta.getAllTypeElements`).to.eql(
                 CSSType.getAll(meta)
             );
+        });
+        describe(`st-import`, () => {
+            it(`should mark type as import alias`, () => {
+                const { meta } = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: `entry`,
+                            content: `
+                                .root Before {}
+                                @st-import Before from './before.st.css';
+                                @st-import After from './after.st.css';
+                                .root After {}
+                            `,
+                        },
+                        '/before.st.css': {
+                            namespace: `before`,
+                            content: ``,
+                        },
+                        '/after.st.css': {
+                            namespace: `after`,
+                            content: ``,
+                        },
+                    },
+                });
+
+                const importBeforeDef = meta.getImportStatements()[0];
+                const importAfterDef = meta.getImportStatements()[1];
+                expect(CSSType.get(meta, `Before`), `before type symbol`).to.eql({
+                    _kind: `element`,
+                    name: 'Before',
+                    alias: STImport.createImportSymbol(importBeforeDef, `default`, `default`, `/`),
+                });
+                expect(CSSType.get(meta, `After`), `after type symbol`).to.eql({
+                    _kind: `element`,
+                    name: 'After',
+                    alias: STImport.createImportSymbol(importAfterDef, `default`, `default`, `/`),
+                });
+                expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
+            });
         });
     });
     describe(`transform`, () => {
