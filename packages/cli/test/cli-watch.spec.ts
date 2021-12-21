@@ -9,7 +9,6 @@ import {
     escapeRegExp,
     loadDirSync,
     populateDirectorySync,
-    runCliSync,
     writeToExistingFile,
 } from '@stylable/e2e-test-kit';
 
@@ -441,27 +440,6 @@ describe('Stylable Cli Watch', () => {
             const files = loadDirSync(tempDir.path);
             expect(files['dist/index.st.css']).to.include('style.st.css');
             expect(files['dist/index.st.css']).to.include('comp.st.css');
-        });
-
-        it('should error when source dir match out dir and output sources enabled', () => {
-            populateDirectorySync(tempDir.path, {
-                'package.json': `{"name": "test", "version": "0.0.0"}`,
-            });
-
-            const res = runCliSync([
-                '--rootDir',
-                tempDir.path,
-                '--outDir',
-                './',
-                '--srcDir',
-                './',
-                '-w',
-                '--stcss',
-                '--cjs=false',
-            ]);
-            expect(res.stderr).to.contain(
-                'Error: Invalid configuration: When using "stcss" outDir and srcDir must be different.'
-            );
         });
     });
 

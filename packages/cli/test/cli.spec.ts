@@ -350,5 +350,26 @@ describe('Stylable Cli', function () {
                 stdout.match(new RegExp(STSymbol.diagnostics.REDECLARE_SYMBOL('x'), 'g'))
             ).to.have.length(1);
         });
+
+        it('should report error when source dir match out dir and output sources enabled', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+            });
+
+            const res = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--outDir',
+                './',
+                '--srcDir',
+                './',
+                '-w',
+                '--stcss',
+                '--cjs=false',
+            ]);
+            expect(res.stderr).to.contain(
+                'Error: Invalid configuration: When using "stcss" outDir and srcDir must be different.'
+            );
+        });
     });
 });
