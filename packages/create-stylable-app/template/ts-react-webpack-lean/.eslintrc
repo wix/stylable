@@ -11,13 +11,14 @@
     "prettier"
   ],
   "plugins": ["react-hooks"],
+  "ignorePatterns": ["node_modules", "dist"],
   "settings": {
     "react": {
       "version": "detect"
     }
   },
   "rules": {
-    "no-console": "error",
+    "no-console": "warn",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "error",
     "react/prop-types": "off",

@@ -1,5 +1,9 @@
-/* Remove all the styles of the "User-Agent-Stylesheet", except for the 'display' property */
-:global(*:where(:not(iframe, canvas, img, svg, video):not(svg *))) {
+/*** https://github.com/elad2412/the-new-css-reset ***/
+/*
+    Remove all the styles of the "User-Agent-Stylesheet", except for the 'display' property
+    - The "symbol *" part is to solve Firefox SVG sprite bug
+ */
+:global(*:where(:not(iframe, canvas, img, svg, video):not(svg *, symbol *))) {
     all: unset;
     display: revert;
 }
@@ -11,12 +15,10 @@
     box-sizing: border-box;
 }
 
-/*
-  Remove list styles (bullets/numbers)
-  in case you use it with normalize.css
-*/
+/* Remove list styles (bullets/numbers) */
 :global(ol),
-:global(ul) {
+:global(ul),
+:global(menu) {
     list-style: none;
 }
 
@@ -25,12 +27,27 @@
     max-width: 100%;
 }
 
-/* Removes spacing between cells in tables */
+/* removes spacing between cells in tables */
 :global(table) {
     border-collapse: collapse;
 }
 
-/* Revert the 'white-space' property for textarea elements on Safari */
+/* revert the 'white-space' property for textarea elements on Safari */
 :global(textarea) {
     white-space: revert;
+}
+
+/* fix the feature of 'hidden' attribute.
+   display:revert; revert to element instead of attribute */
+:global(:where([hidden])) {
+    display: none;
+}
+
+/* revert for bug in Chromium browsers
+   - fix for the content editable attribute will work properly. */
+:global(:where([contenteditable])) {
+    -moz-user-modify: read-write;
+    -webkit-user-modify: read-write;
+    overflow-wrap: break-word;
+    -webkit-line-break: after-white-space;
 }
