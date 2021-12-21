@@ -1,4 +1,4 @@
-export const messages = {
+export const processMessages = {
     START_WATCHING() {
         return 'Start watching...';
     },

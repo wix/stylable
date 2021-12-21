@@ -6,7 +6,7 @@ import {
     DirectoryProcessService,
 } from './directory-process-service/directory-process-service';
 import { levels, Log } from './logger';
-import { messages } from './messages';
+import { processMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
 export interface WatchHandlerOptions {
@@ -49,11 +49,13 @@ export class WatchHandler {
                     foundChanges = true;
 
                     this.log(
-                        messages.CHANGE_DETECTED(event.path.replace(this.options.rootDir ?? '', ''))
+                        processMessages.CHANGE_DETECTED(
+                            event.path.replace(this.options.rootDir ?? '', '')
+                        )
                     );
                 }
 
-                this.log(messages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
+                this.log(processMessages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
             }
         }
 
@@ -62,8 +64,8 @@ export class WatchHandler {
 
             this.log(levels.clear);
             this.log(
-                messages.WATCH_SUMMARY(changed, deleted),
-                messages.CONTINUE_WATCH(),
+                processMessages.WATCH_SUMMARY(changed, deleted),
+                processMessages.CONTINUE_WATCH(),
                 levels.info
             );
             this.diagnosticsManager.report();

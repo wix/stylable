@@ -7,7 +7,7 @@ import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { DiagnosticsManager } from './diagnostics-manager';
 import { tryRun } from './build-tools';
-import { messages } from './messages';
+import { processMessages } from './messages';
 
 export async function build(
     {
@@ -172,7 +172,7 @@ export async function build(
                 log(
                     mode,
                     `[${new Date().toLocaleTimeString()}]`,
-                    messages.FINISHED_PROCESSING(
+                    processMessages.FINISHED_PROCESSING(
                         count,
                         isMultiPackagesProject ? identifier : undefined
                     )
@@ -187,7 +187,7 @@ export async function build(
         log(
             mode,
             `[${new Date().toLocaleTimeString()}]`,
-            messages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined)
+            processMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined)
         );
     }
 
