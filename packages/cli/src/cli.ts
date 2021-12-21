@@ -44,11 +44,9 @@ async function main() {
 
         for (let i = 0; i < options.length; i++) {
             const optionsEntity = options[i];
-            const identifier = hasMultipleOptions
-                ? `[${i}] ${projectRoot.replace(rootDir, '')}`
-                : isMultipleProjects
-                ? projectRoot.replace(rootDir, '')
-                : projectRoot;
+            const identifier =
+                (hasMultipleOptions ? `[${i}] ` : '') +
+                `${isMultipleProjects ? projectRoot.replace(rootDir, '') : projectRoot}`;
 
             log('[Project]', projectRoot, optionsEntity);
 
