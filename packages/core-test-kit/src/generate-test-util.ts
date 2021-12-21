@@ -62,17 +62,28 @@ export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = ne
     return { resolver, requireModule, fileProcessor, resolvePath };
 }
 
+interface CreateTransformerOptions {
+    diagnostics?: Diagnostics;
+    replaceValueHook?: replaceValueHook;
+    postProcessor?: postProcessor;
+    onResolve?: (resolved: string, _directoryPath: string, _request: string) => string;
+}
+
 export function createTransformer(
     config: Config,
-    diagnostics: Diagnostics = new Diagnostics(),
-    replaceValueHook?: replaceValueHook,
-    postProcessor?: postProcessor
+    {
+        diagnostics = new Diagnostics(),
+        replaceValueHook,
+        postProcessor,
+        onResolve = (resolved) => resolved,
+    }: CreateTransformerOptions = {}
 ): StylableTransformer {
     const { requireModule, fileProcessor, resolvePath } = generateInfra(config, diagnostics);
 
     return new StylableTransformer({
         fileProcessor,
-        moduleResolver: resolvePath,
+        moduleResolver: (directoryPath: string, request: string) =>
+            onResolve(resolvePath(directoryPath, request), directoryPath, request),
         requireModule,
         diagnostics,
         keepValues: false,
@@ -104,7 +115,7 @@ export function generateStylableResult(
     if (!isAbsolute(entry || '')) {
         throw new Error(`entry must be absolute path got: ${entry}`);
     }
-    const transformer = createTransformer(config, diagnostics);
+    const transformer = createTransformer(config, { diagnostics });
     return transformer.transform(transformer.fileProcessor.process(entry || ''));
 }
 
