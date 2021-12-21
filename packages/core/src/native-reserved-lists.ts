@@ -72,17 +72,18 @@ export const reservedFunctionalPseudoClasses = [
     `global`,
     `local`,
 ];
-export const knownPseudoClassesWithNestedSelectors = reservedFunctionalPseudoClasses.filter(name => {
-    switch(name) {
-        case `global`:
-        case `local`:
-        case `nth-of-type`:
-        case `nth-last-of-type`:
-            return false;
-
+export const knownPseudoClassesWithNestedSelectors = reservedFunctionalPseudoClasses.filter(
+    (name) => {
+        switch (name) {
+            case `global`:
+            case `local`:
+            case `nth-of-type`:
+            case `nth-last-of-type`:
+                return false;
+        }
+        return true;
     }
-    return true;
-});
+);
 
 export const nativePseudoElements = [
     'after',
