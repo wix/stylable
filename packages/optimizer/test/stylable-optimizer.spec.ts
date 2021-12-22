@@ -96,4 +96,20 @@ describe('StylableOptimizer', () => {
         const output = new StylableOptimizer().minifyCSS(meta.outputAst!.toString());
         expect(output).to.equal(`.${meta.namespace}__x{color:red}`);
     }).timeout(25000);
+
+    it('preserve white space on string tokens ', () => {
+        const index = '/index.st.css';
+        const files = {
+            [index]: {
+                content: `
+                    .x {
+                        border: 1px solid "color(xxx)";
+                    }
+                `,
+            },
+        };
+        const { meta } = generateStylableResult({ entry: index, files });
+        const output = new StylableOptimizer().minifyCSS(meta.outputAst!.toString());
+        expect(output).to.equal(`.${meta.namespace}__x{border:1px solid "color(xxx)"}`);
+    });
 });
