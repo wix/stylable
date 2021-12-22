@@ -1,14 +1,6 @@
+@st-import Header from './header.st.css';
+
 .root {}
-
-:import {
-    -st-from: './header.st.css';
-    -st-default: Header;
-}
-
-:global(html) {
-    background-color: rgb(37, 37, 38);
-    color: white;
-}
 
 .header {
     -st-extends: Header;
