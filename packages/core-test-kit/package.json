@@ -25,7 +25,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/wix/stylable/tree/master/packages/optimizer",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/core-test-kit",
   "homepage": "https://stylable.io",
   "author": "Wix.com",
   "license": "MIT"
