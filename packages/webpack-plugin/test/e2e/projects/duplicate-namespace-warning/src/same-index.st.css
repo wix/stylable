@@ -1,0 +1,6 @@
+/* st-namespace-reference="x" */
+@namespace "X";
+
+.root {
+    color: red;
+}
