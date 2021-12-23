@@ -15,14 +15,14 @@ export type PartialBuildOptions = Partial<BuildOptions>;
  *   }
  * }
  */
-export type Configuration<T extends string = string> =
+export type Configuration<P extends string = string> =
     | SingleProjectConfig
-    | MultipleProjectsConfig<T>;
+    | MultipleProjectsConfig<P>;
 
-export type ConfigurationProvider<T extends string = string> = () => Configuration<T>;
+export type ConfigurationProvider<P extends string = string> = () => Configuration<P>;
 
-export function typedConfiguration<T extends string>(
-    configOrConfigProvider: Configuration<T> | ConfigurationProvider<T>
+export function typedConfiguration<P extends string>(
+    configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>
 ) {
     return configOrConfigProvider;
 }
@@ -48,44 +48,38 @@ export interface ResolveProjectsContext {
     projectRoot: string;
 }
 
-export interface ResolveProjectsRequestsParams {
-    projectRoot: string;
-    entities: Array<RawProjectEntity>;
-    resolveRequests: ResolveRequests;
-}
-
 export interface SingleProjectConfig {
     options: PartialBuildOptions;
 }
 
-export type Presets<T extends string = string> = {
-    [key in T]: PartialBuildOptions;
+export type Presets<P extends string = string> = {
+    [key in P]: PartialBuildOptions;
 };
 
-export type Projects<T extends string> =
-    | Array<string | [string, ProjectEntryValues<T>]>
-    | Record<string, ProjectEntryValues<T>>;
+export type Projects<P extends string> =
+    | Array<string | [string, ProjectEntryValues<P>]>
+    | Record<string, ProjectEntryValues<P>>;
 
-export interface MultipleProjectsConfig<T extends string> extends Partial<SingleProjectConfig> {
-    presets?: Presets<T>;
-    projects: Projects<T>;
+export interface MultipleProjectsConfig<P extends string> extends Partial<SingleProjectConfig> {
+    presets?: Presets<P>;
+    projects: Projects<P>;
     projectsOptions?: {
         resolveRequests?: ResolveRequests;
     };
 }
 
-export type ProjectEntryValue<T extends string> =
-    | T
+export type ProjectEntryValues<P extends string> =
+    | ProjectEntryValue<P>
+    | Array<ProjectEntryValue<P>>;
+
+export type ProjectEntryValue<P extends string> =
+    | P
     | PartialBuildOptions
     | {
-          preset?: T;
-          presets?: Array<T>;
+          preset?: P;
+          presets?: Array<P>;
           options: PartialBuildOptions;
       };
-
-export type ProjectEntryValues<T extends string> =
-    | ProjectEntryValue<T>
-    | Array<ProjectEntryValue<T>>;
 
 export interface ProcessProjectsOptions {
     defaultOptions?: BuildOptions;
@@ -118,11 +112,6 @@ export interface CliArguments {
     diagnostics: boolean | undefined;
     diagnosticsMode: string | undefined;
     watch: boolean;
-}
-
-export interface ProjectsConfigResult {
-    rootDir: string;
-    projects: STCConfig;
 }
 
 export interface BuildOptions {

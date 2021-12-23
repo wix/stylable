@@ -10,8 +10,8 @@ import type {
 } from '../types';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 
-export function processProjects<T extends string>(
-    { projects, presets }: MultipleProjectsConfig<T>,
+export function processProjects<P extends string>(
+    { projects, presets }: MultipleProjectsConfig<P>,
     { defaultOptions = createDefaultOptions() }: ProcessProjectsOptions = {}
 ) {
     const entities: RawProjectEntity[] = [];
@@ -30,7 +30,7 @@ export function processProjects<T extends string>(
             );
         }
     } else if (typeof projects === 'object') {
-        for (const entry of Object.entries<ProjectEntryValues<T>>(projects)) {
+        for (const entry of Object.entries<ProjectEntryValues<P>>(projects)) {
             entities.push(resolveProjectEntry(entry, defaultOptions, presets));
         }
     }
@@ -40,8 +40,8 @@ export function processProjects<T extends string>(
     };
 }
 
-function resolveProjectEntry<T extends string>(
-    [request, value]: [string, ProjectEntryValues<T>] | [string],
+function resolveProjectEntry<P extends string>(
+    [request, value]: [string, ProjectEntryValues<P>] | [string],
     configOptions: BuildOptions,
     availablePresets: Presets = {}
 ): RawProjectEntity {
@@ -69,7 +69,7 @@ function resolveProjectEntry<T extends string>(
         }),
     };
 
-    function normalizeEntry(entryValue: ProjectEntryValue<T>) {
+    function normalizeEntry(entryValue: ProjectEntryValue<P>) {
         if (typeof entryValue === 'string') {
             return [resolvePreset(entryValue, availablePresets)];
         } else if (typeof entryValue === 'object') {

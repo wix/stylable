@@ -6,9 +6,9 @@ import type {
     Configuration,
     ConfigurationProvider,
     MultipleProjectsConfig,
-    ProjectsConfigResult,
+    RawProjectEntity,
     ResolveProjectsContext,
-    ResolveProjectsRequestsParams,
+    ResolveRequests,
     STCConfig,
 } from '../types';
 import { processProjects } from './process-projects';
@@ -20,7 +20,10 @@ import {
 } from './resolve-options';
 import { resolveNpmRequests } from './resolve-requests';
 
-export async function projectsConfig(argv: CliArguments): Promise<ProjectsConfigResult> {
+export async function projectsConfig(argv: CliArguments): Promise<{
+    rootDir: string;
+    projects: STCConfig;
+}> {
     const projectRoot = resolve(argv.rootDir);
     const defaultOptions = createDefaultOptions();
     const configFile = resolveConfigFile(projectRoot);
@@ -86,7 +89,11 @@ async function resolveProjectsRequests({
     entities,
     projectRoot,
     resolveRequests,
-}: ResolveProjectsRequestsParams): Promise<STCConfig> {
+}: {
+    projectRoot: string;
+    entities: Array<RawProjectEntity>;
+    resolveRequests: ResolveRequests;
+}): Promise<STCConfig> {
     const context: ResolveProjectsContext = { projectRoot };
 
     return resolveRequests(entities, context);

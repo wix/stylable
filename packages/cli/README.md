@@ -233,19 +233,18 @@ export type Projects =
     | Array<string | [string, ProjectEntryValues]>
     | Record<string, ProjectEntryValues>;
 
-// P = Preset name
-export type ProjectEntryValue<P extends string> =
-    | P
+export type ProjectEntryValues<PRESET extends string> =
+    | ProjectEntryValue<PRESET>
+    | Array<ProjectEntryValue<PRESET>>;
+
+export type ProjectEntryValue<PRESET extends string> =
+    | PRESET
     | PartialBuildOptions
     | {
-          preset?: P;
-          presets?: Array<P>;
+          preset?: PRESET;
+          presets?: Array<PRESET>;
           options: PartialBuildOptions;
       };
-
-export type ProjectEntryValues<P extends string> =
-    | ProjectEntryValue<P>
-    | Array<ProjectEntryValue<P>>;
 ```
 
 
