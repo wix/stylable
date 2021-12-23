@@ -365,9 +365,9 @@ export function getSortedModules(stylableModules: Map<NormalModule, BuildData | 
 export function reportNamespaceCollision(
     namespaceToFileMapping: Map<string, Set<NormalModule>>,
     compilation: Compilation,
-    ignore?: boolean | 'warn'
+    mode: 'ignore' | 'warnings' | 'errors'
 ) {
-    if (ignore === true) {
+    if (mode === 'ignore') {
         return;
     }
     for (const [namespace, resources] of namespaceToFileMapping) {
@@ -382,8 +382,18 @@ export function reportNamespaceCollision(
                 )} found in multiple different resources:\n${resourcesReport}\nThis issue indicates multiple versions of the same library in the compilation, or different paths importing the same stylesheet like: "esm" or "cjs".`
             );
             error.hideStack = true;
-            compilation[ignore === 'warn' ? 'warnings' : 'errors'].push(error);
+            compilation[mode].push(error);
         }
+    }
+}
+
+export function normalizeNamespaceCollisionOption(opt?: boolean | 'warn') {
+    if (opt === true) {
+        return 'ignore';
+    } else if (opt === 'warn') {
+        return 'warnings';
+    } else {
+        return 'errors';
     }
 }
 

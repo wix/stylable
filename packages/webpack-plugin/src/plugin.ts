@@ -35,6 +35,7 @@ import {
     getOnlyChunk,
     getStylableBuildData,
     isDependencyOf,
+    normalizeNamespaceCollisionOption,
 } from './plugin-utils';
 import { injectCssModules } from './mini-css-support';
 import type {
@@ -428,7 +429,9 @@ export class StylableWebpackPlugin {
             reportNamespaceCollision(
                 namespaceToFileMapping,
                 compilation,
-                this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE
+                normalizeNamespaceCollisionOption(
+                    this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE
+                )
             );
 
             for (const module of sortedModules) {
