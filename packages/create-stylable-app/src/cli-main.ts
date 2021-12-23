@@ -10,7 +10,7 @@ const argv = yargs
         type: 'string',
         description: 'Stylable project template to use',
         default: 'ts-react-webpack',
-        choices: ['ts-react-webpack', 'ts-react-rollup'],
+        choices: ['ts-react-webpack', 'ts-react-rollup', 'ts-react-webpack-lean'],
     })
     .option('verboseNpm', {
         type: 'boolean',

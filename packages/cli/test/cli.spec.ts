@@ -5,7 +5,7 @@ import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
 import { processorWarnings } from '@stylable/core';
-import { STSymbol } from '@stylable/core/dist/features';
+import { STImport } from '@stylable/core/dist/features';
 
 describe('Stylable Cli', function () {
     this.timeout(25000);
@@ -337,17 +337,23 @@ describe('Stylable Cli', function () {
             expect(stderr).to.include('"dtsSourceMap" requires turning on "dts"');
         });
 
-        it('should report diagnostic once', () => {
+        it('should report diagnostic once (regression)', () => {
+            /**
+             * This test checks for a case that
+             * diagnostics were outputted multiple times
+             */
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
-                'style.st.css': `:vars {x: red; x: blue}`,
+                'style.st.css': `.root {
+                    @st-import X from ".x.st.css";
+                }`,
             });
 
             const { stdout, status } = runCliSync(['--rootDir', tempDir.path]);
 
             expect(status).to.equal(1);
             expect(
-                stdout.match(new RegExp(STSymbol.diagnostics.REDECLARE_SYMBOL('x'), 'g'))
+                stdout.match(new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE(), 'g'))
             ).to.have.length(1);
         });
 

@@ -1,45 +1,53 @@
+/*** https://github.com/elad2412/the-new-css-reset ***/
+/*
+    Remove all the styles of the "User-Agent-Stylesheet", except for the 'display' property
+    - The "symbol *" part is to solve Firefox SVG sprite bug
+ */
+:global(*:where(:not(iframe, canvas, img, svg, video):not(svg *, symbol *))) {
+    all: unset;
+    display: revert;
+}
+
+/* Preferred box-sizing value */
 :global(*),
-:global(::before),
-:global(::after) {
+:global(*::before),
+:global(*::after) {
     box-sizing: border-box;
 }
 
-:global(html),
-:global(body) {
-    margin: 0;
-    padding: 0;
+/* Remove list styles (bullets/numbers) */
+:global(ol),
+:global(ul),
+:global(menu) {
+    list-style: none;
 }
 
-:global(html) {
-    font-family:
-        system-ui,
-        /* macOS 10.11-10.12 */
-        -apple-system,
-        /* Windows 6+ */
-        "Segoe UI",
-        /* Android 4+ */
-        "Roboto",
-        /* Ubuntu 10.10+ */
-        "Ubuntu",
-        /* Gnome 3+ */
-        "Cantarell",
-        /* KDE Plasma 5+ */
-        "Noto Sans",
-        /* fallback */
-        sans-serif,
-        /* macOS emoji */
-        "Apple Color Emoji",
-        /* Windows emoji */
-        "Segoe UI Emoji",
-        /* Windows emoji */
-        "Segoe UI Symbol",
-        /* Linux emoji */
-        "Noto Color Emoji";
-    ;
+/* For images to not be able to exceed their container */
+:global(img) {
+    max-width: 100%;
 }
 
-:global(a),
-:global(a:visited) {
-    color: inherit;
-    cursor: pointer;
+/* removes spacing between cells in tables */
+:global(table) {
+    border-collapse: collapse;
+}
+
+/* revert the 'white-space' property for textarea elements on Safari */
+:global(textarea) {
+    white-space: revert;
+}
+
+/* fix the feature of 'hidden' attribute.
+   display:revert; revert to element instead of attribute */
+:global(:where([hidden])) {
+    display: none;
+}
+
+/* revert for bug in Chromium browsers
+   - fix for the content editable attribute will work properly. */
+:global(:where([contenteditable])) {
+    -moz-user-modify: read-write;
+    -webkit-user-modify: read-write;
+    overflow-wrap: break-word;
+    -webkit-line-break: after-white-space;
 }

@@ -680,18 +680,23 @@ describe('diagnostics: warnings and errors', () => {
             it('should warn when import redeclare same symbol (in different block types)', () => {
                 expectAnalyzeDiagnostics(
                     `
-                    :import {
+                    |:import {
                         -st-from: './file.st.css';
-                        -st-default: Name;
-                    }
+                        -st-default: $Name$;
+                    }|
                     :vars {
-                        |$Name$: red;
+                        Name: red;
                     }
                 `,
                     [
                         {
                             message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
                             file: 'main.st.css',
+                        },
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
+                            file: 'main.st.css',
+                            skipLocationCheck: true,
                         },
                     ]
                 );

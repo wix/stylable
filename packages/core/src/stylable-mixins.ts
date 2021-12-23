@@ -336,16 +336,16 @@ function handleLocalClassMixin(
     mergeRules(mixinRoot, rule);
 }
 
-function createInheritedMeta(resolvedClass: CSSResolve) {
-    const mixinMeta: StylableMeta = Object.create(resolvedClass.meta);
-    mixinMeta.data = Object.create(mixinMeta.data);
-    mixinMeta.parent = resolvedClass.meta;
-
-    STSymbol.inheritSymbols(resolvedClass.meta, mixinMeta);
-
-    const symbols = STSymbol.getAll(mixinMeta);
-    symbols[resolvedClass.meta.root] = symbols[resolvedClass.symbol.name];
-    // ToDo: check if this works: symbols[resolvedClass.meta.root] = resolvedClass.symbol;
+function createInheritedMeta({ meta, symbol }: CSSResolve) {
+    const mixinMeta: StylableMeta = Object.create(meta);
+    mixinMeta.data = { ...meta.data };
+    mixinMeta.parent = meta;
+    STSymbol.inheritSymbols(meta, mixinMeta);
+    STSymbol.forceSetSymbol({
+        meta: mixinMeta,
+        symbol: STSymbol.getAll(mixinMeta)[symbol.name], // ToDo: check as an alternative: `symbol`;
+        localName: meta.root,
+    });
     return mixinMeta;
 }
 

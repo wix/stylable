@@ -1,6 +1,6 @@
 /** @type {import('create-stylable-app').TemplateDefinition} */
 module.exports = {
-    dependencies: ['@stylable/runtime', 'react', 'react-dom'],
+    dependencies: ['react', 'react-dom'],
     devDependencies: [
         '@rollup/plugin-commonjs',
         '@rollup/plugin-html',
@@ -10,6 +10,7 @@ module.exports = {
         '@rollup/plugin-typescript',
         '@stylable/core',
         '@stylable/rollup-plugin',
+        '@stylable/runtime',
         '@types/react',
         '@types/react-dom',
         '@typescript-eslint/eslint-plugin',
