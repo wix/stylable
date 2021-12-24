@@ -1,4 +1,4 @@
-import type { LoaderDefinition } from 'webpack';
+import type { LoaderDefinition, LoaderContext } from 'webpack';
 import type { StylableExports } from '@stylable/core';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 
@@ -27,8 +27,26 @@ const stylableRuntimeLoader: LoaderDefinition = function loader(content) {
 
     const [namespace, mapping] = evalStylableExtractModule(content);
 
+    addBuildInfo(this, namespace);
+
     return createRuntimeTargetCode(namespace, mapping);
 };
+
+function addBuildInfo(ctx: LoaderContext<any>, namespace: string) {
+    try {
+        if (ctx && ctx._module) {
+            ctx._module.buildInfo.stylableNamespace = namespace;
+        }
+    } catch (error) {
+        ctx.emitWarning(
+            new Error(
+                `Failed to add stylableNamespace buildInfo for: ${ctx.resourcePath} because ${
+                    (error as Error).message
+                }`
+            )
+        );
+    }
+}
 
 export const loaderPath = __filename;
 export default stylableRuntimeLoader;
