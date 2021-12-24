@@ -1,5 +1,10 @@
 export { build } from './build';
-export { Generator, ReExports, reExportsAllSymbols } from './base-generator';
+export {
+    IndexGenerator,
+    IndexGenerator as Generator,
+    ReExports,
+    reExportsAllSymbols,
+} from './base-generator';
 export {
     BuildOptions,
     Configuration,

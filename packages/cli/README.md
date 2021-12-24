@@ -76,6 +76,7 @@ exports.stcConfig = typedConfiguration({
 
 #### Build options
 ```ts
+
 export interface BuildOptions {
     /** Specify the extension of stylable files */
     extension: string;
@@ -88,7 +89,7 @@ export interface BuildOptions {
     /** opt into build index file and specify the filepath for the generated index file */
     indexFile?: string;
     /** custom cli index generator class */
-    Generator?: typeof BaseGenerator;
+    IndexGenerator?: typeof IndexGenerator;
     /** output commonjs module (.js) */
     cjs?: boolean;
     /** output esm module (.mjs) */
@@ -116,7 +117,7 @@ export interface BuildOptions {
     /** should emit diagnostics */
     diagnostics?: boolean;
     /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
-    diagnosticsMode?: 'strict' | 'loose';
+    diagnosticsMode?: DiagnosticsMode;
 }
 ```
 

@@ -1,6 +1,6 @@
 import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
-import type { Generator as BaseGenerator } from './base-generator';
+import type { IndexGenerator } from './base-generator';
 import type { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { Log } from './logger';
 
@@ -126,7 +126,7 @@ export interface BuildOptions {
     /** opt into build index file and specify the filepath for the generated index file */
     indexFile?: string;
     /** custom cli index generator class */
-    Generator?: typeof BaseGenerator;
+    IndexGenerator?: typeof IndexGenerator;
     /** output commonjs module (.js) */
     cjs?: boolean;
     /** output esm module (.mjs) */

@@ -1,6 +1,6 @@
 import type { BuildMetaData, BuildOptions } from './types';
 import { visitMetaCSSDependenciesBFS } from '@stylable/core';
-import { Generator as BaseGenerator } from './base-generator';
+import { IndexGenerator as BaseIndexGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
@@ -16,7 +16,7 @@ export async function build(
         srcDir,
         outDir,
         indexFile,
-        Generator = BaseGenerator,
+        IndexGenerator = BaseIndexGenerator,
         cjs,
         esm,
         includeCSSInJS,
@@ -58,7 +58,7 @@ export async function build(
     }
 
     const mode = watch ? '[Watch]' : '[Build]';
-    const generator = new Generator(stylable, log);
+    const generator = new IndexGenerator(stylable, log);
     const generated = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
@@ -303,7 +303,7 @@ export async function build(
 export function createGenerator(
     root: string,
     generatorPath?: string
-): undefined | typeof BaseGenerator {
+): undefined | typeof BaseIndexGenerator {
     if (!generatorPath) {
         return undefined;
     }
@@ -311,7 +311,9 @@ export function createGenerator(
     const absoluteGeneratorPath = require.resolve(generatorPath, { paths: [root] });
 
     return tryRun(() => {
-        const generatorModule: { Generator: typeof BaseGenerator } = require(absoluteGeneratorPath);
+        const generatorModule: {
+            Generator: typeof BaseIndexGenerator;
+        } = require(absoluteGeneratorPath);
 
         return generatorModule.Generator;
     }, `Could not resolve custom generator from "${absoluteGeneratorPath}"`);

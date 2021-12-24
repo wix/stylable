@@ -105,7 +105,7 @@ describe('build index', () => {
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
-                Generator: require('./fixtures/test-generator').Generator,
+                IndexGenerator: require('./fixtures/test-generator').Generator,
             },
             {
                 fs,
@@ -146,7 +146,7 @@ describe('build index', () => {
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
-                Generator: require('./fixtures/test-generator').Generator,
+                IndexGenerator: require('./fixtures/test-generator').Generator,
             },
             {
                 fs,
@@ -188,7 +188,7 @@ describe('build index', () => {
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
-                Generator: require('./fixtures/named-exports-generator').Generator,
+                IndexGenerator: require('./fixtures/named-exports-generator').Generator,
             },
             {
                 fs,

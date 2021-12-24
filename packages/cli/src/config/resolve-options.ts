@@ -183,7 +183,7 @@ export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): P
         outputSources: argv.stcss,
         outputCSSNameTemplate: argv.cssFilename,
         diagnosticsMode: argv.diagnosticsMode as BuildOptions['diagnosticsMode'],
-        Generator: createGenerator(rootDir, argv.customGenerator),
+        IndexGenerator: createGenerator(rootDir, argv.customGenerator),
     };
 }
 
