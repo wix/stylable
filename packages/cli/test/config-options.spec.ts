@@ -135,7 +135,7 @@ describe('Stylable CLI config file options', function () {
                         exports.stcConfig = () => ({ 
                             options: { 
                                 indexFile: 'my-index.st.css',
-                                Generator: require(${JSON.stringify(
+                                IndexGenerator: require(${JSON.stringify(
                                     require.resolve('./fixtures/test-generator')
                                 )}).Generator,
                                 outDir: './dist',
