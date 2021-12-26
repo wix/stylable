@@ -529,7 +529,7 @@ describe('Stylable Cli Watch', () => {
             });
         });
 
-        it('should re-build derived files deep for the relevant scope', async () => {
+        it('should re-build derived files deep in the relevent package only', async () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'stylable.config.js': `
@@ -606,7 +606,7 @@ describe('Stylable Cli Watch', () => {
             expect(files['packages/project-a/dist/style.css']).to.include('color:blue');
             expect(
                 Object.keys(files).some((file) => file.includes(tempDir.path)),
-                'build dependency from the wrong scope (build from scope "b" inside scope "a")'
+                'build from package "b" inside package "a"'
             ).to.be.false;
         });
 
