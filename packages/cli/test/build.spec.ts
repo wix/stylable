@@ -33,7 +33,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: 'lib',
                 srcDir: '.',
                 cjs: true,
@@ -94,7 +93,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 srcDir: 'src',
                 outDir: 'cjs',
                 cjs: true,
@@ -125,7 +123,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 srcDir: 'cjs',
                 outDir: 'cjs2',
                 cjs: true,
@@ -167,7 +164,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 cjs: true,
@@ -211,7 +207,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: './dist',
                 srcDir: '.',
                 cjs: true,
@@ -253,7 +248,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: './dist',
                 srcDir: '.',
                 minify: true,
@@ -288,7 +282,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: './dist',
                 srcDir: '.',
                 cjs: true,
@@ -322,7 +315,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 dts: true,
@@ -361,7 +353,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 dts: true,
@@ -414,7 +405,6 @@ describe('build stand alone', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 dts: true,

@@ -23,7 +23,6 @@ describe('build index', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
@@ -62,7 +61,6 @@ describe('build index', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
@@ -101,7 +99,6 @@ describe('build index', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
@@ -142,7 +139,6 @@ describe('build index', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
@@ -184,7 +180,6 @@ describe('build index', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
@@ -224,7 +219,6 @@ describe('build index', () => {
         const stylable = new Stylable('/', fs, () => ({}));
         await build(
             {
-                extension: '.st.css',
                 outDir: './some-dir/other-dir/',
                 srcDir: '.',
                 indexFile: 'index.st.css',
@@ -259,7 +253,6 @@ describe('build index', () => {
 
         await build(
             {
-                extension: '.st.css',
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',

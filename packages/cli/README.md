@@ -78,8 +78,6 @@ exports.stcConfig = typedConfiguration({
 ```ts
 
 export interface BuildOptions {
-    /** Specify the extension of stylable files */
-    extension: string;
     /** specify where to find source files */
     srcDir: string;
     /** specify where to build the target files */

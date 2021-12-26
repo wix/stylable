@@ -106,7 +106,6 @@ export interface CliArguments {
     manifest: boolean | undefined;
     manifestFilepath: string;
     customGenerator: string | undefined;
-    ext: string | undefined;
     require: string[];
     log: boolean | undefined;
     diagnostics: boolean | undefined;
@@ -115,8 +114,6 @@ export interface CliArguments {
 }
 
 export interface BuildOptions {
-    /** Specify the extension of stylable files */
-    extension: string;
     /** specify where to find source files */
     srcDir: string;
     /** specify where to build the target files */

@@ -116,11 +116,6 @@ export function getCliArguments(): Arguments<CliArguments> {
             type: 'string',
             description: 'path to file containing indexFile output override methods',
         })
-        .option('ext', {
-            type: 'string',
-            description: 'extension of stylable css files',
-            defaultDescription: String(defaults.extension),
-        })
         .option('require', {
             type: 'array',
             description: 'require hooks',
@@ -166,7 +161,6 @@ export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): P
     return {
         outDir: argv.outDir,
         srcDir: argv.srcDir,
-        extension: argv.ext,
         indexFile: argv.indexFile,
         esm: argv.esm,
         cjs: argv.cjs,
@@ -191,7 +185,6 @@ export function createDefaultOptions(): BuildOptions {
     return {
         outDir: '.',
         srcDir: '.',
-        extension: '.st.css',
         cjs: true,
         esm: false,
         dts: false,

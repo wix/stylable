@@ -12,7 +12,6 @@ import { errorMessages, processMessages } from './messages';
 
 export async function build(
     {
-        extension,
         srcDir,
         outDir,
         indexFile,
@@ -94,7 +93,7 @@ export async function build(
                 return false;
             }
             // stylable files
-            return filePath.endsWith(extension);
+            return filePath.endsWith('.st.css');
         },
         onError(error) {
             if (watch) {
