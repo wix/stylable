@@ -280,20 +280,13 @@ export async function build(
             generator.generateIndexFile(fs, indexFilePath);
         } else {
             const generatedAssets = handleAssets(assets, projectRoot, srcDir, outDir, fs);
-            const { manifestOutputPath } = generateManifest(
-                projectRoot,
-                sourceFiles,
-                manifest,
-                stylable,
-                mode,
-                log,
-                fs
-            );
-
-            generated.add(manifestOutputPath);
-
             for (const generatedAsset of generatedAssets) {
                 generated.add(generatedAsset);
+            }
+
+            if (manifest) {
+                generateManifest(projectRoot, sourceFiles, manifest, stylable, mode, log, fs);
+                generated.add(manifest);
             }
         }
     }
