@@ -18,6 +18,7 @@ export function formatCSS(css: string) {
             node.selector = formatSelectors(node.selectors);
             node.nodes.forEach((child) => {
                 if (child.type === 'decl') {
+                    // TODO: handle child.variable
                     // TODO: handle case the raws contains comments
                     child.raws.between = ': ';
                     child.raws.before = NL + indent.repeat(indentLevel);
@@ -56,6 +57,10 @@ function formatSelectors(selectors: string[]) {
     }
     // join groups with new line
     return selectorsFormatted.join(',\n');
+}
+
+function formatValueList(values: string[]) {
+    return values.join(', ');
 }
 
 // naive implementation

@@ -91,6 +91,10 @@ describe('Formatting - Decl', () => {
         expect(formatCSS('.root {color\n\n\n: red;}\n')).to.equal('.root {\n    color: red;\n}\n');
     });
 
+    it.only('multiple values are separated with one comma and space between each value (short line)', () => {
+        expect(formatCSS('.root {\n    font-family: A,B,C;\n}\n')).to.equal('.root {\n    font-family: A, B, C;\n}\n');
+    });
+
     it.skip('comments before and after colon', () => {
         expect(formatCSS('.root {color/*!*/:/*!*/red;}\n')).to.equal('.root {\n?????\n}\n');
     });
