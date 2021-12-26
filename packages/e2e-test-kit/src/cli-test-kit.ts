@@ -12,55 +12,71 @@ import { on } from 'events';
 import { join, relative } from 'path';
 import type { Readable } from 'stream';
 
+interface Step {
+    msg: string;
+    action?: () => void | {
+        sleep?: number;
+    };
+}
+
 interface ProcessCliOutputParams {
     dirPath: string;
     args: string[];
-    steps: Array<{
-        msg: string;
-        action?: () => void | {
-            sleep?: number;
-        };
-    }>;
+    steps: Step[];
+    timeout?: number;
 }
 
 export function createCliTester() {
     const cliProcesses: ChildProcess[] = [];
 
-    async function processCliOutput({ dirPath, args, steps }: ProcessCliOutputParams): Promise<{
+    async function processCliOutput({
+        dirPath,
+        args,
+        steps,
+        timeout = 5000,
+    }: ProcessCliOutputParams): Promise<{
         output: string;
     }> {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess);
 
-        const found = [];
+        const found: Step[] = [];
         let output = '';
 
-        if (!cliProcess.stdout) {
-            throw new Error('no stdout on cli process');
+        return Promise.race([onTimeout(timeout, found), runSteps()]);
+
+        function onTimeout(ms: number, rejectWith?: unknown) {
+            return new Promise<{ output: string }>((resolve, reject) =>
+                setTimeout(() => (rejectWith ? reject(rejectWith) : resolve({ output })), ms)
+            );
         }
 
-        for await (const line of readLines(cliProcess.stdout)) {
-            const step = steps[found.length];
-            output += `\n${line}`;
+        async function runSteps() {
+            if (!cliProcess.stdout) {
+                throw new Error('no stdout on cli process');
+            }
+            for await (const line of readLines(cliProcess.stdout)) {
+                const step = steps[found.length];
+                output += `\n${line}`;
 
-            if (line.includes(step.msg)) {
-                found.push(true);
+                if (line.includes(step.msg)) {
+                    found.push(step);
 
-                if (step.action) {
-                    const { sleep } = step.action() || {};
+                    if (step.action) {
+                        const { sleep } = step.action() || {};
 
-                    if (typeof sleep === 'number') {
-                        await new Promise((res) => setTimeout(res, sleep));
+                        if (typeof sleep === 'number') {
+                            await onTimeout(sleep);
+                        }
+                    }
+
+                    if (steps.length === found.length) {
+                        return { output };
                     }
                 }
-
-                if (steps.length === found.length) {
-                    return { output };
-                }
             }
+            return { output };
         }
-
-        return { output };
     }
 
     return {
