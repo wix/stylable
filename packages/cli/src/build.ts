@@ -224,7 +224,7 @@ export async function build(
                         generated,
                     });
                 }
-            } catch (error: any) {
+            } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
             }
         }
@@ -255,16 +255,16 @@ export async function build(
                         );
                     }
                 );
-            } catch (error: any) {
+            } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
             }
         }
     }
 
-    function setFileErrorDiagnostic(filePath: string, error: Error) {
+    function setFileErrorDiagnostic(filePath: string, error: any) {
         const diangostic: Diagnostic = {
             type: 'error',
-            message: error.message,
+            message: error instanceof Error ? error.message : String(error),
         };
 
         diagnosticsManager.set(identifier, filePath, {
