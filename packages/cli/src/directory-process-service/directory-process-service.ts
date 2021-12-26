@@ -12,9 +12,7 @@ export class DirectoryProcessService {
         }
     }
     public startWatch() {
-        this.fs.watchService.addGlobalListener((event) => {
-            void this.watchHandler(event);
-        });
+        this.fs.watchService.addGlobalListener(this.watchHandler);
     }
     public async dispose() {
         for (const path of this.watchedDirectoryFiles.keys()) {
@@ -41,7 +39,7 @@ export class DirectoryProcessService {
             return;
         }
         try {
-            await this.options.processFiles?.(this, affectedFiles, new Set());
+            return this.options.processFiles?.(this, affectedFiles, new Set());
         } catch (error) {
             this.options.onError?.(error as Error);
         }
@@ -99,14 +97,13 @@ export class DirectoryProcessService {
             }
 
             if (this.options.fileFilter?.(event.path) ?? true) {
-                this.registerInvalidateOnChange(event.path);
-                affectedFiles.add(event.path);
-
-                if (!event.stats) {
+                if (event.stats) {
+                    this.registerInvalidateOnChange(event.path);
+                    affectedFiles.add(event.path);
+                } else {
                     this.invalidationMap.delete(event.path);
                     this.removeFileFromWatchedDirectory(event.path);
                     deletedFiles.add(event.path);
-                    affectedFiles.delete(event.path);
                 }
 
                 if (this.options.autoResetInvalidations) {
@@ -173,7 +170,7 @@ export class DirectoryProcessService {
             files.set(file, createWatchEvent(file, this.fs));
         }
 
-        return this.handleWatchChange(files, event).catch((error) => this.options.onError?.(error));
+        this.handleWatchChange(files, event).catch((error) => this.options.onError?.(error));
     };
     private filterWatchItems = (event: DirectoryItem): boolean => {
         const { fileFilter, directoryFilter } = this.options;
