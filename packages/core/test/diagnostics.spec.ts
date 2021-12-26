@@ -901,7 +901,10 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
                 expectTransformDiagnostics(config, [
-                    { message: processorWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
+                    {
+                        message: CSSKeyframes.diagnostics.KEYFRAME_NAME_RESERVED(key),
+                        file: '/main.css',
+                    },
                 ]);
             });
         });

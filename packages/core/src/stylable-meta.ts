@@ -16,11 +16,11 @@ import type { PlugableRecord } from './helpers/plugable-record';
 import { getSourcePath } from './stylable-utils';
 import { setFieldForDeprecation } from './helpers/deprecation';
 import { valueMapping } from './stylable-value-parsers';
-import { STSymbol, STImport, STGlobal, CSSClass, CSSType } from './features';
+import { STSymbol, STImport, STGlobal, CSSClass, CSSType, CSSKeyframes } from './features';
 
 export const RESERVED_ROOT_NAME = 'root';
 
-const features = [STSymbol, STImport, STGlobal, CSSClass, CSSType];
+const features = [STSymbol, STImport, STGlobal, CSSClass, CSSType, CSSKeyframes];
 
 export class StylableMeta {
     public data: PlugableRecord = {};

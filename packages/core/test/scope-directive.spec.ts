@@ -13,6 +13,7 @@ import {
     transformerWarnings,
     getRuleScopeSelector,
 } from '@stylable/core';
+import { CSSKeyframes } from '@stylable/core/dist/features';
 
 use(flatMatch);
 
@@ -630,7 +631,7 @@ describe('@st-scope', () => {
 
             expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE(),
+                    message: CSSKeyframes.diagnostics.NO_KEYFRAMES_IN_ST_SCOPE(),
                     file: '/entry.st.css',
                     severity: 'error',
                 },

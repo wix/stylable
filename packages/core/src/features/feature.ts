@@ -24,7 +24,7 @@ export interface NodeTypes {
     IMMUTABLE_SELECTOR: any;
 }
 
-export interface FeatureHooks<T extends NodeTypes> {
+export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     metaInit: (context: FeatureContext) => void;
     analyzeInit: (context: FeatureContext) => void;
     analyzeAtRule: (options: { context: FeatureContext; atRule: postcss.AtRule }) => void;

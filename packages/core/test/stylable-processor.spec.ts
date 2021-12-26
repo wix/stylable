@@ -4,6 +4,7 @@ import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
+import { CSSKeyframes } from '@stylable/core/dist/features';
 
 chai.use(flatMatch);
 
@@ -40,7 +41,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'warning',
-            message: processorWarnings.MISSING_KEYFRAMES_NAME(),
+            message: CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME(),
         });
     });
 
@@ -51,7 +52,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'warning',
-            message: processorWarnings.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(),
+            message: CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(),
         });
     });
 
