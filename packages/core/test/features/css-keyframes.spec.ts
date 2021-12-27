@@ -1,4 +1,5 @@
 import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
+import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import {
     generateStylableRoot,
     generateStylableResult,
@@ -39,7 +40,9 @@ describe(`features/css-keyframes`, () => {
             ).to.containSubset([meta.ast.nodes[0], meta.ast.nodes[1]]);
 
             // deprecation
-            expect(meta.keyframes.length).to.eql(2);
+            ignoreDeprecationWarn(() => {
+                expect(meta.keyframes.length).to.eql(2);
+            });
         });
         it(`should add keyframes symbols`, () => {
             const { meta } = generateStylableResult({
@@ -66,8 +69,14 @@ describe(`features/css-keyframes`, () => {
                 name: 'b',
                 global: undefined,
             });
-            // deprecated
-            expect(meta.mappedKeyframes.a, `deprecated`).to.equal(CSSKeyframes.get(meta, `a`));
+            expect(CSSKeyframes.getAll(meta), `CSSKeyframes.getAll`).to.eql({
+                a: CSSKeyframes.get(meta, `a`),
+                b: CSSKeyframes.get(meta, `b`),
+            });
+            // deprecation
+            ignoreDeprecationWarn(() => {
+                expect(meta.mappedKeyframes.a, `deprecated`).to.equal(CSSKeyframes.get(meta, `a`));
+            });
         });
         it('should collect global keyframes symbols', () => {
             const { meta } = generateStylableResult({

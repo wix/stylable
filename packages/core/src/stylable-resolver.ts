@@ -8,6 +8,7 @@ import {
     Imported,
     StylableSymbol,
     CSSClass,
+    STSymbol,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
@@ -129,7 +130,7 @@ export class StylableResolver {
             const symbol =
                 !name || subtype === `mappedSymbols`
                     ? meta.getSymbol(name || meta.root)!
-                    : meta.mappedKeyframes[name];
+                    : STSymbol.get(meta, name, `keyframes`)!;
             return {
                 _kind: 'css',
                 symbol,

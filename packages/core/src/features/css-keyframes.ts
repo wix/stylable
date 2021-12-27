@@ -4,6 +4,7 @@ import type { Imported } from './st-import';
 import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver } from '../stylable-resolver';
 import { plugableRecord } from '../helpers/plugable-record';
+import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { isChildOfAtRule } from '../helpers/rule';
 import { namespace } from '../helpers/namespace';
 import { paramMapping } from '../stylable-value-parsers';
@@ -91,7 +92,8 @@ export const hooks = createFeature<{
         // save keyframes declarations
         const keyframesAsts = plugableRecord.getUnsafe(context.meta.data, dataKey);
         keyframesAsts.push(atRule);
-        context.meta.keyframes.push(atRule); // deprecated
+        // deprecated
+        ignoreDeprecationWarn(() => context.meta.keyframes.push(atRule));
         // validate name
         if (!name) {
             context.diagnostics.warn(atRule, diagnostics.MISSING_KEYFRAMES_NAME());
@@ -123,7 +125,9 @@ export const hooks = createFeature<{
             },
         });
         // deprecated
-        context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
+        ignoreDeprecationWarn(() => {
+            context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
+        });
     },
     transformResolve({ context }) {
         const symbols = STSymbol.getAllByType(context.meta, `keyframes`);
@@ -172,6 +176,10 @@ export function getKeyframesStatements({ data }: StylableMeta): ReadonlyArray<po
 
 export function get(meta: StylableMeta, name: string): KeyframesSymbol | undefined {
     return STSymbol.get(meta, name, `keyframes`);
+}
+
+export function getAll(meta: StylableMeta): Record<string, KeyframesSymbol> {
+    return STSymbol.getAllByType(meta, `keyframes`);
 }
 
 function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {

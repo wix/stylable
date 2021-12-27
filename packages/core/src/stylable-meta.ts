@@ -32,6 +32,7 @@ export class StylableMeta {
     public imports: Imported[] = [];
     public vars: VarSymbol[] = [];
     public cssVars: Record<string, CSSVarSymbol> = {};
+    /** @deprecated */
     public keyframes: postcss.AtRule[] = [];
     /** @deprecated use meta.getAllClasses() or meta.getClass(name) */
     public classes: Record<string, ClassSymbol> = {};
@@ -39,6 +40,7 @@ export class StylableMeta {
     public elements: Record<string, ElementSymbol> = {};
     /** @deprecated use meta.getAllSymbols() or meta.getSymbol(name) */
     public mappedSymbols: Record<string, StylableSymbol> = {};
+    /** @deprecated */
     public mappedKeyframes: Record<string, KeyframesSymbol> = {};
     public customSelectors: Record<string, string> = {};
     public urls: string[] = [];
@@ -104,4 +106,12 @@ setFieldForDeprecation(StylableMeta.prototype, `imports`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
     pleaseUse: `meta.getImportStatements()`,
+});
+setFieldForDeprecation(StylableMeta.prototype, `keyframes`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+});
+setFieldForDeprecation(StylableMeta.prototype, `mappedKeyframes`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
 });

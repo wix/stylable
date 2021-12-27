@@ -1,5 +1,6 @@
 import { basename } from 'path';
 import { ClassSymbol, StylableMeta, valueMapping } from '@stylable/core';
+import { CSSKeyframes } from '@stylable/core/dist/features';
 import { encode } from 'vlq';
 import {
     ClassesToken,
@@ -71,7 +72,9 @@ function getStVarsSrcPosition(varName: string, meta: StylableMeta): Position | u
 }
 
 function getKeyframeSrcPosition(keyframeName: string, meta: StylableMeta): Position | undefined {
-    const keyframe = meta.keyframes.find((keyframe) => keyframe.params === keyframeName);
+    const keyframe = CSSKeyframes.getKeyframesStatements(meta).find(
+        (keyframe) => keyframe.params === keyframeName
+    );
 
     if (keyframe && keyframe.source && keyframe.source.start) {
         return {

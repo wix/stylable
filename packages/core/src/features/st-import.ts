@@ -170,7 +170,9 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
             },
         });
         // deprecated
-        context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
+        ignoreDeprecationWarn(() => {
+            context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
+        });
     });
 }
 
