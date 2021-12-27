@@ -170,6 +170,11 @@ export const hooks = createFeature<{
 
 // API
 
+export function getKeyframesStatements({ data }: StylableMeta): ReadonlyArray<postcss.AtRule> {
+    const state = plugableRecord.getUnsafe(data, dataKey);
+    return state;
+}
+
 export function get(meta: StylableMeta, name: string): KeyframesSymbol | undefined {
     return STSymbol.get(meta, name, `keyframes`);
 }
