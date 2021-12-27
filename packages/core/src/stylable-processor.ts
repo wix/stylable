@@ -61,9 +61,6 @@ export const processorWarnings = {
     STATE_DEFINITION_IN_COMPLEX() {
         return 'cannot define pseudo states inside complex selectors';
     },
-    // REDECLARE_SYMBOL_KEYFRAMES(name: string) {
-    //     return `redeclare keyframes symbol "${name}"`;
-    // },
     CANNOT_RESOLVE_EXTEND(name: string) {
         return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
     },
