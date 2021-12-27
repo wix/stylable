@@ -1,11 +1,15 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
 import type { Imported } from './st-import';
+import type { StylableMeta } from '../stylable-meta';
+import type { StylableResolver } from '../stylable-resolver';
 import { plugableRecord } from '../helpers/plugable-record';
 import { isChildOfAtRule } from '../helpers/rule';
+import { namespace } from '../helpers/namespace';
 import { paramMapping } from '../stylable-value-parsers';
 import { globalValue } from '../utils';
 import type * as postcss from 'postcss';
+import postcssValueParser from 'postcss-value-parser';
 
 export interface KeyframesSymbol {
     _kind: 'keyframes';
@@ -13,6 +17,11 @@ export interface KeyframesSymbol {
     name: string;
     import?: Imported;
     global?: boolean;
+}
+
+export interface KeyframesResolve {
+    meta: StylableMeta;
+    symbol: KeyframesSymbol;
 }
 
 export const reservedKeyFrames = [
@@ -68,7 +77,9 @@ const dataKey = plugableRecord.key<postcss.AtRule[]>('keyframes');
 
 // HOOKS
 
-export const hooks = createFeature({
+export const hooks = createFeature<{
+    RESOLVED: Record<string, KeyframesResolve>;
+}>({
     metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, []);
     },
@@ -119,7 +130,49 @@ export const hooks = createFeature({
         // deprecated
         context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
     },
+    transformResolve({ context }) {
+        const symbols = STSymbol.getAllByType(context.meta, `keyframes`);
+        const resolved: Record<string, KeyframesResolve> = {};
+        for (const [name, symbol] of Object.entries(symbols)) {
+            const res = resolveKeyframes(context.meta, symbol, context.resolver);
+            if (res) {
+                resolved[name] = res;
+            }
+        }
+        return resolved;
+    },
+    transformAtRuleNode({ context, atRule, resolved }) {
+        const name = globalValue(atRule.params) ?? atRule.params;
+        const resolve = resolved[name];
+        /* js keyframes mixins won't have resolved keyframes */
+        atRule.params = resolve
+            ? getTransformedName(resolve)
+            : namespace(name, context.meta.namespace);
+    },
+    transformDeclaration({ decl, resolved }) {
+        const parsed = postcssValueParser(decl.value);
+        // ToDo: improve by correctly parse & identify `animation-name`
+        parsed.nodes.forEach((node) => {
+            const resolve = resolved[node.value];
+            const scoped = resolve && getTransformedName(resolve);
+            if (scoped) {
+                node.value = scoped;
+            }
+        });
+        decl.value = parsed.toString();
+    },
+    transformJSExports({ exports, resolved }) {
+        for (const [name, resolve] of Object.entries(resolved)) {
+            exports.keyframes[name] = getTransformedName(resolve);
+        }
+    },
 });
+
+// API
+
+export function get(meta: StylableMeta, name: string): KeyframesSymbol | undefined {
+    return STSymbol.get(meta, name, `keyframes`);
+}
 
 function checkRedeclareKeyframes(context: FeatureContext, symbolName: string, node: postcss.Node) {
     const symbol = context.meta.mappedKeyframes[symbolName];
@@ -129,4 +182,32 @@ function checkRedeclareKeyframes(context: FeatureContext, symbolName: string, no
         });
     }
     return symbol;
+}
+
+function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {
+    let current = { meta, symbol };
+    while (current.symbol?.import) {
+        const res = resolver.resolveImported(
+            current.symbol.import,
+            current.symbol.name,
+            'mappedKeyframes' // ToDo: refactor out of resolver
+        );
+        if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
+            const { meta, symbol } = res;
+            current = {
+                meta,
+                symbol,
+            };
+        } else {
+            return undefined;
+        }
+    }
+    if (current.symbol) {
+        return current;
+    }
+    return undefined;
+}
+
+function getTransformedName({ symbol, meta }: KeyframesResolve) {
+    return symbol.global ? symbol.alias : namespace(symbol.alias, meta.namespace);
 }

@@ -1,5 +1,5 @@
 import type { StylableMeta } from '../stylable-meta';
-import type { ScopeContext } from '../stylable-transformer';
+import type { ScopeContext, StylableExports } from '../stylable-transformer';
 import type { StylableResolver } from '../stylable-resolver';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
@@ -20,8 +20,9 @@ export interface FeatureTransformContext extends FeatureContext {
 }
 
 export interface NodeTypes {
-    SELECTOR: any;
-    IMMUTABLE_SELECTOR: any;
+    SELECTOR?: any;
+    IMMUTABLE_SELECTOR?: any;
+    RESOLVED?: any;
 }
 
 export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
@@ -35,11 +36,23 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         walkContext: SelectorNodeContext;
     }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
+    transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
+    transformAtRuleNode: (options: {
+        context: FeatureTransformContext;
+        atRule: postcss.AtRule;
+        resolved: T['RESOLVED'];
+    }) => void;
     transformSelectorNode: (options: {
         context: FeatureTransformContext;
         node: T['SELECTOR'];
         selectorContext: Required<ScopeContext>;
     }) => void;
+    transformDeclaration: (options: {
+        context: FeatureTransformContext;
+        decl: postcss.Declaration;
+        resolved: T['RESOLVED'];
+    }) => void;
+    transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
 }
 const defaultHooks: FeatureHooks<NodeTypes> = {
     metaInit() {
@@ -57,7 +70,19 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
     transformInit() {
         /**/
     },
+    transformResolve() {
+        return {};
+    },
+    transformAtRuleNode() {
+        /**/
+    },
     transformSelectorNode() {
+        /**/
+    },
+    transformDeclaration() {
+        /**/
+    },
+    transformJSExports() {
         /**/
     },
 };
