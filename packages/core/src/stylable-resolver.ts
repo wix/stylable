@@ -172,34 +172,6 @@ export class StylableResolver {
         }
         return this.resolveImport(maybeImport);
     }
-    public resolveKeyframes(meta: StylableMeta, name: string) {
-        const initSymbol = meta.mappedKeyframes[name];
-        let current = {
-            meta,
-            symbol: initSymbol,
-        };
-
-        while (current.symbol?.import) {
-            const res = this.resolveImported(
-                current.symbol.import,
-                current.symbol.name,
-                'mappedKeyframes'
-            );
-            if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
-                const { meta, symbol } = res;
-                current = {
-                    meta,
-                    symbol,
-                };
-            } else {
-                return undefined;
-            }
-        }
-        if (current.symbol) {
-            return current;
-        }
-        return undefined;
-    }
     public deepResolve(
         maybeImport: StylableSymbol | undefined,
         path: StylableSymbol[] = []
