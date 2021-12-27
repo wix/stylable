@@ -239,7 +239,7 @@ describe('Stylable Cli Watch - Single project', () => {
         });
     });
 
-    it.only('should handle renames of files', async () => {
+    it('should handle renames of files', async () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `.root{ color: red }`,
