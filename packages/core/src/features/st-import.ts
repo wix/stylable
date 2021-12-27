@@ -1,6 +1,7 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
+import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
@@ -28,6 +29,11 @@ export interface Imported {
     request: string;
     context: string;
 }
+
+export const ImportTypeHook = new Map<
+    StylableSymbol['_kind'] & keyof Imported,
+    (context: FeatureContext, localName: string, importName: string, importDef: Imported) => void
+>();
 
 const dataKey = plugableRecord.key<Imported[]>('imports');
 
@@ -156,24 +162,14 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
             node: importDef.rule,
         });
     });
-    // ToDo: register typed imports externally (e.g. from css-keyframes feature)
-    Object.keys(importDef.keyframes).forEach((name) => {
-        STSymbol.addSymbol({
-            context,
-            node: importDef.rule,
-            localName: name,
-            symbol: {
-                _kind: 'keyframes',
-                alias: name,
-                name: importDef.keyframes[name],
-                import: importDef,
-            },
-        });
-        // deprecated
-        ignoreDeprecationWarn(() => {
-            context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
-        });
-    });
+    // import as symbol
+    for (const [type, handler] of ImportTypeHook.entries()) {
+        if (type in importDef) {
+            for (const [localName, importName] of Object.entries(importDef[type])) {
+                handler(context, localName, importName, importDef);
+            }
+        }
+    }
 }
 
 function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {

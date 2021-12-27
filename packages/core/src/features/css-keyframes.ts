@@ -1,5 +1,6 @@
-import { createFeature } from './feature';
+import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
+import * as STImport from './st-import';
 import type { Imported } from './st-import';
 import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver } from '../stylable-resolver';
@@ -75,6 +76,16 @@ const dataKey = plugableRecord.key<postcss.AtRule[]>('keyframes');
 
 // HOOKS
 
+STImport.ImportTypeHook.set(`keyframes`, (context, localName, importName, importDef) => {
+    addKeyframes({
+        context,
+        name: localName,
+        importName,
+        ast: importDef.rule,
+        importDef,
+    });
+});
+
 export const hooks = createFeature<{
     RESOLVED: Record<string, KeyframesResolve>;
 }>({
@@ -114,19 +125,12 @@ export const hooks = createFeature<{
                 word: name,
             });
         }
-        STSymbol.addSymbol({
+        addKeyframes({
             context,
-            node: atRule,
-            symbol: {
-                _kind: 'keyframes',
-                alias: name,
-                name,
-                global,
-            },
-        });
-        // deprecated
-        ignoreDeprecationWarn(() => {
-            context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
+            name,
+            importName: name,
+            ast: atRule,
+            global,
         });
     },
     transformResolve({ context }) {
@@ -180,6 +184,42 @@ export function get(meta: StylableMeta, name: string): KeyframesSymbol | undefin
 
 export function getAll(meta: StylableMeta): Record<string, KeyframesSymbol> {
     return STSymbol.getAllByType(meta, `keyframes`);
+}
+
+function addKeyframes({
+    context,
+    name,
+    importName,
+    ast,
+    global,
+    importDef,
+}: {
+    context: FeatureContext;
+    name: string;
+    importName: string;
+    ast: postcss.AtRule | postcss.Rule;
+    global?: boolean;
+    importDef?: Imported;
+}) {
+    // fields are confusing in this symbol:
+    // name: the import name if imported OR the local name
+    // alias: the local name
+    STSymbol.addSymbol({
+        context,
+        node: ast,
+        localName: name,
+        symbol: {
+            _kind: 'keyframes',
+            alias: name,
+            name: importName,
+            global,
+            import: importDef,
+        },
+    });
+    // deprecated
+    ignoreDeprecationWarn(() => {
+        context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
+    });
 }
 
 function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {

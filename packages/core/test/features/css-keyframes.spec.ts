@@ -62,12 +62,14 @@ describe(`features/css-keyframes`, () => {
                 alias: 'a',
                 name: 'a',
                 global: undefined,
+                import: undefined,
             });
             expect(CSSKeyframes.get(meta, `b`), `b`).to.eql({
                 _kind: 'keyframes',
                 alias: 'b',
                 name: 'b',
                 global: undefined,
+                import: undefined,
             });
             expect(CSSKeyframes.getAll(meta), `CSSKeyframes.getAll`).to.eql({
                 a: CSSKeyframes.get(meta, `a`),
@@ -99,6 +101,7 @@ describe(`features/css-keyframes`, () => {
                 alias: 'name',
                 name: 'name',
                 global: true,
+                import: undefined,
             });
         });
         describe(`st-import`, () => {
@@ -123,6 +126,7 @@ describe(`features/css-keyframes`, () => {
                     _kind: 'keyframes',
                     name: 'b-origin',
                     alias: 'b-local',
+                    global: undefined,
                     import: meta.getImportStatements()[0],
                 });
             });
