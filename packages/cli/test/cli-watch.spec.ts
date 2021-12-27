@@ -559,8 +559,18 @@ describe('Stylable Cli Watch', () => {
             const files = loadDirSync(tempDir.path);
             expect(files['packages/project-a/dist/style.css']).to.include('color:blue');
             expect(
-                Object.keys(files).some((file) => file.includes(tempDir.path)),
-                'build from package "b" inside package "a"'
+                Object.keys(files).some(
+                    (fileName) =>
+                        fileName.includes('project-b') && fileName.includes('style.st.css')
+                ),
+                'have files from package "a" inside package "b"'
+            ).to.eql(false);
+            expect(
+                Object.keys(files).some(
+                    (fileName) =>
+                        fileName.includes('project-a') && fileName.includes('depend.st.css')
+                ),
+                'have files from package "b" inside package "a"'
             ).to.eql(false);
         });
 
