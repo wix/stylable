@@ -352,52 +352,6 @@ describe('Stylable Cli Watch', () => {
             expect(files['style.st.css']).to.include('.root{ color: blue; }');
         });
 
-        // it.only('should handle renames of folders', async () => {
-        //     populateDirectorySync(tempDir.path, {
-        //         'package.json': `{"name": "test", "version": "0.0.0"}`,
-        //         styles: {
-        //             deep: { 'style.st.css': `.root{ color: red }` },
-        //         },
-        //     });
-
-        //     await run({
-        //         dirPath: tempDir.path,
-        //         args: ['--outDir', './dist', '-w', '--cjs', '--css'],
-        //         steps: [
-        //             {
-        //                 msg: messages.START_WATCHING(),
-        //                 action() {
-        //                     renameSync(
-        //                         join(tempDir.path, 'styles'),
-        //                         join(tempDir.path, 'styles-renamed')
-        //                     );
-        //                     return true;
-        //                 },
-        //             },
-        //             {
-        //                 msg: messages.FINISHED_PROCESSING(2),
-        //                 action() {
-        //                     return true;
-        //                 },
-        //             },
-        //             {
-        //                 msg: messages.FINISHED_PROCESSING(2),
-        //                 action() {
-        //                     return false;
-        //                 },
-        //             },
-        //         ],
-        //     });
-        //     const files = loadDirSync(tempDir.path);
-        //     expect(files['dist/style-renamed.css']).to.include(`color: red`);
-        //     expect(files).to.include({
-        //         'package.json': '{"name": "test", "version": "0.0.0"}',
-        //         'style-renamed.st.css': '.root{ color: red }',
-        //     });
-        // });
-
-        // it('should ignore source files in dist');
-
         it('should re-build indexes', async () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
