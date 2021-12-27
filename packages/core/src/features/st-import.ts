@@ -156,15 +156,22 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
             node: importDef.rule,
         });
     });
+    // ToDo: register typed imports externally (e.g. from css-keyframes feature)
     Object.keys(importDef.keyframes).forEach((name) => {
-        if (!checkRedeclareKeyframes(context, name, importDef.rule)) {
-            // ToDo: move to STSymbol.addSymbol({namespace: `keyframes`})
-            context.meta.mappedKeyframes[name] = {
+        STSymbol.addSymbol({
+            context,
+            node: importDef.rule,
+            localName: name,
+            symbol: {
                 _kind: 'keyframes',
                 alias: name,
                 name: importDef.keyframes[name],
                 import: importDef,
-            };
+            },
+        });
+        // deprecated
+        if (!checkRedeclareKeyframes(context, name, importDef.rule)) {
+            context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
         }
     });
 }
