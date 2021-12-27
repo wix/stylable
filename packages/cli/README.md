@@ -270,7 +270,7 @@ exports.stcConfig = {
 
 These options let you control the projects resolution process.
 
-#### resolveRequests [Function]
+#### resolveRequests [Function] *(Advanced usage)*
 
 Default: `resolveNpmRequests`
 
