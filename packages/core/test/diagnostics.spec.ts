@@ -14,7 +14,7 @@ import {
     rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
-import { STImport, CSSClass, CSSType, STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
+import { STImport, CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
 describe('findTestLocations', () => {
@@ -881,31 +881,6 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     ]
                 );
-            });
-        });
-    });
-
-    describe('transforms', () => {
-        it('should not allow @keyframe of reserved words', () => {
-            CSSKeyframes.reservedKeyFrames.map((key) => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            |@keyframes $${key}$| {
-                                from {}
-                                to {}
-                            }`,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    {
-                        message: CSSKeyframes.diagnostics.KEYFRAME_NAME_RESERVED(key),
-                        file: '/main.css',
-                    },
-                ]);
             });
         });
     });

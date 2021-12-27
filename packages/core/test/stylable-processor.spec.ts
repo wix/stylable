@@ -4,7 +4,6 @@ import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { processNamespace, processorWarnings, SRule } from '@stylable/core';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
-import { CSSKeyframes } from '@stylable/core/dist/features';
 
 chai.use(flatMatch);
 
@@ -33,26 +32,6 @@ describe('Stylable postcss process', () => {
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
             message: processorWarnings.EMPTY_NAMESPACE_DEF(),
-        });
-    });
-
-    it('warn on missing keyframes parameter', () => {
-        const { diagnostics } = processSource(`@keyframes {}`, { from: '/path/to/source' });
-
-        expect(diagnostics.reports[0]).to.include({
-            type: 'warning',
-            message: CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME(),
-        });
-    });
-
-    it('warn on missing keyframes parameter (global)', () => {
-        const { diagnostics } = processSource(`@keyframes st-global() {}`, {
-            from: '/path/to/source',
-        });
-
-        expect(diagnostics.reports[0]).to.include({
-            type: 'warning',
-            message: CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(),
         });
     });
 
@@ -293,45 +272,6 @@ describe('Stylable postcss process', () => {
         );
 
         expect(Object.keys(result.getAllClasses()).length).to.eql(6);
-    });
-
-    it('collect @keyframes', () => {
-        const result = processSource(
-            `
-            @keyframes name {
-                from{}
-                to{}
-            }
-            @keyframes anther-name {
-                from{}
-                to{}
-            }
-        `,
-            { from: 'path/to/style.css' }
-        );
-
-        expect(result.keyframes.length).to.eql(2);
-    });
-
-    it('collect global @keyframes', () => {
-        const result = processSource(
-            `
-            @keyframes st-global(name) {
-                from{}
-                to{}
-            }
-        `,
-            { from: 'path/to/style.css' }
-        );
-
-        expect(result.mappedKeyframes).to.eql({
-            name: {
-                _kind: 'keyframes',
-                alias: 'name',
-                name: 'name',
-                global: true,
-            },
-        });
     });
 
     it('should collect mixins on rules', () => {

@@ -97,30 +97,6 @@ describe(`features/st-import`, () => {
                 name: `c-origin`,
             });
         });
-        it(`should add imported keyframes symbols`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                        @st-import [keyframes(a, b-origin as b-local)] from "./path";
-                        `,
-                    },
-                },
-            });
-
-            expect(meta.mappedKeyframes.a, `named`).to.include({
-                _kind: 'keyframes',
-                name: 'a',
-            });
-            expect(meta.mappedKeyframes[`b-local`], `mapped`).to.include({
-                _kind: 'keyframes',
-                name: 'b-origin',
-                alias: 'b-local',
-                import: meta.getImportStatements()[0],
-            });
-        });
         it(`should not add nested import`, () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
@@ -562,55 +538,6 @@ describe(`features/st-import`, () => {
                     type: 'named',
                     name: `c-origin`,
                 });
-            });
-            it(`should add imported keyframes symbols`, () => {
-                const { meta } = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: `entry`,
-                            content: `
-                            :import {
-                                -st-from: "./path";
-                                -st-named: keyframes(a, b-origin as b-local);
-                            }`,
-                        },
-                    },
-                });
-
-                expect(meta.mappedKeyframes.a, `named`).to.include({
-                    _kind: 'keyframes',
-                    name: 'a',
-                });
-                expect(meta.mappedKeyframes[`b-local`], `mapped`).to.include({
-                    _kind: 'keyframes',
-                    name: 'b-origin',
-                    alias: 'b-local',
-                    import: meta.getImportStatements()[0],
-                });
-            });
-            it(`should not add nested import`, () => {
-                const { meta } = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: `entry`,
-                            content: `
-                            .x {
-                                :import {
-                                    -st-from: "./some/external/path";
-                                    -st-default: D;
-                                    -st-named: n;
-                                }
-                            }
-                            `,
-                        },
-                    },
-                });
-
-                expect(meta.getImportStatements(), `statement`).to.eql([]);
-                expect(meta.getSymbol(`D`), `default import`).to.eql(undefined);
-                expect(meta.getSymbol(`n`), `names import`).to.eql(undefined);
             });
         });
         describe(`transform`, () => {
