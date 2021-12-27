@@ -28,6 +28,7 @@ export class WatchHandler {
     private resolverCache: StylableResolverCache = new Map();
     private diagnosticsManager = new DiagnosticsManager();
     private listener: WatchEventListener = async (event) => {
+        this.log(processMessages.CHANGE_DETECTED(event.path));
         this.invalidateCache(event.path);
 
         let foundChanges = false;
@@ -45,15 +46,7 @@ export class WatchHandler {
             const { hasChanges } = await service.handleWatchChange(files, event);
 
             if (hasChanges) {
-                if (!foundChanges) {
-                    foundChanges = true;
-
-                    this.log(
-                        processMessages.CHANGE_DETECTED(
-                            event.path.replace(this.options.rootDir ?? '', '')
-                        )
-                    );
-                }
+                foundChanges = true;
 
                 this.log(processMessages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
             }
