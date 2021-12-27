@@ -2,6 +2,7 @@ import { errorMessages, processMessages } from '@stylable/cli/dist/messages';
 import { STImport } from '@stylable/core/dist/features';
 import {
     createCliTester,
+    escapeRegExp,
     loadDirSync,
     populateDirectorySync,
     writeToExistingFile,
@@ -9,7 +10,7 @@ import {
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { realpathSync, renameSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { join, sep } from 'path';
 
 describe('Stylable Cli Watch - Single project', () => {
     let tempDir: ITempDirectory;
@@ -387,6 +388,95 @@ describe('Stylable Cli Watch - Single project', () => {
         const files = loadDirSync(tempDir.path);
         expect(files['dist/index.st.css']).to.include('style.st.css');
         expect(files['dist/index.st.css']).to.include('comp.st.css');
+    });
+
+    it('should not trigger circular assets build', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'stylable.config.js': `
+            exports.stcConfig = () => ({
+                options: {
+                    cjs: false,
+                },
+                projects: {
+                    'packages/*': [
+                        {
+                            outDir: './dist',
+                            srcDir: './src',
+                            outputSources: true
+                        },
+                        {
+                            srcDir: './src',
+                            outDir: './src',
+                            dts: true
+                        }
+                    ]
+                }
+            })`,
+            packages: {
+                'project-a': {
+                    'package.json': JSON.stringify({ name: 'a', version: '0.0.0' }),
+                    src: {
+                        'icon.svg': `<svg height="100" width="100">
+                            <circle cx="5" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+                        </svg> `,
+                        'style.st.css': `
+                        .root{ 
+                            color:red;
+                            background: url('./icon.svg')
+                         }
+                    `,
+                    },
+                },
+            },
+        });
+
+        const { output } = await run({
+            dirPath: tempDir.path,
+            args: ['-w'],
+            steps: [
+                {
+                    msg: processMessages.START_WATCHING(),
+                    action() {
+                        writeToExistingFile(
+                            join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
+                            `.root{ 
+                                color:red;
+                                background: url('./icon.svg')
+                             }`
+                        );
+                    },
+                },
+                {
+                    msg: processMessages.FINISHED_PROCESSING(
+                        2,
+                        `[1] ${sep}` + join('packages', 'project-a')
+                    ),
+                },
+                {
+                    msg: processMessages.FINISHED_PROCESSING(
+                        1,
+                        `[0] ${sep}` + join('packages', 'project-a')
+                    ),
+                    action() {
+                        return {
+                            sleep: 500,
+                        };
+                    },
+                },
+            ],
+        });
+
+        const matches = output.match(
+            new RegExp(
+                escapeRegExp(
+                    processMessages.BUILD_PROCESS_INFO(`[1] ${sep}` + join('packages', 'project-a'))
+                ),
+                'ig'
+            )
+        );
+
+        expect(matches?.length).to.eql(1);
     });
 
     it('should keep watching when getting stylable process error', async () => {
