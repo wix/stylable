@@ -561,7 +561,7 @@ describe('Stylable Cli Watch', () => {
             expect(
                 Object.keys(files).some((file) => file.includes(tempDir.path)),
                 'build from package "b" inside package "a"'
-            ).to.be.false;
+            ).to.eql(false);
         });
 
         it('should re-build index files', async () => {
