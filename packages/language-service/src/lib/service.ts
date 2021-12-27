@@ -298,7 +298,14 @@ export class StylableLanguageService {
 
         for (const stComp of stCompletions) {
             const lspCompletion = CompletionItem.create(stComp.label);
-            const ted: TextEdit = TextEdit.replace(
+
+            if (!groupedCompletions.has(lspCompletion.label)) {
+                groupedCompletions.set(lspCompletion.label, lspCompletion);
+            } else {
+                continue;
+            }
+
+            const textEdit: TextEdit = TextEdit.replace(
                 stComp.range
                     ? stComp.range
                     : new ProviderRange(
@@ -309,7 +316,7 @@ export class StylableLanguageService {
             );
             lspCompletion.insertTextFormat = 2;
             lspCompletion.detail = stComp.detail;
-            lspCompletion.textEdit = ted;
+            lspCompletion.textEdit = textEdit;
             // override sorting order to the top
             // todo: decide on actual sorting for all stylable completions
             lspCompletion.sortText = 'a';
@@ -327,9 +334,6 @@ export class StylableLanguageService {
                     'additional',
                     'editor.action.triggerParameterHints'
                 );
-            }
-            if (!groupedCompletions.has(lspCompletion.label)) {
-                groupedCompletions.set(lspCompletion.label, lspCompletion);
             }
         }
 
