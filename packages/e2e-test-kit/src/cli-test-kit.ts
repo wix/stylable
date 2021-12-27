@@ -40,14 +40,18 @@ export function createCliTester() {
         const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess);
 
-        const found: Step[] = [];
+        const found: { message: string; time: number }[] = [];
+        const startTime = Date.now();
         let output = '';
 
-        return Promise.race([onTimeout(timeout, found), runSteps()]);
+        return Promise.race([
+            onTimeout(timeout, () => new Error(`${JSON.stringify(found, null, 3)}\n\n${output}`)),
+            runSteps(),
+        ]);
 
-        function onTimeout(ms: number, rejectWith?: unknown) {
+        function onTimeout(ms: number, rejectWith?: () => unknown) {
             return new Promise<{ output: string }>((resolve, reject) =>
-                setTimeout(() => (rejectWith ? reject(rejectWith) : resolve({ output })), ms)
+                setTimeout(() => (rejectWith ? reject(rejectWith()) : resolve({ output })), ms)
             );
         }
 
@@ -60,7 +64,10 @@ export function createCliTester() {
                 output += `\n${line}`;
 
                 if (line.includes(step.msg)) {
-                    found.push(step);
+                    found.push({
+                        message: step.msg,
+                        time: Date.now() - startTime,
+                    });
 
                     if (step.action) {
                         const { sleep } = step.action() || {};
