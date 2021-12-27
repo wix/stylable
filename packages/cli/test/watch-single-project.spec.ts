@@ -259,10 +259,12 @@ describe('Stylable Cli Watch - Single project', () => {
                     },
                 },
                 {
-                    msg: processMessages.WATCH_SUMMARY(0, 1),
+                    // Deleted
+                    msg: processMessages.FINISHED_PROCESSING(1),
                 },
                 {
-                    msg: processMessages.WATCH_SUMMARY(1, 0),
+                    // Created
+                    msg: processMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
