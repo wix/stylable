@@ -156,7 +156,6 @@ export class StylableTransformer {
         path: string[] = [],
         mixinTransform = false
     ) {
-        // const keyframeMapping = this.scopeKeyframes(ast, meta);
         const keyframesResolve = CSSKeyframes.hooks.transformResolve({
             context: {
                 meta,
