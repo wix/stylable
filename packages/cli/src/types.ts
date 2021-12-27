@@ -48,10 +48,6 @@ export interface ResolveProjectsContext {
     projectRoot: string;
 }
 
-export interface SingleProjectConfig {
-    options: PartialBuildOptions;
-}
-
 export type Presets<P extends string = string> = {
     [key in P]: PartialBuildOptions;
 };
@@ -60,7 +56,11 @@ export type Projects<P extends string> =
     | Array<string | [string, ProjectEntryValues<P>]>
     | Record<string, ProjectEntryValues<P>>;
 
-export interface MultipleProjectsConfig<P extends string> extends Partial<SingleProjectConfig> {
+export interface SingleProjectConfig {
+    options: PartialBuildOptions;
+}
+export interface MultipleProjectsConfig<P extends string> {
+    options?: PartialBuildOptions;
     presets?: Presets<P>;
     projects: Projects<P>;
     projectsOptions?: {

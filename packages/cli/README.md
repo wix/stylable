@@ -171,9 +171,10 @@ $ stc --srcDir="./src" --outDir="./dist"
 Projects allow you to share `stc` configuration and manage your Stylable projects in one place with predictable and controlled build order with caching optimizations.
 
 ```ts
-export interface MultipleProjectsConfig extends Partial<SingleProjectConfig> {
-    presets?: Presets;
-    projects: Projects;
+export interface MultipleProjectsConfig<PRESET extends string> {
+    options?: PartialBuildOptions;
+    presets?: Presets<P>;
+    projects: Projects<P>;
     projectsOptions?: {
         resolveRequests?: ResolveRequests;
     };
