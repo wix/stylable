@@ -2,7 +2,6 @@ import { errorMessages, processMessages } from '@stylable/cli/dist/messages';
 import { STImport } from '@stylable/core/dist/features';
 import {
     createCliTester,
-    escapeRegExp,
     loadDirSync,
     populateDirectorySync,
     writeToExistingFile,
@@ -10,7 +9,7 @@ import {
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { realpathSync, renameSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
-import { join, sep } from 'path';
+import { join } from 'path';
 
 describe('Stylable Cli Watch - Single project', () => {
     let tempDir: ITempDirectory;
