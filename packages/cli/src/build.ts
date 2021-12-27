@@ -70,7 +70,10 @@ export async function build(
             skipInitialWatch: true,
         },
         directoryFilter(dirPath) {
-            if (!dirPath.startsWith(projectRoot)) {
+            if (!dirPath.startsWith(fullSrcDir)) {
+                return false;
+            }
+            if (fullSrcDir !== fullOutDir && dirPath.startsWith(fullOutDir)) {
                 return false;
             }
             if (dirPath.startsWith(nodeModules) || dirPath.includes('.git')) {
