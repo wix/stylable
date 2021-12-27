@@ -7,7 +7,7 @@ export const levels = {
 export function createLogger(prefix: string, shouldLog: boolean) {
     return function log(...messages: any[]) {
         const clear = messages[messages.length - 1] === levels.clear;
-        if (clear) {
+        if (clear && !shouldLog) {
             console.clear();
             return;
         }
