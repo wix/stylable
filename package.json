@@ -14,7 +14,7 @@
     "prettify": "npx prettier . --write"
   },
   "devDependencies": {
-    "@file-services/memory": "^5.4.1",
+    "@file-services/memory": "^5.7.0",
     "@file-services/node": "^5.4.3",
     "@rollup/plugin-html": "^0.2.4",
     "@rollup/plugin-node-resolve": "^13.1.1",
