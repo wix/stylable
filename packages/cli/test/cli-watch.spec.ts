@@ -668,6 +668,12 @@ describe('Stylable Cli Watch', () => {
                     {
                         msg: processMessages.FINISHED_PROCESSING(
                             1,
+                            sep + join('packages', 'project-b')
+                        ),
+                    },
+                    {
+                        msg: processMessages.FINISHED_PROCESSING(
+                            1,
                             sep + join('packages', 'project-a')
                         ),
                     },
