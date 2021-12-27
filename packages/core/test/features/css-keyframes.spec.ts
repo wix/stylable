@@ -1,4 +1,4 @@
-import { CSSKeyframes } from '@stylable/core/dist/features';
+import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
 import {
     generateStylableRoot,
     generateStylableResult,
@@ -530,6 +530,28 @@ describe(`features/css-keyframes`, () => {
                     file: '/entry.st.css',
                 },
             ]);
+        });
+        describe(`st-import`, () => {
+            it(`should warn on conflict with local @keyframes`, () => {
+                expectAnalyzeDiagnostics(
+                    `
+                    |@st-import [keyframes(a)] from "./x.st.css"|;
+                    @keyframes a{}`,
+                    [
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
+                            severity: `warning`,
+                            file: '/entry.st.css',
+                        },
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
+                            severity: `warning`,
+                            file: '/entry.st.css',
+                            skipLocationCheck: true,
+                        },
+                    ]
+                );
+            });
         });
     });
 });

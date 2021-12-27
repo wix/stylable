@@ -1,4 +1,4 @@
-import { createFeature, FeatureContext } from './feature';
+import { createFeature } from './feature';
 import * as STSymbol from './st-symbol';
 import type { Imported } from './st-import';
 import type { StylableMeta } from '../stylable-meta';
@@ -56,9 +56,6 @@ export const reservedKeyFrames = [
 ];
 
 export const diagnostics = {
-    REDECLARE_SYMBOL_KEYFRAMES(name: string) {
-        return `redeclare keyframes symbol "${name}"`;
-    },
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
     },
@@ -115,7 +112,6 @@ export const hooks = createFeature<{
                 word: name,
             });
         }
-        checkRedeclareKeyframes(context, name, atRule);
         STSymbol.addSymbol({
             context,
             node: atRule,
@@ -125,7 +121,6 @@ export const hooks = createFeature<{
                 name,
                 global,
             },
-            safeRedeclare: true,
         });
         // deprecated
         context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
@@ -177,16 +172,6 @@ export function getKeyframesStatements({ data }: StylableMeta): ReadonlyArray<po
 
 export function get(meta: StylableMeta, name: string): KeyframesSymbol | undefined {
     return STSymbol.get(meta, name, `keyframes`);
-}
-
-function checkRedeclareKeyframes(context: FeatureContext, symbolName: string, node: postcss.Node) {
-    const symbol = context.meta.mappedKeyframes[symbolName];
-    if (symbol) {
-        context.diagnostics.warn(node, diagnostics.REDECLARE_SYMBOL_KEYFRAMES(symbolName), {
-            word: symbolName,
-        });
-    }
-    return symbol;
 }
 
 function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {

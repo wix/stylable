@@ -170,9 +170,7 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
             },
         });
         // deprecated
-        if (!checkRedeclareKeyframes(context, name, importDef.rule)) {
-            context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
-        }
+        context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
     });
 }
 
@@ -226,18 +224,4 @@ function validateImports(context: FeatureTransformContext) {
             }
         }
     }
-}
-
-// ToDo: move to st-symbol once symbol namespace is implemented
-function REDECLARE_SYMBOL_KEYFRAMES(name: string) {
-    return `redeclare keyframes symbol "${name}"`;
-}
-function checkRedeclareKeyframes(context: FeatureContext, symbolName: string, node: postcss.Node) {
-    const symbol = context.meta.mappedKeyframes[symbolName];
-    if (symbol) {
-        context.diagnostics.warn(node, REDECLARE_SYMBOL_KEYFRAMES(symbolName), {
-            word: symbolName,
-        });
-    }
-    return symbol;
 }
