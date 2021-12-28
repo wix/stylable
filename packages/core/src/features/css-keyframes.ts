@@ -70,6 +70,9 @@ export const diagnostics = {
     KEYFRAME_NAME_RESERVED(name: string) {
         return `keyframes "${name}" is reserved`;
     },
+    UNKNOWN_IMPORTED_KEYFRAMES(name: string, path: string) {
+        return `cannot resolve imported keyframes "${name}" from stylesheet "${path}"`;
+    },
 };
 
 const dataKey = plugableRecord.key<postcss.AtRule[]>('keyframes');
@@ -140,6 +143,14 @@ export const hooks = createFeature<{
             const res = resolveKeyframes(context.meta, symbol, context.resolver);
             if (res) {
                 resolved[name] = res;
+            } else if (symbol.import) {
+                context.diagnostics.error(
+                    symbol.import.rule,
+                    diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(symbol.name, symbol.import.request),
+                    {
+                        word: symbol.name,
+                    }
+                );
             }
         }
         return resolved;

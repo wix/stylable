@@ -565,6 +565,33 @@ describe(`features/css-keyframes`, () => {
                     ]
                 );
             });
+            it(`should error on unknown imported keyframes symbol`, () => {
+                expectTransformDiagnostics(
+                    {
+                        entry: `/main.st.css`,
+                        files: {
+                            '/main.st.css': {
+                                content: `
+                                |@st-import [keyframes($unknown$ as local)] from "./import.st.css"|;
+                            `,
+                            },
+                            '/import.st.css': {
+                                content: ``,
+                            },
+                        },
+                    },
+                    [
+                        {
+                            message: CSSKeyframes.diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
+                                `unknown`,
+                                `./import.st.css`
+                            ),
+                            severity: `error`,
+                            file: `/main.st.css`,
+                        },
+                    ]
+                );
+            });
         });
     });
 });
