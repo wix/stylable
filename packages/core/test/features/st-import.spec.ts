@@ -539,6 +539,29 @@ describe(`features/st-import`, () => {
                     name: `c-origin`,
                 });
             });
+            it(`should not add nested import`, () => {
+                const { meta } = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: `entry`,
+                            content: `
+                            .x {
+                                :import {
+                                    -st-from: "./some/external/path";
+                                    -st-default: D;
+                                    -st-named: n;
+                                }
+                            }
+                            `,
+                        },
+                    },
+                });
+
+                expect(meta.getImportStatements(), `statement`).to.eql([]);
+                expect(meta.getSymbol(`D`), `default import`).to.eql(undefined);
+                expect(meta.getSymbol(`n`), `names import`).to.eql(undefined);
+            });
         });
         describe(`transform`, () => {
             it('should remove :import from output', () => {
