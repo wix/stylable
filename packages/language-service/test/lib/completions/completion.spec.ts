@@ -1,7 +1,10 @@
 import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
 import * as asserters from '../../test-kit/completions-asserters';
+import { expect } from 'chai';
+import { getCaretOffsetAndCleanContent } from '../../test-kit/asserters';
+import { getInMemoryLSP } from '../../test-kit/stylable-in-memory-lsp';
 
-describe('Completions', () => {
+describe('Completions - file system fixtures', () => {
     describe('Stylesheet Top Level', () => {
         const topLevelExistingRange = createRange(3, 0, 3, 0);
         const defaultRange = createRange(0, 0, 0, 0);
@@ -145,5 +148,28 @@ describe('Completions', () => {
                 asserters.stateSelectorCompletion('clover', createRange(11, 11, 11, 12)),
             ]);
         });
+    });
+});
+
+describe('Completions - in-memory fixtures', () => {
+    const { fs, lsp } = getInMemoryLSP();
+
+    it('should sort stylable completions above css ones', () => {
+        const { offset, content } = getCaretOffsetAndCleanContent(`
+            .root {
+                -st-states: myState;
+            }
+            
+            .root:|
+        `);
+        fs.populateDirectorySync('/', {
+            'index.st.css': content,
+        });
+
+        const completions = lsp.onCompletion('/index.st.css', offset);
+        const myStateIndex = completions.findIndex((comp) => comp.label === ':myState');
+        const hoverIndex = completions.findIndex((comp) => comp.label === ':hover');
+
+        expect(myStateIndex).to.be.lessThan(hoverIndex);
     });
 });
