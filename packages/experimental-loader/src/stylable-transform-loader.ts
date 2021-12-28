@@ -85,6 +85,18 @@ const stylableLoader: LoaderDefinition = function (content) {
         stylable.resolver
     );
 
+    try {
+        this._module!.buildInfo.stylableNamespace = meta.namespace;
+    } catch (error) {
+        this.emitWarning(
+            new Error(
+                `Failed to add stylableNamespace to buildInfo for ${this.resourcePath} because ${
+                    (error as Error).message
+                }`
+            )
+        );
+    }
+
     if (exportsOnly) {
         return callback(null, createRuntimeTargetCode(meta.namespace, exports));
     }

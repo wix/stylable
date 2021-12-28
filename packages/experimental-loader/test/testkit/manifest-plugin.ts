@@ -11,15 +11,17 @@ export class TestManifestPlugin {
             compilation.hooks.additionalAssets.tap(TestManifestPlugin.name, () => {
                 const data: Record<string, string> = {};
                 for (const module of compilation.modules) {
-                    if (isNormalModule(module)) {
+                    if (isNormalModule(module) && module.resource.endsWith('.st.css')) {
                         const {
                             resource,
                             buildInfo: { stylableNamespace },
                         } = module;
 
-                        if (resource.endsWith('.st.css') && stylableNamespace) {
-                            data[relative(compiler.context, resource)] = stylableNamespace;
+                        if (!stylableNamespace) {
+                            throw new Error('No stylableNamespace found in buildInfo');
                         }
+
+                        data[relative(compiler.context, resource)] = stylableNamespace;
                     }
                 }
 
