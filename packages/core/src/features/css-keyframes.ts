@@ -145,16 +145,18 @@ export const hooks = createFeature<{
         return resolved;
     },
     transformAtRuleNode({ context, atRule, resolved }) {
-        const name = globalValue(atRule.params) ?? atRule.params;
+        const globalName = globalValue(atRule.params);
+        const name = globalName ?? atRule.params;
         const resolve = resolved[name];
         /* js keyframes mixins won't have resolved keyframes */
         atRule.params = resolve
             ? getTransformedName(resolve)
-            : namespace(name, context.meta.namespace);
+            : globalName ?? namespace(name, context.meta.namespace);
     },
     transformDeclaration({ decl, resolved }) {
         const parsed = postcssValueParser(decl.value);
         // ToDo: improve by correctly parse & identify `animation-name`
+        // ToDo: handle symbols from js mixin
         parsed.nodes.forEach((node) => {
             const resolve = resolved[node.value];
             const scoped = resolve && getTransformedName(resolve);
