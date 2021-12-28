@@ -152,9 +152,11 @@ export function addSymbol({
     byNSFlat[nsName][name] = symbol;
     typeTable[name] = symbol;
     // deprecated
-    ignoreDeprecationWarn(() => {
-        context.meta.mappedSymbols[name] = symbol;
-    });
+    if (nsName === `main`) {
+        ignoreDeprecationWarn(() => {
+            context.meta.mappedSymbols[name] = symbol;
+        });
+    }
 }
 
 export function reportRedeclare(context: FeatureContext) {
