@@ -23,20 +23,33 @@ export function getDocumentFormatting(
 const stImport = 'st-import';
 
 function removeFormattingExceptions(ast: Root) {
-    const changes: string[] = [];
+    const atRuleChanges: string[] = [];
+    const declChanges: string[] = [];
 
     // sanitizing @st-imports due to resulting broken formatting
     ast.walkAtRules(stImport, (atRule) => {
-        changes.push(atRule.params);
+        atRuleChanges.push(atRule.params);
         atRule.params = 'temp';
     });
 
-    return changes;
+    ast.walkDecls(/^grid/, (decl) => {
+        declChanges.push(decl.value);
+        decl.value = `temp`;
+    });
+
+    return { atRuleChanges, declChanges };
 }
 
-function restoreFormattingExceptions(ast: Root, changes: string[]) {
+function restoreFormattingExceptions(
+    ast: Root,
+    { atRuleChanges, declChanges }: { atRuleChanges: string[]; declChanges: string[] }
+) {
     ast.walkAtRules(stImport, (atRule) => {
-        atRule.params = changes.shift()!;
+        atRule.params = atRuleChanges.shift()!;
+    });
+
+    ast.walkDecls(/^grid/, (decl) => {
+        decl.value = declChanges.shift()!;
     });
 
     return ast;
