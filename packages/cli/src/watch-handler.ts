@@ -1,5 +1,6 @@
 import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
 import type { Stylable, StylableResolverCache } from '@stylable/core';
+import type { BuildContext } from './types';
 import decache from 'decache';
 import {
     createWatchEvent,
@@ -8,12 +9,11 @@ import {
 import { levels, Log } from './logger';
 import { processMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
-import type { BuildMetaData } from './types';
 
 export interface WatchHandlerOptions {
     log?: Log;
     resolverCache?: StylableResolverCache;
-    outputFiles?: BuildMetaData['outputFiles'];
+    outputFiles?: BuildContext['outputFiles'];
     rootDir?: string;
     diagnosticsManager?: DiagnosticsManager;
 }

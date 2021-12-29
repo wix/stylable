@@ -154,7 +154,7 @@ export interface BuildOptions {
     diagnosticsMode?: DiagnosticsMode;
 }
 
-export interface BuildMetaData {
+export interface BuildContext {
     /** build identifier */
     identifier?: string;
     /** enable watch mode */

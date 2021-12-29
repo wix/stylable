@@ -1,4 +1,4 @@
-import type { BuildMetaData, BuildOptions } from './types';
+import type { BuildContext, BuildOptions } from './types';
 import { visitMetaCSSDependenciesBFS } from '@stylable/core';
 import { IndexGenerator as BaseIndexGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
@@ -42,7 +42,7 @@ export async function build(
         log,
         outputFiles = new Map(),
         diagnosticsManager = new DiagnosticsManager(),
-    }: BuildMetaData
+    }: BuildContext
 ) {
     const { join, realpathSync } = fs;
     const projectRoot = realpathSync(_projectRoot);
