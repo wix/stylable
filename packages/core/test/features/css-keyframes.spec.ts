@@ -544,17 +544,93 @@ describe(`features/css-keyframes`, () => {
                 },
             ]);
         });
+        it('should warn on redeclare keyframes in root', () => {
+            expectAnalyzeDiagnostics(
+                `
+                |@keyframes a|{}
+                @keyframes a{}
+                `,
+                [
+                    {
+                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
+                        severity: `warning`,
+                        file: '/entry.st.css',
+                    },
+                    {
+                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
+                        severity: `warning`,
+                        file: '/entry.st.css',
+                        skipLocationCheck: true,
+                    },
+                ]
+            );
+        });
+        it('should warn on redeclare keyframes in the identical @media nesting', () => {
+            expectAnalyzeDiagnostics(
+                `
+                @media (max-width: 1px) {
+                    |@keyframes a|{}
+                }
+                @media (max-width: 1px) {
+                    @keyframes a{}
+                    @keyframes a{}
+                }
+                `,
+                [
+                    {
+                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
+                        severity: `warning`,
+                        file: '/entry.st.css',
+                    },
+                    {
+                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
+                        severity: `warning`,
+                        file: '/entry.st.css',
+                        skipLocationCheck: true,
+                    },
+                    {
+                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
+                        severity: `warning`,
+                        file: '/entry.st.css',
+                        skipLocationCheck: true,
+                    },
+                ]
+            );
+        });
+        it('should not warn on redeclare keyframes under different @media at-rules', () => {
+            expectAnalyzeDiagnostics(
+                `
+                @keyframes a{}
+                @media (max-width: 1px) {
+                    @keyframes a{}
+                }
+                @media (max-width: 2px) {
+                    @keyframes a{}
+                }
+                `,
+                []
+            );
+        });
         describe(`st-import`, () => {
             it(`should warn on conflict with local @keyframes`, () => {
                 expectAnalyzeDiagnostics(
                     `
                     |@st-import [keyframes(a)] from "./x.st.css"|;
-                    @keyframes a{}`,
+                    @keyframes a{}
+                    @media (max-width: 1px) {
+                        @keyframes a{}
+                    }`,
                     [
                         {
                             message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
                             severity: `warning`,
                             file: '/entry.st.css',
+                        },
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
+                            severity: `warning`,
+                            file: '/entry.st.css',
+                            skipLocationCheck: true,
                         },
                         {
                             message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),

@@ -75,7 +75,11 @@ export const diagnostics = {
     },
 };
 
-const dataKey = plugableRecord.key<postcss.AtRule[]>('keyframes');
+const dataKey = plugableRecord.key<{
+    statements: postcss.AtRule[];
+    paths: Record<string, string[]>;
+    imports: string[];
+}>('keyframes');
 
 // HOOKS
 
@@ -93,7 +97,7 @@ export const hooks = createFeature<{
     RESOLVED: Record<string, KeyframesResolve>;
 }>({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, []);
+        plugableRecord.set(meta.data, dataKey, { statements: [], paths: {}, imports: [] });
     },
     analyzeAtRule({ context, atRule }) {
         let { params: name } = atRule;
@@ -104,7 +108,7 @@ export const hooks = createFeature<{
             return;
         }
         // save keyframes declarations
-        const keyframesAsts = plugableRecord.getUnsafe(context.meta.data, dataKey);
+        const { statements: keyframesAsts } = plugableRecord.getUnsafe(context.meta.data, dataKey);
         keyframesAsts.push(atRule);
         // deprecated
         ignoreDeprecationWarn(() => context.meta.keyframes.push(atRule));
@@ -187,8 +191,8 @@ export const hooks = createFeature<{
 // API
 
 export function getKeyframesStatements({ data }: StylableMeta): ReadonlyArray<postcss.AtRule> {
-    const state = plugableRecord.getUnsafe(data, dataKey);
-    return state;
+    const { statements } = plugableRecord.getUnsafe(data, dataKey);
+    return statements;
 }
 
 export function get(meta: StylableMeta, name: string): KeyframesSymbol | undefined {
@@ -214,6 +218,8 @@ function addKeyframes({
     global?: boolean;
     importDef?: Imported;
 }) {
+    const isFirstInPath = addKeyframesDeclaration(context.meta, name, ast, !!importDef);
+    const safeRedeclare = isFirstInPath && !!STSymbol.get(context.meta, name, `keyframes`);
     // fields are confusing in this symbol:
     // name: the import name if imported OR the local name
     // alias: the local name
@@ -228,11 +234,45 @@ function addKeyframes({
             global,
             import: importDef,
         },
+        safeRedeclare,
     });
     // deprecated
     ignoreDeprecationWarn(() => {
         context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
     });
+}
+
+function addKeyframesDeclaration(
+    meta: StylableMeta,
+    name: string,
+    origin: postcss.AtRule | postcss.Rule,
+    isImported: boolean
+) {
+    let path = ``;
+    let current = origin.parent;
+    while (current) {
+        if (current.type === `rule`) {
+            path += ` -> ` + (current as postcss.Rule).selector;
+        } else if (current.type === `atrule`) {
+            path +=
+                ` -> ` +
+                (current as postcss.AtRule).name +
+                ` ` +
+                (current as postcss.AtRule).params;
+        }
+        current = current.parent as any;
+    }
+    const { paths, imports } = plugableRecord.getUnsafe(meta.data, dataKey);
+    if (!paths[path]) {
+        paths[path] = [];
+    }
+    const isFirstInPath = !paths[path].includes(name);
+    const isImportedBefore = imports.includes(name);
+    paths[path].push(name);
+    if (isImported) {
+        imports.push(name);
+    }
+    return isFirstInPath && !isImportedBefore;
 }
 
 function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {
