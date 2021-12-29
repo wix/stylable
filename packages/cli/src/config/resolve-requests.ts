@@ -25,7 +25,7 @@ export const resolveNpmRequests: ResolveRequests = (entities, { projectRoot }) =
                 // validate duplicate requests, e.g. "packages/*" twice
                 if (existingEntity.request === request) {
                     throw new Error(
-                        'Stylable CLI config can not have a duplicate project requests'
+                        `Stylable CLI config can not have a duplicate project requests "${request}".`
                     );
                 }
             } else {
