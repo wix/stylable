@@ -73,7 +73,7 @@ export async function build(
             if (!dirPath.startsWith(fullSrcDir)) {
                 return false;
             }
-            if (fullSrcDir !== fullOutDir && dirPath.startsWith(fullOutDir)) {
+            if (fullSrcDir !== fullOutDir && !indexFile && dirPath.startsWith(fullOutDir)) {
                 return false;
             }
             if (dirPath.startsWith(nodeModules) || dirPath.includes('.git')) {

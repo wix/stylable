@@ -125,6 +125,49 @@ describe('build index', () => {
         );
     });
 
+    it('should create index file when srcDir is parent directory of outDir', async () => {
+        const fs = createMemoryFs({
+            dist: {
+                'c/compA.st.css': `
+               .a{}
+            `,
+                '/a/b/comp-B.st.css': `
+               .b{}
+            `,
+            },
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        await build(
+            {
+                outDir: '.',
+                srcDir: './dist',
+                indexFile: 'index.st.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        expect(fs.existsSync('/index.st.css'), 'index is not generated').to.eql(true);
+
+        const res = fs.readFileSync('/index.st.css').toString();
+
+        expect(res.trim()).to.equal(
+            [
+                ':import {-st-from: "./dist/c/compA.st.css";-st-default:CompA;}',
+                '.root CompA{}',
+                ':import {-st-from: "./dist/a/b/comp-B.st.css";-st-default:CompB;}',
+                '.root CompB{}',
+            ].join('\n')
+        );
+    });
+
     it('custom generator is able to filter files from the index', async () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
