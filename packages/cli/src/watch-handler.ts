@@ -7,7 +7,7 @@ import {
     DirectoryProcessService,
 } from './directory-process-service/directory-process-service';
 import { levels, Log } from './logger';
-import { processMessages } from './messages';
+import { buildMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
 export interface WatchHandlerOptions {
@@ -29,7 +29,7 @@ export class WatchHandler {
     private resolverCache: StylableResolverCache = new Map();
     private diagnosticsManager = new DiagnosticsManager();
     private listener: WatchEventListener = async (event) => {
-        this.log(processMessages.CHANGE_DETECTED(event.path));
+        this.log(buildMessages.CHANGE_DETECTED(event.path));
         this.invalidateCache(event.path);
 
         let foundChanges = false;
@@ -49,7 +49,7 @@ export class WatchHandler {
             if (hasChanges) {
                 foundChanges = true;
 
-                this.log(processMessages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
+                this.log(buildMessages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
             }
         }
 
@@ -58,8 +58,8 @@ export class WatchHandler {
 
             this.log(levels.clear);
             this.log(
-                processMessages.WATCH_SUMMARY(changed, deleted),
-                processMessages.CONTINUE_WATCH(),
+                buildMessages.WATCH_SUMMARY(changed, deleted),
+                buildMessages.CONTINUE_WATCH(),
                 levels.info
             );
             this.diagnosticsManager.report();

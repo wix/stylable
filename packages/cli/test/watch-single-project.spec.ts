@@ -1,4 +1,4 @@
-import { errorMessages, processMessages } from '@stylable/cli/dist/messages';
+import { errorMessages, buildMessages } from '@stylable/cli/dist/messages';
 import { STImport } from '@stylable/core/dist/features';
 import {
     createCliTester,
@@ -42,7 +42,7 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'depend.st.css'),
@@ -51,7 +51,7 @@ describe('Stylable Cli Watch - Single project', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(2),
+                    msg: buildMessages.FINISHED_PROCESSING(2),
                 },
             ],
         });
@@ -83,7 +83,7 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'deep.st.css'),
@@ -92,7 +92,7 @@ describe('Stylable Cli Watch - Single project', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(3),
+                    msg: buildMessages.FINISHED_PROCESSING(3),
                 },
             ],
         });
@@ -110,13 +110,13 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -142,13 +142,13 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeFileSync(join(tempDir.path, 'asset.svg'), getSvgContent(NEW_SIZE));
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -168,13 +168,13 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         unlinkSync(join(tempDir.path, 'style.st.css'));
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -195,13 +195,13 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -224,13 +224,13 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -251,7 +251,7 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         renameSync(
                             join(tempDir.path, 'style.st.css'),
@@ -261,11 +261,11 @@ describe('Stylable Cli Watch - Single project', () => {
                 },
                 {
                     // Deleted
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
                 {
                     // Created
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -295,7 +295,7 @@ describe('Stylable Cli Watch - Single project', () => {
                     msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
                 },
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                 },
             ],
         });
@@ -327,7 +327,7 @@ describe('Stylable Cli Watch - Single project', () => {
                     msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
                 },
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
@@ -360,13 +360,13 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--indexFile', 'index.st.css'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
@@ -375,13 +375,13 @@ describe('Stylable Cli Watch - Single project', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                     action() {
                         writeFileSync(join(tempDir.path, 'comp.st.css'), `.root{ color:green }`);
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -436,7 +436,7 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['-w'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
@@ -448,13 +448,13 @@ describe('Stylable Cli Watch - Single project', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
+                    msg: buildMessages.FINISHED_PROCESSING(
                         2,
                         `[1] ${sep}` + join('packages', 'project-a')
                     ),
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
+                    msg: buildMessages.FINISHED_PROCESSING(
                         1,
                         `[0] ${sep}` + join('packages', 'project-a')
                     ),
@@ -470,7 +470,7 @@ describe('Stylable Cli Watch - Single project', () => {
         const matches = output.match(
             new RegExp(
                 escapeRegExp(
-                    processMessages.BUILD_PROCESS_INFO(`[1] ${sep}` + join('packages', 'project-a'))
+                    buildMessages.BUILD_PROCESS_INFO(`[1] ${sep}` + join('packages', 'project-a'))
                 ),
                 'ig'
             )
@@ -490,7 +490,7 @@ describe('Stylable Cli Watch - Single project', () => {
             args: ['--outDir', './dist', '-w', '--stcss'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(join(tempDir.path, 'style.st.css'), `.root;{}`);
                     },
@@ -505,7 +505,7 @@ describe('Stylable Cli Watch - Single project', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(1),
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });

@@ -1,4 +1,4 @@
-import { processMessages } from '@stylable/cli/dist/messages';
+import { buildMessages } from '@stylable/cli/dist/messages';
 import { STImport } from '@stylable/core/dist/features';
 import {
     createCliTester,
@@ -50,7 +50,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
             args: ['-w'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
@@ -59,7 +59,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
+                    msg: buildMessages.FINISHED_PROCESSING(
                         1,
                         join(tempDir.path, 'packages', 'project-a')
                     ),
@@ -121,7 +121,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
             args: ['-w'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, './packages/project-b/src/depend.st.css'),
@@ -132,16 +132,10 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
-                        1,
-                        sep + join('packages', 'project-b')
-                    ),
+                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-b')),
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
-                        1,
-                        sep + join('packages', 'project-a')
-                    ),
+                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
                 },
             ],
         });
@@ -221,7 +215,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
             args: ['-w'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeFileSync(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
@@ -239,10 +233,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
-                        1,
-                        sep + join('packages', 'project-a')
-                    ),
+                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-b', 'foo.st.css'),
@@ -254,16 +245,10 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
-                        1,
-                        sep + join('packages', 'project-b')
-                    ),
+                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-b')),
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
-                        1,
-                        sep + join('packages', 'project-a')
-                    ),
+                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
                 },
             ],
         });
@@ -328,7 +313,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
             args: ['-w'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, './packages/project-b/mixin.js'),
@@ -339,10 +324,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
-                        1,
-                        sep + join('packages', 'project-a')
-                    ),
+                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
                 },
             ],
         });
@@ -377,7 +359,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
             args: ['-w'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
@@ -386,7 +368,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
+                    msg: buildMessages.FINISHED_PROCESSING(
                         1,
                         join(tempDir.path, 'packages', 'project-a')
                     ),
@@ -401,7 +383,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
+                    msg: buildMessages.FINISHED_PROCESSING(
                         1,
                         join(tempDir.path, 'packages', 'project-a')
                     ),
@@ -455,7 +437,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
             args: ['-w'],
             steps: [
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
@@ -468,7 +450,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: processMessages.FINISHED_PROCESSING(
+                    msg: buildMessages.FINISHED_PROCESSING(
                         1,
                         `[1] ${sep + join('packages', 'project-a')}`
                     ),
@@ -530,7 +512,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
                 },
                 {
-                    msg: processMessages.START_WATCHING(),
+                    msg: buildMessages.START_WATCHING(),
                 },
             ],
         });

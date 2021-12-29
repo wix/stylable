@@ -6,7 +6,7 @@ import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
 import { createBuildIdentifier, getCliArguments } from './config/resolve-options';
 import { WatchHandler } from './watch-handler';
-import { processMessages } from './messages';
+import { buildMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
 async function main() {
@@ -80,7 +80,7 @@ async function main() {
     diagnosticsManager.report();
 
     if (watch) {
-        log(processMessages.START_WATCHING(), levels.info);
+        log(buildMessages.START_WATCHING(), levels.info);
 
         watchHandler.start();
 

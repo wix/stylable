@@ -8,7 +8,7 @@ import { DirectoryProcessService } from './directory-process-service/directory-p
 import { DiagnosticsManager } from './diagnostics-manager';
 import type { Diagnostic } from './report-diagnostics';
 import { tryRun } from './build-tools';
-import { errorMessages, processMessages } from './messages';
+import { errorMessages, buildMessages } from './messages';
 
 export async function build(
     {
@@ -177,7 +177,7 @@ export async function build(
                 log(
                     mode,
                     `[${new Date().toLocaleTimeString()}]`,
-                    processMessages.FINISHED_PROCESSING(
+                    buildMessages.FINISHED_PROCESSING(
                         count,
                         isMultiPackagesProject ? identifier : undefined
                     )
@@ -192,7 +192,7 @@ export async function build(
         log(
             mode,
             `[${new Date().toLocaleTimeString()}]`,
-            processMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined)
+            buildMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined)
         );
     }
 
