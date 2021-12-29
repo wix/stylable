@@ -57,12 +57,19 @@ export class WatchHandler {
             const { changed, deleted } = filesStats(files);
 
             this.log(levels.clear);
-            this.log(
-                buildMessages.WATCH_SUMMARY(changed, deleted),
-                buildMessages.CONTINUE_WATCH(),
-                levels.info
-            );
-            this.diagnosticsManager.report();
+            this.log(buildMessages.WATCH_SUMMARY(changed, deleted), levels.info);
+
+            const reported = this.diagnosticsManager.report();
+
+            if (!reported) {
+                this.log(
+                    buildMessages.NO_DIANGOSTICS(),
+                    buildMessages.CONTINUE_WATCH(),
+                    levels.info
+                );
+            } else {
+                this.log(buildMessages.CONTINUE_WATCH(), levels.info);
+            }
         }
     };
 

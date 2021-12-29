@@ -84,5 +84,7 @@ export class DiagnosticsManager {
         }
 
         reportDiagnostics(diagnosticMessages, true, diagnosticMode);
+
+        return Boolean(diagnosticMessages.size);
     }
 }

@@ -20,7 +20,10 @@ export const buildMessages = {
         return `Change detected at "${location}".`;
     },
     WATCH_SUMMARY(changes: number, deleted: number) {
-        return `Found ${changes} changes and ${deleted} deletions.`;
+        return `Detected ${changes} changes and ${deleted} deletions.`;
+    },
+    NO_DIANGOSTICS() {
+        return `Found 0 diagnostics.`;
     },
 };
 
