@@ -544,6 +544,26 @@ describe(`features/css-keyframes`, () => {
                 },
             ]);
         });
+        it('should error when not directly placed under root or conditional rules', () => {
+            expectAnalyzeDiagnostics(
+                `
+                @keyframes on-root {}
+                @media (width-min: 1px) {
+                    @keyframes on-media {}
+                }
+                .root {
+                    |@keyframes not-valid| {}
+                }
+                `,
+                [
+                    {
+                        message: CSSKeyframes.diagnostics.ILLEGAL_KEYFRAMES_NESTING(),
+                        severity: `error`,
+                        file: '/entry.st.css',
+                    },
+                ]
+            );
+        });
         it('should warn on redeclare keyframes in root', () => {
             expectAnalyzeDiagnostics(
                 `

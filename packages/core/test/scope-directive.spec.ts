@@ -13,7 +13,6 @@ import {
     transformerWarnings,
     getRuleScopeSelector,
 } from '@stylable/core';
-import { CSSKeyframes } from '@stylable/core/dist/features';
 
 use(flatMatch);
 
@@ -605,37 +604,6 @@ describe('@st-scope', () => {
                 },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__root .entry__part');
-        });
-
-        it('should warn about @keyframe usage inside a scope', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        @st-scope .root {
-                            |@keyframes frames {
-                                from {
-                                    margin: 100%;
-                                }
-                                to {
-                                    margin: 0%;
-                                }
-                            }|
-                        }
-                    `,
-                    },
-                },
-            };
-
-            expectTransformDiagnostics(config, [
-                {
-                    message: CSSKeyframes.diagnostics.NO_KEYFRAMES_IN_ST_SCOPE(),
-                    file: '/entry.st.css',
-                    severity: 'error',
-                },
-            ]);
         });
     });
 });

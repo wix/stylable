@@ -6,7 +6,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver } from '../stylable-resolver';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
-import { isChildOfAtRule } from '../helpers/rule';
+import { isInConditionalGroup } from '../helpers/rule';
 import { namespace } from '../helpers/namespace';
 import { paramMapping } from '../stylable-value-parsers';
 import { globalValue } from '../utils';
@@ -58,8 +58,8 @@ export const reservedKeyFrames = [
 ];
 
 export const diagnostics = {
-    NO_KEYFRAMES_IN_ST_SCOPE() {
-        return `cannot use "@keyframes" inside of "@st-scope"`;
+    ILLEGAL_KEYFRAMES_NESTING() {
+        return `illegal nested "@keyframes"`;
     },
     MISSING_KEYFRAMES_NAME() {
         return '"@keyframes" missing parameter';
@@ -101,10 +101,9 @@ export const hooks = createFeature<{
     },
     analyzeAtRule({ context, atRule }) {
         let { params: name } = atRule;
-        // fail when nested in `@st-scope`.
-        if (isChildOfAtRule(atRule, `st-scope`)) {
-            // ToDo: fix to allow nesting in `@media`
-            context.diagnostics.error(atRule, diagnostics.NO_KEYFRAMES_IN_ST_SCOPE());
+        // check nesting validity
+        if (!isInConditionalGroup(atRule, true)) {
+            context.diagnostics.error(atRule, diagnostics.ILLEGAL_KEYFRAMES_NESTING());
             return;
         }
         // save keyframes declarations
