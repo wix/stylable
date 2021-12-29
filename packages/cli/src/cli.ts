@@ -4,7 +4,7 @@ import { Stylable, StylableResolverCache } from '@stylable/core';
 import { build } from './build';
 import { createLogger, levels } from './logger';
 import { projectsConfig } from './config/projects-config';
-import { getCliArguments } from './config/resolve-options';
+import { createBuildIdentifier, getCliArguments } from './config/resolve-options';
 import { WatchHandler } from './watch-handler';
 import { processMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
@@ -44,14 +44,16 @@ async function main() {
         const hasMultipleOptions = options.length > 1;
 
         for (let i = 0; i < options.length; i++) {
-            const optionsEntity = options[i];
-            const identifier = hasMultipleOptions
-                ? `[${i}] ${projectRoot.replace(rootDir, '')}`
-                : isMultipleProjects
-                ? projectRoot.replace(rootDir, '')
-                : projectRoot;
+            const buildOptions = options[i];
+            const identifier = createBuildIdentifier(
+                rootDir,
+                projectRoot,
+                i,
+                hasMultipleOptions,
+                isMultipleProjects
+            );
 
-            log('[Project]', projectRoot, optionsEntity);
+            log('[Project]', projectRoot, buildOptions);
 
             const stylable = Stylable.create({
                 fileSystem,
@@ -62,7 +64,7 @@ async function main() {
                 fileProcessorCache,
             });
 
-            const { service } = await build(optionsEntity, {
+            const { service } = await build(buildOptions, {
                 watch,
                 stylable,
                 log,

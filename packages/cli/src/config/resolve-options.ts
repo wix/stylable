@@ -233,3 +233,17 @@ export function mergeBuildOptions(
         ...rest.map((currentConfig) => (currentConfig ? removeUndefined(currentConfig) : {}))
     );
 }
+
+export function createBuildIdentifier(
+    rootDir: string,
+    projectRoot: string,
+    index: number,
+    hasMultipleOptions: boolean,
+    isMultipleProjects: boolean
+) {
+    return hasMultipleOptions
+        ? `[${index}] ${projectRoot.replace(rootDir, '')}`
+        : isMultipleProjects
+        ? projectRoot.replace(rootDir, '')
+        : projectRoot;
+}
