@@ -29,6 +29,7 @@ async function main() {
     const resolverCache: StylableResolverCache = new Map();
     const fileProcessorCache = {};
     const outputFiles = new Map<string, Set<string>>();
+    const { resolveNamespace } = require(argv.namespaceResolver);
     const isMultipleProjects = projects.length > 1;
     const diagnosticsManager = new DiagnosticsManager();
     const watchHandler = new WatchHandler(fileSystem, {
@@ -56,7 +57,7 @@ async function main() {
                 fileSystem,
                 requireModule: require,
                 projectRoot,
-                resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
+                resolveNamespace,
                 resolverCache,
                 fileProcessorCache,
             });
