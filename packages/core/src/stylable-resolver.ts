@@ -127,10 +127,9 @@ export class StylableResolver {
 
         if (res.kind === 'css') {
             const { value: meta } = res;
-            const symbol =
-                !name || subtype === `mappedSymbols`
-                    ? meta.getSymbol(name || meta.root)!
-                    : STSymbol.get(meta, name, `keyframes`)!;
+            const namespace = subtype === `mappedSymbols` ? `main` : `keyframes`;
+            name = !name && namespace === `main` ? `root` : name;
+            const symbol = STSymbol.getAll(meta, namespace)[name];
             return {
                 _kind: 'css',
                 symbol,

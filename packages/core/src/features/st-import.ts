@@ -162,7 +162,7 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
             node: importDef.rule,
         });
     });
-    // import as symbol
+    // import as typed symbol
     for (const [type, handler] of ImportTypeHook.entries()) {
         if (type in importDef) {
             for (const [localName, importName] of Object.entries(importDef[type])) {
