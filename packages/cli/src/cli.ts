@@ -30,7 +30,6 @@ async function main() {
     const fileProcessorCache = {};
     const outputFiles = new Map<string, Set<string>>();
     const { resolveNamespace } = require(argv.namespaceResolver);
-    const isMultipleProjects = projects.length > 1;
     const diagnosticsManager = new DiagnosticsManager();
     const watchHandler = new WatchHandler(fileSystem, {
         log,
@@ -41,16 +40,14 @@ async function main() {
     });
 
     for (const { projectRoot, options } of projects) {
-        const hasMultipleOptions = options.length > 1;
-
         for (let i = 0; i < options.length; i++) {
             const buildOptions = options[i];
             const identifier = createBuildIdentifier(
                 rootDir,
                 projectRoot,
                 i,
-                hasMultipleOptions,
-                isMultipleProjects
+                options.length > 1,
+                projects.length > 1
             );
 
             log('[Project]', projectRoot, buildOptions);
