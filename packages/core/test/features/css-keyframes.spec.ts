@@ -505,6 +505,37 @@ describe(`features/css-keyframes`, () => {
                 });
             });
         });
+        describe(`escape`, () => {
+            it(`should escape invlid inputs`, () => {
+                const { meta, exports } = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'a|a',
+                            content: `
+                                /* @check(statement) a\\|a__a */
+                                @keyframes a {
+                                    from {}
+                                    to {}
+                                }
+                                
+                                /* @check(decl) .a\\|a__x {
+                                    animation-name: a\\|a__a;
+                                }*/
+                                .x {
+                                    animation-name: a;
+                                }
+                            `,
+                        },
+                    },
+                });
+
+                testInlineExpects(meta.outputAst!);
+                expect(exports.keyframes, `JS export`).to.eql({
+                    a: 'a\\|a__a',
+                });
+            });
+        });
     });
     describe(`diagnostics`, () => {
         it('should warn on missing keyframes name', () => {

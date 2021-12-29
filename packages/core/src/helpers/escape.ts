@@ -7,3 +7,7 @@ export function unescapeCSS(text: string) {
 export function namespaceEscape(name: string, namespace: string) {
     return namespace ? cssesc(namespace, { isIdentifier: true }) + `__` + name : name;
 }
+
+export function escapeIdentifier(value: string) {
+    return cssesc(value, { isIdentifier: true });
+}
