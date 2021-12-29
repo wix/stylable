@@ -27,14 +27,12 @@ export function typedConfiguration<P extends string>(
     return configOrConfigProvider;
 }
 
-interface BaseProjectEntity {
+export interface ProjectEntity {
     options: BuildOptions[];
-}
-
-export interface ProjectEntity extends BaseProjectEntity {
     projectRoot: string;
 }
-export interface RawProjectEntity extends BaseProjectEntity {
+export interface RawProjectEntity {
+    options: BuildOptions[];
     request: string;
 }
 
