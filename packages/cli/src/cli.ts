@@ -28,7 +28,7 @@ async function main() {
     const fileSystem = nodeFs;
     const resolverCache: StylableResolverCache = new Map();
     const fileProcessorCache = {};
-    const outputFiles = new Map<string, string>();
+    const outputFiles = new Map<string, Set<string>>();
     const isMultipleProjects = projects.length > 1;
     const diagnosticsManager = new DiagnosticsManager();
     const watchHandler = new WatchHandler(fileSystem, {

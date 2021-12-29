@@ -8,11 +8,12 @@ import {
 import { levels, Log } from './logger';
 import { processMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
+import type { BuildMetaData } from './types';
 
 export interface WatchHandlerOptions {
     log?: Log;
     resolverCache?: StylableResolverCache;
-    outputFiles?: Map<string, string>;
+    outputFiles?: BuildMetaData['outputFiles'];
     rootDir?: string;
     diagnosticsManager?: DiagnosticsManager;
 }
@@ -99,7 +100,7 @@ export class WatchHandler {
             if (
                 !entity.value ||
                 entity.resolvedPath === filePath ||
-                this.options.outputFiles?.get(entity.resolvedPath) === filePath
+                this.options.outputFiles?.get(entity.resolvedPath)?.has(filePath)
             ) {
                 if (entity.kind === 'js') {
                     decache(filePath);

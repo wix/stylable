@@ -149,8 +149,10 @@ export async function build(
             }
 
             for (const filePath of affectedFiles) {
-                // map st output file path to src file path
-                outputFiles.set(filePath.replace(fullSrcDir, fullOutDir), filePath);
+                if (!indexFile) {
+                    // map st output file path to src file path
+                    outputFiles.set(filePath.replace(fullSrcDir, fullOutDir), new Set([filePath]));
+                }
 
                 // remove assets from the affected files (handled in buildAggregatedEntities)
                 if (assets.has(filePath)) {
@@ -163,7 +165,7 @@ export async function build(
             // rewire invalidations
             updateWatcherDependencies(affectedFiles);
             // rebuild assets from aggregated content: index files and assets
-            buildAggregatedEntities();
+            buildAggregatedEntities(affectedFiles);
 
             if (!diagnostics) {
                 diagnosticsManager.delete(identifier);
@@ -244,22 +246,22 @@ export async function build(
                 );
                 visitMetaCSSDependenciesBFS(
                     meta,
-                    ({ source }) => {
-                        service.registerInvalidateOnChange(
-                            outputFiles.get(source) ?? source,
-                            filePath
-                        );
-                    },
+                    ({ source }) => registerInvalidation(source, filePath),
                     resolver,
-                    (resolvedPath) => {
-                        service.registerInvalidateOnChange(
-                            outputFiles.get(resolvedPath) ?? resolvedPath,
-                            filePath
-                        );
-                    }
+                    (resolvedPath) => registerInvalidation(resolvedPath, filePath)
                 );
             } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
+            }
+        }
+
+        function registerInvalidation(source: string, filePath: string) {
+            if (outputFiles.has(source)) {
+                for (const sourceFile of outputFiles.get(source)!) {
+                    service.registerInvalidateOnChange(sourceFile, filePath);
+                }
+            } else {
+                service.registerInvalidateOnChange(source, filePath);
             }
         }
     }
@@ -276,11 +278,13 @@ export async function build(
         });
     }
 
-    function buildAggregatedEntities() {
+    function buildAggregatedEntities(affectedFiles: Set<string>) {
         if (indexFile) {
             const indexFilePath = join(fullOutDir, indexFile);
             generated.add(indexFilePath);
             generator.generateIndexFile(fs, indexFilePath);
+
+            outputFiles.set(indexFilePath, affectedFiles);
         } else {
             const generatedAssets = handleAssets(assets, projectRoot, srcDir, outDir, fs);
             for (const generatedAsset of generatedAssets) {
