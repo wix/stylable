@@ -33,7 +33,7 @@ export function createCliTester() {
         dirPath,
         args,
         steps,
-        timeout = Number(process.env.CLI_WATCH_TEST_TIMEOUT) || 5000,
+        timeout = Number(process.env.CLI_WATCH_TEST_TIMEOUT) || 10_000,
     }: ProcessCliOutputParams): Promise<{
         output: string;
     }> {
