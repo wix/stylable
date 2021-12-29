@@ -100,6 +100,7 @@ export class WatchHandler {
             if (
                 !entity.value ||
                 entity.resolvedPath === filePath ||
+                // deep source invalidation
                 this.options.outputFiles?.get(entity.resolvedPath)?.has(filePath)
             ) {
                 if (entity.kind === 'js') {
