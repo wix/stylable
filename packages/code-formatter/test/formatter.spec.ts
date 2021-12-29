@@ -1,5 +1,6 @@
 import { getDocumentFormatting } from '@stylable/code-formatter';
 import { expect } from 'chai';
+import deindent from 'deindent';
 
 describe('Formatting', () => {
     it('should format an entire stylesheet with extra spaces', () => {
@@ -8,12 +9,60 @@ describe('Formatting', () => {
         expect(res).to.eql('.root {\n    color: red;\n}');
     });
 
-    it('should perserve custom selectors with immediate decendants ', () => {
+    it('should preserve custom selectors with immediate descendants ', () => {
         const res = getDocumentFormatting(
             '@custom-selector :--some-selector     >      :global(div) > :global(span);'
         );
 
         expect(res).to.eql('@custom-selector :--some-selector > :global(div) > :global(span);');
+    });
+    it('should preserve grid-template declarations', () => {
+        const res = getDocumentFormatting(
+            deindent(`
+                /* PRESERVE INDENT */
+                .foo {
+                    grid-template:
+                        "icon  name name ."    16px
+                        ".     type .    ."    16px
+                        ".     desc desc desc" 20px
+                        / 16px 3fr  2fr  4fr;
+                }`)
+        );
+
+        expect(res).to.eql(
+            deindent(`/* PRESERVE INDENT */
+                .foo {
+                    grid-template:
+                        "icon  name name ."    16px
+                        ".     type .    ."    16px
+                        ".     desc desc desc" 20px
+                        / 16px 3fr  2fr  4fr;
+                }`)
+        );
+    });
+    it('should preserve grid declarations', () => {
+        const res = getDocumentFormatting(
+            deindent(`
+                /* PRESERVE INDENT */
+                .foo {
+                    grid:
+                        "icon  name name ."    16px
+                        ".     type .    ."    16px
+                        ".     desc desc desc" 20px
+                        / 16px 3fr  2fr  4fr;
+                }`)
+        );
+
+        expect(res).to.eql(
+            deindent(`/* PRESERVE INDENT */
+                .foo {
+                    grid:
+                        "icon  name name ."    16px
+                        ".     type .    ."    16px
+                        ".     desc desc desc" 20px
+                        / 16px 3fr  2fr  4fr;
+                }`)
+        );
     });
 
     it('should format a specific range', () => {
