@@ -1,7 +1,23 @@
 import nodeFs from '@file-services/node';
 import type { IFileSystem, IWatchEvent } from '@file-services/types';
-import type { DirectoryProcessServiceOptions } from './types';
 import { directoryDeepChildren, DirectoryItem } from './walk-fs';
+
+export interface DirectoryProcessServiceOptions {
+    processFiles?(
+        watcher: DirectoryProcessService,
+        affectedFiles: Set<string>,
+        deletedFiles: Set<string>,
+        changeOrigin?: IWatchEvent
+    ): Promise<void> | void;
+    directoryFilter?(directoryPath: string): boolean;
+    fileFilter?(filePath: string): boolean;
+    onError?(error: Error): void;
+    autoResetInvalidations?: boolean;
+    watchMode?: boolean;
+    watchOptions?: {
+        skipInitialWatch?: boolean;
+    };
+}
 
 export class DirectoryProcessService {
     public invalidationMap = new Map<string, Set<string>>();
