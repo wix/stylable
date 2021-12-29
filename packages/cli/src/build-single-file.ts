@@ -268,9 +268,11 @@ export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
 
     return diagnostics.map((diagnostic) => {
         const err = diagnostic.node.error(diagnostic.message, diagnostic.options);
+
         return {
             type: diagnostic.type,
-            message: `${diagnostic.message}\n${err.showSourceCode()}`,
+            message: `${diagnostic.message}\n${err.showSourceCode(true)}`,
+            offset: diagnostic.node.source?.start?.offset,
         };
     });
 }

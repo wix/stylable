@@ -3,6 +3,7 @@ import type { DiagnosticType } from '@stylable/core';
 export interface Diagnostic {
     message: string;
     type: DiagnosticType;
+    offset?: number;
 }
 
 export type DiagnosticMessages = Map<string, Diagnostic[]>;
@@ -12,7 +13,10 @@ function report(diagnosticsMessages: DiagnosticMessages) {
     for (const [filePath, diagnostics] of diagnosticsMessages.entries()) {
         console.log(
             `[${filePath}]\n`,
-            diagnostics.map(({ type, message }) => `[${type}]: ${message}`).join('\n\n')
+            diagnostics
+                .sort(({ offset: a = 0 }, { offset: b = 0 }) => a - b)
+                .map(({ type, message }) => `[${type}]: ${message}`)
+                .join('\n\n')
         );
     }
 }

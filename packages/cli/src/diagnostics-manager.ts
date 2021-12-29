@@ -7,34 +7,13 @@ interface ProcessDiagnostics {
     diagnosticsMode?: DiagnosticsMode | undefined;
 }
 
-type diagnosticsStore = Map<string, Map<string, ProcessDiagnostics>>;
+type DiagnosticsStore = Map<string, Map<string, ProcessDiagnostics>>;
 
 export class DiagnosticsManager {
-    protected store!: diagnosticsStore;
+    private store: DiagnosticsStore = new Map();
 
-    constructor() {
-        this.clear();
-    }
-
-    public report() {
-        let diagnosticMode: DiagnosticsMode = 'loose';
-        const diagnosticMessages: DiagnosticMessages = new Map();
-        const existingDiagnostics = [...this.store.values()].flatMap((processDiagnostics) => [
-            ...processDiagnostics.entries(),
-        ]);
-
-        for (const [
-            filepath,
-            { diagnostics, diagnosticsMode: currentMode },
-        ] of existingDiagnostics) {
-            if (diagnosticMode !== 'strict') {
-                diagnosticMode = currentMode || diagnosticMode;
-            }
-
-            diagnosticMessages.set(filepath, diagnostics);
-        }
-
-        reportDiagnostics(diagnosticMessages, true, diagnosticMode);
+    public clear() {
+        this.store = new Map();
     }
 
     public set(
@@ -72,7 +51,38 @@ export class DiagnosticsManager {
         }
     }
 
-    public clear() {
-        this.store = new Map();
+    public report() {
+        let diagnosticMode: DiagnosticsMode = 'loose';
+        const diagnosticMessages: DiagnosticMessages = new Map();
+        const collectedDiagnostics = new Map<string, Map<string, Diagnostic>>();
+
+        for (const buildDiagnostics of this.store.values()) {
+            for (const [
+                filePath,
+                { diagnostics, diagnosticsMode: currentMode },
+            ] of buildDiagnostics) {
+                if (diagnosticMode !== 'strict') {
+                    diagnosticMode = currentMode || diagnosticMode;
+                }
+
+                if (!diagnosticMessages.has(filePath)) {
+                    diagnosticMessages.set(filePath, []);
+                    collectedDiagnostics.set(filePath, new Map());
+                }
+
+                const currentDiagnostics = diagnosticMessages.get(filePath)!;
+                const ids = collectedDiagnostics.get(filePath)!;
+
+                for (const diagnostic of diagnostics) {
+                    const diagnosticId = `${diagnostic.type};${diagnostic.message}`;
+                    if (!ids.has(diagnosticId)) {
+                        ids.set(diagnosticId, diagnostic);
+                        currentDiagnostics.push(ids.get(diagnosticId)!);
+                    }
+                }
+            }
+        }
+
+        reportDiagnostics(diagnosticMessages, true, diagnosticMode);
     }
 }

@@ -7,6 +7,7 @@ import {
     populateDirectorySync,
     runCliSync,
 } from '@stylable/e2e-test-kit';
+import { functionWarnings } from '@stylable/core';
 
 describe('Stylable CLI config multiple projects', function () {
     this.timeout(25000);
@@ -419,6 +420,65 @@ describe('Stylable CLI config multiple projects', function () {
     });
 
     describe('Projects validation', () => {
+        it('should dedup diagnostics across build processes', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': JSON.stringify({
+                    name: 'workspace',
+                    version: '0.0.0',
+                    private: true,
+                }),
+                packages: {
+                    'project-a': {
+                        'mixin.js': `
+                        let count = 0;
+                        module.exports = () => {
+                            count++;
+                            if (count === 1 || count === 4) {
+                                return 'red';
+                            } else {
+                                throw new Error('error ' + count);
+                            }
+                        }
+                        `,
+                        'style.st.css': `
+                        @st-import color from './mixin.js';
+
+                        .root { 
+                            color1: color();
+                            color2: color();
+                            x: value(unknown);
+                        }
+                        `,
+                        'package.json': `{
+                            "name": "a", 
+                            "version": "0.0.0"
+                        }`,
+                    },
+                },
+                'stylable.config.js': `
+                    exports.stcConfig = () => ({ 
+                        options: { 
+                            outDir: './dist',
+                        },
+                        projects: {
+                            'packages/*': [{}, {}]
+                        }
+                    })
+                    `,
+            });
+
+            const { stdout } = runCliSync(['--rootDir', tempDir.path]);
+
+            const firstError = stdout.indexOf('error 3');
+            const secondError = stdout.indexOf('error 2');
+            const thirdError = stdout.indexOf(functionWarnings.UNKNOWN_VAR('unknown'));
+
+            expect(firstError, 'sorted by location')
+                .to.be.lessThan(secondError)
+                .and.lessThan(thirdError);
+            expect(stdout.match(functionWarnings.UNKNOWN_VAR('unknown'))?.length).to.eql(1);
+        });
+
         it('should throw when the property "projects" is invalid', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': JSON.stringify({
