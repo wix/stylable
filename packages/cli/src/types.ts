@@ -79,10 +79,6 @@ export type ProjectEntryValue<P extends string> =
           options: PartialBuildOptions;
       };
 
-export interface ProcessProjectsOptions {
-    defaultOptions?: BuildOptions;
-}
-
 export interface CliArguments {
     rootDir: string;
     srcDir: string | undefined;

@@ -3,12 +3,15 @@ import type {
     MultipleProjectsConfig,
     PartialBuildOptions,
     Presets,
-    ProcessProjectsOptions,
     ProjectEntryValue,
     ProjectEntryValues,
     RawProjectEntity,
 } from '../types';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
+
+interface ProcessProjectsOptions {
+    defaultOptions?: BuildOptions;
+}
 
 export function processProjects<P extends string>(
     { projects, presets }: MultipleProjectsConfig<P>,
