@@ -24,16 +24,30 @@ export interface Build {
     stylable: Stylable;
 }
 
+type File = {
+    generated?: boolean;
+} & IWatchEvent;
+
 export class WatchHandler {
     private builds: Build[] = [];
     private resolverCache: StylableResolverCache = new Map();
     private diagnosticsManager = new DiagnosticsManager();
+    private generatedFiles = new Set<string>();
     private listener: WatchEventListener = async (event) => {
-        this.log(buildMessages.CHANGE_DETECTED(event.path));
+        if (this.generatedFiles.has(event.path)) {
+            buildMessages.SKIP_GENERATED_FILE(event.path);
+            return;
+        }
+
+        this.log(levels.clear);
+        this.log(buildMessages.CHANGE_DETECTED(event.path), levels.info);
+
+        this.generatedFiles.clear();
         this.invalidateCache(event.path);
 
         let foundChanges = false;
-        const files = new Map<string, IWatchEvent>();
+
+        const files = new Map<string, File>();
 
         for (const { service, identifier } of this.builds) {
             for (const path of service.getAffectedFiles(event.path)) {
@@ -44,10 +58,19 @@ export class WatchHandler {
                 files.set(path, createWatchEvent(path, this.fileSystem));
             }
 
-            const { hasChanges } = await service.handleWatchChange(files, event);
+            const { hasChanges, generatedFiles } = await service.handleWatchChange(files, event);
 
             if (hasChanges) {
                 foundChanges = true;
+
+                for (const generatedFile of generatedFiles) {
+                    this.generatedFiles.add(generatedFile);
+
+                    files.set(generatedFile, {
+                        ...createWatchEvent(generatedFile, this.fileSystem),
+                        generated: true,
+                    });
+                }
 
                 this.log(buildMessages.BUILD_PROCESS_INFO(identifier), Array.from(files.keys()));
             }
@@ -56,7 +79,6 @@ export class WatchHandler {
         if (foundChanges) {
             const { changed, deleted } = filesStats(files);
 
-            this.log(levels.clear);
             this.log(buildMessages.WATCH_SUMMARY(changed, deleted), levels.info);
 
             const reported = this.diagnosticsManager.report();
@@ -126,13 +148,17 @@ export class WatchHandler {
     }
 }
 
-function filesStats(files: Map<string, IWatchEvent>) {
+function filesStats(files: Map<string, File>) {
     const filesChangesSummary = {
         changed: 0,
         deleted: 0,
     };
 
     for (const file of files.values()) {
+        if (file.generated) {
+            continue;
+        }
+
         if (file.stats) {
             filesChangesSummary.changed++;
         } else {

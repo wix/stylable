@@ -8,7 +8,7 @@ export interface DirectoryProcessServiceOptions {
         affectedFiles: Set<string>,
         deletedFiles: Set<string>,
         changeOrigin?: IWatchEvent
-    ): Promise<void> | void;
+    ): Promise<{ generatedFiles: Set<string> }> | { generatedFiles: Set<string> };
     directoryFilter?(directoryPath: string): boolean;
     fileFilter?(filePath: string): boolean;
     onError?(error: Error): void;
@@ -55,7 +55,7 @@ export class DirectoryProcessService {
             return;
         }
         try {
-            return this.options.processFiles?.(this, affectedFiles, new Set());
+            await this.options.processFiles?.(this, affectedFiles, new Set());
         } catch (error) {
             this.options.onError?.(error as Error);
         }
@@ -100,7 +100,10 @@ export class DirectoryProcessService {
     public async handleWatchChange(
         files: Map<string, IWatchEvent>,
         originalEvent: IWatchEvent
-    ): Promise<{ hasChanges: boolean }> {
+    ): Promise<{
+        hasChanges: boolean;
+        generatedFiles: Set<string>;
+    }> {
         const affectedFiles = new Set<string>();
         const deletedFiles = new Set<string>();
 
@@ -153,14 +156,21 @@ export class DirectoryProcessService {
         }
 
         if (this.options.processFiles && (affectedFiles.size || deletedFiles.size)) {
-            await this.options.processFiles(this, affectedFiles, deletedFiles, originalEvent);
+            const { generatedFiles } = await this.options.processFiles(
+                this,
+                affectedFiles,
+                deletedFiles,
+                originalEvent
+            );
 
             return {
                 hasChanges: true,
+                generatedFiles,
             };
         } else {
             return {
                 hasChanges: false,
+                generatedFiles: new Set(),
             };
         }
     }

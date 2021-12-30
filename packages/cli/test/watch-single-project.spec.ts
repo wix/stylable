@@ -450,33 +450,32 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.FINISHED_PROCESSING(
                         2,
-                        `[1] ${sep}` + join('packages', 'project-a')
+                        `[0] ${sep}` + join('packages', 'project-a')
                     ),
                 },
                 {
                     msg: buildMessages.FINISHED_PROCESSING(
-                        1,
-                        `[0] ${sep}` + join('packages', 'project-a')
+                        2,
+                        `[1] ${sep}` + join('packages', 'project-a')
                     ),
                     action() {
                         return {
-                            sleep: 500,
+                            sleep: 1000,
                         };
                     },
                 },
             ],
         });
-
         const matches = output.match(
             new RegExp(
                 escapeRegExp(
-                    buildMessages.BUILD_PROCESS_INFO(`[1] ${sep}` + join('packages', 'project-a'))
+                    buildMessages.BUILD_PROCESS_INFO(`[0] ${sep}` + join('packages', 'project-a'))
                 ),
                 'ig'
             )
         );
 
-        expect(matches?.length).to.eql(1);
+        expect(matches?.length, 'processed once on build and once on watch').to.eql(2);
     });
 
     it('should keep watching when getting stylable process error', async () => {

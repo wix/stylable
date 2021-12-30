@@ -183,6 +183,8 @@ export async function build(
                     )
                 );
             }
+
+            return { generatedFiles: generated };
         },
     });
 

@@ -16,11 +16,14 @@ export const buildMessages = {
     BUILD_SKIPPED(identifier?: string) {
         return `No stylable files found. build skipped${identifier ? ` for "${identifier}"` : ''}.`;
     },
+    SKIP_GENERATED_FILE(location: string) {
+        return `Skipping generated file build of "${location}".`;
+    },
     CHANGE_DETECTED(location: string) {
         return `Change detected at "${location}".`;
     },
     WATCH_SUMMARY(changes: number, deleted: number) {
-        return `Detected ${changes} changes and ${deleted} deletions.`;
+        return `Processed ${changes} changes and ${deleted} deletions.`;
     },
     NO_DIANGOSTICS() {
         return `Found 0 diagnostics.`;
