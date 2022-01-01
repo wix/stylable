@@ -34,19 +34,16 @@ export class WatchHandler {
     private diagnosticsManager = new DiagnosticsManager();
     private generatedFiles = new Set<string>();
     private listener: WatchEventListener = async (event) => {
+        this.log(buildMessages.CHANGE_EVENT_TRIGGERED(event.path));
+
         if (this.generatedFiles.has(event.path)) {
             buildMessages.SKIP_GENERATED_FILE(event.path);
             return;
         }
 
-        this.log(levels.clear);
-        this.log(buildMessages.CHANGE_DETECTED(event.path), levels.info);
-
-        this.generatedFiles.clear();
         this.invalidateCache(event.path);
 
         let foundChanges = false;
-
         const files = new Map<string, File>();
 
         for (const { service, identifier } of this.builds) {
@@ -61,13 +58,20 @@ export class WatchHandler {
             const { hasChanges, generatedFiles } = await service.handleWatchChange(files, event);
 
             if (hasChanges) {
-                foundChanges = true;
+                if (!foundChanges) {
+                    foundChanges = true;
+                    this.generatedFiles.clear();
+
+                    this.log(levels.clear);
+                    this.log(buildMessages.CHANGE_DETECTED(event.path), levels.info);
+                }
 
                 for (const generatedFile of generatedFiles) {
                     this.generatedFiles.add(generatedFile);
 
                     files.set(generatedFile, {
-                        ...createWatchEvent(generatedFile, this.fileSystem),
+                        ...(files.get(generatedFile) ||
+                            createWatchEvent(generatedFile, this.fileSystem)),
                         generated: true,
                     });
                 }

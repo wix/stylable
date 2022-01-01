@@ -466,16 +466,33 @@ describe('Stylable Cli Watch - Single project', () => {
                 },
             ],
         });
-        const matches = output.match(
-            new RegExp(
-                escapeRegExp(
-                    buildMessages.BUILD_PROCESS_INFO(`[0] ${sep}` + join('packages', 'project-a'))
-                ),
-                'ig'
-            )
-        );
 
-        expect(matches?.length, 'processed once on build and once on watch').to.eql(2);
+        expect(
+            output.match(
+                new RegExp(
+                    escapeRegExp(
+                        buildMessages.CHANGE_EVENT_TRIGGERED(
+                            join(tempDir.path, 'packages', 'project-a', 'src', 'icon.svg')
+                        )
+                    ),
+                    'ig'
+                )
+            )?.length,
+            'svg file should trigger change event once'
+        ).to.eql(1);
+        expect(
+            output.match(
+                new RegExp(
+                    escapeRegExp(
+                        buildMessages.CHANGE_EVENT_TRIGGERED(
+                            join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css.d.ts')
+                        )
+                    ),
+                    'ig'
+                )
+            )?.length,
+            'dts file should trigger change event once'
+        ).to.eql(1);
     });
 
     it('should keep watching when getting stylable process error', async () => {

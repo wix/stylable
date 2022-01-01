@@ -58,7 +58,7 @@ export async function build(
 
     const mode = watch ? '[Watch]' : '[Build]';
     const generator = new IndexGenerator(stylable, log);
-    const generated = new Set<string>();
+    const buildGeneratedFiles = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
     const moduleFormats = getModuleFormats({ cjs, esm });
@@ -82,7 +82,7 @@ export async function build(
             return true;
         },
         fileFilter(filePath) {
-            if (generated.has(filePath)) {
+            if (buildGeneratedFiles.has(filePath)) {
                 return false;
             }
             if (!indexFile && outputSources && filePath.startsWith(fullOutDir)) {
@@ -129,7 +129,7 @@ export async function build(
                             outputCSS,
                             outputCSSNameTemplate,
                             outputSources,
-                            generated,
+                            generated: buildGeneratedFiles,
                             dts,
                             dtsSourceMap,
                         });
@@ -137,6 +137,7 @@ export async function build(
                 }
             }
 
+            const processGeneratedFiles = new Set<string>();
             const diagnosedFiles = Array.from(diagnosticsManager.get(identifier)?.keys() || []);
 
             if (diagnosedFiles.length) {
@@ -161,11 +162,11 @@ export async function build(
             }
 
             // rebuild
-            buildFiles(affectedFiles);
+            buildFiles(affectedFiles, processGeneratedFiles);
             // rewire invalidations
             updateWatcherDependencies(affectedFiles);
             // rebuild assets from aggregated content: index files and assets
-            buildAggregatedEntities(affectedFiles);
+            buildAggregatedEntities(affectedFiles, processGeneratedFiles);
 
             if (!diagnostics) {
                 diagnosticsManager.delete(identifier);
@@ -184,7 +185,12 @@ export async function build(
                 );
             }
 
-            return { generatedFiles: generated };
+            // merge the current process generated files with the total build generated files
+            for (const generatedFile of processGeneratedFiles) {
+                buildGeneratedFiles.add(generatedFile);
+            }
+
+            return { generatedFiles: processGeneratedFiles };
         },
     });
 
@@ -200,7 +206,7 @@ export async function build(
 
     return { service };
 
-    function buildFiles(filesToBuild: Set<string>) {
+    function buildFiles(filesToBuild: Set<string>, generated: Set<string>) {
         for (const filePath of filesToBuild) {
             try {
                 if (indexFile) {
@@ -280,7 +286,7 @@ export async function build(
         });
     }
 
-    function buildAggregatedEntities(affectedFiles: Set<string>) {
+    function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
         if (indexFile) {
             const indexFilePath = join(fullOutDir, indexFile);
             generated.add(indexFilePath);
