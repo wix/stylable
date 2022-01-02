@@ -43,7 +43,7 @@ export type ResolveRequests = (
 ) => Promise<STCConfig> | STCConfig;
 
 export interface ResolveProjectsContext {
-    projectRoot: string;
+    rootDir: string;
 }
 
 export type Presets<P extends string = string> = {

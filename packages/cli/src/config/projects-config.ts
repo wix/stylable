@@ -24,9 +24,9 @@ export async function projectsConfig(argv: CliArguments): Promise<{
     rootDir: string;
     projects: STCConfig;
 }> {
-    const projectRoot = resolve(argv.rootDir);
+    const rootDir = resolve(argv.rootDir);
     const defaultOptions = createDefaultOptions();
-    const configFile = resolveConfigFile(projectRoot);
+    const configFile = resolveConfigFile(rootDir);
     const cliOptions = resolveCliOptions(argv, defaultOptions);
     const topLevelOptions = mergeBuildOptions(defaultOptions, configFile?.options, cliOptions);
 
@@ -40,21 +40,21 @@ export async function projectsConfig(argv: CliArguments): Promise<{
         });
 
         projects = await resolveProjectsRequests({
-            projectRoot,
+            rootDir,
             entities,
             resolveRequests: configFile.projectsOptions?.resolveRequests ?? resolveNpmRequests,
         });
     } else {
         projects = [
             {
-                projectRoot,
+                projectRoot: rootDir,
                 options: [topLevelOptions],
             },
         ];
     }
 
     return {
-        rootDir: projectRoot,
+        rootDir,
         projects,
     };
 }
@@ -87,14 +87,14 @@ function isMultpleConfigProject(config: any): config is MultipleProjectsConfig<s
 
 async function resolveProjectsRequests({
     entities,
-    projectRoot,
+    rootDir,
     resolveRequests,
 }: {
-    projectRoot: string;
+    rootDir: string;
     entities: Array<RawProjectEntity>;
     resolveRequests: ResolveRequests;
 }): Promise<STCConfig> {
-    const context: ResolveProjectsContext = { projectRoot };
+    const context: ResolveProjectsContext = { rootDir };
 
     return resolveRequests(entities, context);
 }

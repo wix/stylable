@@ -5,13 +5,13 @@ import {
 } from '@wixc3/resolve-directory-context';
 import type { RawProjectEntity, ResolveRequests } from '../types';
 
-export const resolveNpmRequests: ResolveRequests = (entities, { projectRoot }) => {
+export const resolveNpmRequests: ResolveRequests = (entities, { rootDir }) => {
     const entitiesMap = new Map<string, RawProjectEntity>();
     const packages = new Set<INpmPackage>();
 
     for (const entity of entities) {
         const { request } = entity;
-        const workspacePackages = resolveWorkspacePackages(projectRoot, [request]);
+        const workspacePackages = resolveWorkspacePackages(rootDir, [request]);
 
         if (!workspacePackages.length) {
             throw new Error(`Stylable CLI config can not resolve project request "${request}"`);
