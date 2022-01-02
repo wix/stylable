@@ -8,6 +8,7 @@
     { "path": "../../node/src" },
     { "path": "../../module-utils/src" },
     { "path": "../../code-formatter/src" },
-    { "path": "../../optimizer/src" }
+    { "path": "../../optimizer/src" },
+    { "path": "../../build-tools/src" }
   ]
 }
