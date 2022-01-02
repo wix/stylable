@@ -164,11 +164,9 @@ export const hooks = createFeature<{
         const name = globalName ?? atRule.params;
         const resolve = resolved[name];
         /* js keyframes mixins won't have resolved keyframes */
-        atRule.params = escapeIdentifier(
-            resolve
-                ? getTransformedName(resolve)
-                : globalName ?? namespace(name, context.meta.namespace)
-        );
+        atRule.params = resolve
+            ? getTransformedName(resolve)
+            : globalName ?? namespace(name, context.meta.namespace);
     },
     transformDeclaration({ decl, resolved }) {
         const parsed = postcssValueParser(decl.value);
@@ -178,14 +176,14 @@ export const hooks = createFeature<{
             const resolve = resolved[node.value];
             const scoped = resolve && getTransformedName(resolve);
             if (scoped) {
-                node.value = escapeIdentifier(scoped);
+                node.value = scoped;
             }
         });
         decl.value = parsed.toString();
     },
     transformJSExports({ exports, resolved }) {
         for (const [name, resolve] of Object.entries(resolved)) {
-            exports.keyframes[name] = escapeIdentifier(getTransformedName(resolve));
+            exports.keyframes[name] = getTransformedName(resolve);
         }
     },
 });
