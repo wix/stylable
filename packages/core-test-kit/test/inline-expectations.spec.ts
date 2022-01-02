@@ -112,10 +112,6 @@ describe('inline-expectations', () => {
 
         expect(() => testInlineExpects(result)).to.throw(
             testInlineExpectsErrors.combine([
-                testInlineExpectsErrors.malformedDecl(
-                    `color:`,
-                    `(only prop) .entry__malformed {color:}`
-                ),
                 testInlineExpectsErrors.declarations(
                     `color: green; width: 1px`,
                     `color: green; width: 2px`,
@@ -130,6 +126,10 @@ describe('inline-expectations', () => {
                     `color: red; width: 2px`,
                     `color: green; width: 1px`,
                     `.entry__multiline`
+                ),
+                testInlineExpectsErrors.malformedDecl(
+                    `color:`,
+                    `(only prop) .entry__malformed {color:}`
                 ),
             ])
         );
@@ -177,7 +177,7 @@ describe('inline-expectations', () => {
                 '/style.st.css': {
                     namespace: 'entry',
                     content: `
-                        /* @check entry__anim @check[1] entry__anim */
+                        /* @check[16] entry__anim */
                         @keyframes animX {}
                     `,
                 },
@@ -185,7 +185,7 @@ describe('inline-expectations', () => {
         });
 
         expect(() => testInlineExpects(result)).to.throw(
-            testInlineExpectsErrors.atRuleMultiTest(`@check entry__anim @check[1] entry__anim`)
+            testInlineExpectsErrors.atRuleMultiTest(`[16] entry__anim`)
         );
     });
     it('should throw for keyframes nested rules', () => {
