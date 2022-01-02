@@ -8,7 +8,6 @@ import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { isInConditionalGroup } from '../helpers/rule';
 import { namespace } from '../helpers/namespace';
-import { escapeIdentifier } from '../helpers/escape';
 import { paramMapping } from '../stylable-value-parsers';
 import { globalValue } from '../utils';
 import type * as postcss from 'postcss';
