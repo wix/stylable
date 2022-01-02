@@ -6,7 +6,7 @@ import {
     createWatchEvent,
     DirectoryProcessService,
 } from './directory-process-service/directory-process-service';
-import { createLogger, levels, Log } from './logger';
+import { createDefaultLogger, levels, Log } from './logger';
 import { buildMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
@@ -30,10 +30,18 @@ type File = {
 
 export class WatchHandler {
     private builds: Build[] = [];
-    private resolverCache: StylableResolverCache = new Map();
-    private diagnosticsManager = new DiagnosticsManager();
-    private generatedFiles = new Set<string>();
+    private resolverCache: StylableResolverCache;
     private log: Log;
+    private diagnosticsManager: DiagnosticsManager;
+    private generatedFiles = new Set<string>();
+
+    constructor(private fileSystem: IFileSystem, private options: WatchHandlerOptions = {}) {
+        this.resolverCache = this.options.resolverCache ?? new Map();
+        this.log = this.options.log ?? createDefaultLogger();
+        this.diagnosticsManager =
+            this.options.diagnosticsManager ?? new DiagnosticsManager({ log: this.log });
+    }
+
     private listener: WatchEventListener = async (event) => {
         this.log(buildMessages.CHANGE_EVENT_TRIGGERED(event.path));
 
@@ -100,23 +108,12 @@ export class WatchHandler {
         }
     };
 
-    constructor(private fileSystem: IFileSystem, private options: WatchHandlerOptions = {}) {
-        if (this.options.resolverCache) {
-            this.resolverCache = this.options.resolverCache;
-        }
-
-        if (this.options.diagnosticsManager) {
-            this.diagnosticsManager = this.options.diagnosticsManager;
-        }
-
-        this.log = this.options.log ?? createLogger(console.log, console.clear);
-    }
-
     public register(process: Build) {
         this.builds.push(process);
     }
 
     public start() {
+        this.log(buildMessages.START_WATCHING(), levels.info);
         this.fileSystem.watchService.addGlobalListener(this.listener);
     }
 

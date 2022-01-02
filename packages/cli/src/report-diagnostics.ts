@@ -1,4 +1,5 @@
 import type { DiagnosticType } from '@stylable/core';
+import { levels, Log } from './logger';
 
 export interface Diagnostic {
     message: string;
@@ -8,35 +9,22 @@ export interface Diagnostic {
 
 export type DiagnosticMessages = Map<string, Diagnostic[]>;
 
-function report(diagnosticsMessages: DiagnosticMessages) {
-    console.log('[Stylable Diagnostics]');
-    for (const [filePath, diagnostics] of diagnosticsMessages.entries()) {
-        console.log(
-            `[${filePath}]\n`,
-            diagnostics
-                .sort(({ offset: a = 0 }, { offset: b = 0 }) => a - b)
-                .map(({ type, message }) => `[${type}]: ${message}`)
-                .join('\n\n')
-        );
-    }
-}
-
 export function reportDiagnostics(
+    log: Log,
     diagnosticsMessages: DiagnosticMessages,
-    diagnostics?: boolean,
     diagnosticsMode?: string
 ) {
-    if (!diagnosticsMessages.size) {
-        return;
+    let message = '[Stylable Diagnostics]';
+    for (const [filePath, diagnostics] of diagnosticsMessages.entries()) {
+        message += `\n[${filePath}]\n${diagnostics
+            .sort(({ offset: a = 0 }, { offset: b = 0 }) => a - b)
+            .map(({ type, message }) => `[${type}]: ${message}`)
+            .join('\n')}`;
     }
 
-    if (diagnostics) {
-        report(diagnosticsMessages);
-    }
+    log(message, levels.info);
 
-    if (diagnosticsMode === 'strict' && hasErrorOrWarning(diagnosticsMessages)) {
-        process.exitCode = 1;
-    }
+    return diagnosticsMode === 'strict' && hasErrorOrWarning(diagnosticsMessages);
 }
 
 function hasErrorOrWarning(diagnosticsMessages: DiagnosticMessages) {

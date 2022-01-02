@@ -1,8 +1,7 @@
 import { loadStylableConfig } from '@stylable/build-tools';
-import { resolve } from 'path';
+import type { BuildOptions } from '../types';
 import { tryRun } from '../build-tools';
 import type {
-    CliArguments,
     Configuration,
     ConfigurationProvider,
     MultipleProjectsConfig,
@@ -12,23 +11,20 @@ import type {
     STCConfig,
 } from '../types';
 import { processProjects } from './process-projects';
-import {
-    createDefaultOptions,
-    mergeBuildOptions,
-    resolveCliOptions,
-    validateOptions,
-} from './resolve-options';
+import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 import { resolveNpmRequests } from './resolve-requests';
 
-export async function projectsConfig(argv: CliArguments): Promise<{
-    rootDir: string;
-    projects: STCConfig;
-}> {
-    const rootDir = resolve(argv.rootDir);
-    const defaultOptions = createDefaultOptions();
+export async function projectsConfig(
+    rootDir: string,
+    overrideBuildOptions: Partial<BuildOptions>,
+    defaultOptions: BuildOptions = createDefaultOptions()
+): Promise<STCConfig> {
     const configFile = resolveConfigFile(rootDir);
-    const cliOptions = resolveCliOptions(argv, defaultOptions);
-    const topLevelOptions = mergeBuildOptions(defaultOptions, configFile?.options, cliOptions);
+    const topLevelOptions = mergeBuildOptions(
+        defaultOptions,
+        configFile?.options,
+        overrideBuildOptions
+    );
 
     validateOptions(topLevelOptions);
 
@@ -53,10 +49,7 @@ export async function projectsConfig(argv: CliArguments): Promise<{
         ];
     }
 
-    return {
-        rootDir,
-        projects,
-    };
+    return projects;
 }
 
 export function resolveConfigFile(context: string) {

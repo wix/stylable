@@ -18,4 +18,5 @@ export {
     DirectoryProcessService,
     DirectoryProcessServiceOptions,
 } from './directory-process-service/directory-process-service';
+export { BuildStylableContext, buildStylable } from './build-stylable';
 export type { CodeMod } from './code-mods/types';

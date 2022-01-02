@@ -1,3 +1,4 @@
+import { createDefaultLogger, Log } from './logger';
 import { Diagnostic, DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
 
 export type DiagnosticsMode = 'strict' | 'loose';
@@ -9,8 +10,18 @@ interface ProcessDiagnostics {
 
 type DiagnosticsStore = Map<string, Map<string, ProcessDiagnostics>>;
 
+interface DiagnosticsManagerOptions {
+    log?: Log;
+    onFatalDiagnostics?: () => void;
+}
+
 export class DiagnosticsManager {
     private store: DiagnosticsStore = new Map();
+    private log: Log;
+
+    constructor(private options: DiagnosticsManagerOptions = {}) {
+        this.log = this.options.log ?? createDefaultLogger();
+    }
 
     public clear() {
         this.store = new Map();
@@ -83,7 +94,17 @@ export class DiagnosticsManager {
             }
         }
 
-        reportDiagnostics(diagnosticMessages, true, diagnosticMode);
+        if (diagnosticMessages.size) {
+            const hasFatalDiangostics = reportDiagnostics(
+                this.log,
+                diagnosticMessages,
+                diagnosticMode
+            );
+
+            if (hasFatalDiangostics) {
+                this.options.onFatalDiagnostics?.();
+            }
+        }
 
         return Boolean(diagnosticMessages.size);
     }

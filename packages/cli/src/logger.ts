@@ -26,3 +26,10 @@ export function createLogger(
 }
 
 export type Log = (...args: [...any[]]) => void;
+
+export function createDefaultLogger() {
+    return createLogger(
+        (level, ...messages) => level === 'info' && console.log(...messages),
+        console.clear
+    );
+}

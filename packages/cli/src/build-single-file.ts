@@ -65,7 +65,7 @@ export function buildSingleFile({
     dts = false,
     dtsSourceMap,
     diagnosticsMode = 'loose',
-    diagnosticsManager = new DiagnosticsManager(),
+    diagnosticsManager = new DiagnosticsManager({ log }),
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));

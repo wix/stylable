@@ -41,7 +41,7 @@ export async function build(
         stylable,
         log,
         outputFiles = new Map(),
-        diagnosticsManager = new DiagnosticsManager(),
+        diagnosticsManager = new DiagnosticsManager({ log }),
     }: BuildContext
 ) {
     const { join, realpathSync } = fs;

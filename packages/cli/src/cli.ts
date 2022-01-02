@@ -1,18 +1,17 @@
 #!/usr/bin/env node
-import { nodeFs } from '@file-services/node';
-import { Stylable, StylableResolverCache } from '@stylable/core';
-import { build } from './build';
-import { createLogger, levels } from './logger';
-import { projectsConfig } from './config/projects-config';
-import { createBuildIdentifier, getCliArguments } from './config/resolve-options';
-import { WatchHandler } from './watch-handler';
-import { buildMessages } from './messages';
-import { DiagnosticsManager } from './diagnostics-manager';
+import { nodeFs as fs } from '@file-services/node';
+import { buildStylable } from './build-stylable';
+import { createDefaultOptions, getCliArguments, resolveCliOptions } from './config/resolve-options';
+import { createLogger } from './logger';
 
 async function main() {
     const argv = getCliArguments();
-    const { watch, require: requires, log: shouldLog } = argv;
+    const { resolve } = fs;
+    const { watch, require: requires, log: shouldLog, namespaceResolver } = argv;
+    const { resolveNamespace } = require(namespaceResolver);
+    const rootDir = resolve(argv.rootDir);
 
+    //
     const log = createLogger(
         (level, ...messages) => {
             if (shouldLog || level === 'info') {
@@ -23,8 +22,6 @@ async function main() {
         () => !shouldLog && console.clear()
     );
 
-    log('[CLI Arguments]', argv);
-
     // execute all require hooks before running the CLI build
     for (const request of requires) {
         if (request) {
@@ -32,70 +29,20 @@ async function main() {
         }
     }
 
-    const { rootDir, projects } = await projectsConfig(argv);
-    const fileSystem = nodeFs;
-    const resolverCache: StylableResolverCache = new Map();
-    const fileProcessorCache = {};
-    const outputFiles = new Map<string, Set<string>>();
-    const { resolveNamespace } = require(argv.namespaceResolver);
-    const diagnosticsManager = new DiagnosticsManager();
-    const watchHandler = new WatchHandler(fileSystem, {
+    const defaultOptions = createDefaultOptions();
+    const overrideBuildOptions = resolveCliOptions(argv, defaultOptions);
+    const { watchHandler } = await buildStylable(rootDir, {
+        overrideBuildOptions,
+        defaultOptions,
+        fs,
+        resolveNamespace,
+        watch,
         log,
-        resolverCache,
-        outputFiles,
-        rootDir,
-        diagnosticsManager,
     });
 
-    for (const { projectRoot, options } of projects) {
-        for (let i = 0; i < options.length; i++) {
-            const buildOptions = options[i];
-            const identifier = createBuildIdentifier(
-                rootDir,
-                projectRoot,
-                i,
-                options.length > 1,
-                projects.length > 1
-            );
-
-            log('[Project]', projectRoot, buildOptions);
-
-            const stylable = Stylable.create({
-                fileSystem,
-                requireModule: require,
-                projectRoot,
-                resolveNamespace,
-                resolverCache,
-                fileProcessorCache,
-            });
-
-            const { service } = await build(buildOptions, {
-                watch,
-                stylable,
-                log,
-                fs: fileSystem,
-                rootDir,
-                projectRoot,
-                outputFiles,
-                identifier,
-                diagnosticsManager,
-            });
-
-            watchHandler.register({ service, identifier, stylable });
-        }
-    }
-
-    diagnosticsManager.report();
-
-    if (watch) {
-        log(buildMessages.START_WATCHING(), levels.info);
-
-        watchHandler.start();
-
-        process.on('SIGTERM', () => {
-            void watchHandler.stop();
-        });
-    }
+    process.on('SIGTERM', () => {
+        void watchHandler.stop();
+    });
 }
 
 main().catch((e) => {
