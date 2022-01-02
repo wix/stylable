@@ -27,41 +27,44 @@ interface ProcessCliOutputParams {
 }
 
 export function createCliTester() {
-    const cliProcesses: ChildProcess[] = [];
+    const cliProcesses: { process: ChildProcess }[] = [];
 
     async function processCliOutput({
         dirPath,
         args,
         steps,
         timeout = Number(process.env.CLI_WATCH_TEST_TIMEOUT) || 10_000,
-    }: ProcessCliOutputParams): Promise<{
-        output: string;
-    }> {
-        const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
-        cliProcesses.push(cliProcess);
+    }: ProcessCliOutputParams): Promise<{ output(): string }> {
+        const process = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
+        const lines: string[] = [];
+        const output = () => lines.join('\n');
+
+        cliProcesses.push({ process });
+
+        if (!process.stdout) {
+            throw new Error('no stdout on cli process');
+        }
+
+        // save the output lines to not depened on the reabline async await.
+        process.stdout.on('data', (e) => lines.push(e.toString()));
 
         const found: { message: string; time: number }[] = [];
         const startTime = Date.now();
-        let output = '';
 
         return Promise.race([
-            onTimeout(timeout, () => new Error(`${JSON.stringify(found, null, 3)}\n\n${output}`)),
+            onTimeout(timeout, () => new Error(`${JSON.stringify(found, null, 3)}\n\n${output()}`)),
             runSteps(),
         ]);
 
         function onTimeout(ms: number, rejectWith?: () => unknown) {
-            return new Promise<{ output: string }>((resolve, reject) =>
+            return new Promise<{ output(): string }>((resolve, reject) =>
                 setTimeout(() => (rejectWith ? reject(rejectWith()) : resolve({ output })), ms)
             );
         }
 
         async function runSteps() {
-            if (!cliProcess.stdout) {
-                throw new Error('no stdout on cli process');
-            }
-            for await (const line of readLines(cliProcess.stdout)) {
+            for await (const line of readLines(process.stdout!)) {
                 const step = steps[found.length];
-                output += `\n${line}`;
 
                 if (line.includes(step.msg)) {
                     found.push({
@@ -89,9 +92,10 @@ export function createCliTester() {
     return {
         run: processCliOutput,
         cleanup() {
-            for (const cliProcess of cliProcesses) {
-                cliProcess.kill();
+            for (const { process } of cliProcesses) {
+                process.kill();
             }
+
             cliProcesses.length = 0;
         },
     };

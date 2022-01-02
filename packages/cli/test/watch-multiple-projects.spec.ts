@@ -518,7 +518,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
         });
 
         expect(
-            output.match(STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'))
+            output().match(STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'))
         ).to.lengthOf(1);
     });
 });
