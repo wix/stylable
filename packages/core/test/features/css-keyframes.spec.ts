@@ -582,6 +582,9 @@ describe(`features/css-keyframes`, () => {
                 @media (width-min: 1px) {
                     @keyframes on-media {}
                 }
+                @supports (display: grid) {
+                    @keyframes on-supports {}
+                }
                 .root {
                     |@keyframes not-valid| {}
                 }

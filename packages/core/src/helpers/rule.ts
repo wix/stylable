@@ -27,7 +27,7 @@ export function isInConditionalGroup(node: postcss.Rule | postcss.AtRule, includ
     return (
         parent &&
         ((includeRoot && parent.type === `root`) ||
-            (parent.type === `atrule` && parent.name === `media`))
+            (parent.type === `atrule` && (parent.name === `media` || parent.name === `supports`)))
     );
 }
 
