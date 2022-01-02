@@ -218,7 +218,16 @@ function addKeyframes({
     global?: boolean;
     importDef?: Imported;
 }) {
+    /**
+     * keyframes are safe to redeclare in case they are unique within their context (applied
+     * in different times/cases), for example 2 keyframes statements can override each other
+     * if 1 is applied on the root (always) and the other in @media (on some condition).
+     *
+     * > in case keyframes are imported, then no local keyframes
+     * > are allowed to override them (will report a warning).
+     */
     const isFirstInPath = addKeyframesDeclaration(context.meta, name, ast, !!importDef);
+    // first must not be `safeRedeclare`
     const safeRedeclare = isFirstInPath && !!STSymbol.get(context.meta, name, `keyframes`);
     // fields are confusing in this symbol:
     // name: the import name if imported OR the local name

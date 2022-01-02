@@ -30,6 +30,14 @@ export interface Imported {
     context: string;
 }
 
+/**
+ * ImportTypeHook is used as a way to cast imported symbols before resolving their actual type.
+ * currently used only for `keyframes` as they are completely on a separate namespace from other symbols.
+ *
+ * Hooks are registered statically since the features are static and cannot be selected/disabled.
+ * If the system will ever change to support picking features dynamically, this mechanism would
+ * have to move into the `metaInit` hook.
+ */
 export const ImportTypeHook = new Map<
     StylableSymbol['_kind'] & keyof Imported,
     (context: FeatureContext, localName: string, importName: string, importDef: Imported) => void

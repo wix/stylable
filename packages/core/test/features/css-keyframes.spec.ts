@@ -41,7 +41,7 @@ describe(`features/css-keyframes`, () => {
 
             // deprecation
             ignoreDeprecationWarn(() => {
-                expect(meta.keyframes.length).to.eql(2);
+                expect(meta.keyframes).to.eql(CSSKeyframes.getKeyframesStatements(meta));
             });
         });
         it(`should add keyframes symbols`, () => {
@@ -222,10 +222,7 @@ describe(`features/css-keyframes`, () => {
                         '/entry.st.css': {
                             namespace: 'entry',
                             content: `
-                                :import {
-                                    -st-from: './imported.st.css';
-                                    -st-named: keyframes(anim1, anim2 as anim3);
-                                }
+                                @st-import [keyframes(anim1, anim2 as anim3)] from './imported.st.css';
                                 /* @check .entry__selector {
                                     animation: 2s imported__anim1 infinite, 1s imported__anim2 infinite;
                                     animation-name: imported__anim1
@@ -325,10 +322,7 @@ describe(`features/css-keyframes`, () => {
                         '/entry.st.css': {
                             namespace: 'entry',
                             content: `
-                                :import {
-                                    -st-from: './imported.st.css';
-                                    -st-named: anim1, keyframes(anim1);
-                                }
+                                @st-import [anim1, keyframes(anim1)] from './imported.st.css';
                                 /* @check .entry__selector {
                                     animation: 2s imported__anim1 infinite;
                                     animation-name: imported__anim1;
@@ -409,10 +403,7 @@ describe(`features/css-keyframes`, () => {
                             '/entry.st.css': {
                                 namespace: 'entry',
                                 content: `
-                                    :import {
-                                        -st-from: "./imported.st.css";
-                                        -st-named: keyframes(name);
-                                    }
+                                    @st-import [keyframes(name)] from "./imported.st.css";
                                 `,
                             },
                             '/imported.st.css': {
@@ -435,10 +426,7 @@ describe(`features/css-keyframes`, () => {
                             '/entry.st.css': {
                                 namespace: 'entry',
                                 content: `
-                                    :import {
-                                        -st-from: "./imported.st.css";
-                                        -st-named: keyframes(name as myName);
-                                    }
+                                    @st-import [keyframes(name as myName)] from "./imported.st.css";
                                 `,
                             },
                             '/imported.st.css': {
@@ -461,10 +449,7 @@ describe(`features/css-keyframes`, () => {
                             '/entry.st.css': {
                                 namespace: 'entry',
                                 content: `
-                                    :import {
-                                        -st-from: "./imported.st.css";
-                                        -st-named: keyframes(name);
-                                    }
+                                    @st-import [keyframes(name)] from "./imported.st.css";
                                     @keyframes name {}
                                 `,
                             },
@@ -506,7 +491,7 @@ describe(`features/css-keyframes`, () => {
             });
         });
         describe(`escape`, () => {
-            it.skip(`should escape invlid inputs`, () => {
+            it.skip(`should escape invalid inputs`, () => {
                 const { meta, exports } = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
