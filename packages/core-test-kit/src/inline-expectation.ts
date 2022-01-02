@@ -108,15 +108,10 @@ function checkTest(expectation: string, node: AST): Test {
             return tests[`@atrule`](expectation, node);
         }
         default:
-            // ToDo: test
             return {
                 type: `@check`,
                 expectation,
-                errors: [
-                    node
-                        ? `unsupported type "${type}" for "@check"`
-                        : `@check must be placed above rule or at-rule`,
-                ],
+                errors: [testInlineExpectsErrors.unsupportedNode(`@check`, type)],
             };
     }
 }
@@ -143,7 +138,7 @@ function ruleTest(expectation: string, node: AST): Test {
                 result.errors.push(testInlineExpectsErrors.unfoundMixin(expectation));
                 return result;
             }
-            targetNode = actualTarget;
+            targetNode = actualTarget as AST;
         }
     }
     // test by target node type
@@ -192,14 +187,13 @@ function ruleTest(expectation: string, node: AST): Test {
                 );
             }
         }
-    } else if (nodeType === `atrule`) {
-        // ToDo: implement mixed-in atrule
     } else {
-        // ToDo: report unknown node type check
+        // unsupported mixed-in node test
+        result.errors.push(testInlineExpectsErrors.unsupportedMixinNode(targetNode.type));
     }
     return result;
 }
-function atRuleTest(expectation: string, node: postcss.ChildNode): Test {
+function atRuleTest(expectation: string, node: AST): Test {
     const result: Test = {
         type: `@atrule`,
         expectation,
@@ -219,23 +213,20 @@ function atRuleTest(expectation: string, node: postcss.ChildNode): Test {
             );
         }
     } else {
-        // ToDo: error on illegal node
+        result.errors.push(testInlineExpectsErrors.unsupportedNode(`@atrule`, node.type));
     }
     return result;
 }
 
-function getNextMixinRule(currentRule: postcss.Rule, count: number): AST | undefined {
-    while (currentRule && count > 0) {
-        const next: postcss.ChildNode | undefined = currentRule.next();
-        // next must be a rule sense mixin can only add rules
-        if (next?.type === `rule`) {
-            currentRule = next;
+function getNextMixinRule(originRule: postcss.Rule, count: number) {
+    let current: postcss.Node | undefined = originRule;
+    while (current && count > 0) {
+        current = current.next();
+        if (current?.type !== `comment`) {
             count--;
-        } else {
-            return;
         }
     }
-    return currentRule && count === 0 ? currentRule : undefined;
+    return current && count === 0 ? current : undefined;
 }
 
 export const testInlineExpectsErrors = {
@@ -243,11 +234,14 @@ export const testInlineExpectsErrors = {
         `no tests found try to add "${testScopesRegex()}" comments before any selector`,
     matchAmount: (expectedAmount: number, actualAmount: number) =>
         `Expected ${expectedAmount} checks to run but there was ${actualAmount}`,
+    unsupportedNode: (testType: string, nodeType: string) =>
+        `unsupported type "${testType}" for "${nodeType}"`,
     selector: (expectedSelector: string, actualSelector: string, label = ``) =>
         `${label}expected "${actualSelector}" to transform to "${expectedSelector}"`,
     declarations: (expectedDecl: string, actualDecl: string, selector: string, label = ``) =>
         `${label}expected ${selector} to have declaration {${expectedDecl}}, but got {${actualDecl}}`,
     unfoundMixin: (expectInput: string) => `cannot locate mixed-in rule for "${expectInput}"`,
+    unsupportedMixinNode: (type: string) => `unsupported mixin expectation of type ${type}`,
     malformedDecl: (decl: string, expectInput: string) =>
         `error in expectation "${decl}" of "${expectInput}"`,
     atruleParams: (expectedParams: string, actualParams: string, label = ``) =>

@@ -240,6 +240,25 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.unfoundMixin(`[10] .entry__root:focus`)
             );
         });
+        it(`should throw on none supported mixed-in node type`, () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @rule[1] unsupported */
+                            .root {}
+                            @mix {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.unsupportedMixinNode(`atrule`)
+            );
+        });
         it('should add label to thrown miss matches', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
@@ -328,6 +347,24 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.atRuleMultiTest(`[16] entry__anim`)
             );
         });
+        it(`should throw on none @atrule`, () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @atrule unsupported*/
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.unsupportedNode(`@atrule`, `rule`)
+            );
+        });
     });
     describe(`@check`, () => {
         it(`should proxy to @rule and @atrule`, () => {
@@ -352,6 +389,26 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.selector(`.otherNamespace__root`, `.entry__root`),
                     testInlineExpectsErrors.atruleParams(`entry__anim`, `entry__animX`),
                 ])
+            );
+        });
+        it(`should throw on none @rule or @atrule`, () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                /* @check unsupported*/
+                                decl: val;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.unsupportedNode(`@check`, `decl`)
             );
         });
     });
