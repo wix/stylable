@@ -55,7 +55,6 @@ export function testInlineExpects(
         ?.length || 0
 ) {
     if (expectedTestsCount === 0) {
-        // ToDo: test
         throw new Error(testInlineExpectsErrors.noTestsFound());
     }
     const checks: Test[] = [];
