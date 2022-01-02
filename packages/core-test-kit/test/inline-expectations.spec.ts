@@ -55,6 +55,24 @@ describe('inline-expectations', () => {
 
         expect(() => testInlineExpects(result)).to.throw(testInlineExpectsErrors.matchAmount(1, 0));
     });
+    it('should support `@` in expectation', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        /* @check .entry__before\\@after-x */
+                        .before\\@after {}
+                    `,
+                },
+            },
+        });
+
+        expect(() => testInlineExpects(result)).to.throw(
+            testInlineExpectsErrors.selector(`.entry__before\\@after-x`, `.entry__before\\@after`)
+        );
+    });
     describe(`@rule`, () => {
         it('should throw for unexpected selector', () => {
             const result = generateStylableRoot({

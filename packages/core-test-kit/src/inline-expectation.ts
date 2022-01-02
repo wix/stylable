@@ -71,15 +71,20 @@ export function testInlineExpects(
                 const testMatch = next.match(new RegExp(`^(${testScopesRegex()})`, `g`));
                 if (testMatch) {
                     const testScope = testMatch[0] as TestScopes;
-                    const testInput = next.replace(testScope, ``).trim();
+                    let testInput = next.replace(testScope, ``);
+                    // collect expectation inner `@` fragments
+                    while (
+                        input.length &&
+                        !(`@` + input[0]).match(new RegExp(`^(${testScopesRegex()})`, `g`))
+                    ) {
+                        testInput += `@` + input.shift();
+                    }
                     if (testInput) {
-                        const result = tests[testScope](testInput, node);
+                        const result = tests[testScope](testInput.trim(), node);
                         result.type = testScope;
                         errors.push(...result.errors);
                         checks.push(result);
                     }
-                } else {
-                    // ToDo: support @ in the expectation
                 }
             }
         }
