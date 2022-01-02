@@ -101,6 +101,7 @@ export function expectAnalyzeDiagnostics(
             warnings.length
         );
     }
+    return res;
 }
 
 function matchPartialDiagnostics(

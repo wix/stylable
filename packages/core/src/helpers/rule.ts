@@ -21,6 +21,16 @@ export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     );
 }
 
+export function isInConditionalGroup(node: postcss.Rule | postcss.AtRule, includeRoot = true) {
+    // https://www.w3.org/TR/css-conditional-3/#contents-of
+    const parent = node.parent as any;
+    return (
+        parent &&
+        ((includeRoot && parent.type === `root`) ||
+            (parent.type === `atrule` && (parent.name === `media` || parent.name === `supports`)))
+    );
+}
+
 export function createWarningRule(
     extendedNode: string,
     scopedExtendedNode: string,
