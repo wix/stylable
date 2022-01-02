@@ -6,6 +6,21 @@ import {
 import { expect } from 'chai';
 
 describe('inline-expectations', () => {
+    it('should throw when no tests are found', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        .root {}
+                    `,
+                },
+            },
+        });
+
+        expect(() => testInlineExpects(result)).to.throw(testInlineExpectsErrors.noTestsFound());
+    });
     it('should throw when expected @match amount is not found (manual)', () => {
         const result = generateStylableRoot({
             entry: `/style.st.css`,

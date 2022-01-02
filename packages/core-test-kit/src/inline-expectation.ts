@@ -51,10 +51,12 @@ const testScopesRegex = () => testScopes.join(`|`);
  */
 export function testInlineExpects(
     result: postcss.Root,
-    expectedTestsCount = result.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))!.length
+    expectedTestsCount = result.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))
+        ?.length || 0
 ) {
     if (expectedTestsCount === 0) {
-        throw new Error('no tests found try to add @check comments before any selector');
+        // ToDo: test
+        throw new Error(testInlineExpectsErrors.noTestsFound());
     }
     const checks: Test[] = [];
     const errors: string[] = [];
@@ -232,6 +234,8 @@ function getNextMixinRule(currentRule: postcss.Rule, count: number): AST | undef
 }
 
 export const testInlineExpectsErrors = {
+    noTestsFound: () =>
+        `no tests found try to add "${testScopesRegex()}" comments before any selector`,
     matchAmount: (expectedAmount: number, actualAmount: number) =>
         `Expected ${expectedAmount} checks to run but there was ${actualAmount}`,
     selector: (expectedSelector: string, actualSelector: string, label = ``) =>
