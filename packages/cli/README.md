@@ -173,8 +173,8 @@ Projects allow you to share `stc` configuration and manage your Stylable project
 ```ts
 export interface MultipleProjectsConfig<PRESET extends string> {
     options?: PartialBuildOptions;
-    presets?: Presets<P>;
-    projects: Projects<P>;
+    presets?: Presets<PRESET>;
+    projects: Projects<PRESET>;
     projectsOptions?: {
         resolveRequests?: ResolveRequests;
     };
