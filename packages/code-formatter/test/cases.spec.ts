@@ -91,8 +91,28 @@ describe('Formatting - Decl', () => {
         expect(formatCSS('.root {color\n\n\n: red;}\n')).to.equal('.root {\n    color: red;\n}\n');
     });
 
+    it('no space before closing semi colon', () => {
+        expect(formatCSS('.root {\n    color: red    ;}\n')).to.equal(
+            '.root {\n    color: red;\n}\n'
+        );
+    });
+
+    it("don't format css variable values", () => {
+        expect(formatCSS('.root {\n    --x:   "a" 1 2 "b"  ;\n}\n')).to.equal(
+            '.root {\n    --x:   "a" 1 2 "b"  ;\n}\n'
+        );
+    });
+
+    it('remove css variable space after decl props and place in new line', () => {
+        expect(formatCSS('.root {--x    :   "a" 1 2 "b"  ;\n}\n')).to.equal(
+            '.root {\n    --x:   "a" 1 2 "b"  ;\n}\n'
+        );
+    });
+
     it.only('multiple values are separated with one comma and space between each value (short line)', () => {
-        expect(formatCSS('.root {\n    font-family: A,B,C;\n}\n')).to.equal('.root {\n    font-family: A, B, C;\n}\n');
+        expect(formatCSS('.root {\n    font-family: A,B,C;\n}\n')).to.equal(
+            '.root {\n    font-family: A, B, C;\n}\n'
+        );
     });
 
     it.skip('comments before and after colon', () => {
