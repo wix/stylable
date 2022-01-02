@@ -1,4 +1,5 @@
 export { build } from './build';
+export { Log, createLogger } from './logger';
 export {
     IndexGenerator,
     IndexGenerator as Generator,

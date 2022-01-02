@@ -6,7 +6,7 @@ import {
     createWatchEvent,
     DirectoryProcessService,
 } from './directory-process-service/directory-process-service';
-import { levels, Log } from './logger';
+import { createLogger, levels, Log } from './logger';
 import { buildMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
 
@@ -33,6 +33,7 @@ export class WatchHandler {
     private resolverCache: StylableResolverCache = new Map();
     private diagnosticsManager = new DiagnosticsManager();
     private generatedFiles = new Set<string>();
+    private log: Log;
     private listener: WatchEventListener = async (event) => {
         this.log(buildMessages.CHANGE_EVENT_TRIGGERED(event.path));
 
@@ -107,6 +108,8 @@ export class WatchHandler {
         if (this.options.diagnosticsManager) {
             this.diagnosticsManager = this.options.diagnosticsManager;
         }
+
+        this.log = this.options.log ?? createLogger(console.log, console.clear);
     }
 
     public register(process: Build) {
@@ -143,12 +146,6 @@ export class WatchHandler {
                 this.resolverCache.delete(key);
             }
         }
-    }
-
-    private log(...messages: any[]) {
-        const logger = this.options.log || console.log;
-
-        logger(`[${new Date().toLocaleTimeString()}]`, ...messages);
     }
 }
 

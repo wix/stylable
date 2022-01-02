@@ -177,7 +177,6 @@ export async function build(
             if (count) {
                 log(
                     mode,
-                    `[${new Date().toLocaleTimeString()}]`,
                     buildMessages.FINISHED_PROCESSING(
                         count,
                         isMultiPackagesProject ? identifier : undefined
@@ -197,11 +196,7 @@ export async function build(
     await service.init(fullSrcDir);
 
     if (sourceFiles.size === 0) {
-        log(
-            mode,
-            `[${new Date().toLocaleTimeString()}]`,
-            buildMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined)
-        );
+        log(mode, buildMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined));
     }
 
     return { service };

@@ -4,11 +4,14 @@ export const levels = {
     clear: Symbol('clear'),
 };
 
-export function createLogger(prefix: string, shouldLog: boolean) {
+export function createLogger(
+    onLog: (level: 'info' | 'debug', ...messages: string[]) => void,
+    onClear: () => void
+) {
     return function log(...messages: any[]) {
         const clear = messages[messages.length - 1] === levels.clear;
-        if (clear && !shouldLog) {
-            console.clear();
+        if (clear) {
+            onClear();
             return;
         }
 
@@ -17,9 +20,8 @@ export function createLogger(prefix: string, shouldLog: boolean) {
         if (info || debug) {
             messages.pop();
         }
-        if (shouldLog || info) {
-            console.log(prefix, ...messages);
-        }
+
+        onLog(info ? 'info' : 'debug', ...messages);
     };
 }
 

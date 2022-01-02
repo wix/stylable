@@ -11,11 +11,19 @@ import { DiagnosticsManager } from './diagnostics-manager';
 
 async function main() {
     const argv = getCliArguments();
-    const log = createLogger('[Stylable]', argv.log ?? false);
+    const { watch, require: requires, log: shouldLog } = argv;
+
+    const log = createLogger(
+        (level, ...messages) => {
+            if (shouldLog || level === 'info') {
+                const currentTime = new Date().toLocaleTimeString();
+                console.log('[Stylable]', `[${currentTime}]`, ...messages);
+            }
+        },
+        () => !shouldLog && console.clear()
+    );
 
     log('[CLI Arguments]', argv);
-
-    const { watch, require: requires } = argv;
 
     // execute all require hooks before running the CLI build
     for (const request of requires) {
