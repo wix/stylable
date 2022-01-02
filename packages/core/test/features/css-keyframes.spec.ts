@@ -567,13 +567,14 @@ describe(`features/css-keyframes`, () => {
             });
         });
         it('should warn on missing keyframes parameter inside st-global', () => {
-            expectAnalyzeDiagnostics(`|@keyframes st-global()| {}`, [
+            const meta = expectAnalyzeDiagnostics(`|@keyframes st-global()| {}`, [
                 {
                     message: CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(),
                     severity: `warning`,
                     file: '/entry.st.css',
                 },
             ]);
+            expect(CSSKeyframes.getAll(meta), `no keyframes symbols`).to.eql({});
         });
         it('should error when not directly placed under root or conditional rules', () => {
             expectAnalyzeDiagnostics(

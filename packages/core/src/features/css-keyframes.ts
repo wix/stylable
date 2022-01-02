@@ -125,6 +125,7 @@ export const hooks = createFeature<{
         }
         if (name === '') {
             context.diagnostics.warn(atRule, diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL());
+            return;
         }
         if (reservedKeyFrames.includes(name)) {
             context.diagnostics.error(atRule, diagnostics.KEYFRAME_NAME_RESERVED(name), {
