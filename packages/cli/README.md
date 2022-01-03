@@ -23,7 +23,7 @@ yarn add @stylable/cli -D
 
 After installing `@stylable/cli`, the `stc` command will be available, running `stc --help` will provide a brief description for the options available.
 
-`stc` accepts [CLI arguments](#cli-arguments) or Stylable [configuration file](#configuration-file).
+`stc` accepts [CLI arguments](#cli-arguments) or a Stylable [configuration file](#configuration-file).
 
 ### CLI Arguments
 
@@ -60,8 +60,8 @@ After installing `@stylable/cli`, the `stc` command will be available, running `
 
 ### Configuration file
 
-`stc` configuration file should be defined in the `stylable.config.js` under the name `stcConfig`.
-We also provide a helper method and types to give you a better configuration experience.
+The `stc` configuration should be located in the `stylable.config.js` file under the property name `stcConfig`.
+The CLI provides a helper method and type definitions to provide a better configuration experience.
 
 ```js
 const { typedConfiguration } = require('@stylable/cli');
@@ -168,7 +168,7 @@ $ stc --srcDir="./src" --outDir="./dist"
 
 ## Multiple Projects
 
-Projects allow you to share `stc` configuration and manage your Stylable projects in one place with predictable and controlled build order with caching optimizations.
+Projects allow sharing `stc` configurations and management of Stylable projects in one location. They provides a controllable and predictable build order with caching optimizations.
 
 ```ts
 export interface MultipleProjectsConfig<PRESET extends string> {
@@ -200,16 +200,16 @@ exports.stcConfig = typedConfiguration({
 
 ### Options
 
-Like for [single project](#configuration-file) `options` is the top-level `BuildOptions` and is the default options for each project.
+Similar to a [single project](#configuration-file), `options` is the top-level `BuildOptions` and is the default options for each project.
 
 ### Projects
 
-**Projects** is a generic term that refers to the set of requests with defined single or multiple `BuildOptions`.\
+**Projects** is a generic term that refers to a set of path requests that define single or multiple `BuildOptions`.\
 This set of requests is being processed and then evaluated as a map of `projectRoot` (directory path) to a set of `BuildOptions`.
 
 By default, the request is a path to a package, and in order to make the correct topological sort, the dependency needs to be specified in each package `package.json`
 
-As said, the value of the request can be resolved to a single `BuildOptions`, but it can also be multiple builds.
+As mentioned above, the value of a request can be resolved to a single or multiple `BuildOptions`.
 
 ```jsonc
 {
@@ -251,7 +251,7 @@ export type ProjectEntryValue<PRESET extends string> =
 
 ### Presets
 
-To reuse `BuildOptions`, you can define them under a name inside the `presets` property and use them inside the project entry value.
+To reuse `BuildOptions`, define them using a name under the `presets` property and use them as the project entry value.
 
 ```js
 exports.stcConfig = {
@@ -269,7 +269,7 @@ exports.stcConfig = {
 
 ### Projects Options
 
-These options let you control the projects resolution process.
+These options control the projects resolution process.
 
 #### resolveRequests [Function] *(Advanced usage)*
 
