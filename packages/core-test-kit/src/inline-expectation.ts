@@ -1,3 +1,5 @@
+import { matchDiagnostic } from './diagnostics';
+import type { StylableMeta, DiagnosticType } from '@stylable/core';
 import type * as postcss from 'postcss';
 
 interface Test {
@@ -13,10 +15,16 @@ const tests = {
     '@rule': ruleTest,
     '@atrule': atRuleTest,
     '@decl': declTest,
+    '@analyze': analyzeTest,
 } as const;
 type TestScopes = keyof typeof tests;
 const testScopes = Object.keys(tests) as TestScopes[];
 const testScopesRegex = () => testScopes.join(`|`);
+
+interface Context {
+    meta: Pick<StylableMeta, 'outputAst' | 'rawAst' | 'diagnostics' | 'transformDiagnostics'>;
+}
+const isRoot = (val: any): val is postcss.Root => val.type === `root`;
 
 /**
  * Test transformed stylesheets inline expectation comments
@@ -50,19 +58,32 @@ const testScopesRegex = () => testScopes.join(`|`);
  * support atrule params (anything between the @atrule and body or semicolon)
  * @check screen and (min-width: 900px)
  */
-export function testInlineExpects(
-    result: postcss.Root,
-    expectedTestsCount = result.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))
-        ?.length || 0
-) {
-    if (expectedTestsCount === 0) {
+export function testInlineExpects(result: postcss.Root | Context, expectedTestAmount = 0) {
+    // backward compatibility (no diagnostic checks)
+    const isDeprecatedInput = isRoot(result);
+    const context = isDeprecatedInput
+        ? {
+              meta: {
+                  outputAst: result,
+                  rawAst: null as unknown as StylableMeta['rawAst'],
+                  diagnostics: null as unknown as StylableMeta['diagnostics'],
+                  transformDiagnostics: null as unknown as StylableMeta['transformDiagnostics'],
+              },
+          }
+        : result;
+    // ToDo: support analyze mode
+    expectedTestAmount =
+        expectedTestAmount ||
+        context.meta.outputAst!.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))
+            ?.length ||
+        0;
+    if (expectedTestAmount === 0) {
         throw new Error(testInlineExpectsErrors.noTestsFound());
     }
     const checks: Test[] = [];
     const errors: string[] = [];
-
     // collect checks
-    result.walkComments((comment) => {
+    context.meta.outputAst!.walkComments((comment) => {
         const input = comment.text.split(/@/gm);
         const node = comment.next() as AST;
         if (node) {
@@ -80,10 +101,25 @@ export function testInlineExpects(
                         testInput += `@` + input.shift();
                     }
                     if (testInput) {
-                        const result = tests[testScope](testInput.trim(), node);
-                        result.type = testScope;
-                        errors.push(...result.errors);
-                        checks.push(result);
+                        if (isDeprecatedInput && testScope === `@analyze`) {
+                            // not possible with just AST root
+                            const result: Test = {
+                                type: testScope,
+                                expectation: testInput.trim(),
+                                errors: [
+                                    testInlineExpectsErrors.deprecatedRootInputNotSupported(
+                                        testScope + testInput
+                                    ),
+                                ],
+                            };
+                            errors.push(...result.errors);
+                            checks.push(result);
+                        } else {
+                            const result = tests[testScope](context, testInput.trim(), node);
+                            result.type = testScope;
+                            errors.push(...result.errors);
+                            checks.push(result);
+                        }
                     }
                 }
             }
@@ -93,19 +129,19 @@ export function testInlineExpects(
     if (errors.length) {
         throw new Error(testInlineExpectsErrors.combine(errors));
     }
-    if (expectedTestsCount !== checks.length) {
-        throw new Error(testInlineExpectsErrors.matchAmount(expectedTestsCount, checks.length));
+    if (expectedTestAmount !== checks.length) {
+        throw new Error(testInlineExpectsErrors.matchAmount(expectedTestAmount, checks.length));
     }
 }
 
-function checkTest(expectation: string, node: AST): Test {
+function checkTest(context: Context, expectation: string, node: AST): Test {
     const type = node?.type;
     switch (type) {
         case `rule`: {
-            return tests[`@rule`](expectation, node);
+            return tests[`@rule`](context, expectation, node);
         }
         case `atrule`: {
-            return tests[`@atrule`](expectation, node);
+            return tests[`@atrule`](context, expectation, node);
         }
         default:
             return {
@@ -115,7 +151,7 @@ function checkTest(expectation: string, node: AST): Test {
             };
     }
 }
-function ruleTest(expectation: string, node: AST): Test {
+function ruleTest(_context: Context, expectation: string, node: AST): Test {
     const result: Test = {
         type: `@rule`,
         expectation,
@@ -193,7 +229,7 @@ function ruleTest(expectation: string, node: AST): Test {
     }
     return result;
 }
-function atRuleTest(expectation: string, node: AST): Test {
+function atRuleTest(_context: Context, expectation: string, node: AST): Test {
     const result: Test = {
         type: `@atrule`,
         expectation,
@@ -217,7 +253,7 @@ function atRuleTest(expectation: string, node: AST): Test {
     }
     return result;
 }
-function declTest(expectation: string, node: AST): Test {
+function declTest(_context: Context, expectation: string, node: AST): Test {
     const result: Test = {
         type: `@decl`,
         expectation,
@@ -239,6 +275,54 @@ function declTest(expectation: string, node: AST): Test {
         }
     } else {
         result.errors.push(testInlineExpectsErrors.unsupportedNode(`@decl`, node.type, label));
+    }
+    return result;
+}
+function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
+    const result: Test = {
+        type: `@analyze`,
+        expectation,
+        errors: [],
+    };
+    const matchResult = expectation.match(/-(?<severity>\w+)(?<label>\([^)]*\))?\s*(?<message>.*)/);
+    if (!matchResult) {
+        result.errors.push(testInlineExpectsErrors.analyzeMalformed({ expectation }));
+        return result;
+    }
+    let { label, severity, message } = matchResult.groups!;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    label = label ? label + `: ` : ``;
+    severity = severity.trim();
+    message = message.trim();
+
+    if (!message) {
+        result.errors.push(testInlineExpectsErrors.analyzeMalformed({ expectation }));
+        return result;
+    }
+    // check for diagnostic
+    const error = matchDiagnostic(
+        `analyze`,
+        meta,
+        {
+            message,
+            severity,
+            location: {
+                start: node.source?.start,
+                end: node.source?.end,
+                word: ``,
+                css: ``,
+            },
+        },
+        {
+            diagnosticsNotFound: testInlineExpectsErrors.diagnosticsNotFound,
+            unsupportedSeverity: testInlineExpectsErrors.diagnosticsUnsupportedSeverity,
+            locationMismatch: testInlineExpectsErrors.diagnosticsLocationMismatch,
+            severityMismatch: testInlineExpectsErrors.diagnosticsSeverityMismatch,
+            expectedNotFound: testInlineExpectsErrors.diagnosticExpectedNotFound,
+        }
+    );
+    if (error) {
+        result.errors.push(error);
     }
     return result;
 }
@@ -283,5 +367,32 @@ export const testInlineExpectsErrors = {
             return `${label}malformed declaration expectation missing value: "${expectedProp}: ???"`;
         }
     },
+    deprecatedRootInputNotSupported: (expectation: string) =>
+        `"${expectation}" is not supported for with the used input, try calling testInlineExpects(generateStylableResults())`,
+    analyzeMissingDiagnostic: ({
+        message,
+        label = ``,
+    }: {
+        severity: DiagnosticType;
+        message: string;
+        label?: string;
+    }) => `${label}expected "${message}" diagnostic`,
+    analyzeMalformed: ({ expectation }: { expectation: string }) =>
+        `malformed @analyze expectation "@analyze${expectation}". format should be: "analyze-[severity] diagnostic message"`,
+    diagnosticsNotFound: (type: string, message: string) =>
+        `${type} diagnostics not found for "${message}"`,
+    diagnosticsUnsupportedSeverity: (type: string, severity: string) =>
+        `unsupported @${type}-[severity]: "${severity}"`,
+    diagnosticsLocationMismatch: (type: string, message: string) =>
+        `expected "@${type}-[severity] "${message}" to be reported in location, but got it somewhere else`,
+    diagnosticsSeverityMismatch: (
+        type: string,
+        expectedSeverity: string,
+        actualSeverity: string,
+        message: string
+    ) =>
+        `expected ${type} diagnostic "${message}" to be reported with "${expectedSeverity}, but it was reported with "${actualSeverity}"`,
+    diagnosticExpectedNotFound: (type: string, message: string) =>
+        `no ${type} diagnostic found for "${message}"`,
     combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
 };

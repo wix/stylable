@@ -1,8 +1,10 @@
 import {
     generateStylableRoot,
+    generateStylableResult,
     testInlineExpects,
     testInlineExpectsErrors,
 } from '@stylable/core-test-kit';
+import { CSSType } from '@stylable/core/dist/features';
 import { expect } from 'chai';
 
 describe('inline-expectations', () => {
@@ -499,6 +501,157 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.not.throw();
+        });
+    });
+    describe(`@analyze`, () => {
+        it(`should throw on malformed diagnostic`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @analyze- */
+                            .root {}
+
+                            /* @analyze-warn */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.analyzeMalformed({
+                        expectation: `-`,
+                    }),
+                    testInlineExpectsErrors.analyzeMalformed({
+                        expectation: `-warn`,
+                    }),
+                ])
+            );
+        });
+        it(`should throw for backwards compatibility (@analyze is not supported with just AST root)`, () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @analyze-warn message */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.deprecatedRootInputNotSupported(`@analyze-warn message`)
+            );
+        });
+        it(`should not throw when diagnostic is matched`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @analyze-warn ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)} */
+                            div {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.not.throw();
+        });
+        it(`should throw on unsupported severity`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @analyze-unknown diagnostic message */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.diagnosticsUnsupportedSeverity(`analyze`, `unknown`)
+            );
+        });
+        it(`should throw on possible location mismatch`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @analyze-warn ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)} */
+                            .root {}
+
+                            div {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.diagnosticsLocationMismatch(
+                    `analyze`,
+                    CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                )
+            );
+        });
+        it(`should throw on severity mismatch`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @analyze-error ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                                `div`
+                            )} */
+                            div {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.diagnosticsSeverityMismatch(
+                    `analyze`,
+                    `error`,
+                    `warning`,
+                    CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                )
+            );
+        });
+        it(`should throw on missing diagnostic`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @analyze-warn fake diagnostic message */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.diagnosticExpectedNotFound(
+                    `analyze`,
+                    `fake diagnostic message`
+                )
+            );
         });
     });
     describe(`@check`, () => {
