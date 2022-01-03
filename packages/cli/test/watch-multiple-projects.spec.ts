@@ -233,7 +233,9 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
+                    msg: buildMessages.CHANGE_DETECTED(
+                        join(tempDir.path, 'packages', 'project-a', 'style.st.css')
+                    ),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-b', 'foo.st.css'),
@@ -245,10 +247,14 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     },
                 },
                 {
-                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-b')),
+                    msg: buildMessages.CHANGE_DETECTED(
+                        join(tempDir.path, 'packages', 'project-b', 'foo.st.css')
+                    ),
                 },
                 {
-                    msg: buildMessages.FINISHED_PROCESSING(1, sep + join('packages', 'project-a')),
+                    msg: buildMessages.CHANGE_EVENT_TRIGGERED(
+                        join(tempDir.path, 'packages', 'project-b', 'dist', 'index.st.css')
+                    ),
                 },
             ],
         });
