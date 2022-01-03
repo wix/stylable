@@ -72,10 +72,10 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestAm
           }
         : result;
     // ToDo: support analyze mode
+    const rootAst = context.meta.outputAst!;
     expectedTestAmount =
         expectedTestAmount ||
-        context.meta.outputAst!.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))
-            ?.length ||
+        rootAst.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))?.length ||
         0;
     if (expectedTestAmount === 0) {
         throw new Error(testInlineExpectsErrors.noTestsFound());
@@ -83,9 +83,12 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestAm
     const checks: Test[] = [];
     const errors: string[] = [];
     // collect checks
-    context.meta.outputAst!.walkComments((comment) => {
+    rootAst.walkComments((comment) => {
         const input = comment.text.split(/@/gm);
-        const node = comment.next() as AST;
+        const testComment = isDeprecatedInput
+            ? comment
+            : getSourceComment(context.meta, comment) || comment;
+        const node = testComment.next() as AST;
         if (node) {
             while (input.length) {
                 const next = `@` + input.shift()!;
@@ -329,6 +332,21 @@ function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
         result.errors.push(error);
     }
     return result;
+}
+
+function getSourceComment(meta: Context['meta'], { source }: postcss.Comment) {
+    let match: postcss.Comment | undefined = undefined;
+    meta.rawAst.walkComments((srcComment) => {
+        if (
+            srcComment.source?.start?.offset === source?.start?.offset &&
+            srcComment.source?.end?.offset === source?.end?.offset
+        ) {
+            match = srcComment;
+            return false;
+        }
+        return;
+    });
+    return match;
 }
 
 function getNextMixinRule(originRule: postcss.Rule, count: number) {

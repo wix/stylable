@@ -4,7 +4,7 @@ import {
     testInlineExpects,
     testInlineExpectsErrors,
 } from '@stylable/core-test-kit';
-import { CSSType } from '@stylable/core/dist/features';
+import { STImport, CSSType } from '@stylable/core/dist/features';
 import { expect } from 'chai';
 
 describe('inline-expectations', () => {
@@ -730,6 +730,32 @@ describe('inline-expectations', () => {
                         `analyze`,
                         `fake diagnostic message`,
                         `(label): `
+                    ),
+                ])
+            );
+        });
+        it(`should check against rawAst (for nodes that are removed in transform)`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @analyze-warn word:comp ${STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
+                            @st-import comp "./x.st.css";
+                            
+                            /* @analyze-warn ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
+                            @st-import comp "./x.st.css";
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(
+                        `analyze`,
+                        STImport.diagnostics.ST_IMPORT_EMPTY_FROM()
                     ),
                 ])
             );
