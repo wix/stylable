@@ -161,7 +161,7 @@ describe('inline-expectations', () => {
                         `color: green; width: 1px`,
                         `.entry__multiline`
                     ),
-                    testInlineExpectsErrors.malformedDecl(
+                    testInlineExpectsErrors.ruleMalformedDecl(
                         `color:`,
                         `(only prop) .entry__malformed {color:}`
                     ),
@@ -364,6 +364,141 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.unsupportedNode(`@atrule`, `rule`)
             );
+        });
+    });
+    describe(`@decl`, () => {
+        it('should throw for unexpected value', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                /* @decl color: blue */
+                                color: red;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.decl(`color: blue`, `color: red`)
+            );
+        });
+        it('should mark error with label', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                /* @decl(text) color: blue */
+                                color: red;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.decl(`color: blue`, `color: red`, `(text): `)
+            );
+        });
+        it('should throw on malformed expectation', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                /* @decl(only prop) color */
+                                color: red;
+
+                                /* @decl(missing value) color: */
+                                color: red;
+                                
+                                /* @decl(missing prop) : red */
+                                color: red;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.declMalformed(`color`, ``, `(only prop): `),
+                    testInlineExpectsErrors.declMalformed(`color`, ``, `(missing value): `),
+                    testInlineExpectsErrors.declMalformed(``, `red`, `(missing prop): `),
+                ])
+            );
+        });
+        it(`should throw on none declaration node`, () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @decl(on rule) color: red*/
+                            .root {}
+                            
+                            /* @decl(on atrule) color: red*/
+                            @keyframes a {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.unsupportedNode(`@decl`, `rule`, `(on rule): `),
+                    testInlineExpectsErrors.unsupportedNode(`@decl`, `atrule`, `(on atrule): `),
+                ])
+            );
+        });
+        it('should not throw when valid', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                /* @decl color: green */
+                                color: green;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.not.throw();
+        });
+        it('should not throw when valid (various formats)', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                /* @decl(no-spaces)color:green */
+                                color: green;
+                                
+                                /* @decl(all-spaces)  color  :      green */
+                                color: green;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.not.throw();
         });
     });
     describe(`@check`, () => {

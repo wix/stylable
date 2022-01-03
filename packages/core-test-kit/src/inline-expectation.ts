@@ -6,12 +6,13 @@ interface Test {
     errors: string[];
 }
 
-type AST = postcss.Rule | postcss.AtRule;
+type AST = postcss.Rule | postcss.AtRule | postcss.Declaration;
 
 const tests = {
     '@check': checkTest,
     '@rule': ruleTest,
     '@atrule': atRuleTest,
+    '@decl': declTest,
 } as const;
 type TestScopes = keyof typeof tests;
 const testScopes = Object.keys(tests) as TestScopes[];
@@ -154,7 +155,7 @@ function ruleTest(expectation: string, node: AST): Test {
                         expectedDeclarations.push([prop.trim(), value.trim()]);
                     } else {
                         result.errors.push(
-                            testInlineExpectsErrors.malformedDecl(decl, expectation)
+                            testInlineExpectsErrors.ruleMalformedDecl(decl, expectation)
                         );
                     }
                 }
@@ -216,6 +217,31 @@ function atRuleTest(expectation: string, node: AST): Test {
     }
     return result;
 }
+function declTest(expectation: string, node: AST): Test {
+    const result: Test = {
+        type: `@decl`,
+        expectation,
+        errors: [],
+    };
+    let { label, prop, value } = expectation.match(
+        /(?<label>\([^)]*\))*(?<prop>[^:]*)\s*:?\s*(?<value>.*)/
+    )!.groups!;
+    label = label ? label + `: ` : ``;
+    prop = prop.trim();
+    value = value.trim();
+    if (!prop || !value) {
+        result.errors.push(testInlineExpectsErrors.declMalformed(prop, value, label));
+    } else if (node.type === `decl`) {
+        if (node.prop !== prop.trim() || node.value !== value) {
+            const expected = prop.trim() + `: ` + value.trim();
+            const actual = node.prop + `: ` + node.value;
+            result.errors.push(testInlineExpectsErrors.decl(expected, actual, label));
+        }
+    } else {
+        result.errors.push(testInlineExpectsErrors.unsupportedNode(`@decl`, node.type, label));
+    }
+    return result;
+}
 
 function getNextMixinRule(originRule: postcss.Rule, count: number) {
     let current: postcss.Node | undefined = originRule;
@@ -233,18 +259,29 @@ export const testInlineExpectsErrors = {
         `no tests found try to add "${testScopesRegex()}" comments before any selector`,
     matchAmount: (expectedAmount: number, actualAmount: number) =>
         `Expected ${expectedAmount} checks to run but there was ${actualAmount}`,
-    unsupportedNode: (testType: string, nodeType: string) =>
-        `unsupported type "${testType}" for "${nodeType}"`,
+    unsupportedNode: (testType: string, nodeType: string, label = ``) =>
+        `${label}unsupported type "${testType}" for "${nodeType}"`,
     selector: (expectedSelector: string, actualSelector: string, label = ``) =>
         `${label}expected "${actualSelector}" to transform to "${expectedSelector}"`,
     declarations: (expectedDecl: string, actualDecl: string, selector: string, label = ``) =>
         `${label}expected ${selector} to have declaration {${expectedDecl}}, but got {${actualDecl}}`,
     unfoundMixin: (expectInput: string) => `cannot locate mixed-in rule for "${expectInput}"`,
     unsupportedMixinNode: (type: string) => `unsupported mixin expectation of type ${type}`,
-    malformedDecl: (decl: string, expectInput: string) =>
+    ruleMalformedDecl: (decl: string, expectInput: string) =>
         `error in expectation "${decl}" of "${expectInput}"`,
     atruleParams: (expectedParams: string, actualParams: string, label = ``) =>
         `${label}expected ${actualParams} to transform to ${expectedParams}`,
     atRuleMultiTest: (comment: string) => `atrule mixin is not supported: (${comment})`,
+    decl: (expected: string, actual: string, label = ``) =>
+        `${label}expected "${actual}" to transform to "${expected}"`,
+    declMalformed: (expectedProp: string, expectedLabel: string, label = ``) => {
+        if (!expectedProp && !expectedLabel) {
+            return `${label}malformed declaration expectation, format should be: "prop: value"`;
+        } else if (!expectedProp) {
+            return `${label}malformed declaration expectation missing prop: "???: ${expectedLabel}"`;
+        } else {
+            return `${label}malformed declaration expectation missing value: "${expectedProp}: ???"`;
+        }
+    },
     combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
 };
