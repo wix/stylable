@@ -43,6 +43,10 @@ async function main() {
     process.on('SIGTERM', () => {
         void watchHandler.stop();
     });
+
+    process.on('SIGINT', () => {
+        void watchHandler.stop();
+    });
 }
 
 main().catch((e) => {
