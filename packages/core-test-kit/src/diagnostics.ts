@@ -52,6 +52,12 @@ export function matchDiagnostic(
         diagnosticsNotFound: (type: string, message: string, label?: string) => string;
         unsupportedSeverity: (type: string, severity: string, label?: string) => string;
         locationMismatch: (type: string, message: string, label?: string) => string;
+        wordMismatch: (
+            type: string,
+            expectedWord: string,
+            message: string,
+            label?: string
+        ) => string;
         severityMismatch: (
             type: string,
             expectedSeverity: string,
@@ -95,7 +101,12 @@ export function matchDiagnostic(
         // }
         if (expected.location.word) {
             if (report.options.word !== expected.location.word) {
-                matchState.word = `word mismatch`;
+                matchState.word = errors.wordMismatch(
+                    type,
+                    expected.location.word,
+                    expected.message,
+                    expected.label
+                );
                 foundPartialMatch(matchState);
                 continue;
             }

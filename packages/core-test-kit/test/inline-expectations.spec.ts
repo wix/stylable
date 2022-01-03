@@ -629,6 +629,43 @@ describe('inline-expectations', () => {
                 ])
             );
         });
+        it(`should throw on word mismatch`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        /* @analyze-warn word:span ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                            `div`
+                        )} */
+                        div {}
+                        
+                        /* @analyze-warn(label) word:input ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                            `div`
+                        )} */
+                        div {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticsWordMismatch(
+                        `analyze`,
+                        `span`,
+                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                    ),
+                    testInlineExpectsErrors.diagnosticsWordMismatch(
+                        `analyze`,
+                        `input`,
+                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
+                        `(label): `
+                    ),
+                ])
+            );
+        });
         it(`should throw on severity mismatch`, () => {
             const result = generateStylableResult({
                 entry: `/style.st.css`,

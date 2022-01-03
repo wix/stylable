@@ -284,15 +284,18 @@ function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
         expectation,
         errors: [],
     };
-    const matchResult = expectation.match(/-(?<severity>\w+)(?<label>\([^)]*\))?\s*(?<message>.*)/);
+    const matchResult = expectation.match(
+        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word:(?<word>[^\s]*))?\s?(?<message>.*)/
+    );
     if (!matchResult) {
         result.errors.push(testInlineExpectsErrors.analyzeMalformed(expectation));
         return result;
     }
-    let { label, severity, message } = matchResult.groups!;
+    let { label, severity, message, word } = matchResult.groups!;
     label = label ? label + `: ` : ``;
-    severity = severity.trim();
-    message = message.trim();
+    severity = severity?.trim() || ``;
+    message = message?.trim() || ``;
+    word = word?.trim() || ``;
 
     if (!message) {
         result.errors.push(testInlineExpectsErrors.analyzeMalformed(expectation, label));
@@ -309,7 +312,7 @@ function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
             location: {
                 start: node.source?.start,
                 end: node.source?.end,
-                word: ``,
+                word,
                 css: ``,
             },
         },
@@ -317,6 +320,7 @@ function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
             diagnosticsNotFound: testInlineExpectsErrors.diagnosticsNotFound,
             unsupportedSeverity: testInlineExpectsErrors.diagnosticsUnsupportedSeverity,
             locationMismatch: testInlineExpectsErrors.diagnosticsLocationMismatch,
+            wordMismatch: testInlineExpectsErrors.diagnosticsWordMismatch,
             severityMismatch: testInlineExpectsErrors.diagnosticsSeverityMismatch,
             expectedNotFound: testInlineExpectsErrors.diagnosticExpectedNotFound,
         }
@@ -385,6 +389,8 @@ export const testInlineExpectsErrors = {
         `${label}unsupported @${type}-[severity]: "${severity}"`,
     diagnosticsLocationMismatch: (type: string, message: string, label = ``) =>
         `${label}expected "@${type}-[severity] "${message}" to be reported in location, but got it somewhere else`,
+    diagnosticsWordMismatch: (type: string, expectedWord: string, message: string, label = ``) =>
+        `${label}expected word in "@${type}-[severity] word:${expectedWord} ${message}" to be found, but it wasn't`,
     diagnosticsSeverityMismatch: (
         type: string,
         expectedSeverity: string,
