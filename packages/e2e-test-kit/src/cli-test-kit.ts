@@ -27,7 +27,7 @@ interface ProcessCliOutputParams {
 }
 
 export function createCliTester() {
-    const cliProcesses: { process: ChildProcess }[] = [];
+    const processes: ChildProcess[] = [];
 
     async function processCliOutput({
         dirPath,
@@ -39,7 +39,7 @@ export function createCliTester() {
         const lines: string[] = [];
         const output = () => lines.join('\n');
 
-        cliProcesses.push({ process });
+        processes.push(process);
 
         if (!process.stdout) {
             throw new Error('no stdout on cli process');
@@ -92,11 +92,11 @@ export function createCliTester() {
     return {
         run: processCliOutput,
         cleanup() {
-            for (const { process } of cliProcesses) {
+            for (const process of processes) {
                 process.kill();
             }
 
-            cliProcesses.length = 0;
+            processes.length = 0;
         },
     };
 }
