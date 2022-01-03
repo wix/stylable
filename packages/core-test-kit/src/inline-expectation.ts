@@ -85,11 +85,13 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestAm
     // collect checks
     rootAst.walkComments((comment) => {
         const input = comment.text.split(/@/gm);
-        const testComment = isDeprecatedInput
+        const testCommentTarget = comment;
+        const testCommentSrc = isDeprecatedInput
             ? comment
             : getSourceComment(context.meta, comment) || comment;
-        const node = testComment.next() as AST;
-        if (node) {
+        const nodeTarget = testCommentTarget.next() as AST;
+        const nodeSrc = testCommentSrc.next() as AST;
+        if (nodeTarget || nodeSrc) {
             while (input.length) {
                 const next = `@` + input.shift()!;
                 const testMatch = next.match(new RegExp(`^(${testScopesRegex()})`, `g`));
@@ -118,7 +120,12 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestAm
                             errors.push(...result.errors);
                             checks.push(result);
                         } else {
-                            const result = tests[testScope](context, testInput.trim(), node);
+                            const result = tests[testScope](
+                                context,
+                                testInput.trim(),
+                                nodeTarget,
+                                nodeSrc
+                            );
                             result.type = testScope;
                             errors.push(...result.errors);
                             checks.push(result);
@@ -137,14 +144,14 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestAm
     }
 }
 
-function checkTest(context: Context, expectation: string, node: AST): Test {
-    const type = node?.type;
+function checkTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+    const type = targetNode?.type;
     switch (type) {
         case `rule`: {
-            return tests[`@rule`](context, expectation, node);
+            return tests[`@rule`](context, expectation, targetNode, srcNode);
         }
         case `atrule`: {
-            return tests[`@atrule`](context, expectation, node);
+            return tests[`@atrule`](context, expectation, targetNode, srcNode);
         }
         default:
             return {
@@ -154,7 +161,7 @@ function checkTest(context: Context, expectation: string, node: AST): Test {
             };
     }
 }
-function ruleTest(_context: Context, expectation: string, node: AST): Test {
+function ruleTest(_context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
     const result: Test = {
         type: `@rule`,
         expectation,
@@ -163,25 +170,25 @@ function ruleTest(_context: Context, expectation: string, node: AST): Test {
     const { msg, ruleIndex, expectedSelector, expectedBody } = expectation.match(
         /(?<msg>\(.*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
     )!.groups!;
-    let targetNode: AST = node;
+    let testNode: AST = targetNode;
     // get mixed-in rule
     if (ruleIndex) {
-        if (node?.type !== `rule`) {
+        if (targetNode?.type !== `rule`) {
             result.errors.push(
-                `mixed-in expectation is only supported for CSS Rule, not ${node?.type}`
+                `mixed-in expectation is only supported for CSS Rule, not ${targetNode?.type}`
             );
             return result;
         } else {
-            const actualTarget = getNextMixinRule(node, Number(ruleIndex));
+            const actualTarget = getNextMixinRule(targetNode, Number(ruleIndex));
             if (!actualTarget) {
                 result.errors.push(testInlineExpectsErrors.unfoundMixin(expectation));
                 return result;
             }
-            targetNode = actualTarget as AST;
+            testNode = actualTarget as AST;
         }
     }
     // test by target node type
-    const nodeType = targetNode?.type;
+    const nodeType = testNode?.type;
     if (nodeType === `rule`) {
         const expectedDeclarations: [string, string][] = [];
         const declsInput = expectedBody.trim().match(/^{(.*)}$/s);
@@ -201,17 +208,13 @@ function ruleTest(_context: Context, expectation: string, node: AST): Test {
             }
         }
         const prefix = msg ? msg + `: ` : ``;
-        if (targetNode.selector !== expectedSelector.trim()) {
+        if (testNode.selector !== expectedSelector.trim()) {
             result.errors.push(
-                testInlineExpectsErrors.selector(
-                    expectedSelector.trim(),
-                    targetNode.selector,
-                    prefix
-                )
+                testInlineExpectsErrors.selector(expectedSelector.trim(), testNode.selector, prefix)
             );
         }
         if (declarationCheck === `full`) {
-            const actualDecl = targetNode.nodes.map((x) => x.toString()).join(`; `);
+            const actualDecl = testNode.nodes.map((x) => x.toString()).join(`; `);
             const expectedDecl = expectedDeclarations
                 .map(([prop, value]) => `${prop}: ${value}`)
                 .join(`; `);
@@ -220,7 +223,7 @@ function ruleTest(_context: Context, expectation: string, node: AST): Test {
                     testInlineExpectsErrors.declarations(
                         expectedDecl,
                         actualDecl,
-                        targetNode.selector,
+                        testNode.selector,
                         prefix
                     )
                 );
@@ -228,11 +231,11 @@ function ruleTest(_context: Context, expectation: string, node: AST): Test {
         }
     } else {
         // unsupported mixed-in node test
-        result.errors.push(testInlineExpectsErrors.unsupportedMixinNode(targetNode.type));
+        result.errors.push(testInlineExpectsErrors.unsupportedMixinNode(testNode.type));
     }
     return result;
 }
-function atRuleTest(_context: Context, expectation: string, node: AST): Test {
+function atRuleTest(_context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
     const result: Test = {
         type: `@atrule`,
         expectation,
@@ -245,18 +248,22 @@ function atRuleTest(_context: Context, expectation: string, node: AST): Test {
         return result;
     }
     const prefix = msg ? msg + `: ` : ``;
-    if (node.type === `atrule`) {
-        if (node.params !== expectedParams.trim()) {
+    if (targetNode.type === `atrule`) {
+        if (targetNode.params !== expectedParams.trim()) {
             result.errors.push(
-                testInlineExpectsErrors.atruleParams(expectedParams.trim(), node.params, prefix)
+                testInlineExpectsErrors.atruleParams(
+                    expectedParams.trim(),
+                    targetNode.params,
+                    prefix
+                )
             );
         }
     } else {
-        result.errors.push(testInlineExpectsErrors.unsupportedNode(`@atrule`, node.type));
+        result.errors.push(testInlineExpectsErrors.unsupportedNode(`@atrule`, targetNode.type));
     }
     return result;
 }
-function declTest(_context: Context, expectation: string, node: AST): Test {
+function declTest(_context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
     const result: Test = {
         type: `@decl`,
         expectation,
@@ -270,18 +277,20 @@ function declTest(_context: Context, expectation: string, node: AST): Test {
     value = value.trim();
     if (!prop || !value) {
         result.errors.push(testInlineExpectsErrors.declMalformed(prop, value, label));
-    } else if (node.type === `decl`) {
-        if (node.prop !== prop.trim() || node.value !== value) {
+    } else if (targetNode.type === `decl`) {
+        if (targetNode.prop !== prop.trim() || targetNode.value !== value) {
             const expected = prop.trim() + `: ` + value.trim();
-            const actual = node.prop + `: ` + node.value;
+            const actual = targetNode.prop + `: ` + targetNode.value;
             result.errors.push(testInlineExpectsErrors.decl(expected, actual, label));
         }
     } else {
-        result.errors.push(testInlineExpectsErrors.unsupportedNode(`@decl`, node.type, label));
+        result.errors.push(
+            testInlineExpectsErrors.unsupportedNode(`@decl`, targetNode.type, label)
+        );
     }
     return result;
 }
-function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
+function analyzeTest({ meta }: Context, expectation: string, _targetNode: AST, srcNode: AST): Test {
     const result: Test = {
         type: `@analyze`,
         expectation,
@@ -313,8 +322,8 @@ function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
             message,
             severity,
             location: {
-                start: node.source?.start,
-                end: node.source?.end,
+                start: srcNode.source?.start,
+                end: srcNode.source?.end,
                 word,
                 css: ``,
             },

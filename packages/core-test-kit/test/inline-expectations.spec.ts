@@ -1,6 +1,6 @@
 import {
-    generateStylableRoot,
     generateStylableResult,
+    generateStylableRoot,
     testInlineExpects,
     testInlineExpectsErrors,
 } from '@stylable/core-test-kit';
@@ -9,7 +9,7 @@ import { expect } from 'chai';
 
 describe('inline-expectations', () => {
     it('should throw when no tests are found', () => {
-        const result = generateStylableRoot({
+        const result = generateStylableResult({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -24,7 +24,7 @@ describe('inline-expectations', () => {
         expect(() => testInlineExpects(result)).to.throw(testInlineExpectsErrors.noTestsFound());
     });
     it('should throw when expected amount is not found (manual)', () => {
-        const result = generateStylableRoot({
+        const result = generateStylableResult({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -42,7 +42,7 @@ describe('inline-expectations', () => {
         );
     });
     it('should throw when expected amount is not found (auto)', () => {
-        const result = generateStylableRoot({
+        const result = generateStylableResult({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -58,7 +58,7 @@ describe('inline-expectations', () => {
         expect(() => testInlineExpects(result)).to.throw(testInlineExpectsErrors.matchAmount(1, 0));
     });
     it('should support `@` in expectation', () => {
-        const result = generateStylableRoot({
+        const result = generateStylableResult({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -77,7 +77,7 @@ describe('inline-expectations', () => {
     });
     describe(`@rule`, () => {
         it('should throw for unexpected selector', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -95,7 +95,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should throw for unexpected declarations', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -115,7 +115,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should throw for unexpected declarations (multiple variations)', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -171,7 +171,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should throw for mismatch on nested rules', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -191,7 +191,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should throw for mixed-in rules', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -217,7 +217,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should throw for missing mixed-in rules', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -243,7 +243,7 @@ describe('inline-expectations', () => {
             );
         });
         it(`should throw on none supported mixed-in node type`, () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -262,7 +262,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should add label to thrown miss matches', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -296,7 +296,7 @@ describe('inline-expectations', () => {
     });
     describe(`@atrule`, () => {
         it('should throw for at rules params', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -332,7 +332,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should throw for mixed-in rules (unsupported)', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -350,7 +350,7 @@ describe('inline-expectations', () => {
             );
         });
         it(`should throw on none @atrule`, () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -370,7 +370,7 @@ describe('inline-expectations', () => {
     });
     describe(`@decl`, () => {
         it('should throw for unexpected value', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -390,7 +390,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should mark error with label', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -410,7 +410,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should throw on malformed expectation', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -440,7 +440,7 @@ describe('inline-expectations', () => {
             );
         });
         it(`should throw on none declaration node`, () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -464,7 +464,7 @@ describe('inline-expectations', () => {
             );
         });
         it('should not throw when valid', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -482,7 +482,7 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.not.throw();
         });
         it('should not throw when valid (various formats)', () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -763,7 +763,7 @@ describe('inline-expectations', () => {
     });
     describe(`@check`, () => {
         it(`should proxy to @rule and @atrule`, () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -787,7 +787,7 @@ describe('inline-expectations', () => {
             );
         });
         it(`should throw on none @rule or @atrule`, () => {
-            const result = generateStylableRoot({
+            const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
