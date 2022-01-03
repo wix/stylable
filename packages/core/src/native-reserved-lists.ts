@@ -72,17 +72,18 @@ export const reservedFunctionalPseudoClasses = [
     `global`,
     `local`,
 ];
-export const knownPseudoClassesWithNestedSelectors = reservedFunctionalPseudoClasses.filter(name => {
-    switch(name) {
-        case `global`:
-        case `local`:
-        case `nth-of-type`:
-        case `nth-last-of-type`:
-            return false;
-
+export const knownPseudoClassesWithNestedSelectors = reservedFunctionalPseudoClasses.filter(
+    (name) => {
+        switch (name) {
+            case `global`:
+            case `local`:
+            case `nth-of-type`:
+            case `nth-last-of-type`:
+                return false;
+        }
+        return true;
     }
-    return true;
-});
+);
 
 export const nativePseudoElements = [
     'after',
@@ -97,37 +98,6 @@ export const nativePseudoElements = [
     'selection',
     'slotted',
     'spelling-error',
-];
-
-export const reservedKeyFrames = [
-    'none',
-    'inherited',
-    'initial',
-    'unset',
-    /* single-timing-function */
-    'linear',
-    'ease',
-    'ease-in',
-    'ease-in-out',
-    'ease-out',
-    'step-start',
-    'step-end',
-    'start',
-    'end',
-    /* single-animation-iteration-count */
-    'infinite',
-    /* single-animation-direction */
-    'normal',
-    'reverse',
-    'alternate',
-    'alternate-reverse',
-    /* single-animation-fill-mode */
-    'forwards',
-    'backwards',
-    'both',
-    /* single-animation-play-state */
-    'running',
-    'paused',
 ];
 
 export const nativeFunctionsDic = {

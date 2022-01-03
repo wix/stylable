@@ -11,7 +11,6 @@ import {
     processorWarnings,
     transformerWarnings,
     nativePseudoElements,
-    reservedKeyFrames,
     rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
@@ -882,28 +881,6 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     ]
                 );
-            });
-        });
-    });
-
-    describe('transforms', () => {
-        it('should not allow @keyframe of reserved words', () => {
-            reservedKeyFrames.map((key) => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            |@keyframes $${key}$| {
-                                from {}
-                                to {}
-                            }`,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    { message: processorWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
-                ]);
             });
         });
     });

@@ -1,5 +1,6 @@
 import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
+import { CSSKeyframes } from '@stylable/core/dist/features';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { basename, relative } from 'path';
@@ -111,7 +112,7 @@ export function reExportsAllSymbols(filePath: string, generator: IndexGenerator)
         acc[varName] = `--${rootExport}__${varName.slice(2)}`;
         return acc;
     }, {});
-    const keyframes = Object.keys(meta.mappedKeyframes).reduce<Record<string, string>>(
+    const keyframes = Object.keys(CSSKeyframes.getAll(meta)).reduce<Record<string, string>>(
         (acc, keyframe) => {
             acc[keyframe] = `${rootExport}__${keyframe}`;
             return acc;
