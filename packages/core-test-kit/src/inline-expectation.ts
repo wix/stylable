@@ -286,17 +286,16 @@ function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
     };
     const matchResult = expectation.match(/-(?<severity>\w+)(?<label>\([^)]*\))?\s*(?<message>.*)/);
     if (!matchResult) {
-        result.errors.push(testInlineExpectsErrors.analyzeMalformed({ expectation }));
+        result.errors.push(testInlineExpectsErrors.analyzeMalformed(expectation));
         return result;
     }
     let { label, severity, message } = matchResult.groups!;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     label = label ? label + `: ` : ``;
     severity = severity.trim();
     message = message.trim();
 
     if (!message) {
-        result.errors.push(testInlineExpectsErrors.analyzeMalformed({ expectation }));
+        result.errors.push(testInlineExpectsErrors.analyzeMalformed(expectation, label));
         return result;
     }
     // check for diagnostic
@@ -304,6 +303,7 @@ function analyzeTest({ meta }: Context, expectation: string, node: AST): Test {
         `analyze`,
         meta,
         {
+            label,
             message,
             severity,
             location: {
@@ -377,22 +377,23 @@ export const testInlineExpectsErrors = {
         message: string;
         label?: string;
     }) => `${label}expected "${message}" diagnostic`,
-    analyzeMalformed: ({ expectation }: { expectation: string }) =>
-        `malformed @analyze expectation "@analyze${expectation}". format should be: "analyze-[severity] diagnostic message"`,
-    diagnosticsNotFound: (type: string, message: string) =>
-        `${type} diagnostics not found for "${message}"`,
-    diagnosticsUnsupportedSeverity: (type: string, severity: string) =>
-        `unsupported @${type}-[severity]: "${severity}"`,
-    diagnosticsLocationMismatch: (type: string, message: string) =>
-        `expected "@${type}-[severity] "${message}" to be reported in location, but got it somewhere else`,
+    analyzeMalformed: (expectation: string, label = ``) =>
+        `${label}malformed @analyze expectation "@analyze${expectation}". format should be: "analyze-[severity] diagnostic message"`,
+    diagnosticsNotFound: (type: string, message: string, label = ``) =>
+        `${label}${type} diagnostics not found for "${message}"`,
+    diagnosticsUnsupportedSeverity: (type: string, severity: string, label = ``) =>
+        `${label}unsupported @${type}-[severity]: "${severity}"`,
+    diagnosticsLocationMismatch: (type: string, message: string, label = ``) =>
+        `${label}expected "@${type}-[severity] "${message}" to be reported in location, but got it somewhere else`,
     diagnosticsSeverityMismatch: (
         type: string,
         expectedSeverity: string,
         actualSeverity: string,
-        message: string
+        message: string,
+        label = ``
     ) =>
-        `expected ${type} diagnostic "${message}" to be reported with "${expectedSeverity}, but it was reported with "${actualSeverity}"`,
-    diagnosticExpectedNotFound: (type: string, message: string) =>
-        `no ${type} diagnostic found for "${message}"`,
+        `${label}expected ${type} diagnostic "${message}" to be reported with "${expectedSeverity}, but it was reported with "${actualSeverity}"`,
+    diagnosticExpectedNotFound: (type: string, message: string, label = ``) =>
+        `${label}no ${type} diagnostic found for "${message}"`,
     combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
 };

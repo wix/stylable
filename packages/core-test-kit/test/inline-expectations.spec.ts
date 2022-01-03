@@ -516,6 +516,9 @@ describe('inline-expectations', () => {
 
                             /* @analyze-warn */
                             .root {}
+                            
+                            /* @analyze-warn(label) */
+                            .root {}
                         `,
                     },
                 },
@@ -523,12 +526,9 @@ describe('inline-expectations', () => {
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.combine([
-                    testInlineExpectsErrors.analyzeMalformed({
-                        expectation: `-`,
-                    }),
-                    testInlineExpectsErrors.analyzeMalformed({
-                        expectation: `-warn`,
-                    }),
+                    testInlineExpectsErrors.analyzeMalformed(`-`),
+                    testInlineExpectsErrors.analyzeMalformed(`-warn`),
+                    testInlineExpectsErrors.analyzeMalformed(`-warn(label)`, `(label): `),
                 ])
             );
         });
@@ -575,13 +575,23 @@ describe('inline-expectations', () => {
                         content: `
                             /* @analyze-unknown diagnostic message */
                             .root {}
+
+                            /* @analyze-unknown(label) diagnostic message */
+                            .root {}
                         `,
                     },
                 },
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.diagnosticsUnsupportedSeverity(`analyze`, `unknown`)
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticsUnsupportedSeverity(`analyze`, `unknown`),
+                    testInlineExpectsErrors.diagnosticsUnsupportedSeverity(
+                        `analyze`,
+                        `unknown`,
+                        `(label): `
+                    ),
+                ])
             );
         });
         it(`should throw on possible location mismatch`, () => {
@@ -591,7 +601,12 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @analyze-warn ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)} */
+                            /* 
+                                @analyze-warn ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)}
+                                @analyze-warn(label) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                                    `div`
+                                )}
+                            */
                             .root {}
 
                             div {}
@@ -601,10 +616,17 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.diagnosticsLocationMismatch(
-                    `analyze`,
-                    CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
-                )
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticsLocationMismatch(
+                        `analyze`,
+                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                    ),
+                    testInlineExpectsErrors.diagnosticsLocationMismatch(
+                        `analyze`,
+                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
+                        `(label): `
+                    ),
+                ])
             );
         });
         it(`should throw on severity mismatch`, () => {
@@ -614,22 +636,34 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @analyze-error ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
-                                `div`
-                            )} */
-                            div {}
+                        /* @analyze-error ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)} */
+                        div {}
+
+                        /* @analyze-error(label) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                            `div`
+                        )} */
+                        div {}
                         `,
                     },
                 },
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.diagnosticsSeverityMismatch(
-                    `analyze`,
-                    `error`,
-                    `warning`,
-                    CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
-                )
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticsSeverityMismatch(
+                        `analyze`,
+                        `error`,
+                        `warning`,
+                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                    ),
+                    testInlineExpectsErrors.diagnosticsSeverityMismatch(
+                        `analyze`,
+                        `error`,
+                        `warning`,
+                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
+                        `(label): `
+                    ),
+                ])
             );
         });
         it(`should throw on missing diagnostic`, () => {
@@ -641,16 +675,26 @@ describe('inline-expectations', () => {
                         content: `
                             /* @analyze-warn fake diagnostic message */
                             .root {}
+                            
+                            /* @analyze-warn(label) fake diagnostic message */
+                            .root {}
                         `,
                     },
                 },
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.diagnosticExpectedNotFound(
-                    `analyze`,
-                    `fake diagnostic message`
-                )
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(
+                        `analyze`,
+                        `fake diagnostic message`
+                    ),
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(
+                        `analyze`,
+                        `fake diagnostic message`,
+                        `(label): `
+                    ),
+                ])
             );
         });
     });

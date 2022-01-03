@@ -43,31 +43,33 @@ export function matchDiagnostic(
     type: `analyze` | `transform`,
     meta: Pick<StylableMeta, `diagnostics` | `transformDiagnostics`>,
     expected: {
+        label?: string;
         message: string;
         severity: string;
         location: Location;
     },
     errors: {
-        diagnosticsNotFound: (type: string, message: string) => string;
-        unsupportedSeverity: (type: string, severity: string) => string;
-        locationMismatch: (type: string, message: string) => string;
+        diagnosticsNotFound: (type: string, message: string, label?: string) => string;
+        unsupportedSeverity: (type: string, severity: string, label?: string) => string;
+        locationMismatch: (type: string, message: string, label?: string) => string;
         severityMismatch: (
             type: string,
             expectedSeverity: string,
             actualSeverity: string,
-            message: string
+            message: string,
+            label?: string
         ) => string;
-        expectedNotFound: (type: string, message: string) => string;
+        expectedNotFound: (type: string, message: string, label?: string) => string;
     }
 ): string {
     const diagnostics = type === `analyze` ? meta.diagnostics : meta.transformDiagnostics;
     if (!diagnostics) {
-        return errors.diagnosticsNotFound(type, expected.message);
+        return errors.diagnosticsNotFound(type, expected.message, expected.label);
     }
     const expectedSeverity =
         (expected.severity as any) === `warn` ? `warning` : expected.severity || ``;
     if (!isSupportedSeverity(expectedSeverity)) {
-        return errors.unsupportedSeverity(type, expected.severity || ``);
+        return errors.unsupportedSeverity(type, expected.severity || ``, expected.label);
     }
     let closestMatchState = createMatchDiagnosticState();
     const foundPartialMatch = (newState: MatchState) => {
@@ -85,7 +87,7 @@ export function matchDiagnostic(
         // if (!expected.skipLocationCheck) {
         // ToDo: test all range
         if (report.node.source!.start !== expected.location.start) {
-            matchState.location = errors.locationMismatch(type, expected.message);
+            matchState.location = errors.locationMismatch(type, expected.message, expected.label);
             foundPartialMatch(matchState);
             continue;
         }
@@ -105,7 +107,8 @@ export function matchDiagnostic(
                     type,
                     expectedSeverity,
                     report.type,
-                    expected.message
+                    expected.message,
+                    expected.label
                 );
                 foundPartialMatch(matchState);
                 continue;
@@ -119,7 +122,7 @@ export function matchDiagnostic(
         closestMatchState.location ||
         closestMatchState.word ||
         closestMatchState.severity ||
-        errors.expectedNotFound(type, expected.message)
+        errors.expectedNotFound(type, expected.message, expected.label)
     );
 }
 
