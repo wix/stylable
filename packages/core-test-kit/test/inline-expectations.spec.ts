@@ -4,7 +4,8 @@ import {
     testInlineExpects,
     testInlineExpectsErrors,
 } from '@stylable/core-test-kit';
-import { STImport, CSSType } from '@stylable/core/dist/features';
+import { transformerWarnings } from '@stylable/core/dist/stylable-transformer';
+import { STImport, CSSType, CSSClass } from '@stylable/core/dist/features';
 import { expect } from 'chai';
 
 describe('inline-expectations', () => {
@@ -752,12 +753,282 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.diagnosticExpectedNotFound(
+                    `analyze`,
+                    STImport.diagnostics.ST_IMPORT_EMPTY_FROM()
+                )
+            );
+        });
+    });
+    describe(`@transform`, () => {
+        it(`should throw on malformed diagnostic`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform- */
+                            .root {}
+
+                            /* @transform-warn */
+                            .root {}
+                            
+                            /* @transform-warn(label) */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.combine([
-                    testInlineExpectsErrors.diagnosticExpectedNotFound(
-                        `analyze`,
-                        STImport.diagnostics.ST_IMPORT_EMPTY_FROM()
+                    testInlineExpectsErrors.transformMalformed(`-`),
+                    testInlineExpectsErrors.transformMalformed(`-warn`),
+                    testInlineExpectsErrors.transformMalformed(`-warn(label)`, `(label): `),
+                ])
+            );
+        });
+        it(`should throw for backwards compatibility (@transform is not supported with just AST root)`, () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform-warn message */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.deprecatedRootInputNotSupported(`@transform-warn message`)
+            );
+        });
+        it(`should not throw when diagnostic is matched`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-import [unknown] from './other.st.css';
+
+                        .root {
+                            /* @transform-error ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
+                                `unknown`
+                            )}*/
+                            -st-extends: unknown;
+                        }
+                        `,
+                    },
+                    '/other.st.css': {
+                        namespace: 'other',
+                        content: ``,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.not.throw();
+        });
+        it(`should throw on unsupported severity`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform-unknown diagnostic message */
+                            .root {}
+
+                            /* @transform-unknown(label) diagnostic message */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticsUnsupportedSeverity(`transform`, `unknown`),
+                    testInlineExpectsErrors.diagnosticsUnsupportedSeverity(
+                        `transform`,
+                        `unknown`,
+                        `(label): `
                     ),
                 ])
+            );
+        });
+        it(`should throw on possible location mismatch`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            @st-import [unknown] from './unknown.st.css';
+
+                            /* 
+                                @transform-warn ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
+                                    `./unknown.st.css`
+                                )}
+                                @transform-warn(label) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
+                                    `./unknown.st.css`
+                                )}
+                            */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticsLocationMismatch(
+                        `transform`,
+                        STImport.diagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`)
+                    ),
+                    testInlineExpectsErrors.diagnosticsLocationMismatch(
+                        `transform`,
+                        STImport.diagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`),
+                        `(label): `
+                    ),
+                ])
+            );
+        });
+        it(`should throw on word mismatch`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        /* @transform-warn word:something-else ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                            `not-a-real-thing`
+                        )} */
+                        .root::not-a-real-thing {}
+                        
+                        /* @transform-warn(label) word:something-else ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                            `not-a-real-thing`
+                        )} */
+                        .root::not-a-real-thing {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticsWordMismatch(
+                        `transform`,
+                        `something-else`,
+                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`)
+                    ),
+                    testInlineExpectsErrors.diagnosticsWordMismatch(
+                        `transform`,
+                        `something-else`,
+                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
+                        `(label): `
+                    ),
+                ])
+            );
+        });
+        it(`should throw on severity mismatch`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        /* @transform-info ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                            `not-a-real-thing`
+                        )} */
+                        .root::not-a-real-thing {}
+                        
+                        /* @transform-error(label) ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                            `not-a-real-thing`
+                        )} */
+                        .root::not-a-real-thing {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticsSeverityMismatch(
+                        `transform`,
+                        `info`,
+                        `warning`,
+                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`)
+                    ),
+                    testInlineExpectsErrors.diagnosticsSeverityMismatch(
+                        `transform`,
+                        `error`,
+                        `warning`,
+                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
+                        `(label): `
+                    ),
+                ])
+            );
+        });
+        it(`should throw on missing diagnostic`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform-warn fake diagnostic message */
+                            .root {}
+                            
+                            /* @transform-warn(label) fake diagnostic message */
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(
+                        `transform`,
+                        `fake diagnostic message`
+                    ),
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(
+                        `transform`,
+                        `fake diagnostic message`,
+                        `(label): `
+                    ),
+                ])
+            );
+        });
+        it(`should check against rawAst (for nodes that are removed in transform)`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform-warn word:./x.st.css ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
+                                `./x.st.css`
+                            )} */
+                            @st-import A "./x.st.css";
+
+                            /* @transform-warn ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
+                            @st-import B "./x.st.css";
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.diagnosticExpectedNotFound(
+                    `transform`,
+                    STImport.diagnostics.ST_IMPORT_EMPTY_FROM()
+                )
             );
         });
     });

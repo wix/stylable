@@ -16,6 +16,7 @@ const tests = {
     '@atrule': atRuleTest,
     '@decl': declTest,
     '@analyze': analyzeTest,
+    '@transform': transformTest,
 } as const;
 type TestScopes = keyof typeof tests;
 const testScopes = Object.keys(tests) as TestScopes[];
@@ -106,7 +107,10 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestAm
                         testInput += `@` + input.shift();
                     }
                     if (testInput) {
-                        if (isDeprecatedInput && testScope === `@analyze`) {
+                        if (
+                            isDeprecatedInput &&
+                            (testScope === `@analyze` || testScope === `@transform`)
+                        ) {
                             // not possible with just AST root
                             const result: Test = {
                                 type: testScope,
@@ -342,6 +346,63 @@ function analyzeTest({ meta }: Context, expectation: string, _targetNode: AST, s
     }
     return result;
 }
+function transformTest(
+    { meta }: Context,
+    expectation: string,
+    _targetNode: AST,
+    srcNode: AST
+): Test {
+    const result: Test = {
+        type: `@transform`,
+        expectation,
+        errors: [],
+    };
+    const matchResult = expectation.match(
+        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word:(?<word>[^\s]*))?\s?(?<message>.*)/
+    );
+    if (!matchResult) {
+        result.errors.push(testInlineExpectsErrors.transformMalformed(expectation));
+        return result;
+    }
+    let { label, severity, message, word } = matchResult.groups!;
+    label = label ? label + `: ` : ``;
+    severity = severity?.trim() || ``;
+    message = message?.trim() || ``;
+    word = word?.trim() || ``;
+
+    if (!message) {
+        result.errors.push(testInlineExpectsErrors.transformMalformed(expectation, label));
+        return result;
+    }
+    // check for diagnostic
+    const error = matchDiagnostic(
+        `transform`,
+        meta,
+        {
+            label,
+            message,
+            severity,
+            location: {
+                start: srcNode.source?.start,
+                end: srcNode.source?.end,
+                word,
+                css: ``,
+            },
+        },
+        {
+            diagnosticsNotFound: testInlineExpectsErrors.diagnosticsNotFound,
+            unsupportedSeverity: testInlineExpectsErrors.diagnosticsUnsupportedSeverity,
+            locationMismatch: testInlineExpectsErrors.diagnosticsLocationMismatch,
+            wordMismatch: testInlineExpectsErrors.diagnosticsWordMismatch,
+            severityMismatch: testInlineExpectsErrors.diagnosticsSeverityMismatch,
+            expectedNotFound: testInlineExpectsErrors.diagnosticExpectedNotFound,
+        }
+    );
+    if (error) {
+        result.errors.push(error);
+    }
+    return result;
+}
 
 function getSourceComment(meta: Context['meta'], { source }: postcss.Comment) {
     let match: postcss.Comment | undefined = undefined;
@@ -410,6 +471,8 @@ export const testInlineExpectsErrors = {
     }) => `${label}expected "${message}" diagnostic`,
     analyzeMalformed: (expectation: string, label = ``) =>
         `${label}malformed @analyze expectation "@analyze${expectation}". format should be: "analyze-[severity] diagnostic message"`,
+    transformMalformed: (expectation: string, label = ``) =>
+        `${label}malformed @transform expectation "@transform${expectation}". format should be: "transform-[severity] diagnostic message"`,
     diagnosticsNotFound: (type: string, message: string, label = ``) =>
         `${label}${type} diagnostics not found for "${message}"`,
     diagnosticsUnsupportedSeverity: (type: string, severity: string, label = ``) =>

@@ -92,7 +92,7 @@ export function matchDiagnostic(
         matchState.matches++;
         // if (!expected.skipLocationCheck) {
         // ToDo: test all range
-        if (report.node.source!.start !== expected.location.start) {
+        if (report.node.source!.start!.offset !== expected.location.start!.offset) {
             matchState.location = errors.locationMismatch(type, expected.message, expected.label);
             foundPartialMatch(matchState);
             continue;
