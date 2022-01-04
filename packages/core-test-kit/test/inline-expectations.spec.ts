@@ -767,10 +767,10 @@ describe('inline-expectations', () => {
                         namespace: 'entry',
                         content: `
                             /* @analyze-warn word(comp) ${STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
-                            @st-import comp "./x.st.css";
+                            @st-import comp from "./x.st.css";
                             
                             /* @analyze-warn ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
-                            @st-import comp "./x.st.css";
+                            @st-import comp from "./x.st.css";
                         `,
                     },
                 },
@@ -1039,10 +1039,10 @@ describe('inline-expectations', () => {
                             /* @transform-warn word(./x.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
                                 `./x.st.css`
                             )} */
-                            @st-import A "./x.st.css";
+                            @st-import A from "./x.st.css";
 
                             /* @transform-warn ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
-                            @st-import B "./x.st.css";
+                            @st-import B from "./x.st.css";
                         `,
                     },
                 },
