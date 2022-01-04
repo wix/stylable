@@ -161,7 +161,7 @@ function checkTest(context: Context, expectation: string, targetNode: AST, srcNo
             };
     }
 }
-function ruleTest(_context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
+function ruleTest(context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
     const result: Test = {
         type: `@rule`,
         expectation,
@@ -229,6 +229,15 @@ function ruleTest(_context: Context, expectation: string, targetNode: AST, _srcN
                 );
             }
         }
+    } else if (nodeType === `atrule`) {
+        // passing null to srcNode as atruleTest doesn't actually requires it.
+        // if it would at some point, then its just a matter of searching the rawAst for it.
+        return atRuleTest(
+            context,
+            expectation.replace(`[${ruleIndex}]`, ``),
+            testNode,
+            null as unknown as AST
+        );
     } else {
         // unsupported mixed-in node test
         result.errors.push(testInlineExpectsErrors.unsupportedMixinNode(testNode.type));

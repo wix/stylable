@@ -228,6 +228,45 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.unfoundMixin(`[10] .entry__root:focus`)
             );
         });
+        it(`should support mixed-in atrule`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            @st-import Mix from './mix.st.css';
+
+                            /*
+                                @rule[1] mixed-params-x
+                                @rule(label)[2] mixed-params-y
+                            */
+                            .root {
+                                -st-mixin: Mix;
+                            }
+                        `,
+                    },
+                    '/mix.st.css': {
+                        namespace: 'mix',
+                        content: `
+                            @mix mixed-params-a {}
+                            @mix mixed-params-b {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.atruleParams(`mixed-params-x`, `mixed-params-a`),
+                    testInlineExpectsErrors.atruleParams(
+                        `mixed-params-y`,
+                        `mixed-params-b`,
+                        `(label): `
+                    ),
+                ])
+            );
+        });
         it(`should throw on none supported mixed-in node type`, () => {
             const result = generateStylableResult({
                 entry: `/style.st.css`,
@@ -237,14 +276,14 @@ describe('inline-expectations', () => {
                         content: `
                             /* @rule[1] unsupported */
                             .root {}
-                            @mix {}
+                            decl: val;
                         `,
                     },
                 },
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.unsupportedMixinNode(`atrule`)
+                testInlineExpectsErrors.unsupportedMixinNode(`decl`)
             );
         });
         it('should add label to thrown miss matches', () => {
