@@ -15,7 +15,7 @@ export interface ReExports {
     stVars: Record<string, string>;
 }
 
-export class Generator {
+export class IndexGenerator {
     private indexFileOutput = new Map<string, ReExports>();
     private collisionDetector = new NameCollisionDetector<string>();
 
@@ -95,7 +95,7 @@ export class Generator {
     }
 }
 
-export function reExportsAllSymbols(filePath: string, generator: Generator): ReExports {
+export function reExportsAllSymbols(filePath: string, generator: IndexGenerator): ReExports {
     const meta = generator.stylable.process(filePath);
     const rootExport = generator.filename2varname(filePath);
     const classes = Object.keys(meta.getAllClasses())

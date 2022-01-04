@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { Stylable } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
+import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
 
 const log = () => {
     /**/
@@ -20,16 +21,20 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            indexFile: 'index.st.css',
-            rootDir: '/',
-            log,
-        });
+        await build(
+            {
+                outDir: '.',
+                srcDir: '.',
+                indexFile: 'index.st.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         const res = fs.readFileSync('/index.st.css').toString();
 
@@ -54,16 +59,20 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            indexFile: 'index.st.css',
-            rootDir: '/',
-            log,
-        });
+        await build(
+            {
+                outDir: '.',
+                srcDir: '.',
+                indexFile: 'index.st.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         const res = fs.readFileSync('/index.st.css').toString();
 
@@ -88,17 +97,21 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            indexFile: 'index.st.css',
-            rootDir: '/',
-            log,
-            Generator: require('./fixtures/test-generator').Generator,
-        });
+        await build(
+            {
+                outDir: '.',
+                srcDir: '.',
+                indexFile: 'index.st.css',
+                IndexGenerator: require('./fixtures/test-generator').Generator,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         const res = fs.readFileSync('/index.st.css').toString();
 
@@ -108,6 +121,49 @@ describe('build index', () => {
                 '.root Style0{}',
                 ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:Style1;}',
                 '.root Style1{}',
+            ].join('\n')
+        );
+    });
+
+    it('should create index file when srcDir is parent directory of outDir', async () => {
+        const fs = createMemoryFs({
+            dist: {
+                'c/compA.st.css': `
+               .a{}
+            `,
+                '/a/b/comp-B.st.css': `
+               .b{}
+            `,
+            },
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        await build(
+            {
+                outDir: '.',
+                srcDir: './dist',
+                indexFile: 'index.st.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        expect(fs.existsSync('/index.st.css'), 'index is not generated').to.eql(true);
+
+        const res = fs.readFileSync('/index.st.css').toString();
+
+        expect(res.trim()).to.equal(
+            [
+                ':import {-st-from: "./dist/c/compA.st.css";-st-default:CompA;}',
+                '.root CompA{}',
+                ':import {-st-from: "./dist/a/b/comp-B.st.css";-st-default:CompB;}',
+                '.root CompB{}',
             ].join('\n')
         );
     });
@@ -124,17 +180,21 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            indexFile: 'index.st.css',
-            rootDir: '/',
-            log,
-            Generator: require('./fixtures/test-generator').Generator,
-        });
+        await build(
+            {
+                outDir: '.',
+                srcDir: '.',
+                indexFile: 'index.st.css',
+                IndexGenerator: require('./fixtures/test-generator').Generator,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         const res = fs.readFileSync('/index.st.css').toString();
 
@@ -161,17 +221,21 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: '.',
-            srcDir: '.',
-            indexFile: 'index.st.css',
-            rootDir: '/',
-            log,
-            Generator: require('./fixtures/named-exports-generator').Generator,
-        });
+        await build(
+            {
+                outDir: '.',
+                srcDir: '.',
+                indexFile: 'index.st.css',
+                IndexGenerator: require('./fixtures/named-exports-generator').Generator,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         const res = fs.readFileSync('/index.st.css').toString();
 
@@ -196,16 +260,20 @@ describe('build index', () => {
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
-        await build({
-            extension: '.st.css',
-            fs,
-            stylable,
-            outDir: './some-dir/other-dir/',
-            srcDir: '.',
-            indexFile: 'index.st.css',
-            rootDir: '/',
-            log,
-        });
+        await build(
+            {
+                outDir: './some-dir/other-dir/',
+                srcDir: '.',
+                indexFile: 'index.st.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
 
         const res = fs.readFileSync('/some-dir/other-dir/index.st.css').toString();
 
@@ -222,23 +290,28 @@ describe('build index', () => {
                .b{}
             `,
         });
-        let cliError: unknown;
+
         const stylable = new Stylable('/', fs, () => ({}));
-        try {
-            await build({
-                extension: '.st.css',
-                fs,
-                stylable,
+        const diagnosticsManager = new DiagnosticsManager();
+
+        await build(
+            {
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
+                diagnostics: true,
+            },
+            {
+                fs,
+                stylable,
                 rootDir: '/',
+                projectRoot: '/',
                 log,
-            });
-        } catch (error) {
-            cliError = error;
-        }
-        expect((cliError as Error)?.message).to.equal(
+                diagnosticsManager,
+            }
+        );
+
+        expect(diagnosticsManager.get('/', '/a/comp.st.css')?.diagnostics[0].message).to.equal(
             `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`
         );
     });

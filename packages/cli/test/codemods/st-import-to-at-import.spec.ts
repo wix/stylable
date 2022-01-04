@@ -1,8 +1,7 @@
 import { parseImportMessages } from '@stylable/core/dist/helpers/import';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { populateDirectorySync, loadDirSync } from '../test-kit/cli-test-kit';
-import { runCliCodeMod } from '../test-kit/cli-test-kit';
+import { populateDirectorySync, loadDirSync, runCliCodeMod } from '@stylable/e2e-test-kit';
 
 describe('CLI Codemods st-import-to-at-import', () => {
     let tempDir: ITempDirectory;
