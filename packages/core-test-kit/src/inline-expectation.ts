@@ -59,7 +59,7 @@ const isRoot = (val: any): val is postcss.Root => val.type === `root`;
  * support atrule params (anything between the @atrule and body or semicolon)
  * @check screen and (min-width: 900px)
  */
-export function testInlineExpects(result: postcss.Root | Context, expectedTestAmount = 0) {
+export function testInlineExpects(result: postcss.Root | Context, expectedTestInput?: number) {
     // backward compatibility (no diagnostic checks)
     const isDeprecatedInput = isRoot(result);
     const context = isDeprecatedInput
@@ -74,13 +74,9 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestAm
         : result;
     // ToDo: support analyze mode
     const rootAst = context.meta.outputAst!;
-    expectedTestAmount =
-        expectedTestAmount ||
-        rootAst.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))?.length ||
-        0;
-    if (expectedTestAmount === 0) {
-        throw new Error(testInlineExpectsErrors.noTestsFound());
-    }
+    const expectedTestAmount =
+        expectedTestInput ??
+        (rootAst.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))?.length || 0);
     const checks: Test[] = [];
     const errors: string[] = [];
     // collect checks
@@ -431,8 +427,6 @@ function getNextMixinRule(originRule: postcss.Rule, count: number) {
 }
 
 export const testInlineExpectsErrors = {
-    noTestsFound: () =>
-        `no tests found try to add "${testScopesRegex()}" comments before any selector`,
     matchAmount: (expectedAmount: number, actualAmount: number) =>
         `Expected ${expectedAmount} checks to run but there was ${actualAmount}`,
     unsupportedNode: (testType: string, nodeType: string, label = ``) =>

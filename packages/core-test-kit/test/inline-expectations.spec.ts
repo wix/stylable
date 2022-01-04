@@ -9,21 +9,6 @@ import { STImport, CSSType, CSSClass } from '@stylable/core/dist/features';
 import { expect } from 'chai';
 
 describe('inline-expectations', () => {
-    it('should throw when no tests are found', () => {
-        const result = generateStylableResult({
-            entry: `/style.st.css`,
-            files: {
-                '/style.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        .root {}
-                    `,
-                },
-            },
-        });
-
-        expect(() => testInlineExpects(result)).to.throw(testInlineExpectsErrors.noTestsFound());
-    });
     it('should throw when expected amount is not found (manual)', () => {
         const result = generateStylableResult({
             entry: `/style.st.css`,
