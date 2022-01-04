@@ -661,12 +661,12 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                        /* @analyze-warn word:span ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                        /* @analyze-warn word(single) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
                             `div`
                         )} */
                         div {}
                         
-                        /* @analyze-warn(label) word:input ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                        /* @analyze-warn(many words) word(one two) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
                             `div`
                         )} */
                         div {}
@@ -679,14 +679,14 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `analyze`,
-                        `span`,
+                        `single`,
                         CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
                     ),
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `analyze`,
-                        `input`,
+                        `one two`,
                         CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
-                        `(label): `
+                        `(many words): `
                     ),
                 ])
             );
@@ -766,7 +766,7 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @analyze-warn word:comp ${STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
+                            /* @analyze-warn word(comp) ${STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
                             @st-import comp "./x.st.css";
                             
                             /* @analyze-warn ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
@@ -929,12 +929,12 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                        /* @transform-warn word:something-else ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                        /* @transform-warn word(something-else) ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
                             `not-a-real-thing`
                         )} */
                         .root::not-a-real-thing {}
                         
-                        /* @transform-warn(label) word:something-else ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                        /* @transform-warn(many) word(a b c) ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
                             `not-a-real-thing`
                         )} */
                         .root::not-a-real-thing {}
@@ -952,9 +952,9 @@ describe('inline-expectations', () => {
                     ),
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `transform`,
-                        `something-else`,
+                        `a b c`,
                         transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
-                        `(label): `
+                        `(many): `
                     ),
                 ])
             );
@@ -1036,7 +1036,7 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @transform-warn word:./x.st.css ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
+                            /* @transform-warn word(./x.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
                                 `./x.st.css`
                             )} */
                             @st-import A "./x.st.css";

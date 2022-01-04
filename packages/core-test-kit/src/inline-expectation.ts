@@ -306,7 +306,7 @@ function analyzeTest({ meta }: Context, expectation: string, _targetNode: AST, s
         errors: [],
     };
     const matchResult = expectation.match(
-        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word:(?<word>[^\s]*))?\s?(?<message>.*)/
+        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>.*)/
     );
     if (!matchResult) {
         result.errors.push(testInlineExpectsErrors.analyzeMalformed(expectation));
@@ -363,7 +363,7 @@ function transformTest(
         errors: [],
     };
     const matchResult = expectation.match(
-        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word:(?<word>[^\s]*))?\s?(?<message>.*)/
+        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>.*)/
     );
     if (!matchResult) {
         result.errors.push(testInlineExpectsErrors.transformMalformed(expectation));
@@ -483,7 +483,7 @@ export const testInlineExpectsErrors = {
     diagnosticsLocationMismatch: (type: string, message: string, label = ``) =>
         `${label}expected "@${type}-[severity] "${message}" to be reported in location, but got it somewhere else`,
     diagnosticsWordMismatch: (type: string, expectedWord: string, message: string, label = ``) =>
-        `${label}expected word in "@${type}-[severity] word:${expectedWord} ${message}" to be found, but it wasn't`,
+        `${label}expected word in "@${type}-[severity] word(${expectedWord}) ${message}" to be found, but it wasn't`,
     diagnosticsSeverityMismatch: (
         type: string,
         expectedSeverity: string,
