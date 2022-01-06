@@ -109,9 +109,53 @@ describe('Formatting - Decl', () => {
         );
     });
 
-    it.only('multiple values are separated with one comma and space between each value (short line)', () => {
+    it('multiple values are separated with one comma and space between each value (short line)', () => {
         expect(formatCSS('.root {\n    font-family: A,B,C;\n}\n')).to.equal(
             '.root {\n    font-family: A, B, C;\n}\n'
+        );
+    });
+
+    it('multiple long values each placed in a new line and preserved original indent', () => {
+        const declWithIndent = `    font-family: `;
+        const declIndent = declWithIndent.length;
+        expect(
+            formatCSS(
+                `.root {\n${declWithIndent}${'A'.repeat(50)},${'B'.repeat(50)},${'C'.repeat(
+                    50
+                )};\n}\n`
+            )
+        ).to.equal(
+            `.root {\n    font-family: ${'A'.repeat(50)},\n${' '.repeat(declIndent)}${'B'.repeat(
+                50
+            )},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
+        );
+        // with spaces after decl
+        expect(
+            formatCSS(
+                `.root {\n${declWithIndent}${'    '}${'A'.repeat(50)},${'B'.repeat(
+                    50
+                )},${'C'.repeat(50)};\n}\n`
+            )
+        ).to.equal(
+            `.root {\n    font-family: ${'A'.repeat(50)},\n${' '.repeat(declIndent)}${'B'.repeat(
+                50
+            )},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
+        );
+    });
+
+    it('multiple values are grouped. each group is in new line and preserved original indent', () => {
+        const declWithIndent = `    font-family: `;
+        const declIndent = declWithIndent.length;
+        expect(
+            formatCSS(
+                `.root {\n${declWithIndent}${'1,2,3,'}${'A'.repeat(50)},${'B'.repeat(50)},${'C'.repeat(
+                    50
+                )};\n}\n`
+            )
+        ).to.equal(
+            `.root {\n    font-family: ${'1, 2, 3, '}${'A'.repeat(50)},\n${' '.repeat(declIndent)}${'B'.repeat(
+                50
+            )},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
         );
     });
 

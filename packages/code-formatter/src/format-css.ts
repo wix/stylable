@@ -1,4 +1,5 @@
 import { parse, AnyNode } from 'postcss';
+import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
 
 export function formatCSS(css: string) {
     const ast = parse(css);
@@ -30,17 +31,27 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         ast.raws.semicolon = childrenLen ? true : false;
         ast.selector = formatSelectors(ast.selectors);
     } else if (ast.type === 'decl') {
+        ast.raws.before = NL + indent.repeat(indentLevel);
         if (ast.variable) {
             // TODO: handle case the raws contains comments
             ast.raws.between = ast.raws.between?.trimStart() || ':' /* no space here! */;
         } else {
+            const valueGroups = groupMultipleValues(parseCSSValue(ast.value));
+
             // TODO: handle case the raws contains comments
             ast.raws.between = ': ';
-            if (ast.raws.value) {
-                ast.raws.value.raw = ast.raws.value.value;
+
+            const warpLineIndentSize =
+                ast.prop.length + ast.raws.before.length - 1 /* 1 NL */ + ast.raws.between.length;
+
+            const strs = valueGroups.map((valueAst) => stringifyCSSValue(valueAst));
+            const newValue2 = groupBySize(strs).join(`,\n${' '.repeat(warpLineIndentSize)}`);
+
+            ast.value = newValue2;
+            if (ast.raws.value /* The postcss type does not represent the reality */) {
+                delete (ast.raws as any).value;
             }
         }
-        ast.raws.before = NL + indent.repeat(indentLevel);
     } else if (ast.type === 'comment') {
         /* TODO */
     }
@@ -51,33 +62,54 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     }
 }
 
+function groupMultipleValues(ast: ReturnType<typeof parseCSSValue>) {
+    const groups = [];
+    let currentGroup = [];
+    for (const node of ast) {
+        if (node.type === 'literal' && node.value === ',') {
+            groups.push(currentGroup);
+            currentGroup = [];
+        } else {
+            currentGroup.push(node);
+        }
+    }
+    if (currentGroup.length) {
+        groups.push(currentGroup);
+    }
+    return groups;
+}
+
 function formatSelectors(selectors: string[]) {
     // sort selectors by length from short to long
     selectors.sort((a, b) => a.length - b.length);
     // group selectors until reach upto 50 chars
-    const maxSelectorLength = 50;
-    const selectorsGrouped = [];
+    const selectorsFormatted = groupBySize(selectors);
+    // join groups with new line
+    return selectorsFormatted.join(',\n');
+}
+
+function groupBySize(parts: string[], joinWith = ', ') {
+    const maxLength = 50;
+    const grouped = [];
     let currentGroup = [];
     let currentGroupLength = 0;
-    for (const selector of selectors) {
-        currentGroup.push(selector);
-        currentGroupLength += selector.length;
-        if (currentGroupLength >= maxSelectorLength) {
-            selectorsGrouped.push(currentGroup);
+    for (const part of parts) {
+        currentGroup.push(part);
+        currentGroupLength += part.length;
+        if (currentGroupLength >= maxLength) {
+            grouped.push(currentGroup);
             currentGroup = [];
             currentGroupLength = 0;
         }
     }
     if (currentGroup.length) {
-        selectorsGrouped.push(currentGroup);
+        grouped.push(currentGroup);
     }
-    // join selectors in each group with comma and space
-    const selectorsFormatted = [];
-    for (const group of selectorsGrouped) {
-        selectorsFormatted.push(group.join(', '));
+    const formatted = [];
+    for (const group of grouped) {
+        formatted.push(group.join(joinWith));
     }
-    // join groups with new line
-    return selectorsFormatted.join(',\n');
+    return formatted;
 }
 
 // function formatValueList(values: string[]) {
