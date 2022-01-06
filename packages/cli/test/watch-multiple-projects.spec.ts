@@ -8,8 +8,10 @@ import {
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { realpathSync, writeFileSync } from 'fs';
+import { realpathSync, promises } from 'fs';
 import { join, sep } from 'path';
+
+const { writeFile } = promises;
 
 describe('Stylable Cli Watch - Multiple projects', () => {
     let tempDir: ITempDirectory;
@@ -217,7 +219,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeFileSync(
+                        return writeFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                             `
                             @st-import [Foo] from "../project-b/dist/index.st.css";
