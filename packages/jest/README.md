@@ -43,7 +43,7 @@ module.exports = {
 ```
 
 ### Ignore Stylable files from exsiting css integrations
-To disable exsiting css integration affecting Stylable files ignore '.st.css' from the exsiting integration
+To prevent existing CSS integrations from affecting Stylable files, ignore '.st.css' in the integration configuration.
 
 Change: 
 ```js
