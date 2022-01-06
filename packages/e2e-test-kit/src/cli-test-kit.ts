@@ -14,9 +14,14 @@ import type { Readable } from 'stream';
 
 interface Step {
     msg: string;
-    action?: () => void | {
-        sleep?: number;
-    };
+    action?: () =>
+        | void
+        | {
+              sleep?: number;
+          }
+        | Promise<void | {
+              sleep?: number;
+          }>;
 }
 
 interface ProcessCliOutputParams {
@@ -73,7 +78,7 @@ export function createCliTester() {
                     });
 
                     if (step.action) {
-                        const { sleep } = step.action() || {};
+                        const { sleep } = (await step.action()) || {};
 
                         if (typeof sleep === 'number') {
                             await onTimeout(sleep);

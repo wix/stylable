@@ -9,8 +9,10 @@ import {
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { realpathSync, renameSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
+import { realpathSync, renameSync, rmdirSync, unlinkSync, promises } from 'fs';
 import { join, sep } from 'path';
+
+const { writeFile } = promises;
 
 describe('Stylable Cli Watch - Single project', () => {
     let tempDir: ITempDirectory;
@@ -112,7 +114,10 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
+                        return writeFile(
+                            join(tempDir.path, 'style.st.css'),
+                            `.root{ color:green }`
+                        );
                     },
                 },
                 {
@@ -144,7 +149,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeFileSync(join(tempDir.path, 'asset.svg'), getSvgContent(NEW_SIZE));
+                        return writeFile(join(tempDir.path, 'asset.svg'), getSvgContent(NEW_SIZE));
                     },
                 },
                 {
@@ -362,7 +367,10 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
+                        return writeFile(
+                            join(tempDir.path, 'style.st.css'),
+                            `.root{ color:green }`
+                        );
                     },
                 },
                 {
@@ -377,7 +385,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.FINISHED_PROCESSING(1),
                     action() {
-                        writeFileSync(join(tempDir.path, 'comp.st.css'), `.root{ color:green }`);
+                        return writeFile(join(tempDir.path, 'comp.st.css'), `.root{ color:green }`);
                     },
                 },
                 {
