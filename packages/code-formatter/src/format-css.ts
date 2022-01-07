@@ -3,6 +3,7 @@ import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
 // TODO: comment before node should remove separation
 // TODO: declaration that starts with newline ???
 // TODO: indent of selector groups in nested levels
+// TODO: handle case the raws contains comments
 /* TODO: 
 .root {
   -st-extends: Dialog;
@@ -21,7 +22,7 @@ import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
   justify-content: center;
   cursor: pointer;
 }
-*/ 
+*/
 export function formatCSS(css: string) {
     const ast = parse(css);
     const NL = getLineEnding(css);
@@ -44,7 +45,6 @@ type FormatOptions = {
 function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     const { NL, indent, indentLevel, linesBetween } = options;
     if (ast.type === 'atrule') {
-        // TODO: handle case the raws contains comments
         // TODO: handle params
 
         /* The postcss type does not represent the reality there are atRules without nodes */
@@ -59,7 +59,6 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         ast.raws.between = childrenLen === -1 ? '' : ' ';
     } else if (ast.type === 'rule') {
         const childrenLen = ast.nodes.length;
-        // TODO: handle case the raws contains comments
         const isFirstChild = index === 0 && indentLevel > 0;
         const separation = isFirstChild ? 0 : linesBetween;
         ast.raws.before =
@@ -73,15 +72,11 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     } else if (ast.type === 'decl') {
         ast.raws.before = NL + indent.repeat(indentLevel);
         if (ast.variable) {
-            // TODO: handle case the raws contains comments
             ast.raws.between =
                 ast.raws.between?.trimStart() ||
                 ':' /* no space here! css vars are space sensitive */;
         } else {
             const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(ast.value));
-
-            // TODO: handle case the raws contains comments
-            ast.raws.between = ': ';
 
             const warpLineIndentSize =
                 ast.prop.length + ast.raws.before.length - 1 /* -1 NL */ + ast.raws.between.length;
@@ -89,6 +84,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             const strs = valueGroups.map((valueAst) => stringifyCSSValue(valueAst));
             const newValue2 = groupBySize(strs).join(`,\n${' '.repeat(warpLineIndentSize)}`);
 
+            ast.raws.between = ': ';
             ast.value = newValue2;
             if (ast.raws.value /* The postcss type does not represent the reality */) {
                 delete (ast.raws as any).value;
@@ -96,6 +92,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         }
     } else if (ast.type === 'comment') {
         /* TODO */
+        /* handle space before */
     }
     if ('nodes' in ast) {
         ast.nodes.forEach((node, i) =>
