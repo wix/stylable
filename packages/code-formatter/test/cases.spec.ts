@@ -11,12 +11,23 @@ describe('Formatting - Top level', () => {
     it('preserve new line type at the end', () => {
         expect(formatCSS('/*\r\n*/')).to.equal('/*\r\n*/\r\n');
     });
-    it('one line separation after each rule', () => {
+    it('one line separation after each node', () => {
         expect(formatCSS('.root {}\n\n\n.root {}')).to.equal('.root {}\n\n.root {}\n');
         expect(formatCSS('.root {}\n\n.root {}')).to.equal('.root {}\n\n.root {}\n');
         expect(formatCSS('.root {}\n.root {}')).to.equal('.root {}\n\n.root {}\n');
         expect(formatCSS('.root {}.root {}')).to.equal('.root {}\n\n.root {}\n');
+        expect(formatCSS('.root {}@media {}')).to.equal('.root {}\n\n@media {}\n');
+        expect(formatCSS('.root {}/*COMMENT*/')).to.equal('.root {}\n\n/*COMMENT*/\n');
+        expect(formatCSS('@media {.root {}/*COMMENT*/}')).to.equal(
+            '@media {\n    .root {}\n\n    /*COMMENT*/\n}\n'
+        );
     });
+
+    it('no line separation after comment', () => {
+        expect(formatCSS('/*COMMENT*/.root {}')).to.equal('/*COMMENT*/\n.root {}\n');
+        expect(formatCSS('/*COMMENT*/\n\n\n.root {}')).to.equal('/*COMMENT*/\n.root {}\n');
+    });
+
     it('no spaces before level 1 selector', () => {
         expect(formatCSS('   .root {}\n')).to.equal('.root {}\n');
     });

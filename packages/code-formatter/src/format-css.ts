@@ -30,9 +30,12 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     if (ast.type === 'atrule') {
         // TODO: handle params
 
+        const hasCommentBefore = ast.prev()?.type === 'comment';
+
         /* The postcss type does not represent the reality there are atRules without nodes */
         const childrenLen = ast.nodes?.length ?? -1;
-        const separation = childrenLen === -1 ? 0 : linesBetween;
+        const separation = childrenLen === -1 || hasCommentBefore ? 0 : linesBetween;
+
         ast.raws.before =
             index !== 0 || indentLevel > 0
                 ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
@@ -41,9 +44,10 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         ast.raws.afterName = ast.params.length ? ' ' : '';
         ast.raws.between = childrenLen === -1 ? '' : ' ';
     } else if (ast.type === 'rule') {
+        const hasCommentBefore = ast.prev()?.type === 'comment';
         const childrenLen = ast.nodes.length;
-        const isFirstChild = index === 0 && indentLevel > 0;
-        const separation = isFirstChild ? 0 : linesBetween;
+        const isFirstChildInNested = index === 0 && indentLevel > 0;
+        const separation = isFirstChildInNested || hasCommentBefore ? 0 : linesBetween;
         ast.raws.before =
             index !== 0 || indentLevel > 0
                 ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
@@ -71,8 +75,16 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             }
         }
     } else if (ast.type === 'comment') {
-        /* TODO */
-        /* handle space before */
+        if (ast.prev()?.type !== 'decl') {
+            const isFirstChildInNested = index === 0 && indentLevel > 0;
+            const separation = isFirstChildInNested ? 0 : linesBetween;
+            ast.raws.before =
+                index !== 0 || indentLevel > 0
+                    ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
+                    : '';
+        } else {
+            // TODO
+        }
     }
     if ('nodes' in ast) {
         for (let i = 0; i < ast.nodes.length; i++) {
