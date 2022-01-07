@@ -148,19 +148,44 @@ describe('Formatting - Decl', () => {
         const declIndent = declWithIndent.length;
         expect(
             formatCSS(
-                `.root {\n${declWithIndent}${'1,2,3,'}${'A'.repeat(50)},${'B'.repeat(50)},${'C'.repeat(
+                `.root {\n${declWithIndent}${'1,2,3,'}${'A'.repeat(50)},${'B'.repeat(
                     50
-                )};\n}\n`
+                )},${'C'.repeat(50)};\n}\n`
             )
         ).to.equal(
-            `.root {\n    font-family: ${'1, 2, 3, '}${'A'.repeat(50)},\n${' '.repeat(declIndent)}${'B'.repeat(
-                50
-            )},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
+            `.root {\n    font-family: ${'1, 2, 3, '}${'A'.repeat(50)},\n${' '.repeat(
+                declIndent
+            )}${'B'.repeat(50)},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
         );
     });
 
     it.skip('comments before and after colon', () => {
         expect(formatCSS('.root {color/*!*/:/*!*/red;}\n')).to.equal('.root {\n?????\n}\n');
+    });
+});
+
+describe('Formatting - AtRule', () => {
+    it('no children only atRule (no semi colon)', () => {
+        expect(formatCSS(`@namespace "abc"`)).to.equal(`@namespace "abc"\n`);
+    });
+    it('no children only atRule', () => {
+        expect(formatCSS(`@namespace "abc";`)).to.equal(`@namespace "abc";\n`);
+    });
+    it('atRule with decelerations (no params)', () => {
+        expect(formatCSS(`@font-face { font-family: "Open Sans";}`)).to.equal(
+            `@font-face {\n    font-family: "Open Sans";\n}\n`
+        );
+    });
+    it('one space after name', () => {
+        expect(formatCSS(`@media${'    '}screen {}\n`)).to.equal(`@media screen {}\n`);
+    });
+    it('one space after params', () => {
+        expect(formatCSS(`@media screen${'    '}{}\n`)).to.equal(`@media screen {}\n`);
+    });
+    it('format children with indent', () => {
+        expect(formatCSS('@media screen {.root {color: red;}}\n')).to.equal(
+            '@media screen {\n    .root {\n        color: red;\n    }\n}\n'
+        );
     });
 });
 

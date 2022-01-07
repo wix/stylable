@@ -5,9 +5,8 @@ export function formatCSS(css: string) {
     const ast = parse(css);
     const NL = getLineEnding(css);
     const indent = '    ';
-    const indentLevel = -1;
-
-    formatAst(ast, 0, { NL, indent, indentLevel });
+    const indentLevel = 0;
+    ast.nodes.forEach((node, i) => formatAst(node, i, { NL, indent, indentLevel }));
     const outputCSS = ast.toString();
     return outputCSS.endsWith('\n') || outputCSS.length === 0 ? outputCSS : outputCSS + NL;
 }
@@ -21,12 +20,20 @@ type FormatOptions = {
 function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     const { NL, indent, indentLevel } = options;
     if (ast.type === 'atrule') {
-        throw 'not implemented';
+        // TODO: handle case the raws contains comments
+        // TODO: handle params
+
+        /* The postcss type does not represent the reality there are atRules without nodes */
+        const childrenLen = ast.nodes?.length ?? -1;
+        ast.raws.before = index !== 0 || indentLevel > 0 ? NL + indent.repeat(indentLevel) : '';
+        ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
+        ast.raws.afterName = ast.params.length ? ' ' : '';
+        ast.raws.between = childrenLen === -1 ? '' : ' ';
     } else if (ast.type === 'rule') {
         const childrenLen = ast.nodes.length;
         // TODO: handle case the raws contains comments
-        ast.raws.before = index !== 0 ? NL : '';
-        ast.raws.after = childrenLen ? NL : '';
+        ast.raws.before = index !== 0 || indentLevel > 0 ? NL + indent.repeat(indentLevel) : '';
+        ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
         ast.raws.between = ' ';
         ast.raws.semicolon = childrenLen ? true : false;
         ast.selector = formatSelectors(ast.selectors);
@@ -34,15 +41,17 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         ast.raws.before = NL + indent.repeat(indentLevel);
         if (ast.variable) {
             // TODO: handle case the raws contains comments
-            ast.raws.between = ast.raws.between?.trimStart() || ':' /* no space here! */;
+            ast.raws.between =
+                ast.raws.between?.trimStart() ||
+                ':' /* no space here! css vars are space sensitive */;
         } else {
-            const valueGroups = groupMultipleValues(parseCSSValue(ast.value));
+            const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(ast.value));
 
             // TODO: handle case the raws contains comments
             ast.raws.between = ': ';
 
             const warpLineIndentSize =
-                ast.prop.length + ast.raws.before.length - 1 /* 1 NL */ + ast.raws.between.length;
+                ast.prop.length + ast.raws.before.length - 1 /* -1 NL */ + ast.raws.between.length;
 
             const strs = valueGroups.map((valueAst) => stringifyCSSValue(valueAst));
             const newValue2 = groupBySize(strs).join(`,\n${' '.repeat(warpLineIndentSize)}`);
@@ -62,7 +71,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     }
 }
 
-function groupMultipleValues(ast: ReturnType<typeof parseCSSValue>) {
+function groupMultipleValuesSeparatedByComma(ast: ReturnType<typeof parseCSSValue>) {
     const groups = [];
     let currentGroup = [];
     for (const node of ast) {
@@ -82,9 +91,7 @@ function groupMultipleValues(ast: ReturnType<typeof parseCSSValue>) {
 function formatSelectors(selectors: string[]) {
     // sort selectors by length from short to long
     selectors.sort((a, b) => a.length - b.length);
-    // group selectors until reach upto 50 chars
     const selectorsFormatted = groupBySize(selectors);
-    // join groups with new line
     return selectorsFormatted.join(',\n');
 }
 
@@ -112,12 +119,8 @@ function groupBySize(parts: string[], joinWith = ', ') {
     return formatted;
 }
 
-// function formatValueList(values: string[]) {
-//     return values.join(', ');
-// }
-
-// naive implementation
 function getLineEnding(css: string) {
+    // naive implementation
     for (const ch of css) {
         if (ch === '\r') {
             return '\r\n';
