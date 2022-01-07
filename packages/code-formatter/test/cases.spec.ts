@@ -116,6 +116,12 @@ describe('Formatting - Decl', () => {
         expect(formatCSS('.root {\n    font-family: A,B,C;\n}\n')).to.equal(
             '.root {\n    font-family: A, B, C;\n}\n'
         );
+        expect(formatCSS('.root {\n    font-family: A, B, C;\n}\n')).to.equal(
+            '.root {\n    font-family: A, B, C;\n}\n'
+        );
+        expect(formatCSS('.root {\n    font-family: A,   B   ,   C;\n}\n')).to.equal(
+            '.root {\n    font-family: A, B, C;\n}\n'
+        );
     });
 
     it('multiple long values each placed in a new line and preserved original indent', () => {

@@ -4,25 +4,6 @@ import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
 // TODO: declaration that starts with newline ???
 // TODO: indent of selector groups in nested levels
 // TODO: handle case the raws contains comments
-/* TODO: 
-.root {
-  -st-extends: Dialog;
-  -st-states: running, shouldHide;
-}
-*/
-/* TODO:
-.root {
-  -st-states: running, completed, disabled, toggled, output, error, expanded, hidden, togglingEnabled;
-  min-width: 400px;
-  min-height: 43px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
-  cursor: pointer;
-}
-*/
 export function formatCSS(css: string) {
     const ast = parse(css);
     const NL = getLineEnding(css);
@@ -81,7 +62,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             const warpLineIndentSize =
                 ast.prop.length + ast.raws.before.length - 1 /* -1 NL */ + ast.raws.between.length;
 
-            const strs = valueGroups.map((valueAst) => stringifyCSSValue(valueAst));
+            const strs = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());
             const newValue2 = groupBySize(strs).join(`,\n${' '.repeat(warpLineIndentSize)}`);
 
             ast.value = newValue2;
