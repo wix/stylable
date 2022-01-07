@@ -1,8 +1,9 @@
 import { parse, AnyNode } from 'postcss';
 import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
+
 // TODO: comment before node should remove separation
-// TODO: declaration that starts with newline ???
-// TODO: handle case the raws contains comments
+// TODO: handle case where declaration value starts or include newline
+// TODO: handle case where "raws" contains comments or newlines
 // TODO: handle case where internal selector has newline (not the separation)
 
 export function formatCSS(css: string) {
@@ -10,9 +11,9 @@ export function formatCSS(css: string) {
     const NL = getLineEnding(css);
     const indent = '    ';
     const indentLevel = 0;
-    ast.nodes.forEach((node, i) =>
-        formatAst(node, i, { NL, indent, indentLevel, linesBetween: 1 })
-    );
+    for (let i = 0; i < ast.nodes.length; i++) {
+        formatAst(ast.nodes[i], i, { NL, indent, indentLevel, linesBetween: 1 });
+    }
     const outputCSS = ast.toString();
     return outputCSS.endsWith('\n') || outputCSS.length === 0 ? outputCSS : outputCSS + NL;
 }
@@ -63,11 +64,8 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(ast.value));
             const warpLineIndentSize =
                 ast.prop.length + ast.raws.before.length - 1 /* -1 NL */ + ast.raws.between.length;
-
-            const strs = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());
-            const newValue2 = groupBySize(strs).join(`,${NL}${' '.repeat(warpLineIndentSize)}`);
-
-            ast.value = newValue2;
+            const values = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());
+            ast.value = groupBySize(values).join(`,${NL}${' '.repeat(warpLineIndentSize)}`);
             if (ast.raws.value /* The postcss type does not represent the reality */) {
                 delete (ast.raws as any).value;
             }
@@ -77,9 +75,9 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         /* handle space before */
     }
     if ('nodes' in ast) {
-        ast.nodes.forEach((node, i) =>
-            formatAst(node, i, { NL, indent, linesBetween, indentLevel: indentLevel + 1 })
-        );
+        for (let i = 0; i < ast.nodes.length; i++) {
+            formatAst(ast.nodes[i], i, { NL, indent, indentLevel: indentLevel + 1, linesBetween });
+        }
     }
 }
 
