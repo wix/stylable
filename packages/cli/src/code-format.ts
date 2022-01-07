@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
 import { nodeFs } from '@file-services/node';
-import { getDocumentFormatting } from '@stylable/code-formatter';
+import { getDocumentFormatting, formatCSS } from '@stylable/code-formatter';
 import { createLogger } from './logger';
 import { writeFileSync } from 'fs';
 
@@ -9,6 +9,11 @@ const { join } = nodeFs;
 
 const argv = yargs
     .usage('$0 [options]')
+    .option('experimental', {
+        type: 'boolean',
+        description: 'use experimental code formatter',
+        default: false,
+    })
     .option('target', {
         type: 'string',
         description: 'file or directory to format',
@@ -103,6 +108,7 @@ const {
     selectorSeparatorNewline,
     target,
     silent,
+    experimental,
 } = argv;
 
 const log = createLogger('[Stylable code formatter]', true);
@@ -139,20 +145,22 @@ function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css') {
 function formatStylesheet(filePath: string) {
     const fileContent = nodeFs.readFileSync(filePath, 'utf-8');
 
-    const newText = getDocumentFormatting(
-        fileContent,
-        { start: 0, end: fileContent.length },
-        {
-            end_with_newline: endWithNewline,
-            indent_empty_lines: indentEmptyLines,
-            indent_size: indentSize,
-            indent_with_tabs: indentWithTabs,
-            max_preserve_newlines: maxPerserveNewlines,
-            newline_between_rules: newlineBetweenRules,
-            preserve_newlines: perserveNewlines,
-            selector_separator_newline: selectorSeparatorNewline,
-        }
-    );
+    const newText = experimental
+        ? formatCSS(fileContent)
+        : getDocumentFormatting(
+              fileContent,
+              { start: 0, end: fileContent.length },
+              {
+                  end_with_newline: endWithNewline,
+                  indent_empty_lines: indentEmptyLines,
+                  indent_size: indentSize,
+                  indent_with_tabs: indentWithTabs,
+                  max_preserve_newlines: maxPerserveNewlines,
+                  newline_between_rules: newlineBetweenRules,
+                  preserve_newlines: perserveNewlines,
+                  selector_separator_newline: selectorSeparatorNewline,
+              }
+          );
 
     if (newText.length) {
         writeFileSync(filePath, newText);
