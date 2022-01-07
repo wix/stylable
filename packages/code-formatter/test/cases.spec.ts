@@ -199,6 +199,11 @@ describe('Formatting - AtRule', () => {
             '@media screen {\n    .root {\n        color: red;\n    }\n}\n'
         );
     });
+    it('selector group indentation', () => {
+        expect(formatCSS(`@media screen {.${'x'.repeat(50)},.${'y'.repeat(50)} {}}\n`)).to.equal(
+            `@media screen {\n    .${'x'.repeat(50)},\n    .${'y'.repeat(50)} {}\n}\n`
+        );
+    });
 });
 
 // xdescribe('Formatting From cases', () => {

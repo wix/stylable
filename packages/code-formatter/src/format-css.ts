@@ -2,8 +2,8 @@ import { parse, AnyNode } from 'postcss';
 import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
 // TODO: comment before node should remove separation
 // TODO: declaration that starts with newline ???
-// TODO: indent of selector groups in nested levels
 // TODO: handle case the raws contains comments
+
 export function formatCSS(css: string) {
     const ast = parse(css);
     const NL = getLineEnding(css);
@@ -49,7 +49,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
         ast.raws.between = ' ';
         ast.raws.semicolon = childrenLen ? true : false;
-        ast.selector = formatSelectors(ast.selectors);
+        ast.selector = formatSelectors(ast.selectors, options);
     } else if (ast.type === 'decl') {
         ast.raws.before = NL + indent.repeat(indentLevel);
         if (ast.variable) {
@@ -63,7 +63,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 ast.prop.length + ast.raws.before.length - 1 /* -1 NL */ + ast.raws.between.length;
 
             const strs = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());
-            const newValue2 = groupBySize(strs).join(`,\n${' '.repeat(warpLineIndentSize)}`);
+            const newValue2 = groupBySize(strs).join(`,${NL}${' '.repeat(warpLineIndentSize)}`);
 
             ast.value = newValue2;
             if (ast.raws.value /* The postcss type does not represent the reality */) {
@@ -98,11 +98,11 @@ function groupMultipleValuesSeparatedByComma(ast: ReturnType<typeof parseCSSValu
     return groups;
 }
 
-function formatSelectors(selectors: string[]) {
+function formatSelectors(selectors: string[], { NL, indent, indentLevel }: FormatOptions) {
     // sort selectors by length from short to long
     selectors.sort((a, b) => a.length - b.length);
     const selectorsFormatted = groupBySize(selectors);
-    return selectorsFormatted.join(',\n');
+    return selectorsFormatted.join(`,${NL}${indent.repeat(indentLevel)}`);
 }
 
 function groupBySize(parts: string[], joinWith = ', ') {
