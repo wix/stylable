@@ -76,15 +76,14 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 ast.raws.between?.trimStart() ||
                 ':' /* no space here! css vars are space sensitive */;
         } else {
+            ast.raws.between = ': ';
             const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(ast.value));
-
             const warpLineIndentSize =
                 ast.prop.length + ast.raws.before.length - 1 /* -1 NL */ + ast.raws.between.length;
 
             const strs = valueGroups.map((valueAst) => stringifyCSSValue(valueAst));
             const newValue2 = groupBySize(strs).join(`,\n${' '.repeat(warpLineIndentSize)}`);
 
-            ast.raws.between = ': ';
             ast.value = newValue2;
             if (ast.raws.value /* The postcss type does not represent the reality */) {
                 delete (ast.raws as any).value;
