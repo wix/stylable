@@ -3,6 +3,7 @@ import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
 // TODO: comment before node should remove separation
 // TODO: declaration that starts with newline ???
 // TODO: handle case the raws contains comments
+// TODO: handle case where internal selector has newline (not the separation)
 
 export function formatCSS(css: string) {
     const ast = parse(css);
@@ -49,7 +50,8 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
         ast.raws.between = ' ';
         ast.raws.semicolon = childrenLen ? true : false;
-        ast.selector = formatSelectors(ast.selectors, options);
+        const hasNewLine = ast.selector.includes('\n' /* don't use NL */);
+        ast.selector = formatSelectors(ast.selectors, hasNewLine, options);
     } else if (ast.type === 'decl') {
         ast.raws.before = NL + indent.repeat(indentLevel);
         if (ast.variable) {
@@ -98,10 +100,14 @@ function groupMultipleValuesSeparatedByComma(ast: ReturnType<typeof parseCSSValu
     return groups;
 }
 
-function formatSelectors(selectors: string[], { NL, indent, indentLevel }: FormatOptions) {
+function formatSelectors(
+    selectors: string[],
+    forceNL: boolean,
+    { NL, indent, indentLevel }: FormatOptions
+) {
     // sort selectors by length from short to long
     selectors.sort((a, b) => a.length - b.length);
-    const selectorsFormatted = groupBySize(selectors);
+    const selectorsFormatted = forceNL ? selectors : groupBySize(selectors);
     return selectorsFormatted.join(`,${NL}${indent.repeat(indentLevel)}`);
 }
 

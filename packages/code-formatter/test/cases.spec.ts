@@ -61,6 +61,10 @@ describe('Formatting - Rule', () => {
         );
     });
 
+    it('selectors that included newline should preserve the newline', () => {
+        expect(formatCSS('.root,\n.part {}\n')).to.equal('.root,\n.part {}\n');
+    });
+
     it('rule with declarations should have newline after open block declaration should be indented once then new line before closing block closing block should start at rule selector start', () => {
         expect(formatCSS('.root {color: red;}\n')).to.equal('.root {\n    color: red;\n}\n');
     });
