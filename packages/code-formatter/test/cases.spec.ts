@@ -28,6 +28,12 @@ describe('Formatting - Top level', () => {
         expect(formatCSS('/*COMMENT*/\n\n\n.root {}')).to.equal('/*COMMENT*/\n.root {}\n');
     });
 
+    it('no format between comments', () => {
+        expect(formatCSS('/*COMMENT*//*COMMENT*/')).to.equal('/*COMMENT*//*COMMENT*/\n');
+        expect(formatCSS('/*COMMENT*/\n/*COMMENT*/')).to.equal('/*COMMENT*/\n/*COMMENT*/\n');
+        expect(formatCSS('/*COMMENT*/\n\n/*COMMENT*/')).to.equal('/*COMMENT*/\n\n/*COMMENT*/\n');
+    });
+
     it('no spaces before level 1 selector', () => {
         expect(formatCSS('   .root {}\n')).to.equal('.root {}\n');
     });

@@ -75,7 +75,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             }
         }
     } else if (ast.type === 'comment') {
-        if (ast.prev()?.type !== 'decl') {
+        if (ast.prev()?.type !== 'decl' && ast.prev()?.type !== 'comment') {
             const isFirstChildInNested = index === 0 && indentLevel > 0;
             const separation = isFirstChildInNested ? 0 : linesBetween;
             ast.raws.before =
