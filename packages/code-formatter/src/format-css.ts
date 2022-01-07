@@ -1,10 +1,9 @@
 import { parse, AnyNode } from 'postcss';
 import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
 
-// TODO: comment before node should remove separation
-// TODO: handle case where declaration value starts or include newline
+// TODO: handle case where declaration value starts or include newline - semi completed
 // TODO: handle case where "raws" contains comments or newlines
-// TODO: handle case where internal selector has newline (not the separation)
+// TODO: handle case where internal selector has newline (not the separation ,\n)
 
 export function formatCSS(css: string) {
     const ast = parse(css);
@@ -64,12 +63,24 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 ast.raws.between?.trimStart() ||
                 ':' /* no space here! css vars are space sensitive */;
         } else {
-            ast.raws.between = ': ';
+            const hasNewLineBeforeValue = ast.raws.between?.includes('\n' /* don't use NL */);
+
+            ast.raws.between = hasNewLineBeforeValue ? ':\n' : ': ';
             const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(ast.value));
             const warpLineIndentSize =
-                ast.prop.length + ast.raws.before.length - 1 /* -1 NL */ + ast.raws.between.length;
-            const values = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());
-            ast.value = groupBySize(values).join(`,${NL}${' '.repeat(warpLineIndentSize)}`);
+                ast.raws.before.length - 1 /* -1 NL */ + ast.prop.length + ast.raws.between.length;
+            if (hasNewLineBeforeValue) {
+                // TODO: check if we want to preserve original indentation
+                ast.value = valueGroups
+                    .map(
+                        (valueAst) =>
+                            indent.repeat(indentLevel + 1) + stringifyCSSValue(valueAst).trim()
+                    )
+                    .join(',' + NL);
+            } else {
+                const values = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());
+                ast.value = groupBySize(values).join(`,${NL}${' '.repeat(warpLineIndentSize)}`);
+            }
             if (ast.raws.value /* The postcss type does not represent the reality */) {
                 delete (ast.raws as any).value;
             }

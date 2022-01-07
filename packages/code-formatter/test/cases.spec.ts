@@ -189,6 +189,15 @@ describe('Formatting - Decl', () => {
         );
     });
 
+    it('preserve new line after colon and indent value +1', () => {
+        expect(formatCSS('\ngrid-template-areas:\n    "A B"\n    "A B";\n')).to.equal(
+            '\ngrid-template-areas:\n    "A B"\n    "A B";\n'
+        );
+        expect(formatCSS(`\ngrid-template-areas:${'    '}\n    "A B"\n    "A B";\n`)).to.equal(
+            '\ngrid-template-areas:\n    "A B"\n    "A B";\n'
+        );
+    });
+
     it.skip('comments before and after colon', () => {
         expect(formatCSS('.root {color/*!*/:/*!*/red;}\n')).to.equal('.root {\n?????\n}\n');
     });
