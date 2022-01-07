@@ -11,8 +11,11 @@ describe('Formatting - Top level', () => {
     it('preserve new line type at the end', () => {
         expect(formatCSS('/*\r\n*/')).to.equal('/*\r\n*/\r\n');
     });
-    it('one line after each rule', () => {
-        expect(formatCSS('.root {}\n\n.root {}')).to.equal('.root {}\n.root {}\n');
+    it('one line separation after each rule', () => {
+        expect(formatCSS('.root {}\n\n\n.root {}')).to.equal('.root {}\n\n.root {}\n');
+        expect(formatCSS('.root {}\n\n.root {}')).to.equal('.root {}\n\n.root {}\n');
+        expect(formatCSS('.root {}\n.root {}')).to.equal('.root {}\n\n.root {}\n');
+        expect(formatCSS('.root {}.root {}')).to.equal('.root {}\n\n.root {}\n');
     });
     it('no spaces before level 1 selector', () => {
         expect(formatCSS('   .root {}\n')).to.equal('.root {}\n');
@@ -182,8 +185,11 @@ describe('Formatting - AtRule', () => {
     it('one space after params', () => {
         expect(formatCSS(`@media screen${'    '}{}\n`)).to.equal(`@media screen {}\n`);
     });
-    it('format children with indent', () => {
+    it('format children with indent no separation before first rule', () => {
         expect(formatCSS('@media screen {.root {color: red;}}\n')).to.equal(
+            '@media screen {\n    .root {\n        color: red;\n    }\n}\n'
+        );
+        expect(formatCSS('@media screen {\n\n\n\n.root {color: red;}}\n')).to.equal(
             '@media screen {\n    .root {\n        color: red;\n    }\n}\n'
         );
     });

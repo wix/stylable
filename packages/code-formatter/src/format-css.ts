@@ -1,12 +1,35 @@
 import { parse, AnyNode } from 'postcss';
 import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
-
+// TODO: comment before node should remove separation
+// TODO: declaration that starts with newline ???
+// TODO: indent of selector groups in nested levels
+/* TODO: 
+.root {
+  -st-extends: Dialog;
+  -st-states: running, shouldHide;
+}
+*/
+/* TODO:
+.root {
+  -st-states: running, completed, disabled, toggled, output, error, expanded, hidden, togglingEnabled;
+  min-width: 400px;
+  min-height: 43px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+}
+*/ 
 export function formatCSS(css: string) {
     const ast = parse(css);
     const NL = getLineEnding(css);
     const indent = '    ';
     const indentLevel = 0;
-    ast.nodes.forEach((node, i) => formatAst(node, i, { NL, indent, indentLevel }));
+    ast.nodes.forEach((node, i) =>
+        formatAst(node, i, { NL, indent, indentLevel, linesBetween: 1 })
+    );
     const outputCSS = ast.toString();
     return outputCSS.endsWith('\n') || outputCSS.length === 0 ? outputCSS : outputCSS + NL;
 }
@@ -15,24 +38,34 @@ type FormatOptions = {
     NL: string;
     indent: string;
     indentLevel: number;
+    linesBetween: number;
 };
 
 function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
-    const { NL, indent, indentLevel } = options;
+    const { NL, indent, indentLevel, linesBetween } = options;
     if (ast.type === 'atrule') {
         // TODO: handle case the raws contains comments
         // TODO: handle params
 
         /* The postcss type does not represent the reality there are atRules without nodes */
         const childrenLen = ast.nodes?.length ?? -1;
-        ast.raws.before = index !== 0 || indentLevel > 0 ? NL + indent.repeat(indentLevel) : '';
+        const separation = childrenLen === -1 ? 0 : linesBetween;
+        ast.raws.before =
+            index !== 0 || indentLevel > 0
+                ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
+                : '';
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
         ast.raws.afterName = ast.params.length ? ' ' : '';
         ast.raws.between = childrenLen === -1 ? '' : ' ';
     } else if (ast.type === 'rule') {
         const childrenLen = ast.nodes.length;
         // TODO: handle case the raws contains comments
-        ast.raws.before = index !== 0 || indentLevel > 0 ? NL + indent.repeat(indentLevel) : '';
+        const isFirstChild = index === 0 && indentLevel > 0;
+        const separation = isFirstChild ? 0 : linesBetween;
+        ast.raws.before =
+            index !== 0 || indentLevel > 0
+                ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
+                : '';
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
         ast.raws.between = ' ';
         ast.raws.semicolon = childrenLen ? true : false;
@@ -66,7 +99,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     }
     if ('nodes' in ast) {
         ast.nodes.forEach((node, i) =>
-            formatAst(node, i, { NL, indent, indentLevel: indentLevel + 1 })
+            formatAst(node, i, { NL, indent, linesBetween, indentLevel: indentLevel + 1 })
         );
     }
 }
