@@ -63,7 +63,8 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 ast.raws.between?.trimStart() ||
                 ':' /* no space here! css vars are space sensitive */;
         } else {
-            const hasNewLineBeforeValue = ast.raws.between?.includes('\n' /* don't use NL */);
+            
+            const hasNewLineBeforeValue = ast.raws.between?.match(/:.*?\n.*?$/)
 
             ast.raws.between = hasNewLineBeforeValue ? ':\n' : ': ';
             const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(ast.value));
@@ -72,10 +73,15 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             if (hasNewLineBeforeValue) {
                 // TODO: check if we want to preserve original indentation
                 ast.value = valueGroups
-                    .map(
-                        (valueAst) =>
-                            indent.repeat(indentLevel + 1) + stringifyCSSValue(valueAst).trim()
-                    )
+                    .map((valueAst) => {
+                        return stringifyCSSValue(valueAst)
+                            .trim()
+                            .split(/\r?\n/gm)
+                            .map((part) => {
+                                return indent.repeat(indentLevel + 1) + part.trim();
+                            })
+                            .join(NL);
+                    })
                     .join(',' + NL);
             } else {
                 const values = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());

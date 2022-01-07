@@ -198,6 +198,12 @@ describe('Formatting - Decl', () => {
         );
     });
 
+    it('re-indent values contains newlines', () => {
+        expect(formatCSS(`\ngrid-template-areas:\n        "A B"\n        "A B";\n`)).to.equal(
+            '\ngrid-template-areas:\n    "A B"\n    "A B";\n'
+        );
+    });
+
     it.skip('comments before and after colon', () => {
         expect(formatCSS('.root {color/*!*/:/*!*/red;}\n')).to.equal('.root {\n?????\n}\n');
     });
