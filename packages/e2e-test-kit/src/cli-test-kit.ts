@@ -189,7 +189,7 @@ export function populateDirectorySync(
             if (content.type === smlinkSymbol) {
                 const existingPath = join(path, content.path as string);
                 try {
-                    symlinkSync(existingPath, path);
+                    symlinkSync(existingPath, path, 'junction');
                 } catch {
                     // The existing path does not exist yet so we save it in the context to create it later.
 
@@ -204,7 +204,7 @@ export function populateDirectorySync(
 
                 if (context.smlinks.has(path)) {
                     for (const linkedPath of context.smlinks.get(path)!) {
-                        symlinkSync(path, linkedPath);
+                        symlinkSync(path, linkedPath, 'junction');
                     }
 
                     context.smlinks.delete(path);
@@ -217,7 +217,7 @@ export function populateDirectorySync(
 
             if (context.smlinks.has(path)) {
                 for (const linkedPath of context.smlinks.get(path)!) {
-                    symlinkSync(path, linkedPath);
+                    symlinkSync(path, linkedPath, 'junction');
                 }
 
                 context.smlinks.delete(path);
