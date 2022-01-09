@@ -1,18 +1,26 @@
 #!/usr/bin/env node
-import { nodeFs } from '@file-services/node';
-import { Stylable } from '@stylable/core';
-import { build } from './build';
+import { nodeFs as fs } from '@file-services/node';
+import { buildStylable } from './build-stylable';
+import { createDefaultOptions, getCliArguments, resolveCliOptions } from './config/resolve-options';
 import { createLogger } from './logger';
-import { projectsConfig } from './projects-config';
-import { getCliArguments } from './resolve-options';
 
 async function main() {
     const argv = getCliArguments();
-    const log = createLogger('[Stylable]', argv.log ?? false);
+    const { resolve } = fs;
+    const { watch, require: requires, log: shouldLog, namespaceResolver } = argv;
+    const { resolveNamespace } = require(namespaceResolver);
+    const rootDir = resolve(argv.rootDir);
 
-    log('[CLI Arguments]', argv);
-
-    const { watch, require: requires } = argv;
+    //
+    const log = createLogger(
+        (level, ...messages) => {
+            if (shouldLog || level === 'info') {
+                const currentTime = new Date().toLocaleTimeString();
+                console.log('[Stylable]', `[${currentTime}]`, ...messages);
+            }
+        },
+        () => !shouldLog && console.clear()
+    );
 
     // execute all require hooks before running the CLI build
     for (const request of requires) {
@@ -21,36 +29,24 @@ async function main() {
         }
     }
 
-    const projects = projectsConfig(argv);
-    const resolverCache = new Map();
+    const defaultOptions = createDefaultOptions();
+    const overrideBuildOptions = resolveCliOptions(argv, defaultOptions);
+    const { watchHandler } = await buildStylable(rootDir, {
+        overrideBuildOptions,
+        defaultOptions,
+        fs,
+        resolveNamespace,
+        watch,
+        log,
+    });
 
-    for (const [projectRoot, options] of Object.entries(projects)) {
-        const { dts, dtsSourceMap } = options;
+    process.on('SIGTERM', () => {
+        void watchHandler.stop();
+    });
 
-        log('[Project]', projectRoot, options);
-
-        if (!dts && dtsSourceMap) {
-            throw new Error(`"dtsSourceMap" requires turning on "dts"`);
-        }
-
-        const fileSystem = nodeFs;
-        const stylable = Stylable.create({
-            fileSystem,
-            requireModule: require,
-            projectRoot,
-            resolveNamespace: require(argv.namespaceResolver).resolveNamespace,
-            resolverCache,
-        });
-
-        await build({
-            watch,
-            stylable,
-            log,
-            fs: fileSystem,
-            rootDir: projectRoot,
-            ...options,
-        });
-    }
+    process.on('SIGINT', () => {
+        void watchHandler.stop();
+    });
 }
 
 main().catch((e) => {

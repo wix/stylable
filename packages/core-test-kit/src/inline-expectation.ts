@@ -1,5 +1,5 @@
 import { matchDiagnostic } from './diagnostics';
-import type { StylableMeta, DiagnosticType } from '@stylable/core';
+import type { StylableMeta } from '@stylable/core';
 import type * as postcss from 'postcss';
 
 interface Test {
@@ -299,66 +299,21 @@ function declTest(_context: Context, expectation: string, targetNode: AST, _srcN
     }
     return result;
 }
-function analyzeTest({ meta }: Context, expectation: string, _targetNode: AST, srcNode: AST): Test {
-    const result: Test = {
-        type: `@analyze`,
-        expectation,
-        errors: [],
-    };
-    const matchResult = expectation.match(
-        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>.*)/
-    );
-    if (!matchResult) {
-        result.errors.push(testInlineExpectsErrors.analyzeMalformed(expectation));
-        return result;
-    }
-    let { label, severity, message, word } = matchResult.groups!;
-    label = label ? label + `: ` : ``;
-    severity = severity?.trim() || ``;
-    message = message?.trim() || ``;
-    word = word?.trim() || ``;
-
-    if (!message) {
-        result.errors.push(testInlineExpectsErrors.analyzeMalformed(expectation, label));
-        return result;
-    }
-    // check for diagnostic
-    const error = matchDiagnostic(
-        `analyze`,
-        meta,
-        {
-            label,
-            message,
-            severity,
-            location: {
-                start: srcNode.source?.start,
-                end: srcNode.source?.end,
-                word,
-                css: ``,
-            },
-        },
-        {
-            diagnosticsNotFound: testInlineExpectsErrors.diagnosticsNotFound,
-            unsupportedSeverity: testInlineExpectsErrors.diagnosticsUnsupportedSeverity,
-            locationMismatch: testInlineExpectsErrors.diagnosticsLocationMismatch,
-            wordMismatch: testInlineExpectsErrors.diagnosticsWordMismatch,
-            severityMismatch: testInlineExpectsErrors.diagnosticsSeverityMismatch,
-            expectedNotFound: testInlineExpectsErrors.diagnosticExpectedNotFound,
-        }
-    );
-    if (error) {
-        result.errors.push(error);
-    }
-    return result;
+function analyzeTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+    return diagnosticTest(`analyze`, context, expectation, targetNode, srcNode);
 }
-function transformTest(
+function transformTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+    return diagnosticTest(`transform`, context, expectation, targetNode, srcNode);
+}
+function diagnosticTest(
+    type: `analyze` | `transform`,
     { meta }: Context,
     expectation: string,
     _targetNode: AST,
     srcNode: AST
 ): Test {
     const result: Test = {
-        type: `@transform`,
+        type: `@${type}`,
         expectation,
         errors: [],
     };
@@ -366,7 +321,7 @@ function transformTest(
         /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>.*)/
     );
     if (!matchResult) {
-        result.errors.push(testInlineExpectsErrors.transformMalformed(expectation));
+        result.errors.push(testInlineExpectsErrors.diagnosticsMalformed(type, expectation));
         return result;
     }
     let { label, severity, message, word } = matchResult.groups!;
@@ -376,12 +331,12 @@ function transformTest(
     word = word?.trim() || ``;
 
     if (!message) {
-        result.errors.push(testInlineExpectsErrors.transformMalformed(expectation, label));
+        result.errors.push(testInlineExpectsErrors.diagnosticsMalformed(type, expectation, label));
         return result;
     }
     // check for diagnostic
     const error = matchDiagnostic(
-        `transform`,
+        type,
         meta,
         {
             label,
@@ -463,19 +418,9 @@ export const testInlineExpectsErrors = {
         }
     },
     deprecatedRootInputNotSupported: (expectation: string) =>
-        `"${expectation}" is not supported for the used input, try calling testInlineExpects(generateStylableResults())`,
-    analyzeMissingDiagnostic: ({
-        message,
-        label = ``,
-    }: {
-        severity: DiagnosticType;
-        message: string;
-        label?: string;
-    }) => `${label}expected "${message}" diagnostic`,
-    analyzeMalformed: (expectation: string, label = ``) =>
-        `${label}malformed @analyze expectation "@analyze${expectation}". format should be: "analyze-[severity] diagnostic message"`,
-    transformMalformed: (expectation: string, label = ``) =>
-        `${label}malformed @transform expectation "@transform${expectation}". format should be: "transform-[severity] diagnostic message"`,
+        `"${expectation}" is not supported for with the used input, try calling testInlineExpects(generateStylableResults())`,
+    diagnosticsMalformed: (type: string, expectation: string, label = ``) =>
+        `${label}malformed @${type} expectation "@${type}${expectation}". format should be: "@${type}-[severity] diagnostic message"`,
     diagnosticsNotFound: (type: string, message: string, label = ``) =>
         `${label}${type} diagnostics not found for "${message}"`,
     diagnosticsUnsupportedSeverity: (type: string, severity: string, label = ``) =>

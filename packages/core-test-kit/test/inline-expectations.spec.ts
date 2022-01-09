@@ -28,6 +28,12 @@ describe('inline-expectations', () => {
         );
     });
     it('should throw when expected amount is not found (auto)', () => {
+        /* simple parse amount of expected tests to compare to the actual run tests
+           and throw in case actual tests diff from expected.
+
+           `@check` is used without expectation input which is counted in the simple auto
+           expectation, but is not generating an actual test.
+        */
         const result = generateStylableResult({
             entry: `/style.st.css`,
             files: {
@@ -286,7 +292,7 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.unsupportedMixinNode(`decl`)
             );
         });
-        it('should add label to thrown miss matches', () => {
+        it('should add label to thrown mismatches', () => {
             const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
@@ -498,28 +504,14 @@ describe('inline-expectations', () => {
                             .root {
                                 /* @decl color: green */
                                 color: green;
-                            }
-                        `,
-                    },
-                },
-            });
 
-            expect(() => testInlineExpects(result)).to.not.throw();
-        });
-        it('should not throw when valid (various formats)', () => {
-            const result = generateStylableResult({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            .root {
                                 /* @decl(no-spaces)color:green */
                                 color: green;
                                 
                                 /* @decl(all-spaces)  color  :      green */
                                 color: green;
                             }
+                            
                         `,
                     },
                 },
@@ -529,7 +521,7 @@ describe('inline-expectations', () => {
         });
     });
     describe(`@analyze`, () => {
-        it(`should throw on malformed diagnostic`, () => {
+        it(`should throw on malformed expectation`, () => {
             const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
@@ -551,9 +543,13 @@ describe('inline-expectations', () => {
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.combine([
-                    testInlineExpectsErrors.analyzeMalformed(`-`),
-                    testInlineExpectsErrors.analyzeMalformed(`-warn`),
-                    testInlineExpectsErrors.analyzeMalformed(`-warn(label)`, `(label): `),
+                    testInlineExpectsErrors.diagnosticsMalformed(`analyze`, `-`),
+                    testInlineExpectsErrors.diagnosticsMalformed(`analyze`, `-warn`),
+                    testInlineExpectsErrors.diagnosticsMalformed(
+                        `analyze`,
+                        `-warn(label)`,
+                        `(label): `
+                    ),
                 ])
             );
         });
@@ -785,7 +781,7 @@ describe('inline-expectations', () => {
         });
     });
     describe(`@transform`, () => {
-        it(`should throw on malformed diagnostic`, () => {
+        it(`should throw on malformed expectation`, () => {
             const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
@@ -807,9 +803,13 @@ describe('inline-expectations', () => {
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.combine([
-                    testInlineExpectsErrors.transformMalformed(`-`),
-                    testInlineExpectsErrors.transformMalformed(`-warn`),
-                    testInlineExpectsErrors.transformMalformed(`-warn(label)`, `(label): `),
+                    testInlineExpectsErrors.diagnosticsMalformed(`transform`, `-`),
+                    testInlineExpectsErrors.diagnosticsMalformed(`transform`, `-warn`),
+                    testInlineExpectsErrors.diagnosticsMalformed(
+                        `transform`,
+                        `-warn(label)`,
+                        `(label): `
+                    ),
                 ])
             );
         });
@@ -1036,18 +1036,19 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @transform-warn word(./x.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
+                            /* @transform-warn(should match) word(./x.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
                                 `./x.st.css`
                             )} */
                             @st-import A from "./x.st.css";
 
-                            /* @transform-warn ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
+                            /* @transform-warn(should fail) ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
                             @st-import B from "./x.st.css";
                         `,
                     },
                 },
             });
 
+            // only the second expectation should fail - the first one should be found
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.diagnosticExpectedNotFound(
                     `transform`,

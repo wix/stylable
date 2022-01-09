@@ -8,6 +8,8 @@ export function handleAssets(
     outDir: string,
     fs: IFileSystem
 ) {
+    const generatedAssets = new Set<string>();
+
     const { dirname, join } = fs;
     for (const originalPath of assets) {
         if (fs.existsSync(originalPath)) {
@@ -16,6 +18,9 @@ export function handleAssets(
             const targetDir = dirname(targetPath);
             ensureDirectory(targetDir, fs);
             fs.writeFileSync(targetPath, content);
+            generatedAssets.add(targetPath);
         }
     }
+
+    return generatedAssets;
 }

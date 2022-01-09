@@ -6,5 +6,16 @@ export {
     evalCssJSModule,
     webpackTest,
 } from './webpack-in-memory-test';
+export {
+    createCliTester,
+    loadDirSync,
+    populateDirectorySync,
+    runCliCodeMod,
+    runCliSync,
+    runFormatCliSync,
+    writeToExistingFile,
+    escapeRegExp,
+    smlinkSymbol,
+} from './cli-test-kit';
 export { runServer } from './run-server';
 export { DTSKit } from './dts-kit';

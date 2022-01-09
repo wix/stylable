@@ -661,15 +661,25 @@ describe('Javascript Mixins', () => {
                     .container {
                         -st-mixin: mixin;
                     }
+                    @keyframes st-global(conflict) {}
                 `,
                 },
                 '/mixin.js': {
                     content: `
                     module.exports = function() {
                         return {
-                            "@keyframes abc": {
+                            "@keyframes unknown": {
                                 "0%": { "color": "red" },
                                 "100%": { "color": "green" }
+                            },
+                            "@keyframes conflict": {},
+                            "@keyframes st-global(global-name)": {},
+                            ".x": {
+                                "animation-name": [
+                                    "unknown",
+                                    "conflict",
+                                    "global-name",
+                                ],
                             }
                         }
                     }
@@ -678,14 +688,37 @@ describe('Javascript Mixins', () => {
             },
         });
 
-        const { 0: rule, 1: keyframes } = result.nodes;
+        const {
+            0: rule,
+            1: unknownKeyframes,
+            2: knownKeyframes,
+            3: globalKeyframes,
+            4: animationDeclRule,
+        } = result.nodes;
         expect((rule as any).nodes.length, 'rule is empty').to.equal(0);
-        if (keyframes.type !== 'atrule') {
-            throw new Error('expected 2nd rule to be the @keyframes');
+        if (
+            unknownKeyframes.type !== 'atrule' ||
+            knownKeyframes.type !== 'atrule' ||
+            globalKeyframes.type !== 'atrule' ||
+            animationDeclRule.type !== 'rule'
+        ) {
+            throw new Error('expected 3 injected to be the @keyframes');
         }
-        expect(keyframes.params, 'keyframes id').to.equal('entry__abc');
-        expect((keyframes as any).nodes[0].selector, 'first keyframe').to.equal('0%');
-        expect((keyframes as any).nodes[1].selector, 'last keyframe').to.equal('100%');
+        expect(unknownKeyframes.params, 'new id').to.equal('entry__unknown');
+        expect((unknownKeyframes as any).nodes[0].selector, 'first keyframe').to.equal('0%');
+        expect((unknownKeyframes as any).nodes[1].selector, 'last keyframe').to.equal('100%');
+        expect(knownKeyframes.params, 'existing id').to.equal('conflict');
+        expect(globalKeyframes.params, 'global id').to.equal('global-name');
+        expect(globalKeyframes.params, 'global id').to.equal('global-name');
+        expect(
+            (animationDeclRule as any).nodes[1].value,
+            `conflict value - prefer stylesheet`
+        ).to.equal(`conflict`);
+        // ToDo: pass with mixin symbols - once mixin symbols are available in transformer
+        // expect((animationDeclRule as any).nodes[0].value, `unknown value`).to.equal(
+        //     `entry__unknown`
+        // );
+        // expect((animationDeclRule as any).nodes[2].value, `global value`).to.equal(`global-name`);
     });
 
     describe('url() handling', () => {

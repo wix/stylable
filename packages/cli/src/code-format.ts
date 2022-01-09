@@ -105,7 +105,10 @@ const {
     silent,
 } = argv;
 
-const log = createLogger('[Stylable code formatter]', true);
+const log = createLogger(
+    (_, ...messages) => console.log('[Stylable code formatter]', ...messages),
+    () => console.clear()
+);
 
 if (debug) {
     log('[Arguments]', argv);
