@@ -2,117 +2,126 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/core-test-kit.svg)](https://www.npmjs.com/package/stylable/core-test-kit)
 
-`@stylable/core-test-kit` is a collection of utilities aimed at making testing Stylable core behavior and functionality easier.
+## Inline expectations syntax
 
-## What's in this test-kit?
+The inline expectation syntax can be used with `testInlineExpects` for testing stylesheets transformation and diagnostics.
 
-### Matchers
+An expectation is written as a comment just before the code it checks on. All expectations support `label` that will be thrown as pars of an expectation fail message.
 
-An assortment of `Chai` matchers used by Stylable.
+### **@rule** - check rule transformation including selector and nested declarations:
 
-- `flat-match` - flattens and matches passed arguments
-- `results` - test Stylable transpiled style rules output
+Selector - `@rule SELECTOR`
+```css 
+/* @rule .entry__root::before */
+.root::before {}
+```
 
-### Diagnostics tooling
+Declarations - `@rule SELECTOR { decl: val; }`
+```css 
+/* @rule .entry__root { color: red } */
+.root { color: red; }
 
-A collection of tools used for testing Stylable diagnostics messages (warnings and errors).
+/* @rule .entry__root {
+    color: red;
+    background: green;
+}*/
+.root {
+    color: red;
+    background: green;
+}
+```
 
-- `expectAnalyzeDiagnostics` - processes a Stylable input and checks for diagnostics during processing
-- `expectTransformDiagnostics` - checks for diagnostics after a full transformation
-- `shouldReportNoDiagnostics` - helper to check no diagnostics were reported
-
-### Testing infrastructure
-
-Used for setting up Stylable instances (`processor`/`transformer`) and their infrastructure:
-
-- `generateInfra` - create Stylable basic in memory infrastructure (`resolver`, `requireModule`, `fileProcessor`)
-- `generateStylableResult` - genetare transformation results from in memory configuration
-- `generateStylableRoot` - helper over `generateStylableResult` that returns the `outputAst`
-- `generateStylableExports` - helper over `generateStylableResult` that returns the `exports` mapping
-
-### `testInlineExpects` utility
-
-Exposes `testInlineExpects` for testing transformed stylesheets that include inline expectation comments. These are the most common type of core tests and the recommended way of testing the core functionality.
-
-#### Supported checks:
-
-Rule checking (place just before rule) supporting multi-line declarations and multiple `@checks` statements
-
-##### Terminilogy
-- `LABEL: <string>` - label for the test expectation 
-- `OFFEST: <number>` - offest for the tested rule after the `@check`   
-- `SELECTOR: <string>` - output selector
-- `DECL: <string>` - declaration name
-- `VALUE: <string>` - declaration value 
-
-Full options:
+Target generated rules (mixin) - ` @rule[OFFSET] SELECTOR`
 ```css
-/* @check(LABEL)[OFFEST] SELECTOR {DECL: VALUE} */
-```
-
-Basic - `@check SELECTOR`
-```css 
-/* @check header::before */
-header::before {}
-```
-
-With declarations - ` @check SELECTOR {DECL1: VALUE1; DECL2: VALUE2;}`
-
-This will check full match and order.
-```css 
-.my-mixin {
+.mix {
     color: red;
 }
-
-/* @check .entry__container {color: red;} */
-.container {
-    -st-mixin: my-mixin;
-}
-```
-
-Target generated rules (mixin) - ` @check[OFFEST] SELECTOR`
-```css
-.my-mixin {
-    color: blue;
+.mix:hover {
+    color: green;
 }
 /* 
-    @check[1] .entry__container:hover {color: blue;} 
+    @rule .entry__root {color: red;} 
+    @rule[1] .entry__root:hover {color: green;} 
 */
-.container {
-    -st-mixin: my-mixin;
+.root {
+    -st-mixin: mix;
 }
 ```
 
-Support atrule params (anything between the @atrule and body or semicolon):
+Label - `@rule(LABEL) SELECTOR`
 ```css
-/* @check screen and (min-width: 900px) */
+/* @rule(expect 1) .entry__root */
+.root {}
+
+/* @rule(expect 2) .entry__part */
+.part {}
+```
+
+### **@atrule** - check at-rule transformation of params:
+
+AtRule params - `@atrule PARAMS`:
+```css
+/* @atrule screen and (min-width: 900px) */
 @media value(smallScreen) {}
 ```
-#### Example 
-Here we are generating a Stylable AST which lncludes the `/* @check SELECTOR */` comment to test the root class selector target.
 
-The `testInlineExpects` function performs that actual assertions to perform the test.
-
-```ts
-it('...', ()=>{
-    const root = generateStylableRoot({
-        entry: `/style.st.css`,
-        files: {
-            '/style.st.css': {
-                namespace: 'ns',
-                content: `
-                /* @check .ns__root */
-                .root {}
-            `
-        },
-    });
-    testInlineExpects(root, 1);
-})
+Label - `@atrule(LABEL) PARAMS`
+```css
+/* @rule(jump keyframes) entry__jump */
+@keyframes jump {}
 ```
 
-### Match rules
+### **@decl** - check declaration transformation
 
-Exposes two utility functions (`matchRuleAndDeclaration` and `matchAllRulesAndDeclarations`) used for testing Stylable generated AST representing CSS rules and declarations.
+Prop & value - `@decl PROP: VALUE`
+```css
+.root {
+    /* @decl color: red */
+    color: red
+}
+```
+
+Label - `@decl(LABEL) PROP: VALUE`
+```css
+.root {
+    /* @decl(color is red) color: red*/
+    color: red;
+}
+```
+
+### **@analyze & @transform** - check single file (analyze) and multiple files (transform) diagnostics:
+
+Severity - `@analyze-SEVERITY MESSAGE` / `@transform-SEVERITY MESSAGE`
+```css
+/* @analyze-info found deprecated usage */
+@st-global-custom-property --x;
+
+/* @analyze-warn missing keyframes name */
+@keyframes {}
+
+/* @analyze-error invalid functional id */
+#id() {}
+
+.root {
+    /* @transform-error unresolved "unknown" build variable */
+    color: value(unknown);
+}
+```
+
+Word - `@analyze-SEVERITY word(TEXT) MESSAGE` / `@transform-SEVERITY word(TEXT) MESSAGE`
+```css
+/* @transform-warn word(unknown) unknown pseudo element */
+.root::unknown {}
+```
+
+Label - `@analyze(LABEL) MESSAGE` / `@transform(LABEL) MESSAGE`
+```css
+/* @analyze-warn(local keyframes) missing keyframes name */
+@keyframes {}
+
+/* @transform-warn(imported keyframes) unresolved keyframes "unknown" */
+@keyframes unknown {}
+```
 
 ## License
 
