@@ -437,7 +437,7 @@ function getNextMixinRule(originRule: postcss.Rule, count: number) {
 
 export const testInlineExpectsErrors = {
     matchAmount: (expectedAmount: number, actualAmount: number) =>
-        `Expected ${expectedAmount} checks to run but there was ${actualAmount}`,
+        `Expected "${expectedAmount}" checks to run but "${actualAmount}" were found`,
     unsupportedNode: (testType: string, nodeType: string, label = ``) =>
         `${label}unsupported type "${testType}" for "${nodeType}"`,
     selector: (expectedSelector: string, actualSelector: string, label = ``) =>
@@ -445,11 +445,11 @@ export const testInlineExpectsErrors = {
     declarations: (expectedDecl: string, actualDecl: string, selector: string, label = ``) =>
         `${label}expected ${selector} to have declaration {${expectedDecl}}, but got {${actualDecl}}`,
     unfoundMixin: (expectInput: string) => `cannot locate mixed-in rule for "${expectInput}"`,
-    unsupportedMixinNode: (type: string) => `unsupported mixin expectation of type ${type}`,
+    unsupportedMixinNode: (type: string) => `unsupported mixin expectation of type "${type}"`,
     ruleMalformedDecl: (decl: string, expectInput: string) =>
         `error in expectation "${decl}" of "${expectInput}"`,
     atruleParams: (expectedParams: string, actualParams: string, label = ``) =>
-        `${label}expected ${actualParams} to transform to ${expectedParams}`,
+        `${label}expected "${actualParams}" to transform to ${expectedParams}`,
     atRuleMultiTest: (comment: string) => `atrule mixin is not supported: (${comment})`,
     decl: (expected: string, actual: string, label = ``) =>
         `${label}expected "${actual}" to transform to "${expected}"`,
@@ -463,7 +463,7 @@ export const testInlineExpectsErrors = {
         }
     },
     deprecatedRootInputNotSupported: (expectation: string) =>
-        `"${expectation}" is not supported for with the used input, try calling testInlineExpects(generateStylableResults())`,
+        `"${expectation}" is not supported for the used input, try calling testInlineExpects(generateStylableResults())`,
     analyzeMissingDiagnostic: ({
         message,
         label = ``,
@@ -481,9 +481,9 @@ export const testInlineExpectsErrors = {
     diagnosticsUnsupportedSeverity: (type: string, severity: string, label = ``) =>
         `${label}unsupported @${type}-[severity]: "${severity}"`,
     diagnosticsLocationMismatch: (type: string, message: string, label = ``) =>
-        `${label}expected "@${type}-[severity] "${message}" to be reported in location, but got it somewhere else`,
+        `${label}expected "@${type}-[severity] "${message}" to be reported in this location, but got it somewhere else`,
     diagnosticsWordMismatch: (type: string, expectedWord: string, message: string, label = ``) =>
-        `${label}expected word in "@${type}-[severity] word(${expectedWord}) ${message}" to be found, but it wasn't`,
+        `${label}expected word in "@${type}-[severity] word(${expectedWord}) ${message}" was not found`,
     diagnosticsSeverityMismatch: (
         type: string,
         expectedSeverity: string,
@@ -491,8 +491,8 @@ export const testInlineExpectsErrors = {
         message: string,
         label = ``
     ) =>
-        `${label}expected ${type} diagnostic "${message}" to be reported with "${expectedSeverity}, but it was reported with "${actualSeverity}"`,
+        `${label}expected ${type} diagnostic "${message}" to be reported with "${expectedSeverity}", but it was reported with "${actualSeverity}"`,
     diagnosticExpectedNotFound: (type: string, message: string, label = ``) =>
-        `${label}no ${type} diagnostic found for "${message}"`,
+        `${label}no "${type}" diagnostic found for "${message}"`,
     combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
 };
