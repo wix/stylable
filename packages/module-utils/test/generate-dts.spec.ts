@@ -85,6 +85,36 @@ describe('Generate DTS', function () {
         expect(tk.typecheck('test.ts')).to.equal('');
     });
 
+    it('should generate complex Stylable var .d.ts', () => {
+        tk.populate({
+            'test.st.css': `
+                :vars {
+                    a: st-map(
+                        b st-array(red, blue, st-map(d green)),
+                        c gold,
+                    )
+                }
+              `,
+            'test.ts': `
+                import { eq } from "./test-kit";
+                import { stVars } from "./test.st.css";
+                
+                eq<{
+                    b: [
+                        string, 
+                        string, 
+                        {
+                            d: string;
+                        }
+                    ];
+                    c: string;
+                }>(stVars.a);
+            `,
+        });
+
+        expect(tk.typecheck('test.ts')).to.equal('');
+    });
+
     it('should warn about non-existing Stylable var', () => {
         tk.populate({
             'test.st.css': ':vars {c1: green;}',

@@ -63,10 +63,30 @@ function stringifyStates(meta: StylableMeta) {
     return out;
 }
 
-function stringifyStringRecord(record: Record<string, string>, indent = SPACING) {
-    return Object.keys(record)
-        .map((k) => `${indent}${asString(k)}: string;`)
-        .join('\n');
+function stringifyStringRecord(
+    record: Record<string, any>,
+    addParentasis = false,
+    delimiter = '\n'
+): string {
+    const s = Object.entries(record)
+        .map(([key, value]) => `${SPACING}${asString(key)}: ${stringifyValue(value, delimiter)};`)
+        .join(delimiter);
+
+    return addParentasis ? `{${s}}` : s;
+}
+
+function stringifyStringArray(array: any[], delimiter = '\n') {
+    return `[${array.map((value) => `${stringifyValue(value, delimiter)},`).join(delimiter)}]`;
+}
+
+function stringifyValue(value: string | any[] | Record<string, any>, delimiter = '\n'): string {
+    if (typeof value === 'string') {
+        return 'string';
+    } else if (Array.isArray(value)) {
+        return stringifyStringArray(value, delimiter);
+    } else {
+        return stringifyStringRecord(value, true, delimiter);
+    }
 }
 
 function stringifyClasses(classes: Record<string, string>, namespace: string, indent = SPACING) {
@@ -104,7 +124,7 @@ export function generateDTSContent({ exports, meta }: StylableResults) {
     const namespace = asString(meta.namespace);
     const classes = wrapNL(stringifyClasses(exports.classes, meta.namespace));
     const vars = wrapNL(stringifyStringRecord(exports.vars));
-    const stVars = wrapNL(stringifyStringRecord(exports.stVars));
+    const stVars = wrapNL(stringifyStringRecord(exports.stVars, false, ' '));
     const keyframes = wrapNL(stringifyStringRecord(exports.keyframes));
     const states = wrapNL(stringifyStates(meta));
 
