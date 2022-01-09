@@ -6,9 +6,9 @@
 
 The inline expectation syntax can be used with `testInlineExpects` for testing stylesheets transformation and diagnostics.
 
-An expectation is written as a comment just before the code it checks on. All expectations support `label` that will be thrown as pars of an expectation fail message.
+An expectation is written as a comment just before the code it checks on. All expectations support `label` that will be thrown as part of an expectation fail message.
 
-### **@rule** - check rule transformation including selector and nested declarations:
+### `@rule` - check rule transformation including selector and nested declarations:
 
 Selector - `@rule SELECTOR`
 ```css 
@@ -57,7 +57,7 @@ Label - `@rule(LABEL) SELECTOR`
 .part {}
 ```
 
-### **@atrule** - check at-rule transformation of params:
+### `@atrule` - check at-rule transformation of params:
 
 AtRule params - `@atrule PARAMS`:
 ```css
@@ -67,11 +67,11 @@ AtRule params - `@atrule PARAMS`:
 
 Label - `@atrule(LABEL) PARAMS`
 ```css
-/* @rule(jump keyframes) entry__jump */
+/* @atrule(jump keyframes) entry__jump */
 @keyframes jump {}
 ```
 
-### **@decl** - check declaration transformation
+### `@decl` - check declaration transformation
 
 Prop & value - `@decl PROP: VALUE`
 ```css
@@ -84,12 +84,12 @@ Prop & value - `@decl PROP: VALUE`
 Label - `@decl(LABEL) PROP: VALUE`
 ```css
 .root {
-    /* @decl(color is red) color: red*/
+    /* @decl(color is red) color: red */
     color: red;
 }
 ```
 
-### **@analyze & @transform** - check single file (analyze) and multiple files (transform) diagnostics:
+### `@analyze` & `@transform` - check single file (analyze) and multiple files (transform) diagnostics:
 
 Severity - `@analyze-SEVERITY MESSAGE` / `@transform-SEVERITY MESSAGE`
 ```css
