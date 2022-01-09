@@ -66,26 +66,38 @@ function stringifyStates(meta: StylableMeta) {
 function stringifyStringRecord(
     record: Record<string, any>,
     addParentasis = false,
+    indent = SPACING,
     delimiter = '\n'
 ): string {
     const s = Object.entries(record)
-        .map(([key, value]) => `${SPACING}${asString(key)}: ${stringifyValue(value, delimiter)};`)
+        .map(
+            ([key, value]) =>
+                `${indent}${asString(key)}: ${stringifyValue(value, indent + SPACING, delimiter)};`
+        )
         .join(delimiter);
 
-    return addParentasis ? `{${s}}` : s;
+    return addParentasis ? `{\n${s}\n${indent.replace(SPACING, '')}}` : s;
 }
 
-function stringifyStringArray(array: any[], delimiter = '\n') {
-    return `[${array.map((value) => `${stringifyValue(value, delimiter)},`).join(delimiter)}]`;
+function stringifyStringArray(array: any[], indent = SPACING, delimiter = '\n') {
+    return `[${wrapNL(
+        array
+            .map((value) => `${indent}${stringifyValue(value, indent + SPACING, delimiter)},`)
+            .join(delimiter)
+    )}${indent.replace(SPACING, '')}]`;
 }
 
-function stringifyValue(value: string | any[] | Record<string, any>, delimiter = '\n'): string {
+function stringifyValue(
+    value: string | any[] | Record<string, any>,
+    indent = SPACING,
+    delimiter = '\n'
+): string {
     if (typeof value === 'string') {
         return 'string';
     } else if (Array.isArray(value)) {
-        return stringifyStringArray(value, delimiter);
+        return stringifyStringArray(value, indent, delimiter);
     } else {
-        return stringifyStringRecord(value, true, delimiter);
+        return stringifyStringRecord(value, true, indent, delimiter);
     }
 }
 
@@ -124,7 +136,7 @@ export function generateDTSContent({ exports, meta }: StylableResults) {
     const namespace = asString(meta.namespace);
     const classes = wrapNL(stringifyClasses(exports.classes, meta.namespace));
     const vars = wrapNL(stringifyStringRecord(exports.vars));
-    const stVars = wrapNL(stringifyStringRecord(exports.stVars, false, ' '));
+    const stVars = wrapNL(stringifyStringRecord(exports.stVars));
     const keyframes = wrapNL(stringifyStringRecord(exports.keyframes));
     const states = wrapNL(stringifyStates(meta));
 
