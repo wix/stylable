@@ -97,30 +97,6 @@ describe(`features/st-import`, () => {
                 name: `c-origin`,
             });
         });
-        it(`should add imported keyframes symbols`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                        @st-import [keyframes(a, b-origin as b-local)] from "./path";
-                        `,
-                    },
-                },
-            });
-
-            expect(meta.mappedKeyframes.a, `named`).to.include({
-                _kind: 'keyframes',
-                name: 'a',
-            });
-            expect(meta.mappedKeyframes[`b-local`], `mapped`).to.include({
-                _kind: 'keyframes',
-                name: 'b-origin',
-                alias: 'b-local',
-                import: meta.getImportStatements()[0],
-            });
-        });
         it(`should not add nested import`, () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
@@ -318,7 +294,7 @@ describe(`features/st-import`, () => {
             it(`should warn within a single import symbol`, () => {
                 expectAnalyzeDiagnostics(
                     `
-                    |@st-import Name, [$Name$] from "./file.st.css"|;
+                    |@st-import $Name$, [Name] from "./file.st.css"|;
                 `,
                     [
                         {
@@ -326,20 +302,32 @@ describe(`features/st-import`, () => {
                             severity: `warning`,
                             file: `main.st.css`,
                         },
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
+                            severity: `warning`,
+                            file: `main.st.css`,
+                            skipLocationCheck: true,
+                        },
                     ]
                 );
             });
             it(`should warn between multiple import statements`, () => {
                 expectAnalyzeDiagnostics(
                     `
-                    @st-import Name from "./file.st.css";
                     |@st-import $Name$ from "./file.st.css"|;
+                    @st-import Name from "./file.st.css";
                 `,
                     [
                         {
                             message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
                             severity: `warning`,
                             file: `main.st.css`,
+                        },
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
+                            severity: `warning`,
+                            file: `main.st.css`,
+                            skipLocationCheck: true,
                         },
                     ]
                 );
@@ -549,32 +537,6 @@ describe(`features/st-import`, () => {
                     _kind: `import`,
                     type: 'named',
                     name: `c-origin`,
-                });
-            });
-            it(`should add imported keyframes symbols`, () => {
-                const { meta } = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: `entry`,
-                            content: `
-                            :import {
-                                -st-from: "./path";
-                                -st-named: keyframes(a, b-origin as b-local);
-                            }`,
-                        },
-                    },
-                });
-
-                expect(meta.mappedKeyframes.a, `named`).to.include({
-                    _kind: 'keyframes',
-                    name: 'a',
-                });
-                expect(meta.mappedKeyframes[`b-local`], `mapped`).to.include({
-                    _kind: 'keyframes',
-                    name: 'b-origin',
-                    alias: 'b-local',
-                    import: meta.getImportStatements()[0],
                 });
             });
             it(`should not add nested import`, () => {
@@ -873,9 +835,9 @@ describe(`features/st-import`, () => {
                         `
                         |:import {
                             -st-from: './file.st.css';
-                            -st-default: Name;
-                            -st-named: $Name$;
-                        }
+                            -st-default: $Name$;
+                            -st-named: Name;
+                        }|
                     `,
                         [
                             {
@@ -883,19 +845,25 @@ describe(`features/st-import`, () => {
                                 severity: `warning`,
                                 file: `main.st.css`,
                             },
+                            {
+                                message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
+                                severity: `warning`,
+                                file: `main.st.css`,
+                                skipLocationCheck: true,
+                            },
                         ]
                     );
                 });
                 it(`should warn on redeclare import between multiple import statements`, () => {
                     expectAnalyzeDiagnostics(
                         `
-                        :import {
-                            -st-from: './file.st.css';
-                            -st-default: Name;
-                        }
                         |:import {
                             -st-from: './file.st.css';
                             -st-default: $Name$;
+                        }|
+                        :import {
+                            -st-from: './file.st.css';
+                            -st-default: Name;
                         }
                     `,
                         [
@@ -903,6 +871,12 @@ describe(`features/st-import`, () => {
                                 message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
                                 severity: `warning`,
                                 file: 'main.st.css',
+                            },
+                            {
+                                message: STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`),
+                                severity: `warning`,
+                                file: 'main.st.css',
+                                skipLocationCheck: true,
                             },
                         ]
                     );

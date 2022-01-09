@@ -76,32 +76,6 @@ describe(`features/css-class`, () => {
             expect(CSSClass.get(meta, `a`), `a`).to.equal(STSymbol.get(meta, `a`));
             expect(CSSClass.get(meta, `root`), `root`).to.equal(STSymbol.get(meta, `root`));
         });
-        it(`should mark class as import alias`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            @st-import [imported] from './other.st.css';
-                            .root .imported {}
-                        `,
-                    },
-                    '/other.st.css': {
-                        namespace: `other`,
-                        content: `.imported {}`,
-                    },
-                },
-            });
-
-            const importDef = meta.getImportStatements()[0];
-            expect(CSSClass.get(meta, `imported`), `symbol`).to.eql({
-                _kind: `class`,
-                name: 'imported',
-                alias: STImport.createImportSymbol(importDef, `named`, `imported`, `/`),
-            });
-            expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
-        });
         it(`should return collected symbols`, () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
@@ -122,6 +96,69 @@ describe(`features/css-class`, () => {
                 gallery: CSSClass.get(meta, `gallery`),
             });
             expect(meta.getAllClasses(), `meta.getAllClasses`).to.eql(CSSClass.getAll(meta));
+        });
+        describe(`st-import`, () => {
+            it(`should mark class as import alias`, () => {
+                const { meta } = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: `entry`,
+                            content: `
+                                .root .before {}
+                                @st-import [before, after] from './other.st.css';
+                                .root .after {}
+                            `,
+                        },
+                        '/other.st.css': {
+                            namespace: `other`,
+                            content: `
+                                .before {}
+                                .after {}
+                            `,
+                        },
+                    },
+                });
+
+                const importDef = meta.getImportStatements()[0];
+                expect(CSSClass.get(meta, `before`), `before symbol`).to.eql({
+                    _kind: `class`,
+                    name: 'before',
+                    alias: STImport.createImportSymbol(importDef, `named`, `before`, `/`),
+                });
+                expect(CSSClass.get(meta, `after`), `after symbol`).to.eql({
+                    _kind: `class`,
+                    name: 'after',
+                    alias: STImport.createImportSymbol(importDef, `named`, `after`, `/`),
+                });
+                expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
+            });
+            it(`should not override root`, () => {
+                const { meta } = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: `entry`,
+                            content: `
+                                @st-import [root] from './other.st.css';
+                                .root{}
+                            `,
+                        },
+                        '/other.st.css': {
+                            namespace: `other`,
+                            content: ``,
+                        },
+                    },
+                });
+
+                expect(CSSClass.get(meta, `root`), `class`).to.eql({
+                    _kind: `class`,
+                    name: 'root',
+                    '-st-root': true,
+                    alias: undefined,
+                });
+                expect(STSymbol.get(meta, `root`), `general`).to.equal(CSSClass.get(meta, `root`));
+            });
         });
     });
     describe(`transform`, () => {

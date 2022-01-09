@@ -1,14 +1,16 @@
-import { isAsset, Stylable } from '@stylable/core';
+import { isAsset, Stylable, StylableResults } from '@stylable/core';
 import {
     createModuleSource,
     generateDTSContent,
     generateDTSSourceMap,
 } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
+import { ensureDirectory, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
-import type { DiagnosticMessages } from './report-diagnostics';
+import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
+import type { Diagnostic } from './report-diagnostics';
+import { errorMessages } from './messages';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -24,11 +26,13 @@ export interface BuildCommonOptions {
     mode?: string;
     dts?: boolean;
     dtsSourceMap?: boolean;
+    diagnosticsMode?: DiagnosticsMode;
 }
 
 export interface BuildFileOptions extends BuildCommonOptions {
+    identifier?: string;
     stylable: Stylable;
-    diagnosticsMessages: DiagnosticMessages;
+    diagnosticsManager: DiagnosticsManager;
     projectAssets: Set<string>;
     includeCSSInJS?: boolean;
     useNamespaceReference?: boolean;
@@ -41,6 +45,7 @@ export function buildSingleFile({
     fullOutDir,
     filePath,
     fullSrcDir,
+    identifier = fullSrcDir,
     log,
     fs,
     moduleFormats,
@@ -52,7 +57,6 @@ export function buildSingleFile({
     // build specific
     stylable,
     includeCSSInJS = false,
-    diagnosticsMessages,
     projectAssets,
     useNamespaceReference = false,
     injectCSSRequest = false,
@@ -60,6 +64,8 @@ export function buildSingleFile({
     minify = false,
     dts = false,
     dtsSourceMap,
+    diagnosticsMode = 'loose',
+    diagnosticsManager = new DiagnosticsManager({ log }),
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
@@ -78,7 +84,10 @@ export function buildSingleFile({
         () => fs.readFileSync(filePath).toString(),
         `Read File Error: ${filePath}`
     );
-    const res = stylable.transform(content, filePath);
+    const res = tryRun(
+        () => stylable.transform(content, filePath),
+        errorMessages.STYLABLE_PROCESS(filePath)
+    );
     const optimizer = new StylableOptimizer();
     if (optimize) {
         optimizer.optimize(
@@ -93,7 +102,15 @@ export function buildSingleFile({
             {}
         );
     }
-    handleDiagnostics(res, diagnosticsMessages, filePath);
+
+    const diagnostics = getAllDiagnostics(res);
+    if (diagnostics.length) {
+        diagnosticsManager.set(identifier, filePath, {
+            diagnosticsMode,
+            diagnostics,
+        });
+    }
+
     // st.css
     if (outputSources) {
         if (outSrcPath === filePath) {
@@ -242,4 +259,20 @@ export function removeBuildProducts({
     }
 
     log(mode, `removed: [${outputLogs.join(', ')}]`);
+}
+
+export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
+    const diagnostics = res.meta.transformDiagnostics
+        ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
+        : res.meta.diagnostics.reports;
+
+    return diagnostics.map((diagnostic) => {
+        const err = diagnostic.node.error(diagnostic.message, diagnostic.options);
+
+        return {
+            type: diagnostic.type,
+            message: `${diagnostic.message}\n${err.showSourceCode(true)}`,
+            offset: diagnostic.node.source?.start?.offset,
+        };
+    });
 }

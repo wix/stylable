@@ -35,6 +35,7 @@ import {
     getOnlyChunk,
     getStylableBuildData,
     isDependencyOf,
+    normalizeNamespaceCollisionOption,
 } from './plugin-utils';
 import { injectCssModules } from './mini-css-support';
 import type {
@@ -107,7 +108,7 @@ export interface StylableWebpackPluginOptions {
      * Allow to disable specific diagnostics reports
      */
     unsafeMuteDiagnostics?: {
-        DUPLICATE_MODULE_NAMESPACE?: boolean;
+        DUPLICATE_MODULE_NAMESPACE?: boolean | 'warn';
     };
     /**
      * Set the strategy of how to spit the extracted css
@@ -433,9 +434,13 @@ export class StylableWebpackPlugin {
             const { usageMapping, namespaceMapping, namespaceToFileMapping } =
                 createOptimizationMapping(sortedModules, optimizer);
 
-            if (!this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE) {
-                reportNamespaceCollision(namespaceToFileMapping, compilation);
-            }
+            reportNamespaceCollision(
+                namespaceToFileMapping,
+                compilation,
+                normalizeNamespaceCollisionOption(
+                    this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE
+                )
+            );
 
             for (const module of sortedModules) {
                 const { css, globals, namespace } = getStylableBuildMeta(module);

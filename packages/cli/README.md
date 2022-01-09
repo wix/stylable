@@ -23,6 +23,10 @@ yarn add @stylable/cli -D
 
 After installing `@stylable/cli`, the `stc` command will be available, running `stc --help` will provide a brief description for the options available.
 
+`stc` accepts [CLI arguments](#cli-arguments) or a Stylable [configuration file](#configuration-file).
+
+### CLI Arguments
+
 | Option                    | Alias  | Description                                                                            | Default Value    |
 | ------------------------- | ------ | ----------------------------------------------------------------------------------     | ---------------- |
 | `--version`               |  `v`   | show CLI version number                                                                | `boolean`        |
@@ -44,7 +48,7 @@ After installing `@stylable/cli`, the `stc` command will be available, running `
 | `--cssFilename`           |        | pattern of the generated css file                                                      | `[filename].css` |
 | `--injectCSSRequest`      | `icr`  | add a static import for the generated css in the js module output                      | `false`          |
 | `--namespaceResolver`     | `nsr`  | node request to a module that exports a stylable resolveNamespace function             | `@stylable/node` |
-| `--require`               | `r`    | require hook to execture before running                                                | `-`              |
+| `--require`               | `r`    | require hook to execute before running                                                | `-`              |
 | `--optimize`              | `o`    | removes: empty nodes, stylable directives, comments                                    | `false`          |
 | `--minify`                | `m`    | minify generated css                                                                   | `false`          |
 | `--log`                   |        | verbose log                                                                            | `false`          |
@@ -53,6 +57,67 @@ After installing `@stylable/cli`, the `stc` command will be available, running `
 | `--help`                  | `h`    | Show help                                                                              | `boolean`                                    |
 
 `*` - For the `useNamespaceReference` flag to function properly, the `source` folder must be published in addition to the output `target` code
+
+### Configuration file
+
+The `stc` configuration should be located in the `stylable.config.js` file under the property name `stcConfig`.
+The CLI provides a helper method and type definitions to provide a better configuration experience.
+
+```js
+const { typedConfiguration } = require('@stylable/cli');
+
+// This can be an object or a method that returns an object.
+exports.stcConfig = typedConfiguration({
+    options: {
+        // BuildOptions
+    }
+});
+```
+
+#### Build options
+```ts
+
+export interface BuildOptions {
+    /** specify where to find source files */
+    srcDir: string;
+    /** specify where to build the target files */
+    outDir: string;
+    /** should the build need to output manifest file */
+    manifest?: string;
+    /** opt into build index file and specify the filepath for the generated index file */
+    indexFile?: string;
+    /** custom cli index generator class */
+    IndexGenerator?: typeof IndexGenerator;
+    /** output commonjs module (.js) */
+    cjs?: boolean;
+    /** output esm module (.mjs) */
+    esm?: boolean;
+    /** template of the css file emitted when using outputCSS */
+    outputCSSNameTemplate?: string;
+    /** should include the css in the generated JS module */
+    includeCSSInJS?: boolean;
+    /** should output build css for each source file */
+    outputCSS?: boolean;
+    /** should output source .st.css file to dist */
+    outputSources?: boolean;
+    /** should add namespace reference to the .st.css copy  */
+    useNamespaceReference?: boolean;
+    /** should inject css import in the JS module for the generated css from outputCSS */
+    injectCSSRequest?: boolean;
+    /** should apply css optimizations */
+    optimize?: boolean;
+    /** should minify css */
+    minify?: boolean;
+    /** should generate .d.ts definitions for every stylesheet */
+    dts?: boolean;
+    /** should generate .d.ts.map files for every .d.ts mapping back to the source .st.css */
+    dtsSourceMap?: boolean;
+    /** should emit diagnostics */
+    diagnostics?: boolean;
+    /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
+    diagnosticsMode?: DiagnosticsMode;
+}
+```
 
 ### Generating an index file
 
@@ -100,6 +165,119 @@ To transform your project stylesheets to target JavaScript modules containing th
 ```sh
 $ stc --srcDir="./src" --outDir="./dist"
 ```
+
+## Multiple Projects
+
+Projects allow sharing `stc` configurations and management of Stylable projects in one location. They provides a controllable and predictable build order with caching optimizations.
+
+```ts
+export interface MultipleProjectsConfig<PRESET extends string> {
+    options?: PartialBuildOptions;
+    presets?: Presets<PRESET>;
+    projects: Projects<PRESET>;
+    projectsOptions?: {
+        resolveRequests?: ResolveRequests;
+    };
+}
+```
+
+> Example for simple monorepo with Stylable packages
+```js
+const { typedConfiguration } = require('@stylable/cli');
+
+exports.stcConfig = typedConfiguration({
+    options: {
+        srcDir: './src',
+        outDir: './dist',
+        outputSources: true,
+        cjs: false,
+        useNamespaceReference: true, 
+    },
+    projects: ['packages/*']
+});
+
+```
+
+### Options
+
+Similar to a [single project](#configuration-file), `options` is the top-level `BuildOptions` and is the default options for each project.
+
+### Projects
+
+**Projects** is a generic term that refers to a set of path requests that define single or multiple `BuildOptions`.\
+This set of requests is being processed and then evaluated as a map of `projectRoot` (directory path) to a set of `BuildOptions`.
+
+By default, the request is a path to a package, and in order to make the correct topological sort, the dependency needs to be specified in each package `package.json`
+
+As mentioned above, the value of a request can be resolved to a single or multiple `BuildOptions`.
+
+```jsonc
+{
+    //...
+    projects: {
+        "packages/*": { 
+            // ...BuildOptions
+        },
+        "other-package/*": [
+            { /* #1 ...BuildOptions */ }, 
+            { /* #2 ...BuildOptions */ }, 
+        ]
+    }
+    //...
+}
+```
+
+> The full types specification for defining Projects
+```ts
+export type Projects =
+    | Array<string | [string, ProjectEntryValues]>
+    | Record<string, ProjectEntryValues>;
+
+export type ProjectEntryValues<PRESET extends string> =
+    | ProjectEntryValue<PRESET>
+    | Array<ProjectEntryValue<PRESET>>;
+
+export type ProjectEntryValue<PRESET extends string> =
+    | PRESET
+    | PartialBuildOptions
+    | {
+          preset?: PRESET;
+          presets?: Array<PRESET>;
+          options: PartialBuildOptions;
+      };
+```
+
+
+
+### Presets
+
+To reuse `BuildOptions`, define them using a name under the `presets` property and use them as the project entry value.
+
+```js
+exports.stcConfig = {
+    //...
+    presets: {
+        firstPreset: {/* ...BuildOptions */},
+        secondPreset: {/* ...BuildOptions */},
+    },
+    projects: {
+        'packages/*': ['firstPreset', 'secondPreset']
+    }
+
+};
+```
+
+### Projects Options
+
+These options control the projects resolution process.
+
+#### resolveRequests [Function] *(Advanced usage)*
+
+Default: `resolveNpmRequests`
+
+This method is used to resolve the Projects `requests` (e.g. 'packages/*' in the example) to the actual `projectRoot`s (absolute path to the relevant projects).
+
+The order of the resolved entities will be the order of the builds.
 
 ## Usage `stc-format`
 

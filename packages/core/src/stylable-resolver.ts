@@ -8,6 +8,7 @@ import {
     Imported,
     StylableSymbol,
     CSSClass,
+    STSymbol,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
@@ -126,10 +127,9 @@ export class StylableResolver {
 
         if (res.kind === 'css') {
             const { value: meta } = res;
-            const symbol =
-                !name || subtype === `mappedSymbols`
-                    ? meta.getSymbol(name || meta.root)!
-                    : meta.mappedKeyframes[name];
+            const namespace = subtype === `mappedSymbols` ? `main` : `keyframes`;
+            name = !name && namespace === `main` ? `root` : name;
+            const symbol = STSymbol.getAll(meta, namespace)[name];
             return {
                 _kind: 'css',
                 symbol,
@@ -171,34 +171,6 @@ export class StylableResolver {
             return null;
         }
         return this.resolveImport(maybeImport);
-    }
-    public resolveKeyframes(meta: StylableMeta, name: string) {
-        const initSymbol = meta.mappedKeyframes[name];
-        let current = {
-            meta,
-            symbol: initSymbol,
-        };
-
-        while (current.symbol?.import) {
-            const res = this.resolveImported(
-                current.symbol.import,
-                current.symbol.name,
-                'mappedKeyframes'
-            );
-            if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
-                const { meta, symbol } = res;
-                current = {
-                    meta,
-                    symbol,
-                };
-            } else {
-                return undefined;
-            }
-        }
-        if (current.symbol) {
-            return current;
-        }
-        return undefined;
     }
     public deepResolve(
         maybeImport: StylableSymbol | undefined,

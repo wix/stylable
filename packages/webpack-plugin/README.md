@@ -163,5 +163,14 @@ CSS assets are handled by webpack native AssetsModules support.
 ## Compatibilities with existing loading mechanisms
 If you're using css_loader/extract make sure to exclude `.st.css` files from the process. You cannot use loaders with Stylable `.st.css` files
 
+## FAQ:
+
+#### In what cases should I provide a custom Optimizer?
+- You want to have different `className` and `namespace` short prefixes when you combine two projects that are not built together
+- You want to override the `minify` function and use a custom minifier
+
+#### When should I provide assetFilter?
+- When your webpack compilation should not handle a specific asset. For example, in NextJS all assets are already processed for you and the URLs in the CSS are not touched.
+
 ## License
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [MIT license](./LICENSE).

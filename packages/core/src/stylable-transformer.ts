@@ -2,7 +2,6 @@ import isVendorPrefixed from 'is-vendor-prefixed';
 import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import * as postcss from 'postcss';
-import postcssValueParser from 'postcss-value-parser';
 import type { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import type { Diagnostics } from './diagnostics';
@@ -24,17 +23,17 @@ import {
     splitCompoundSelectors,
 } from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
+import { namespace } from './helpers/namespace';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
 import { STImport, ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
-import { STSymbol, STGlobal, CSSClass, CSSType } from './features';
+import { STSymbol, STGlobal, CSSClass, CSSType, CSSKeyframes } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
-import { animationPropRegExp, valueMapping } from './stylable-value-parsers';
+import { valueMapping } from './stylable-value-parsers';
 import { unescapeCSS, namespaceEscape } from './helpers/escape';
-import { globalValue } from './utils';
 import type { ModuleResolver } from './types';
 
 const { hasOwnProperty } = Object.prototype;
@@ -122,7 +121,7 @@ export class StylableTransformer {
             options.fileProcessor,
             options.requireModule,
             options.moduleResolver,
-            options.resolverCache
+            options.resolverCache || new Map()
         );
         this.mode = options.mode || 'production';
     }
@@ -157,7 +156,13 @@ export class StylableTransformer {
         path: string[] = [],
         mixinTransform = false
     ) {
-        const keyframeMapping = this.scopeKeyframes(ast, meta);
+        const keyframesResolve = CSSKeyframes.hooks.transformResolve({
+            context: {
+                meta,
+                diagnostics: this.diagnostics,
+                resolver: this.resolver,
+            },
+        });
         const cssVarsMapping = this.createCSSVarsMapping(ast, meta);
 
         ast.walkRules((rule) => {
@@ -188,6 +193,16 @@ export class StylableTransformer {
                 } else {
                     atRule.remove();
                 }
+            } else if (name === 'keyframes') {
+                CSSKeyframes.hooks.transformAtRuleNode({
+                    context: {
+                        meta,
+                        diagnostics: this.diagnostics,
+                        resolver: this.resolver,
+                    },
+                    atRule,
+                    resolved: keyframesResolve,
+                });
             }
         });
 
@@ -196,6 +211,16 @@ export class StylableTransformer {
 
             if (isCSSVarProp(decl.prop)) {
                 decl.prop = this.getScopedCSSVar(decl, meta, cssVarsMapping);
+            } else if (decl.prop === `animation` || decl.prop === `animation-name`) {
+                CSSKeyframes.hooks.transformDeclaration({
+                    context: {
+                        meta,
+                        diagnostics: this.diagnostics,
+                        resolver: this.resolver,
+                    },
+                    decl,
+                    resolved: keyframesResolve,
+                });
             }
 
             switch (decl.prop) {
@@ -229,7 +254,10 @@ export class StylableTransformer {
         if (metaExports) {
             Object.assign(metaExports.classes, this.exportClasses(meta));
             this.exportLocalVars(meta, metaExports.stVars, variableOverride);
-            this.exportKeyframes(keyframeMapping, metaExports.keyframes);
+            CSSKeyframes.hooks.transformJSExports({
+                exports: metaExports,
+                resolved: keyframesResolve,
+            });
             this.exportCSSVars(cssVarsMapping, metaExports.vars);
         }
     }
@@ -257,49 +285,6 @@ export class StylableTransformer {
         for (const varName of Object.keys(cssVarsMapping)) {
             varsExport[varName.slice(2)] = cssVarsMapping[varName];
         }
-    }
-    public exportKeyframes(
-        keyframeMapping: Record<string, string>,
-        keyframesExport: Record<string, string>
-    ) {
-        Object.assign(keyframesExport, keyframeMapping);
-    }
-    public scopeKeyframes(ast: postcss.Root, meta: StylableMeta) {
-        ast.walkAtRules(/keyframes$/, (atRule) => {
-            const name = atRule.params;
-            const globalName = globalValue(name);
-
-            if (globalName === undefined) {
-                atRule.params = this.scope(name, meta.namespace);
-            } else {
-                atRule.params = globalName;
-            }
-        });
-
-        const keyframesExports: Record<string, string> = {};
-
-        Object.keys(meta.mappedKeyframes).forEach((key) => {
-            const res = this.resolver.resolveKeyframes(meta, key);
-
-            if (res) {
-                keyframesExports[key] = res.symbol.global
-                    ? res.symbol.alias
-                    : this.scope(res.symbol.alias, res.meta.namespace);
-            }
-        });
-
-        ast.walkDecls(animationPropRegExp, (decl: postcss.Declaration) => {
-            const parsed = postcssValueParser(decl.value);
-            parsed.nodes.forEach((node) => {
-                const scoped = keyframesExports[node.value];
-                if (scoped) {
-                    node.value = scoped;
-                }
-            });
-            decl.value = parsed.toString();
-        });
-
-        return keyframesExports;
     }
     public createCSSVarsMapping(_ast: postcss.Root, meta: StylableMeta) {
         const cssVarsMapping: Record<string, string> = {};
@@ -373,8 +358,8 @@ export class StylableTransformer {
     public scopeRule(meta: StylableMeta, rule: postcss.Rule): string {
         return this.scopeSelector(meta, rule.selector, rule).selector;
     }
-    public scope(name: string, namespace: string, delimiter: string = this.delimiter) {
-        return namespace ? namespace + delimiter + name : name;
+    public scope(name: string, ns: string, delimiter: string = this.delimiter) {
+        return namespace(name, ns, delimiter);
     }
     public exportClasses(meta: StylableMeta) {
         const locals: Record<string, string> = {};

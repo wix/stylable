@@ -11,7 +11,6 @@ import {
     processorWarnings,
     transformerWarnings,
     nativePseudoElements,
-    reservedKeyFrames,
     rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
@@ -680,18 +679,23 @@ describe('diagnostics: warnings and errors', () => {
             it('should warn when import redeclare same symbol (in different block types)', () => {
                 expectAnalyzeDiagnostics(
                     `
-                    :import {
+                    |:import {
                         -st-from: './file.st.css';
-                        -st-default: Name;
-                    }
+                        -st-default: $Name$;
+                    }|
                     :vars {
-                        |$Name$: red;
+                        Name: red;
                     }
                 `,
                     [
                         {
                             message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
                             file: 'main.st.css',
+                        },
+                        {
+                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
+                            file: 'main.st.css',
+                            skipLocationCheck: true,
                         },
                     ]
                 );
@@ -877,28 +881,6 @@ describe('diagnostics: warnings and errors', () => {
                         },
                     ]
                 );
-            });
-        });
-    });
-
-    describe('transforms', () => {
-        it('should not allow @keyframe of reserved words', () => {
-            reservedKeyFrames.map((key) => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            |@keyframes $${key}$| {
-                                from {}
-                                to {}
-                            }`,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    { message: processorWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
-                ]);
             });
         });
     });

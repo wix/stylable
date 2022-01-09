@@ -51,13 +51,20 @@ describe('DirectoryWatchService', () => {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
+                    const generatedFiles = new Set<string>();
                     for (const filePath of affectedFiles) {
                         const { deps, value } = evalTemplate(fs, filePath);
-                        writeTemplateOutputToDist(fs, filePath, value);
+                        const { outFilePath } = writeTemplateOutputToDist(fs, filePath, value);
+                        generatedFiles.add(outFilePath);
+
                         for (const dep of deps) {
                             watcher.registerInvalidateOnChange(dep, filePath);
                         }
                     }
+
+                    return {
+                        generatedFiles,
+                    };
                 },
             });
 
@@ -105,9 +112,12 @@ describe('DirectoryWatchService', () => {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles, _, changeOrigin) {
+                    const generatedFiles = new Set<string>();
                     for (const filePath of affectedFiles) {
                         const { deps, value } = evalTemplate(fs, filePath);
-                        writeTemplateOutputToDist(fs, filePath, value);
+                        const { outFilePath } = writeTemplateOutputToDist(fs, filePath, value);
+                        generatedFiles.add(outFilePath);
+
                         for (const dep of deps) {
                             watcher.registerInvalidateOnChange(dep, filePath);
                         }
@@ -116,6 +126,10 @@ describe('DirectoryWatchService', () => {
                         changedFiles: Array.from(affectedFiles),
                         changeOriginPath: changeOrigin?.path,
                     });
+
+                    return {
+                        generatedFiles,
+                    };
                 },
             });
 
@@ -143,13 +157,19 @@ describe('DirectoryWatchService', () => {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
+                    const generatedFiles = new Set<string>();
                     for (const filePath of affectedFiles) {
                         const { deps, value } = evalTemplate(fs, filePath);
-                        writeTemplateOutputToDist(fs, filePath, value);
+                        const { outFilePath } = writeTemplateOutputToDist(fs, filePath, value);
+                        generatedFiles.add(outFilePath);
                         for (const dep of deps) {
                             watcher.registerInvalidateOnChange(dep, filePath);
                         }
                     }
+
+                    return {
+                        generatedFiles,
+                    };
                 },
             });
 
@@ -171,13 +191,19 @@ describe('DirectoryWatchService', () => {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
+                    const generatedFiles = new Set<string>();
                     for (const filePath of affectedFiles) {
                         const { deps, value } = evalTemplate(fs, filePath);
-                        writeTemplateOutputToDist(fs, filePath, value);
+                        const { outFilePath } = writeTemplateOutputToDist(fs, filePath, value);
+                        generatedFiles.add(outFilePath);
                         for (const dep of deps) {
                             watcher.registerInvalidateOnChange(dep, filePath);
                         }
                     }
+
+                    return {
+                        generatedFiles,
+                    };
                 },
             });
 
@@ -217,6 +243,10 @@ describe('DirectoryWatchService', () => {
                         affectedFiles: Array.from(affectedFiles),
                         changeOriginPath: changeOrigin?.path,
                     });
+
+                    return {
+                        generatedFiles: new Set(),
+                    };
                 },
             });
 
@@ -248,6 +278,10 @@ describe('DirectoryWatchService', () => {
                             watcher.registerInvalidateOnChange(depFilePath, filePath);
                         }
                     }
+
+                    return {
+                        generatedFiles: new Set(),
+                    };
                 },
             });
 
@@ -277,6 +311,10 @@ describe('DirectoryWatchService', () => {
                         affectedFiles: Array.from(affectedFiles),
                         changeOriginPath: changeOrigin?.path,
                     });
+
+                    return {
+                        generatedFiles: new Set(),
+                    };
                 },
             });
 
@@ -385,7 +423,13 @@ function isTemplateFile(filePath: string): boolean {
 function writeTemplateOutputToDist(fs: IFileSystem, filePath: string, value: string) {
     const outDir = fs.join('dist', fs.dirname(filePath));
     fs.ensureDirectorySync(outDir);
-    fs.writeFileSync(fs.join(outDir, fs.basename(filePath, '.template.js') + '.txt'), value);
+    const outFilePath = fs.join(outDir, fs.basename(filePath, '.template.js') + '.txt');
+    fs.writeFileSync(outFilePath, value);
+
+    return {
+        outDir,
+        outFilePath,
+    };
 }
 
 function expectInvalidationMap(

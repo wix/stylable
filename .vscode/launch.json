@@ -23,7 +23,8 @@
       "skipFiles": ["<node_internals>/**"],
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
       "env": {
-        "FILE": "${file}"
+        "FILE": "${file}",
+        "CLI_WATCH_TEST_TIMEOUT": "999999"
       }
     },
     {

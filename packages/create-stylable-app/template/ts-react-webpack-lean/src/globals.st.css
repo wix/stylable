@@ -1,0 +1,17 @@
+:global(*),
+:global(::before),
+:global(::after) {
+    box-sizing: border-box;
+}
+
+:global(html),
+:global(body) {
+    margin: 0;
+    padding: 0;
+}
+
+:global(html) {
+  background-color: rgb(37, 37, 38);
+  color: white;
+  font-family: sans-serif;
+}

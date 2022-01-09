@@ -1,7 +1,5 @@
 # Stylable App
-
 [Stylable](https://github.com/wix/stylable)-powered application. Generated using `create-stylable-app`.
-
 ## Development
 
 The following scripts are available:
