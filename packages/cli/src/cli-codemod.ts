@@ -54,7 +54,10 @@ for (const request of requires) {
     }
 }
 
-const log = createLogger('[CodeMod]', true);
+const log = createLogger(
+    (_, ...messages) => console.log('[CodeMod]', ...messages),
+    () => console.clear()
+);
 
 const loadedMods = new Set<{ id: string; apply: CodeMod }>();
 

@@ -18,6 +18,7 @@ export type {
     StylableSymbol,
     VarSymbol,
 } from './features';
+export { reservedKeyFrames } from './features/css-keyframes';
 export {
     StylableProcessor,
     createEmptyMeta,
@@ -146,7 +147,6 @@ export {
     nativeFunctionsDic,
     nativePseudoClasses,
     nativePseudoElements,
-    reservedKeyFrames,
 } from './native-reserved-lists';
 export { noCollisionNamespace, packageNamespaceFactory } from './resolve-namespace-factories';
 export { createDefaultResolver } from './module-resolver';
