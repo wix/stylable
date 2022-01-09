@@ -124,18 +124,16 @@ for (const request of requires) {
     }
 }
 
-function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css') {
-    const files = nodeFs.readdirSync(dirPath, 'utf-8');
-    let res: string[] = [];
+function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css', res = new Set<string>()) {
+    const items = nodeFs.readdirSync(dirPath, { withFileTypes: true });
 
-    for (const item of files) {
-        const currentlFilePath = join(dirPath, item);
-        const itemStat = nodeFs.statSync(join(currentlFilePath));
+    for (const item of items) {
+        const path = join(dirPath, item.name);
 
-        if (itemStat.isFile() && item.endsWith(fileSuffixFilter)) {
-            res.push(currentlFilePath);
-        } else if (itemStat.isDirectory()) {
-            res = res.concat(readDirectoryDeep(currentlFilePath));
+        if (item.isFile() && path.endsWith(fileSuffixFilter)) {
+            res.add(path);
+        } else if (item.isDirectory()) {
+            readDirectoryDeep(path, fileSuffixFilter, res);
         }
     }
 
@@ -188,7 +186,7 @@ if (formatPathStats.isFile()) {
 } else if (formatPathStats.isDirectory()) {
     const stylesheets = readDirectoryDeep(target);
 
-    if (stylesheets.length) {
+    if (stylesheets.size) {
         for (const stylesheet of stylesheets) {
             formatStylesheet(stylesheet);
         }
