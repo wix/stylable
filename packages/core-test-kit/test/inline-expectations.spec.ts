@@ -543,9 +543,13 @@ describe('inline-expectations', () => {
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.combine([
-                    testInlineExpectsErrors.analyzeMalformed(`-`),
-                    testInlineExpectsErrors.analyzeMalformed(`-warn`),
-                    testInlineExpectsErrors.analyzeMalformed(`-warn(label)`, `(label): `),
+                    testInlineExpectsErrors.diagnosticsMalformed(`analyze`, `-`),
+                    testInlineExpectsErrors.diagnosticsMalformed(`analyze`, `-warn`),
+                    testInlineExpectsErrors.diagnosticsMalformed(
+                        `analyze`,
+                        `-warn(label)`,
+                        `(label): `
+                    ),
                 ])
             );
         });
@@ -799,9 +803,13 @@ describe('inline-expectations', () => {
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.combine([
-                    testInlineExpectsErrors.transformMalformed(`-`),
-                    testInlineExpectsErrors.transformMalformed(`-warn`),
-                    testInlineExpectsErrors.transformMalformed(`-warn(label)`, `(label): `),
+                    testInlineExpectsErrors.diagnosticsMalformed(`transform`, `-`),
+                    testInlineExpectsErrors.diagnosticsMalformed(`transform`, `-warn`),
+                    testInlineExpectsErrors.diagnosticsMalformed(
+                        `transform`,
+                        `-warn(label)`,
+                        `(label): `
+                    ),
                 ])
             );
         });
