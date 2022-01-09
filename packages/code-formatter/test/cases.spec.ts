@@ -68,6 +68,35 @@ describe('Formatting - Rule', () => {
         );
     });
 
+    it('format groups that contains same amount of newlines should stay grouped', () => {
+        const res = `:global(p), :global(a), :global(q), :global(s), :global(b),
+:global(u), :global(i), :global(h1), :global(h2), :global(h3),
+:global(h4), :global(h5), :global(h6), :global(em), :global(tt),
+:global(dl), :global(dt), :global(dd), :global(ol), :global(ul),
+:global(li), :global(tr), :global(th), :global(td), :global(div),
+:global(pre), :global(big), :global(del), :global(dfn), :global(img),
+:global(ins), :global(kbd), :global(sub), :global(sup), :global(var),
+:global(nav), :global(html), :global(body), :global(span),
+:global(abbr), :global(cite), :global(code), :global(samp),
+:global(form), :global(menu), :global(ruby), :global(time),
+:global(mark), :global(small), :global(label), :global(table),
+:global(tbody), :global(tfoot), :global(thead), :global(aside),
+:global(embed), :global(audio), :global(video), :global(applet),
+:global(object), :global(iframe), :global(strike), :global(strong),
+:global(center), :global(legend), :global(canvas), :global(figure),
+:global(footer), :global(header), :global(hgroup), :global(output),
+:global(acronym), :global(address), :global(caption), :global(article),
+:global(details), :global(section), :global(summary), :global(fieldset),
+:global(blockquote), :global(figcaption) {}
+`;
+        expect(
+            formatCSS(
+                `:global(html), :global(body), :global(div), :global(span), :global(applet), :global(object), :global(iframe), :global(h1), :global(h2), :global(h3), :global(h4), :global(h5), :global(h6), :global(p), :global(blockquote), :global(pre), :global(a), :global(abbr), :global(acronym), :global(address), :global(big), :global(cite), :global(code), :global(del), :global(dfn), :global(em), :global(img), :global(ins), :global(kbd), :global(q), :global(s), :global(samp), :global(small), :global(strike), :global(strong), :global(sub), :global(sup), :global(tt), :global(var), :global(b), :global(u), :global(i), :global(center), :global(dl), :global(dt), :global(dd), :global(ol), :global(ul), :global(li), :global(fieldset), :global(form), :global(label), :global(legend), :global(table), :global(caption), :global(tbody), :global(tfoot), :global(thead), :global(tr), :global(th), :global(td), :global(article), :global(aside), :global(canvas), :global(details), :global(embed), :global(figure), :global(figcaption), :global(footer), :global(header), :global(hgroup), :global(menu), :global(nav), :global(output), :global(ruby), :global(section), :global(summary), :global(time), :global(mark), :global(audio), :global(video) {\n}`
+            )
+        ).to.equal(res);
+        expect(formatCSS(res)).to.equal(res);
+    });
+
     it('multiple selectors should be sorted by length and grouped until reach max length each group has its own line', () => {
         expect(
             formatCSS(
@@ -201,6 +230,12 @@ describe('Formatting - Decl', () => {
     it('re-indent values contains newlines', () => {
         expect(formatCSS(`\ngrid-template-areas:\n        "A B"\n        "A B";\n`)).to.equal(
             '\ngrid-template-areas:\n    "A B"\n    "A B";\n'
+        );
+    });
+
+    it('preserve comments in values', () => {
+        expect(formatCSS('left: calc(1em * 1.414 /* ~sqrt(2) */);')).to.equal(
+            '\nleft: calc(1em * 1.414 /* ~sqrt(2) */);\n'
         );
     });
 

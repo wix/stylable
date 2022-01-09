@@ -1,9 +1,11 @@
-import { parse, AnyNode } from 'postcss';
+import { parse, AnyNode, Rule } from 'postcss';
 import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
 
 // TODO: handle case where declaration value starts or include newline - semi completed
 // TODO: handle case where "raws" contains comments or newlines
 // TODO: handle case where internal selector has newline (not the separation ,\n)
+// TODO: handle case where rule before atRule with no children
+// TODO: move css vars to top?
 
 export function formatCSS(css: string) {
     const ast = parse(css);
@@ -55,7 +57,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         ast.raws.between = ' ';
         ast.raws.semicolon = childrenLen ? true : false;
         const hasNewLine = ast.selector.includes('\n' /* don't use NL */);
-        ast.selector = formatSelectors(ast.selectors, hasNewLine, options);
+        ast.selector = formatSelectors(ast, hasNewLine, options);
     } else if (ast.type === 'decl') {
         ast.raws.before = NL + indent.repeat(indentLevel);
         if (ast.variable) {
@@ -63,11 +65,12 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 ast.raws.between?.trimStart() ||
                 ':' /* no space here! css vars are space sensitive */;
         } else {
-            
-            const hasNewLineBeforeValue = ast.raws.between?.match(/:.*?\n.*?$/)
+            const hasNewLineBeforeValue = ast.raws.between?.match(/:.*?\n.*?$/);
 
             ast.raws.between = hasNewLineBeforeValue ? ':\n' : ': ';
-            const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(ast.value));
+            const valueGroups = groupMultipleValuesSeparatedByComma(
+                parseCSSValue(ast.raws.value?.raw ?? ast.value)
+            );
             const warpLineIndentSize =
                 ast.raws.before.length - 1 /* -1 NL */ + ast.prop.length + ast.raws.between.length;
             if (hasNewLineBeforeValue) {
@@ -127,15 +130,17 @@ function groupMultipleValuesSeparatedByComma(ast: ReturnType<typeof parseCSSValu
     return groups;
 }
 
-function formatSelectors(
-    selectors: string[],
-    forceNL: boolean,
-    { NL, indent, indentLevel }: FormatOptions
-) {
-    // sort selectors by length from short to long
+function formatSelectors(rule: Rule, forceNL: boolean, { NL, indent, indentLevel }: FormatOptions) {
+    const selectors = rule.selectors;
+    const newlines = rule.selector.match(/\n/gm)?.length ?? 0;
     selectors.sort((a, b) => a.length - b.length);
-    const selectorsFormatted = forceNL ? selectors : groupBySize(selectors);
-    return selectorsFormatted.join(`,${NL}${indent.repeat(indentLevel)}`);
+    const groups = groupBySize(selectors);
+    const selectorsToFormatted = forceNL
+        ? groups.length === newlines + 1
+            ? groups
+            : selectors
+        : groups;
+    return selectorsToFormatted.join(`,${NL}${indent.repeat(indentLevel)}`);
 }
 
 function groupBySize(parts: string[], joinWith = ', ') {
