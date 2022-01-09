@@ -1,19 +1,31 @@
+import { matchDiagnostic } from './diagnostics';
+import type { StylableMeta } from '@stylable/core';
 import type * as postcss from 'postcss';
 
-interface RuleCheck {
-    kind: `rule`;
-    rule: postcss.Rule;
-    msg?: string;
-    expectedSelector: string;
-    expectedDeclarations: [string, string][];
-    declarationCheck: 'full' | 'none';
+interface Test {
+    type: TestScopes;
+    expectation: string;
+    errors: string[];
 }
-interface AtRuleCheck {
-    kind: `atrule`;
-    rule: postcss.AtRule;
-    msg?: string;
-    expectedParams: string;
+
+type AST = postcss.Rule | postcss.AtRule | postcss.Declaration;
+
+const tests = {
+    '@check': checkTest,
+    '@rule': ruleTest,
+    '@atrule': atRuleTest,
+    '@decl': declTest,
+    '@analyze': analyzeTest,
+    '@transform': transformTest,
+} as const;
+type TestScopes = keyof typeof tests;
+const testScopes = Object.keys(tests) as TestScopes[];
+const testScopesRegex = () => testScopes.join(`|`);
+
+interface Context {
+    meta: Pick<StylableMeta, 'outputAst' | 'rawAst' | 'diagnostics' | 'transformDiagnostics'>;
 }
+const isRoot = (val: any): val is postcss.Root => val.type === `root`;
 
 /**
  * Test transformed stylesheets inline expectation comments
@@ -47,75 +59,79 @@ interface AtRuleCheck {
  * support atrule params (anything between the @atrule and body or semicolon)
  * @check screen and (min-width: 900px)
  */
-export function testInlineExpects(
-    result: postcss.Root,
-    expectedTestsCount = result.toString().match(/@check/gm)!.length
-) {
-    if (expectedTestsCount === 0) {
-        throw new Error('no tests found try to add @check comments before any selector');
-    }
-    const checks: Array<RuleCheck | AtRuleCheck> = [];
+export function testInlineExpects(result: postcss.Root | Context, expectedTestInput?: number) {
+    // backward compatibility (no diagnostic checks)
+    const isDeprecatedInput = isRoot(result);
+    const context = isDeprecatedInput
+        ? {
+              meta: {
+                  outputAst: result,
+                  rawAst: null as unknown as StylableMeta['rawAst'],
+                  diagnostics: null as unknown as StylableMeta['diagnostics'],
+                  transformDiagnostics: null as unknown as StylableMeta['transformDiagnostics'],
+              },
+          }
+        : result;
+    // ToDo: support analyze mode
+    const rootAst = context.meta.outputAst!;
+    const expectedTestAmount =
+        expectedTestInput ??
+        (rootAst.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))?.length || 0);
+    const checks: Test[] = [];
     const errors: string[] = [];
-
     // collect checks
-    result.walkComments((comment) => {
-        const checksInput = comment.text.split(`@check`);
-        const rule = comment.next();
-        if (checksInput.length > 1 && rule) {
-            if (rule.type === `rule`) {
-                for (const checkInput of checksInput) {
-                    if (checkInput.trim()) {
-                        const check = createRuleCheck(rule, checkInput, errors);
-                        if (check) {
-                            checks.push(check);
+    rootAst.walkComments((comment) => {
+        const input = comment.text.split(/@/gm);
+        const testCommentTarget = comment;
+        const testCommentSrc = isDeprecatedInput
+            ? comment
+            : getSourceComment(context.meta, comment) || comment;
+        const nodeTarget = testCommentTarget.next() as AST;
+        const nodeSrc = testCommentSrc.next() as AST;
+        if (nodeTarget || nodeSrc) {
+            while (input.length) {
+                const next = `@` + input.shift()!;
+                const testMatch = next.match(new RegExp(`^(${testScopesRegex()})`, `g`));
+                if (testMatch) {
+                    const testScope = testMatch[0] as TestScopes;
+                    let testInput = next.replace(testScope, ``);
+                    // collect expectation inner `@` fragments
+                    while (
+                        input.length &&
+                        !(`@` + input[0]).match(new RegExp(`^(${testScopesRegex()})`, `g`))
+                    ) {
+                        testInput += `@` + input.shift();
+                    }
+                    if (testInput) {
+                        if (
+                            isDeprecatedInput &&
+                            (testScope === `@analyze` || testScope === `@transform`)
+                        ) {
+                            // not possible with just AST root
+                            const result: Test = {
+                                type: testScope,
+                                expectation: testInput.trim(),
+                                errors: [
+                                    testInlineExpectsErrors.deprecatedRootInputNotSupported(
+                                        testScope + testInput
+                                    ),
+                                ],
+                            };
+                            errors.push(...result.errors);
+                            checks.push(result);
+                        } else {
+                            const result = tests[testScope](
+                                context,
+                                testInput.trim(),
+                                nodeTarget,
+                                nodeSrc
+                            );
+                            result.type = testScope;
+                            errors.push(...result.errors);
+                            checks.push(result);
                         }
                     }
                 }
-            }
-            if (rule.type === `atrule`) {
-                if (checksInput.length > 2) {
-                    errors.push(testInlineExpectsErrors.atRuleMultiTest(comment.text));
-                }
-                const check = createAtRuleCheck(rule, checksInput[1]);
-                if (check) {
-                    checks.push(check);
-                }
-            }
-        }
-    });
-    // check
-    checks.forEach((check) => {
-        if (check.kind === `rule`) {
-            const { msg, rule, expectedSelector, expectedDeclarations, declarationCheck } = check;
-            const prefix = msg ? msg + `: ` : ``;
-            if (rule.selector !== expectedSelector) {
-                errors.push(
-                    testInlineExpectsErrors.selector(expectedSelector, rule.selector, prefix)
-                );
-            }
-            if (declarationCheck === `full`) {
-                const actualDecl = rule.nodes.map((x) => x.toString()).join(`; `);
-                const expectedDecl = expectedDeclarations
-                    .map(([prop, value]) => `${prop}: ${value}`)
-                    .join(`; `);
-                if (actualDecl !== expectedDecl) {
-                    errors.push(
-                        testInlineExpectsErrors.declarations(
-                            expectedDecl,
-                            actualDecl,
-                            rule.selector,
-                            prefix
-                        )
-                    );
-                }
-            }
-        } else if (check.kind === `atrule`) {
-            const { msg, rule, expectedParams } = check;
-            const prefix = msg ? msg + `: ` : ``;
-            if (rule.params !== expectedParams) {
-                errors.push(
-                    testInlineExpectsErrors.atruleParams(expectedParams, rule.params, prefix)
-                );
             }
         }
     });
@@ -123,85 +139,305 @@ export function testInlineExpects(
     if (errors.length) {
         throw new Error(testInlineExpectsErrors.combine(errors));
     }
-    if (expectedTestsCount !== checks.length) {
-        throw new Error(testInlineExpectsErrors.matchAmount(expectedTestsCount, checks.length));
+    if (expectedTestAmount !== checks.length) {
+        throw new Error(testInlineExpectsErrors.matchAmount(expectedTestAmount, checks.length));
     }
 }
 
-function createRuleCheck(
-    rule: postcss.Rule,
-    expectInput: string,
-    errors: string[]
-): RuleCheck | undefined {
-    const { msg, ruleIndex, expectedSelector, expectedBody } = expectInput.match(
+function checkTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+    const type = targetNode?.type;
+    switch (type) {
+        case `rule`: {
+            return tests[`@rule`](context, expectation, targetNode, srcNode);
+        }
+        case `atrule`: {
+            return tests[`@atrule`](context, expectation, targetNode, srcNode);
+        }
+        default:
+            return {
+                type: `@check`,
+                expectation,
+                errors: [testInlineExpectsErrors.unsupportedNode(`@check`, type)],
+            };
+    }
+}
+function ruleTest(context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
+    const result: Test = {
+        type: `@rule`,
+        expectation,
+        errors: [],
+    };
+    const { msg, ruleIndex, expectedSelector, expectedBody } = expectation.match(
         /(?<msg>\(.*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
     )!.groups!;
-    const targetRule = ruleIndex ? getNextMixinRule(rule, Number(ruleIndex)) : rule;
-    if (!targetRule) {
-        errors.push(testInlineExpectsErrors.unfoundMixin(expectInput));
-        return;
+    let testNode: AST = targetNode;
+    // get mixed-in rule
+    if (ruleIndex) {
+        if (targetNode?.type !== `rule`) {
+            result.errors.push(
+                `mixed-in expectation is only supported for CSS Rule, not ${targetNode?.type}`
+            );
+            return result;
+        } else {
+            const actualTarget = getNextMixinRule(targetNode, Number(ruleIndex));
+            if (!actualTarget) {
+                result.errors.push(testInlineExpectsErrors.unfoundMixin(expectation));
+                return result;
+            }
+            testNode = actualTarget as AST;
+        }
     }
-    const expectedDeclarations: RuleCheck[`expectedDeclarations`] = [];
-    const declsInput = expectedBody.trim().match(/^{(.*)}$/s);
-    const declarationCheck: RuleCheck[`declarationCheck`] = declsInput ? `full` : `none`;
-    if (declsInput && declsInput[1]?.includes(`:`)) {
-        for (const decl of declsInput[1].split(`;`)) {
-            if (decl.trim() !== ``) {
-                const [prop, value] = decl.split(':');
-                if (prop && value) {
-                    expectedDeclarations.push([prop.trim(), value.trim()]);
-                } else {
-                    errors.push(testInlineExpectsErrors.malformedDecl(decl, expectInput));
+    // test by target node type
+    const nodeType = testNode?.type;
+    if (nodeType === `rule`) {
+        const expectedDeclarations: [string, string][] = [];
+        const declsInput = expectedBody.trim().match(/^{(.*)}$/s);
+        const declarationCheck: 'full' | 'none' = declsInput ? `full` : `none`;
+        if (declsInput && declsInput[1]?.includes(`:`)) {
+            for (const decl of declsInput[1].split(`;`)) {
+                if (decl.trim() !== ``) {
+                    const [prop, value] = decl.split(':');
+                    if (prop && value) {
+                        expectedDeclarations.push([prop.trim(), value.trim()]);
+                    } else {
+                        result.errors.push(
+                            testInlineExpectsErrors.ruleMalformedDecl(decl, expectation)
+                        );
+                    }
                 }
             }
         }
+        const prefix = msg ? msg + `: ` : ``;
+        if (testNode.selector !== expectedSelector.trim()) {
+            result.errors.push(
+                testInlineExpectsErrors.selector(expectedSelector.trim(), testNode.selector, prefix)
+            );
+        }
+        if (declarationCheck === `full`) {
+            const actualDecl = testNode.nodes.map((x) => x.toString()).join(`; `);
+            const expectedDecl = expectedDeclarations
+                .map(([prop, value]) => `${prop}: ${value}`)
+                .join(`; `);
+            if (actualDecl !== expectedDecl) {
+                result.errors.push(
+                    testInlineExpectsErrors.declarations(
+                        expectedDecl,
+                        actualDecl,
+                        testNode.selector,
+                        prefix
+                    )
+                );
+            }
+        }
+    } else if (nodeType === `atrule`) {
+        // passing null to srcNode as atruleTest doesn't actually requires it.
+        // if it would at some point, then its just a matter of searching the rawAst for it.
+        return atRuleTest(
+            context,
+            expectation.replace(`[${ruleIndex}]`, ``),
+            testNode,
+            null as unknown as AST
+        );
+    } else {
+        // unsupported mixed-in node test
+        result.errors.push(testInlineExpectsErrors.unsupportedMixinNode(testNode.type));
     }
-    return {
-        kind: `rule`,
-        msg,
-        rule: targetRule,
-        expectedSelector: expectedSelector.trim(),
-        expectedDeclarations,
-        declarationCheck,
-    };
+    return result;
 }
-function createAtRuleCheck(rule: postcss.AtRule, expectInput: string): AtRuleCheck | undefined {
-    const { msg, expectedParams } = expectInput.match(/(?<msg>\([^)]*\))*(?<expectedParams>.*)/)!
-        .groups!;
-    return {
-        kind: `atrule`,
-        msg,
-        rule,
-        expectedParams: expectedParams.trim(),
+function atRuleTest(_context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
+    const result: Test = {
+        type: `@atrule`,
+        expectation,
+        errors: [],
     };
+    const { msg, expectedParams } = expectation.match(/(?<msg>\([^)]*\))*(?<expectedParams>.*)/)!
+        .groups!;
+    if (expectedParams.match(/^\[\d+\]/)) {
+        result.errors.push(testInlineExpectsErrors.atRuleMultiTest(expectation));
+        return result;
+    }
+    const prefix = msg ? msg + `: ` : ``;
+    if (targetNode.type === `atrule`) {
+        if (targetNode.params !== expectedParams.trim()) {
+            result.errors.push(
+                testInlineExpectsErrors.atruleParams(
+                    expectedParams.trim(),
+                    targetNode.params,
+                    prefix
+                )
+            );
+        }
+    } else {
+        result.errors.push(testInlineExpectsErrors.unsupportedNode(`@atrule`, targetNode.type));
+    }
+    return result;
+}
+function declTest(_context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
+    const result: Test = {
+        type: `@decl`,
+        expectation,
+        errors: [],
+    };
+    let { label, prop, value } = expectation.match(
+        /(?<label>\([^)]*\))*(?<prop>[^:]*)\s*:?\s*(?<value>.*)/
+    )!.groups!;
+    label = label ? label + `: ` : ``;
+    prop = prop.trim();
+    value = value.trim();
+    if (!prop || !value) {
+        result.errors.push(testInlineExpectsErrors.declMalformed(prop, value, label));
+    } else if (targetNode.type === `decl`) {
+        if (targetNode.prop !== prop.trim() || targetNode.value !== value) {
+            const expected = prop.trim() + `: ` + value.trim();
+            const actual = targetNode.prop + `: ` + targetNode.value;
+            result.errors.push(testInlineExpectsErrors.decl(expected, actual, label));
+        }
+    } else {
+        result.errors.push(
+            testInlineExpectsErrors.unsupportedNode(`@decl`, targetNode.type, label)
+        );
+    }
+    return result;
+}
+function analyzeTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+    return diagnosticTest(`analyze`, context, expectation, targetNode, srcNode);
+}
+function transformTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+    return diagnosticTest(`transform`, context, expectation, targetNode, srcNode);
+}
+function diagnosticTest(
+    type: `analyze` | `transform`,
+    { meta }: Context,
+    expectation: string,
+    _targetNode: AST,
+    srcNode: AST
+): Test {
+    const result: Test = {
+        type: `@${type}`,
+        expectation,
+        errors: [],
+    };
+    const matchResult = expectation.match(
+        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>.*)/
+    );
+    if (!matchResult) {
+        result.errors.push(testInlineExpectsErrors.diagnosticsMalformed(type, expectation));
+        return result;
+    }
+    let { label, severity, message, word } = matchResult.groups!;
+    label = label ? label + `: ` : ``;
+    severity = severity?.trim() || ``;
+    message = message?.trim() || ``;
+    word = word?.trim() || ``;
+
+    if (!message) {
+        result.errors.push(testInlineExpectsErrors.diagnosticsMalformed(type, expectation, label));
+        return result;
+    }
+    // check for diagnostic
+    const error = matchDiagnostic(
+        type,
+        meta,
+        {
+            label,
+            message,
+            severity,
+            location: {
+                start: srcNode.source?.start,
+                end: srcNode.source?.end,
+                word,
+                css: ``,
+            },
+        },
+        {
+            diagnosticsNotFound: testInlineExpectsErrors.diagnosticsNotFound,
+            unsupportedSeverity: testInlineExpectsErrors.diagnosticsUnsupportedSeverity,
+            locationMismatch: testInlineExpectsErrors.diagnosticsLocationMismatch,
+            wordMismatch: testInlineExpectsErrors.diagnosticsWordMismatch,
+            severityMismatch: testInlineExpectsErrors.diagnosticsSeverityMismatch,
+            expectedNotFound: testInlineExpectsErrors.diagnosticExpectedNotFound,
+        }
+    );
+    if (error) {
+        result.errors.push(error);
+    }
+    return result;
 }
 
-function getNextMixinRule(currentRule: postcss.Rule, count: number): postcss.Rule | undefined {
-    while (currentRule && count > 0) {
-        const next: postcss.ChildNode | undefined = currentRule.next();
-        // next must be a rule sense mixin can only add rules
-        if (next?.type === `rule`) {
-            currentRule = next;
+function getSourceComment(meta: Context['meta'], { source }: postcss.Comment) {
+    let match: postcss.Comment | undefined = undefined;
+    meta.rawAst.walkComments((srcComment) => {
+        if (
+            srcComment.source?.start?.offset === source?.start?.offset &&
+            srcComment.source?.end?.offset === source?.end?.offset
+        ) {
+            match = srcComment;
+            return false;
+        }
+        return;
+    });
+    return match;
+}
+
+function getNextMixinRule(originRule: postcss.Rule, count: number) {
+    let current: postcss.Node | undefined = originRule;
+    while (current && count > 0) {
+        current = current.next();
+        if (current?.type !== `comment`) {
             count--;
-        } else {
-            return;
         }
     }
-    return currentRule && count === 0 ? currentRule : undefined;
+    return current && count === 0 ? current : undefined;
 }
 
 export const testInlineExpectsErrors = {
     matchAmount: (expectedAmount: number, actualAmount: number) =>
-        `Expected ${expectedAmount} checks to run but there was ${actualAmount}`,
+        `Expected "${expectedAmount}" checks to run but "${actualAmount}" were found`,
+    unsupportedNode: (testType: string, nodeType: string, label = ``) =>
+        `${label}unsupported type "${testType}" for "${nodeType}"`,
     selector: (expectedSelector: string, actualSelector: string, label = ``) =>
-        `${label}expected ${actualSelector} to transform to ${expectedSelector}`,
+        `${label}expected "${actualSelector}" to transform to "${expectedSelector}"`,
     declarations: (expectedDecl: string, actualDecl: string, selector: string, label = ``) =>
         `${label}expected ${selector} to have declaration {${expectedDecl}}, but got {${actualDecl}}`,
     unfoundMixin: (expectInput: string) => `cannot locate mixed-in rule for "${expectInput}"`,
-    malformedDecl: (decl: string, expectInput: string) =>
+    unsupportedMixinNode: (type: string) => `unsupported mixin expectation of type "${type}"`,
+    ruleMalformedDecl: (decl: string, expectInput: string) =>
         `error in expectation "${decl}" of "${expectInput}"`,
     atruleParams: (expectedParams: string, actualParams: string, label = ``) =>
-        `${label}expected ${actualParams} to transform to ${expectedParams}`,
-    atRuleMultiTest: (comment: string) => `atrule multi test is not supported (${comment})`,
+        `${label}expected "${actualParams}" to transform to ${expectedParams}`,
+    atRuleMultiTest: (comment: string) => `atrule mixin is not supported: (${comment})`,
+    decl: (expected: string, actual: string, label = ``) =>
+        `${label}expected "${actual}" to transform to "${expected}"`,
+    declMalformed: (expectedProp: string, expectedLabel: string, label = ``) => {
+        if (!expectedProp && !expectedLabel) {
+            return `${label}malformed declaration expectation, format should be: "prop: value"`;
+        } else if (!expectedProp) {
+            return `${label}malformed declaration expectation missing prop: "???: ${expectedLabel}"`;
+        } else {
+            return `${label}malformed declaration expectation missing value: "${expectedProp}: ???"`;
+        }
+    },
+    deprecatedRootInputNotSupported: (expectation: string) =>
+        `"${expectation}" is not supported for with the used input, try calling testInlineExpects(generateStylableResults())`,
+    diagnosticsMalformed: (type: string, expectation: string, label = ``) =>
+        `${label}malformed @${type} expectation "@${type}${expectation}". format should be: "@${type}-[severity] diagnostic message"`,
+    diagnosticsNotFound: (type: string, message: string, label = ``) =>
+        `${label}${type} diagnostics not found for "${message}"`,
+    diagnosticsUnsupportedSeverity: (type: string, severity: string, label = ``) =>
+        `${label}unsupported @${type}-[severity]: "${severity}"`,
+    diagnosticsLocationMismatch: (type: string, message: string, label = ``) =>
+        `${label}expected "@${type}-[severity] "${message}" to be reported in this location, but got it somewhere else`,
+    diagnosticsWordMismatch: (type: string, expectedWord: string, message: string, label = ``) =>
+        `${label}expected word in "@${type}-[severity] word(${expectedWord}) ${message}" was not found`,
+    diagnosticsSeverityMismatch: (
+        type: string,
+        expectedSeverity: string,
+        actualSeverity: string,
+        message: string,
+        label = ``
+    ) =>
+        `${label}expected ${type} diagnostic "${message}" to be reported with "${expectedSeverity}", but it was reported with "${actualSeverity}"`,
+    diagnosticExpectedNotFound: (type: string, message: string, label = ``) =>
+        `${label}no "${type}" diagnostic found for "${message}"`,
     combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
 };
