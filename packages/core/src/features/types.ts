@@ -1,4 +1,4 @@
-import type { ImportSymbol, Imported } from './st-import';
+import type { ImportSymbol } from './st-import';
 import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import type { MappedStates, MixinValue } from '../stylable-value-parsers';
@@ -26,14 +26,6 @@ export interface VarSymbol {
     text: string;
     valueType: string | null;
     node: postcss.Node;
-}
-
-export interface KeyframesSymbol {
-    _kind: 'keyframes';
-    alias: string;
-    name: string;
-    import?: Imported;
-    global?: boolean;
 }
 
 export interface CSSVarSymbol {

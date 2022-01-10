@@ -1,14 +1,14 @@
 {
   "name": "@stylable/core-test-kit",
-  "version": "4.9.3",
+  "version": "4.10.0",
   "description": "Stylable core test-kit",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/memory": "^5.4.1",
-    "@stylable/core": "^4.9.3",
+    "@file-services/memory": "^5.7.1",
+    "@stylable/core": "^4.10.0",
     "chai": "^4.3.4",
     "flat": "^5.0.2",
     "postcss": "^8.4.5"
@@ -25,7 +25,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/wix/stylable/tree/master/packages/optimizer",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/core-test-kit",
   "homepage": "https://stylable.io",
   "author": "Wix.com",
   "license": "MIT"

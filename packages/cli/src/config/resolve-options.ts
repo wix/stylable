@@ -1,39 +1,13 @@
 import { nodeFs } from '@file-services/node';
 import type { Arguments } from 'yargs';
 import yargs from 'yargs';
-import { createGenerator } from './build';
-import type { ConfigOptions, PartialConfigOptions } from './projects-config';
+import { createGenerator } from '../build';
+import { removeUndefined } from '../helpers';
+import type { CliArguments, BuildOptions, PartialBuildOptions } from '../types';
 
 const { join } = nodeFs;
 
-export interface CliArguments {
-    rootDir: string;
-    srcDir: string | undefined;
-    outDir: string | undefined;
-    esm: boolean | undefined;
-    cjs: boolean | undefined;
-    css: boolean | undefined;
-    stcss: boolean | undefined;
-    dts: boolean | undefined;
-    dtsSourceMap: boolean | undefined;
-    useNamespaceReference: boolean | undefined;
-    namespaceResolver: string;
-    injectCSSRequest: boolean | undefined;
-    cssFilename: string | undefined;
-    cssInJs: boolean | undefined;
-    optimize: boolean | undefined;
-    minify: boolean | undefined;
-    indexFile: string | undefined;
-    manifest: boolean | undefined;
-    manifestFilepath: string;
-    customGenerator: string | undefined;
-    ext: string | undefined;
-    require: string[];
-    log: boolean | undefined;
-    diagnostics: boolean | undefined;
-    diagnosticsMode: string | undefined;
-    watch: boolean;
-}
+export const NAMESPACE_RESOLVER_MODULE_REQUEST = '@stylable/node';
 
 export function getCliArguments(): Arguments<CliArguments> {
     const defaults = createDefaultOptions();
@@ -96,7 +70,7 @@ export function getCliArguments(): Arguments<CliArguments> {
             description:
                 'node request to a module that exports a stylable resolveNamespace function',
             alias: 'nsr',
-            default: '@stylable/node',
+            default: NAMESPACE_RESOLVER_MODULE_REQUEST,
         })
         .option('injectCSSRequest', {
             type: 'boolean',
@@ -144,11 +118,6 @@ export function getCliArguments(): Arguments<CliArguments> {
             type: 'string',
             description: 'path to file containing indexFile output override methods',
         })
-        .option('ext', {
-            type: 'string',
-            description: 'extension of stylable css files',
-            defaultDescription: String(defaults.extension),
-        })
         .option('require', {
             type: 'array',
             description: 'require hooks',
@@ -187,17 +156,13 @@ export function getCliArguments(): Arguments<CliArguments> {
         .parseSync();
 }
 
-export function resolveCliOptions(
-    argv: CliArguments,
-    defaults: ConfigOptions
-): PartialConfigOptions {
+export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): PartialBuildOptions {
     const rootDir = argv.rootDir;
     const outDir = argv.outDir ?? defaults.outDir;
 
     return {
         outDir: argv.outDir,
         srcDir: argv.srcDir,
-        extension: argv.ext,
         indexFile: argv.indexFile,
         esm: argv.esm,
         cjs: argv.cjs,
@@ -213,16 +178,15 @@ export function resolveCliOptions(
         includeCSSInJS: argv.cssInJs,
         outputSources: argv.stcss,
         outputCSSNameTemplate: argv.cssFilename,
-        diagnosticsMode: argv.diagnosticsMode as ConfigOptions['diagnosticsMode'],
-        Generator: createGenerator(rootDir, argv.customGenerator),
+        diagnosticsMode: argv.diagnosticsMode as BuildOptions['diagnosticsMode'],
+        IndexGenerator: createGenerator(rootDir, argv.customGenerator),
     };
 }
 
-export function createDefaultOptions(): ConfigOptions {
+export function createDefaultOptions(): BuildOptions {
     return {
         outDir: '.',
         srcDir: '.',
-        extension: '.st.css',
         cjs: true,
         esm: false,
         dts: false,
@@ -238,4 +202,50 @@ export function createDefaultOptions(): ConfigOptions {
         outputCSSNameTemplate: '[filename].css',
         diagnosticsMode: 'strict',
     };
+}
+
+export function validateOptions(
+    { outDir, srcDir, outputSources, dts, dtsSourceMap }: BuildOptions,
+    name?: string
+) {
+    const prefix = name ? `"${name}" options - ` : '';
+
+    if (!dts && dtsSourceMap) {
+        throw new Error(prefix + `"dtsSourceMap" requires turning on "dts"`);
+    }
+
+    if (outputSources && srcDir === outDir) {
+        throw new Error(
+            prefix +
+                'Invalid configuration: When using "stcss" outDir and srcDir must be different.' +
+                `\noutDir: ${outDir}` +
+                `\nsrcDir: ${srcDir}`
+        );
+    }
+}
+
+export function mergeBuildOptions(
+    ...configs: [BuildOptions, ...(BuildOptions | PartialBuildOptions | undefined)[]]
+): BuildOptions {
+    const [config, ...rest] = configs;
+
+    return Object.assign(
+        {},
+        config,
+        ...rest.map((currentConfig) => (currentConfig ? removeUndefined(currentConfig) : {}))
+    );
+}
+
+export function createBuildIdentifier(
+    rootDir: string,
+    projectRoot: string,
+    index: number,
+    hasMultipleOptions: boolean,
+    isMultipleProjects: boolean
+) {
+    return hasMultipleOptions
+        ? `[${index}] ${projectRoot.replace(rootDir, '')}`
+        : isMultipleProjects
+        ? projectRoot.replace(rootDir, '')
+        : projectRoot;
 }

@@ -1,21 +1,24 @@
-import { writeFileSync, unlinkSync, rmdirSync, renameSync } from 'fs';
-import { join } from 'path';
-import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { messages } from '@stylable/cli';
+import { errorMessages, buildMessages } from '@stylable/cli/dist/messages';
+import { STImport } from '@stylable/core/dist/features';
 import {
     createCliTester,
+    escapeRegExp,
     loadDirSync,
     populateDirectorySync,
-    runCliSync,
     writeToExistingFile,
-} from './test-kit/cli-test-kit';
+} from '@stylable/e2e-test-kit';
+import { expect } from 'chai';
+import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
+import { realpathSync, renameSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
+import { join, sep } from 'path';
 
-describe('Stylable Cli Watch', () => {
+describe('Stylable Cli Watch - Single project', () => {
     let tempDir: ITempDirectory;
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
         tempDir = await createTempDirectory();
+        // This is used to make the output paths matching consistent since we use the real path in the logs of the CLI
+        tempDir.path = realpathSync(tempDir.path);
     });
     afterEach(async () => {
         cleanup();
@@ -33,12 +36,13 @@ describe('Stylable Cli Watch', () => {
                 .root{ color:green; }
             `,
         });
+
         await run({
             dirPath: tempDir.path,
             args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'depend.st.css'),
@@ -47,7 +51,7 @@ describe('Stylable Cli Watch', () => {
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(2),
                 },
             ],
         });
@@ -79,7 +83,7 @@ describe('Stylable Cli Watch', () => {
             args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'deep.st.css'),
@@ -88,7 +92,7 @@ describe('Stylable Cli Watch', () => {
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING + ' 3',
+                    msg: buildMessages.FINISHED_PROCESSING(3),
                 },
             ],
         });
@@ -106,13 +110,13 @@ describe('Stylable Cli Watch', () => {
             args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -138,13 +142,13 @@ describe('Stylable Cli Watch', () => {
             args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeFileSync(join(tempDir.path, 'asset.svg'), getSvgContent(NEW_SIZE));
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -164,13 +168,13 @@ describe('Stylable Cli Watch', () => {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         unlinkSync(join(tempDir.path, 'style.st.css'));
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -191,13 +195,13 @@ describe('Stylable Cli Watch', () => {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -220,13 +224,13 @@ describe('Stylable Cli Watch', () => {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -247,7 +251,7 @@ describe('Stylable Cli Watch', () => {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         renameSync(
                             join(tempDir.path, 'style.st.css'),
@@ -256,10 +260,12 @@ describe('Stylable Cli Watch', () => {
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    // Deleted
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    // Created
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -271,51 +277,78 @@ describe('Stylable Cli Watch', () => {
         });
     });
 
-    // it.only('should handle renames of folders', async () => {
-    //     populateDirectorySync(tempDir.path, {
-    //         'package.json': `{"name": "test", "version": "0.0.0"}`,
-    //         styles: {
-    //             deep: { 'style.st.css': `.root{ color: red }` },
-    //         },
-    //     });
+    it('should report diagnostics on initial build and then start watching', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `
+                    @st-import Module from './does-not-exist.st.css';
+                    
+                    .root{ color: red }
+                `,
+        });
 
-    //     await run({
-    //         dirPath: tempDir.path,
-    //         args: ['--outDir', './dist', '-w', '--cjs', '--css'],
-    //         steps: [
-    //             {
-    //                 msg: messages.START_WATCHING,
-    //                 action() {
-    //                     renameSync(
-    //                         join(tempDir.path, 'styles'),
-    //                         join(tempDir.path, 'styles-renamed')
-    //                     );
-    //                     return true;
-    //                 },
-    //             },
-    //             {
-    //                 msg: messages.FINISHED_PROCESSING,
-    //                 action() {
-    //                     return true;
-    //                 },
-    //             },
-    //             {
-    //                 msg: messages.FINISHED_PROCESSING,
-    //                 action() {
-    //                     return false;
-    //                 },
-    //             },
-    //         ],
-    //     });
-    //     const files = loadDirSync(tempDir.path);
-    //     expect(files['dist/style-renamed.css']).to.include(`color: red`);
-    //     expect(files).to.include({
-    //         'package.json': '{"name": "test", "version": "0.0.0"}',
-    //         'style-renamed.st.css': '.root{ color: red }',
-    //     });
-    // });
+        await run({
+            dirPath: tempDir.path,
+            args: ['--outDir', './dist', '-w', '--cjs', '--css'],
+            steps: [
+                {
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                },
+                {
+                    msg: buildMessages.START_WATCHING(),
+                },
+            ],
+        });
 
-    // it('should ignore source files in dist');
+        const files = loadDirSync(tempDir.path);
+        expect(Object.keys(files)).to.eql([
+            'dist/style.css',
+            'dist/style.st.css.js',
+            'package.json',
+            'style.st.css',
+        ]);
+    });
+
+    it('should keep diagnostics when not fixed in second iteration', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `
+                    @st-import Module from './does-not-exist.st.css';
+                    
+                    .root{ color: red; }
+                `,
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--outDir', './dist', '-w', '--cjs', '--css'],
+            steps: [
+                {
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                },
+                {
+                    msg: buildMessages.START_WATCHING(),
+                    action() {
+                        writeToExistingFile(
+                            join(tempDir.path, 'style.st.css'),
+                            ` 
+                                /* The import stays so it should get reported again */
+                                @st-import Module from './does-not-exist.st.css';
+                    
+                                .root{ color: blue; }
+                                `
+                        );
+                    },
+                },
+                {
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                },
+            ],
+        });
+
+        const files = loadDirSync(tempDir.path);
+        expect(files['style.st.css']).to.include('.root{ color: blue; }');
+    });
 
     it('should re-build indexes', async () => {
         populateDirectorySync(tempDir.path, {
@@ -327,13 +360,13 @@ describe('Stylable Cli Watch', () => {
             args: ['--outDir', './dist', '-w', '--indexFile', 'index.st.css'],
             steps: [
                 {
-                    msg: messages.START_WATCHING,
+                    msg: buildMessages.START_WATCHING(),
                     action() {
                         writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                     action() {
                         writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
@@ -342,13 +375,13 @@ describe('Stylable Cli Watch', () => {
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                     action() {
                         writeFileSync(join(tempDir.path, 'comp.st.css'), `.root{ color:green }`);
                     },
                 },
                 {
-                    msg: messages.FINISHED_PROCESSING,
+                    msg: buildMessages.FINISHED_PROCESSING(1),
                 },
             ],
         });
@@ -357,24 +390,129 @@ describe('Stylable Cli Watch', () => {
         expect(files['dist/index.st.css']).to.include('comp.st.css');
     });
 
-    it('should error when source dir match out dir and output sources enabled', () => {
+    it('should not trigger circular assets build', async () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'stylable.config.js': `
+            exports.stcConfig = () => ({
+                options: {
+                    cjs: false,
+                },
+                projects: {
+                    'packages/*': [
+                        {
+                            outDir: './dist',
+                            srcDir: './src',
+                            outputSources: true
+                        },
+                        {
+                            srcDir: './src',
+                            outDir: './src',
+                            dts: true
+                        }
+                    ]
+                }
+            })`,
+            packages: {
+                'project-a': {
+                    'package.json': JSON.stringify({ name: 'a', version: '0.0.0' }),
+                    src: {
+                        'icon.svg': `<svg height="100" width="100">
+                            <circle cx="5" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+                        </svg> `,
+                        'style.st.css': `
+                        .root{ 
+                            color:red;
+                            background: url('./icon.svg')
+                         }
+                    `,
+                    },
+                },
+            },
         });
 
-        const res = runCliSync([
-            '--rootDir',
-            tempDir.path,
-            '--outDir',
-            './',
-            '--srcDir',
-            './',
-            '-w',
-            '--stcss',
-            '--cjs=false',
-        ]);
-        expect(res.stderr).to.contain(
-            'Error: Invalid configuration: When using "stcss" outDir and srcDir must be different.'
-        );
+        const { output } = await run({
+            dirPath: tempDir.path,
+            args: ['-w'],
+            steps: [
+                {
+                    msg: buildMessages.START_WATCHING(),
+                    action() {
+                        writeToExistingFile(
+                            join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
+                            `.root{ 
+                                color:red;
+                                background: url('./icon.svg')
+                             }`
+                        );
+                    },
+                },
+                {
+                    msg: buildMessages.FINISHED_PROCESSING(
+                        2,
+                        `[0] ${sep}` + join('packages', 'project-a')
+                    ),
+                },
+                {
+                    msg: buildMessages.FINISHED_PROCESSING(
+                        2,
+                        `[1] ${sep}` + join('packages', 'project-a')
+                    ),
+                    action() {
+                        return {
+                            sleep: 2000,
+                        };
+                    },
+                },
+            ],
+        });
+
+        expect(
+            output().match(
+                new RegExp(
+                    escapeRegExp(
+                        buildMessages.CHANGE_EVENT_TRIGGERED(
+                            join(tempDir.path, 'packages', 'project-a', 'src', 'icon.svg')
+                        )
+                    ),
+                    'ig'
+                )
+            )?.length,
+            'svg file should trigger change event once'
+        ).to.eql(2, output());
+    });
+
+    it('should keep watching when getting stylable process error', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{ color:red }`,
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--outDir', './dist', '-w', '--stcss'],
+            steps: [
+                {
+                    msg: buildMessages.START_WATCHING(),
+                    action() {
+                        writeToExistingFile(join(tempDir.path, 'style.st.css'), `.root;{}`);
+                    },
+                },
+                {
+                    msg: errorMessages.STYLABLE_PROCESS(join(tempDir.path, 'style.st.css')),
+                    action() {
+                        writeToExistingFile(
+                            join(tempDir.path, 'style.st.css'),
+                            `.root{ color:green }`
+                        );
+                    },
+                },
+                {
+                    msg: buildMessages.FINISHED_PROCESSING(1),
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files['dist/style.st.css']).to.include('color:green');
     });
 });

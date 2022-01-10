@@ -5,7 +5,7 @@ import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { murmurhash3_32_gc } from './murmurhash';
-import { reservedKeyFrames, knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
+import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
 import type {
     ClassSymbol,
@@ -16,7 +16,7 @@ import type {
     VarSymbol,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
-import { FeatureContext, STSymbol, STImport, CSSClass, CSSType } from './features';
+import { FeatureContext, STSymbol, STImport, CSSClass, CSSType, CSSKeyframes } from './features';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
@@ -61,12 +61,6 @@ export const processorWarnings = {
     STATE_DEFINITION_IN_COMPLEX() {
         return 'cannot define pseudo states inside complex selectors';
     },
-    REDECLARE_SYMBOL_KEYFRAMES(name: string) {
-        return `redeclare keyframes symbol "${name}"`;
-    },
-    KEYFRAME_NAME_RESERVED(name: string) {
-        return `keyframes "${name}" is reserved`;
-    },
     CANNOT_RESOLVE_EXTEND(name: string) {
         return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
     },
@@ -94,17 +88,8 @@ export const processorWarnings = {
     NO_VARS_DEF_IN_ST_SCOPE() {
         return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`;
     },
-    NO_KEYFRAMES_IN_ST_SCOPE() {
-        return `cannot use "@keyframes" inside of "@st-scope"`;
-    },
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" missing scoping selector parameter';
-    },
-    MISSING_KEYFRAMES_NAME() {
-        return '"@keyframes" missing parameter';
-    },
-    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL() {
-        return `"@keyframes" missing parameter inside "${paramMapping.global}()"`;
     },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
@@ -231,55 +216,10 @@ export class StylableProcessor implements FeatureContext {
                     break;
                 }
                 case 'keyframes':
-                    if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
-                        this.meta.keyframes.push(atRule);
-                        let { params: name } = atRule;
-
-                        if (name) {
-                            let global: boolean | undefined;
-                            const globalName = globalValue(name);
-
-                            if (globalName !== undefined) {
-                                name = globalName;
-                                global = true;
-                            }
-
-                            if (name === '') {
-                                this.diagnostics.warn(
-                                    atRule,
-                                    processorWarnings.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL()
-                                );
-                            }
-
-                            if (reservedKeyFrames.includes(name)) {
-                                this.diagnostics.error(
-                                    atRule,
-                                    processorWarnings.KEYFRAME_NAME_RESERVED(name),
-                                    {
-                                        word: name,
-                                    }
-                                );
-                            }
-
-                            this.checkRedeclareKeyframes(name, atRule);
-                            this.meta.mappedKeyframes[name] = {
-                                _kind: 'keyframes',
-                                alias: name,
-                                name,
-                                global,
-                            };
-                        } else {
-                            this.diagnostics.warn(
-                                atRule,
-                                processorWarnings.MISSING_KEYFRAMES_NAME()
-                            );
-                        }
-                    } else {
-                        this.diagnostics.error(
-                            atRule,
-                            processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE()
-                        );
-                    }
+                    CSSKeyframes.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                    });
                     break;
                 case 'custom-selector': {
                     const params = atRule.params.split(/\s/);
@@ -544,16 +484,6 @@ export class StylableProcessor implements FeatureContext {
         if (!isRootValid(selectorAst)) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
-    }
-
-    protected checkRedeclareKeyframes(symbolName: string, node: postcss.Node) {
-        const symbol = this.meta.mappedKeyframes[symbolName];
-        if (symbol) {
-            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL_KEYFRAMES(symbolName), {
-                word: symbolName,
-            });
-        }
-        return symbol;
     }
 
     protected addVarSymbols(rule: postcss.Rule) {

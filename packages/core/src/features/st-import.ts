@@ -1,6 +1,7 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
+import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
@@ -28,6 +29,19 @@ export interface Imported {
     request: string;
     context: string;
 }
+
+/**
+ * ImportTypeHook is used as a way to cast imported symbols before resolving their actual type.
+ * currently used only for `keyframes` as they are completely on a separate namespace from other symbols.
+ *
+ * Hooks are registered statically since the features are static and cannot be selected/disabled.
+ * If the system will ever change to support picking features dynamically, this mechanism would
+ * have to move into the `metaInit` hook.
+ */
+export const ImportTypeHook = new Map<
+    StylableSymbol['_kind'] & keyof Imported,
+    (context: FeatureContext, localName: string, importName: string, importDef: Imported) => void
+>();
 
 const dataKey = plugableRecord.key<Imported[]>('imports');
 
@@ -156,17 +170,14 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
             node: importDef.rule,
         });
     });
-    Object.keys(importDef.keyframes).forEach((name) => {
-        if (!checkRedeclareKeyframes(context, name, importDef.rule)) {
-            // ToDo: move to STSymbol.addSymbol({namespace: `keyframes`})
-            context.meta.mappedKeyframes[name] = {
-                _kind: 'keyframes',
-                alias: name,
-                name: importDef.keyframes[name],
-                import: importDef,
-            };
+    // import as typed symbol
+    for (const [type, handler] of ImportTypeHook.entries()) {
+        if (type in importDef) {
+            for (const [localName, importName] of Object.entries(importDef[type])) {
+                handler(context, localName, importName, importDef);
+            }
         }
-    });
+    }
 }
 
 function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {
@@ -219,18 +230,4 @@ function validateImports(context: FeatureTransformContext) {
             }
         }
     }
-}
-
-// ToDo: move to st-symbol once symbol namespace is implemented
-function REDECLARE_SYMBOL_KEYFRAMES(name: string) {
-    return `redeclare keyframes symbol "${name}"`;
-}
-function checkRedeclareKeyframes(context: FeatureContext, symbolName: string, node: postcss.Node) {
-    const symbol = context.meta.mappedKeyframes[symbolName];
-    if (symbol) {
-        context.diagnostics.warn(node, REDECLARE_SYMBOL_KEYFRAMES(symbolName), {
-            word: symbolName,
-        });
-    }
-    return symbol;
 }

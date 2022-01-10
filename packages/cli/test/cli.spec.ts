@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
-import { loadDirSync, populateDirectorySync, runCliSync } from './test-kit/cli-test-kit';
+import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
 import { processorWarnings } from '@stylable/core';
 import { STImport } from '@stylable/core/dist/features';
 
@@ -355,6 +355,27 @@ describe('Stylable Cli', function () {
             expect(
                 stdout.match(new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE(), 'g'))
             ).to.have.length(1);
+        });
+
+        it('should report error when source dir match out dir and output sources enabled', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+            });
+
+            const res = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--outDir',
+                './',
+                '--srcDir',
+                './',
+                '-w',
+                '--stcss',
+                '--cjs=false',
+            ]);
+            expect(res.stderr).to.contain(
+                'Error: Invalid configuration: When using "stcss" outDir and srcDir must be different.'
+            );
         });
     });
 });
