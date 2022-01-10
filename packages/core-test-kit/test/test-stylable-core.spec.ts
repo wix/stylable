@@ -1,5 +1,6 @@
 import { testStylableCore } from '@stylable/core-test-kit';
 import { CSSClass } from '@stylable/core/dist/features';
+import { createMemoryFs } from '@file-services/memory';
 import { expect } from 'chai';
 
 describe(`testStylableCore()`, () => {
@@ -117,6 +118,38 @@ describe(`testStylableCore()`, () => {
                     `,
                 })
             ).to.throw();
+        });
+    });
+    describe(`stylable config`, () => {
+        it(`should pass configuration to stylable instance`, () => {
+            const onProcessCalls: any[] = [];
+            const { sheets } = testStylableCore(``, {
+                stylableConfig: {
+                    onProcess(meta, path) {
+                        onProcessCalls.push({ meta, path });
+                        return meta;
+                    },
+                },
+            });
+
+            expect(onProcessCalls).to.eql([
+                { meta: sheets[`/entry.st.css`].meta, path: `/entry.st.css` },
+            ]);
+        });
+        it(`should use filesystem from configuration (ignore input)`, () => {
+            const inputFS = createMemoryFs({
+                '/abc.st.css': ``,
+            });
+            const { fs, sheets } = testStylableCore(``, {
+                stylableConfig: {
+                    filesystem: inputFS,
+                },
+            });
+
+            expect(fs, `filesystem`).to.equal(inputFS);
+            expect(sheets['/abc.st.css'].exports.classes.root, `sheet from config fs`).to.equal(
+                `abc__root`
+            );
         });
     });
 });

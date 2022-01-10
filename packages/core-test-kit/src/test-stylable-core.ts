@@ -1,22 +1,36 @@
 import { testInlineExpects } from './inline-expectation';
-import { Stylable, StylableExports, StylableMeta } from '@stylable/core';
+import { Stylable, StylableConfig, StylableExports, StylableMeta } from '@stylable/core';
 import { createMemoryFs } from '@file-services/memory';
-import type { IDirectoryContents } from '@file-services/types';
+import type { IDirectoryContents, IFileSystem } from '@file-services/types';
 import { isAbsolute } from 'path';
 
 export interface TestOptions {
     entries: string[];
+    stylableConfig: TestStylableConfig;
 }
+
+export type TestStylableConfig = Omit<
+    StylableConfig,
+    'fileSystem' | `projectRoot` | `resolveNamespace`
+> & {
+    filesystem?: IFileSystem;
+    projectRoot?: StylableConfig['projectRoot'];
+    resolveNamespace?: StylableConfig['resolveNamespace'];
+};
+
 export function testStylableCore(
     input: string | IDirectoryContents,
     options: Partial<TestOptions> = {}
 ) {
     // infra
-    const fs = createMemoryFs(typeof input === `string` ? { '/entry.st.css': input } : input);
+    const fs =
+        options.stylableConfig?.filesystem ||
+        createMemoryFs(typeof input === `string` ? { '/entry.st.css': input } : input);
     const stylable = Stylable.create({
         fileSystem: fs,
         projectRoot: '/',
         resolveNamespace: (ns) => ns,
+        ...(options.stylableConfig || {}),
     });
 
     // collect sheets
