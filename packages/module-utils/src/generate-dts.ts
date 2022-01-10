@@ -8,7 +8,7 @@ import {
     valueMapping,
 } from '@stylable/core';
 
-const SPACING = ' '.repeat(4);
+export const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
 
 function addStatesEntries(

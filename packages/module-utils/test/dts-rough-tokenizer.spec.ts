@@ -34,4 +34,58 @@ describe('tokenizeDTS (e2e)', () => {
         expect(states[2].type[2].value, 'stateValue Type enum b').to.equal('"b"');
         expect(states[2].type[4].value, 'stateValue Type enum c').to.equal('"c"');
     });
+
+    it('should tokenize complex st-vars', () => {
+        tk.populate({
+            'test.st.css': `
+            :vars {
+                a: st-map(b st-array(red,
+                    blue,
+                    st-map(c green, d gold)))
+            }`,
+        });
+        const dts = tk.read('test.st.css.d.ts');
+
+        const out = tokenizeDTS(dts);
+
+        const stVars = out.find(({ type }) => type === 'stVars')!;
+        const a = stVars.tokens[0];
+        const b = stVars.tokens[1];
+        const c = stVars.tokens[2];
+        const d = stVars.tokens[3];
+
+        expect(stVars.tokens.length, 'generate all st-vars tokens').to.equal(4);
+        expect(a, 'generate token for variable a').to.eql({
+            value: '"a"',
+            type: 'string',
+            start: 210,
+            end: 213,
+            line: 12,
+            column: 4,
+        });
+        expect(b, 'generate token for variable b').to.eql({
+            value: '"b"',
+            type: 'string',
+            start: 225,
+            end: 228,
+            line: 13,
+            column: 8,
+        });
+        expect(c, 'generate token for variable c').to.eql({
+            value: '"c"',
+            type: 'string',
+            start: 302,
+            end: 305,
+            line: 17,
+            column: 16,
+        });
+        expect(d, 'generate token for variable d').to.eql({
+            value: '"d"',
+            type: 'string',
+            start: 331,
+            end: 334,
+            line: 18,
+            column: 16,
+        });
+    });
 });
