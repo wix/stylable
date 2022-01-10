@@ -25,14 +25,12 @@ function findFunction(node: AnyValueNode, onFunctionNode: OnFunction, level: num
             node.nodes.forEach((child) => findFunction(child, onFunctionNode, level));
             break;
         case 'url':
+        case 'item':
             onFunctionNode(node, level);
             break;
         case 'nested-item':
             onFunctionNode(node, level);
             node.nodes.forEach((child) => findFunction(child, onFunctionNode, level + 1));
-            break;
-        case 'item':
-            onFunctionNode(node, level);
             break;
     }
 }
