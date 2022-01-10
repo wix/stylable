@@ -1,14 +1,11 @@
-import { validateAtProperty } from '../helpers/css-custom-property';
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
+import { validateAtProperty, isCSSVarProp } from '../helpers/css-custom-property';
+import { validateAllowedNodesUntil } from '../helpers/value';
+import { globalValue } from '../helpers/global';
 import type * as postcss from 'postcss';
 // ToDo: refactor out
 import postcssValueParser from 'postcss-value-parser';
-// ToDo: move to helpers
-import { globalValue } from '../utils';
-import { isCSSVarProp } from '../stylable-utils';
-import { validateAllowedNodesUntil } from '../stylable-value-parsers';
-
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;

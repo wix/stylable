@@ -31,7 +31,8 @@ import type { StylableMeta } from './stylable-meta';
 import { STSymbol, STGlobal, CSSClass, CSSType, CSSKeyframes } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
-import { generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
+import { generateScopedCSSVar } from './stylable-utils'; // ToDO: move
+import { isCSSVarProp } from './helpers/css-custom-property';
 import { valueMapping } from './stylable-value-parsers';
 import { unescapeCSS, namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';

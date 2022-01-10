@@ -17,12 +17,8 @@ import {
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
 import { FeatureContext, STSymbol, STImport, CSSClass, CSSType, CSSKeyframes } from './features';
-import {
-    CUSTOM_SELECTOR_RE,
-    expandCustomSelectors,
-    getAlias,
-    isCSSVarProp,
-} from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
+import { isCSSVarProp } from './helpers/css-custom-property';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
     walkSelector,
@@ -34,9 +30,9 @@ import {
     stringifySelector,
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
+import { GLOBAL_FUNC } from './helpers/global';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import {
-    paramMapping,
     rootValueMapping,
     SBTypesParsers,
     stValuesMap,
@@ -102,7 +98,7 @@ export const processorWarnings = {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
     },
     DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
-        return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${paramMapping.global}`;
+        return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`;
     },
     DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
         return `"${name}" is deprecated, use "${alternativeName}"`;

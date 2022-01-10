@@ -124,3 +124,22 @@ export function groupValues(nodes: ValueNode[], divType = 'div') {
     }
     return grouped;
 }
+
+export function validateAllowedNodesUntil(
+    node: ParsedValue,
+    i: number,
+    untilType = 'div',
+    allowed = ['comment']
+) {
+    i = 1;
+    let current = node.nodes[i];
+    while (current && current.type !== untilType) {
+        if (!allowed.includes(current.type)) {
+            return false;
+        }
+        i++;
+        current = node.nodes[i];
+    }
+
+    return true;
+}

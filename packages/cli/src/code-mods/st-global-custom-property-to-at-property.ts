@@ -1,10 +1,5 @@
-import {
-    CSSVarSymbol,
-    Diagnostics,
-    isCSSVarProp,
-    paramMapping,
-    processorWarnings,
-} from '@stylable/core';
+import { CSSVarSymbol, Diagnostics, isCSSVarProp, processorWarnings } from '@stylable/core';
+import { GLOBAL_FUNC } from '@stylable/core/dist/helpers/global';
 import type { AtRule } from 'postcss';
 import type { CodeMod } from './types';
 
@@ -18,7 +13,7 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = ({ ast, diagnostics, 
                 atRule.before(
                     postcss.atRule({
                         name: 'property',
-                        params: `${paramMapping.global}(${property.name})`,
+                        params: `${GLOBAL_FUNC}(${property.name})`,
                     })
                 );
             }

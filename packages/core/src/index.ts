@@ -29,6 +29,14 @@ export {
 } from './stylable-processor';
 
 export { ensureStylableImports, parseStylableImport } from './helpers/import';
+export { isCSSVarProp } from './helpers/css-custom-property';
+export { globalValueRegExp } from './helpers/global';
+
+import { GLOBAL_FUNC } from './helpers/global';
+/**@deprecated*/
+export const paramMapping = {
+    global: GLOBAL_FUNC,
+};
 
 export { StylableMeta, RESERVED_ROOT_NAME } from './stylable-meta';
 export {
@@ -50,7 +58,6 @@ export {
     generateScopedCSSVar,
     getAlias,
     getSourcePath,
-    isCSSVarProp,
     isValidClassName,
     isValidDeclaration,
     mergeRules,
@@ -78,15 +85,12 @@ export {
     STYLABLE_VALUE_MATCHER,
     TypedClass,
     animationPropRegExp,
-    globalValueRegExp,
     mixinDeclRegExp,
-    paramMapping,
     rootValueMapping,
     stKeys,
     stValues,
     stValuesMap,
     strategies,
-    validateAllowedNodesUntil,
     valueMapping,
     valueParserWarnings,
 } from './stylable-value-parsers';
@@ -186,6 +190,7 @@ export {
     getStringValue,
     groupValues,
     listOptions,
+    validateAllowedNodesUntil,
 } from './helpers/value';
 
 // *** deprecated ***

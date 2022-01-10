@@ -131,10 +131,6 @@ export function generateScopedCSSVar(namespace: string, varName: string) {
     return `--${namespace}-${varName}`;
 }
 
-export function isCSSVarProp(value: string) {
-    return value.startsWith('--');
-}
-
 export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symbolName: string) {
     const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
     if (
