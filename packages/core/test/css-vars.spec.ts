@@ -5,7 +5,6 @@ import {
     generateStylableResult,
     processSource,
 } from '@stylable/core-test-kit';
-import { processorWarnings } from '@stylable/core';
 import { STSymbol, STImport, CSSCustomProperty } from '@stylable/core/dist/features';
 
 describe('css custom-properties (vars)', () => {
@@ -677,7 +676,8 @@ describe('css custom-properties (vars)', () => {
                 const res = expectTransformDiagnostics(config, [
                     {
                         file: '/entry.st.css',
-                        message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                        message:
+                            CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                         severity: 'info',
                     },
                 ]);
@@ -834,7 +834,7 @@ describe('css custom-properties (vars)', () => {
             const res = expectTransformDiagnostics(config, [
                 {
                     file: '/entry.st.css',
-                    message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                    message: CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     severity: 'info',
                 },
             ]);
@@ -965,12 +965,12 @@ describe('css custom-properties (vars)', () => {
 
             expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                    message: CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     file: '/entry.st.css',
                     severity: 'info',
                 },
                 {
-                    message: processorWarnings.ILLEGAL_GLOBAL_CSS_VAR('illegalVar'),
+                    message: CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR('illegalVar'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },
@@ -992,12 +992,13 @@ describe('css custom-properties (vars)', () => {
 
             expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
+                    message: CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(),
                     file: '/entry.st.css',
                     severity: 'info',
                 },
                 {
-                    message: processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA('--var1 --var2'),
+                    message:
+                        CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA('--var1 --var2'),
                     file: '/entry.st.css',
                     skipLocationCheck: true,
                 },

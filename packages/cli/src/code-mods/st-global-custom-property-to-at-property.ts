@@ -1,5 +1,6 @@
-import { CSSVarSymbol, Diagnostics, isCSSVarProp, processorWarnings } from '@stylable/core';
+import { CSSVarSymbol, Diagnostics, isCSSVarProp } from '@stylable/core';
 import { GLOBAL_FUNC } from '@stylable/core/dist/helpers/global';
+import { CSSCustomProperty } from '@stylable/core/dist/features';
 import type { AtRule } from 'postcss';
 import type { CodeMod } from './types';
 
@@ -36,9 +37,13 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
         .filter((s) => s !== ',');
 
     if (cssVarsBySpacing.length > cssVarsByComma.length) {
-        diagnostics.warn(atRule, processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params), {
-            word: atRule.params,
-        });
+        diagnostics.warn(
+            atRule,
+            CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
+            {
+                word: atRule.params,
+            }
+        );
         return cssVars;
     }
 
@@ -52,7 +57,7 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
                 global: true,
             });
         } else {
-            diagnostics.warn(atRule, processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
+            diagnostics.warn(atRule, CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
                 word: cssVar,
             });
         }

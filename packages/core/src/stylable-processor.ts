@@ -9,7 +9,6 @@ import { StylableMeta } from './stylable-meta';
 import {
     ClassSymbol,
     CSSCustomProperty,
-    CSSVarSymbol,
     ElementSymbol,
     RefedMixin,
     StylableDirectives,
@@ -18,7 +17,6 @@ import {
 import { generalDiagnostics } from './features/diagnostics';
 import { FeatureContext, STSymbol, STImport, CSSClass, CSSType, CSSKeyframes } from './features';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
-import { isCSSVarProp } from './helpers/css-custom-property';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
     walkSelector,
@@ -30,7 +28,6 @@ import {
     stringifySelector,
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
-import { GLOBAL_FUNC } from './helpers/global';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import {
     rootValueMapping,
@@ -85,20 +82,11 @@ export const processorWarnings = {
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" missing scoping selector parameter';
     },
-    ILLEGAL_GLOBAL_CSS_VAR(name: string) {
-        return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
-    },
-    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) {
-        return `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`;
-    },
     INVALID_NAMESPACE_REFERENCE() {
         return 'st-namespace-reference dose not have any value';
     },
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
-    },
-    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
-        return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`;
     },
     DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
         return `"${name}" is deprecated, use "${alternativeName}"`;
@@ -173,7 +161,7 @@ export class StylableProcessor implements FeatureContext {
 
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
-        const toRemove: postcss.Node[] = [];
+        const toRemove: postcss.AtRule[] = [];
 
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
@@ -181,6 +169,7 @@ export class StylableProcessor implements FeatureContext {
                     STImport.hooks.analyzeAtRule({
                         context: this,
                         atRule,
+                        toRemove,
                     });
                     break;
                 }
@@ -202,6 +191,7 @@ export class StylableProcessor implements FeatureContext {
                     CSSKeyframes.hooks.analyzeAtRule({
                         context: this,
                         atRule,
+                        toRemove,
                     });
                     break;
                 case 'custom-selector': {
@@ -220,59 +210,9 @@ export class StylableProcessor implements FeatureContext {
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
                     break;
-                case 'property': {
-                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule });
-                    break;
-                }
+                case 'property':
                 case 'st-global-custom-property': {
-                    this.diagnostics.info(
-                        atRule,
-                        processorWarnings.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()
-                    );
-
-                    const cssVarsByComma = atRule.params.split(',');
-                    const cssVarsBySpacing = atRule.params
-                        .trim()
-                        .split(/\s+/g)
-                        .filter((s) => s !== ',');
-
-                    if (cssVarsBySpacing.length > cssVarsByComma.length) {
-                        this.diagnostics.warn(
-                            atRule,
-                            processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
-                            {
-                                word: atRule.params,
-                            }
-                        );
-                        break;
-                    }
-
-                    for (const entry of cssVarsByComma) {
-                        const cssVar = entry.trim();
-
-                        if (isCSSVarProp(cssVar)) {
-                            const property: CSSVarSymbol = {
-                                _kind: 'cssVar',
-                                name: cssVar,
-                                global: true,
-                            };
-
-                            this.meta.cssVars[cssVar] = property;
-                            STSymbol.addSymbol({
-                                context: this,
-                                symbol: property,
-                                node: atRule,
-                            });
-                        } else {
-                            this.diagnostics.warn(
-                                atRule,
-                                processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar),
-                                { word: cssVar }
-                            );
-                        }
-                    }
-
-                    toRemove.push(atRule);
+                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule, toRemove });
                     break;
                 }
             }

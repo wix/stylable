@@ -28,7 +28,11 @@ export interface NodeTypes {
 export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     metaInit: (context: FeatureContext) => void;
     analyzeInit: (context: FeatureContext) => void;
-    analyzeAtRule: (options: { context: FeatureContext; atRule: postcss.AtRule }) => void;
+    analyzeAtRule: (options: {
+        context: FeatureContext;
+        atRule: postcss.AtRule;
+        toRemove: postcss.AtRule[]; // ToDo: remove once rawAst is immutable in processor
+    }) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
         node: T['IMMUTABLE_SELECTOR'];

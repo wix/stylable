@@ -2,7 +2,7 @@ import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
 import { validateAtProperty, isCSSVarProp } from '../helpers/css-custom-property';
 import { validateAllowedNodesUntil } from '../helpers/value';
-import { globalValue } from '../helpers/global';
+import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import type * as postcss from 'postcss';
 // ToDo: refactor out
 import postcssValueParser from 'postcss-value-parser';
@@ -19,14 +19,28 @@ export const diagnostics = {
     ILLEGAL_CSS_VAR_ARGS(name: string) {
         return `custom property "${name}" usage (var()) must receive comma separated values`;
     },
+    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
+        return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`;
+    },
+    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) {
+        return `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`;
+    },
+    ILLEGAL_GLOBAL_CSS_VAR(name: string) {
+        return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
+    },
 };
 
 // HOOKS
 
 export const hooks = createFeature({
-    analyzeAtRule({ context, atRule }) {
-        addCSSVarDefinition(context, atRule);
-        validateAtProperty(atRule, context.diagnostics);
+    analyzeAtRule({ context, atRule, toRemove }) {
+        if (atRule.name === `property`) {
+            addCSSVarDefinition(context, atRule);
+            validateAtProperty(atRule, context.diagnostics);
+        } else if (atRule.name === `st-global-custom-property`) {
+            analyzeDeprecatedStGlobalCustomProperty(context, atRule);
+            toRemove.push(atRule);
+        }
     },
     analyzeDeclaration({ context, decl }) {
         if (isCSSVarProp(decl.prop)) {
@@ -103,5 +117,44 @@ function addCSSVar(
         context.diagnostics.warn(node, diagnostics.ILLEGAL_CSS_VAR_USE(varName), {
             word: varName,
         });
+    }
+}
+
+function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule: postcss.AtRule) {
+    // report deprecation
+    context.diagnostics.info(atRule, diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY());
+    //
+    const cssVarsByComma = atRule.params.split(',');
+    const cssVarsBySpacing = atRule.params
+        .trim()
+        .split(/\s+/g)
+        .filter((s) => s !== ',');
+
+    if (cssVarsBySpacing.length > cssVarsByComma.length) {
+        context.diagnostics.warn(atRule, diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params), {
+            word: atRule.params,
+        });
+        return;
+    }
+
+    for (const entry of cssVarsByComma) {
+        const cssVar = entry.trim();
+        if (isCSSVarProp(cssVar)) {
+            const property: CSSVarSymbol = {
+                _kind: 'cssVar',
+                name: cssVar,
+                global: true,
+            };
+            context.meta.cssVars[cssVar] = property;
+            STSymbol.addSymbol({
+                context,
+                symbol: property,
+                node: atRule,
+            });
+        } else {
+            context.diagnostics.warn(atRule, diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
+                word: cssVar,
+            });
+        }
     }
 }

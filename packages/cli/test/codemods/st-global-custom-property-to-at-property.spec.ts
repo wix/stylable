@@ -1,4 +1,4 @@
-import { processorWarnings } from '@stylable/core';
+import { CSSCustomProperty } from '@stylable/core/dist/features';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { populateDirectorySync, loadDirSync, runCliCodeMod } from '@stylable/e2e-test-kit';
@@ -68,7 +68,7 @@ describe('CLI Codemods st-global-custom-property-to-at-property', () => {
 
         expect(stdout).to.match(
             new RegExp(
-                `style.st.css: ${processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(
+                `style.st.css: ${CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
                     '--myVar --mySecondVar'
                 )}`
             )
