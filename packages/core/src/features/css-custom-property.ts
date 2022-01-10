@@ -5,7 +5,7 @@ import {
     isCSSVarProp,
     generateScopedCSSVar,
 } from '../helpers/css-custom-property';
-import { validateAllowedNodesUntil } from '../helpers/value';
+import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver } from '../stylable-resolver';
@@ -106,6 +106,19 @@ export const hooks = createFeature<{
             atRule.remove();
         }
         // ToDo: move removal of `@st-global-custom-property` here
+    },
+    transformDeclarationValue({ node, resolved }) {
+        const { value } = node;
+        const varWithPrefix = node.nodes[0].value;
+        if (isCSSVarProp(varWithPrefix)) {
+            if (resolved && resolved[varWithPrefix]) {
+                node.nodes[0].value = resolved[varWithPrefix];
+            }
+        }
+        // handle default values
+        if (node.nodes.length > 2) {
+            node.resolvedValue = stringifyFunction(value, node);
+        }
     },
     transformJSExports({ exports, resolved }) {
         for (const varName of Object.keys(resolved)) {

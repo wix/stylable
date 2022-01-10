@@ -8,12 +8,11 @@ import { assureRelativeUrlPrefix } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
 import type { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
-import { isCSSVarProp } from './helpers/css-custom-property';
 import { strategies, valueMapping } from './stylable-value-parsers';
-import { getFormatterArgs, getStringValue } from './helpers/value';
+import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
 import type { ParsedValue } from './types';
 import { stripQuotation } from './utils';
-import { STSymbol } from './features';
+import { CSSCustomProperty, STSymbol } from './features';
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
@@ -296,16 +295,15 @@ export function processDeclarationValue(
                             }
                         }
                     } else if (value === 'var') {
-                        const varWithPrefix = parsedNode.nodes[0].value;
-                        if (isCSSVarProp(varWithPrefix)) {
-                            if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
-                                parsedNode.nodes[0].value = cssVarsMapping[varWithPrefix];
-                            }
-                        }
-                        // handle default values
-                        if (parsedNode.nodes.length > 2) {
-                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                        }
+                        CSSCustomProperty.hooks.transformDeclarationValue({
+                            context: {
+                                meta,
+                                diagnostics: diagnostics || (null as unknown as Diagnostics), // ToDo: make sure context is available here
+                                resolver,
+                            },
+                            node: parsedNode,
+                            resolved: cssVarsMapping || {},
+                        });
                     } else if (isCssNativeFunction(value)) {
                         parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                     } else if (diagnostics && node) {
@@ -390,10 +388,6 @@ function handleCyclicValues(
         });
     }
     return stringifyFunction(value, parsedNode);
-}
-
-function stringifyFunction(name: string, parsedNode: ParsedValue, perserveQuotes = false) {
-    return `${name}(${getFormatterArgs(parsedNode, false, undefined, perserveQuotes).join(', ')})`;
 }
 
 function createUniqID(source: string, varName: string) {
