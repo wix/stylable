@@ -1,7 +1,7 @@
 import { expectTransformDiagnostics, generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { atPropertyValidationWarnings } from '@stylable/core/dist/validate-at-property';
+import { atPropertyValidationWarnings } from '@stylable/core/dist/helpers/css-custom-property';
 import { STSymbol } from '@stylable/core/dist/features';
 
 describe('@property support', () => {

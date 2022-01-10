@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
-import type { Diagnostics } from './diagnostics';
-import { stripQuotation } from './utils';
+import type { Diagnostics } from '../diagnostics';
+import { stripQuotation } from '../utils';
 
 const UNIVERSAL_SYNTAX_DEFINITION = '*';
 const AT_PROPERTY_DISCRIPTOR_LIST = ['initial-value', 'syntax', 'inherits'];

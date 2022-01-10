@@ -45,7 +45,7 @@ import {
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, globalValue, stripQuotation } from './utils';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
-import { validateAtProperty } from './validate-at-property';
+import { validateAtProperty } from './helpers/css-custom-property';
 
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
