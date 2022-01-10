@@ -31,7 +31,7 @@ import type { StylableMeta } from './stylable-meta';
 import { STSymbol, STGlobal, CSSClass, CSSType, CSSKeyframes } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
-import { isCSSVarProp } from './helpers/css-custom-property';
+import { isCSSVarProp, getScopedCSSVar } from './helpers/css-custom-property';
 import { valueMapping } from './stylable-value-parsers';
 import { unescapeCSS, namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
@@ -220,7 +220,15 @@ export class StylableTransformer {
             (decl as SDecl).stylable = { sourceValue: decl.value };
 
             if (isCSSVarProp(decl.prop)) {
-                decl.prop = this.getScopedCSSVar(decl, meta, cssVarsMapping);
+                CSSCustomProperty.hooks.transformDeclaration({
+                    context: {
+                        meta,
+                        diagnostics: this.diagnostics,
+                        resolver: this.resolver,
+                    },
+                    decl,
+                    resolved: cssVarsMapping,
+                });
             } else if (decl.prop === `animation` || decl.prop === `animation-name`) {
                 CSSKeyframes.hooks.transformDeclaration({
                     context: {
@@ -291,18 +299,13 @@ export class StylableTransformer {
             stVarsExport[varSymbol.name] = topLevelType ? unbox(topLevelType) : outputValue;
         }
     }
+    /** @deprecated */
     public getScopedCSSVar(
         decl: postcss.Declaration,
         meta: StylableMeta,
         cssVarsMapping: Record<string, string>
     ) {
-        let prop = decl.prop;
-
-        if (meta.cssVars[prop]) {
-            prop = cssVarsMapping[prop];
-        }
-
-        return prop;
+        return getScopedCSSVar(decl, meta, cssVarsMapping);
     }
     public transformGlobals(ast: postcss.Root, meta: StylableMeta) {
         ast.walkRules((r) => {

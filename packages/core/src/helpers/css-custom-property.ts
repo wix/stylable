@@ -1,5 +1,6 @@
 import type * as postcss from 'postcss';
 import type { Diagnostics } from '../diagnostics';
+import type { StylableMeta } from '../stylable-meta';
 import { stripQuotation } from '../utils';
 
 const UNIVERSAL_SYNTAX_DEFINITION = '*';
@@ -117,4 +118,18 @@ export function isCSSVarProp(value: string) {
 
 export function generateScopedCSSVar(namespace: string, varName: string) {
     return `--${namespace}-${varName}`;
+}
+
+export function getScopedCSSVar(
+    decl: postcss.Declaration,
+    meta: StylableMeta,
+    cssVarsMapping: Record<string, string>
+) {
+    let prop = decl.prop;
+
+    if (meta.cssVars[prop]) {
+        prop = cssVarsMapping[prop];
+    }
+
+    return prop;
 }
