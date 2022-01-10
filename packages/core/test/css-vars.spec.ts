@@ -6,7 +6,7 @@ import {
     processSource,
 } from '@stylable/core-test-kit';
 import { processorWarnings } from '@stylable/core';
-import { STSymbol, STImport } from '@stylable/core/dist/features';
+import { STSymbol, STImport, CSSCustomProperty } from '@stylable/core/dist/features';
 
 describe('css custom-properties (vars)', () => {
     describe('process', () => {
@@ -860,7 +860,7 @@ describe('css custom-properties (vars)', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'),
+                    message: CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE('illegalVar'),
                     file: '/entry.st.css',
                 },
             ]);
@@ -886,7 +886,9 @@ describe('css custom-properties (vars)', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.ILLEGAL_CSS_VAR_ARGS('--value illegalHere, red'),
+                    message: CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_ARGS(
+                        '--value illegalHere, red'
+                    ),
                     file: '/entry.st.css',
                 },
             ]);
@@ -942,7 +944,7 @@ describe('css custom-properties (vars)', () => {
 
             expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'),
+                    message: CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE('illegalVar'),
                     file: '/entry.st.css',
                 },
             ]);
