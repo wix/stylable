@@ -1,5 +1,5 @@
 import { testInlineExpects } from './inline-expectation';
-import { Stylable, StylableConfig, StylableExports, StylableMeta } from '@stylable/core';
+import { Stylable, StylableConfig, StylableResults } from '@stylable/core';
 import { createMemoryFs } from '@file-services/memory';
 import type { IDirectoryContents, IFileSystem } from '@file-services/types';
 import { isAbsolute } from 'path';
@@ -18,6 +18,13 @@ export type TestStylableConfig = Omit<
     resolveNamespace?: StylableConfig['resolveNamespace'];
 };
 
+/**
+ * The test function takes in a single '/entry.st.css' stylesheet string
+ * or a directory structure and then runs 2 phases
+ * 1. build stylesheets from entries in a configurable order
+ * 2. run inline test on all '.st.css' files found
+ * @param input single '/entry.st.css' string or file system structure
+ */
 export function testStylableCore(
     input: string | IDirectoryContents,
     options: Partial<TestOptions> = {}
@@ -37,8 +44,8 @@ export function testStylableCore(
     const allSheets = fs.findFilesSync(`/`, { filterFile: ({ path }) => path.endsWith(`.st.css`) });
     const entries = options.entries || allSheets;
 
-    // transform entries
-    const sheets: Record<string, { meta: StylableMeta; exports: StylableExports }> = {};
+    // transform entries - run build in requested order
+    const sheets: Record<string, StylableResults> = {};
     for (const path of entries) {
         if (!isAbsolute(path || '')) {
             throw new Error(testStylableCore.errors.absoluteEntry(path));
@@ -48,7 +55,7 @@ export function testStylableCore(
         sheets[path] = { meta, exports };
     }
 
-    // inline test
+    // inline test - build all and test
     for (const path of allSheets) {
         const meta = stylable.process(path);
         if (!meta.outputAst) {
