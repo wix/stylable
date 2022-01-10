@@ -26,12 +26,11 @@ import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './help
 import { namespace } from './helpers/namespace';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
-import { STImport, ClassSymbol, ElementSymbol } from './features';
+import { STImport, ClassSymbol, ElementSymbol, CSSCustomProperty } from './features';
 import type { StylableMeta } from './stylable-meta';
 import { STSymbol, STGlobal, CSSClass, CSSType, CSSKeyframes } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
-import { generateScopedCSSVar } from './stylable-utils'; // ToDO: move
 import { isCSSVarProp } from './helpers/css-custom-property';
 import { valueMapping } from './stylable-value-parsers';
 import { unescapeCSS, namespaceEscape } from './helpers/escape';
@@ -164,7 +163,13 @@ export class StylableTransformer {
                 resolver: this.resolver,
             },
         });
-        const cssVarsMapping = this.createCSSVarsMapping(ast, meta);
+        const cssVarsMapping = CSSCustomProperty.hooks.transformResolve({
+            context: {
+                meta,
+                diagnostics: this.diagnostics,
+                resolver: this.resolver,
+            },
+        });
 
         ast.walkRules((rule) => {
             if (isChildOfAtRule(rule, 'keyframes')) {
@@ -189,11 +194,15 @@ export class StylableTransformer {
                     undefined
                 );
             } else if (name === 'property') {
-                if (atRule.nodes?.length) {
-                    atRule.params = cssVarsMapping[atRule.params] ?? atRule.params;
-                } else {
-                    atRule.remove();
-                }
+                CSSCustomProperty.hooks.transformAtRuleNode({
+                    context: {
+                        meta,
+                        diagnostics: this.diagnostics,
+                        resolver: this.resolver,
+                    },
+                    atRule,
+                    resolved: cssVarsMapping,
+                });
             } else if (name === 'keyframes') {
                 CSSKeyframes.hooks.transformAtRuleNode({
                     context: {
@@ -259,7 +268,10 @@ export class StylableTransformer {
                 exports: metaExports,
                 resolved: keyframesResolve,
             });
-            this.exportCSSVars(cssVarsMapping, metaExports.vars);
+            CSSCustomProperty.hooks.transformJSExports({
+                exports: metaExports,
+                resolved: cssVarsMapping,
+            });
         }
     }
     public exportLocalVars(
@@ -278,53 +290,6 @@ export class StylableTransformer {
 
             stVarsExport[varSymbol.name] = topLevelType ? unbox(topLevelType) : outputValue;
         }
-    }
-    public exportCSSVars(
-        cssVarsMapping: Record<string, string>,
-        varsExport: Record<string, string>
-    ) {
-        for (const varName of Object.keys(cssVarsMapping)) {
-            varsExport[varName.slice(2)] = cssVarsMapping[varName];
-        }
-    }
-    public createCSSVarsMapping(_ast: postcss.Root, meta: StylableMeta) {
-        const cssVarsMapping: Record<string, string> = {};
-
-        // imported vars
-        for (const imported of meta.getImportStatements()) {
-            for (const symbolName of Object.keys(imported.named)) {
-                if (isCSSVarProp(symbolName)) {
-                    const importedVar = this.resolver.deepResolve(STSymbol.get(meta, symbolName));
-
-                    if (
-                        importedVar &&
-                        importedVar._kind === 'css' &&
-                        importedVar.symbol &&
-                        importedVar.symbol._kind === 'cssVar'
-                    ) {
-                        cssVarsMapping[symbolName] = importedVar.symbol.global
-                            ? importedVar.symbol.name
-                            : generateScopedCSSVar(
-                                  importedVar.meta.namespace,
-                                  importedVar.symbol.name.slice(2)
-                              );
-                    }
-                }
-            }
-        }
-
-        // locally defined vars
-        for (const localVarName of Object.keys(meta.cssVars)) {
-            const cssVar = meta.cssVars[localVarName];
-
-            if (!cssVarsMapping[localVarName]) {
-                cssVarsMapping[localVarName] = cssVar.global
-                    ? localVarName
-                    : generateScopedCSSVar(meta.namespace, localVarName.slice(2));
-            }
-        }
-
-        return cssVarsMapping;
     }
     public getScopedCSSVar(
         decl: postcss.Declaration,

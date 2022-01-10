@@ -1,11 +1,18 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
-import { validateAtProperty, isCSSVarProp } from '../helpers/css-custom-property';
+import {
+    validateAtProperty,
+    isCSSVarProp,
+    generateScopedCSSVar,
+} from '../helpers/css-custom-property';
 import { validateAllowedNodesUntil } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
+import type { StylableMeta } from '../stylable-meta';
+import type { StylableResolver } from '../stylable-resolver';
 import type * as postcss from 'postcss';
 // ToDo: refactor out
 import postcssValueParser from 'postcss-value-parser';
+
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
@@ -32,7 +39,9 @@ export const diagnostics = {
 
 // HOOKS
 
-export const hooks = createFeature({
+export const hooks = createFeature<{
+    RESOLVED: Record<string, string>;
+}>({
     analyzeAtRule({ context, atRule, toRemove }) {
         if (atRule.name === `property`) {
             addCSSVarDefinition(context, atRule);
@@ -48,6 +57,60 @@ export const hooks = createFeature({
         }
         if (decl.value.includes('var(')) {
             handleCSSVarUse(context, decl);
+        }
+    },
+    transformResolve({ context: { meta, resolver } }) {
+        const cssVarsMapping: Record<string, string> = {};
+        // imported vars
+        for (const imported of meta.getImportStatements()) {
+            for (const symbolName of Object.keys(imported.named)) {
+                if (isCSSVarProp(symbolName)) {
+                    const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
+
+                    if (
+                        importedVar &&
+                        importedVar._kind === 'css' &&
+                        importedVar.symbol &&
+                        importedVar.symbol._kind === 'cssVar'
+                    ) {
+                        cssVarsMapping[symbolName] = importedVar.symbol.global
+                            ? importedVar.symbol.name
+                            : generateScopedCSSVar(
+                                  importedVar.meta.namespace,
+                                  importedVar.symbol.name.slice(2)
+                              );
+                    }
+                }
+            }
+        }
+
+        // locally defined vars
+        for (const localVarName of Object.keys(meta.cssVars)) {
+            const cssVar = meta.cssVars[localVarName];
+
+            if (!cssVarsMapping[localVarName]) {
+                cssVarsMapping[localVarName] = cssVar.global
+                    ? localVarName
+                    : generateScopedCSSVar(meta.namespace, localVarName.slice(2));
+            }
+        }
+
+        return cssVarsMapping;
+    },
+    transformAtRuleNode({ atRule, resolved }) {
+        if (atRule.nodes?.length) {
+            // ToDo: namespace
+            atRule.params = resolved[atRule.params] ?? atRule.params;
+        } else {
+            // remove `@property` with no body
+            atRule.remove();
+        }
+        // ToDo: move removal of `@st-global-custom-property` here
+    },
+    transformJSExports({ exports, resolved }) {
+        for (const varName of Object.keys(resolved)) {
+            // ToDo: namespace
+            exports.vars[varName.slice(2)] = resolved[varName];
         }
     },
 });
@@ -156,5 +219,25 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
                 word: cssVar,
             });
         }
+    }
+}
+
+export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symbolName: string) {
+    const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
+    if (
+        importedVar &&
+        importedVar._kind === 'css' &&
+        importedVar.symbol &&
+        importedVar.symbol._kind === 'cssVar'
+    ) {
+        return importedVar.symbol.global
+            ? importedVar.symbol.name
+            : generateScopedCSSVar(importedVar.meta.namespace, importedVar.symbol.name.slice(2));
+    }
+    const cssVar = meta.cssVars[symbolName];
+    if (cssVar?.global) {
+        return symbolName;
+    } else {
+        return generateScopedCSSVar(meta.namespace, symbolName.slice(2));
     }
 }

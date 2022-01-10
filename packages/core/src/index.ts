@@ -19,6 +19,7 @@ export type {
     VarSymbol,
 } from './features';
 export { reservedKeyFrames } from './features/css-keyframes';
+export { scopeCSSVar } from './features/css-custom-property';
 export {
     StylableProcessor,
     createEmptyMeta,
@@ -29,7 +30,7 @@ export {
 } from './stylable-processor';
 
 export { ensureStylableImports, parseStylableImport } from './helpers/import';
-export { isCSSVarProp } from './helpers/css-custom-property';
+export { isCSSVarProp, generateScopedCSSVar } from './helpers/css-custom-property';
 export { globalValueRegExp } from './helpers/global';
 
 import { GLOBAL_FUNC } from './helpers/global';
@@ -55,13 +56,11 @@ export {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
     findDeclaration,
-    generateScopedCSSVar,
     getAlias,
     getSourcePath,
     isValidClassName,
     isValidDeclaration,
     mergeRules,
-    scopeCSSVar,
     transformMatchesOnRule,
 } from './stylable-utils';
 export {

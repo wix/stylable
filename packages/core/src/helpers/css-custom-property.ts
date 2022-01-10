@@ -114,3 +114,7 @@ export function validateAtProperty(
 export function isCSSVarProp(value: string) {
     return value.startsWith('--');
 }
+
+export function generateScopedCSSVar(namespace: string, varName: string) {
+    return `--${namespace}-${varName}`;
+}
