@@ -26,7 +26,7 @@ type StVars = { [key: string]: StVar };
 export interface StylableExports {
     classes: ClassesMap;
     keyframes: Record<string, string>;
-    stVars: Record<string, string>;
+    stVars: StVars;
     vars: Record<string, string>;
 }
 
