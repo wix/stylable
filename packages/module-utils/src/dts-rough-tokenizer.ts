@@ -227,6 +227,7 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
             isRelevantKey(s.peek(2).value)
         ) {
             const levels: { [key in '{' | '[']?: number } = {};
+            const values = new WeakSet<DTSCodeToken>();
             const start = t.start;
             s.next(); // const
             const declareType = s.next(); // name
@@ -234,6 +235,10 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
 
             const resTokens: DtsToken[] = []; // {...resTokens[]}
             while ((t = s.next())) {
+                if (values.has(t)) {
+                    // registered as value of token
+                    continue;
+                }
                 if (!t.type) {
                     break;
                 }
@@ -258,14 +263,15 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
                     lastNewLinePosition.columm = t.end;
                 }
                 if (t.type === 'string') {
-                    const value = s.peek(2);
                     const token: DtsToken = {
                         ...t,
                         line: lastNewLinePosition.line,
                         column: t.start - lastNewLinePosition.columm,
                     };
 
-                    if (value.type === 'string') {
+                    const value = s.peek(2);
+                    if (value.type === 'string' || value.type === 'text') {
+                        values.add(value);
                         token.outputValue = {
                             ...value,
                             line: lastNewLinePosition.line,
