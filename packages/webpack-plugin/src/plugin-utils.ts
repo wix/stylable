@@ -108,6 +108,7 @@ export function replaceMappedCSSAssetPlaceholders({
             if (isLoadedWithKnownAssetLoader(assetModule)) {
                 return extractFilenameFromAssetModule(assetModule, publicPath);
             } else {
+                const data = new Map<string, unknown>();
                 const assetModuleSource = assetModule.generator.generate(assetModule, {
                     chunkGraph,
                     moduleGraph,
@@ -116,12 +117,16 @@ export function replaceMappedCSSAssetPlaceholders({
                     runtimeTemplate,
                     dependencyTemplates,
                     type: 'asset/resource',
+                    getData: () => data,
                 });
 
                 if (assetModule.buildInfo.dataUrl) {
-                    return extractDataUrlFromAssetModuleSource(
-                        assetModuleSource.source().toString()
-                    );
+                    const dataUrl = data.get('url');
+                    return typeof dataUrl === 'string'
+                        ? dataUrl
+                        : extractDataUrlFromAssetModuleSource(
+                              assetModuleSource.source().toString()
+                          );
                 }
 
                 return publicPath + assetModule.buildInfo.filename;
