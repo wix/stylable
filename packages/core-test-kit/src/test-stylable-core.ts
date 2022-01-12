@@ -37,6 +37,7 @@ export function testStylableCore(
         fileSystem: fs,
         projectRoot: '/',
         resolveNamespace: (ns) => ns,
+        requireModule: createJavascriptRequireModule(fs),
         ...(options.stylableConfig || {}),
     });
 
@@ -71,3 +72,30 @@ export function testStylableCore(
 testStylableCore.errors = {
     absoluteEntry: (entry: string) => `entry must be absolute path got: ${entry}`,
 };
+
+// copied from memory-minimal
+function createJavascriptRequireModule(fs: IFileSystem) {
+    const requireModule = (id: string): any => {
+        const _module = {
+            id,
+            exports: {},
+        };
+        try {
+            if (!id.match(/\.js$/)) {
+                id += '.js';
+            }
+            // eslint-disable-next-line @typescript-eslint/no-implied-eval
+            const fn = new Function(
+                'module',
+                'exports',
+                'require',
+                fs.readFileSync(id, { encoding: 'utf8', flag: 'r' })
+            );
+            fn(_module, _module.exports, requireModule);
+        } catch (e) {
+            throw new Error('Cannot require file: ' + id);
+        }
+        return _module.exports;
+    };
+    return requireModule;
+}

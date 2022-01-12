@@ -119,6 +119,19 @@ describe(`testStylableCore()`, () => {
                 })
             ).to.throw();
         });
+        it(`should provide default naive requireModule for JS files`, () => {
+            testStylableCore({
+                '/file.js': `module.exports.jsParam = 'green';`,
+                '/entry.st.css': `
+                    @st-import [jsParam] from './file.js';
+
+                    .root {
+                        /* @decl prop: green */
+                        prop: value(jsParam);
+                    }
+                `,
+            });
+        });
     });
     describe(`stylable config`, () => {
         it(`should pass configuration to stylable instance`, () => {
