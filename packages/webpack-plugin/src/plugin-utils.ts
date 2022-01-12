@@ -121,12 +121,10 @@ export function replaceMappedCSSAssetPlaceholders({
                 });
 
                 if (assetModule.buildInfo.dataUrl) {
-                    const dataUrl = data.get('url');
-                    return typeof dataUrl === 'string'
-                        ? dataUrl
-                        : extractDataUrlFromAssetModuleSource(
-                              assetModuleSource.source().toString()
-                          );
+                    // Investigate using the data map from getData currently there is an unknown in term from escaping keeping extractDataUrlFromAssetModuleSource
+                    return extractDataUrlFromAssetModuleSource(
+                        assetModuleSource.source().toString()
+                    );
                 }
 
                 return publicPath + assetModule.buildInfo.filename;
