@@ -35,6 +35,48 @@ describe('Stylable postcss transform (Scoping)', () => {
 
             testInlineExpects(result);
         });
+        it('should transform pseudo-element chain inside nested pseudo-classes', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                        @st-import Btn from "./button.st.css";
+
+                        /* @check :is(.button__root .button__label) */
+                        :is(Btn::label) {}
+                        `,
+                    },
+                    '/button.st.css': {
+                        namespace: 'button',
+                        content: `
+                        .label {}
+                        .icon {}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
+        it('should transform custom element with multiple selector inside nested pseudo-classes', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            @custom-selector :--part .partA, .partB;
+                            /* @check .entry__root:not(.entry__partA,.entry__partB) */
+                            .root:not(::part) {}
+                        `,
+                    },
+                },
+            });
+
+            testInlineExpects(result);
+        });
     });
 
     describe('scoped pseudo-elements', () => {
