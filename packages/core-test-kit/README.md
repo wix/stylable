@@ -123,6 +123,12 @@ Label - `@analyze(LABEL) MESSAGE` / `@transform(LABEL) MESSAGE`
 @keyframes unknown {}
 ```
 
+Removed in transformation - `@transform-remove`
+```css
+/* @transform-remove */
+@import X from './x.st.css';
+```
+
 ## License
 
 Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [MIT license](./LICENSE).
