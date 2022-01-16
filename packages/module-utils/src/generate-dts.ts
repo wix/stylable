@@ -76,7 +76,7 @@ function stringifyStringRecord(
         )
         .join(delimiter);
 
-    return addParentasis ? `{\n${s}\n${indent.replace(SPACING, '')}}` : s;
+    return addParentasis ? `{${wrapNL(s)}${indent.replace(SPACING, '')}}` : s;
 }
 
 function stringifyStringArray(array: any[], indent = SPACING, delimiter = '\n') {
