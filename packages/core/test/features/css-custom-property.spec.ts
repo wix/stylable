@@ -14,10 +14,11 @@ describe(`features/css-custom-property`, () => {
             }
         `);
 
-        const { meta } = sheets['/entry.st.css'];
+        const { meta, exports } = sheets['/entry.st.css'];
 
         shouldReportNoDiagnostics(meta);
 
+        // symbols
         expect(CSSCustomProperty.get(meta, `--propA`), `--propA symbol`).to.eql({
             _kind: `cssVar`,
             name: `--propA`,
@@ -28,6 +29,10 @@ describe(`features/css-custom-property`, () => {
             name: `--propB`,
             global: false,
         });
+
+        // JS exports
+        expect(exports.vars.propA, `propA JS export`).to.eql(`--entry-propA`);
+        expect(exports.vars.propB, `propB JS export`).to.eql(`--entry-propB`);
 
         // deprecation
         expect(meta.cssVars, `deprecated 'meta.cssVars'`).to.eql({
@@ -219,6 +224,19 @@ describe(`features/css-custom-property`, () => {
             }
         `);
     });
+    it.skip(`should escape`, () => {
+        const { sheets } = testStylableCore(`
+            .root {
+                /* @decl --entry-aa\\.bb: var(--entry-cc\\{dd) */
+                --aa\\.bb: var(--cc\\{dd);
+            }
+        `);
+
+        const { exports } = sheets['/entry.st.css'];
+
+        expect(exports.vars[`aa.bb`], `JS export prop`).to.eql(`--entry-aa\\.bb`);
+        expect(exports.vars[`cc.dd`], `JS export value`).to.eql(`--entry-cc\\.dd`);
+    });
     describe(`@st-global-custom-property (deprecated)`, () => {
         it(`should mark properties as global`, () => {
             testStylableCore(`
@@ -295,7 +313,7 @@ describe(`features/css-custom-property`, () => {
         });
     });
     describe(`st-import`, () => {
-        it(`should resolve imported property to be set/get`, () => {
+        it(`should resolve imported property to set/get`, () => {
             const { sheets } = testStylableCore({
                 '/props.st.css': `
                     .root {
@@ -333,6 +351,33 @@ describe(`features/css-custom-property`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        it(`should re-export imported symbols`, () => {
+            const { sheets } = testStylableCore({
+                '/base.st.css': `
+                    .root {
+                        --deepProp: red;
+                    }
+                `,
+                '/props.st.css': `
+                    @st-import [--deepProp] from './base.st.css';
+                    .root {
+                        --propA: red;
+                        --propB: red;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [--propA, --propB as --local, --deepProp] from './props.st.css';
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(exports.vars.propA, `propA export`).to.eql(`--props-propA`);
+            expect(exports.vars.local, `mapped export`).to.eql(`--props-propB`);
+            expect(exports.vars.deepProp, `deep export`).to.eql(`--base-deepProp`);
         });
         it(`should override imported with local definition`, () => {
             // ToDo: add redeclare diagnostics to import
@@ -575,6 +620,31 @@ describe(`features/css-custom-property`, () => {
                     }
                 `,
             });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it(`should resolve property as stylable var replacement`, () => {
+            const { sheets } = testStylableCore(`
+                :vars {
+                    stVar: green;
+                }
+
+                .mix {}
+                .mix:hover {
+                    color: var(--a, value(stVar));
+                }
+                
+                /* @rule[1] .entry__root:hover {
+                    color: var(--entry-a, var(--entry-b))
+                } */
+                .root {
+                    -st-mixin: mix(
+                        stVar var(--b)
+                    );
+                }
+            `);
 
             const { meta } = sheets['/entry.st.css'];
 
