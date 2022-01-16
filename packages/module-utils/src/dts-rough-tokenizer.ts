@@ -269,9 +269,11 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
                         column: t.start - lastNewLinePosition.columm,
                     };
 
+                    // in case this token has a string value token we add it to current token object
                     const value = s.peek(2);
                     if (value.type === 'string' || value.type === 'text') {
                         values.add(value);
+
                         token.outputValue = {
                             ...value,
                             line: lastNewLinePosition.line,

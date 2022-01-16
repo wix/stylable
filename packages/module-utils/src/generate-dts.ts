@@ -65,29 +65,33 @@ function stringifyStates(meta: StylableMeta) {
 
 function stringifyStringRecord(
     record: Record<string, any>,
-    addParentasis = false,
+    addParentheses = false,
     indent = SPACING,
     delimiter = '\n'
 ): string {
     const s = Object.entries(record)
         .map(
             ([key, value]) =>
-                `${indent}${asString(key)}: ${stringifyValue(value, indent + SPACING, delimiter)};`
+                `${indent}${asString(key)}: ${stringifyTypedValue(
+                    value,
+                    indent + SPACING,
+                    delimiter
+                )};`
         )
         .join(delimiter);
 
-    return addParentasis ? `{${wrapNL(s)}${indent.replace(SPACING, '')}}` : s;
+    return addParentheses ? `{${wrapNL(s)}${indent.replace(SPACING, '')}}` : s;
 }
 
 function stringifyStringArray(array: any[], indent = SPACING, delimiter = '\n') {
     return `[${wrapNL(
         array
-            .map((value) => `${indent}${stringifyValue(value, indent + SPACING, delimiter)},`)
+            .map((value) => `${indent}${stringifyTypedValue(value, indent + SPACING, delimiter)},`)
             .join(delimiter)
     )}${indent.replace(SPACING, '')}]`;
 }
 
-function stringifyValue(
+function stringifyTypedValue(
     value: string | any[] | Record<string, any>,
     indent = SPACING,
     delimiter = '\n'
