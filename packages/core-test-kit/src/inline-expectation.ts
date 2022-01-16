@@ -179,7 +179,7 @@ function ruleTest(
         errors: [],
     };
     const { msg, ruleIndex, expectedSelector, expectedBody } = expectation.match(
-        /(?<msg>\(.*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
+        /(?<msg>\([^)]*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
     )!.groups!;
     const prefix = msg ? msg + `: ` : ``;
     if (!targetNode) {

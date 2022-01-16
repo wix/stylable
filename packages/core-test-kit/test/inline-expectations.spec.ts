@@ -133,6 +133,11 @@ describe('inline-expectations', () => {
                             }
                             /* @rule(only prop) .entry__malformed {color:}*/
                             .malformed {}
+
+                            /* @rule(with parenthesis) .entry__parenthesis {color: var(--entry-y);}*/
+                            .parenthesis {
+                                color: var(--x);
+                            }
                         `,
                     },
                 },
@@ -158,6 +163,12 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.ruleMalformedDecl(
                         `color:`,
                         `(only prop) .entry__malformed {color:}`
+                    ),
+                    testInlineExpectsErrors.declarations(
+                        `color: var(--entry-y)`,
+                        `color: var(--entry-x)`,
+                        `.entry__parenthesis`,
+                        `(with parenthesis): `
                     ),
                 ])
             );
