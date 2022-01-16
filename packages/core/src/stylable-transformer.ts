@@ -49,14 +49,12 @@ export interface KeyFrameWithNode {
     node: postcss.Node;
 }
 
-type StVar = string | StVars | StVarsArray;
-type StVarsArray = StVar[];
-type StVars = { [key: string]: StVar };
+type StVar = string | { [key: string]: StVar } | StVar[];
 
 export interface StylableExports {
     classes: Record<string, string>;
     vars: Record<string, string>;
-    stVars: StVars;
+    stVars: Record<string, StVar>;
     keyframes: Record<string, string>;
 }
 
@@ -267,7 +265,7 @@ export class StylableTransformer {
     }
     public exportLocalVars(
         meta: StylableMeta,
-        stVarsExport: StVars,
+        stVarsExport: StylableExports['stVars'],
         variableOverride?: Record<string, string>
     ) {
         for (const varSymbol of meta.vars) {

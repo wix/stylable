@@ -19,14 +19,12 @@ export interface InheritedAttributes {
     [props: string]: any;
 }
 
-type StVar = string | StVars | StVarsArray;
-type StVarsArray = StVar[];
-type StVars = { [key: string]: StVar };
+type StVar = string | { [key: string]: StVar } | StVar[];
 
 export interface StylableExports {
     classes: ClassesMap;
     keyframes: Record<string, string>;
-    stVars: StVars;
+    stVars: Record<string, StVar>;
     vars: Record<string, string>;
 }
 
