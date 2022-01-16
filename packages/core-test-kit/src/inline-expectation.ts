@@ -303,6 +303,23 @@ function analyzeTest(context: Context, expectation: string, targetNode: AST, src
     return diagnosticTest(`analyze`, context, expectation, targetNode, srcNode);
 }
 function transformTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+    // check node is removed in transformation
+    const matchResult = expectation.match(/-remove(?<label>\([^)]*\))?/);
+    if (matchResult) {
+        const node = srcNode;
+        let { label } = matchResult.groups!;
+        label = label ? label + `: ` : ``;
+        const isRemoved =
+            !targetNode ||
+            targetNode.source?.start !== srcNode.source?.start ||
+            targetNode.source?.end !== srcNode.source?.end;
+        return {
+            type: `@transform`,
+            expectation,
+            errors: isRemoved ? [] : [testInlineExpectsErrors.transformRemoved(node.type, label)],
+        };
+    }
+    // check transform diagnostics
     return diagnosticTest(`transform`, context, expectation, targetNode, srcNode);
 }
 function diagnosticTest(
@@ -419,6 +436,8 @@ export const testInlineExpectsErrors = {
     },
     deprecatedRootInputNotSupported: (expectation: string) =>
         `"${expectation}" is not supported for with the used input, try calling testInlineExpects(generateStylableResults())`,
+    transformRemoved: (nodeType: string, label = ``) =>
+        `${label} expected ${nodeType} to be removed, but it was kept after transform`,
     diagnosticsMalformed: (type: string, expectation: string, label = ``) =>
         `${label}malformed @${type} expectation "@${type}${expectation}". format should be: "@${type}-[severity] diagnostic message"`,
     diagnosticsNotFound: (type: string, message: string, label = ``) =>

@@ -781,6 +781,27 @@ describe('inline-expectations', () => {
         });
     });
     describe(`@transform`, () => {
+        it(`should throw on un-removed node`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform-remove(not removed) */
+                            .root {}
+                        
+                            /* @transform-remove(removed) */
+                            @st-import A from './imported.st.css';
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.transformRemoved(`rule`, `(not removed): `)
+            );
+        });
         it(`should throw on malformed expectation`, () => {
             const result = generateStylableResult({
                 entry: `/style.st.css`,
