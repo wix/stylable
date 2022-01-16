@@ -2,6 +2,75 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/core-test-kit.svg)](https://www.npmjs.com/package/stylable/core-test-kit)
 
+## `testStylableCore`
+
+Use `import {testStylableCore} from '@stylable/core-test-kit'` to test core analysis, transformation, diagnostics and symbols. All stylable files are checked for [inline expectations](#inline-expectations-syntax):
+
+**single entry**
+```js
+// source + inline expectations
+const { sheets } = testStylableCore(`
+    /* @rule .entry__root */
+    .root {}
+`);
+// single entry is mapped to `/entry.st.css`
+const { meta, exports } = sheets[`/entry.st.css`];
+```
+
+**multiple files**
+```js
+// source + inline expectations
+const { sheets } = testStylableCore({
+    '/entry.st.css': `
+        @st-import Comp from './comp.st.css';
+
+        /* @rule .entry__root .comp__root */
+        .root Comp {}
+    `,
+    '/comp.st.css': `
+        /* @rule .comp__root */
+        .root {}
+    `
+});
+// sheets results ({meta, exports})
+const entryResults = sheets[`/entry.st.css`];
+const compResults = sheets[`/comp.st.css`];
+```
+
+**stylable config**
+```js
+testStylableCore({
+    '/a.st.css': ``,
+    '/b.st.css': ``,
+    '/c.st.css': ``,
+}, {
+    entries: [`/b.st.css`, `/c.st.css`] // list of entries to transform (in order)
+    stylableConfig: {
+        projectRoot: string, // defaults to `/`
+        resolveNamespace: (ns: string) => string, // defaults to no change
+        requireModule: (path: string) => any // defaults to naive CJS eval
+        filesystem: IFileSystem, // @file-services/types
+        // ...other stylable configurations
+    }
+});
+```
+
+**expose infra**
+```js
+const { stylable, fs } = testStylableCore(``);
+
+// add a file
+fs.writeFileSync(
+    `/new.st.css`,
+    `
+    @st-import [part] from './entry.st.css';
+    .part {}
+    `
+);
+// transform new file
+const { meta, exports } = stylable.transform(stylable.process(`/new.st.css`));
+```
+
 ## Inline expectations syntax
 
 The inline expectation syntax can be used with `testInlineExpects` for testing stylesheets transformation and diagnostics.
