@@ -1,4 +1,6 @@
 import { nodeFs as fs } from '@file-services/node';
+import { createRequestResolver } from '@file-services/resolve';
+import type { IFileSystem } from '@file-services/types';
 import { Stylable, StylableConfig, StylableResolverCache } from '@stylable/core';
 import { build } from './build';
 import { projectsConfig } from './config/projects-config';
@@ -14,7 +16,7 @@ import { WatchHandler } from './watch-handler';
 
 export interface BuildStylableContext
     extends Partial<Pick<BuildContext, 'fs' | 'watch' | 'log'>>,
-        Partial<Pick<StylableConfig, 'resolveNamespace' | 'requireModule'>> {
+        Partial<Pick<StylableConfig, 'resolveNamespace' | 'requireModule' | 'resolveModule'>> {
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: StylableConfig['fileProcessorCache'];
     diagnosticsManager?: DiagnosticsManager;
@@ -44,6 +46,7 @@ export async function buildStylable(
         outputFiles = new Map(),
         requireModule = require,
         resolveNamespace = requireModule(NAMESPACE_RESOLVER_MODULE_REQUEST).resolveNamespace,
+        resolveModule = createDefaultResolveModule(fs),
     }: BuildStylableContext = {}
 ) {
     const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions);
@@ -71,6 +74,7 @@ export async function buildStylable(
             const stylable = Stylable.create({
                 fileSystem,
                 requireModule,
+                resolveModule,
                 projectRoot,
                 resolveNamespace,
                 resolverCache,
@@ -100,4 +104,22 @@ export async function buildStylable(
     }
 
     return { watchHandler };
+}
+
+function createDefaultResolveModule(fs: IFileSystem): BuildStylableContext['resolveModule'] {
+    const moduleResolver = createRequestResolver({ fs });
+
+    return (context, request) => {
+        const { resolvedFile } = moduleResolver(context, request);
+
+        if (resolvedFile === false) {
+            throw new Error(
+                `Stylable CLI does not support browser field 'false' values. ${request} resolved to 'false' from ${context}`
+            );
+        } else if (resolvedFile === undefined) {
+            throw new Error(`Stylable CLI cannot resolve request: ${request}`);
+        }
+
+        return resolvedFile;
+    };
 }
