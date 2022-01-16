@@ -132,6 +132,13 @@ export const hooks = createFeature<{
     },
 });
 
+// API
+
+export function get(meta: StylableMeta, name: string): CSSVarSymbol | undefined {
+    // return STSymbol.get(meta, name, `class`);
+    return meta.cssVars[name];
+}
+
 function handleCSSVarUse(context: FeatureContext, decl: postcss.Declaration) {
     const parsed = postcssValueParser(decl.value);
     parsed.walk((node) => {
