@@ -449,6 +449,9 @@ export class StylableTransformer {
         }
         const outputAst = splitCompoundSelectors(selectorList);
         context.additionalSelectors.forEach((addSelector) => outputAst.push(addSelector()));
+        for (let i = 0; i < outputAst.length; i++) {
+            selectorAst[i] = outputAst[i];
+        }
         return outputAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
@@ -586,10 +589,7 @@ export class StylableTransformer {
                             : node.nodes
                     ) as Selector[];
                     const nestedContext = context.createNestedContext(innerSelectors);
-                    const transformedSelectors = this.scopeSelectorAst(nestedContext);
-                    for (let i = 0; i < transformedSelectors.length; i++) {
-                        innerSelectors[i] = transformedSelectors[i];
-                    }
+                    this.scopeSelectorAst(nestedContext);
                     /**
                      * ToDo: remove once elements is deprecated!
                      * support deprecated elements.
