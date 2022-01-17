@@ -451,6 +451,9 @@ export class StylableTransformer {
         }
         const outputAst = splitCompoundSelectors(selectorList);
         context.additionalSelectors.forEach((addSelector) => outputAst.push(addSelector()));
+        for (let i = 0; i < outputAst.length; i++) {
+            selectorAst[i] = outputAst[i];
+        }
         return outputAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
@@ -491,10 +494,18 @@ export class StylableTransformer {
                 if (!symbol[valueMapping.root]) {
                     continue;
                 }
-
+                const isFirstInSelector =
+                    context.selectorAst[context.selectorIndex].nodes[0] === node;
                 const customSelector = meta.customSelectors[':--' + node.value];
                 if (customSelector) {
-                    this.handleCustomSelector(customSelector, meta, context, node.value, node);
+                    this.handleCustomSelector(
+                        customSelector,
+                        meta,
+                        context,
+                        node.value,
+                        node,
+                        isFirstInSelector
+                    );
                     return;
                 }
 
@@ -516,7 +527,7 @@ export class StylableTransformer {
 
                 const resolvedPart = getOriginDefinition(resolved);
 
-                if (!resolvedPart.symbol[valueMapping.root]) {
+                if (!resolvedPart.symbol[valueMapping.root] && !isFirstInSelector) {
                     // insert nested combinator before internal custom element
                     context.insertDescendantCombinatorBeforePseudoElement();
                 }
@@ -643,7 +654,8 @@ export class StylableTransformer {
         meta: StylableMeta,
         context: ScopeContext,
         name: string,
-        node: SelectorNode
+        node: SelectorNode,
+        isFirstInSelector: boolean
     ) {
         const selectorList = parseSelectorWithCache(customSelector, { clone: true });
         const hasSingleSelector = selectorList.length === 1;
@@ -654,7 +666,9 @@ export class StylableTransformer {
             context.rule
         );
         const customAstSelectors = this.scopeSelectorAst(internalContext);
-        customAstSelectors.forEach(setSingleSpaceOnSelectorLeft);
+        if (!isFirstInSelector) {
+            customAstSelectors.forEach(setSingleSpaceOnSelectorLeft);
+        }
         if (hasSingleSelector && internalContext.currentAnchor) {
             context.setCurrentAnchor({
                 name,
