@@ -10,6 +10,7 @@ import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
+import { addBuildInfo } from './add-build-info';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 
 // TODO: maybe adopt the code
@@ -85,17 +86,7 @@ const stylableLoader: LoaderDefinition = function (content) {
         stylable.resolver
     );
 
-    try {
-        this._module!.buildInfo.stylableNamespace = meta.namespace;
-    } catch (error) {
-        this.emitWarning(
-            new Error(
-                `Failed to add stylableNamespace to buildInfo for ${this.resourcePath} because ${
-                    (error as Error).message
-                }`
-            )
-        );
-    }
+    addBuildInfo(this, meta.namespace);
 
     if (exportsOnly) {
         return callback(null, createRuntimeTargetCode(meta.namespace, exports));
