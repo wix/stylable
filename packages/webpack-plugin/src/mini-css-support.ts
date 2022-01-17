@@ -1,8 +1,20 @@
 import type { Compilation, Compiler, NormalModule } from 'webpack';
 import { replaceMappedCSSAssetPlaceholders, getStylableBuildData } from './plugin-utils';
-
 import { StylableWebpackPlugin } from './plugin';
 import type { BuildData } from './types';
+
+interface CssModule {
+    new (options: {
+        context: string | null;
+        identifier: string;
+        identifierIndex: number;
+        content: string;
+        media: string;
+        sourceMap: null;
+        assets: {};
+        assetsInfo: {};
+    }): import('webpack').Module;
+}
 
 export function injectCssModules(
     webpack: Compiler['webpack'],
@@ -21,8 +33,11 @@ export function injectCssModules(
         );
     }
 
+    // getCssModule is marked as private since v2.5.1
     const CssModule = (
-        MiniCssExtractPlugin.constructor as typeof import('mini-css-extract-plugin')
+        MiniCssExtractPlugin.constructor as unknown as {
+            getCssModule(webpack: typeof import('webpack')): CssModule;
+        }
     ).getCssModule(webpack);
 
     compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
