@@ -1,6 +1,7 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { dirname } from 'path';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
 
 const project = 'basic-integration';
 const projectDir = dirname(
@@ -25,6 +26,16 @@ describe(`(${project})`, () => {
         const cssLinks = await page.evaluate(browserFunctions.getCSSLinks);
 
         expect(cssLinks).to.eql(['main.css']);
+    });
+
+    it('output buildInfo', () => {
+        const manifest = JSON.parse(
+            readFileSync(join(projectRunner.outputDir, 'test-manifest.json'), 'utf8')
+        );
+        expect(manifest).to.eql({
+            'foo.st.css': 'foo',
+            'index.st.css': 'index',
+        });
     });
 
     it('css applied correctly', async () => {

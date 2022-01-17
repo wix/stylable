@@ -10,6 +10,7 @@ import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
+import { addBuildInfo } from './add-build-info';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 
 // TODO: maybe adopt the code
@@ -84,6 +85,8 @@ const stylableLoader: LoaderDefinition = function (content) {
         ({ source }) => this.addDependency(source),
         stylable.resolver
     );
+
+    addBuildInfo(this, meta.namespace);
 
     if (exportsOnly) {
         return callback(null, createRuntimeTargetCode(meta.namespace, exports));
