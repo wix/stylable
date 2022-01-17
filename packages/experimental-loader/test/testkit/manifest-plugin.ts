@@ -1,5 +1,5 @@
 import { relative } from 'path';
-import { Module, Compiler, NormalModule, sources } from 'webpack';
+import type { Module, Compiler, NormalModule } from 'webpack';
 
 const isNormalModule = (module: Module): module is NormalModule => {
     return (module as NormalModule).resource !== undefined;
@@ -25,7 +25,7 @@ export class TestManifestPlugin {
                     }
                 }
 
-                compilation.assets['test-manifest.json'] = new sources.RawSource(
+                compilation.assets['test-manifest.json'] = new compiler.webpack.sources.RawSource(
                     JSON.stringify(data, null, 4)
                 );
             });
