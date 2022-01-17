@@ -8,7 +8,7 @@ import {
     valueMapping,
 } from '@stylable/core';
 
-const SPACING = ' '.repeat(4);
+export const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
 
 function addStatesEntries(
@@ -63,10 +63,46 @@ function stringifyStates(meta: StylableMeta) {
     return out;
 }
 
-function stringifyStringRecord(record: Record<string, string>, indent = SPACING) {
-    return Object.keys(record)
-        .map((k) => `${indent}${asString(k)}: string;`)
-        .join('\n');
+function stringifyStringRecord(
+    record: Record<string, any>,
+    addParentheses = false,
+    indent = SPACING,
+    delimiter = '\n'
+): string {
+    const s = Object.entries(record)
+        .map(
+            ([key, value]) =>
+                `${indent}${asString(key)}: ${stringifyTypedValue(
+                    value,
+                    indent + SPACING,
+                    delimiter
+                )};`
+        )
+        .join(delimiter);
+
+    return addParentheses ? `{${wrapNL(s)}${indent.replace(SPACING, '')}}` : s;
+}
+
+function stringifyStringArray(array: any[], indent = SPACING, delimiter = '\n') {
+    return `[${wrapNL(
+        array
+            .map((value) => `${indent}${stringifyTypedValue(value, indent + SPACING, delimiter)},`)
+            .join(delimiter)
+    )}${indent.replace(SPACING, '')}]`;
+}
+
+function stringifyTypedValue(
+    value: string | any[] | Record<string, any>,
+    indent = SPACING,
+    delimiter = '\n'
+): string {
+    if (typeof value === 'string') {
+        return 'string';
+    } else if (Array.isArray(value)) {
+        return stringifyStringArray(value, indent, delimiter);
+    } else {
+        return stringifyStringRecord(value, true, indent, delimiter);
+    }
 }
 
 function stringifyClasses(classes: Record<string, string>, namespace: string, indent = SPACING) {

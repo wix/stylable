@@ -371,4 +371,76 @@ describe('.d.ts source-maps', () => {
             name: null,
         });
     });
+
+    it('maps a complex st-vars example to its positions in the original ".st.css" file', async () => {
+        const res = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: deindent(`
+                    :vars {
+                        a: st-map(b st-array(red,
+                            st-map(e blue),
+                            st-map(d green)),
+                          c gold,
+                        )
+                    }
+                    `),
+                },
+            },
+        });
+
+        const dtsText = generateDTSContent(res);
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta);
+
+        sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
+
+        const aOriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'a":')
+        );
+        const bOriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'b":')
+        );
+        const cOriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'c":')
+        );
+        const dOriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'd":')
+        );
+        const eOriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'e":')
+        );
+
+        expect(aOriginalPosition).to.eql({
+            column: 4,
+            line: 3,
+            name: null,
+            source: 'entry.st.css',
+        });
+        expect(bOriginalPosition).to.eql({
+            column: 14,
+            line: 3,
+            name: null,
+            source: 'entry.st.css',
+        });
+        expect(cOriginalPosition).to.eql({
+            column: 6,
+            line: 6,
+            name: null,
+            source: 'entry.st.css',
+        });
+        expect(dOriginalPosition).to.eql({
+            column: 15,
+            line: 5,
+            name: null,
+            source: 'entry.st.css',
+        });
+        expect(eOriginalPosition).to.eql({
+            column: 15,
+            line: 4,
+            name: null,
+            source: 'entry.st.css',
+        });
+    });
 });
