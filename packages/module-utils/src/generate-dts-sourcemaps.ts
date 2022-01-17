@@ -1,6 +1,7 @@
 import { basename } from 'path';
 import { ClassSymbol, StylableMeta, valueMapping } from '@stylable/core';
 import { CSSKeyframes } from '@stylable/core/dist/features';
+import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
 import { encode } from 'vlq';
 import {
     ClassesToken,
@@ -8,6 +9,7 @@ import {
     TokenizedDtsEntry,
     tokenizeDTS,
 } from './dts-rough-tokenizer';
+import { SPACING } from './generate-dts';
 
 type LineMapping = Array<Array<number>>;
 
@@ -50,25 +52,57 @@ function getVarsSrcPosition(varName: string, meta: StylableMeta): Position | und
 
 function getStVarsSrcPosition(varName: string, meta: StylableMeta): Position | undefined {
     const stVar = meta.vars.find((v) => v.name === varName);
-    let res;
 
-    if (stVar) {
+    if (stVar?.node.source?.start) {
+        return {
+            line: stVar.node.source.start.line - 1,
+            column: stVar.node.source.start.column - 1,
+        };
+    } else {
+        // TODO: move this logic to Stylable core and enhance it. The meta should provide the API to get to the inner parts of the st-var
+        let res: Position;
         meta.rawAst.walkRules(':vars', (rule) => {
-            return rule.walkDecls(varName, (decl) => {
-                if (decl.source && decl.source.start) {
-                    res = {
-                        line: decl.source.start.line - 1,
-                        column: decl.source.start.column - 1,
-                    };
-                    return false;
+            return rule.walkDecls((decl) => {
+                if (decl.source?.start) {
+                    if (decl.prop === varName) {
+                        res = {
+                            line: decl.source.start.line - 1,
+                            column: decl.source.start.column - 1,
+                        };
+                    } else {
+                        processDeclarationFunctions(decl, (node, level) => {
+                            if (node.type === 'item' && node.name === varName) {
+                                const rawDeclaration = `${decl.raws.before ?? ''}${decl.prop}${
+                                    decl.raws.between ?? ''
+                                }${decl.value}`;
+                                const rootPosition = {
+                                    line: rule.source!.start!.line - 1,
+                                    column: rule.source!.start!.column - 1,
+                                };
+
+                                res = {
+                                    ...calculateEstimatedPosition(
+                                        rawDeclaration,
+                                        node.name,
+                                        node.after,
+                                        rootPosition
+                                    ),
+                                    generatedOffsetLevel: level,
+                                };
+                            }
+                        });
+                    }
+
+                    if (res) {
+                        return false;
+                    }
                 }
 
                 return;
             });
         });
+        return res!;
     }
-
-    return res;
 }
 
 function getKeyframeSrcPosition(keyframeName: string, meta: StylableMeta): Position | undefined {
@@ -107,6 +141,7 @@ function createLineMapping(dtsOffset: number, srcLine: number, srcCol: number): 
 type Position = {
     line: number;
     column: number;
+    generatedOffsetLevel?: number;
 };
 
 function findDefiningClassName(stateToken: ClassStateToken, entryClassName: ClassSymbol) {
@@ -236,11 +271,18 @@ export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
                 }
 
                 if (currentSrcPosition) {
+                    const lineDelta = currentSrcPosition.line - lastSrcPosition.line;
+                    const columnDelta = currentSrcPosition.column - lastSrcPosition.column;
+
                     mapping[dtsLine] = createLineMapping(
-                        4, // top-level object property offset
-                        currentSrcPosition.line - lastSrcPosition.line,
-                        currentSrcPosition.column - lastSrcPosition.column
+                        SPACING.repeat(currentSrcPosition.generatedOffsetLevel ?? 1).length,
+                        lineDelta,
+                        columnDelta
                     );
+
+                    // reset to default offset level
+                    currentSrcPosition.generatedOffsetLevel = undefined;
+
                     lastSrcPosition = { ...currentSrcPosition };
                 }
             } else if (resToken.type === 'states') {
@@ -279,4 +321,21 @@ export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
         null,
         4
     );
+}
+
+function calculateEstimatedPosition(
+    rawValue: string,
+    name: string,
+    after = '',
+    rootPosition?: Position
+): Position {
+    const valueLength = rawValue.indexOf(name + after) + name.length - after.length;
+    const value = rawValue.slice(0, valueLength);
+    const byLines = value.split(/\n/g);
+    const lastLine = byLines[byLines.length - 1];
+
+    return {
+        line: byLines.length - 1 + (rootPosition?.line ?? 0),
+        column: lastLine.length + (rootPosition?.column ?? 0),
+    };
 }

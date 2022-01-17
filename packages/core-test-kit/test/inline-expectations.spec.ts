@@ -133,6 +133,11 @@ describe('inline-expectations', () => {
                             }
                             /* @rule(only prop) .entry__malformed {color:}*/
                             .malformed {}
+
+                            /* @rule(with parenthesis) .entry__parenthesis {color: var(--entry-y);}*/
+                            .parenthesis {
+                                color: var(--x);
+                            }
                         `,
                     },
                 },
@@ -158,6 +163,12 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.ruleMalformedDecl(
                         `color:`,
                         `(only prop) .entry__malformed {color:}`
+                    ),
+                    testInlineExpectsErrors.declarations(
+                        `color: var(--entry-y)`,
+                        `color: var(--entry-x)`,
+                        `.entry__parenthesis`,
+                        `(with parenthesis): `
                     ),
                 ])
             );
@@ -324,6 +335,26 @@ describe('inline-expectations', () => {
                 ])
             );
         });
+        it('should throw for removed rule (use @transform-remove for removal check)', () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @rule(label) .entry__root*/
+                            .root {}
+                        `,
+                    },
+                },
+            });
+
+            result.meta.outputAst?.nodes[1].remove();
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.removedNode(`rule`, `(label): `)
+            );
+        });
     });
     describe(`@atrule`, () => {
         it('should throw for at rules params', () => {
@@ -396,6 +427,26 @@ describe('inline-expectations', () => {
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.unsupportedNode(`@atrule`, `rule`)
+            );
+        });
+        it('should throw for removed rule (use @transform-remove for removal check)', () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @atrule(label) abc */
+                            @some-rule abc {}
+                        `,
+                    },
+                },
+            });
+
+            result.meta.outputAst?.nodes[1].remove();
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.removedNode(`atrule`, `(label): `)
             );
         });
     });
@@ -518,6 +569,28 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.not.throw();
+        });
+        it('should throw for removed declaration (use @transform-remove for removal check)', () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                /* @decl(label) color: green */
+                                color: green;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            (result.meta.outputAst?.nodes[0] as any).nodes[1].remove();
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.removedNode(`decl`, `(label): `)
+            );
         });
     });
     describe(`@analyze`, () => {
@@ -781,6 +854,27 @@ describe('inline-expectations', () => {
         });
     });
     describe(`@transform`, () => {
+        it(`should throw on un-removed node`, () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform-remove(not removed) */
+                            .root {}
+                        
+                            /* @transform-remove(removed) */
+                            @st-import A from './imported.st.css';
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.transformRemoved(`rule`, `(not removed): `)
+            );
+        });
         it(`should throw on malformed expectation`, () => {
             const result = generateStylableResult({
                 entry: `/style.st.css`,

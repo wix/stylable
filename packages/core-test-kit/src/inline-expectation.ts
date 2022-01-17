@@ -88,6 +88,7 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
             : getSourceComment(context.meta, comment) || comment;
         const nodeTarget = testCommentTarget.next() as AST;
         const nodeSrc = testCommentSrc.next() as AST;
+        const isRemoved = isRemovedFromTarget(nodeTarget, nodeSrc);
         if (nodeTarget || nodeSrc) {
             while (input.length) {
                 const next = `@` + input.shift()!;
@@ -123,7 +124,7 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
                             const result = tests[testScope](
                                 context,
                                 testInput.trim(),
-                                nodeTarget,
+                                isRemoved ? undefined : nodeTarget,
                                 nodeSrc
                             );
                             result.type = testScope;
@@ -144,8 +145,13 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
     }
 }
 
-function checkTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
-    const type = targetNode?.type;
+function checkTest(
+    context: Context,
+    expectation: string,
+    targetNode: AST | undefined,
+    srcNode: AST
+): Test {
+    const type = srcNode?.type || targetNode?.type;
     switch (type) {
         case `rule`: {
             return tests[`@rule`](context, expectation, targetNode, srcNode);
@@ -161,15 +167,26 @@ function checkTest(context: Context, expectation: string, targetNode: AST, srcNo
             };
     }
 }
-function ruleTest(context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
+function ruleTest(
+    context: Context,
+    expectation: string,
+    targetNode: AST | undefined,
+    srcNode: AST
+): Test {
     const result: Test = {
         type: `@rule`,
         expectation,
         errors: [],
     };
     const { msg, ruleIndex, expectedSelector, expectedBody } = expectation.match(
-        /(?<msg>\(.*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
+        /(?<msg>\([^)]*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
     )!.groups!;
+    const prefix = msg ? msg + `: ` : ``;
+    if (!targetNode) {
+        // ToDo:  maybe support nodes that are removed from target and leaves mixins
+        result.errors.push(testInlineExpectsErrors.removedNode(srcNode.type, prefix));
+        return result;
+    }
     let testNode: AST = targetNode;
     // get mixed-in rule
     if (ruleIndex) {
@@ -207,7 +224,7 @@ function ruleTest(context: Context, expectation: string, targetNode: AST, _srcNo
                 }
             }
         }
-        const prefix = msg ? msg + `: ` : ``;
+
         if (testNode.selector !== expectedSelector.trim()) {
             result.errors.push(
                 testInlineExpectsErrors.selector(expectedSelector.trim(), testNode.selector, prefix)
@@ -244,7 +261,12 @@ function ruleTest(context: Context, expectation: string, targetNode: AST, _srcNo
     }
     return result;
 }
-function atRuleTest(_context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
+function atRuleTest(
+    _context: Context,
+    expectation: string,
+    targetNode: AST | undefined,
+    srcNode: AST
+): Test {
     const result: Test = {
         type: `@atrule`,
         expectation,
@@ -257,7 +279,10 @@ function atRuleTest(_context: Context, expectation: string, targetNode: AST, _sr
         return result;
     }
     const prefix = msg ? msg + `: ` : ``;
-    if (targetNode.type === `atrule`) {
+    if (!targetNode) {
+        // ToDo:  maybe support nodes that are removed from target and leaves mixins
+        result.errors.push(testInlineExpectsErrors.removedNode(srcNode.type, prefix));
+    } else if (targetNode.type === `atrule`) {
         if (targetNode.params !== expectedParams.trim()) {
             result.errors.push(
                 testInlineExpectsErrors.atruleParams(
@@ -272,7 +297,12 @@ function atRuleTest(_context: Context, expectation: string, targetNode: AST, _sr
     }
     return result;
 }
-function declTest(_context: Context, expectation: string, targetNode: AST, _srcNode: AST): Test {
+function declTest(
+    _context: Context,
+    expectation: string,
+    targetNode: AST | undefined,
+    srcNode: AST
+): Test {
     const result: Test = {
         type: `@decl`,
         expectation,
@@ -284,7 +314,9 @@ function declTest(_context: Context, expectation: string, targetNode: AST, _srcN
     label = label ? label + `: ` : ``;
     prop = prop.trim();
     value = value.trim();
-    if (!prop || !value) {
+    if (!targetNode) {
+        result.errors.push(testInlineExpectsErrors.removedNode(srcNode.type, label));
+    } else if (!prop || !value) {
         result.errors.push(testInlineExpectsErrors.declMalformed(prop, value, label));
     } else if (targetNode.type === `decl`) {
         if (targetNode.prop !== prop.trim() || targetNode.value !== value) {
@@ -299,17 +331,44 @@ function declTest(_context: Context, expectation: string, targetNode: AST, _srcN
     }
     return result;
 }
-function analyzeTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+function analyzeTest(
+    context: Context,
+    expectation: string,
+    targetNode: AST | undefined,
+    srcNode: AST
+): Test {
     return diagnosticTest(`analyze`, context, expectation, targetNode, srcNode);
 }
-function transformTest(context: Context, expectation: string, targetNode: AST, srcNode: AST): Test {
+function transformTest(
+    context: Context,
+    expectation: string,
+    targetNode: AST | undefined,
+    srcNode: AST
+): Test {
+    // check node is removed in transformation
+    const matchResult = expectation.match(/-remove(?<label>\([^)]*\))?/);
+    if (matchResult) {
+        const node = srcNode;
+        let { label } = matchResult.groups!;
+        label = label ? label + `: ` : ``;
+        const isRemoved =
+            !targetNode ||
+            targetNode.source?.start !== srcNode.source?.start ||
+            targetNode.source?.end !== srcNode.source?.end;
+        return {
+            type: `@transform`,
+            expectation,
+            errors: isRemoved ? [] : [testInlineExpectsErrors.transformRemoved(node.type, label)],
+        };
+    }
+    // check transform diagnostics
     return diagnosticTest(`transform`, context, expectation, targetNode, srcNode);
 }
 function diagnosticTest(
     type: `analyze` | `transform`,
     { meta }: Context,
     expectation: string,
-    _targetNode: AST,
+    _targetNode: AST | undefined,
     srcNode: AST
 ): Test {
     const result: Test = {
@@ -379,6 +438,14 @@ function getSourceComment(meta: Context['meta'], { source }: postcss.Comment) {
     return match;
 }
 
+function isRemovedFromTarget(target: AST, source: AST) {
+    return (
+        !target ||
+        target.source?.start !== source.source?.start ||
+        target.source?.end !== source.source?.end
+    );
+}
+
 function getNextMixinRule(originRule: postcss.Rule, count: number) {
     let current: postcss.Node | undefined = originRule;
     while (current && count > 0) {
@@ -395,6 +462,8 @@ export const testInlineExpectsErrors = {
         `Expected "${expectedAmount}" checks to run but "${actualAmount}" were found`,
     unsupportedNode: (testType: string, nodeType: string, label = ``) =>
         `${label}unsupported type "${testType}" for "${nodeType}"`,
+    removedNode: (nodeType: string, label = ``) =>
+        `${label}fail to check transformation on removed node with type "${nodeType}"`,
     selector: (expectedSelector: string, actualSelector: string, label = ``) =>
         `${label}expected "${actualSelector}" to transform to "${expectedSelector}"`,
     declarations: (expectedDecl: string, actualDecl: string, selector: string, label = ``) =>
@@ -419,6 +488,8 @@ export const testInlineExpectsErrors = {
     },
     deprecatedRootInputNotSupported: (expectation: string) =>
         `"${expectation}" is not supported for with the used input, try calling testInlineExpects(generateStylableResults())`,
+    transformRemoved: (nodeType: string, label = ``) =>
+        `${label} expected ${nodeType} to be removed, but it was kept after transform`,
     diagnosticsMalformed: (type: string, expectation: string, label = ``) =>
         `${label}malformed @${type} expectation "@${type}${expectation}". format should be: "@${type}-[severity] diagnostic message"`,
     diagnosticsNotFound: (type: string, message: string, label = ``) =>

@@ -108,6 +108,7 @@ export function replaceMappedCSSAssetPlaceholders({
             if (isLoadedWithKnownAssetLoader(assetModule)) {
                 return extractFilenameFromAssetModule(assetModule, publicPath);
             } else {
+                const data = new Map<string, unknown>();
                 const assetModuleSource = assetModule.generator.generate(assetModule, {
                     chunkGraph,
                     moduleGraph,
@@ -116,9 +117,11 @@ export function replaceMappedCSSAssetPlaceholders({
                     runtimeTemplate,
                     dependencyTemplates,
                     type: 'asset/resource',
+                    getData: () => data,
                 });
 
                 if (assetModule.buildInfo.dataUrl) {
+                    // Investigate using the data map from getData currently there is an unknown in term from escaping keeping extractDataUrlFromAssetModuleSource
                     return extractDataUrlFromAssetModuleSource(
                         assetModuleSource.source().toString()
                     );
