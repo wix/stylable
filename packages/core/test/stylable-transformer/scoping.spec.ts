@@ -40,8 +40,14 @@ describe('Stylable postcss transform (Scoping)', () => {
                 '/style.st.css': `
                     @st-import Btn from "./button.st.css";
 
-                    /* @rule :is(.button__root .button__label) */
+                    /* @rule(single) :is(.button__root .button__label) */
                     :is(Btn::label) {}
+
+                    /* @rule(multi) :is(.button__root .button__label, .button__root .button__icon) */
+                    :is(Btn::label, Btn::icon) {}
+
+                    /* @rule(nested) :is(:where(.button__root .button__label)) */
+                    :is(:where(Btn::label)) {}
                 `,
                 '/button.st.css': `
                     .label {}
@@ -52,9 +58,23 @@ describe('Stylable postcss transform (Scoping)', () => {
         it('should transform custom element with multiple selector inside nested pseudo-classes', () => {
             testStylableCore(`
                 @custom-selector :--part .partA, .partB;
+                @custom-selector :--nestedPart ::part, .partC;
 
-                /* @rule .entry__root:not(.entry__partA,.entry__partB) */
+                /* @rule(1 level) .entry__root:not(.entry__partA,.entry__partB) */
                 .root:not(::part) {}
+
+                /* 
+                    notice: partB is pushed at the end because of how custom selectors are
+                    processed atm.
+
+                    @rule(2 levels) .entry__root:not(.entry__partA,.entry__partC,.entry__partB) 
+                */
+                .root:not(::nestedPart) {}
+
+                /* @rule(custom-selector syntax) 
+                        .entry__root:not(.entry__partA), .entry__root:not(.entry__partB)
+                */
+                .root:not(:--part) {}
             `);
         });
     });
