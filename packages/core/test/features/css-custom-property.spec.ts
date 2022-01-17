@@ -70,48 +70,22 @@ describe(`features/css-custom-property`, () => {
             }
         `);
 
-        const { meta } = sheets['/entry.st.css'];
+        const { meta, exports } = sheets['/entry.st.css'];
 
         shouldReportNoDiagnostics(meta);
-        expect(CSSCustomProperty.get(meta, `--colorA`), `--colorA symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--colorA`,
-            global: false,
+
+        // symbols
+        [`--colorA`, `--colorB`, `--colorC`, `--a`, `--b`, `--c`, `--d`, `--e`].forEach((name) => {
+            expect(CSSCustomProperty.get(meta, name), `${name} symbol`).to.eql({
+                _kind: `cssVar`,
+                name,
+                global: false,
+            });
         });
-        expect(CSSCustomProperty.get(meta, `--colorB`), `--colorB symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--colorB`,
-            global: false,
-        });
-        expect(CSSCustomProperty.get(meta, `--colorC`), `--colorC symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--colorC`,
-            global: false,
-        });
-        expect(CSSCustomProperty.get(meta, `--a`), `--a symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--a`,
-            global: false,
-        });
-        expect(CSSCustomProperty.get(meta, `--b`), `--b symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--b`,
-            global: false,
-        });
-        expect(CSSCustomProperty.get(meta, `--c`), `--c symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--c`,
-            global: false,
-        });
-        expect(CSSCustomProperty.get(meta, `--d`), `--d symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--d`,
-            global: false,
-        });
-        expect(CSSCustomProperty.get(meta, `--e`), `--e symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--e`,
-            global: false,
+
+        // JS exports
+        [`colorA`, `colorB`, `colorC`, `a`, `b`, `c`, `d`, `e`].forEach((name) => {
+            expect(exports.vars[name], `${name} JS export`).to.eql(`--entry-${name}`);
         });
     });
     it(`should process @property definitions`, () => {
@@ -127,10 +101,11 @@ describe(`features/css-custom-property`, () => {
             @property --propB;
         `);
 
-        const { meta } = sheets['/entry.st.css'];
+        const { meta, exports } = sheets['/entry.st.css'];
 
         shouldReportNoDiagnostics(meta);
 
+        // symbols
         expect(CSSCustomProperty.get(meta, `--propA`), `--propA symbol`).to.eql({
             _kind: `cssVar`,
             name: `--propA`,
@@ -141,13 +116,19 @@ describe(`features/css-custom-property`, () => {
             name: `--propB`,
             global: false,
         });
+
+        // JS exports
+        expect(exports.vars.propA, `propA JS export`).to.eql(`--entry-propA`);
+        expect(exports.vars.propB, `propB JS export`).to.eql(`--entry-propB`);
     });
     it(`should reuse css prop symbol between declaration usages`, () => {
         const { sheets } = testStylableCore(`
             .root {
+                /* @decl --entry-prop: green */
                 --prop: green;
             }
             .part {
+                /* @decl --entry-prop: blue */
                 --prop: blue;
             }
         `);
@@ -155,12 +136,6 @@ describe(`features/css-custom-property`, () => {
         const { meta } = sheets['/entry.st.css'];
 
         shouldReportNoDiagnostics(meta);
-
-        expect(CSSCustomProperty.get(meta, `--prop`), `--prop symbol`).to.eql({
-            _kind: `cssVar`,
-            name: `--prop`,
-            global: false,
-        });
     });
     it(`should collect global css props`, () => {
         const { sheets } = testStylableCore(`
@@ -259,7 +234,7 @@ describe(`features/css-custom-property`, () => {
         it(`should conflict with @property`, () => {
             const symbolDiag = STSymbol.diagnostics;
             // ToDo: report redeclare on on all definitions
-            const { sheets } = testStylableCore(`
+            testStylableCore(`
                 /* @ToDo-analyze-warn(@property before) word(--before)
                     ${symbolDiag.REDECLARE_SYMBOL(`--before`)}*/
                 @property --before {
@@ -290,7 +265,6 @@ describe(`features/css-custom-property`, () => {
                     --after: var(--after);
                 }
             `);
-            sheets;
         });
         it(`should report malformed syntax`, () => {
             testStylableCore(`
@@ -348,9 +322,25 @@ describe(`features/css-custom-property`, () => {
                 `,
             });
 
-            const { meta } = sheets['/entry.st.css'];
+            const { meta, exports } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+
+            // symbols
+            expect(CSSCustomProperty.get(meta, `--before`), `--before symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--before`,
+                global: false,
+            });
+            expect(CSSCustomProperty.get(meta, `--after`), `--after symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--after`,
+                global: false,
+            });
+
+            // JS exports
+            expect(exports.vars.before, `before JS export`).to.eql(`--props-before`);
+            expect(exports.vars.after, `after JS export`).to.eql(`--props-after`);
         });
         it(`should re-export imported symbols`, () => {
             const { sheets } = testStylableCore({
@@ -375,13 +365,14 @@ describe(`features/css-custom-property`, () => {
 
             shouldReportNoDiagnostics(meta);
 
+            // JS exports
             expect(exports.vars.propA, `propA export`).to.eql(`--props-propA`);
             expect(exports.vars.local, `mapped export`).to.eql(`--props-propB`);
             expect(exports.vars.deepProp, `deep export`).to.eql(`--base-deepProp`);
         });
         it(`should override imported with local definition`, () => {
             // ToDo: add redeclare diagnostics to import
-            testStylableCore({
+            const { sheets } = testStylableCore({
                 '/props.st.css': `
                     .root {
                         --before: red;
@@ -415,7 +406,24 @@ describe(`features/css-custom-property`, () => {
                     }
                 `,
             });
-            // ToDo: check symbols and exports
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            // symbols
+            expect(CSSCustomProperty.get(meta, `--before`), `--before symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--before`,
+                global: false,
+            });
+            expect(CSSCustomProperty.get(meta, `--after`), `--after symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--after`,
+                global: false,
+            });
+
+            // JS exports
+            expect(exports.vars.before, `before JS export`).to.eql(`--entry-before`);
+            expect(exports.vars.after, `after JS export`).to.eql(`--entry-after`);
         });
         it(`should resolve mapped property`, () => {
             const { sheets } = testStylableCore({
@@ -440,9 +448,19 @@ describe(`features/css-custom-property`, () => {
                 `,
             });
 
-            const { meta } = sheets['/entry.st.css'];
+            const { meta, exports } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+
+            // symbols
+            expect(CSSCustomProperty.get(meta, `--mapped`), `--mapped symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--mapped`,
+                global: false,
+            });
+
+            // JS exports
+            expect(exports.vars.mapped, `mapped JS export`).to.eql(`--props-a`);
         });
         it(`should resolve global property`, () => {
             const { sheets } = testStylableCore({
@@ -470,7 +488,7 @@ describe(`features/css-custom-property`, () => {
             shouldReportNoDiagnostics(meta);
         });
         it(`should handle unresolved property`, () => {
-            testStylableCore({
+            const { sheets } = testStylableCore({
                 '/props.st.css': ``,
                 '/entry.st.css': `
                     /* @transform-warn word(--unknown) ${STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
@@ -480,6 +498,14 @@ describe(`features/css-custom-property`, () => {
                     @st-import [--unknown] from './props.st.css';
                 `,
             });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            // symbols
+            expect(CSSCustomProperty.get(meta, `--unknown`), `--unknown symbol`).to.eql(undefined);
+
+            // JS exports
+            expect(exports.vars.unknown, `unknown JS export`).to.eql(undefined);
         });
     });
     describe(`st-vars`, () => {
