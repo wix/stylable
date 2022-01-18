@@ -212,6 +212,79 @@ describe(`features/css-custom-property`, () => {
         expect(exports.vars[`aa.bb`], `JS export prop`).to.eql(`--entry-aa\\.bb`);
         expect(exports.vars[`cc.dd`], `JS export value`).to.eql(`--entry-cc\\.dd`);
     });
+    describe(`@property validation`, () => {
+        it(`should report on missing syntax`, () => {
+            const { sheets } = testStylableCore(`
+                /* @analyze-warn(syntax) word(--a) ${atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR(
+                    'syntax'
+                )} */
+                @property --a {
+                    inherits: true;
+                    initial-value: #c0ffee;
+                }
+
+                /* @analyze-warn(inherits) word(--b) ${atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR(
+                    'inherits'
+                )} */
+                @property --b {
+                    syntax: '<color>';
+                    initial-value: #c0ffee;
+                }
+
+                /* @analyze-warn(inherits) word(--c) ${atPropertyValidationWarnings.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR()} */
+                @property --c {
+                    syntax: '<color>';
+                    inherits: false;
+                }
+
+                /* no error for syntax="*" and missing initial-value */
+                @property --d {
+                    syntax: '*';
+                    inherits: false;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(meta.diagnostics.reports.length, `no unexpected`).to.eql(3);
+        });
+        it(`should report invlid descriptor node type`, () => {
+            testStylableCore(`
+                @property --x {
+                    syntax: '*';
+                    inherits: false;
+
+                    /* @analyze-warn(atrule) word(abc) ${atPropertyValidationWarnings.INVALID_DESCRIPTOR_TYPE(
+                        'atrule'
+                    )} */
+                    @some-at-rule abc{}
+                }
+
+                @property --x {
+                    syntax: '*';
+                    inherits: false;
+
+                    /* @analyze-warn(rule) word(div) ${atPropertyValidationWarnings.INVALID_DESCRIPTOR_TYPE(
+                        'rule'
+                    )} */
+                    div {}
+                }
+            `);
+        });
+        it(`should report invalid descriptor`, () => {
+            testStylableCore(`
+                @property --x {
+                    syntax: '*';
+                    inherits: false;
+
+                    /* @analyze-warn word(initialValue) ${atPropertyValidationWarnings.INVALID_DESCRIPTOR_NAME(
+                        'initialValue'
+                    )} */
+                    initialValue: red;
+                }
+            `);
+        });
+    });
     describe(`@st-global-custom-property (deprecated)`, () => {
         it(`should mark properties as global`, () => {
             testStylableCore(`
