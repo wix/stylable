@@ -3,19 +3,6 @@ import { replaceMappedCSSAssetPlaceholders, getStylableBuildData } from './plugi
 import { StylableWebpackPlugin } from './plugin';
 import type { BuildData } from './types';
 
-interface CssModule {
-    new (options: {
-        context: string | null;
-        identifier: string;
-        identifierIndex: number;
-        content: string;
-        media: string;
-        sourceMap: null;
-        assets: {};
-        assetsInfo: {};
-    }): import('webpack').Module;
-}
-
 export function injectCssModules(
     webpack: Compiler['webpack'],
     compilation: Compilation,
@@ -33,11 +20,8 @@ export function injectCssModules(
         );
     }
 
-    // getCssModule is marked as private since v2.5.1
     const CssModule = (
-        MiniCssExtractPlugin.constructor as unknown as {
-            getCssModule(webpack: typeof import('webpack')): CssModule;
-        }
+        MiniCssExtractPlugin.constructor as typeof import('mini-css-extract-plugin')
     ).getCssModule(webpack);
 
     compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
@@ -49,20 +33,18 @@ export function injectCssModules(
                 context: module.context,
                 identifier: module.resource.replace(/\.st\.css$/, '.css') + '?stylable-css-inject',
                 identifierIndex: 1,
-                content: replaceMappedCSSAssetPlaceholders({
-                    assetsModules,
-                    staticPublicPath,
-                    chunkGraph,
-                    moduleGraph,
-                    dependencyTemplates,
-                    runtime: 'CSS' /*runtime*/,
-                    runtimeTemplate,
-                    stylableBuildData: getStylableBuildData(stylableModules, module),
-                }),
-                media: '',
-                sourceMap: null,
-                assets: {},
-                assetsInfo: {},
+                content: Buffer.from(
+                    replaceMappedCSSAssetPlaceholders({
+                        assetsModules,
+                        staticPublicPath,
+                        chunkGraph,
+                        moduleGraph,
+                        dependencyTemplates,
+                        runtime: 'CSS' /*runtime*/,
+                        runtimeTemplate,
+                        stylableBuildData: getStylableBuildData(stylableModules, module),
+                    })
+                ),
             });
 
             try {
