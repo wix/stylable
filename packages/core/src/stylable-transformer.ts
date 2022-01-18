@@ -49,12 +49,12 @@ export interface KeyFrameWithNode {
     node: postcss.Node;
 }
 
-export type StVar = string | { [key: string]: StVar } | StVar[];
+export type RuntimeStVar = string | { [key: string]: RuntimeStVar } | RuntimeStVar[];
 
 export interface StylableExports {
     classes: Record<string, string>;
     vars: Record<string, string>;
-    stVars: Record<string, StVar>;
+    stVars: Record<string, RuntimeStVar>;
     keyframes: Record<string, string>;
 }
 

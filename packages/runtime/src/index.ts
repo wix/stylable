@@ -12,6 +12,6 @@ export {
     StateMap,
     StateValue,
     StylableExports,
-    StVar,
+    RuntimeStVar,
 } from './types';
 export { DOMListRenderer, createDOMListRenderer } from './keyed-list-renderer';

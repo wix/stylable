@@ -35,7 +35,7 @@ export {
     KeyFrameWithNode,
     ResolvedElement,
     StylableExports,
-    StVar,
+    RuntimeStVar,
     StylableResults,
     StylableTransformer,
     TransformHooks,
