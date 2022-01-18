@@ -1,7 +1,7 @@
 import type { Declaration } from 'postcss';
 import { AnyValueNode, parseValues, stringifyValues } from 'css-selector-tokenizer';
 
-type OnFunction = (node: AnyValueNode, level: number) => void;
+export type OnFunction = (node: AnyValueNode, level: number) => void;
 
 export function processDeclarationFunctions(
     decl: Declaration,
