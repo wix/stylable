@@ -19,7 +19,7 @@ export interface InheritedAttributes {
     [props: string]: any;
 }
 
-type StVar = string | { [key: string]: StVar } | StVar[];
+export type StVar = string | { [key: string]: StVar } | StVar[];
 
 export interface StylableExports {
     classes: ClassesMap;

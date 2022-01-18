@@ -49,7 +49,7 @@ export interface KeyFrameWithNode {
     node: postcss.Node;
 }
 
-type StVar = string | { [key: string]: StVar } | StVar[];
+export type StVar = string | { [key: string]: StVar } | StVar[];
 
 export interface StylableExports {
     classes: Record<string, string>;
