@@ -161,6 +161,9 @@ export const hooks = createFeature<{
     transformAtRuleNode({ context, atRule, resolved }) {
         const globalName = globalValue(atRule.params);
         const name = globalName ?? atRule.params;
+        if (!name) {
+            return;
+        }
         const resolve = resolved[name];
         /* js keyframes mixins won't have resolved keyframes */
         atRule.params = resolve
