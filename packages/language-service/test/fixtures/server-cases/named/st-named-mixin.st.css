@@ -1,4 +1,1 @@
-:import {
-    -st-from: '../mixins/js-mixins.js';
-    -st-named: |
-}
+@st-import [|] from "../mixins/js-mixins.js";

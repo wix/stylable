@@ -1,7 +1,4 @@
-:import {
-    -st-from: "test-components/index.st.css";
-    -st-named: Button, Gallery;
-}
+@st-import [Button, Gallery] from "test-components/index.st.css";
 
 .root Button {}
 .root Gallery {}

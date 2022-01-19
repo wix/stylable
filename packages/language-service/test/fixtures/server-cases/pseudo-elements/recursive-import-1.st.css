@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./recursive-import-0.st.css";
-    -st-default: Compi;
-}
+@st-import Compi from "./recursive-import-0.st.css";
 
 .shlomo {
     color: black;

@@ -1,7 +1,4 @@
-:import {
-    -st-from: "test-components/index.st.css";
-    -st-named: Label;
-}
+@st-import [Label] from "test-components/index.st.css";
 
 .root {
     background-color: red;

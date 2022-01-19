@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./mixin-a.st.css";
-    -st-named: a;
-}
+@st-import [a] from "./mixin-a.st.css";
 
 .root {
     -st-mixin: a;

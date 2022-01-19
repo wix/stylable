@@ -1,6 +1,3 @@
-:import {
-    -st-from: "./missing-import.st.css";
-    -st-named: btn;
-}
+@st-import [btn] from "./missing-import.st.css";
 
 .btn:|

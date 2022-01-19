@@ -1,7 +1,4 @@
-:import {
-    -st-from: "fake-stylable-package/stylesheet.st.css";
-    -st-named: part1;
-}
+@st-import [part1] from "fake-stylable-package/stylesheet.st.css";
 
 .root {
     -st-mixin:|

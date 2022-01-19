@@ -1,7 +1,4 @@
-:import {
-    -st-from: "test-components/mix.st.css";
-    -st-default: Comp;
-}
+@st-import Comp from "test-components/mix.st.css";
 
 .css {
     -st-mixin: Comp;

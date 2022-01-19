@@ -1,22 +1,10 @@
-:import {
-    -st-from: "./not-included.st.css";
-    -st-named: x;
-}
+@st-import [x] from "./not-included.st.css";
 
-:import {
-    -st-from: "./included-via-compse.st.css";
-    -st-named: x as x1;
-}
+@st-import [x as x1] from "./included-via-compse.st.css";
 
-:import {
-    -st-from: "./not-included-explicit-global.st.css";
-    -st-default: WithGlobals;
-}
+@st-import WithGlobals from "./not-included-explicit-global.st.css";
 
-:import {
-    -st-from: "./included-via-keyframes.st.css";
-    -st-named: keyframes(x);
-}
+@st-import [keyframes(x)] from "./included-via-keyframes.st.css";
 
 WithGlobals {}
 

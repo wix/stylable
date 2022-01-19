@@ -1,8 +1,4 @@
-:import{
-    -st-from:"./import.st.css";
-    -st-default:Comp;
-    -st-named:shlomo;
-}
+@st-import Comp, [shlomo] from "./import.st.css";
 
 @custom-selector :--popo div > Comp;
 

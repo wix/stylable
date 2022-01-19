@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./substring-var-top.st.css";
-    -st-named: colcol;
-}
+@st-import [colcol] from "./substring-var-top.st.css";
 
 .root {
     color: value(colcol);

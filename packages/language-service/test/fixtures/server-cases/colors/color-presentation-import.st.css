@@ -1,4 +1,1 @@
-:import {
-    -st-from: "./color-presentation.st.css";
-    -st-named: color1;
-}
+@st-import [color1] from "./color-presentation.st.css";

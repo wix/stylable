@@ -1,13 +1,6 @@
-:import {
-    -st-from: "./my-mixins.ts";
-    -st-named: paramlessMixin, paramfulMixin, notARealMixin;
-    -st-default: mixin;
-}
+@st-import mixin, [paramlessMixin, paramfulMixin, notARealMixin] from "./my-mixins.ts";
 
-:import {
-    -st-from: "./js-mixins.js";
-    -st-named: aMixin, aBareMixin, aFormatter;
-}
+@st-import [aMixin, aBareMixin, aFormatter] from "./js-mixins.js";
 
 .myClass {
     -st-mixin: |

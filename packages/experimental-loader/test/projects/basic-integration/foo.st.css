@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./formatter.js";
-    -st-named: echo;
-}
+@st-import [echo] from "./formatter.js";
 
 .hello {
   color: echo(red);

@@ -1,12 +1,6 @@
-:import {
-    -st-from: "../mixins/my-mixins.ts";
-    -st-named: paramlessMixin, paramfulMixin, paramlessFormatter;
-}
+@st-import [paramlessMixin, paramfulMixin, paramlessFormatter] from "../mixins/my-mixins.ts";
 
-:import {
-    -st-from: "../mixins/js-mixins.js";
-    -st-named: aMixin, aBareMixin, aFormatter;
-}
+@st-import [aMixin, aBareMixin, aFormatter] from "../mixins/js-mixins.js";
 
 .local {
     color: paramlessFormat|ter();

@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./comp-to-import-with-param-and-validators.st.css";
-    -st-default: Comp;
-}
+@st-import Comp from "./comp-to-import-with-param-and-validators.st.css";
 
 .gaga{
     -st-extends: Comp;

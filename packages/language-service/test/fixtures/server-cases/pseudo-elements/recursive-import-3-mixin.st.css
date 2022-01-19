@@ -1,12 +1,6 @@
-:import {
-    -st-from: "./recursive-import-2.st.css";
-    -st-default: Comp;
-}
+@st-import Comp from "./recursive-import-2.st.css";
 
-:import {
-    -st-from: "./recursive-import-1.st.css";
-    -st-named: momo, shlomo;
-}
+@st-import [momo, shlomo] from "./recursive-import-1.st.css";
 
 .local {
     color: fuchsia;

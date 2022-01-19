@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./states-import.st.css";
-    -st-default: Comp;
-}
+@st-import Comp from "./states-import.st.css";
 
 .root Comp:rootState {}
 

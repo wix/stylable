@@ -1,12 +1,6 @@
-:import {
-    -st-from: "./my-mixins.ts";
-    -st-named: paramlessMixin, paramfulMixin;
-}
+@st-import [paramlessMixin, paramfulMixin] from "./my-mixins.ts";
 
-:import {
-    -st-from: "./js-mixins.js";
-    -st-named: aMixin, aBareMixin;
-}
+@st-import [aMixin, aBareMixin] from "./js-mixins.js";
 
 .myClass {
     -st-mixin: paramfulMixin('25','aaa','a'), |

@@ -1,9 +1,3 @@
-:import {
-    -st-from: "lib1/index.st.css";
-    -st-default: Lib1;
-}
-:import {
-    -st-from: "lib2/index.st.css";
-    -st-default: Lib2;
-}
+@st-import Lib1 from "lib1/index.st.css";
+@st-import Lib2 from "lib2/index.st.css";
 .root {}

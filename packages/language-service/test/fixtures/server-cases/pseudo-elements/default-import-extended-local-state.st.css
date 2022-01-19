@@ -1,8 +1,4 @@
-:import {
-    -st-from: "./import.st.css";
-    -st-named: shlomo, momo;
-    -st-default: Comp;
-}
+@st-import Comp, [shlomo, momo] from "./import.st.css";
 
 .gaga {
     -st-extends: Comp;

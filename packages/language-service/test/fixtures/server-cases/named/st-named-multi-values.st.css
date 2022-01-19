@@ -1,4 +1,1 @@
-:import {
-    -st-from: './import.st.css';
-    -st-named: shlomo, poopy,|
-}
+@st-import [shlomo, poopy, |] from "./import.st.css";

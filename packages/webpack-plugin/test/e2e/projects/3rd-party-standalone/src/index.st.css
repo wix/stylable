@@ -1,9 +1,6 @@
 @namespace "SRCIndex";
 
-:import {
-    -st-from: "test-components/index.st.css";
-    -st-named: Button;
-}
+@st-import [Button] from "test-components/index.st.css";
 
 Button {
     font-size: 2em;

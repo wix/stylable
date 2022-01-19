@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./import.st.css";
-    -st-named: bV|ar;
-}
+@st-import [bV|ar] from "./import.st.css";
 
 .local {
     color: value(bVar);

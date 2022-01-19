@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./states-deep.st.css";
-    -st-named: deep;
-}
+@st-import [deep] from "./states-deep.st.css";
 
 .veryDeep {
     -st-extends: deep;

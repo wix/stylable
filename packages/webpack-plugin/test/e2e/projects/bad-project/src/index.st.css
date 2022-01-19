@@ -1,8 +1,4 @@
-
-:import {
-    -st-from: "./comp.st.css";
-    -st-named: unknown;
-}
+@st-import [unknown] from "./comp.st.css";
 
 .root {
     background-color: value(xxx); 

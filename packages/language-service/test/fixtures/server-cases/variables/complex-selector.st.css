@@ -1,7 +1,4 @@
-:import {
-    -st-from: './import.st.css';
-    -st-default: Comp;
-}
+@st-import Comp from "./import.st.css";
 
 :vars {
     color1: red;

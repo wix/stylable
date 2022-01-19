@@ -1,7 +1,4 @@
-:import {
-    -st-from: "test-package/index.st.css";
-    -st-default: Comp;
-}
+@st-import Comp from "test-package/index.st.css";
 
 .root { background-color: red; }
 .Comp { background-color: red; }

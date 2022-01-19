@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./c.st.css";
-    -st-default: C;
-}
+@st-import C from "./c.st.css";
 
 .root {
     color: chocolate;

@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./single-var-color.st.css";
-    -st-named: color1;
-}
+@st-import [color1] from "./single-var-color.st.css";
 
 .root {
     color: value(color1);

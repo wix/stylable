@@ -1,8 +1,4 @@
-:import{
-    -st-from: 'fake-stylable-package/stylesheet.st.css';
-    -st-default: Comp;
-    -st-named: part1, color1;
-}
+@st-import Comp, [part1, color1] from "fake-stylable-package/stylesheet.st.css";
 
 .gaga{
     -st-extends:|

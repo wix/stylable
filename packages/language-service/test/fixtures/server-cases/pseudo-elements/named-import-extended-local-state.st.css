@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./mid-import.st.css";
-    -st-named: bobo;
-}
+@st-import [bobo] from "./mid-import.st.css";
 
 .gaga {
     -st-extends: bobo;

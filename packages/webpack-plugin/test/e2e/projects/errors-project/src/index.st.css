@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./test.st.css";
-    -st-named: NotFound;
-}
+@st-import [NotFound] from "./test.st.css";
 
 .root {
     -st-extends: NotFound;

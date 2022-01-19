@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./classes-top.st.css";
-    -st-default: Comp;
-}
+@st-import Comp from "./classes-top.st.css";
 
 .root Comp {}
 

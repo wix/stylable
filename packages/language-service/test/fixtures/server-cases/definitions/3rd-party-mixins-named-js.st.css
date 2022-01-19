@@ -1,5 +1,2 @@
-:import {
-    -st-from: "fake-stylable-package/js-mixins.js";
-    -st-named: aM|ixin, aBareMixin, aFormatter;
-}
+@st-import [aM|ixin, aBareMixin, aFormatter] from "fake-stylable-package/js-mixins.js";
 

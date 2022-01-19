@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./classes-top.st.css";
-    -st-named: aaa,bbb,ccc;
-}
+@st-import [aaa, bbb, ccc] from "./classes-top.st.css";
 
 .root .aaa .bbb .ccc {
 

@@ -1,6 +1,3 @@
-:import {
-    -st-from: "./other.st.css";
-    -st-default: Other;
-}
+@st-import Other from "./other.st.css";
 
 .root Other {}

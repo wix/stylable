@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./states-default.st.css";
-    -st-named: local;
-}
+@st-import [local] from "./states-default.st.css";
 
 .deep {
     -st-extends: local;

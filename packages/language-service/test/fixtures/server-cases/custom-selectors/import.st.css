@@ -1,7 +1,4 @@
-:import {
-    -st-from: './top-import.st.css';
-    -st-default: Comp;
-}
+@st-import Comp from "./top-import.st.css";
 
 @custom-selector :--pongo div > Comp;
 

@@ -1,7 +1,4 @@
-:import {
-    -st-from: "fake-stylable-package/stylesheet.st.css";
-    -st-named: color1;
-}
+@st-import [color1] from "fake-stylable-package/stylesheet.st.css";
 
 .root {
     color: value(|);

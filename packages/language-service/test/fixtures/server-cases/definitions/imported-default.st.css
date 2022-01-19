@@ -1,4 +1,1 @@
-:import {
-    -st-from: "./import.st.css";
-    -st-default: Co|mp;
-}
+@st-import Co|mp from "./import.st.css";

@@ -1,9 +1,6 @@
 @st-global-custom-property --y;
 
-:import {
-    -st-from: "./css-vars-level2.st.css";
-    -st-named: --x2, --y2;
-}
+@st-import [--x2, --y2] from "./css-vars-level2.st.css";
 
 .root {
     --x: red;

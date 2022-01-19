@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./state-with-enum.st.css";
-    -st-default: Enum;
-}
+@st-import Enum from "./state-with-enum.st.css";
 
 .blah {
     -st-extends: Enum;

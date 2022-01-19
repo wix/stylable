@@ -1,12 +1,6 @@
-:import {
-    -st-from: "./other.st.css";
-    -st-default: Other;
-}
+@st-import Other from "./other.st.css";
 
-:import {
-    -st-from: "./not-direct.st.css";
-    -st-named: Other as NotDirect;
-}
+@st-import [Other as NotDirect] from "./not-direct.st.css";
 
 .root {
     -st-extends: Other;

@@ -1,9 +1,6 @@
 @namespace "moshe";
 
-:import {
-    -st-from: "./import-from-here.st.css";
-    -st-named: shlomo;
-}
+@st-import [shlomo] from "./import-from-here.st.css";
 
 :vars {
     color1: red;

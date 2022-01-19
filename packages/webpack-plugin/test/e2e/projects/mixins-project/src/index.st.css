@@ -1,17 +1,8 @@
-:import {
-    -st-from: "./mixin";
-    -st-named: Mixin;
-}
+@st-import [Mixin] from "./mixin";
 
-:import {
-    -st-from: "./mixin2";
-    -st-named: Mixin as Mixin2;
-}
+@st-import [Mixin as Mixin2] from "./mixin2";
 
-:import {
-    -st-from: "./functions.js";
-    -st-named: add;
-}
+@st-import [add] from "./functions.js";
 
 .root {
     -st-mixin: Mixin(1, "2"), Mixin2(1px solid rgb(255, 0, 0));

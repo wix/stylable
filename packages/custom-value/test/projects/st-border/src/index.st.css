@@ -1,7 +1,4 @@
-:import {
-    -st-from: "@stylable/custom-value";
-    -st-named: stBorder;
-}
+@st-import [stBorder] from "@stylable/custom-value";
 
 :vars {
     myBorder: stBorder(1px, solid, green);

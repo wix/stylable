@@ -1,7 +1,4 @@
-:import {
-    -st-from: "./import.st.css";
-    -st-named: momo;
-}
+@st-import [momo] from "./import.st.css";
 
 .local {
     -st-extends: m|omo;

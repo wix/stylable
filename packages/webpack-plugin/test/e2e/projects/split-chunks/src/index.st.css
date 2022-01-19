@@ -1,7 +1,4 @@
-:import {
-    -st-from: "lib/index.st.css";
-    -st-default: Lib;
-}
+@st-import Lib from "lib/index.st.css";
 .root {
     -st-extends: Lib;
     background-color: red; 
