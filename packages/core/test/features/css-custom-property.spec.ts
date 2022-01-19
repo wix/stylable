@@ -816,10 +816,9 @@ describe(`features/css-custom-property`, () => {
         });
     });
     describe(`unit`, () => {
-        it.skip('scopeCSSVar (deprecated)', () => {
-            // ToDo: check why resolve fails
+        it('scopeCSSVar', () => {
             const { sheets, stylable } = testStylableCore({
-                '/props.st.css': `
+                '/imported.st.css': `
                     @st-global-custom-property --imported-global;
 
                     .root {
@@ -829,10 +828,7 @@ describe(`features/css-custom-property`, () => {
                 '/entry.st.css': `
                     @st-global-custom-property --local-global;
         
-                    :import {
-                        -st-from: "./imported.st.css";
-                        -st-named: --imported, --imported-global;
-                    }
+                    @st-import [--imported, --imported-global] from "./imported.st.css";
 
                     .root {
                         --local: ;
@@ -842,27 +838,23 @@ describe(`features/css-custom-property`, () => {
 
             const { meta } = sheets['/entry.st.css'];
 
-            expect(
-                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--unknown'),
-                `a`
-            ).to.equal(generateScopedCSSVar('entry', 'unknown'));
+            expect(CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--unknown')).to.equal(
+                generateScopedCSSVar('entry', 'unknown')
+            );
 
             expect(CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--local'), `b`).to.equal(
                 generateScopedCSSVar('entry', 'local')
             );
 
-            expect(
-                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--imported'),
-                `c`
-            ).to.equal(generateScopedCSSVar('imported', 'imported'));
+            expect(CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--imported')).to.equal(
+                generateScopedCSSVar('imported', 'imported')
+            );
 
             expect(
-                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--imported-global'),
-                `d`
+                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--imported-global')
             ).to.equal('--imported-global');
             expect(
-                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--local-global'),
-                `e`
+                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--local-global')
             ).to.equal('--local-global');
         });
     });
