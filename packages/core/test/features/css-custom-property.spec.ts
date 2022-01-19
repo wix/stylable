@@ -228,6 +228,14 @@ describe(`features/css-custom-property`, () => {
                 inherits: false;
             };
 
+            .decls {
+                /* 
+                    @decl(empty var) prop: var() 
+                    @analyze-warn(empty var) ${CSSCustomProperty.diagnostics.MISSING_PROP_NAME()}
+                */
+                prop: var();
+            }
+
             .root {
                 /* 
                     @decl(no-dashes) prop: var(propA) 

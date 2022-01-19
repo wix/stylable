@@ -41,6 +41,9 @@ export const diagnostics = {
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
     },
+    MISSING_PROP_NAME() {
+        return `missing custom property name for "var(--[PROP NAME])"`;
+    },
 };
 
 const dataKey = plugableRecord.key<{
@@ -167,7 +170,7 @@ export const hooks = createFeature<{
     },
     transformDeclarationValue({ node, resolved }) {
         const { value } = node;
-        const varWithPrefix = node.nodes[0].value;
+        const varWithPrefix = node.nodes[0]?.value || ``;
         if (isCSSVarProp(varWithPrefix)) {
             if (resolved && resolved[varWithPrefix]) {
                 node.nodes[0].value = resolved[varWithPrefix];
@@ -241,6 +244,11 @@ function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declara
     parsed.walk((node) => {
         if (node.type === 'function' && node.value === 'var' && node.nodes) {
             const varName = node.nodes[0];
+            if (!varName) {
+                context.diagnostics.warn(decl, diagnostics.MISSING_PROP_NAME());
+                return;
+            }
+
             if (!validateAllowedNodesUntil(node, 1)) {
                 const args = postcssValueParser.stringify(node.nodes);
                 context.diagnostics.warn(decl, diagnostics.ILLEGAL_CSS_VAR_ARGS(args), {
@@ -250,7 +258,7 @@ function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declara
 
             addCSSProperty({
                 context,
-                name: postcssValueParser.stringify(varName).trim(),
+                name: postcssValueParser.stringify(varName)?.trim() || ``,
                 node: decl,
                 global: false,
                 final: false,
