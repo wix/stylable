@@ -1,26 +1,30 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
+import * as STImport from './st-import';
+import type { ImportSymbol } from './st-import';
 import {
     validateAtProperty,
     isCSSVarProp,
     generateScopedCSSVar,
-    getScopedCSSVar,
+    atPropertyValidationWarnings,
 } from '../helpers/css-custom-property';
 import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
+import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
-import type { StylableResolver } from '../stylable-resolver';
+import type { StylableResolver, CSSResolve } from '../stylable-resolver';
 import type * as postcss from 'postcss';
-// ToDo: refactor out
+// ToDo: refactor out - parse once and pass to hooks
 import postcssValueParser from 'postcss-value-parser';
-
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
     global: boolean;
+    alias: ImportSymbol | undefined;
 }
 
 export const diagnostics = {
+    ...atPropertyValidationWarnings,
     ILLEGAL_CSS_VAR_USE(name: string) {
         return `a custom css property must begin with "--" (double-dash), but received "${name}"`;
     },
@@ -38,78 +42,126 @@ export const diagnostics = {
     },
 };
 
+const dataKey = plugableRecord.key<{
+    stCustomGlobalProperty: Record<string, CSSVarSymbol>;
+}>('custom-property');
+
 // HOOKS
 
 export const hooks = createFeature<{
     RESOLVED: Record<string, string>;
 }>({
-    analyzeAtRule({ context, atRule, toRemove }) {
-        if (atRule.name === `property`) {
-            addCSSVarDefinition(context, atRule);
-            validateAtProperty(atRule, context.diagnostics);
-        } else if (atRule.name === `st-global-custom-property`) {
-            analyzeDeprecatedStGlobalCustomProperty(context, atRule);
-            toRemove.push(atRule);
-        }
+    metaInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, { stCustomGlobalProperty: {} });
     },
-    analyzeDeclaration({ context, decl }) {
-        if (isCSSVarProp(decl.prop)) {
-            addCSSVarDefinition(context, decl);
-        }
-        if (decl.value.includes('var(')) {
-            handleCSSVarUse(context, decl);
-        }
-    },
-    transformResolve({ context: { meta, resolver } }) {
-        const cssVarsMapping: Record<string, string> = {};
-        // imported vars
-        for (const imported of meta.getImportStatements()) {
+    analyzeInit(context) {
+        // ToDo: move to `STImport.ImportTypeHook`
+        for (const imported of STImport.getImportStatements(context.meta)) {
             for (const symbolName of Object.keys(imported.named)) {
                 if (isCSSVarProp(symbolName)) {
-                    const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
-
-                    if (
-                        importedVar &&
-                        importedVar._kind === 'css' &&
-                        importedVar.symbol &&
-                        importedVar.symbol._kind === 'cssVar'
-                    ) {
-                        cssVarsMapping[symbolName] = importedVar.symbol.global
-                            ? importedVar.symbol.name
-                            : generateScopedCSSVar(
-                                  importedVar.meta.namespace,
-                                  importedVar.symbol.name.slice(2)
-                              );
+                    const importSymbol = STSymbol.get(context.meta, symbolName, `import`);
+                    if (!importSymbol) {
+                        console.warn(
+                            `imported symbol "${symbolName}" not found on "${context.meta.source}"`
+                        );
+                        continue;
                     }
+                    addCSSProperty({
+                        context,
+                        node: imported.rule,
+                        name: symbolName,
+                        global: false,
+                        final: true,
+                        alias: importSymbol,
+                    });
                 }
             }
         }
-
-        // locally defined vars
+    },
+    analyzeAtRule({ context, atRule, toRemove }) {
+        if (atRule.name === `property`) {
+            let name = atRule.params;
+            let global = false;
+            // check global
+            const globalVarName = globalValue(name);
+            if (globalVarName !== undefined) {
+                name = globalVarName.trim();
+                global = true;
+            }
+            // handle conflict with deprecated `@st-global-custom-property`
+            if (plugableRecord.getUnsafe(context.meta.data, dataKey).stCustomGlobalProperty[name]) {
+                global = true;
+            }
+            addCSSProperty({
+                context,
+                node: atRule,
+                name,
+                global,
+                final: true,
+            });
+            validateAtProperty(atRule, context.diagnostics);
+        } else if (atRule.name === `st-global-custom-property`) {
+            analyzeDeprecatedStGlobalCustomProperty(context, atRule);
+            toRemove.push(atRule); // ToDo: move to transform
+        }
+    },
+    analyzeDeclaration({ context, decl }) {
+        // register prop
+        if (isCSSVarProp(decl.prop)) {
+            addCSSProperty({
+                context,
+                node: decl,
+                name: decl.prop,
+                global: false,
+                final: false,
+            });
+        }
+        // register value
+        if (decl.value.includes('var(')) {
+            analyzeDeclValueVarCalls(context, decl);
+        }
+    },
+    transformResolve({ context: { meta, resolver } }) {
+        const customPropsMapping: Record<string, string> = {};
         for (const localVarName of Object.keys(meta.cssVars)) {
             const cssVar = meta.cssVars[localVarName];
-
-            if (!cssVarsMapping[localVarName]) {
-                cssVarsMapping[localVarName] = cssVar.global
-                    ? localVarName
-                    : generateScopedCSSVar(meta.namespace, localVarName.slice(2));
+            if (cssVar.alias) {
+                const resolved = resolver.deepResolve(cssVar.alias);
+                const unresolved =
+                    !resolved || resolved._kind !== `css` || resolved.symbol?._kind !== `cssVar`;
+                // fallback to local namespace
+                customPropsMapping[localVarName] = getTransformedName(
+                    unresolved
+                        ? {
+                              _kind: `css`,
+                              symbol: cssVar,
+                              meta,
+                          }
+                        : (resolved as CSSResolve<CSSVarSymbol>)
+                );
+            } else {
+                customPropsMapping[localVarName] = getTransformedName({
+                    _kind: `css`,
+                    symbol: cssVar,
+                    meta,
+                });
             }
         }
 
-        return cssVarsMapping;
+        return customPropsMapping;
     },
     transformAtRuleNode({ atRule, resolved }) {
         if (atRule.nodes?.length) {
-            // ToDo: namespace
-            atRule.params = resolved[atRule.params] ?? atRule.params;
+            if (resolved[atRule.params]) {
+                atRule.params = resolved[atRule.params] || atRule.params;
+            }
         } else {
             // remove `@property` with no body
             atRule.remove();
         }
-        // ToDo: move removal of `@st-global-custom-property` here
     },
-    transformDeclaration({ decl, context, resolved }) {
-        decl.prop = getScopedCSSVar(decl, context.meta, resolved);
+    transformDeclaration({ decl, resolved }) {
+        decl.prop = resolved[decl.prop] || decl.prop;
     },
     transformDeclarationValue({ node, resolved }) {
         const { value } = node;
@@ -126,7 +178,6 @@ export const hooks = createFeature<{
     },
     transformJSExports({ exports, resolved }) {
         for (const varName of Object.keys(resolved)) {
-            // ToDo: namespace
             exports.vars[varName.slice(2)] = resolved[varName];
         }
     },
@@ -135,11 +186,54 @@ export const hooks = createFeature<{
 // API
 
 export function get(meta: StylableMeta, name: string): CSSVarSymbol | undefined {
-    // return STSymbol.get(meta, name, `class`);
+    // return STSymbol.get(meta, name, `cssVars`);
     return meta.cssVars[name];
 }
 
-function handleCSSVarUse(context: FeatureContext, decl: postcss.Declaration) {
+function addCSSProperty({
+    context,
+    node,
+    name,
+    global,
+    final,
+    alias,
+}: {
+    context: FeatureContext;
+    node: postcss.Declaration | postcss.AtRule | postcss.Rule;
+    name: string;
+    global: boolean;
+    final: boolean;
+    alias?: ImportSymbol;
+}) {
+    // validate indent
+    if (!isCSSVarProp(name)) {
+        context.diagnostics.warn(node, diagnostics.ILLEGAL_CSS_VAR_USE(name), {
+            word: name,
+        });
+        return;
+    }
+    // usages bailout: addition of weak definition reference `--x: var(--x)`
+    if (!final && !!STSymbol.get(context.meta, name, `cssVar`)) {
+        return;
+    }
+
+    // define symbol
+    STSymbol.addSymbol({
+        context,
+        symbol: {
+            _kind: 'cssVar',
+            name: name,
+            global,
+            alias,
+        },
+        safeRedeclare: !final || !!alias,
+        node,
+    });
+    // deprecated
+    context.meta.cssVars[name] = STSymbol.get(context.meta, name, `cssVar`)!;
+}
+
+function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declaration) {
     const parsed = postcssValueParser(decl.value);
     parsed.walk((node) => {
         if (node.type === 'function' && node.value === 'var' && node.nodes) {
@@ -151,60 +245,15 @@ function handleCSSVarUse(context: FeatureContext, decl: postcss.Declaration) {
                 });
             }
 
-            addCSSVar(context, postcssValueParser.stringify(varName).trim(), decl, false);
+            addCSSProperty({
+                context,
+                name: postcssValueParser.stringify(varName).trim(),
+                node: decl,
+                global: false,
+                final: false,
+            });
         }
     });
-}
-
-function addCSSVarDefinition(context: FeatureContext, node: postcss.Declaration | postcss.AtRule) {
-    let varName = node.type === 'atrule' ? node.params.trim() : node.prop.trim();
-    let isGlobal = false;
-
-    const globalVarName = globalValue(varName);
-
-    if (globalVarName !== undefined) {
-        varName = globalVarName.trim();
-        isGlobal = true;
-    }
-
-    if (node.type === 'atrule' && STSymbol.get(context.meta, varName)) {
-        context.diagnostics.warn(node, STSymbol.diagnostics.REDECLARE_SYMBOL(varName), {
-            word: varName,
-        });
-    }
-
-    addCSSVar(context, varName, node, isGlobal);
-}
-
-function addCSSVar(
-    context: FeatureContext,
-    varName: string,
-    node: postcss.Declaration | postcss.AtRule,
-    global: boolean
-) {
-    if (isCSSVarProp(varName)) {
-        if (!context.meta.cssVars[varName]) {
-            const cssVarSymbol: CSSVarSymbol = {
-                _kind: 'cssVar',
-                name: varName,
-                global,
-            };
-            context.meta.cssVars[varName] = cssVarSymbol;
-            const prevSymbol = STSymbol.get(context.meta, varName);
-            const override = node.type === `atrule` || !prevSymbol;
-            if (override) {
-                STSymbol.addSymbol({
-                    context,
-                    symbol: cssVarSymbol,
-                    safeRedeclare: true,
-                });
-            }
-        }
-    } else {
-        context.diagnostics.warn(node, diagnostics.ILLEGAL_CSS_VAR_USE(varName), {
-            word: varName,
-        });
-    }
 }
 
 function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule: postcss.AtRule) {
@@ -225,27 +274,30 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
     }
 
     for (const entry of cssVarsByComma) {
-        const cssVar = entry.trim();
-        if (isCSSVarProp(cssVar)) {
-            const property: CSSVarSymbol = {
-                _kind: 'cssVar',
-                name: cssVar,
-                global: true,
-            };
-            context.meta.cssVars[cssVar] = property;
-            STSymbol.addSymbol({
+        const name = entry.trim();
+        if (isCSSVarProp(name)) {
+            // ToDo: change to modify global instead of override
+            addCSSProperty({
                 context,
-                symbol: property,
                 node: atRule,
+                name,
+                global: true,
+                final: true,
             });
+            // keep track of defined props through `@st-custom-global-property` in order
+            // to not override the default with following `@property` definitions
+            const { stCustomGlobalProperty } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+            stCustomGlobalProperty[name] = STSymbol.get(context.meta, name, `cssVar`)!;
         } else {
-            context.diagnostics.warn(atRule, diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
-                word: cssVar,
+            context.diagnostics.warn(atRule, diagnostics.ILLEGAL_GLOBAL_CSS_VAR(name), {
+                word: name,
             });
         }
     }
 }
-
+export function getTransformedName({ symbol, meta }: CSSResolve<CSSVarSymbol>) {
+    return symbol.global ? symbol.name : generateScopedCSSVar(meta.namespace, symbol.name.slice(2));
+}
 export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symbolName: string) {
     const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
     if (
@@ -254,14 +306,9 @@ export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symb
         importedVar.symbol &&
         importedVar.symbol._kind === 'cssVar'
     ) {
-        return importedVar.symbol.global
-            ? importedVar.symbol.name
-            : generateScopedCSSVar(importedVar.meta.namespace, importedVar.symbol.name.slice(2));
+        importedVar;
+        return getTransformedName(importedVar as CSSResolve<CSSVarSymbol>);
     }
     const cssVar = meta.cssVars[symbolName];
-    if (cssVar?.global) {
-        return symbolName;
-    } else {
-        return generateScopedCSSVar(meta.namespace, symbolName.slice(2));
-    }
+    return cssVar?.global ? symbolName : generateScopedCSSVar(meta.namespace, symbolName.slice(2));
 }

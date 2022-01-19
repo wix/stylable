@@ -104,6 +104,7 @@ export class StylableProcessor implements FeatureContext {
         this.meta = new StylableMeta(root, this.diagnostics);
 
         STImport.hooks.analyzeInit(this);
+        CSSCustomProperty.hooks.analyzeInit(this);
 
         this.handleAtRules(root);
 

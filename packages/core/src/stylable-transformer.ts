@@ -31,7 +31,7 @@ import type { StylableMeta } from './stylable-meta';
 import { STSymbol, STGlobal, CSSClass, CSSType, CSSKeyframes } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
-import { isCSSVarProp, getScopedCSSVar } from './helpers/css-custom-property';
+import { isCSSVarProp } from './helpers/css-custom-property';
 import { valueMapping } from './stylable-value-parsers';
 import { unescapeCSS, namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
@@ -305,7 +305,11 @@ export class StylableTransformer {
         meta: StylableMeta,
         cssVarsMapping: Record<string, string>
     ) {
-        return getScopedCSSVar(decl, meta, cssVarsMapping);
+        let prop = decl.prop;
+        if (CSSCustomProperty.get(meta, prop)) {
+            prop = cssVarsMapping[prop];
+        }
+        return prop;
     }
     public transformGlobals(ast: postcss.Root, meta: StylableMeta) {
         ast.walkRules((r) => {

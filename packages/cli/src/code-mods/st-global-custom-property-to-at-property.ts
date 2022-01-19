@@ -55,6 +55,7 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
                 _kind: 'cssVar',
                 name: cssVar,
                 global: true,
+                alias: undefined,
             });
         } else {
             diagnostics.warn(atRule, CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
