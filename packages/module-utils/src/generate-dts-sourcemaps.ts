@@ -1,6 +1,6 @@
 import { basename } from 'path';
 import { ClassSymbol, StylableMeta, valueMapping } from '@stylable/core';
-import { CSSKeyframes } from '@stylable/core/dist/features';
+import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
 import { encode } from 'vlq';
 import {
     ClassesToken,
@@ -31,7 +31,7 @@ function getClassSrcPosition(className: string, meta: StylableMeta): Position | 
 }
 
 function getVarsSrcPosition(varName: string, meta: StylableMeta): Position | undefined {
-    const cssVar = meta.cssVars[`--${varName}`];
+    const cssVar = STSymbol.get(meta, `--${varName}`, `cssVar`);
     let res;
 
     if (cssVar) {

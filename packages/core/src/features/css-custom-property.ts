@@ -8,6 +8,7 @@ import {
     generateScopedCSSVar,
     atPropertyValidationWarnings,
 } from '../helpers/css-custom-property';
+import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import { plugableRecord } from '../helpers/plugable-record';
@@ -123,8 +124,9 @@ export const hooks = createFeature<{
     },
     transformResolve({ context: { meta, resolver } }) {
         const customPropsMapping: Record<string, string> = {};
-        for (const localVarName of Object.keys(meta.cssVars)) {
-            const cssVar = meta.cssVars[localVarName];
+        for (const [localVarName, cssVar] of Object.entries(
+            STSymbol.getAllByType(meta, `cssVar`)
+        )) {
             if (cssVar.alias) {
                 const resolved = resolver.deepResolve(cssVar.alias);
                 const unresolved =
@@ -186,8 +188,7 @@ export const hooks = createFeature<{
 // API
 
 export function get(meta: StylableMeta, name: string): CSSVarSymbol | undefined {
-    // return STSymbol.get(meta, name, `cssVars`);
-    return meta.cssVars[name];
+    return STSymbol.get(meta, name, `cssVar`);
 }
 
 function addCSSProperty({
@@ -230,7 +231,9 @@ function addCSSProperty({
         node,
     });
     // deprecated
-    context.meta.cssVars[name] = STSymbol.get(context.meta, name, `cssVar`)!;
+    ignoreDeprecationWarn(
+        () => (context.meta.cssVars[name] = STSymbol.get(context.meta, name, `cssVar`)!)
+    );
 }
 
 function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declaration) {
@@ -298,6 +301,7 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
 export function getTransformedName({ symbol, meta }: CSSResolve<CSSVarSymbol>) {
     return symbol.global ? symbol.name : generateScopedCSSVar(meta.namespace, symbol.name.slice(2));
 }
+
 export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symbolName: string) {
     const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
     if (
@@ -309,6 +313,6 @@ export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symb
         importedVar;
         return getTransformedName(importedVar as CSSResolve<CSSVarSymbol>);
     }
-    const cssVar = meta.cssVars[symbolName];
+    const cssVar = STSymbol.get(meta, symbolName, `cssVar`);
     return cssVar?.global ? symbolName : generateScopedCSSVar(meta.namespace, symbolName.slice(2));
 }

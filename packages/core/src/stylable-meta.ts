@@ -39,6 +39,7 @@ export class StylableMeta {
     /** @deprecated use meta.getImportStatements() */
     public imports: Imported[] = [];
     public vars: VarSymbol[] = [];
+    /** @deprecated */
     public cssVars: Record<string, CSSVarSymbol> = {};
     /** @deprecated */
     public keyframes: postcss.AtRule[] = [];
@@ -120,6 +121,10 @@ setFieldForDeprecation(StylableMeta.prototype, `keyframes`, {
     valueOnThis: true,
 });
 setFieldForDeprecation(StylableMeta.prototype, `mappedKeyframes`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+});
+setFieldForDeprecation(StylableMeta.prototype, `cssVars`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
 });
