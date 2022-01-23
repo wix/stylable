@@ -4,7 +4,7 @@ import type { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelectorWithCache } from './helpers/selector';
 import { getNamedArgs, getFormatterArgs } from './helpers/value';
-import type { ParsedValue, StateParsedValue } from './types';
+import type { StateParsedValue } from './types';
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
@@ -64,10 +64,6 @@ export const valueMapping = {
     global: '-st-global' as const,
 };
 
-export const paramMapping = {
-    global: 'st-global' as const,
-};
-
 export const mixinDeclRegExp = new RegExp(`(${valueMapping.mixin})|(${valueMapping.partialMixin})`);
 
 export type stKeys = keyof typeof valueMapping;
@@ -77,8 +73,6 @@ export const stValues: string[] = Object.keys(valueMapping).map(
 );
 
 export const animationPropRegExp = /animation$|animation-name$/;
-
-export const globalValueRegExp = new RegExp(`^${paramMapping.global}\\((.*?)\\)$`);
 
 export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce((acc, key) => {
     acc[valueMapping[key as stKeys]] = true;
@@ -222,23 +216,4 @@ function stringifyParam(nodes: any) {
             return undefined;
         }
     });
-}
-
-export function validateAllowedNodesUntil(
-    node: ParsedValue,
-    i: number,
-    untilType = 'div',
-    allowed = ['comment']
-) {
-    i = 1;
-    let current = node.nodes[i];
-    while (current && current.type !== untilType) {
-        if (!allowed.includes(current.type)) {
-            return false;
-        }
-        i++;
-        current = node.nodes[i];
-    }
-
-    return true;
 }

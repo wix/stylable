@@ -25,6 +25,10 @@ export function getNamedArgs(node: ParsedValue) {
     return args.length && args[args.length - 1].length === 0 ? args.slice(0, -1) : args;
 }
 
+export function stringifyFunction(name: string, parsedNode: ParsedValue, perserveQuotes = false) {
+    return `${name}(${getFormatterArgs(parsedNode, false, undefined, perserveQuotes).join(', ')})`;
+}
+
 export function getFormatterArgs(
     node: ParsedValue,
     allowComments = false,
@@ -123,4 +127,23 @@ export function groupValues(nodes: ValueNode[], divType = 'div') {
         grouped.push(current);
     }
     return grouped;
+}
+
+export function validateAllowedNodesUntil(
+    node: ParsedValue,
+    i: number,
+    untilType = 'div',
+    allowed = ['comment']
+) {
+    i = 1;
+    let current = node.nodes[i];
+    while (current && current.type !== untilType) {
+        if (!allowed.includes(current.type)) {
+            return false;
+        }
+        i++;
+        current = node.nodes[i];
+    }
+
+    return true;
 }

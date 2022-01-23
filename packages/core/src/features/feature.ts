@@ -4,6 +4,7 @@ import type { StylableResolver } from '../stylable-resolver';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type { Diagnostics } from '../diagnostics';
+import type { ParsedValue } from '../types';
 
 export type SelectorNodeContext = [
     index: number,
@@ -28,13 +29,18 @@ export interface NodeTypes {
 export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     metaInit: (context: FeatureContext) => void;
     analyzeInit: (context: FeatureContext) => void;
-    analyzeAtRule: (options: { context: FeatureContext; atRule: postcss.AtRule }) => void;
+    analyzeAtRule: (options: {
+        context: FeatureContext;
+        atRule: postcss.AtRule;
+        toRemove: postcss.AtRule[]; // ToDo: remove once rawAst is immutable in processor
+    }) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
         node: T['IMMUTABLE_SELECTOR'];
         rule: postcss.Rule;
         walkContext: SelectorNodeContext;
     }) => void;
+    analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
     transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
     transformAtRuleNode: (options: {
@@ -52,6 +58,11 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         decl: postcss.Declaration;
         resolved: T['RESOLVED'];
     }) => void;
+    transformDeclarationValue: (options: {
+        context: FeatureTransformContext;
+        node: ParsedValue;
+        resolved: T['RESOLVED'];
+    }) => void;
     transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
 }
 const defaultHooks: FeatureHooks<NodeTypes> = {
@@ -67,6 +78,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
     analyzeSelectorNode() {
         /**/
     },
+    analyzeDeclaration() {
+        /**/
+    },
     transformInit() {
         /**/
     },
@@ -80,6 +94,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
         /**/
     },
     transformDeclaration() {
+        /**/
+    },
+    transformDeclarationValue() {
         /**/
     },
     transformJSExports() {

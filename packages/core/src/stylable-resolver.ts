@@ -163,6 +163,12 @@ export class StylableResolver {
                 } else {
                     return null;
                 }
+            } else if (maybeImport && maybeImport._kind === 'cssVar') {
+                if (maybeImport.alias) {
+                    maybeImport = maybeImport.alias;
+                } else {
+                    return null;
+                }
             } else {
                 return null;
             }
@@ -185,19 +191,19 @@ export class StylableResolver {
         ) {
             resolved = this.resolve(resolved.symbol);
         }
-        if (
-            resolved &&
-            resolved.symbol &&
-            resolved.meta &&
-            (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') &&
-            resolved.symbol.alias &&
-            !resolved.symbol[valueMapping.extends]
-        ) {
-            if (path.includes(resolved.symbol)) {
-                return { _kind: 'css', symbol: resolved.symbol, meta: resolved.meta };
+        if (resolved && resolved.symbol && resolved.meta) {
+            if (
+                ((resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') &&
+                    resolved.symbol.alias &&
+                    !resolved.symbol[valueMapping.extends]) ||
+                (resolved.symbol._kind === 'cssVar' && resolved.symbol.alias)
+            ) {
+                if (path.includes(resolved.symbol)) {
+                    return { _kind: 'css', symbol: resolved.symbol, meta: resolved.meta };
+                }
+                path.push(resolved.symbol);
+                return this.deepResolve(resolved.symbol.alias, path);
             }
-            path.push(resolved.symbol);
-            return this.deepResolve(resolved.symbol.alias, path);
         }
         return resolved;
     }

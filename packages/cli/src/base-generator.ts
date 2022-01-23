@@ -1,6 +1,6 @@
 import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
-import { CSSKeyframes } from '@stylable/core/dist/features';
+import { STSymbol } from '@stylable/core/dist/features';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { basename, relative } from 'path';
@@ -108,17 +108,19 @@ export function reExportsAllSymbols(filePath: string, generator: IndexGenerator)
         acc[name] = `${rootExport}__${name}`;
         return acc;
     }, {});
-    const vars = Object.keys(meta.cssVars).reduce<Record<string, string>>((acc, varName) => {
-        acc[varName] = `--${rootExport}__${varName.slice(2)}`;
-        return acc;
-    }, {});
-    const keyframes = Object.keys(CSSKeyframes.getAll(meta)).reduce<Record<string, string>>(
-        (acc, keyframe) => {
-            acc[keyframe] = `${rootExport}__${keyframe}`;
+    const vars = Object.keys(STSymbol.getAllByType(meta, `cssVar`)).reduce<Record<string, string>>(
+        (acc, varName) => {
+            acc[varName] = `--${rootExport}__${varName.slice(2)}`;
             return acc;
         },
         {}
     );
+    const keyframes = Object.keys(STSymbol.getAllByType(meta, `keyframes`)).reduce<
+        Record<string, string>
+    >((acc, keyframe) => {
+        acc[keyframe] = `${rootExport}__${keyframe}`;
+        return acc;
+    }, {});
     return {
         root: rootExport,
         classes,

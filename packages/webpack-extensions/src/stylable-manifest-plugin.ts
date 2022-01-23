@@ -1,4 +1,5 @@
 import { Stylable, StylableMeta } from '@stylable/core';
+import { STSymbol } from '@stylable/core/dist/features';
 import { resolveNamespace } from '@stylable/node';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
 import { hashContent } from './hash-content-util';
@@ -43,7 +44,7 @@ const defaultOptions: Options = {
 };
 
 function generateCssVarsNamedExports(name: string, meta: StylableMeta) {
-    return Object.keys(meta.cssVars)
+    return Object.keys(STSymbol.getAllByType(meta, `cssVar`))
         .map((varName) => `${varName} as --${name}-${varName.slice(2)}`)
         .join(',');
 }

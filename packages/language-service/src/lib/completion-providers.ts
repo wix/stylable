@@ -1108,7 +1108,7 @@ function getNamedCSSImports(
 ) {
     const namedSet = new Set(namedValues);
     for (const [symbolName, symbol] of Object.entries(resolvedImport.getAllSymbols())) {
-        if (symbol._kind === 'import') {
+        if (symbol._kind === 'cssVar' && !!symbol.alias) {
             if (symbol.name.startsWith('--')) {
                 const importedVar = stylable.createResolver({}).deepResolve(symbol);
                 if (
@@ -1120,7 +1120,7 @@ function getNamedCSSImports(
                     addCompletion(symbolName, importedVar.meta, importedVar.symbol);
                 }
             }
-        } else {
+        } else if (symbol._kind !== `import`) {
             addCompletion(symbolName, meta, symbol);
         }
     }

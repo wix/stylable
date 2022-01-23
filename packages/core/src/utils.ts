@@ -1,10 +1,3 @@
-import { globalValueRegExp } from './stylable-value-parsers';
-
-export function globalValue(str: string) {
-    const match = str.match(globalValueRegExp);
-    return match?.[1];
-}
-
 export function stripQuotation(str: string) {
     return str.replace(/^['"](.*?)['"]$/g, '$1');
 }

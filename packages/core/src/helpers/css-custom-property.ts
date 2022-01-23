@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
-import type { Diagnostics } from './diagnostics';
-import { stripQuotation } from './utils';
+import type { Diagnostics } from '../diagnostics';
+import { stripQuotation } from '../utils';
 
 const UNIVERSAL_SYNTAX_DEFINITION = '*';
 const AT_PROPERTY_DISCRIPTOR_LIST = ['initial-value', 'syntax', 'inherits'];
@@ -109,4 +109,12 @@ export function validateAtProperty(
     return {
         valid: true,
     };
+}
+
+export function isCSSVarProp(value: string) {
+    return value.startsWith('--');
+}
+
+export function generateScopedCSSVar(namespace: string, varName: string) {
+    return `--${namespace}-${varName}`;
 }
