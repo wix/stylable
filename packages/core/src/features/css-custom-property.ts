@@ -1,6 +1,5 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
-import * as STImport from './st-import';
 import type { ImportSymbol } from './st-import';
 import {
     validateAtProperty,
@@ -60,25 +59,25 @@ export const hooks = createFeature<{
     },
     analyzeInit(context) {
         // ToDo: move to `STImport.ImportTypeHook`
-        for (const imported of STImport.getImportStatements(context.meta)) {
-            for (const symbolName of Object.keys(imported.named)) {
-                if (isCSSVarProp(symbolName)) {
-                    const importSymbol = STSymbol.get(context.meta, symbolName, `import`);
-                    if (!importSymbol) {
-                        console.warn(
-                            `imported symbol "${symbolName}" not found on "${context.meta.source}"`
-                        );
-                        continue;
-                    }
-                    addCSSProperty({
-                        context,
-                        node: imported.rule,
-                        name: symbolName,
-                        global: false,
-                        final: true,
-                        alias: importSymbol,
-                    });
+        for (const [symbolName, symbol] of Object.entries(
+            STSymbol.getAllByType(context.meta, `import`)
+        )) {
+            if (isCSSVarProp(symbolName)) {
+                const importSymbol = STSymbol.get(context.meta, symbolName, `import`);
+                if (!importSymbol) {
+                    console.warn(
+                        `imported symbol "${symbolName}" not found on "${context.meta.source}"`
+                    );
+                    continue;
                 }
+                addCSSProperty({
+                    context,
+                    node: symbol.import.rule,
+                    name: symbolName,
+                    global: false,
+                    final: true,
+                    alias: importSymbol,
+                });
             }
         }
     },
@@ -156,6 +155,10 @@ export const hooks = createFeature<{
         return customPropsMapping;
     },
     transformAtRuleNode({ atRule, resolved }) {
+        if (atRule.name !== `property`) {
+            return;
+        }
+
         if (atRule.nodes?.length) {
             if (resolved[atRule.params]) {
                 atRule.params = resolved[atRule.params] || atRule.params;
@@ -176,7 +179,7 @@ export const hooks = createFeature<{
                 node.nodes[0].value = resolved[varWithPrefix];
             }
         }
-        // handle default values
+        // handle default values - ToDo: check if required
         if (node.nodes.length > 2) {
             node.resolvedValue = stringifyFunction(value, node);
         }

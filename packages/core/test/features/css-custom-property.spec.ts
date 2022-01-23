@@ -58,7 +58,7 @@ describe(`features/css-custom-property`, () => {
                 /* @decl(within value) prop: 2px var(--entry-colorB) solid */
                 prop: 2px var(--colorB) solid;
 
-                /* @decl(as default) prop: var(--entry-colorC, black) */
+                /* @decl(with default) prop: var(--entry-colorC, black) */
                 prop: var(--colorC, black);
                 
                 /* @decl(nested fallbacks) 
@@ -187,6 +187,7 @@ describe(`features/css-custom-property`, () => {
     });
     it(`should collect global css props`, () => {
         const { sheets } = testStylableCore(`
+            /* @transform-remove(definition)*/
             @property st-global(--propX);
 
             .root {
