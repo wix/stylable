@@ -377,7 +377,7 @@ function diagnosticTest(
         errors: [],
     };
     const matchResult = expectation.match(
-        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>.*)/
+        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>[\s\S]*)/
     );
     if (!matchResult) {
         result.errors.push(testInlineExpectsErrors.diagnosticsMalformed(type, expectation));

@@ -1,6 +1,7 @@
 import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import {
+    testStylableCore,
     generateStylableRoot,
     generateStylableResult,
     generateStylableExports,
@@ -213,6 +214,16 @@ describe(`features/css-keyframes`, () => {
             });
 
             testInlineExpects(result);
+        });
+        it('should report malformed syntax', () => {
+            const { sheets } = testStylableCore(`
+                /* @analyze-warn(empty name) ${CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME()} */
+                @keyframes {}
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(meta.outputAst?.nodes[1]?.toString()).to.eql(`@keyframes {}`);
         });
         describe(`st-import`, () => {
             it('should namespace imported animation and animation name', () => {

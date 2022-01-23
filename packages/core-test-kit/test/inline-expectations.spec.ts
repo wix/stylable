@@ -651,8 +651,15 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @analyze-warn ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)} */
+                            /* @analyze-warn(1 line) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                                `div`
+                            )} */
                             div {}
+
+                            /* @analyze-warn(multi line) word(span) 
+                                ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`span`)}
+                            */
+                            span {}
                         `,
                     },
                 },
@@ -935,9 +942,15 @@ describe('inline-expectations', () => {
                         @st-import [unknown] from './other.st.css';
 
                         .root {
-                            /* @transform-error ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
+                            /* @transform-error(1 line) ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
                                 `unknown`
                             )}*/
+                            -st-extends: unknown;
+                        }
+
+                        .part {
+                            /* @transform-error(multi line) 
+                                ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(`unknown`)}*/
                             -st-extends: unknown;
                         }
                         `,

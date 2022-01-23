@@ -14,7 +14,10 @@ export type { ClassSymbol } from './css-class';
 export * as CSSType from './css-type';
 export type { ElementSymbol } from './css-type';
 
+export * as CSSCustomProperty from './css-custom-property';
+export type { CSSVarSymbol } from './css-custom-property';
+
 export * as CSSKeyframes from './css-keyframes';
 export type { KeyframesSymbol } from './css-keyframes';
 
-export type { CSSVarSymbol, RefedMixin, StylableDirectives, VarSymbol } from './types';
+export type { RefedMixin, StylableDirectives, VarSymbol } from './types';
