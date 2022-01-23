@@ -70,6 +70,11 @@ export function getLocalClassStates(local: string, tokens: TokenizedDtsEntry[]) 
     throw new Error(`Could not find states for class ${local}`);
 }
 
+const parenthesesClosures = {
+    '}': '{',
+    ']': '[',
+} as const;
+
 const isDelimiter = (char: string) =>
     char === ':' ||
     char === ';' ||
@@ -221,6 +226,8 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
             s.peek().value === 'const' &&
             isRelevantKey(s.peek(2).value)
         ) {
+            const levels: { [key in '{' | '[']?: number } = {};
+            const values = new WeakSet<DTSCodeToken>();
             const start = t.start;
             s.next(); // const
             const declareType = s.next(); // name
@@ -228,27 +235,53 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
 
             const resTokens: DtsToken[] = []; // {...resTokens[]}
             while ((t = s.next())) {
-                if (!t.type || t.type === '}') {
+                if (values.has(t)) {
+                    // registered as value of token
+                    continue;
+                }
+                if (!t.type) {
                     break;
+                }
+                if (t.type === '{' || t.type === '[') {
+                    if (!levels[t.type]) {
+                        levels[t.type] = 0;
+                    }
+
+                    levels[t.type]!++;
+                }
+
+                if (t.type === '}' || t.type === ']') {
+                    levels[parenthesesClosures[t.type]]!--;
+
+                    if (Object.values(levels).every((level) => level <= 0)) {
+                        break;
+                    }
                 }
 
                 if (t.type === '\n') {
                     lastNewLinePosition.line += 1;
                     lastNewLinePosition.columm = t.end;
-                } else if (t.type === 'string') {
-                    s.next(); // :
-                    const value = s.next(); // value
-                    s.next(); // ;
-                    resTokens.push({
+                }
+                if (t.type === 'string') {
+                    const token: DtsToken = {
                         ...t,
                         line: lastNewLinePosition.line,
                         column: t.start - lastNewLinePosition.columm,
-                        outputValue: {
+                    };
+
+                    // in case this token has a string value token we add it to current token object
+                    const value = s.peek(2);
+                    if (value.type === 'string' || value.type === 'text') {
+                        values.add(value);
+
+                        token.outputValue = {
                             ...value,
                             line: lastNewLinePosition.line,
                             column: value.start - lastNewLinePosition.columm,
-                        },
-                    });
+                        };
+                    }
+
+                    resTokens.push(token);
                 }
             }
 
