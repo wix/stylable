@@ -46,7 +46,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'depend.st.css'),
                             '.root{ color:yellow; }'
                         );
@@ -87,7 +87,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'deep.st.css'),
                             ':vars { color: green; }'
                         );
@@ -334,7 +334,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
                             ` 
                                 /* The import stays so it should get reported again */
@@ -376,7 +376,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.FINISHED_PROCESSING(1),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
                             `.root{ color:blue }`
                         );
@@ -446,7 +446,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
                             `.root{ 
                                 color:red;
@@ -503,13 +503,13 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(join(tempDir.path, 'style.st.css'), `.root;{}`);
+                        return writeToExistingFile(join(tempDir.path, 'style.st.css'), `.root;{}`);
                     },
                 },
                 {
                     msg: errorMessages.STYLABLE_PROCESS(join(tempDir.path, 'style.st.css')),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
                             `.root{ color:green }`
                         );

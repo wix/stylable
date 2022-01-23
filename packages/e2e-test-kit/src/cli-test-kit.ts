@@ -1,4 +1,5 @@
 import {
+    promises,
     readdirSync,
     readFileSync,
     statSync,
@@ -11,6 +12,8 @@ import { fork, spawnSync, ChildProcess } from 'child_process';
 import { on } from 'events';
 import { join, relative } from 'path';
 import type { Readable } from 'stream';
+
+const { writeFile } = promises;
 
 interface Step {
     msg: string;
@@ -123,7 +126,7 @@ async function* readLines(readable: Readable) {
 
 export function writeToExistingFile(filePath: string, content: string) {
     if (existsSync(filePath)) {
-        writeFileSync(filePath, content);
+        return writeFile(filePath, content);
     } else {
         throw new Error(`file ${filePath} does not exist`);
     }

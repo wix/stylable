@@ -54,7 +54,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                             '.root{ color:yellow; }'
                         );
@@ -125,7 +125,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, './packages/project-b/src/depend.st.css'),
                             `:vars {
                                     color: blue;
@@ -239,7 +239,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                         join(tempDir.path, 'packages', 'project-a', 'style.st.css')
                     ),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-b', 'foo.st.css'),
                             `
                                 .foo {}
@@ -323,7 +323,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, './packages/project-b/mixin.js'),
                             `module.exports = {
                                     color: 'blue'
@@ -369,7 +369,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                             '.root{ color:yellow; {} }'
                         );
@@ -384,7 +384,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: '[error]: nesting of rules within rules is not supported',
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                             '.root{ color:blue; }'
                         );
@@ -447,7 +447,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
                             `
                                 @st-import Module from './does-not-exist.st.css';
