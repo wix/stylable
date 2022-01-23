@@ -1,4 +1,5 @@
-import { functionWarnings, nativeFunctionsDic, processorWarnings } from '@stylable/core';
+import { functionWarnings, nativeFunctionsDic } from '@stylable/core';
+import { STVar } from '@stylable/core/dist/features';
 import { expectTransformDiagnostics, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
@@ -696,7 +697,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                     [
                         {
-                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                            message: STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
                                 'stMap',
                                 'st-map'
                             ),
@@ -723,7 +724,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                     [
                         {
-                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                            message: STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
                                 'stArray',
                                 'st-array'
                             ),
@@ -753,7 +754,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
                 expectTransformDiagnostics(config, [
                     {
-                        message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                        message: STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
                             'stArray',
                             'st-array'
                         ),
@@ -761,7 +762,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         severity: 'info',
                     },
                     {
-                        message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME('stMap', 'st-map'),
+                        message: STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME('stMap', 'st-map'),
                         skip: true,
                         file: '/style.st.css',
                         severity: 'info',

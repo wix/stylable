@@ -20,6 +20,7 @@ import {
     STSymbol,
     STImport,
     STGlobal,
+    STVar,
     CSSClass,
     CSSType,
     CSSCustomProperty,
@@ -28,7 +29,16 @@ import {
 
 export const RESERVED_ROOT_NAME = 'root';
 
-const features = [STSymbol, STImport, STGlobal, CSSClass, CSSType, CSSCustomProperty, CSSKeyframes];
+const features = [
+    STSymbol,
+    STImport,
+    STGlobal,
+    STVar,
+    CSSClass,
+    CSSType,
+    CSSCustomProperty,
+    CSSKeyframes,
+];
 
 export class StylableMeta {
     public data: PlugableRecord = {};

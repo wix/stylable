@@ -13,6 +13,7 @@ import {
     transformerWarnings,
     getRuleScopeSelector,
 } from '@stylable/core';
+import { STVar } from '@stylable/core/dist/features';
 
 use(flatMatch);
 
@@ -598,7 +599,7 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.NO_VARS_DEF_IN_ST_SCOPE(),
+                    message: STVar.diagnostics.NO_VARS_DEF_IN_ST_SCOPE(),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },

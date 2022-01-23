@@ -4,8 +4,7 @@ import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
-import { processorWarnings } from '@stylable/core';
-import { STImport } from '@stylable/core/dist/features';
+import { STImport, STVar } from '@stylable/core/dist/features';
 
 describe('Stylable Cli', function () {
     this.timeout(25000);
@@ -287,7 +286,7 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(
                 new RegExp(
-                    `\\[info\\]: ${processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                    `\\[info\\]: ${STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         'stArray',
                         'st-array'
                     )}`

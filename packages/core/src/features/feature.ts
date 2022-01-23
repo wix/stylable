@@ -26,6 +26,8 @@ export interface NodeTypes {
     RESOLVED?: any;
 }
 
+type SelectorWalkReturn = number | undefined | void;
+
 export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     metaInit: (context: FeatureContext) => void;
     analyzeInit: (context: FeatureContext) => void;
@@ -39,7 +41,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         node: T['IMMUTABLE_SELECTOR'];
         rule: postcss.Rule;
         walkContext: SelectorNodeContext;
-    }) => void;
+    }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
     transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
