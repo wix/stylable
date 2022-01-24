@@ -15,16 +15,11 @@ import type { Readable } from 'stream';
 
 const { writeFile } = promises;
 
+type ActionResponse = void | { sleep?: number };
+
 interface Step {
     msg: string;
-    action?: () =>
-        | void
-        | {
-              sleep?: number;
-          }
-        | Promise<void | {
-              sleep?: number;
-          }>;
+    action?: () => ActionResponse | Promise<ActionResponse>;
 }
 
 interface ProcessCliOutputParams {
