@@ -4,7 +4,7 @@ import { CSSKeyframes } from '@stylable/core/dist/features';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { basename, relative } from 'path';
-import { normalizeRelative, ensureDirectory, tryRun } from './build-tools';
+import { normalizeRelative, ensureDirectory } from './build-tools';
 import type { Log } from './logger';
 
 export interface ReExports {
