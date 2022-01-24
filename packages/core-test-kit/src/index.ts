@@ -24,3 +24,4 @@ export { matchCSSMatchers } from './matchers/match-css';
 export { mediaQuery, styleRules } from './matchers/results';
 export { matchAllRulesAndDeclarations, matchRuleAndDeclaration } from './match-rules';
 export { testInlineExpects, testInlineExpectsErrors } from './inline-expectation';
+export { testStylableCore } from './test-stylable-core';

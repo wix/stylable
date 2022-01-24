@@ -2,117 +2,201 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/core-test-kit.svg)](https://www.npmjs.com/package/stylable/core-test-kit)
 
-`@stylable/core-test-kit` is a collection of utilities aimed at making testing Stylable core behavior and functionality easier.
+## `testStylableCore`
 
-## What's in this test-kit?
+Use `import {testStylableCore} from '@stylable/core-test-kit'` to test core analysis, transformation, diagnostics and symbols. All stylable files are checked for [inline expectations](#inline-expectations-syntax):
 
-### Matchers
+**single entry**
+```js
+// source + inline expectations
+const { sheets } = testStylableCore(`
+    /* @rule .entry__root */
+    .root {}
+`);
+// single entry is mapped to `/entry.st.css`
+const { meta, exports } = sheets[`/entry.st.css`];
+```
 
-An assortment of `Chai` matchers used by Stylable.
+**multiple files**
+```js
+// source + inline expectations
+const { sheets } = testStylableCore({
+    '/entry.st.css': `
+        @st-import Comp from './comp.st.css';
 
-- `flat-match` - flattens and matches passed arguments
-- `results` - test Stylable transpiled style rules output
+        /* @rule .entry__root .comp__root */
+        .root Comp {}
+    `,
+    '/comp.st.css': `
+        /* @rule .comp__root */
+        .root {}
+    `
+});
+// sheets results ({meta, exports})
+const entryResults = sheets[`/entry.st.css`];
+const compResults = sheets[`/comp.st.css`];
+```
 
-### Diagnostics tooling
+**stylable config**
+```js
+testStylableCore({
+    '/a.st.css': ``,
+    '/b.st.css': ``,
+    '/c.st.css': ``,
+}, {
+    entries: [`/b.st.css`, `/c.st.css`] // list of entries to transform (in order)
+    stylableConfig: {
+        projectRoot: string, // defaults to `/`
+        resolveNamespace: (ns: string) => string, // defaults to no change
+        requireModule: (path: string) => any // defaults to naive CJS eval
+        filesystem: IFileSystem, // @file-services/types
+        // ...other stylable configurations
+    }
+});
+```
 
-A collection of tools used for testing Stylable diagnostics messages (warnings and errors).
+**expose infra**
+```js
+const { stylable, fs } = testStylableCore(``);
 
-- `expectAnalyzeDiagnostics` - processes a Stylable input and checks for diagnostics during processing
-- `expectTransformDiagnostics` - checks for diagnostics after a full transformation
-- `shouldReportNoDiagnostics` - helper to check no diagnostics were reported
+// add a file
+fs.writeFileSync(
+    `/new.st.css`,
+    `
+    @st-import [part] from './entry.st.css';
+    .part {}
+    `
+);
+// transform new file
+const { meta, exports } = stylable.transform(stylable.process(`/new.st.css`));
+```
 
-### Testing infrastructure
+## Inline expectations syntax
 
-Used for setting up Stylable instances (`processor`/`transformer`) and their infrastructure:
+The inline expectation syntax can be used with `testInlineExpects` for testing stylesheets transformation and diagnostics.
 
-- `generateInfra` - create Stylable basic in memory infrastructure (`resolver`, `requireModule`, `fileProcessor`)
-- `generateStylableResult` - genetare transformation results from in memory configuration
-- `generateStylableRoot` - helper over `generateStylableResult` that returns the `outputAst`
-- `generateStylableExports` - helper over `generateStylableResult` that returns the `exports` mapping
+An expectation is written as a comment just before the code it checks on. All expectations support `label` that will be thrown as part of an expectation fail message.
 
-### `testInlineExpects` utility
+### `@rule` - check rule transformation including selector and nested declarations:
 
-Exposes `testInlineExpects` for testing transformed stylesheets that include inline expectation comments. These are the most common type of core tests and the recommended way of testing the core functionality.
+Selector - `@rule SELECTOR`
+```css 
+/* @rule .entry__root::before */
+.root::before {}
+```
 
-#### Supported checks:
+Declarations - `@rule SELECTOR { decl: val; }`
+```css 
+/* @rule .entry__root { color: red } */
+.root { color: red; }
 
-Rule checking (place just before rule) supporting multi-line declarations and multiple `@checks` statements
+/* @rule .entry__root {
+    color: red;
+    background: green;
+}*/
+.root {
+    color: red;
+    background: green;
+}
+```
 
-##### Terminilogy
-- `LABEL: <string>` - label for the test expectation 
-- `OFFEST: <number>` - offest for the tested rule after the `@check`   
-- `SELECTOR: <string>` - output selector
-- `DECL: <string>` - declaration name
-- `VALUE: <string>` - declaration value 
-
-Full options:
+Target generated rules (mixin) - ` @rule[OFFSET] SELECTOR`
 ```css
-/* @check(LABEL)[OFFEST] SELECTOR {DECL: VALUE} */
-```
-
-Basic - `@check SELECTOR`
-```css 
-/* @check header::before */
-header::before {}
-```
-
-With declarations - ` @check SELECTOR {DECL1: VALUE1; DECL2: VALUE2;}`
-
-This will check full match and order.
-```css 
-.my-mixin {
+.mix {
     color: red;
 }
-
-/* @check .entry__container {color: red;} */
-.container {
-    -st-mixin: my-mixin;
-}
-```
-
-Target generated rules (mixin) - ` @check[OFFEST] SELECTOR`
-```css
-.my-mixin {
-    color: blue;
+.mix:hover {
+    color: green;
 }
 /* 
-    @check[1] .entry__container:hover {color: blue;} 
+    @rule .entry__root {color: red;} 
+    @rule[1] .entry__root:hover {color: green;} 
 */
-.container {
-    -st-mixin: my-mixin;
+.root {
+    -st-mixin: mix;
 }
 ```
 
-Support atrule params (anything between the @atrule and body or semicolon):
+Label - `@rule(LABEL) SELECTOR`
 ```css
-/* @check screen and (min-width: 900px) */
+/* @rule(expect 1) .entry__root */
+.root {}
+
+/* @rule(expect 2) .entry__part */
+.part {}
+```
+
+### `@atrule` - check at-rule transformation of params:
+
+AtRule params - `@atrule PARAMS`:
+```css
+/* @atrule screen and (min-width: 900px) */
 @media value(smallScreen) {}
 ```
-#### Example 
-Here we are generating a Stylable AST which lncludes the `/* @check SELECTOR */` comment to test the root class selector target.
 
-The `testInlineExpects` function performs that actual assertions to perform the test.
-
-```ts
-it('...', ()=>{
-    const root = generateStylableRoot({
-        entry: `/style.st.css`,
-        files: {
-            '/style.st.css': {
-                namespace: 'ns',
-                content: `
-                /* @check .ns__root */
-                .root {}
-            `
-        },
-    });
-    testInlineExpects(root, 1);
-})
+Label - `@atrule(LABEL) PARAMS`
+```css
+/* @atrule(jump keyframes) entry__jump */
+@keyframes jump {}
 ```
 
-### Match rules
+### `@decl` - check declaration transformation
 
-Exposes two utility functions (`matchRuleAndDeclaration` and `matchAllRulesAndDeclarations`) used for testing Stylable generated AST representing CSS rules and declarations.
+Prop & value - `@decl PROP: VALUE`
+```css
+.root {
+    /* @decl color: red */
+    color: red
+}
+```
+
+Label - `@decl(LABEL) PROP: VALUE`
+```css
+.root {
+    /* @decl(color is red) color: red */
+    color: red;
+}
+```
+
+### `@analyze` & `@transform` - check single file (analyze) and multiple files (transform) diagnostics:
+
+Severity - `@analyze-SEVERITY MESSAGE` / `@transform-SEVERITY MESSAGE`
+```css
+/* @analyze-info found deprecated usage */
+@st-global-custom-property --x;
+
+/* @analyze-warn missing keyframes name */
+@keyframes {}
+
+/* @analyze-error invalid functional id */
+#id() {}
+
+.root {
+    /* @transform-error unresolved "unknown" build variable */
+    color: value(unknown);
+}
+```
+
+Word - `@analyze-SEVERITY word(TEXT) MESSAGE` / `@transform-SEVERITY word(TEXT) MESSAGE`
+```css
+/* @transform-warn word(unknown) unknown pseudo element */
+.root::unknown {}
+```
+
+Label - `@analyze(LABEL) MESSAGE` / `@transform(LABEL) MESSAGE`
+```css
+/* @analyze-warn(local keyframes) missing keyframes name */
+@keyframes {}
+
+/* @transform-warn(imported keyframes) unresolved keyframes "unknown" */
+@keyframes unknown {}
+```
+
+Removed in transformation - `@transform-remove`
+```css
+/* @transform-remove */
+@import X from './x.st.css';
+```
 
 ## License
 

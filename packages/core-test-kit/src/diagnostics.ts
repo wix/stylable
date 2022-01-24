@@ -26,6 +26,117 @@ export interface Location {
     css: string;
 }
 
+interface MatchState {
+    matches: number;
+    location: string;
+    word: string;
+    severity: string;
+}
+const createMatchDiagnosticState = (): MatchState => ({
+    matches: 0,
+    location: ``,
+    word: ``,
+    severity: ``,
+});
+const isSupportedSeverity = (val: string): val is DiagnosticType => !!val.match(/info|warn|error/);
+export function matchDiagnostic(
+    type: `analyze` | `transform`,
+    meta: Pick<StylableMeta, `diagnostics` | `transformDiagnostics`>,
+    expected: {
+        label?: string;
+        message: string;
+        severity: string;
+        location: Location;
+    },
+    errors: {
+        diagnosticsNotFound: (type: string, message: string, label?: string) => string;
+        unsupportedSeverity: (type: string, severity: string, label?: string) => string;
+        locationMismatch: (type: string, message: string, label?: string) => string;
+        wordMismatch: (
+            type: string,
+            expectedWord: string,
+            message: string,
+            label?: string
+        ) => string;
+        severityMismatch: (
+            type: string,
+            expectedSeverity: string,
+            actualSeverity: string,
+            message: string,
+            label?: string
+        ) => string;
+        expectedNotFound: (type: string, message: string, label?: string) => string;
+    }
+): string {
+    const diagnostics = type === `analyze` ? meta.diagnostics : meta.transformDiagnostics;
+    if (!diagnostics) {
+        return errors.diagnosticsNotFound(type, expected.message, expected.label);
+    }
+    const expectedSeverity =
+        (expected.severity as any) === `warn` ? `warning` : expected.severity || ``;
+    if (!isSupportedSeverity(expectedSeverity)) {
+        return errors.unsupportedSeverity(type, expected.severity || ``, expected.label);
+    }
+    let closestMatchState = createMatchDiagnosticState();
+    const foundPartialMatch = (newState: MatchState) => {
+        if (newState.matches >= closestMatchState.matches) {
+            closestMatchState = newState;
+        }
+    };
+    for (const report of diagnostics.reports.values()) {
+        const matchState = createMatchDiagnosticState();
+        if (report.message !== expected.message) {
+            foundPartialMatch(matchState);
+            continue;
+        }
+        matchState.matches++;
+        // if (!expected.skipLocationCheck) {
+        // ToDo: test all range
+        if (report.node.source!.start!.offset !== expected.location.start!.offset) {
+            matchState.location = errors.locationMismatch(type, expected.message, expected.label);
+            foundPartialMatch(matchState);
+            continue;
+        }
+        matchState.matches++;
+        // }
+        if (expected.location.word) {
+            if (report.options.word !== expected.location.word) {
+                matchState.word = errors.wordMismatch(
+                    type,
+                    expected.location.word,
+                    expected.message,
+                    expected.label
+                );
+                foundPartialMatch(matchState);
+                continue;
+            }
+            matchState.matches++;
+        }
+        if (expected.severity) {
+            if (report.type !== expectedSeverity) {
+                matchState.location = errors.severityMismatch(
+                    type,
+                    expectedSeverity,
+                    report.type,
+                    expected.message,
+                    expected.label
+                );
+                foundPartialMatch(matchState);
+                continue;
+            }
+            matchState.matches++;
+        }
+        // expected matched!
+        return ``;
+    }
+    return (
+        closestMatchState.location ||
+        closestMatchState.word ||
+        closestMatchState.severity ||
+        errors.expectedNotFound(type, expected.message, expected.label)
+    );
+}
+
 export function findTestLocations(css: string) {
     let line = 1;
     let column = 1;

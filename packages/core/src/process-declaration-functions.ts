@@ -1,32 +1,36 @@
 import type { Declaration } from 'postcss';
 import { AnyValueNode, parseValues, stringifyValues } from 'css-selector-tokenizer';
 
+export type OnFunction = (node: AnyValueNode, level: number) => void;
+
 export function processDeclarationFunctions(
     decl: Declaration,
-    onFunction: (node: AnyValueNode) => void,
+    onFunction: OnFunction,
     transform = false
 ) {
     const ast = parseValues(decl.value);
 
-    ast.nodes.forEach((node) => findFunction(node, onFunction));
+    ast.nodes.forEach((node) => findFunction(node, onFunction, 1));
 
     if (transform) {
         decl.value = stringifyValues(ast);
     }
 }
 
-function findFunction(node: AnyValueNode, onFunctionNode: (node: AnyValueNode) => void) {
+function findFunction(node: AnyValueNode, onFunctionNode: OnFunction, level: number) {
     switch (node.type) {
         case 'value':
         case 'values':
-            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
+            onFunctionNode(node, level);
+            node.nodes.forEach((child) => findFunction(child, onFunctionNode, level));
             break;
         case 'url':
-            onFunctionNode(node);
+        case 'item':
+            onFunctionNode(node, level);
             break;
         case 'nested-item':
-            onFunctionNode(node);
-            node.nodes.forEach((child) => findFunction(child, onFunctionNode));
+            onFunctionNode(node, level);
+            node.nodes.forEach((child) => findFunction(child, onFunctionNode, level + 1));
             break;
     }
 }

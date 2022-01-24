@@ -151,10 +151,10 @@ export interface Files {
     [filepath: string]: string;
 }
 
-export const smlinkSymbol = Symbol('smlink');
+export const symlinkSymbol = Symbol('symlink');
 
 export interface LinkedDirectory {
-    type: typeof smlinkSymbol;
+    type: typeof symlinkSymbol;
     path: string;
 }
 export interface FilesStructure {
@@ -183,34 +183,34 @@ export function loadDirSync(rootPath: string, dirPath: string = rootPath): Files
 export function populateDirectorySync(
     rootDir: string,
     files: FilesStructure,
-    context: { smlinks: Map<string, Set<string>> } = { smlinks: new Map() }
+    context: { symlinks: Map<string, Set<string>> } = { symlinks: new Map() }
 ) {
     for (const [filePath, content] of Object.entries(files)) {
         const path = join(rootDir, filePath);
 
         if (typeof content === 'object') {
-            if (content.type === smlinkSymbol) {
+            if (content.type === symlinkSymbol) {
                 const existingPath = join(path, content.path as string);
                 try {
-                    symlinkSync(existingPath, path);
+                    symlinkSync(existingPath, path, 'junction');
                 } catch {
                     // The existing path does not exist yet so we save it in the context to create it later.
 
-                    if (!context.smlinks.has(existingPath)) {
-                        context.smlinks.set(existingPath, new Set());
+                    if (!context.symlinks.has(existingPath)) {
+                        context.symlinks.set(existingPath, new Set());
                     }
 
-                    context.smlinks.get(existingPath)!.add(path);
+                    context.symlinks.get(existingPath)!.add(path);
                 }
             } else {
                 mkdirSync(path);
 
-                if (context.smlinks.has(path)) {
-                    for (const linkedPath of context.smlinks.get(path)!) {
-                        symlinkSync(path, linkedPath);
+                if (context.symlinks.has(path)) {
+                    for (const linkedPath of context.symlinks.get(path)!) {
+                        symlinkSync(path, linkedPath, 'junction');
                     }
 
-                    context.smlinks.delete(path);
+                    context.symlinks.delete(path);
                 }
 
                 populateDirectorySync(path, content as FilesStructure, context);
@@ -218,12 +218,12 @@ export function populateDirectorySync(
         } else {
             writeFileSync(path, content);
 
-            if (context.smlinks.has(path)) {
-                for (const linkedPath of context.smlinks.get(path)!) {
-                    symlinkSync(path, linkedPath);
+            if (context.symlinks.has(path)) {
+                for (const linkedPath of context.symlinks.get(path)!) {
+                    symlinkSync(path, linkedPath, 'junction');
                 }
 
-                context.smlinks.delete(path);
+                context.symlinks.delete(path);
             }
         }
     }

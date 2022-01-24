@@ -19,11 +19,13 @@ export interface InheritedAttributes {
     [props: string]: any;
 }
 
+export type RuntimeStVar = string | { [key: string]: RuntimeStVar } | RuntimeStVar[];
+
 export interface StylableExports {
     classes: ClassesMap;
     keyframes: Record<string, string>;
+    stVars: Record<string, RuntimeStVar>;
     vars: Record<string, string>;
-    stVars: Record<string, string>;
 }
 
 export type STFunction = (

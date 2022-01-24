@@ -1,6 +1,7 @@
 import type { LoaderDefinition } from 'webpack';
 import type { StylableExports } from '@stylable/core';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
+import { addBuildInfo } from './add-build-info';
 
 function evalStylableExtractModule(source: string): [string, StylableExports] {
     if (!source) {
@@ -26,6 +27,8 @@ const stylableRuntimeLoader: LoaderDefinition = function loader(content) {
     }
 
     const [namespace, mapping] = evalStylableExtractModule(content);
+
+    addBuildInfo(this, namespace);
 
     return createRuntimeTargetCode(namespace, mapping);
 };

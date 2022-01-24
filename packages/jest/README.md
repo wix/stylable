@@ -42,6 +42,22 @@ module.exports = {
 };
 ```
 
+### Ignore Stylable files from exsiting css integrations
+To prevent existing CSS integrations from affecting Stylable files, ignore '.st.css' in the integration configuration.
+
+Change: 
+```js
+"moduleNameMapper": {
+  "\\.(css|scss)$": "SOME_MOCK_PATH"
+},
+```
+To:
+```js
+"moduleNameMapper": {
+  "(?<!\\.st)\\.(css|scss)$": "SOME_MOCK_PATH"
+},
+```
+
 ### Ignoring `node_modules` stylesheets
 
 To disable transformation for stylehseets originating from your `node_modules` add the following configuration:
