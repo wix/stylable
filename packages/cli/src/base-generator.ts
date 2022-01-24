@@ -44,13 +44,15 @@ export class IndexGenerator {
         this.indexFileOutput.delete(normalizeRelative(relative(fullOutDir, filePath)));
     }
 
-    public generateIndexFile(fs: IFileSystem, indexFileTargetPath: string) {
+    public async generateIndexFile(fs: IFileSystem, indexFileTargetPath: string) {
         const indexFileContent = this.generateIndexSource(indexFileTargetPath);
         ensureDirectory(fs.dirname(indexFileTargetPath), fs);
-        tryRun(
-            () => fs.writeFileSync(indexFileTargetPath, '\n' + indexFileContent + '\n'),
-            'Write Index File Error'
-        );
+        try {
+            await fs.promises.writeFile(indexFileTargetPath, '\n' + indexFileContent + '\n');
+        } catch {
+            throw new Error(`Failed to write index file: ${indexFileTargetPath}`);
+        }
+
         this.log('[Generator Index]', 'creating index file: ' + indexFileTargetPath);
     }
 
