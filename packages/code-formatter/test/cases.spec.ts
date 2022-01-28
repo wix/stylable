@@ -1,5 +1,7 @@
 import { expect } from 'chai';
-import { formatCSS } from '@stylable/code-formatter';
+import * as codeFormatter from '@stylable/code-formatter';
+
+const { formatCSS } = codeFormatter;
 
 describe('Formatting - Top level', () => {
     it('empty input stay empty', () => {
@@ -135,8 +137,8 @@ describe('Formatting - Decl', () => {
     });
 
     it('one space after colon', () => {
-        expect(formatCSS('.root {color:red;}\n')).to.equal('.root {\n    color: red;\n}\n');
         expect(formatCSS('.root {color:\n\n\nred;}\n')).to.equal('.root {\n    color: red;\n}\n');
+        expect(formatCSS('.root {color:red;}\n')).to.equal('.root {\n    color: red;\n}\n');
     });
 
     it('no space before colon', () => {
@@ -150,15 +152,32 @@ describe('Formatting - Decl', () => {
         );
     });
 
-    it("don't format css variable values", () => {
-        expect(formatCSS('.root {\n    --x:   "a" 1 2 "b"  ;\n}\n')).to.equal(
-            '.root {\n    --x:   "a" 1 2 "b"  ;\n}\n'
+    it('keep only one space between tokens in custom properties', () => {
+        expect(formatCSS('.root {\n    --x:   "a" 1  2 "b"  ;\n}\n')).to.equal(
+            '.root {\n    --x: "a" 1 2 "b" ;\n}\n'
+        );
+    });
+
+    it('keep broken custom properties', () => {
+        expect(formatCSS('.root {--x:;}')).to.equal(`.root {\n    --x:;\n}\n`);
+    });
+
+    it('css custom property with comments in raws preserve comments', () => {
+        expect(formatCSS('.root {--x/*a*/:/*b*/1;}')).to.equal(
+            `.root {\n    --x/*a*/:/*b*/1;\n}\n`
+        );
+    });
+
+    it('css custom property with comments and spaces in raws preserve comments and space after colon comments', () => {
+        // THIS TEST IS BASED ON HOW BROKEN POSTCSS PARSE CSS PROPERTY
+        expect(formatCSS('.root {--x /*a*/ :   /*b*/   ;}')).to.equal(
+            `.root {\n    --x/*a*/: /*b*/ ;\n}\n`
         );
     });
 
     it('remove css variable space after decl props and place in new line', () => {
-        expect(formatCSS('.root {--x    :   "a" 1 2 "b"  ;\n}\n')).to.equal(
-            '.root {\n    --x:   "a" 1 2 "b"  ;\n}\n'
+        expect(formatCSS('.root {--x    : "a" 1 2 "b";\n}\n')).to.equal(
+            '.root {\n    --x: "a" 1 2 "b";\n}\n'
         );
     });
 
@@ -239,8 +258,39 @@ describe('Formatting - Decl', () => {
         );
     });
 
-    it.skip('comments before and after colon', () => {
-        expect(formatCSS('.root {color/*!*/:/*!*/red;}\n')).to.equal('.root {\n?????\n}\n');
+    it('comments before and after colon', () => {
+        expect(formatCSS('.root {color /*!*/ : /*!*/ red;}\n')).to.equal(
+            '.root {\n    color/*!*/: /*!*/red;\n}\n'
+        );
+    });
+
+    it('comments with newline after colon and value does not contains newline with add single space', () => {
+        expect(formatCSS('.root {color /*!*/ :\n/*!*/ red;}\n')).to.equal(
+            '.root {\n    color/*!*/: /*!*/red;\n}\n'
+        );
+    });
+
+    it('multiline value and no newline after colon', () => {
+        expect(formatCSS('.root {border:1px \n solid \n red;}\n')).to.equal(
+            `.root {\n    border: 1px\n${' '.repeat(12)}solid\n${' '.repeat(12)}red;\n}\n`
+        );
+    });
+    it('value with newlines each line get same indent', () => {
+        const indent = ' '.repeat('    box-shadow: '.length);
+
+        expect(
+            formatCSS(`.root {box-shadow:0px\n0px\n0px\nblack, 1px\n1px\n1px\nblack;\n}\n`)
+        ).to.equal(
+            `.root {\n    box-shadow: 0px\n${indent}0px\n${indent}0px\n${indent}black,\n${indent}1px\n${indent}1px\n${indent}1px\n${indent}black;\n}\n`
+        );
+    });
+    it('value with newlines and newline after colon each line get base indent', () => {
+        const indent = ' '.repeat(8);
+        expect(
+            formatCSS('.root {box-shadow:\n0px\n0px\n0px\nblack, 1px\n1px\n1px\nblack;\n}\n')
+        ).to.equal(
+            `.root {\n    box-shadow:\n${indent}0px\n${indent}0px\n${indent}0px\n${indent}black,\n${indent}1px\n${indent}1px\n${indent}1px\n${indent}black;\n}\n`
+        );
     });
 });
 

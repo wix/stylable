@@ -2,7 +2,7 @@ import { parse, AnyNode, Rule } from 'postcss';
 import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
 
 // TODO: handle case where declaration value starts or include newline - semi completed
-// TODO: handle case where "raws" contains comments or newlines
+// TODO: handle case where "raws" contains comments or newlines - done for decls
 // TODO: handle case where internal selector has newline (not the separation ,\n)
 // TODO: handle case where rule before atRule with no children
 // TODO: move css vars to top?
@@ -60,36 +60,63 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         ast.selector = formatSelectors(ast, hasNewLine, options);
     } else if (ast.type === 'decl') {
         ast.raws.before = NL + indent.repeat(indentLevel);
-        if (ast.variable) {
-            ast.raws.between =
-                ast.raws.between?.trimStart() ||
-                ':' /* no space here! css vars are space sensitive */;
-        } else {
-            const hasNewLineBeforeValue = ast.raws.between?.match(/:.*?\n.*?$/);
-
-            ast.raws.between = hasNewLineBeforeValue ? ':\n' : ': ';
-            const valueGroups = groupMultipleValuesSeparatedByComma(
-                parseCSSValue(ast.raws.value?.raw ?? ast.value)
-            );
-            const warpLineIndentSize =
-                ast.raws.before.length - 1 /* -1 NL */ + ast.prop.length + ast.raws.between.length;
-            if (hasNewLineBeforeValue) {
-                // TODO: check if we want to preserve original indentation
-                ast.value = valueGroups
-                    .map((valueAst) => {
-                        return stringifyCSSValue(valueAst)
-                            .trim()
-                            .split(/\r?\n/gm)
-                            .map((part) => {
-                                return indent.repeat(indentLevel + 1) + part.trim();
-                            })
-                            .join(NL);
-                    })
-                    .join(',' + NL);
+        const value = ast.raws.value?.raw ?? ast.value;
+        const valueHasNewline = value.includes('\n' /* don't use NL */);
+        let hasNewLineBeforeValue = false;
+        let newBetween = '';
+        if (ast.raws.between) {
+            const betweenNode = parseDeclBetweenRaws(ast.raws.between);
+            const afterComments = betweenNode.postComments.join(``);
+            if (ast.variable) {
+                newBetween +=
+                    betweenNode.preComments.join(``) +
+                    ':' +
+                    afterComments +
+                    betweenNode.postSpace.replace(/\s+/gu, ' ');
+                // newBetween += ast.raws.between.trimStart().replace(/\s+/gu, ' ');
+            } else if (betweenNode.postSpace.includes('\n' /* don't use NL */) && valueHasNewline) {
+                newBetween += betweenNode.preComments.join(``);
+                hasNewLineBeforeValue = true;
+                newBetween += ':' + afterComments + NL;
             } else {
-                const values = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());
-                ast.value = groupBySize(values).join(`,${NL}${' '.repeat(warpLineIndentSize)}`);
+                newBetween += betweenNode.preComments.join(``);
+                newBetween += ': ' + afterComments;
             }
+        }
+
+        ast.raws.between = newBetween;
+        if (ast.variable) {
+            const endSpace = value.match(/[\s\S]?\s+$/m) ? ' ' : '';
+            ast.value = (ast.value + endSpace).replace(/\s+/gu, ' ');
+        } else {
+            const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(value));
+
+            const warpLineIndentSize = hasNewLineBeforeValue
+                ? indent.repeat(indentLevel + 1).length
+                : ast.raws.before.length -
+                  1 /* -1 NL */ +
+                  ast.prop.length +
+                  ast.raws.between.length;
+
+            const values = valueGroups.map((valueAst) => stringifyCSSValue(valueAst).trim());
+            const groups = groupBySize(
+                values,
+                valueHasNewline ? ',' + NL /* only NL needed indentation taken care after */ : ', '
+            );
+
+            ast.value = groups
+                .map((groupedValue) => {
+                    return groupedValue
+                        .split(/\r?\n/gm)
+                        .map((part, i) => {
+                            if (!hasNewLineBeforeValue && i === 0) {
+                                return part.trim();
+                            }
+                            return ' '.repeat(warpLineIndentSize) + part.trim();
+                        })
+                        .join(NL);
+                })
+                .join(',' + NL + ' '.repeat(warpLineIndentSize));
             if (ast.raws.value /* The postcss type does not represent the reality */) {
                 delete (ast.raws as any).value;
             }
@@ -111,6 +138,35 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             formatAst(ast.nodes[i], i, { NL, indent, indentLevel: indentLevel + 1, linesBetween });
         }
     }
+}
+
+function parseDeclBetweenRaws(between: string) {
+    const beforeAst = parseCSSValue(between);
+    const beforeNode = {
+        preSpace: '',
+        preComments: [] as string[],
+        postSpace: '',
+        postComments: [] as string[],
+        colon: false,
+    };
+    for (const node of beforeAst) {
+        if (node.type === 'space') {
+            if (beforeNode.colon) {
+                beforeNode.postSpace += stringifyCSSValue(node);
+            } else {
+                beforeNode.preSpace += stringifyCSSValue(node);
+            }
+        } else if (node.type === 'comment') {
+            if (beforeNode.colon) {
+                beforeNode.postComments.push(node.value);
+            } else {
+                beforeNode.preComments.push(node.value);
+            }
+        } else if (node.type === 'literal' && node.value === ':') {
+            beforeNode.colon = true;
+        }
+    }
+    return beforeNode;
 }
 
 function groupMultipleValuesSeparatedByComma(ast: ReturnType<typeof parseCSSValue>) {
