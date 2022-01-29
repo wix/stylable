@@ -45,11 +45,27 @@ describe('Formatting - Rule', () => {
     it('one space after between selector and open block', () => {
         expect(formatCSS('.root{}\n')).to.equal('.root {}\n');
         expect(formatCSS('.root\n\n\n{}\n')).to.equal('.root {}\n');
+        expect(formatCSS('.root\r\n\r\n\r\n{}\n')).to.equal('.root {}\n');
     });
 
     it('empty rule should have no spaces inside block', () => {
         expect(formatCSS('.root {   }\n')).to.equal('.root {}\n');
         expect(formatCSS('.root {\n\n\n}\n')).to.equal('.root {}\n');
+    });
+
+    it('rule with comment before brace', () => {
+        expect(formatCSS('.root/*  */{}\n')).to.equal('.root /*  */ {}\n');
+        expect(formatCSS('.root /*  */ {}\n')).to.equal('.root /*  */ {}\n');
+        expect(formatCSS('.root   /*  */   {}\n')).to.equal('.root /*  */ {}\n');
+        expect(formatCSS('.root   /*  */ /*  */  /*  */   {}\n')).to.equal(
+            '.root /*  */ /*  */ /*  */ {}\n'
+        );
+        expect(formatCSS('.root   /*  */\n/*  */\n/*  */   {}\n')).to.equal(
+            '.root /*  */ /*  */ /*  */ {}\n'
+        );
+        expect(formatCSS('.root   /*  */\r\n/*  */\r\n/*  */   {}\n')).to.equal(
+            '.root /*  */ /*  */ /*  */ {}\n'
+        );
     });
 
     it('multiple selectors are separated with one comma and space between each selector', () => {
@@ -160,6 +176,14 @@ describe('Formatting - Decl', () => {
 
     it('keep broken custom properties', () => {
         expect(formatCSS('.root {--x:;}')).to.equal(`.root {\n    --x:;\n}\n`);
+    });
+
+    it.skip('Broken parsing', () => {
+        expect(formatCSS('.root {--x: /*a*/}')).to.equal(``);
+    });
+
+    it('keep spaces in side strings', () => {
+        expect(formatCSS('.root {--x:"  ";}')).to.equal(`.root {\n    --x:"  ";\n}\n`);
     });
 
     it('css custom property with comments in raws preserve comments', () => {
@@ -324,6 +348,12 @@ describe('Formatting - AtRule', () => {
         expect(formatCSS(`@media screen {.${'x'.repeat(50)},.${'y'.repeat(50)} {}}\n`)).to.equal(
             `@media screen {\n    .${'x'.repeat(50)},\n    .${'y'.repeat(50)} {}\n}\n`
         );
+    });
+
+    it('rule before at rule with no children should have newline separation', () => {
+        expect(formatCSS(`.root {}\n@namespace "x";`)).to.equal(`.root {}\n\n@namespace "x";\n`);
+        expect(formatCSS(`.root {}\n\n@namespace "x";`)).to.equal(`.root {}\n\n@namespace "x";\n`);
+        expect(formatCSS(`.root {}\n\n\n\n\n@namespace "x";`)).to.equal(`.root {}\n\n@namespace "x";\n`);
     });
 });
 

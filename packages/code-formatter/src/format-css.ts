@@ -1,11 +1,9 @@
 import { parse, AnyNode, Rule } from 'postcss';
 import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
+import type { ParseResults } from '@tokey/css-value-parser/dist/value-parser';
 
-// TODO: handle case where declaration value starts or include newline - semi completed
-// TODO: handle case where "raws" contains comments or newlines - done for decls
+// TODO: handle case where "raws" contains comments or newlines - done for decls, done  for rules
 // TODO: handle case where internal selector has newline (not the separation ,\n)
-// TODO: handle case where rule before atRule with no children
-// TODO: move css vars to top?
 
 export function formatCSS(css: string) {
     const ast = parse(css);
@@ -28,23 +26,7 @@ type FormatOptions = {
 
 function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     const { NL, indent, indentLevel, linesBetween } = options;
-    if (ast.type === 'atrule') {
-        // TODO: handle params
-
-        const hasCommentBefore = ast.prev()?.type === 'comment';
-
-        /* The postcss type does not represent the reality there are atRules without nodes */
-        const childrenLen = ast.nodes?.length ?? -1;
-        const separation = childrenLen === -1 || hasCommentBefore ? 0 : linesBetween;
-
-        ast.raws.before =
-            index !== 0 || indentLevel > 0
-                ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
-                : '';
-        ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
-        ast.raws.afterName = ast.params.length ? ' ' : '';
-        ast.raws.between = childrenLen === -1 ? '' : ' ';
-    } else if (ast.type === 'rule') {
+    if (ast.type === 'rule') {
         const hasCommentBefore = ast.prev()?.type === 'comment';
         const childrenLen = ast.nodes.length;
         const isFirstChildInNested = index === 0 && indentLevel > 0;
@@ -54,7 +36,20 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
                 : '';
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
-        ast.raws.between = ' ';
+        if (ast.raws.between) {
+            let newBetween = cleanValue(ast.raws.between, true);
+            const startWithSpace = newBetween.startsWith(' ');
+            const endWithSpace = newBetween.endsWith(' ');
+            if (!startWithSpace) {
+                newBetween = ' ' + newBetween;
+            }
+            if (!endWithSpace) {
+                newBetween = newBetween + ' ';
+            }
+            ast.raws.between = newBetween;
+        } else {
+            ast.raws.between = ' ';
+        }
         ast.raws.semicolon = childrenLen ? true : false;
         const hasNewLine = ast.selector.includes('\n' /* don't use NL */);
         ast.selector = formatSelectors(ast, hasNewLine, options);
@@ -68,6 +63,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             const betweenNode = parseDeclBetweenRaws(ast.raws.between);
             const afterComments = betweenNode.postComments.join(``);
             if (ast.variable) {
+                // TODO: change approach parse the thing remove spaces and stringify
                 newBetween +=
                     betweenNode.preComments.join(``) +
                     ':' +
@@ -86,8 +82,14 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
 
         ast.raws.between = newBetween;
         if (ast.variable) {
+            // TODO: change approach parse the thing remove spaces and stringify
             const endSpace = value.match(/[\s\S]?\s+$/m) ? ' ' : '';
-            ast.value = (ast.value + endSpace).replace(/\s+/gu, ' ');
+            const hasStartSpaceInBetween = newBetween.match(/[\s\S]?\s+$/m) ? true : false;
+            let cleaned = hasStartSpaceInBetween
+                ? cleanValue(ast.value).trimStart()
+                : cleanValue(ast.value);
+            cleaned = endSpace ? cleaned.trimEnd() : cleaned;
+            ast.value = cleaned + endSpace;
         } else {
             const valueGroups = groupMultipleValuesSeparatedByComma(parseCSSValue(value));
 
@@ -121,6 +123,24 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 delete (ast.raws as any).value;
             }
         }
+    } else if (ast.type === 'atrule') {
+        // TODO: handle params
+        const prevType = ast.prev()?.type;
+        const hasCommentBefore = prevType === 'comment';
+        const hasRuleBefore = prevType === 'rule';
+
+        /* The postcss type does not represent the reality there are atRules without nodes */
+        const childrenLen = ast.nodes?.length ?? -1;
+        const separation =
+            (childrenLen === -1 && !hasRuleBefore) || hasCommentBefore ? 0 : linesBetween;
+
+        ast.raws.before =
+            index !== 0 || indentLevel > 0
+                ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
+                : '';
+        ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
+        ast.raws.afterName = ast.params.length ? ' ' : '';
+        ast.raws.between = childrenLen === -1 ? '' : ' ';
     } else if (ast.type === 'comment') {
         if (ast.prev()?.type !== 'decl' && ast.prev()?.type !== 'comment') {
             const isFirstChildInNested = index === 0 && indentLevel > 0;
@@ -130,7 +150,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                     ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
                     : '';
         } else {
-            // TODO
+            // TODO - what else todo?
         }
     }
     if ('nodes' in ast) {
@@ -138,6 +158,31 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             formatAst(ast.nodes[i], i, { NL, indent, indentLevel: indentLevel + 1, linesBetween });
         }
     }
+}
+
+function cleanValue(value: string, forceSpaceInSpaceNode = false) {
+    return stringifyCSSValue(cleanValueAst(parseCSSValue(value), forceSpaceInSpaceNode));
+}
+
+function cleanValueAst(ast: ParseResults, forceSpaceInSpaceNode = false) {
+    for (const node of ast) {
+        if ('before' in node) {
+            node.before = node.before.replace(/[\s\S]+/gu, ' ');
+        }
+        if ('after' in node) {
+            node.after = node.after.replace(/[\s\S]+/gu, ' ');
+        }
+        if (node.type === 'space') {
+            node.before = '';
+            node.after = '';
+            if (forceSpaceInSpaceNode) {
+                node.value = ' ';
+            }
+        } else if (node.type === 'call') {
+            cleanValueAst(node.args);
+        }
+    }
+    return ast;
 }
 
 function parseDeclBetweenRaws(between: string) {
