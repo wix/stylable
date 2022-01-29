@@ -5,27 +5,28 @@ import type { ParseResults } from '@tokey/css-value-parser/dist/value-parser';
 // TODO: handle case where "raws" contains comments or newlines - done for decls, done  for rules
 // TODO: handle case where internal selector has newline (not the separation ,\n)
 
-export function formatCSS(css: string) {
-    const ast = parse(css);
-    const NL = getLineEnding(css);
-    const indent = '    ';
-    const indentLevel = 0;
-    for (let i = 0; i < ast.nodes.length; i++) {
-        formatAst(ast.nodes[i], i, { NL, indent, indentLevel, linesBetween: 1 });
-    }
-    const outputCSS = ast.toString();
-    return outputCSS.endsWith('\n') || outputCSS.length === 0 ? outputCSS : outputCSS + NL;
-}
-
-type FormatOptions = {
-    NL: string;
+export interface FormatOptions {
+    lineEndings: string;
     indent: string;
     indentLevel: number;
     linesBetween: number;
-};
+}
+
+export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
+    const ast = parse(css);
+    const lineEndings = options.lineEndings ?? getLineEnding(css);
+    const indent = options.indent ?? '    ';
+    const indentLevel = options.indentLevel ?? 0;
+    const linesBetween = options.linesBetween ?? 1;
+    for (let i = 0; i < ast.nodes.length; i++) {
+        formatAst(ast.nodes[i], i, { lineEndings, indent, indentLevel, linesBetween });
+    }
+    const outputCSS = ast.toString();
+    return outputCSS.endsWith('\n') || outputCSS.length === 0 ? outputCSS : outputCSS + lineEndings;
+}
 
 function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
-    const { NL, indent, indentLevel, linesBetween } = options;
+    const { lineEndings: NL, indent, indentLevel, linesBetween } = options;
     if (ast.type === 'rule') {
         const hasCommentBefore = ast.prev()?.type === 'comment';
         const childrenLen = ast.nodes.length;
@@ -155,7 +156,12 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     }
     if ('nodes' in ast) {
         for (let i = 0; i < ast.nodes.length; i++) {
-            formatAst(ast.nodes[i], i, { NL, indent, indentLevel: indentLevel + 1, linesBetween });
+            formatAst(ast.nodes[i], i, {
+                lineEndings: NL,
+                indent,
+                indentLevel: indentLevel + 1,
+                linesBetween,
+            });
         }
     }
 }
@@ -231,7 +237,11 @@ function groupMultipleValuesSeparatedByComma(ast: ReturnType<typeof parseCSSValu
     return groups;
 }
 
-function formatSelectors(rule: Rule, forceNL: boolean, { NL, indent, indentLevel }: FormatOptions) {
+function formatSelectors(
+    rule: Rule,
+    forceNL: boolean,
+    { lineEndings: NL, indent, indentLevel }: FormatOptions
+) {
     const selectors = rule.selectors;
     const newlines = rule.selector.match(/\n/gm)?.length ?? 0;
     selectors.sort((a, b) => a.length - b.length);
