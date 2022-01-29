@@ -27,9 +27,3 @@ export interface VarSymbol {
     valueType: string | null;
     node: postcss.Node;
 }
-
-export interface CSSVarSymbol {
-    _kind: 'cssVar';
-    name: string;
-    global: boolean;
-}

@@ -5,7 +5,7 @@ import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
-import { isCSSVarProp } from '../stylable-utils';
+import { isCSSVarProp } from '../helpers/css-custom-property';
 import type { StylableMeta } from '../stylable-meta';
 import { rootValueMapping, valueMapping } from '../stylable-value-parsers';
 import path from 'path';

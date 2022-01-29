@@ -19,6 +19,7 @@ export type {
     VarSymbol,
 } from './features';
 export { reservedKeyFrames } from './features/css-keyframes';
+export { scopeCSSVar } from './features/css-custom-property';
 export {
     StylableProcessor,
     createEmptyMeta,
@@ -29,12 +30,21 @@ export {
 } from './stylable-processor';
 
 export { ensureStylableImports, parseStylableImport } from './helpers/import';
+export { isCSSVarProp, generateScopedCSSVar } from './helpers/css-custom-property';
+export { globalValueRegExp } from './helpers/global';
+
+import { GLOBAL_FUNC } from './helpers/global';
+/**@deprecated*/
+export const paramMapping = {
+    global: GLOBAL_FUNC,
+};
 
 export { StylableMeta, RESERVED_ROOT_NAME } from './stylable-meta';
 export {
     KeyFrameWithNode,
     ResolvedElement,
     StylableExports,
+    RuntimeStVar,
     StylableResults,
     StylableTransformer,
     TransformHooks,
@@ -47,14 +57,11 @@ export {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
     findDeclaration,
-    generateScopedCSSVar,
     getAlias,
     getSourcePath,
-    isCSSVarProp,
     isValidClassName,
     isValidDeclaration,
     mergeRules,
-    scopeCSSVar,
     transformMatchesOnRule,
 } from './stylable-utils';
 export {
@@ -78,15 +85,12 @@ export {
     STYLABLE_VALUE_MATCHER,
     TypedClass,
     animationPropRegExp,
-    globalValueRegExp,
     mixinDeclRegExp,
-    paramMapping,
     rootValueMapping,
     stKeys,
     stValues,
     stValuesMap,
     strategies,
-    validateAllowedNodesUntil,
     valueMapping,
     valueParserWarnings,
 } from './stylable-value-parsers';
@@ -186,6 +190,7 @@ export {
     getStringValue,
     groupValues,
     listOptions,
+    validateAllowedNodesUntil,
 } from './helpers/value';
 
 // *** deprecated ***

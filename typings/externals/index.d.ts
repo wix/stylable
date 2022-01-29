@@ -1,24 +1,3 @@
-declare module 'mini-css-extract-plugin' {
-    interface CssModule {
-        new (options: {
-            context: string | null;
-            identifier: string;
-            identifierIndex: number;
-            content: string;
-            media: string;
-            sourceMap: null;
-            assets: {};
-            assetsInfo: {};
-        }): import('webpack').Module;
-    }
-    class MiniCssExtractPlugin {
-        static loader: string;
-        static getCssModule(webpack: typeof import('webpack')): CssModule;
-        apply(compiler: typeof import('webpack').Compiler): void;
-    }
-    export = MiniCssExtractPlugin;
-}
-
 declare module 'enhanced-resolve/lib/ResolverFactory' {
     const ResolverFactory: typeof import('enhanced-resolve').ResolverFactory;
     export = ResolverFactory;

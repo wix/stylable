@@ -1,8 +1,9 @@
 import { FeatureContext, createFeature } from './feature';
-import type { VarSymbol, CSSVarSymbol } from './types';
+import type { VarSymbol } from './types';
 import type { ImportSymbol } from './st-import';
 import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
+import type { CSSVarSymbol } from './css-custom-property';
 import type { KeyframesSymbol } from './css-keyframes';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';

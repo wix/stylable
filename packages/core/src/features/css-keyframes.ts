@@ -8,8 +8,7 @@ import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { isInConditionalGroup } from '../helpers/rule';
 import { namespace } from '../helpers/namespace';
-import { paramMapping } from '../stylable-value-parsers';
-import { globalValue } from '../utils';
+import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 
@@ -65,7 +64,7 @@ export const diagnostics = {
         return '"@keyframes" missing parameter';
     },
     MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL() {
-        return `"@keyframes" missing parameter inside "${paramMapping.global}()"`;
+        return `"@keyframes" missing parameter inside "${GLOBAL_FUNC}()"`;
     },
     KEYFRAME_NAME_RESERVED(name: string) {
         return `keyframes "${name}" is reserved`;
@@ -162,6 +161,9 @@ export const hooks = createFeature<{
     transformAtRuleNode({ context, atRule, resolved }) {
         const globalName = globalValue(atRule.params);
         const name = globalName ?? atRule.params;
+        if (!name) {
+            return;
+        }
         const resolve = resolved[name];
         /* js keyframes mixins won't have resolved keyframes */
         atRule.params = resolve

@@ -1,10 +1,5 @@
-import {
-    CSSVarSymbol,
-    Diagnostics,
-    isCSSVarProp,
-    paramMapping,
-    processorWarnings,
-} from '@stylable/core';
+import { CSSVarSymbol, Diagnostics, isCSSVarProp } from '@stylable/core';
+import { CSSCustomProperty } from '@stylable/core/dist/features';
 import type { AtRule } from 'postcss';
 import type { CodeMod } from './types';
 
@@ -18,7 +13,7 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = ({ ast, diagnostics, 
                 atRule.before(
                     postcss.atRule({
                         name: 'property',
-                        params: `${paramMapping.global}(${property.name})`,
+                        params: `st-global(${property.name})`,
                     })
                 );
             }
@@ -41,9 +36,13 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
         .filter((s) => s !== ',');
 
     if (cssVarsBySpacing.length > cssVarsByComma.length) {
-        diagnostics.warn(atRule, processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params), {
-            word: atRule.params,
-        });
+        diagnostics.warn(
+            atRule,
+            CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
+            {
+                word: atRule.params,
+            }
+        );
         return cssVars;
     }
 
@@ -55,9 +54,10 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
                 _kind: 'cssVar',
                 name: cssVar,
                 global: true,
+                alias: undefined,
             });
         } else {
-            diagnostics.warn(atRule, processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
+            diagnostics.warn(atRule, CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
                 word: cssVar,
             });
         }

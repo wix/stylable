@@ -2,12 +2,10 @@ import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
-import { STSymbol, Imported, ImportSymbol, StylableSymbol } from './features';
+import type { Imported, ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
-import type { StylableMeta } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
-import type { StylableResolver } from './stylable-resolver';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -125,34 +123,6 @@ export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
     }
 
     return undefined;
-}
-
-export function generateScopedCSSVar(namespace: string, varName: string) {
-    return `--${namespace}-${varName}`;
-}
-
-export function isCSSVarProp(value: string) {
-    return value.startsWith('--');
-}
-
-export function scopeCSSVar(resolver: StylableResolver, meta: StylableMeta, symbolName: string) {
-    const importedVar = resolver.deepResolve(STSymbol.get(meta, symbolName));
-    if (
-        importedVar &&
-        importedVar._kind === 'css' &&
-        importedVar.symbol &&
-        importedVar.symbol._kind === 'cssVar'
-    ) {
-        return importedVar.symbol.global
-            ? importedVar.symbol.name
-            : generateScopedCSSVar(importedVar.meta.namespace, importedVar.symbol.name.slice(2));
-    }
-    const cssVar = meta.cssVars[symbolName];
-    if (cssVar?.global) {
-        return symbolName;
-    } else {
-        return generateScopedCSSVar(meta.namespace, symbolName.slice(2));
-    }
 }
 
 export function isValidClassName(className: string) {

@@ -1,6 +1,5 @@
 import type { Compilation, Compiler, NormalModule } from 'webpack';
 import { replaceMappedCSSAssetPlaceholders, getStylableBuildData } from './plugin-utils';
-
 import { StylableWebpackPlugin } from './plugin';
 import type { BuildData } from './types';
 
@@ -34,20 +33,18 @@ export function injectCssModules(
                 context: module.context,
                 identifier: module.resource.replace(/\.st\.css$/, '.css') + '?stylable-css-inject',
                 identifierIndex: 1,
-                content: replaceMappedCSSAssetPlaceholders({
-                    assetsModules,
-                    staticPublicPath,
-                    chunkGraph,
-                    moduleGraph,
-                    dependencyTemplates,
-                    runtime: 'CSS' /*runtime*/,
-                    runtimeTemplate,
-                    stylableBuildData: getStylableBuildData(stylableModules, module),
-                }),
-                media: '',
-                sourceMap: null,
-                assets: {},
-                assetsInfo: {},
+                content: Buffer.from(
+                    replaceMappedCSSAssetPlaceholders({
+                        assetsModules,
+                        staticPublicPath,
+                        chunkGraph,
+                        moduleGraph,
+                        dependencyTemplates,
+                        runtime: 'CSS' /*runtime*/,
+                        runtimeTemplate,
+                        stylableBuildData: getStylableBuildData(stylableModules, module),
+                    })
+                ),
             });
 
             try {
