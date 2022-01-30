@@ -322,20 +322,42 @@ describe('Formatting - AtRule', () => {
     it('no children only atRule (no semi colon)', () => {
         expect(formatCSS(`@namespace "abc"`)).to.equal(`@namespace "abc"\n`);
     });
+
     it('no children only atRule', () => {
         expect(formatCSS(`@namespace "abc";`)).to.equal(`@namespace "abc";\n`);
     });
+
     it('atRule with decelerations (no params)', () => {
         expect(formatCSS(`@font-face { font-family: "Open Sans";}`)).to.equal(
             `@font-face {\n    font-family: "Open Sans";\n}\n`
         );
     });
+
+    it('keep space around after name with comments', () => {
+        expect(formatCSS(`@namespace/**/"abc";`)).to.equal(`@namespace /**/ "abc";\n`);
+        expect(formatCSS(`@namespace /**/ "abc";`)).to.equal(`@namespace /**/ "abc";\n`);
+        expect(formatCSS(`@namespace   /**/   "abc";`)).to.equal(`@namespace /**/ "abc";\n`);
+    });
+
+    it('no params with comments should keep one space before comment', () => {
+        expect(formatCSS(`@namespace/**/;`)).to.equal(`@namespace /**/;\n`);
+        expect(formatCSS(`@namespace /**/;`)).to.equal(`@namespace /**/;\n`);
+        expect(formatCSS(`@namespace  /**/  ;`)).to.equal(`@namespace /**/;\n`);
+    });
+    
+    it('comments after params ', () => {
+        expect(formatCSS(`@namespace "abc"/**/;`)).to.equal(`@namespace "abc" /**/;\n`);
+        expect(formatCSS(`@namespace "abc"  /**/  ;`)).to.equal(`@namespace "abc" /**/;\n`);
+    });
+
     it('one space after name', () => {
         expect(formatCSS(`@media${'    '}screen {}\n`)).to.equal(`@media screen {}\n`);
     });
+
     it('one space after params', () => {
         expect(formatCSS(`@media screen${'    '}{}\n`)).to.equal(`@media screen {}\n`);
     });
+
     it('format children with indent no separation before first rule', () => {
         expect(formatCSS('@media screen {.root {color: red;}}\n')).to.equal(
             '@media screen {\n    .root {\n        color: red;\n    }\n}\n'
@@ -344,6 +366,7 @@ describe('Formatting - AtRule', () => {
             '@media screen {\n    .root {\n        color: red;\n    }\n}\n'
         );
     });
+
     it('selector group indentation', () => {
         expect(formatCSS(`@media screen {.${'x'.repeat(50)},.${'y'.repeat(50)} {}}\n`)).to.equal(
             `@media screen {\n    .${'x'.repeat(50)},\n    .${'y'.repeat(50)} {}\n}\n`
@@ -353,7 +376,9 @@ describe('Formatting - AtRule', () => {
     it('rule before at rule with no children should have newline separation', () => {
         expect(formatCSS(`.root {}\n@namespace "x";`)).to.equal(`.root {}\n\n@namespace "x";\n`);
         expect(formatCSS(`.root {}\n\n@namespace "x";`)).to.equal(`.root {}\n\n@namespace "x";\n`);
-        expect(formatCSS(`.root {}\n\n\n\n\n@namespace "x";`)).to.equal(`.root {}\n\n@namespace "x";\n`);
+        expect(formatCSS(`.root {}\n\n\n\n\n@namespace "x";`)).to.equal(
+            `.root {}\n\n@namespace "x";\n`
+        );
     });
 });
 

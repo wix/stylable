@@ -38,16 +38,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 : '';
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
         if (ast.raws.between) {
-            let newBetween = cleanValue(ast.raws.between, true);
-            const startWithSpace = newBetween.startsWith(' ');
-            const endWithSpace = newBetween.endsWith(' ');
-            if (!startWithSpace) {
-                newBetween = ' ' + newBetween;
-            }
-            if (!endWithSpace) {
-                newBetween = newBetween + ' ';
-            }
-            ast.raws.between = newBetween;
+            ast.raws.between = enforceOneSpaceAround(ast.raws.between);
         } else {
             ast.raws.between = ' ';
         }
@@ -140,8 +131,11 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
                 : '';
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
-        ast.raws.afterName = ast.params.length ? ' ' : '';
-        ast.raws.between = childrenLen === -1 ? '' : ' ';
+        ast.raws.afterName = ast.params.length
+            ? enforceOneSpaceAround(ast.raws.afterName || '')
+            : '';
+        const newBetween = enforceOneSpaceAround(ast.raws.between || '');
+        ast.raws.between = childrenLen === -1 ? newBetween.trimEnd() : newBetween;
     } else if (ast.type === 'comment') {
         if (ast.prev()?.type !== 'decl' && ast.prev()?.type !== 'comment') {
             const isFirstChildInNested = index === 0 && indentLevel > 0;
@@ -164,6 +158,19 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             });
         }
     }
+}
+
+function enforceOneSpaceAround(value: string) {
+    let newBetween = cleanValue(value, true);
+    const startWithSpace = newBetween.startsWith(' ');
+    const endWithSpace = newBetween.endsWith(' ');
+    if (!startWithSpace) {
+        newBetween = ' ' + newBetween;
+    }
+    if (!endWithSpace) {
+        newBetween = newBetween + ' ';
+    }
+    return newBetween;
 }
 
 function cleanValue(value: string, forceSpaceInSpaceNode = false) {
