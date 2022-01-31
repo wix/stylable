@@ -9,7 +9,7 @@
   "dependencies": {
     "@file-services/memory": "^5.7.1",
     "@stylable/core": "^4.10.3",
-    "chai": "^4.3.4",
+    "chai": "^4.3.6",
     "flat": "^5.0.2",
     "postcss": "^8.4.5"
   },

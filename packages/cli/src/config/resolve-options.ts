@@ -148,6 +148,12 @@ export function getCliArguments(): Arguments<CliArguments> {
             description: 'enable watch mode',
             default: false,
         })
+        .option('preserveWatchOutput', {
+            type: 'boolean',
+            description:
+                'Should keep the console output in watch mode instead of clearing the screen whenever a change has occurred',
+            default: false,
+        })
         .alias('h', 'help')
         .alias('v', 'version')
         .help()
