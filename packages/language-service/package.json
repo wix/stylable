@@ -20,7 +20,7 @@
     "postcss-value-parser": "^4.2.0",
     "vscode-css-languageservice": "^5.1.12",
     "vscode-languageserver": "^7.0.0",
-    "vscode-languageserver-textdocument": "^1.0.3",
+    "vscode-languageserver-textdocument": "^1.0.4",
     "vscode-uri": "^3.0.3"
   },
   "author": "Wix.com",
