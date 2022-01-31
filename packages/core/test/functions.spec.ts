@@ -792,7 +792,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                     [
                         {
-                            message: functionWarnings.MULTI_ARGS_IN_VALUE('color1, color2'),
+                            message: STVar.diagnostics.MULTI_ARGS_IN_VALUE('color1, color2'),
                             file: '/style.st.css',
                         },
                     ]
@@ -825,7 +825,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                     [
                         {
-                            message: functionWarnings.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
+                            message: STVar.diagnostics.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
                             file: '/style.st.css',
                         },
                     ]
@@ -858,11 +858,11 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                     [
                         {
-                            message: functionWarnings.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
+                            message: STVar.diagnostics.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
                             file: '/style.st.css',
                         },
                         {
-                            message: functionWarnings.MULTI_ARGS_IN_VALUE('v1, v2'),
+                            message: STVar.diagnostics.MULTI_ARGS_IN_VALUE('v1, v2'),
                             file: '/style.st.css',
                         },
                     ]
@@ -895,7 +895,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                     [
                         {
-                            message: functionWarnings.MULTI_ARGS_IN_VALUE('v1, v2'),
+                            message: STVar.diagnostics.MULTI_ARGS_IN_VALUE('v1, v2'),
                             file: '/style.st.css',
                         },
                     ]
@@ -921,7 +921,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             },
                         },
                     },
-                    [{ message: functionWarnings.UNKNOWN_VAR('myColor'), file: '/style.st.css' }]
+                    [{ message: STVar.diagnostics.UNKNOWN_VAR('myColor'), file: '/style.st.css' }]
                 );
             });
 
@@ -949,7 +949,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
                 expectTransformDiagnostics(config, [
                     {
-                        message: functionWarnings.CANNOT_USE_AS_VALUE('class', 'my-class'),
+                        message: STVar.diagnostics.CANNOT_USE_AS_VALUE('class', 'my-class'),
                         file: '/main.st.css',
                     },
                 ]);
@@ -977,7 +977,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
                 expectTransformDiagnostics(config, [
                     {
-                        message: functionWarnings.CANNOT_USE_AS_VALUE('stylesheet', 'Comp'),
+                        message: STVar.diagnostics.CANNOT_USE_AS_VALUE('stylesheet', 'Comp'),
                         file: '/main.st.css',
                     },
                 ]);
@@ -1005,7 +1005,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
                 expectTransformDiagnostics(config, [
                     {
-                        message: functionWarnings.CANNOT_USE_JS_AS_VALUE('my-mixin'),
+                        message: STVar.diagnostics.CANNOT_USE_JS_AS_VALUE('my-mixin'),
                         file: '/main.st.css',
                     },
                 ]);
@@ -1032,7 +1032,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 const mainPath = '/main.st.css';
                 expectTransformDiagnostics(config, [
                     {
-                        message: functionWarnings.CYCLIC_VALUE([
+                        message: STVar.diagnostics.CYCLIC_VALUE([
                             `${mainPath}: a`,
                             `${mainPath}: b`,
                             `${mainPath}: c`,

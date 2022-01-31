@@ -5,7 +5,6 @@ import {
     findTestLocations,
 } from '@stylable/core-test-kit';
 import {
-    functionWarnings,
     mixinWarnings,
     valueMapping,
     processorWarnings,
@@ -14,7 +13,7 @@ import {
     rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
-import { STImport, CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
+import { STImport, CSSClass, CSSType, STSymbol, STVar } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
 describe('findTestLocations', () => {
@@ -549,7 +548,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
                 expectTransformDiagnostics(config, [
-                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' },
+                    { message: STVar.diagnostics.UNKNOWN_VAR('missingVar'), file: '/main.css' },
                 ]);
             });
 
@@ -575,7 +574,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
                 expectTransformDiagnostics(config, [
-                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' },
+                    { message: STVar.diagnostics.UNKNOWN_VAR('missingVar'), file: '/main.css' },
                 ]);
             });
         });
@@ -739,7 +738,7 @@ describe('diagnostics: warnings and errors', () => {
                         skipLocationCheck: true,
                     },
                     {
-                        message: functionWarnings.CANNOT_FIND_IMPORTED_VAR('myVar'),
+                        message: STVar.diagnostics.CANNOT_FIND_IMPORTED_VAR('myVar'),
                         file: '/main.st.css',
                     },
                 ]);

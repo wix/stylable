@@ -275,7 +275,7 @@ export class StylableProcessor implements FeatureContext {
                         walkContext: nodeContext,
                     });
                 } else if (node.value === 'vars') {
-                    STVar.hooks.analyzeSelectorNode({
+                    return STVar.hooks.analyzeSelectorNode({
                         context: this,
                         node,
                         rule,

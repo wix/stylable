@@ -1,6 +1,7 @@
 import type { StylableMeta } from '../stylable-meta';
 import type { ScopeContext, StylableExports } from '../stylable-transformer';
 import type { StylableResolver } from '../stylable-resolver';
+import type { StylableEvaluator, EvalValueData } from '../functions';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type { Diagnostics } from '../diagnostics';
@@ -18,6 +19,7 @@ export interface FeatureContext {
 }
 export interface FeatureTransformContext extends FeatureContext {
     resolver: StylableResolver;
+    evaluator: StylableEvaluator;
 }
 
 export interface NodeTypes {
@@ -64,6 +66,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         context: FeatureTransformContext;
         node: ParsedValue;
         resolved: T['RESOLVED'];
+        data: EvalValueData;
     }) => void;
     transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
 }

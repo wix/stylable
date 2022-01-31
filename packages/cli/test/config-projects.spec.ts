@@ -7,7 +7,7 @@ import {
     populateDirectorySync,
     runCliSync,
 } from '@stylable/e2e-test-kit';
-import { functionWarnings } from '@stylable/core';
+import { STVar } from '@stylable/core/dist/features';
 
 describe('Stylable CLI config multiple projects', function () {
     this.timeout(25000);
@@ -471,12 +471,12 @@ describe('Stylable CLI config multiple projects', function () {
 
             const firstError = stdout.indexOf('error 3');
             const secondError = stdout.indexOf('error 2');
-            const thirdError = stdout.indexOf(functionWarnings.UNKNOWN_VAR('unknown'));
+            const thirdError = stdout.indexOf(STVar.diagnostics.UNKNOWN_VAR('unknown'));
 
             expect(firstError, 'sorted by location')
                 .to.be.lessThan(secondError)
                 .and.lessThan(thirdError);
-            expect(stdout.match(functionWarnings.UNKNOWN_VAR('unknown'))?.length).to.eql(1);
+            expect(stdout.match(STVar.diagnostics.UNKNOWN_VAR('unknown'))?.length).to.eql(1);
         });
 
         it('should throw when the property "projects" is invalid', () => {

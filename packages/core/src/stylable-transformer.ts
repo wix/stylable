@@ -5,7 +5,7 @@ import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import type { Diagnostics } from './diagnostics';
-import { evalDeclarationValue, processDeclarationValue } from './functions';
+import { evalDeclarationValue, processDeclarationValue, evaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
 import { setStateToNode, stateErrors } from './pseudo-states';
 import {
@@ -140,6 +140,7 @@ export class StylableTransformer {
                 meta,
                 diagnostics: this.diagnostics,
                 resolver: this.resolver,
+                evaluator,
             },
         });
         meta.transformedScopes = validateScopes(this, meta);
@@ -163,6 +164,7 @@ export class StylableTransformer {
                 meta,
                 diagnostics: this.diagnostics,
                 resolver: this.resolver,
+                evaluator,
             },
         });
         const cssVarsMapping = CSSCustomProperty.hooks.transformResolve({
@@ -170,6 +172,7 @@ export class StylableTransformer {
                 meta,
                 diagnostics: this.diagnostics,
                 resolver: this.resolver,
+                evaluator,
             },
         });
 
@@ -201,6 +204,7 @@ export class StylableTransformer {
                         meta,
                         diagnostics: this.diagnostics,
                         resolver: this.resolver,
+                        evaluator,
                     },
                     atRule,
                     resolved: cssVarsMapping,
@@ -211,6 +215,7 @@ export class StylableTransformer {
                         meta,
                         diagnostics: this.diagnostics,
                         resolver: this.resolver,
+                        evaluator,
                     },
                     atRule,
                     resolved: keyframesResolve,
@@ -227,6 +232,7 @@ export class StylableTransformer {
                         meta,
                         diagnostics: this.diagnostics,
                         resolver: this.resolver,
+                        evaluator,
                     },
                     decl,
                     resolved: cssVarsMapping,
@@ -237,6 +243,7 @@ export class StylableTransformer {
                         meta,
                         diagnostics: this.diagnostics,
                         resolver: this.resolver,
+                        evaluator,
                     },
                     decl,
                     resolved: keyframesResolve,
@@ -437,6 +444,7 @@ export class StylableTransformer {
                     meta: originMeta,
                     diagnostics: this.diagnostics,
                     resolver: this.resolver,
+                    evaluator,
                 },
                 selectorContext: context,
                 node,
@@ -447,6 +455,7 @@ export class StylableTransformer {
                     meta: originMeta,
                     diagnostics: this.diagnostics,
                     resolver: this.resolver,
+                    evaluator,
                 },
                 selectorContext: context,
                 node,
