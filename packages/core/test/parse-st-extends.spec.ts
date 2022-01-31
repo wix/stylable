@@ -17,7 +17,6 @@ class stNode {
         return `${op}(${this.left}, ${this.right})`;
     }
 }
-// TODO: fix case `a|`
 
 function stExtendsParser(stExtends: string) {
     const ast = parseCSSValue(stExtends);
