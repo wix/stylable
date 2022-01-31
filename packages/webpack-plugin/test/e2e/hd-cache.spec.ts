@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 import { dirname, join } from 'path';
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
-import { readFileSync, writeFileSync } from 'fs';
+import { promises } from 'fs';
+
+const { writeFile, readFile } = promises;
 
 const project = 'hd-cache';
 const projectDir = dirname(
@@ -23,10 +25,10 @@ describe(`(${project})`, () => {
         after
     );
     it('renders css', async () => {
-        await projectRunner.actAndWaitForRecompile('include box component', () => {
+        await projectRunner.actAndWaitForRecompile('include box component', async () => {
             const indexPath = join(projectRunner.testDir, 'src', 'index.js');
-            const indexSource = readFileSync(indexPath, 'utf8');
-            writeFileSync(indexPath, commentAndUnCommentLines(indexSource));
+            const indexSource = await readFile(indexPath, 'utf8');
+            return writeFile(indexPath, commentAndUnCommentLines(indexSource));
         });
 
         const { page } = await projectRunner.openInBrowser();
