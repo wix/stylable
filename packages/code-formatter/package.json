@@ -9,7 +9,7 @@
   "dependencies": {
     "@stylable/core": "^4.10.3",
     "@tokey/css-value-parser": "^0.0.2",
-    "postcss": "git@github.com:postcss/postcss.git#be42a7c250947165a9d0127cd1a06d8c01550e3f",
+    "postcss": "^8.4.5",
     "js-beautify": "^1.14.0"
   },
   "files": [
