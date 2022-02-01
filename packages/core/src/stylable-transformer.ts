@@ -3,9 +3,8 @@ import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
-import { unbox } from './custom-values';
 import type { Diagnostics } from './diagnostics';
-import { evalDeclarationValue, processDeclarationValue, evaluator } from './functions';
+import { evalDeclarationValue, StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
 import { setStateToNode, stateErrors } from './pseudo-states';
 import {
@@ -26,9 +25,18 @@ import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './help
 import { namespace } from './helpers/namespace';
 import { getOriginDefinition } from './helpers/resolve';
 import { appendMixins } from './stylable-mixins';
-import { STImport, ClassSymbol, ElementSymbol, CSSCustomProperty } from './features';
+import type { ClassSymbol, ElementSymbol } from './features';
 import type { StylableMeta } from './stylable-meta';
-import { STSymbol, STGlobal, CSSClass, CSSType, CSSKeyframes } from './features';
+import {
+    STSymbol,
+    STImport,
+    STGlobal,
+    STVar,
+    CSSClass,
+    CSSType,
+    CSSKeyframes,
+    CSSCustomProperty,
+} from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
 import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { isCSSVarProp } from './helpers/css-custom-property';
@@ -105,6 +113,7 @@ export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
     public diagnostics: Diagnostics;
     public resolver: StylableResolver;
+    private evaluator: StylableEvaluator;
     public delimiter: string;
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
@@ -125,6 +134,7 @@ export class StylableTransformer {
             options.moduleResolver,
             options.resolverCache || new Map()
         );
+        this.evaluator = new StylableEvaluator({});
         this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {
@@ -140,7 +150,7 @@ export class StylableTransformer {
                 meta,
                 diagnostics: this.diagnostics,
                 resolver: this.resolver,
-                evaluator,
+                evaluator: this.evaluator,
             },
         });
         meta.transformedScopes = validateScopes(this, meta);
@@ -155,25 +165,25 @@ export class StylableTransformer {
         ast: postcss.Root,
         meta: StylableMeta,
         metaExports?: StylableExports,
-        variableOverride?: Record<string, string>,
+        tsVarOverride?: Record<string, string>,
         path: string[] = [],
         mixinTransform = false
     ) {
+        this.evaluator.tsVarOverride = tsVarOverride;
+        const transformContext = {
+            meta,
+            diagnostics: this.diagnostics,
+            resolver: this.resolver,
+            evaluator: this.evaluator,
+        };
+        const stVarResolve = STVar.hooks.transformResolve({
+            context: transformContext,
+        });
         const keyframesResolve = CSSKeyframes.hooks.transformResolve({
-            context: {
-                meta,
-                diagnostics: this.diagnostics,
-                resolver: this.resolver,
-                evaluator,
-            },
+            context: transformContext,
         });
         const cssVarsMapping = CSSCustomProperty.hooks.transformResolve({
-            context: {
-                meta,
-                diagnostics: this.diagnostics,
-                resolver: this.resolver,
-                evaluator,
-            },
+            context: transformContext,
         });
 
         ast.walkRules((rule) => {
@@ -191,32 +201,22 @@ export class StylableTransformer {
                     atRule.params,
                     meta,
                     atRule,
-                    variableOverride,
+                    tsVarOverride,
                     this.replaceValueHook,
                     this.diagnostics,
-                    path.slice(),
+                    path.slice(), // ToDo: check how path affect `passedThrough`
                     undefined,
                     undefined
                 );
             } else if (name === 'property') {
                 CSSCustomProperty.hooks.transformAtRuleNode({
-                    context: {
-                        meta,
-                        diagnostics: this.diagnostics,
-                        resolver: this.resolver,
-                        evaluator,
-                    },
+                    context: transformContext,
                     atRule,
                     resolved: cssVarsMapping,
                 });
             } else if (name === 'keyframes') {
                 CSSKeyframes.hooks.transformAtRuleNode({
-                    context: {
-                        meta,
-                        diagnostics: this.diagnostics,
-                        resolver: this.resolver,
-                        evaluator,
-                    },
+                    context: transformContext,
                     atRule,
                     resolved: keyframesResolve,
                 });
@@ -228,23 +228,13 @@ export class StylableTransformer {
 
             if (isCSSVarProp(decl.prop)) {
                 CSSCustomProperty.hooks.transformDeclaration({
-                    context: {
-                        meta,
-                        diagnostics: this.diagnostics,
-                        resolver: this.resolver,
-                        evaluator,
-                    },
+                    context: transformContext,
                     decl,
                     resolved: cssVarsMapping,
                 });
             } else if (decl.prop === `animation` || decl.prop === `animation-name`) {
                 CSSKeyframes.hooks.transformDeclaration({
-                    context: {
-                        meta,
-                        diagnostics: this.diagnostics,
-                        resolver: this.resolver,
-                        evaluator,
-                    },
+                    context: transformContext,
                     decl,
                     resolved: keyframesResolve,
                 });
@@ -261,10 +251,10 @@ export class StylableTransformer {
                         decl.value,
                         meta,
                         decl,
-                        variableOverride,
+                        tsVarOverride,
                         this.replaceValueHook,
                         this.diagnostics,
-                        path.slice(),
+                        path.slice(), // ToDo: check how path affect `passedThrough`
                         cssVarsMapping,
                         undefined
                     );
@@ -275,12 +265,15 @@ export class StylableTransformer {
             this.addDevRules(meta);
         }
         ast.walkRules((rule) =>
-            appendMixins(this, rule as SRule, meta, variableOverride || {}, cssVarsMapping, path)
+            appendMixins(this, rule as SRule, meta, tsVarOverride || {}, cssVarsMapping, path)
         );
 
         if (metaExports) {
             Object.assign(metaExports.classes, this.exportClasses(meta));
-            this.exportLocalVars(meta, metaExports.stVars, variableOverride);
+            STVar.hooks.transformJSExports({
+                exports: metaExports,
+                resolved: stVarResolve,
+            });
             CSSKeyframes.hooks.transformJSExports({
                 exports: metaExports,
                 resolved: keyframesResolve,
@@ -289,23 +282,6 @@ export class StylableTransformer {
                 exports: metaExports,
                 resolved: cssVarsMapping,
             });
-        }
-    }
-    public exportLocalVars(
-        meta: StylableMeta,
-        stVarsExport: StylableExports['stVars'],
-        variableOverride?: Record<string, string>
-    ) {
-        for (const varSymbol of meta.vars) {
-            const { outputValue, topLevelType } = processDeclarationValue(
-                this.resolver,
-                varSymbol.text,
-                meta,
-                varSymbol.node,
-                variableOverride
-            );
-
-            stVarsExport[varSymbol.name] = topLevelType ? unbox(topLevelType) : outputValue;
         }
     }
     /** @deprecated */
@@ -444,7 +420,7 @@ export class StylableTransformer {
                     meta: originMeta,
                     diagnostics: this.diagnostics,
                     resolver: this.resolver,
-                    evaluator,
+                    evaluator: this.evaluator,
                 },
                 selectorContext: context,
                 node,
@@ -455,7 +431,7 @@ export class StylableTransformer {
                     meta: originMeta,
                     diagnostics: this.diagnostics,
                     resolver: this.resolver,
-                    evaluator,
+                    evaluator: this.evaluator,
                 },
                 selectorContext: context,
                 node,

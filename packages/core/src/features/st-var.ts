@@ -3,13 +3,15 @@ import { deprecatedStFunctions } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
-import type { EvalValueData } from '../functions';
+import type { EvalValueData, EvalValueResult } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
 import { walkSelector } from '../helpers/selector';
 import { stringifyFunction } from '../helpers/value';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
+import { Diagnostics } from '../diagnostics';
+import { unbox } from '../custom-values';
 // ToDo: move
 import { strategies, valueMapping } from '../stylable-value-parsers';
 import { stripQuotation } from '../utils';
@@ -53,6 +55,7 @@ export const diagnostics = {
 export const hooks = createFeature<{
     SELECTOR: PseudoClass;
     IMMUTABLE_SELECTOR: ImmutablePseudoClass;
+    RESOLVED: Record<string, EvalValueResult>;
 }>({
     analyzeSelectorNode({ context, node, rule }) {
         if (node.type !== `pseudo_class` || node.value !== `vars`) {
@@ -73,8 +76,33 @@ export const hooks = createFeature<{
         }
         return;
     },
+    transformResolve({ context }) {
+        // Resolve local vars
+        const resolved: Record<string, any> = {};
+        const symbols = STSymbol.getAllByType(context.meta, `var`);
+        // Temporarily don't report issues here // ToDo: move reporting here (from value() transformation)
+        const noDaigContext = {
+            ...context,
+            diagnostics: new Diagnostics(),
+        };
+        for (const name of Object.keys(symbols)) {
+            const symbol = symbols[name];
+            const evaluated = context.evaluator.evaluateValue(noDaigContext, {
+                value: symbol.text,
+                meta: context.meta,
+                node: symbol.node,
+            });
+            resolved[name] = evaluated;
+        }
+        return resolved;
+    },
     transformDeclarationValue({ context, node, data }) {
         evaluateValueCall(context, node, data);
+    },
+    transformJSExports({ exports, resolved }) {
+        for (const [name, { topLevelType, outputValue }] of Object.entries(resolved)) {
+            exports.stVars[name] = topLevelType ? unbox(topLevelType) : outputValue;
+        }
     },
 });
 

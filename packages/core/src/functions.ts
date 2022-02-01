@@ -16,17 +16,6 @@ import { CSSCustomProperty, STSymbol, STVar } from './features';
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
 
-export interface StylableEvaluator {
-    evaluateValue: (
-        context: FeatureTransformContext,
-        data: EvalValueData
-    ) => {
-        topLevelType: any;
-        outputValue: string;
-        typeError?: Error;
-    };
-}
-
 export interface EvalValueData {
     value: string;
     passedThrough: string[];
@@ -38,22 +27,35 @@ export interface EvalValueData {
     args?: string[];
 }
 
-export const evaluator: StylableEvaluator = {
-    evaluateValue(context, data) {
+export interface EvalValueResult {
+    topLevelType: any;
+    outputValue: string;
+    typeError?: Error;
+}
+
+export class StylableEvaluator {
+    public tsVarOverride: Record<string, string> | null | undefined;
+    constructor(options: { tsVarOverride?: Record<string, string> | null }) {
+        this.tsVarOverride = options.tsVarOverride;
+    }
+    evaluateValue(
+        context: FeatureTransformContext,
+        data: Omit<EvalValueData, 'passedThrough'> & { passedThrough?: string[] }
+    ) {
         return processDeclarationValue(
             context.resolver,
             data.value,
             data.meta,
             data.node,
-            data.tsVarOverride,
+            data.tsVarOverride || this.tsVarOverride,
             data.valueHook,
             context.diagnostics,
             data.passedThrough,
             data.cssVarsMapping,
             data.args
         );
-    },
-};
+    }
+}
 
 // old API
 
@@ -103,7 +105,8 @@ export function processDeclarationValue(
     passedThrough: string[] = [],
     cssVarsMapping: Record<string, string> = {},
     args: string[] = []
-): { topLevelType: any; outputValue: string; typeError?: Error } {
+): EvalValueResult {
+    const evaluator = new StylableEvaluator({ tsVarOverride: variableOverride });
     const customValues = resolveCustomValues(meta, resolver);
     const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -129,7 +132,6 @@ export function processDeclarationValue(
                             args,
                         },
                         node: parsedNode,
-                        resolved: cssVarsMapping,
                     });
                 } else if (value === '') {
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
@@ -201,7 +203,6 @@ export function processDeclarationValue(
                                 args,
                             },
                             node: parsedNode,
-                            resolved: cssVarsMapping,
                         });
                     } else if (isCssNativeFunction(value)) {
                         parsedNode.resolvedValue = stringifyFunction(value, parsedNode);

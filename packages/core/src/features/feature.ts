@@ -65,7 +65,6 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     transformDeclarationValue: (options: {
         context: FeatureTransformContext;
         node: ParsedValue;
-        resolved: T['RESOLVED'];
         data: EvalValueData;
     }) => void;
     transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
