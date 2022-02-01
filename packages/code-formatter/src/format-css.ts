@@ -55,13 +55,11 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             const betweenNode = parseDeclBetweenRaws(ast.raws.between);
             const afterComments = betweenNode.postComments.join(``);
             if (ast.variable) {
-                // TODO: change approach parse the thing remove spaces and stringify
                 newBetween +=
                     betweenNode.preComments.join(``) +
                     ':' +
                     afterComments +
                     betweenNode.postSpace.replace(/\s+/gu, ' ');
-                // newBetween += ast.raws.between.trimStart().replace(/\s+/gu, ' ');
             } else if (betweenNode.postSpace.includes('\n' /* don't use NL */) && valueHasNewline) {
                 newBetween += betweenNode.preComments.join(``);
                 hasNewLineBeforeValue = true;
@@ -74,12 +72,11 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
 
         ast.raws.between = newBetween;
         if (ast.variable) {
-            // TODO: change approach parse the thing remove spaces and stringify
             const endSpace = value.match(/[\s\S]?\s+$/m) ? ' ' : '';
             const hasStartSpaceInBetween = newBetween.match(/[\s\S]?\s+$/m) ? true : false;
             let cleaned = hasStartSpaceInBetween
-                ? cleanValue(ast.value).trimStart()
-                : cleanValue(ast.value);
+                ? cleanValue(value).trimStart()
+                : cleanValue(value);
             cleaned = endSpace ? cleaned.trimEnd() : cleaned;
             ast.value = cleaned + endSpace;
         } else {

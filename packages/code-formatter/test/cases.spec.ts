@@ -193,9 +193,23 @@ describe('Formatting - Decl', () => {
     });
 
     it('css custom property with comments and spaces in raws preserve comments and space after colon comments', () => {
-        // THIS TEST IS BASED ON HOW BROKEN POSTCSS PARSE CSS PROPERTY
         expect(formatCSS('.root {--x /*a*/ :   /*b*/   ;}')).to.equal(
             `.root {\n    --x/*a*/: /*b*/ ;\n}\n`
+        );
+    });
+
+    it('css custom property (no semi colon) and newline become one space', () => {
+        expect(formatCSS('.root {--x:\n}')).to.equal(
+            `.root {\n    --x: ;\n}\n`
+        );
+    });
+
+    it('css custom property (no semi colon) with space and comment after', () => {
+        expect(formatCSS('.root {--x:/*a*/ }')).to.equal(
+            `.root {\n    --x:/*a*/;\n}\n`
+        );
+        expect(formatCSS('.root {--x: /*a*/   }')).to.equal(
+            `.root {\n    --x: /*a*/ ;\n}\n`
         );
     });
 
@@ -344,7 +358,7 @@ describe('Formatting - AtRule', () => {
         expect(formatCSS(`@namespace /**/;`)).to.equal(`@namespace /**/;\n`);
         expect(formatCSS(`@namespace  /**/  ;`)).to.equal(`@namespace /**/;\n`);
     });
-    
+
     it('comments after params ', () => {
         expect(formatCSS(`@namespace "abc"/**/;`)).to.equal(`@namespace "abc" /**/;\n`);
         expect(formatCSS(`@namespace "abc"  /**/  ;`)).to.equal(`@namespace "abc" /**/;\n`);
