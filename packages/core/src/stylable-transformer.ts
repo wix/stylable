@@ -4,7 +4,7 @@ import { basename } from 'path';
 import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
 import type { Diagnostics } from './diagnostics';
-import { evalDeclarationValue, StylableEvaluator } from './functions';
+import { StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
 import { setStateToNode, stateErrors } from './pseudo-states';
 import {
@@ -196,18 +196,13 @@ export class StylableTransformer {
         ast.walkAtRules((atRule) => {
             const { name } = atRule;
             if (name === 'media') {
-                atRule.params = evalDeclarationValue(
-                    this.resolver,
-                    atRule.params,
+                atRule.params = this.evaluator.evaluateValue(transformContext, {
+                    value: atRule.params,
                     meta,
-                    atRule,
-                    tsVarOverride,
-                    this.replaceValueHook,
-                    this.diagnostics,
-                    path.slice(), // ToDo: check how path affect `passedThrough`
-                    undefined,
-                    undefined
-                );
+                    node: atRule,
+                    valueHook: this.replaceValueHook,
+                    passedThrough: path.slice(),
+                }).outputValue;
             } else if (name === 'property') {
                 CSSCustomProperty.hooks.transformAtRuleNode({
                     context: transformContext,
@@ -246,18 +241,14 @@ export class StylableTransformer {
                 case valueMapping.states:
                     break;
                 default:
-                    decl.value = evalDeclarationValue(
-                        this.resolver,
-                        decl.value,
+                    decl.value = this.evaluator.evaluateValue(transformContext, {
+                        value: decl.value,
                         meta,
-                        decl,
-                        tsVarOverride,
-                        this.replaceValueHook,
-                        this.diagnostics,
-                        path.slice(), // ToDo: check how path affect `passedThrough`
+                        node: decl,
+                        valueHook: this.replaceValueHook,
+                        passedThrough: path.slice(),
                         cssVarsMapping,
-                        undefined
-                    );
+                    }).outputValue;
             }
         });
 
