@@ -196,7 +196,6 @@ export function createDefaultOptions(): BuildOptions {
         cjs: true,
         esm: false,
         dts: false,
-        dtsSourceMap: false,
         injectCSSRequest: false,
         optimize: false,
         minify: false,
