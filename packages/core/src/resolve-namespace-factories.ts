@@ -12,8 +12,8 @@ export function packageNamespaceFactory(
     prefix = '',
     normalizeVersion = (semver: string) => semver
 ): typeof processNamespace {
-    return (namespace: string, stylesheetPath: string) => {
-        const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
+    return (namespace: string, stylesheetPath: string, origin?: string) => {
+        const configPath = findConfig('package.json', { cwd: dirname(origin || stylesheetPath) });
         if (!configPath) {
             throw new Error(`Could not find package.json for ${stylesheetPath}`);
         }

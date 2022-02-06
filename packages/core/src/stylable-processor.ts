@@ -271,7 +271,8 @@ export class StylableProcessor implements FeatureContext {
             namespace,
             pathToSource
                 ? path.resolve(path.dirname(this.meta.source), pathToSource)
-                : this.meta.source
+                : this.meta.source,
+            this.meta.source
         );
     }
 
@@ -632,7 +633,7 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
     return new StylableMeta(root, diagnostics);
 }
 
-export function processNamespace(namespace: string, source: string) {
+export function processNamespace(namespace: string, source: string, _origin?: string) {
     return namespace + murmurhash3_32_gc(source); // .toString(36);
 }
 
