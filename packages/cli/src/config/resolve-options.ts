@@ -57,7 +57,7 @@ export function getCliArguments(): Arguments<CliArguments> {
         .option('dtsSourceMap', {
             type: 'boolean',
             description:
-                'output source maps for stylable definition files for sources (.st.css.d.ts.map)',
+                'output source maps for stylable definition files for sources (.st.css.d.ts.map). It will use the origin file path unless `--stcss` is set, then it will use the outputted file path as the source-map source',
             defaultDescription: 'true if "--dts" option is enabled, otherwise false',
         })
         .option('useNamespaceReference', {
