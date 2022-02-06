@@ -171,16 +171,7 @@ describe('Stylable Cli', function () {
             src: { 'style.st.css': srcContent },
         });
 
-        runCliSync([
-            '--rootDir',
-            tempDir.path,
-            '--srcDir',
-            './src',
-            '--outDir',
-            'dist',
-            '--stcss',
-            '--dts',
-        ]);
+        runCliSync(['--rootDir', tempDir.path, '--srcDir', './src', '--outDir', 'dist', '--dts']);
 
         const dirContent = loadDirSync(tempDir.path);
         const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
@@ -189,7 +180,7 @@ describe('Stylable Cli', function () {
             dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
         ).to.equal(true);
         expect(dtsSourceMapContent).to.contain(
-            `"sources": [\n        ${join('..', 'src', 'style.st.css')}\n    ]`
+            `"sources": [\n        "${join('..', 'src', 'style.st.css')}"\n    ]`
         );
     });
 

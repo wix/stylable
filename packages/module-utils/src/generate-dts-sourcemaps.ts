@@ -1,4 +1,4 @@
-import { basename } from 'path';
+import { basename, join } from 'path';
 import { ClassSymbol, StylableMeta, valueMapping } from '@stylable/core';
 import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
 import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
@@ -243,7 +243,7 @@ function getClassSourceName(targetName: string, classTokens: ClassesToken): stri
 export function generateDTSSourceMap(
     dtsContent: string,
     meta: StylableMeta,
-    sourceFilePath?: string
+    sourceDirPath?: string
 ) {
     const tokens = tokenizeDTS(dtsContent);
     const mapping: Record<number, LineMapping> = {};
@@ -316,7 +316,7 @@ export function generateDTSSourceMap(
         {
             version: 3,
             file: `${stylesheetName}.d.ts`,
-            sources: [sourceFilePath ?? stylesheetName],
+            sources: [sourceDirPath ? join(sourceDirPath, stylesheetName) : stylesheetName],
             names: [],
             mappings: Object.values(mapping)
                 .map((segment) => (segment.length ? segment.map((s) => encode(s)).join(',') : ''))
