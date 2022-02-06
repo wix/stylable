@@ -189,7 +189,7 @@ describe('Stylable Cli', function () {
             dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
         ).to.equal(true);
         expect(dtsSourceMapContent).to.contain(
-            `"sources": [\n        "../src/style.st.css"\n    ]`
+            `"sources": [\n        ${join('..', 'src', 'style.st.css')}\n    ]`
         );
     });
 
