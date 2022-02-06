@@ -175,7 +175,12 @@ export function buildSingleFile({
         // .d.ts.map
         // if not explicitly defined, assumed true with "--dts" parent scope
         if (dtsSourceMap !== false) {
-            const dtsMappingContent = generateDTSSourceMap(dtsContent, res.meta, filePath);
+            const dtsMappingContent = generateDTSSourceMap(
+                dtsContent,
+                res.meta,
+                relative(dirname(outSrcPath), filePath)
+            );
+
             const dtsMapPath = outSrcPath + '.d.ts.map';
 
             generated.add(dtsMapPath);

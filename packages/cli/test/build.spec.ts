@@ -426,6 +426,6 @@ describe('build stand alone', () => {
         const dtsSourceMapContent = fs.readFileSync('/main.st.css.d.ts.map', 'utf8');
         expect(dtsSourceMapContent).to.contain(`"file": "main.st.css.d.ts",`);
         expect(dtsSourceMapContent).to.contain(`"sources": [`);
-        expect(dtsSourceMapContent).to.contain(`"/main.st.css"`);
+        expect(dtsSourceMapContent).to.contain(`"main.st.css"`);
     });
 });
