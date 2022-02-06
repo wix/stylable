@@ -178,7 +178,7 @@ export function buildSingleFile({
             const dtsMappingContent = generateDTSSourceMap(
                 dtsContent,
                 res.meta,
-                relative(dirname(outSrcPath), filePath)
+                relative(dirname(outSrcPath), outputSources ? outSrcPath : filePath)
             );
 
             const dtsMapPath = outSrcPath + '.d.ts.map';

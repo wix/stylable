@@ -193,6 +193,35 @@ describe('Stylable Cli', function () {
         );
     });
 
+    it('build .st.css.d.ts source-map and target the output source file path', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            src: { 'style.st.css': srcContent },
+            'stylable.config.js': `
+            exports.stcConfig = {
+                options: {
+                    outDir: './dist',
+                    srcDir: './src',
+                    outputSources: true,
+                    cjs: false,
+                    dts: true,
+                }
+            };
+        `,
+        });
+
+        runCliSync(['--rootDir', tempDir.path]);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+        ).to.equal(true);
+        expect(dtsSourceMapContent).to.contain(`"sources": [\n        "style.st.css"\n    ]`);
+    });
+
     it('build .st.css.d.ts alongside source files with source-maps on by default (config file)', () => {
         const srcContent = '.root{color:red}';
         populateDirectorySync(tempDir.path, {
