@@ -64,7 +64,7 @@ describe('.d.ts source-maps', () => {
         });
 
         const dtsText = generateDTSContent(res);
-        const sourcemapText = generateDTSSourceMap(dtsText, res.meta, 'src/entry.st.css');
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta, 'src');
 
         expect(JSON.parse(sourcemapText).sources).to.eql(['src/entry.st.css']);
     });
