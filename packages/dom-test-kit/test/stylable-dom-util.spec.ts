@@ -57,6 +57,6 @@ describe('stylable-dom-utils type compliance', function () {
         });
         tk.linkNodeModules();
 
-        expect(tk.typecheck('test.ts')).to.equal('');
+        expect(tk.typecheck('test.ts', ['lib.dom.d.ts', 'lib.es2020.d.ts'])).to.equal('');
     });
 });

@@ -42,7 +42,7 @@ export class DTSKit {
         }
     }
 
-    public typecheck(internalPath: string) {
+    public typecheck(internalPath: string, lib: string[] = []) {
         const filePath = this.sourcePath(internalPath);
         const program = createProgram({
             options: {
@@ -51,7 +51,8 @@ export class DTSKit {
                 target: ScriptTarget.ES2020,
                 strict: true,
                 types: [],
-                noLib: true,
+                noLib: lib.length ? false : true,
+                lib: lib,
             },
             rootNames: [filePath],
         });
