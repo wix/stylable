@@ -67,7 +67,7 @@ export function buildSingleFile({
     diagnosticsMode = 'loose',
     diagnosticsManager = new DiagnosticsManager({ log }),
 }: BuildFileOptions) {
-    const { basename, dirname, join, relative, resolve } = fs;
+    const { basename, dirname, join, relative, resolve, isAbsolute } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
     const outPath = outSrcPath + '.js';
     const fileDirectory = dirname(filePath);
@@ -175,10 +175,18 @@ export function buildSingleFile({
         // .d.ts.map
         // if not explicitly defined, assumed true with "--dts" parent scope
         if (dtsSourceMap !== false) {
+            const relativeTargetFilePath = relative(
+                dirname(outSrcPath),
+                outputSources ? outSrcPath : filePath
+            );
+
             const dtsMappingContent = generateDTSSourceMap(
                 dtsContent,
                 res.meta,
-                relative(dirname(outSrcPath), dirname(outputSources ? outSrcPath : filePath))
+                // `relativeTargetFilePath` could be a absolute path in windows (e.g. unc path)
+                isAbsolute(relativeTargetFilePath)
+                    ? relativeTargetFilePath
+                    : relativeTargetFilePath.replace(/\\/g, '/')
             );
 
             const dtsMapPath = outSrcPath + '.d.ts.map';
