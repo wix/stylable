@@ -118,6 +118,7 @@ export class WatchHandler {
     }
 
     public async stop() {
+        this.log(buildMessages.STOP_WATCHING(), levels.info);
         this.diagnosticsManager.clear();
         this.fileSystem.watchService.removeGlobalListener(this.listener);
 
