@@ -51,6 +51,7 @@ export class DTSKit {
                 target: ScriptTarget.ES2020,
                 strict: true,
                 types: [],
+                skipDefaultLibCheck: true,
                 noLib: lib.length ? false : true,
                 lib: lib,
             },
