@@ -184,11 +184,9 @@ export function buildSingleFile({
                 dtsContent,
                 res.meta,
                 // `relativeTargetFilePath` could be an absolute path in windows (e.g. unc path)
-                dirname(
-                    isAbsolute(relativeTargetFilePath)
-                        ? relativeTargetFilePath
-                        : relativeTargetFilePath.replace(/\\/g, '/')
-                )
+                isAbsolute(relativeTargetFilePath)
+                    ? relativeTargetFilePath
+                    : relativeTargetFilePath.replace(/\\/g, '/')
             );
 
             const dtsMapPath = outSrcPath + '.d.ts.map';
