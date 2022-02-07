@@ -51,7 +51,7 @@ export class DTSKit {
                 target: ScriptTarget.ES2020,
                 strict: true,
                 types: [],
-                lib: ['lib.dom.d.ts', 'lib.es2020.d.ts'],
+                noLib: true,
             },
             rootNames: [filePath],
         });
