@@ -106,6 +106,12 @@ export const hooks = createFeature<{
     },
 });
 
+// API
+
+export function get(meta: StylableMeta, name: string): VarSymbol | undefined {
+    return STSymbol.get(meta, name, `var`);
+}
+
 function collectVarSymbols(context: FeatureContext, rule: postcss.Rule) {
     rule.walkDecls((decl) => {
         collectUrls(context.meta, decl); // ToDo: remove
@@ -305,7 +311,7 @@ function handleCyclicValues(
         const cyclicChain = passedThrough.map((variable) => variable || '');
         cyclicChain.push(refUniqID);
         context.diagnostics.warn(node, diagnostics.CYCLIC_VALUE(cyclicChain), {
-            word: refUniqID,
+            word: refUniqID, // ToDo: check word is path+var and not var name
         });
     }
     return stringifyFunction(value, parsedNode);

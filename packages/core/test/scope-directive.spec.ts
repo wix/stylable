@@ -13,7 +13,6 @@ import {
     transformerWarnings,
     getRuleScopeSelector,
 } from '@stylable/core';
-import { STVar } from '@stylable/core/dist/features';
 
 use(flatMatch);
 
@@ -576,35 +575,6 @@ describe('@st-scope', () => {
                 },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');
-        });
-
-        it('should warn about vars definition inside a scope', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        @st-scope .root {
-                            |:vars {
-                                myColor: red;
-                            }|
-
-                            .part {}
-                        }
-                    `,
-                    },
-                },
-            };
-
-            const { meta } = expectTransformDiagnostics(config, [
-                {
-                    message: STVar.diagnostics.NO_VARS_DEF_IN_ST_SCOPE(),
-                    file: '/entry.st.css',
-                    severity: 'warning',
-                },
-            ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__root .entry__part');
         });
     });
 });
