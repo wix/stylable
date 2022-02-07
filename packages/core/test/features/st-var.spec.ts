@@ -820,12 +820,8 @@ describe(`features/st-var`, () => {
                     };
                 `,
                 '/entry.st.css': `                
-                    @st-import Sheet, [imported-class] from './vars.st.css';
+                    @st-import Sheet, [imported-class, unknown] from './vars.st.css';
                     @st-import [jsNum, jsFunc] from './code';
-                    :import {
-                        -st-from: "./vars.st.css";
-                        -st-named: unknown;
-                    }
 
                     .root {
                         /* 

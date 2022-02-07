@@ -275,11 +275,15 @@ function evaluateValueCall(
                     });
                 }
             } else {
-                // missing imported var
-                const namedDecl = varSymbol.import.rule.nodes.find((node) => {
-                    return node.type === 'decl' && node.prop === valueMapping.named;
-                });
-                if (namedDecl && node) {
+                // missing imported symbol
+                const importAst = varSymbol.import.rule;
+                const foundImport =
+                    importAst.type === `atrule`
+                        ? importAst
+                        : importAst.nodes.find((node) => {
+                              return node.type === 'decl' && node.prop === valueMapping.named;
+                          });
+                if (foundImport && node) {
                     // ToDo: provide actual exported id (default/named as x)
                     context.diagnostics.error(node, diagnostics.CANNOT_FIND_IMPORTED_VAR(varName), {
                         word: varName,
