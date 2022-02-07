@@ -183,7 +183,7 @@ export function buildSingleFile({
             const dtsMappingContent = generateDTSSourceMap(
                 dtsContent,
                 res.meta,
-                // `relativeTargetFilePath` could be a absolute path in windows (e.g. unc path)
+                // `relativeTargetFilePath` could be an absolute path in windows (e.g. unc path)
                 dirname(
                     isAbsolute(relativeTargetFilePath)
                         ? relativeTargetFilePath
