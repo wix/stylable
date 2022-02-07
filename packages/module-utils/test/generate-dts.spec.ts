@@ -303,7 +303,7 @@ describe('Generate DTS', function () {
                 "Type 'string' is not assignable to type 'boolean | undefined'"
             );
             expect(diagnostics).to.include(
-                "Type 'boolean' is not assignable to type 'string | undefined'"
+                "Type 'true' is not assignable to type 'string | undefined'"
             );
         });
 
@@ -336,7 +336,7 @@ describe('Generate DTS', function () {
                 });
 
                 expect(tk.typecheck('test.ts')).to.include(
-                    `Type 'boolean' is not assignable to type 'string | undefined'`
+                    `Type 'true' is not assignable to type 'string | undefined'`
                 );
             });
 

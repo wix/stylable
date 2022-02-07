@@ -52,8 +52,7 @@ export class DTSKit {
                 strict: true,
                 types: [],
                 skipDefaultLibCheck: true,
-                noLib: lib.length ? false : true,
-                lib: lib,
+                lib: lib.length ? lib : ['lib.es2020.d.ts'],
             },
             rootNames: [filePath],
         });
