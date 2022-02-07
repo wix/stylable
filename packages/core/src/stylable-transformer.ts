@@ -113,7 +113,7 @@ export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
     public diagnostics: Diagnostics;
     public resolver: StylableResolver;
-    private evaluator: StylableEvaluator;
+    private evaluator: StylableEvaluator = new StylableEvaluator();
     public delimiter: string;
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
@@ -134,7 +134,6 @@ export class StylableTransformer {
             options.moduleResolver,
             options.resolverCache || new Map()
         );
-        this.evaluator = new StylableEvaluator({});
         this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {

@@ -171,7 +171,7 @@ export const hooks = createFeature<{
     transformDeclaration({ decl, resolved }) {
         decl.prop = resolved[decl.prop] || decl.prop;
     },
-    transformDeclarationValue({ node, data: { cssVarsMapping } }) {
+    transformValue({ node, data: { cssVarsMapping } }) {
         const { value } = node;
         const varWithPrefix = node.nodes[0]?.value || ``;
         if (isCSSVarProp(varWithPrefix)) {

@@ -98,7 +98,7 @@ export const hooks = createFeature<{
         }
         return resolved;
     },
-    transformDeclarationValue({ context, node, data }) {
+    transformValue({ context, node, data }) {
         evaluateValueCall(context, node, data);
     },
     transformJSExports({ exports, resolved }) {

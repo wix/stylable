@@ -35,7 +35,7 @@ export interface EvalValueResult {
 
 export class StylableEvaluator {
     public tsVarOverride: Record<string, string> | null | undefined;
-    constructor(options: { tsVarOverride?: Record<string, string> | null }) {
+    constructor(options: { tsVarOverride?: Record<string, string> | null } = {}) {
         this.tsVarOverride = options.tsVarOverride;
     }
     evaluateValue(
@@ -114,7 +114,7 @@ export function processDeclarationValue(
         switch (type) {
             case 'function':
                 if (value === 'value') {
-                    STVar.hooks.transformDeclarationValue({
+                    STVar.hooks.transformValue({
                         context: {
                             meta,
                             diagnostics,
@@ -185,7 +185,7 @@ export function processDeclarationValue(
                             }
                         }
                     } else if (value === 'var') {
-                        CSSCustomProperty.hooks.transformDeclarationValue({
+                        CSSCustomProperty.hooks.transformValue({
                             context: {
                                 meta,
                                 diagnostics,

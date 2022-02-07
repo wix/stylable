@@ -334,7 +334,6 @@ describe(`features/st-var`, () => {
             varB: `b(a(b(value(varA))))`,
         });
     });
-    it.skip(`should provide valid var path introspection - value(var, ...path)`);
     describe(`custom-value`, () => {
         it(`should support build-in st-array`, () => {
             const { sheets } = testStylableCore(`
@@ -560,7 +559,7 @@ describe(`features/st-var`, () => {
             });
         });
         it(`should resolve value path from resolved value() as key`, () => {
-            const { sheets } = testStylableCore(`
+            testStylableCore(`
                 :vars {
                     arr-key: 0;
                     map-key: idx;
@@ -573,12 +572,19 @@ describe(`features/st-var`, () => {
                 .root {
                     /* @decl prop: deep-value */
                     prop: value(mixed, value(arr-key), value(map-key));
+
+                    /* 
+                    @decl(success despite internal path error) prop: deep-value
+                    @transform-warn(index un-required path) ${STVar.diagnostics.MULTI_ARGS_IN_VALUE(
+                        'arr-key, no-path'
+                    )} 
+                    @transform-warn(key un-required path) ${STVar.diagnostics.MULTI_ARGS_IN_VALUE(
+                        'map-key, no-path'
+                    )} 
+                    */
+                    prop: value(mixed, value(arr-key, no-path), value(map-key, no-path));
                 }
             `);
-
-            const { meta } = sheets['/entry.st.css'];
-
-            shouldReportNoDiagnostics(meta);
         });
         it(`should report on unknown entry`, () => {
             const { sheets } = testStylableCore(`
@@ -808,7 +814,6 @@ describe(`features/st-var`, () => {
             expect(exports.stVars.a, `a JS export`).to.eql(`123`);
         });
         it(`should report unhandled imported non var symbols in value`, () => {
-            // ToDo: fix unknown value from @st-import (works in legacy :import)
             testStylableCore({
                 '/vars.st.css': `
                     .imported-class {}
@@ -1152,6 +1157,7 @@ describe(`features/st-var`, () => {
             expect(exports.stVars.b, `b JS export`).to.eql(`green`);
         });
         it(`should override value() from JS import"`, () => {
+            // ToDo: move to CSSValue feature when it will be created
             testStylableCore(
                 {
                     '/functions.js': `
@@ -1243,4 +1249,5 @@ describe(`features/st-var`, () => {
             );
         });
     });
+    it.skip(`should provide valid var path introspection - value(var, ...path)`);
 });

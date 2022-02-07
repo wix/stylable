@@ -62,7 +62,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         decl: postcss.Declaration;
         resolved: T['RESOLVED'];
     }) => void;
-    transformDeclarationValue: (options: {
+    transformValue: (options: {
         context: FeatureTransformContext;
         node: ParsedValue;
         data: EvalValueData;
@@ -100,7 +100,7 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
     transformDeclaration() {
         /**/
     },
-    transformDeclarationValue() {
+    transformValue() {
         /**/
     },
     transformJSExports() {
