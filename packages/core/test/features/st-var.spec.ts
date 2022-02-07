@@ -147,13 +147,25 @@ describe(`features/st-var`, () => {
     });
     it(`should handle invalid value() cases`, () => {
         // ToDo: report CANNOT_USE_AS_VALUE on local class
-        testStylableCore(`
+        const { sheets } = testStylableCore(`
             /* @transform-remove */
             :vars {
                 varA: green;
             }
             .part {}
             .root {
+                /* 
+                    @decl(empty) prop: value()
+                    @transform-warn(empty) ${STVar.diagnostics.MISSING_VAR_IN_VALUE()} 
+                */
+                prop: value();
+
+                /* 
+                    @decl(no first arg) prop: value(, path)
+                    @transform-warn(no first arg) ${STVar.diagnostics.MISSING_VAR_IN_VALUE()} 
+                */
+                prop: value(, path);
+                
                 /* 
                     @decl(unknown var) prop: value(unknown)
                     @transform-warn(unknown var) ${STVar.diagnostics.UNKNOWN_VAR('unknown')} 
@@ -178,6 +190,26 @@ describe(`features/st-var`, () => {
                 prop: value(varA, invalidSecondArgument);
             }
         `);
+        const { meta } = sheets[`/entry.st.css`];
+        // checks reports words that contain parenthesis (inline test cannot)
+        expect(
+            meta.transformDiagnostics!.reports[0],
+            `missing var diagnostic word 1`
+        ).to.deep.contain({
+            message: STVar.diagnostics.MISSING_VAR_IN_VALUE(),
+            options: {
+                word: `value()`,
+            },
+        });
+        expect(
+            meta.transformDiagnostics!.reports[1],
+            `missing var diagnostic word 2`
+        ).to.deep.contain({
+            message: STVar.diagnostics.MISSING_VAR_IN_VALUE(),
+            options: {
+                word: `value(, path)`,
+            },
+        });
     });
     it(`should handle escaping`, () => {
         const { sheets } = testStylableCore(`

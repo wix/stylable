@@ -6,7 +6,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { EvalValueData, EvalValueResult } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
 import { walkSelector } from '../helpers/selector';
-import { stringifyFunction } from '../helpers/value';
+import { stringifyFunction, getStringValue } from '../helpers/value';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
@@ -38,6 +38,7 @@ export const diagnostics = {
         `Cyclic value definition detected: "${cyclicChain
             .map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s)
             .join('\n')}"`,
+    MISSING_VAR_IN_VALUE: () => `invalid value() with no var identifier`,
     COULD_NOT_RESOLVE_VALUE: (args: string) =>
         `cannot resolve value function using the arguments provided: "${args}"`,
     MULTI_ARGS_IN_VALUE: (args: string) =>
@@ -183,10 +184,17 @@ function evaluateValueCall(
 ): void {
     const { tsVarOverride, passedThrough, value, node } = data;
     const parsedArgs = strategies.args(parsedNode).map((x) => x.value);
-    if (parsedArgs.length >= 1) {
-        const varName = parsedArgs[0];
-        const restArgs = parsedArgs.slice(1);
+    const varName = parsedArgs[0];
+    const restArgs = parsedArgs.slice(1);
 
+    // check var not empty
+    if (!varName) {
+        if (node) {
+            context.diagnostics.warn(node, diagnostics.MISSING_VAR_IN_VALUE(), {
+                word: getStringValue(parsedNode),
+            });
+        }
+    } else if (parsedArgs.length >= 1) {
         // override with value
         if (tsVarOverride?.[varName]) {
             parsedNode.resolvedValue = tsVarOverride?.[varName];
@@ -294,8 +302,6 @@ function evaluateValueCall(
                 word: varName,
             });
         }
-    } else {
-        // TODO: warn
     }
 }
 
