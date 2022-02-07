@@ -1,10 +1,10 @@
-import { join } from 'path';
+import { join, dirname, relative } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
-import { processorWarnings } from '@stylable/core';
+import { processorWarnings, packageNamespaceFactory } from '@stylable/core';
 import { STImport } from '@stylable/core/dist/features';
 
 describe('Stylable Cli', function () {
@@ -253,6 +253,36 @@ describe('Stylable Cli', function () {
         ]);
 
         expect(stdout).to.contain('I HAVE BEEN REQUIRED');
+    });
+
+    it('single file with namespace reference and use the origin to find the package.json', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `/* st-namespace-reference="../../invalid-path.st.css" */.root{color:red}`,
+        });
+
+        runCliSync(['--rootDir', tempDir.path]);
+
+        const resolveNamespace = packageNamespaceFactory(
+            () => join(tempDir.path, 'package.json'),
+            () => {
+                return { name: 'test', version: '0.0.0' };
+            },
+            { dirname, relative }
+        );
+        const dirContent = loadDirSync(tempDir.path);
+        expect(
+            evalStylableModule<{ namespace: string }>(
+                dirContent['style.st.css.js'],
+                'style.st.css.js'
+            ).namespace
+        ).equal(
+            resolveNamespace(
+                'style',
+                join(tempDir.path, '../../invalid-path.st.css'),
+                join(tempDir.path, 'style.st.css')
+            )
+        );
     });
 
     describe('CLI diagnostics', () => {
