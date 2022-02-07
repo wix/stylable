@@ -146,7 +146,6 @@ describe(`features/st-var`, () => {
         `);
     });
     it(`should handle invalid value() cases`, () => {
-        // ToDo: report CANNOT_USE_AS_VALUE on local class
         const { sheets } = testStylableCore(`
             /* @transform-remove */
             :vars {
@@ -174,7 +173,7 @@ describe(`features/st-var`, () => {
 
                 /* 
                     @decl(non var symbol) prop: value(part)
-                    @x-transform-warn(non var symbol) word(part) ${STVar.diagnostics.CANNOT_USE_AS_VALUE(
+                    @transform-warn(non var symbol) word(part) ${STVar.diagnostics.CANNOT_USE_AS_VALUE(
                         'class',
                         `part`
                     )} 

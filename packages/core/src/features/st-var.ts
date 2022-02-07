@@ -2,6 +2,7 @@ import { createFeature, FeatureContext, FeatureTransformContext } from './featur
 import { deprecatedStFunctions } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
+import type { StylableSymbol } from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
 import type { EvalValueData, EvalValueResult } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
@@ -259,19 +260,7 @@ function evaluateValueCall(
                             ? data.valueHook(outputValue, varName, false, passedThrough)
                             : outputValue;
                     } else {
-                        // report error
-                        const errorKind =
-                            resolvedVarSymbol._kind === 'class' &&
-                            resolvedVarSymbol[valueMapping.root]
-                                ? 'stylesheet'
-                                : resolvedVarSymbol._kind;
-                        if (node) {
-                            context.diagnostics.warn(
-                                node,
-                                diagnostics.CANNOT_USE_AS_VALUE(errorKind, varName),
-                                { word: varName }
-                            );
-                        }
+                        reportUnsupportedSymbolInValue(context, varName, resolvedVarSymbol, node);
                     }
                 } else if (resolvedVar._kind === 'js' && typeof resolvedVar.symbol === 'string') {
                     // value from Javascript
@@ -297,11 +286,28 @@ function evaluateValueCall(
                     });
                 }
             }
+        } else if (varSymbol) {
+            reportUnsupportedSymbolInValue(context, varName, varSymbol, node);
         } else if (node) {
             context.diagnostics.warn(node, diagnostics.UNKNOWN_VAR(varName), {
                 word: varName,
             });
         }
+    }
+}
+
+function reportUnsupportedSymbolInValue(
+    context: FeatureTransformContext,
+    name: string,
+    symbol: StylableSymbol,
+    node: postcss.Node | undefined
+) {
+    const errorKind =
+        symbol._kind === 'class' && symbol[valueMapping.root] ? 'stylesheet' : symbol._kind;
+    if (node) {
+        context.diagnostics.warn(node, diagnostics.CANNOT_USE_AS_VALUE(errorKind, name), {
+            word: name,
+        });
     }
 }
 
