@@ -7,7 +7,13 @@ import { createLogger } from './logger';
 async function main() {
     const argv = getCliArguments();
     const { resolve } = fs;
-    const { watch, require: requires, log: shouldLog, namespaceResolver } = argv;
+    const {
+        watch,
+        require: requires,
+        log: shouldLog,
+        namespaceResolver,
+        preserveWatchOutput,
+    } = argv;
     const { resolveNamespace } = require(namespaceResolver);
     const rootDir = resolve(argv.rootDir);
 
@@ -19,7 +25,7 @@ async function main() {
                 console.log('[Stylable]', `[${currentTime}]`, ...messages);
             }
         },
-        () => !shouldLog && console.clear()
+        () => !shouldLog && !preserveWatchOutput && console.clear()
     );
 
     // execute all require hooks before running the CLI build
