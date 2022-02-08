@@ -17,7 +17,7 @@ import type { StylableResolver } from './stylable-resolver';
 import { MappedStates, valueMapping } from './stylable-value-parsers';
 import type { ParsedValue, StateParsedValue } from './types';
 import { CSSClass } from './features';
-import { stripQuotation } from './utils';
+import { stripQuotation } from './helpers/string';
 import { reservedFunctionalPseudoClasses } from './native-reserved-lists';
 import cssesc from 'cssesc';
 

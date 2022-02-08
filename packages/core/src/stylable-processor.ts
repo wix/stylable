@@ -34,8 +34,8 @@ import {
     stValuesMap,
     valueMapping,
 } from './stylable-value-parsers';
-import { deprecated, filename2varname, stripQuotation } from './utils';
-import { ignoreDeprecationWarn } from './helpers/deprecation';
+import { stripQuotation, filename2varname } from './helpers/string';
+import { ignoreDeprecationWarn, warnOnce } from './helpers/deprecation';
 
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
@@ -554,7 +554,7 @@ export function validateScopingSelector(
 }
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
-    deprecated(
+    warnOnce(
         'createEmptyMeta is deprecated and will be removed in the next version. Use "new StylableMeta()"'
     );
     return new StylableMeta(root, diagnostics);
