@@ -264,11 +264,11 @@ describe(`features/st-var`, () => {
             text: `"'with-quotes'"`,
         });
 
-        // exports - ToDo: fix outer quotes removal
+        // exports
         expect(exports.stVars, `JS exports`).to.eql({
-            double: `"double"`,
-            single: `'single'`,
-            quotes: `"'with-quotes'"`,
+            double: `double`,
+            single: `single`,
+            quotes: `'with-quotes'`,
         });
     });
     it(`should resolve value in :vars definition`, () => {
@@ -1153,7 +1153,7 @@ describe(`features/st-var`, () => {
             shouldReportNoDiagnostics(meta);
 
             // JS exports - ToDo: fix exports to use hook
-            expect(exports.stVars.a, `a JS export`).to.eql(`"red"`);
+            expect(exports.stVars.a, `a JS export`).to.eql(`red`);
             expect(exports.stVars.b, `b JS export`).to.eql(`green`);
         });
         it(`should override value() from JS import"`, () => {

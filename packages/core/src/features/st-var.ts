@@ -90,7 +90,7 @@ export const hooks = createFeature<{
         for (const name of Object.keys(symbols)) {
             const symbol = symbols[name];
             const evaluated = context.evaluator.evaluateValue(noDaigContext, {
-                value: symbol.text,
+                value: stripQuotation(symbol.text),
                 meta: context.meta,
                 node: symbol.node,
             });
