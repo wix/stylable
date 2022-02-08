@@ -12,6 +12,7 @@ import {
     nativePseudoElements,
     valueParserWarnings,
 } from '@stylable/core';
+import { valueDiagnostics } from '@stylable/core/dist/helpers/value';
 import { STImport, CSSClass, CSSType, STVar } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
@@ -372,7 +373,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                     [
                         {
-                            message: valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
+                            message: valueDiagnostics.INVALID_NAMED_PARAMS(),
                             file: '/style.st.css',
                         },
                     ]

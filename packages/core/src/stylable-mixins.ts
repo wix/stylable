@@ -10,8 +10,9 @@ import type { SRule } from './deprecated/postcss-ast-extension';
 import type { CSSResolve } from './stylable-resolver';
 import type { StylableTransformer } from './stylable-transformer';
 import { createSubsetAst } from './helpers/rule';
+import { strategies } from './helpers/value';
 import { isValidDeclaration, mergeRules } from './stylable-utils';
-import { valueMapping, mixinDeclRegExp, strategies } from './stylable-value-parsers';
+import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 import { ignoreDeprecationWarn } from './helpers/deprecation';
 
 export const mixinWarnings = {

@@ -7,7 +7,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { EvalValueData, EvalValueResult } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
 import { walkSelector } from '../helpers/selector';
-import { stringifyFunction, getStringValue } from '../helpers/value';
+import { stringifyFunction, getStringValue, strategies } from '../helpers/value';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
@@ -15,7 +15,6 @@ import { processDeclarationFunctions } from '../process-declaration-functions';
 import { Diagnostics } from '../diagnostics';
 import { unbox } from '../custom-values';
 // ToDo: move
-import { strategies, valueMapping } from '../stylable-value-parsers';
 import { stripQuotation } from '../utils';
 import type { ParsedValue } from '../types';
 
@@ -284,7 +283,7 @@ function evaluateValueCall(
                     importAst.type === `atrule`
                         ? importAst
                         : importAst.nodes.find((node) => {
-                              return node.type === 'decl' && node.prop === valueMapping.named;
+                              return node.type === 'decl' && node.prop === `-st-named`;
                           });
                 if (foundImport && node) {
                     // ToDo: provide actual exported id (default/named as x)
@@ -309,8 +308,7 @@ function reportUnsupportedSymbolInValue(
     symbol: StylableSymbol,
     node: postcss.Node | undefined
 ) {
-    const errorKind =
-        symbol._kind === 'class' && symbol[valueMapping.root] ? 'stylesheet' : symbol._kind;
+    const errorKind = symbol._kind === 'class' && symbol[`-st-root`] ? 'stylesheet' : symbol._kind;
     if (node) {
         context.diagnostics.warn(node, diagnostics.CANNOT_USE_AS_VALUE(errorKind, name), {
             word: name,
