@@ -1155,7 +1155,7 @@ describe(`features/st-var`, () => {
 
             shouldReportNoDiagnostics(meta);
 
-            // JS exports - ToDo: fix exports to use hook
+            // JS exports
             expect(exports.stVars.a, `a JS export`).to.eql(`red`);
             expect(exports.stVars.b, `b JS export`).to.eql(`green`);
         });

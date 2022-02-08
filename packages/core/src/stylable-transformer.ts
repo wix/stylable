@@ -113,12 +113,12 @@ export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
     public diagnostics: Diagnostics;
     public resolver: StylableResolver;
-    private evaluator: StylableEvaluator = new StylableEvaluator();
     public delimiter: string;
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
+    private evaluator: StylableEvaluator = new StylableEvaluator();
     private metaParts = new WeakMap<StylableMeta, MetaParts>();
 
     constructor(options: TransformerOptions) {
