@@ -16,23 +16,6 @@ describe('Stylable postcss transform (General)', () => {
         expect(result.toString()).to.equal('');
     });
 
-    it('should not output :vars', () => {
-        const result = generateStylableRoot({
-            entry: `/a/b/style.st.css`,
-            files: {
-                '/a/b/style.st.css': {
-                    content: `
-                        :vars {
-                            myvar: red;
-                        }
-                    `,
-                },
-            },
-        });
-
-        expect(result.nodes.length, 'remove all vars').to.equal(0);
-    });
-
     it('should support multiple selectors/properties with same name', () => {
         const result = generateStylableRoot({
             entry: `/a/b/style.st.css`,

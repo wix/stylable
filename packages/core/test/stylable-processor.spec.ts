@@ -107,57 +107,6 @@ describe('Stylable postcss process', () => {
         expect(result.namespace).to.eql(processNamespace('style', from));
     });
 
-    it('collect :vars', () => {
-        const result = processSource(
-            `
-            :vars {
-                name: value;
-            }
-            :vars {
-                name: value;
-                name1: value1;
-            }
-        `,
-            { from: 'path/to/style.css' }
-        );
-
-        expect(result.vars.length).to.eql(3);
-    });
-
-    it('collect :vars types', () => {
-        const result = processSource(
-            `
-            :vars {
-                /*@type VALUE_INLINE*/name: inline;
-                /*@type VALUE_LINE_BEFORE*/
-                name1: line before;
-            }
-        `,
-            { from: 'path/to/style.css' }
-        );
-
-        expect(result.vars[0].valueType).to.eql('VALUE_INLINE');
-        expect(result.vars[1].valueType).to.eql('VALUE_LINE_BEFORE');
-    });
-
-    it('resolve local :vars (dont warn if name is imported)', () => {
-        // ToDo: check if test is needed
-        const result = processSource(
-            `
-            :import {
-                -st-from: "./file.css";
-                -st-named: name;
-            }
-            :vars {
-                myname: value(name);
-            }
-        `,
-            { from: 'path/to/style.css' }
-        );
-
-        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-    });
-
     it('collect typed classes extends', () => {
         const result = processSource(
             `

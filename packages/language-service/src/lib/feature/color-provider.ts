@@ -50,7 +50,7 @@ export function resolveDocumentColors(
                     const impMeta = processor.process(
                         stylable.resolvePath(dirname(meta.source), sym.import.request)
                     );
-                    const relevantVar = impMeta.vars.find((v) => v.name === sym.name);
+                    const relevantVar = Object.values(impMeta.getAllStVars()).find((v) => v.name === sym.name);
                     if (relevantVar) {
                         const doc = TextDocument.create(
                             '',

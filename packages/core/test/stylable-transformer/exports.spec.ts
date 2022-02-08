@@ -450,135 +450,6 @@ describe('Exports to js', () => {
         });
     });
 
-    describe('stylable vars', () => {
-        it('contains local vars', () => {
-            const cssExports = generateStylableExports({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :vars {
-                                color1: red;
-                            }
-                            `,
-                    },
-                },
-            });
-
-            expect(cssExports.stVars).to.eql({
-                color1: 'red',
-            });
-        });
-
-        it('should not contain imported vars', () => {
-            const cssExports = generateStylableExports({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :import {
-                                -st-from: "./imported.st.css";
-                                -st-named: color1;
-                            }
-                        `,
-                    },
-                    '/imported.st.css': {
-                        namespace: 'imported',
-                        content: `
-                            :vars {
-                                color1: red;
-                            }
-                        `,
-                    },
-                },
-            });
-
-            expect(cssExports.stVars).to.eql({});
-        });
-
-        it('should not resolve imported vars value on exported var', () => {
-            const cssExports = generateStylableExports({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :import {
-                                -st-from: "./imported.st.css";
-                                -st-named: color1;
-                            }
-                            :vars {
-                                color2: value(color1);
-                            }
-                        `,
-                    },
-                    '/imported.st.css': {
-                        namespace: 'imported',
-                        content: `
-                            :vars {
-                                color1: red;
-                            }
-                        `,
-                    },
-                },
-            });
-
-            expect(cssExports.stVars).to.eql({
-                color2: 'red',
-            });
-        });
-
-        it('should export custom values using their data structure', () => {
-            const cssExports = generateStylableExports({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :vars {
-                                myArray: st-array(1, 2, 3);
-                                deepArray: st-array(1, st-array(2, 3), value(myArray));
-                                object: st-map(x 1, y 2);
-                                deepObject: st-map(x 1, y 2, z st-map(x 1, y 2));
-                                mixed: st-map(x 1, y st-array(2, 3, st-array(4, st-map(z 5))));
-                            }
-                        `,
-                    },
-                },
-            });
-
-            expect(cssExports.stVars).to.eql({
-                myArray: ['1', '2', '3'],
-                deepArray: ['1', ['2', '3'], ['1', '2', '3']],
-                object: { x: '1', y: '2' },
-                deepObject: { x: '1', y: '2', z: { x: '1', y: '2' } },
-                mixed: { x: '1', y: ['2', '3', ['4', { z: '5' }]] },
-            });
-        });
-
-        it('should preserve escaping', () => {
-            const cssExports = generateStylableExports({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :vars {
-                                color\\.1: red;
-                            }
-                            `,
-                    },
-                },
-            });
-
-            expect(cssExports.stVars).to.eql({
-                'color\\.1': 'red',
-            });
-        });
-    });
-
     describe('complex example', () => {
         it('with classes, vars, st-vars, and keyframes', () => {
             const cssExports = generateStylableExports({
@@ -587,17 +458,8 @@ describe('Exports to js', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                            :vars {
-                                stVar: green;
-                            }
-
-                            @keyframes name {
-
-                            }
-
-                            .root {
-                                --cssVar: blue;
-                            }
+                            @keyframes name {}
+                            .root {}
                             .part {}
                             `,
                     },
@@ -609,12 +471,8 @@ describe('Exports to js', () => {
                     root: 'entry__root',
                     part: 'entry__part',
                 },
-                vars: {
-                    cssVar: '--entry-cssVar',
-                },
-                stVars: {
-                    stVar: 'green',
-                },
+                vars: {},
+                stVars: {},
                 keyframes: {
                     name: 'entry__name',
                 },
