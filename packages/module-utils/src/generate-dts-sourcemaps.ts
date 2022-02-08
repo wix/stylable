@@ -51,7 +51,7 @@ function getVarsSrcPosition(varName: string, meta: StylableMeta): Position | und
 }
 
 function getStVarsSrcPosition(varName: string, meta: StylableMeta): Position | undefined {
-    const stVar = meta.vars.find((v) => v.name === varName);
+    const stVar = Object.values(meta.getAllStVars()).find((v) => v.name === varName);
 
     if (stVar?.node.source?.start) {
         return {

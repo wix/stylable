@@ -379,7 +379,7 @@ function filterPartialMixinDecl(
     do {
         size = overrideSet.size;
         regexp = new RegExp(`value\\((\\s*${Array.from(overrideSet).join('\\s*)|(\\s*')}\\s*)\\)`);
-        for (const { text, name } of meta.vars) {
+        for (const { text, name } of Object.values(meta.getAllStVars())) {
             if (!overrideSet.has(name) && text.match(regexp)) {
                 overrideSet.add(name);
             }

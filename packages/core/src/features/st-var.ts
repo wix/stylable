@@ -8,6 +8,7 @@ import type { EvalValueData, EvalValueResult } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
 import { walkSelector } from '../helpers/selector';
 import { stringifyFunction, getStringValue } from '../helpers/value';
+import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
@@ -143,7 +144,9 @@ function collectVarSymbols(context: FeatureContext, rule: postcss.Rule) {
             node: decl,
         });
         // deprecated
-        context.meta.vars.push(STSymbol.get(context.meta, name, `var`)!);
+        ignoreDeprecationWarn(() => {
+            context.meta.vars.push(STSymbol.get(context.meta, name, `var`)!);
+        });
     });
 }
 

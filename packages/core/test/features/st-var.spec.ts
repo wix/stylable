@@ -1,5 +1,6 @@
 import { STSymbol, STVar } from '@stylable/core/dist/features';
 import { stTypes, box } from '@stylable/core/dist/custom-values';
+import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import postcssValueParser from 'postcss-value-parser';
@@ -41,10 +42,12 @@ describe(`features/st-var`, () => {
         expect(exports.stVars.varB, `varB JS export`).to.eql(`b-val`);
 
         // deprecation
-        expect(meta.vars, `deprecated 'meta.vars'`).to.eql([
-            STVar.get(meta, `varA`),
-            STVar.get(meta, `varB`),
-        ]);
+        ignoreDeprecationWarn(() => {
+            expect(meta.vars, `deprecated 'meta.vars'`).to.eql([
+                STVar.get(meta, `varA`),
+                STVar.get(meta, `varB`),
+            ]);
+        });
     });
     it(`should process multiple :vars definitions`, () => {
         const { sheets } = testStylableCore(`
