@@ -5,16 +5,15 @@ import {
     findTestLocations,
 } from '@stylable/core-test-kit';
 import {
-    functionWarnings,
     mixinWarnings,
     valueMapping,
     processorWarnings,
     transformerWarnings,
     nativePseudoElements,
-    rootValueMapping,
     valueParserWarnings,
 } from '@stylable/core';
-import { STImport, CSSClass, CSSType, STSymbol } from '@stylable/core/dist/features';
+import { valueDiagnostics } from '@stylable/core/dist/helpers/value';
+import { STImport, CSSClass, CSSType, STVar } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
 describe('findTestLocations', () => {
@@ -374,7 +373,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                     [
                         {
-                            message: valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
+                            message: valueDiagnostics.INVALID_NAMED_PARAMS(),
                             file: '/style.st.css',
                         },
                     ]
@@ -549,7 +548,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
                 expectTransformDiagnostics(config, [
-                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' },
+                    { message: STVar.diagnostics.UNKNOWN_VAR('missingVar'), file: '/main.css' },
                 ]);
             });
 
@@ -575,30 +574,8 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
                 expectTransformDiagnostics(config, [
-                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' },
+                    { message: STVar.diagnostics.UNKNOWN_VAR('missingVar'), file: '/main.css' },
                 ]);
-            });
-        });
-
-        describe(':vars', () => {
-            it('should return warning when defined in a complex selector', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                |.gaga:vars|{
-                    myColor:red;
-                }
-
-                `,
-
-                    [
-                        {
-                            message: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                rootValueMapping.vars
-                            ),
-                            file: 'main.css',
-                        },
-                    ]
-                );
             });
         });
 
@@ -673,77 +650,6 @@ describe('diagnostics: warnings and errors', () => {
             expectTransformDiagnostics(config, [
                 { message: processorWarnings.OVERRIDE_MIXIN('-st-mixin'), file: '/main.css' },
             ]);
-        });
-
-        describe('from import', () => {
-            it('should warn when import redeclare same symbol (in different block types)', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |:import {
-                        -st-from: './file.st.css';
-                        -st-default: $Name$;
-                    }|
-                    :vars {
-                        Name: red;
-                    }
-                `,
-                    [
-                        {
-                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
-                            file: 'main.st.css',
-                        },
-                        {
-                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('Name'),
-                            file: 'main.st.css',
-                            skipLocationCheck: true,
-                        },
-                    ]
-                );
-            });
-        });
-    });
-
-    describe('complex examples', () => {
-        describe(':import', () => {
-            it('should return warning for unknown var import', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :import{
-                                -st-from: "./file.st.css";
-                                -st-named: myVar;
-                            }
-                            .root {
-                                |color: value($myVar$);|
-                            }`,
-                        },
-                        '/file.st.css': {
-                            content: `
-                            :vars {
-                                otherVar: someValue;
-                            }
-                            `,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    {
-                        message: STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                            'myVar',
-                            './file.st.css'
-                        ),
-                        file: '/main.st.css',
-                        skip: true,
-                        skipLocationCheck: true,
-                    },
-                    {
-                        message: functionWarnings.CANNOT_FIND_IMPORTED_VAR('myVar'),
-                        file: '/main.st.css',
-                    },
-                ]);
-            });
         });
     });
 

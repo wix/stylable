@@ -1,6 +1,7 @@
 import type { StylableMeta } from '../stylable-meta';
 import type { ScopeContext, StylableExports } from '../stylable-transformer';
 import type { StylableResolver } from '../stylable-resolver';
+import type { StylableEvaluator, EvalValueData } from '../functions';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type { Diagnostics } from '../diagnostics';
@@ -18,6 +19,7 @@ export interface FeatureContext {
 }
 export interface FeatureTransformContext extends FeatureContext {
     resolver: StylableResolver;
+    evaluator: StylableEvaluator;
 }
 
 export interface NodeTypes {
@@ -25,6 +27,8 @@ export interface NodeTypes {
     IMMUTABLE_SELECTOR?: any;
     RESOLVED?: any;
 }
+
+type SelectorWalkReturn = number | undefined | void;
 
 export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     metaInit: (context: FeatureContext) => void;
@@ -39,7 +43,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         node: T['IMMUTABLE_SELECTOR'];
         rule: postcss.Rule;
         walkContext: SelectorNodeContext;
-    }) => void;
+    }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
     transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
@@ -58,10 +62,10 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         decl: postcss.Declaration;
         resolved: T['RESOLVED'];
     }) => void;
-    transformDeclarationValue: (options: {
+    transformValue: (options: {
         context: FeatureTransformContext;
         node: ParsedValue;
-        resolved: T['RESOLVED'];
+        data: EvalValueData;
     }) => void;
     transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
 }
@@ -96,7 +100,7 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
     transformDeclaration() {
         /**/
     },
-    transformDeclarationValue() {
+    transformValue() {
         /**/
     },
     transformJSExports() {
