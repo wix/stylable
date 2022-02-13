@@ -250,7 +250,6 @@ describe(`features/css-class`, () => {
             // JS exports - ToDo: add
         });
         it(`should alias imported classes`, () => {
-            // ToDo: fix diagnostics should be on transform and not analyze
             const { sheets } = testStylableCore({
                 '/classes.st.css': `
                     .imported-part {}
@@ -265,7 +264,7 @@ describe(`features/css-class`, () => {
 
                     /* 
                         @rule .entry__unknown-alias
-                        @analyze-error(unresolved alias) word(unknown-alias) ${CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(
+                        @transform-error(unresolved alias) word(unknown-alias) ${CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(
                             `unknown-alias`
                         )} 
                     */
@@ -372,7 +371,6 @@ describe(`features/css-class`, () => {
             });
         });
         it(`should handle un-supported -st-extends imported cases`, () => {
-            // ToDo: fix diagnostics should be on transform and not analyze
             testStylableCore({
                 '/code.js': ``,
                 '/sheet.st.css': `
@@ -385,19 +383,19 @@ describe(`features/css-class`, () => {
                     @st-import [unknown, stColor] from './sheet.st.css';
 
                     .a {
-                        /* @analyze-error(javascript) word(JS) ${CSSClass.diagnostics.CANNOT_EXTEND_JS()} */
+                        /* @transform-error(javascript) word(JS) ${CSSClass.diagnostics.CANNOT_EXTEND_JS()} */
                         -st-extends: JS;
                     }
                     
                     .b {
-                        /* @analyze-error(unresolved named) word(unknown) ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
+                        /* @transform-error(unresolved named) word(unknown) ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
                             `unknown`
                         )} */
                         -st-extends: unknown;
                     }
                     
                     .c {
-                        /* @analyze-error(unsupported symbol) word(stColor) ${CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE()} */
+                        /* @transform-error(unsupported symbol) word(stColor) ${CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE()} */
                         -st-extends: stColor;
                     }
                 `,

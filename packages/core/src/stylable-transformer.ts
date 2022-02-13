@@ -644,7 +644,7 @@ export class StylableTransformer {
     private getMetaParts(meta: StylableMeta): MetaParts {
         let metaParts = this.metaParts.get(meta);
         if (!metaParts) {
-            metaParts = this.resolver.resolveParts(meta, meta.diagnostics);
+            metaParts = this.resolver.resolveParts(meta, this.diagnostics);
             this.metaParts.set(meta, metaParts);
         }
         return metaParts;
