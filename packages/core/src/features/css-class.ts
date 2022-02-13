@@ -33,6 +33,12 @@ export const diagnostics = {
     UNSCOPED_CLASS(name: string) {
         return `unscoped class "${name}" will affect all elements of the same type in the document`;
     },
+    EMPTY_ST_GLOBAL() {
+        return `-st-global must contain a valid selector`;
+    },
+    UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL() {
+        return `unsupported multi selector in -st-global`;
+    },
     // -st-extends
     IMPORT_ISNT_EXTENDABLE() {
         return 'import is not extendable';

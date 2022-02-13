@@ -499,7 +499,10 @@ export class StylableProcessor implements FeatureContext {
         const name = rule.selector.replace('.', '');
         const classSymbol = CSSClass.get(this.meta, name);
         if (classSymbol) {
-            classSymbol[valueMapping.global] = parseGlobal(decl, this.diagnostics);
+            const globalSelectorAst = parseGlobal(decl, this.diagnostics);
+            if (globalSelectorAst) {
+                classSymbol[valueMapping.global] = globalSelectorAst;
+            }
         }
     }
 

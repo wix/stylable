@@ -195,6 +195,33 @@ describe(`features/css-class`, () => {
         expect(exports.classes.d, `complex selector JS export`).to.eql(undefined);
         expect(exports.classes.e, `not only classes compound JS export`).to.eql(undefined);
     });
+    it(`should handle invalid -st-global value`, () => {
+        // ToDo: it might be possible to support multiple selectors using custom-selector
+        const { sheets } = testStylableCore(`
+            /* @rule(empty) .entry__a */
+            .a {
+                /* @analyze-error(empty) ${CSSClass.diagnostics.EMPTY_ST_GLOBAL()} */
+                -st-global: "";
+            }
+
+            /* @rule(empty) .y */
+            .b {
+                /* @analyze-error(multi) ${CSSClass.diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL()} */
+                -st-global: ".y , .z";
+            }
+        `);
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        // meta.globals
+        expect(meta.globals).to.eql({
+            y: true,
+        });
+
+        // JS exports
+        expect(exports.classes.a, `a (empty) JS export`).to.eql(`entry__a`);
+        expect(exports.classes.b, `b (multi) JS export`).to.eql(`y`);
+    });
     it(`should override with :global() value`, () => {
         const { sheets } = testStylableCore(`
             /* @rule(simple selector) .a */
