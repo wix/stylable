@@ -38,10 +38,15 @@ import {
     CSSCustomProperty,
 } from './features';
 import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
-import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
+import {
+    CSSResolve,
+    StylableResolverCache,
+    StylableResolver,
+    MetaParts,
+} from './stylable-resolver';
 import { isCSSVarProp } from './helpers/css-custom-property';
 import { valueMapping } from './stylable-value-parsers';
-import { unescapeCSS, namespaceEscape } from './helpers/escape';
+import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 
 const { hasOwnProperty } = Object.prototype;
@@ -175,14 +180,22 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
         };
+        const metaParts = this.getMetaParts(meta);
+        const cssClassResolve = CSSClass.hooks.transformResolve({
+            context: transformContext,
+            metaParts,
+        });
         const stVarResolve = STVar.hooks.transformResolve({
             context: transformContext,
+            metaParts,
         });
         const keyframesResolve = CSSKeyframes.hooks.transformResolve({
             context: transformContext,
+            metaParts,
         });
         const cssVarsMapping = CSSCustomProperty.hooks.transformResolve({
             context: transformContext,
+            metaParts,
         });
 
         ast.walkRules((rule) => {
@@ -259,7 +272,10 @@ export class StylableTransformer {
         );
 
         if (metaExports) {
-            Object.assign(metaExports.classes, this.exportClasses(meta));
+            CSSClass.hooks.transformJSExports({
+                exports: metaExports,
+                resolved: cssClassResolve,
+            });
             STVar.hooks.transformJSExports({
                 exports: metaExports,
                 resolved: stVarResolve,
@@ -308,31 +324,6 @@ export class StylableTransformer {
     }
     public scope(name: string, ns: string, delimiter: string = this.delimiter) {
         return namespace(name, ns, delimiter);
-    }
-    public exportClasses(meta: StylableMeta) {
-        const locals: Record<string, string> = {};
-        const metaParts = this.getMetaParts(meta);
-        for (const [localName, resolved] of Object.entries(metaParts.class)) {
-            const exportedClasses = this.getPartExports(resolved);
-            locals[localName] = unescapeCSS(exportedClasses.join(' '));
-        }
-        return locals;
-    }
-    /* None alias symbol */
-    public getPartExports(resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>) {
-        const exportedClasses = [];
-        let first = true;
-        for (const { meta, symbol } of resolved) {
-            if (!first && symbol[valueMapping.root]) {
-                break;
-            }
-            first = false;
-            if (symbol.alias && !symbol[valueMapping.extends]) {
-                continue;
-            }
-            exportedClasses.push(this.scope(symbol.name, meta.namespace));
-        }
-        return exportedClasses;
     }
     public scopeSelector(
         originMeta: StylableMeta,
@@ -832,9 +823,4 @@ export class ScopeContext {
 
         return ctx;
     }
-}
-
-interface MetaParts {
-    class: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
-    element: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
 }

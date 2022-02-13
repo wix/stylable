@@ -1,6 +1,6 @@
 import type { StylableMeta } from '../stylable-meta';
 import type { ScopeContext, StylableExports } from '../stylable-transformer';
-import type { StylableResolver } from '../stylable-resolver';
+import type { StylableResolver, MetaParts } from '../stylable-resolver';
 import type { StylableEvaluator, EvalValueData } from '../functions';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
@@ -46,7 +46,10 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
-    transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
+    transformResolve: (options: {
+        context: FeatureTransformContext;
+        metaParts: MetaParts;
+    }) => T['RESOLVED'];
     transformAtRuleNode: (options: {
         context: FeatureTransformContext;
         atRule: postcss.AtRule;

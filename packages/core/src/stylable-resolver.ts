@@ -56,6 +56,11 @@ export interface JSResolve {
     meta: null;
 }
 
+export interface MetaParts {
+    class: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
+    element: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
+}
+
 export type ReportError = (
     res: CSSResolve | JSResolve | null,
     extend: ImportSymbol | ClassSymbol | ElementSymbol,

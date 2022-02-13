@@ -6,7 +6,8 @@ import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import * as STGlobal from './st-global';
 import { getOriginDefinition } from '../helpers/resolve';
-import { namespaceEscape } from '../helpers/escape';
+import { namespace } from '../helpers/namespace';
+import { namespaceEscape, unescapeCSS } from '../helpers/escape';
 import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
 import { valueMapping } from '../stylable-value-parsers';
@@ -49,7 +50,11 @@ export const diagnostics = {
 
 // HOOKS
 
-export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: ImmutableClass }>({
+export const hooks = createFeature<{
+    SELECTOR: Class;
+    IMMUTABLE_SELECTOR: ImmutableClass;
+    RESOLVED: Record<string, string>;
+}>({
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
             // error on functional class
@@ -62,6 +67,25 @@ export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: Immuta
             );
         }
         addClass(context, node.value, rule);
+    },
+    transformResolve({ metaParts }) {
+        const locals: Record<string, string> = {};
+        for (const [localName, resolved] of Object.entries(metaParts.class)) {
+            const exportedClasses = [];
+            let first = true;
+            for (const { meta, symbol } of resolved) {
+                if (!first && symbol[valueMapping.root]) {
+                    break;
+                }
+                first = false;
+                if (symbol.alias && !symbol[valueMapping.extends]) {
+                    continue;
+                }
+                exportedClasses.push(namespace(symbol.name, meta.namespace));
+            }
+            locals[localName] = unescapeCSS(exportedClasses.join(' '));
+        }
+        return locals;
     },
     transformSelectorNode({ context, selectorContext, node }) {
         const { originMeta, resolver } = selectorContext;
@@ -83,6 +107,9 @@ export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: Immuta
             );
         }
         namespaceClass(meta, symbol, node, originMeta);
+    },
+    transformJSExports({ exports, resolved }) {
+        Object.assign(exports.classes, resolved);
     },
 });
 
