@@ -1,483 +1,406 @@
 import { STImport, CSSClass, STSymbol } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import {
-    generateStylableResult,
-    expectAnalyzeDiagnostics,
-    testInlineExpects,
-    generateStylableRoot,
-    expectTransformDiagnostics,
-} from '@stylable/core-test-kit';
+import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/css-class`, () => {
-    describe(`meta`, () => {
-        it(`should collect classes`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            .a {}
-                            .b {}
-                        `,
-                    },
-                },
-            });
+    it(`should have root class`, () => {
+        const { sheets } = testStylableCore({
+            '/auto.st.css': ``,
+            '/explicit.st.css': `
+                /* @rule .explicit__root */
+                .root {}
+            `,
+        });
 
-            expect(CSSClass.get(meta, `a`), `a`).to.contain({
-                _kind: `class`,
-                name: 'a',
-            });
-            expect(CSSClass.get(meta, `b`), `b`).to.contain({
-                _kind: `class`,
-                name: 'b',
-            });
-            expect(meta.getClass(`a`), `meta.getClass`).to.equal(CSSClass.get(meta, `a`));
-            // deprecation
-            expect(
-                ignoreDeprecationWarn(() => meta.classes),
-                `deprecated 'meta.classes'`
-            ).to.eql({
+        const autoResult = sheets['/auto.st.css'];
+        const explicitResult = sheets['/explicit.st.css'];
+
+        shouldReportNoDiagnostics(autoResult.meta);
+
+        // symbols
+        expect(CSSClass.get(autoResult.meta, `root`), `auto root symbol`).to.contain({
+            _kind: `class`,
+            name: 'root',
+        });
+        expect(CSSClass.get(explicitResult.meta, `root`), `explicit root symbol`).to.contain({
+            _kind: `class`,
+            name: 'root',
+        });
+
+        // JS exports
+        expect(autoResult.exports.classes.root, `auto root JS export`).to.eql(`auto__root`);
+        expect(explicitResult.exports.classes.root, `explicit root JS export`).to.eql(
+            `explicit__root`
+        );
+    });
+    it(`should process css class selectors`, () => {
+        const { sheets } = testStylableCore(`
+            /* @rule(single) .entry__a */
+            .a {}
+
+            /* @rule(multi) .entry__b, .entry__c */
+            .b, .c {}
+
+            /* @rule(complex) .entry__d .entry__e*/
+            .d .e {}
+        `);
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+
+        // symbols
+        expect(CSSClass.get(meta, `root`), `default root symbol`).to.contain({
+            _kind: `class`,
+            name: 'root',
+        });
+        expect(CSSClass.get(meta, `a`), `a symbol`).to.contain({
+            _kind: `class`,
+            name: 'a',
+        });
+        expect(CSSClass.get(meta, `b`), `b symbol`).to.contain({
+            _kind: `class`,
+            name: 'b',
+        });
+        expect(CSSClass.get(meta, `c`), `c symbol`).to.contain({
+            _kind: `class`,
+            name: 'c',
+        });
+        expect(CSSClass.get(meta, `d`), `d symbol`).to.contain({
+            _kind: `class`,
+            name: 'd',
+        });
+        expect(CSSClass.get(meta, `e`), `e symbol`).to.contain({
+            _kind: `class`,
+            name: 'e',
+        });
+
+        // public API
+        expect(meta.getClass(`root`), `a meta.getClass`).to.equal(CSSClass.get(meta, `root`));
+        expect(meta.getClass(`a`), `a meta.getClass`).to.equal(CSSClass.get(meta, `a`));
+        expect(meta.getClass(`b`), `b meta.getClass`).to.equal(CSSClass.get(meta, `b`));
+        expect(meta.getClass(`c`), `c meta.getClass`).to.equal(CSSClass.get(meta, `c`));
+        expect(meta.getClass(`d`), `d meta.getClass`).to.equal(CSSClass.get(meta, `d`));
+        expect(meta.getClass(`e`), `e meta.getClass`).to.equal(CSSClass.get(meta, `e`));
+
+        // JS exports
+        expect(exports.classes.root, `root JS export`).to.eql(`entry__root`);
+        expect(exports.classes.a, `a JS export`).to.eql(`entry__a`);
+        expect(exports.classes.b, `b JS export`).to.eql(`entry__b`);
+        expect(exports.classes.c, `c JS export`).to.eql(`entry__c`);
+        expect(exports.classes.d, `d JS export`).to.eql(`entry__d`);
+        expect(exports.classes.e, `e JS export`).to.eql(`entry__e`);
+
+        // deprecation
+        ignoreDeprecationWarn(() => {
+            expect(meta.classes, `deprecated 'meta.classes'`).to.eql({
                 root: CSSClass.get(meta, `root`),
                 a: CSSClass.get(meta, `a`),
                 b: CSSClass.get(meta, `b`),
+                c: CSSClass.get(meta, `c`),
+                d: CSSClass.get(meta, `d`),
+                e: CSSClass.get(meta, `e`),
             });
         });
-        it(`should have root class symbol by default`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: ``,
+    });
+    it(`should add to general symbols`, () => {
+        const { sheets } = testStylableCore(`
+            /* @rule .entry__btn */
+            .btn {}
+            /* @rule .entry__icon */
+            .icon {}
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        expect(CSSClass.get(meta, `root`), `root general symbol`).to.equal(
+            STSymbol.get(meta, `root`)
+        );
+        expect(STSymbol.get(meta, `btn`), `btn general symbol`).to.equal(CSSClass.get(meta, `btn`));
+        expect(STSymbol.get(meta, `icon`), `icon general symbol`).to.equal(
+            CSSClass.get(meta, `icon`)
+        );
+
+        expect(meta.getAllClasses(), `meta.getAllClasses()`).to.eql({
+            root: CSSClass.get(meta, `root`),
+            btn: CSSClass.get(meta, `btn`),
+            icon: CSSClass.get(meta, `icon`),
+        });
+        expect(CSSClass.getAll(meta), `CSSClass.getAll(meta)`).to.eql(meta.getAllClasses());
+    });
+    it(`should override with -st-global value`, () => {
+        const { sheets } = testStylableCore(`
+            /* @rule(simple class) .x */
+            .a {
+                -st-global: ".x";
+            }
+
+            /* @rule .z.zz */
+            .b {
+                -st-global: ".z.zz";
+            }
+        `);
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+
+        // symbols
+        expect(CSSClass.get(meta, `a`), `a symbol`).to.contain({
+            _kind: `class`,
+            name: 'a',
+            // '-st-global': // ToDo: add
+        });
+        expect(CSSClass.get(meta, `b`), `b symbol`).to.contain({
+            _kind: `class`,
+            name: 'b',
+            // '-st-global': // ToDo: add
+        });
+
+        // JS exports - ToDo: fix - export correctly if possible or don't export at all
+        expect(exports.classes.a, `a JS export`).to.eql(`entry__a`);
+        expect(exports.classes.b, `b JS export`).to.eql(`entry__b`);
+    });
+    it(`should escape`, () => {
+        const { sheets } = testStylableCore(
+            `
+            /* @rule .entry\\.__a\\. */
+            .a\\. {}
+        `,
+            {
+                stylableConfig: {
+                    resolveNamespace(namespace) {
+                        // add . character that needs escaping in CSS
+                        return namespace + `.`;
                     },
                 },
+            }
+        );
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+
+        // symbols - ToDo: remove escape from key?
+        expect(CSSClass.get(meta, `a\\.`), `symbol`).to.contain({
+            _kind: `class`,
+            name: 'a\\.',
+        });
+
+        // JS exports - ToDo: remove escape from key
+        expect(exports.classes[`a\\.`], `JS export`).to.eql(`entry.__a.`);
+    });
+    it(`should report invalid cases`, () => {
+        const { sheets } = testStylableCore(`
+            /* 
+                @rule(functional class) .entry__a()
+                @analyze-error(functional class) ${CSSClass.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
+                    `.a`,
+                    `class`
+                )}
+            */
+            .a() {}
+        `);
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        // symbols
+        expect(CSSClass.get(meta, `a`), `symbol`).to.contain({
+            _kind: `class`,
+            name: 'a',
+        });
+
+        // JS exports
+        expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
+    });
+    describe(`st-import`, () => {
+        it(`should resolve imported classes`, () => {
+            const { sheets } = testStylableCore({
+                '/classes.st.css': `
+                    .before {}
+                    .after {}
+                `,
+                '/entry.st.css': `
+                    .root .before {}
+
+                    @st-import [before, after] from './classes.st.css';
+
+                    .root .after {}
+                `,
             });
 
-            expect(CSSClass.get(meta, `root`)).to.contain({
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            const importDef = meta.getImportStatements()[0];
+            expect(CSSClass.get(meta, `before`), `before symbol`).to.eql({
                 _kind: `class`,
-                name: 'root',
+                name: 'before',
+                alias: STImport.createImportSymbol(importDef, `named`, `before`, `/`),
             });
+            expect(CSSClass.get(meta, `after`), `after symbol`).to.eql({
+                _kind: `class`,
+                name: 'after',
+                alias: STImport.createImportSymbol(importDef, `named`, `after`, `/`),
+            });
+
+            // JS exports - ToDo: add
         });
-        it(`should add to general symbols`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            .a {}
-                        `,
-                    },
-                },
+        it(`should alias imported classes`, () => {
+            // ToDo: fix diagnostics should be on transform and not analyze
+            const { sheets } = testStylableCore({
+                '/classes.st.css': `
+                    .imported-part {}
+                `,
+                '/entry.st.css': `
+                    @st-import [imported-part, unknown-alias] from './classes.st.css';
+
+                    /*
+                        @rule(alias) .classes__imported-part
+                    */
+                    .imported-part {}
+
+                    /* 
+                        @rule .entry__unknown-alias
+                        @analyze-error(unresolved alias) word(unknown-alias) ${CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(
+                            `unknown-alias`
+                        )} 
+                    */
+                    .unknown-alias {}
+                `,
             });
 
-            expect(CSSClass.get(meta, `a`), `a`).to.equal(STSymbol.get(meta, `a`));
-            expect(CSSClass.get(meta, `root`), `root`).to.equal(STSymbol.get(meta, `root`));
-        });
-        it(`should return collected symbols`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            .btn {}
-                            .gallery {}
-                        `,
-                    },
-                },
+            const { meta, exports } = sheets[`/entry.st.css`];
+
+            // symbols
+            const importDef = meta.getImportStatements()[0];
+            expect(CSSClass.get(meta, `imported-part`), `imported-part symbol`).to.eql({
+                _kind: `class`,
+                name: 'imported-part',
+                alias: STImport.createImportSymbol(importDef, `named`, `imported-part`, `/`),
+            });
+            expect(CSSClass.get(meta, `unknown-alias`), `unknown-alias symbol`).to.eql({
+                _kind: `class`,
+                name: 'unknown-alias',
+                alias: STImport.createImportSymbol(importDef, `named`, `unknown-alias`, `/`),
             });
 
-            expect(CSSClass.getAll(meta)).to.eql({
-                root: CSSClass.get(meta, `root`),
-                btn: CSSClass.get(meta, `btn`),
-                gallery: CSSClass.get(meta, `gallery`),
-            });
-            expect(meta.getAllClasses(), `meta.getAllClasses`).to.eql(CSSClass.getAll(meta));
-        });
-        describe(`st-import`, () => {
-            it(`should mark class as import alias`, () => {
-                const { meta } = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: `entry`,
-                            content: `
-                                .root .before {}
-                                @st-import [before, after] from './other.st.css';
-                                .root .after {}
-                            `,
-                        },
-                        '/other.st.css': {
-                            namespace: `other`,
-                            content: `
-                                .before {}
-                                .after {}
-                            `,
-                        },
-                    },
-                });
-
-                const importDef = meta.getImportStatements()[0];
-                expect(CSSClass.get(meta, `before`), `before symbol`).to.eql({
-                    _kind: `class`,
-                    name: 'before',
-                    alias: STImport.createImportSymbol(importDef, `named`, `before`, `/`),
-                });
-                expect(CSSClass.get(meta, `after`), `after symbol`).to.eql({
-                    _kind: `class`,
-                    name: 'after',
-                    alias: STImport.createImportSymbol(importDef, `named`, `after`, `/`),
-                });
-                expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
-            });
-            it(`should not override root`, () => {
-                const { meta } = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: `entry`,
-                            content: `
-                                @st-import [root] from './other.st.css';
-                                .root{}
-                            `,
-                        },
-                        '/other.st.css': {
-                            namespace: `other`,
-                            content: ``,
-                        },
-                    },
-                });
-
-                expect(CSSClass.get(meta, `root`), `class`).to.eql({
-                    _kind: `class`,
-                    name: 'root',
-                    '-st-root': true,
-                    alias: undefined,
-                });
-                expect(STSymbol.get(meta, `root`), `general`).to.equal(CSSClass.get(meta, `root`));
-            });
-        });
-    });
-    describe(`transform`, () => {
-        it('should namespace local classes', () => {
-            const result = generateStylableRoot({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            /* @check .entry__a */
-                            .a {}
-                            /* @check .entry__b, .entry__c */
-                            .b, .c {}
-                            /* @check .entry__d .entry__e*/
-                            .d .e {}
-                        `,
-                    },
-                },
-            });
-
-            testInlineExpects(result);
-        });
-        it('scope local root class', () => {
-            const result = generateStylableRoot({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            /* @check .entry__root */
-                            .root {}
-                            /* @check .entry__root .entry__a */
-                            .root .a {}
-                            /* @check .entry__root .entry__b, .entry__c */
-                            .root .b, .c{}
-                        `,
-                    },
-                },
-            });
-
-            testInlineExpects(result);
-        });
-        describe(`-st-global`, () => {
-            it('should replace class symbol', () => {
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                /* @check .x */
-                                .root {
-                                    -st-global: ".x";
-                                }
-                                /* @check .y*/
-                                .a {
-                                    -st-global: ".y";
-                                }
-                            `,
-                        },
-                    },
-                });
-
-                testInlineExpects(result);
-            });
-            it('should replace with complex selector', () => {
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                /* @check .x.y */
-                                .root {
-                                    -st-global: ".x.y";
-                                }
-                                /* @check .z.zz */
-                                .a {
-                                    -st-global: ".z.zz";
-                                }
-                            `,
-                        },
-                    },
-                });
-
-                testInlineExpects(result);
-            });
-            it(`should replace imported class`, () => {
-                const result = generateStylableRoot({
-                    entry: `/style.st.css`,
-                    files: {
-                        '/style.st.css': {
-                            namespace: 'ns',
-                            content: `
-                                @st-import [root as iRoot, part as iPart] from "./inner.st.css";
-
-                                /* @check .r */
-                                .iRoot {}
-
-                                /* @check .p */
-                                .iPart {}
-                            `,
-                        },
-                        '/inner.st.css': {
-                            namespace: 'ns1',
-                            content: `
-                                .root {
-                                    -st-global: ".r";
-                                }
-                                .part {
-                                    -st-global: ".p"
-                                }
-                            `,
-                        },
-                    },
-                });
-
-                testInlineExpects(result);
-            });
-        });
-        describe(`escape`, () => {
-            it('should namespace and preserve local class', () => {
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry.1',
-                            content: `
-                                /* @check .entry\\.1__a\\. */
-                                .a\\. {}
-                            `,
-                        },
-                    },
-                });
-
-                testInlineExpects(result);
-            });
-        });
-    });
-    describe(`diagnostics`, () => {
-        it(`should error on unsupported functional class`, () => {
-            expectAnalyzeDiagnostics(
-                `|$.abc()$| {}`,
-                [
-                    {
-                        file: `/entry.st.css`,
-                        message: CSSClass.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.abc`, `class`),
-                        severity: `error`,
-                    },
-                ],
-                { partial: true }
+            // exports
+            expect(exports.classes[`imported-part`], `imported-part JS export`).to.eql(
+                `classes__imported-part`
+            );
+            expect(exports.classes[`unknown-alias`], `unknown-alias JS export`).to.eql(
+                `` // ToDo: consider exporting `entry__unknown-alias`
             );
         });
-        describe(`scoping`, () => {
-            it(`should warn on unscoped class`, () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    @st-import [importedPart] from "./imported.st.css";
-                    |.$importedPart$|{}
-                    `,
-                    [
-                        {
-                            file: `/entry.st.css`,
-                            message: CSSClass.diagnostics.UNSCOPED_CLASS(`importedPart`),
-                            severity: `warning`,
-                        },
-                    ]
-                );
+        it(`should not override root`, () => {
+            const { sheets } = testStylableCore({
+                '/other.st.css': ``,
+                '/entry.st.css': `
+                    /* ToDo: test re-declare diagnostic */
+                    @st-import [root] from './other.st.css';
+
+                    /* @rule .entry__root */
+                    .root{}
+                `,
             });
-            it(`should not warn if the selector is scoped before imported class`, () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    @st-import [importedPart] from "./imported.st.css";
+
+            const { meta } = sheets['/entry.st.css'];
+
+            // symbols
+            expect(CSSClass.get(meta, `root`), `class`).to.eql({
+                _kind: `class`,
+                name: 'root',
+                '-st-root': true,
+                alias: undefined,
+            });
+            expect(STSymbol.get(meta, `root`), `general`).to.equal(CSSClass.get(meta, `root`));
+        });
+        it(`should report unscoped class`, () => {
+            /*
+            ToDo: consider to accept as scoped when local symbol exists
+            anywhere in the selector: ".importedPart .local div"
+            */
+            const { sheets } = testStylableCore({
+                '/classes.st.css': `
+                    .importedPart {}
+                `,
+                '/entry.st.css': `
+                    @st-import [importedPart] from "./classes.st.css";
+
+                    /* @analyze-warn word(importedPart) ${CSSClass.diagnostics.UNSCOPED_CLASS(
+                        `importedPart`
+                    )} */
+                    .importedPart {}
+
+                    /* NO ERROR - locally scoped */
                     .local .importedPart {}
-                    `,
-                    []
-                );
-            });
-            it(`should not warn if a later part of the compound selector is scoped`, () => {
-                /*
-                ToDo: consider to accept as scoped when local symbol exists
-                anywhere in the selector: ".importedPart .local div"
-                */
-                expectAnalyzeDiagnostics(
-                    `
-                    @st-import [importedPart] from "./imported.st.css";
-                    .importedPart.local {}
                     .local.importedPart {}
-                    `,
-                    []
-                );
+                    .importedPart.local {}
+                `,
+            });
+
+            const { meta } = sheets[`/entry.st.css`];
+
+            expect(meta.diagnostics.reports.length, `only unscoped diagnostic`).to.equal(1);
+        });
+        it(`should override with imported -st-global`, () => {
+            testStylableCore({
+                '/comp.st.css': `
+                    .root {
+                        -st-global: .r;
+                    }
+                    .part {
+                        -st-global: .p;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import Comp, [root as iRoot, part as iPart] from './comp.st.css';
+
+                    /* @rule .r */
+                    Comp {}
+                    
+                    /* @rule .r */
+                    .iRoot {}
+
+                    /* @rule .p */
+                    .iPart {}
+                `,
             });
         });
-        describe(`-st-extends`, () => {
-            it(`should error on extended JS`, () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: `/main.css`,
-                        files: {
-                            '/main.css': {
-                                content: `
-                                    :import {
-                                        -st-from: './imported.js';
-                                        -st-default: special;
-                                    }
-                                    .myclass {
-                                        |-st-extends: $special$|
-                                    }
-                            `,
-                            },
-                            '/imported.js': {
-                                content: ``,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            file: `/main.css`,
-                            message: CSSClass.diagnostics.CANNOT_EXTEND_JS(),
-                            severity: `error`,
-                        },
-                    ]
-                );
-            });
-            it(`should error on extended unknown named import`, () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: `/main.css`,
-                        files: {
-                            '/main.css': {
-                                content: `
-                                    :import {
-                                        -st-from: './file.st.css';
-                                        -st-named: special;
-                                    }
-                                    .myclass {
-                                        |-st-extends: $special$;|
-                                    }
-                            `,
-                            },
-                            '/file.st.css': {
-                                content: ``,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            file: `/main.css`,
-                            message: CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(`special`),
-                            severity: `error`,
-                        },
-                    ],
-                    { partial: true }
-                );
-            });
-            it(`should error on extended symbols that are not a class`, () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: `/main.st.css`,
-                        files: {
-                            '/main.st.css': {
-                                content: `
-                                    :import {
-                                        -st-from: './file.st.css';
-                                        -st-named: special;
-                                    }
-                                    .myclass {
-                                        |-st-extends: $special$|;
-                                    }
-                            `,
-                            },
-                            '/file.st.css': {
-                                content: `
-                                    :vars {
-                                        special: red;
-                                    }
-                            `,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            file: `/main.st.css`,
-                            message: CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(),
-                            severity: `error`,
-                        },
-                    ]
-                );
-            });
-            it(`should error on extended unresolved alias`, () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: `/main.st.css`,
-                        files: {
-                            '/main.st.css': {
-                                namespace: `entry`,
-                                content: `
-                                    @st-import Imported [inner-class] from "./imported.st.css";
-        
-                                    .root .Imported{}
-                                    |.root .$inner-class$ {}|
-                            `,
-                            },
-                            '/imported.st.css': {
-                                namespace: `imported`,
-                                content: ``,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            message: CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(`inner-class`),
-                            file: `/main.st.css`,
-                            severity: `error`,
-                        },
-                    ],
-                    { partial: true }
-                );
+        it(`should handle un-supported -st-extends imported cases`, () => {
+            // ToDo: fix diagnostics should be on transform and not analyze
+            testStylableCore({
+                '/code.js': ``,
+                '/sheet.st.css': `
+                    :vars {
+                        stColor: red;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import JS from './code';
+                    @st-import [unknown, stColor] from './sheet.st.css';
+
+                    .a {
+                        /* @analyze-error(javascript) word(JS) ${CSSClass.diagnostics.CANNOT_EXTEND_JS()} */
+                        -st-extends: JS;
+                    }
+                    
+                    .b {
+                        /* @analyze-error(unresolved named) word(unknown) ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
+                            `unknown`
+                        )} */
+                        -st-extends: unknown;
+                    }
+                    
+                    .c {
+                        /* @analyze-error(unsupported symbol) word(stColor) ${CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE()} */
+                        -st-extends: stColor;
+                    }
+                `,
             });
         });
     });
