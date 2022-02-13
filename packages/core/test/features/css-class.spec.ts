@@ -222,39 +222,6 @@ describe(`features/css-class`, () => {
         expect(exports.classes.a, `a (empty) JS export`).to.eql(`entry__a`);
         expect(exports.classes.b, `b (multi) JS export`).to.eql(`y`);
     });
-    it(`should override with :global() value`, () => {
-        const { sheets } = testStylableCore(`
-            /* @rule(simple selector) .a */
-            :global(.a) {}
-
-            /* @rule(complex selector) .entry__root .b */
-            .root :global(.b) {}
-
-            /* @rule(complex global) div.c */
-            :global(div.c) {}
-        `);
-
-        const { meta, exports } = sheets['/entry.st.css'];
-
-        shouldReportNoDiagnostics(meta);
-
-        // symbols
-        expect(CSSClass.get(meta, `a`), `a symbol`).to.equal(undefined);
-        expect(CSSClass.get(meta, `b`), `b symbol`).to.equal(undefined);
-        expect(CSSClass.get(meta, `c`), `c symbol`).to.equal(undefined);
-
-        // meta.globals
-        expect(meta.globals).to.eql({
-            a: true,
-            b: true,
-            c: true,
-        });
-
-        // JS exports
-        expect(exports.classes.a, `a JS export`).to.eql(undefined);
-        expect(exports.classes.b, `b JS export`).to.eql(undefined);
-        expect(exports.classes.c, `c JS export`).to.eql(undefined);
-    });
     it(`should escape`, () => {
         const { sheets } = testStylableCore(
             `
@@ -337,6 +304,41 @@ describe(`features/css-class`, () => {
 
         // JS exports
         expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
+    });
+    describe(`st-global`, () => {
+        it(`should override with :global() value`, () => {
+            const { sheets } = testStylableCore(`
+                /* @rule(simple selector) .a */
+                :global(.a) {}
+    
+                /* @rule(complex selector) .entry__root .b */
+                .root :global(.b) {}
+    
+                /* @rule(complex global) div.c */
+                :global(div.c) {}
+            `);
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            expect(CSSClass.get(meta, `a`), `a symbol`).to.equal(undefined);
+            expect(CSSClass.get(meta, `b`), `b symbol`).to.equal(undefined);
+            expect(CSSClass.get(meta, `c`), `c symbol`).to.equal(undefined);
+
+            // meta.globals
+            expect(meta.globals).to.eql({
+                a: true,
+                b: true,
+                c: true,
+            });
+
+            // JS exports
+            expect(exports.classes.a, `a JS export`).to.eql(undefined);
+            expect(exports.classes.b, `b JS export`).to.eql(undefined);
+            expect(exports.classes.c, `c JS export`).to.eql(undefined);
+        });
     });
     describe(`st-import`, () => {
         it(`should resolve imported classes`, () => {
