@@ -136,9 +136,24 @@ describe(`features/css-class`, () => {
                 -st-global: ".x";
             }
 
-            /* @rule .z.zz */
+            /* @rule(compound classes) .z.zz */
             .b {
                 -st-global: ".z.zz";
+            }
+
+            /* @rule(no class) [attr=val] */
+            .c {
+                -st-global: "[attr=val]";
+            }
+            
+            /* @rule(complex) .y .z */
+            .d {
+                -st-global: ".y .z";
+            }
+
+            /* @rule(not only classes compound) .yy[attr] */
+            .e {
+                -st-global: ".yy[attr]";
             }
         `);
 
@@ -148,14 +163,20 @@ describe(`features/css-class`, () => {
 
         // symbols
         expect(CSSClass.get(meta, `a`), `a symbol`).to.contain({
-            _kind: `class`,
             name: 'a',
             // '-st-global': // ToDo: add
         });
         expect(CSSClass.get(meta, `b`), `b symbol`).to.contain({
-            _kind: `class`,
             name: 'b',
-            // '-st-global': // ToDo: add
+        });
+        expect(CSSClass.get(meta, `c`), `c symbol`).to.contain({
+            name: 'c',
+        });
+        expect(CSSClass.get(meta, `d`), `d symbol`).to.contain({
+            name: 'd',
+        });
+        expect(CSSClass.get(meta, `e`), `e symbol`).to.contain({
+            name: 'e',
         });
 
         // meta.globals
@@ -163,11 +184,16 @@ describe(`features/css-class`, () => {
             x: true,
             z: true,
             zz: true,
+            y: true,
+            yy: true,
         });
 
-        // JS exports - ToDo: fix - export correctly if possible or don't export at all
-        expect(exports.classes.a, `a JS export`).to.eql(`entry__a`);
-        expect(exports.classes.b, `b JS export`).to.eql(`entry__b`);
+        // JS exports
+        expect(exports.classes.a, `single JS export`).to.eql(`x`);
+        expect(exports.classes.b, `multi JS export`).to.eql(`z zz`);
+        expect(exports.classes.c, `no class selector JS export`).to.eql(undefined);
+        expect(exports.classes.d, `complex selector JS export`).to.eql(undefined);
+        expect(exports.classes.e, `not only classes compound JS export`).to.eql(undefined);
     });
     it(`should override with :global() value`, () => {
         const { sheets } = testStylableCore(`
@@ -368,7 +394,7 @@ describe(`features/css-class`, () => {
                 `classes__imported-part`
             );
             expect(exports.classes[`unknown-alias`], `unknown-alias JS export`).to.eql(
-                `` // ToDo: consider exporting `entry__unknown-alias`
+                undefined // ToDo: consider exporting `entry__unknown-alias`
             );
         });
         it(`should resolve deep imported alias classes`, () => {
@@ -457,7 +483,7 @@ describe(`features/css-class`, () => {
             expect(meta.diagnostics.reports.length, `only unscoped diagnostic`).to.equal(1);
         });
         it(`should override with imported -st-global`, () => {
-            testStylableCore({
+            const { sheets } = testStylableCore({
                 '/comp.st.css': `
                     .root {
                         -st-global: .r;
@@ -479,6 +505,26 @@ describe(`features/css-class`, () => {
                     .iPart {}
                 `,
             });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            // symbols
+            expect(CSSClass.get(meta, `iRoot`), `iRoot symbol`).to.contain({
+                name: 'iRoot',
+            });
+            expect(CSSClass.get(meta, `iPart`), `iPart symbol`).to.contain({
+                name: 'iPart',
+            });
+
+            // meta.globals
+            expect(meta.globals).to.eql({
+                r: true,
+                p: true,
+            });
+
+            // JS exports
+            expect(exports.classes.iRoot, `root alias JS export`).to.eql(undefined);
+            expect(exports.classes.iPart, `class alias JS export`).to.eql(`p`);
         });
         it(`should handle -st-extends of imported class `, () => {
             const { sheets } = testStylableCore({

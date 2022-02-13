@@ -73,17 +73,44 @@ export const hooks = createFeature<{
         for (const [localName, resolved] of Object.entries(metaParts.class)) {
             const exportedClasses = [];
             let first = true;
+            // collect list of css classes for exports
             for (const { meta, symbol } of resolved) {
                 if (!first && symbol[valueMapping.root]) {
+                    // extended stylesheet root: stop collection as root is expected to
+                    // be placed by inner component, for example in <Button class={classes.primaryBtn} />
+                    // `primaryBtn` shouldn't contain `button__root` as it is placed by the Button component
                     break;
                 }
                 first = false;
+                if (symbol[`-st-global`]) {
+                    // collect global override just in case of
+                    // compound set of CSS classes
+                    let isOnlyClasses = true;
+                    const globalClasses = symbol[`-st-global`].reduce<string[]>(
+                        (globalClasses, node) => {
+                            if (node.type === `class`) {
+                                globalClasses.push(node.value);
+                            } else {
+                                isOnlyClasses = false;
+                            }
+                            return globalClasses;
+                        },
+                        []
+                    );
+                    if (isOnlyClasses) {
+                        exportedClasses.push(...globalClasses);
+                    }
+                    continue;
+                }
                 if (symbol.alias && !symbol[valueMapping.extends]) {
                     continue;
                 }
                 exportedClasses.push(namespace(symbol.name, meta.namespace));
             }
-            locals[localName] = unescapeCSS(exportedClasses.join(' '));
+            const classNames = unescapeCSS(exportedClasses.join(' '));
+            if (classNames) {
+                locals[localName] = classNames;
+            }
         }
         return locals;
     },
