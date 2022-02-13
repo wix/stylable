@@ -142,7 +142,6 @@ describe('Stylable postcss process', () => {
         const result = processSource(
             `
             :unknown(Unknown.unknown) {}
-            :global(Global.global) {}
             :nth-of-type(5n, NthOfType.nth-of-type) {}
             :nth-last-of-type(5n, NthLastOfType.nth-last-of-type) {}
             ${knownPseudoClassesWithNestedSelectors
@@ -160,8 +159,6 @@ describe('Stylable postcss process', () => {
         expect(result.getSymbol(`Unknown`)).to.equal(undefined);
         expect(result.getClass(`unknown`)).to.equal(undefined);
         // native with ignored or no nested classes
-        expect(result.getSymbol(`Global`)).to.equal(undefined);
-        expect(result.getClass(`global`)).to.equal(undefined);
         expect(result.getSymbol(`NthOfType`)).to.equal(undefined);
         expect(result.getClass(`nth-of-type`)).to.equal(undefined);
         expect(result.getSymbol(`NthLastOfType`)).to.equal(undefined);

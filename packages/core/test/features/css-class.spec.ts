@@ -158,6 +158,13 @@ describe(`features/css-class`, () => {
             // '-st-global': // ToDo: add
         });
 
+        // meta.globals
+        expect(meta.globals).to.eql({
+            x: true,
+            z: true,
+            zz: true,
+        });
+
         // JS exports - ToDo: fix - export correctly if possible or don't export at all
         expect(exports.classes.a, `a JS export`).to.eql(`entry__a`);
         expect(exports.classes.b, `b JS export`).to.eql(`entry__b`);
@@ -169,6 +176,9 @@ describe(`features/css-class`, () => {
 
             /* @rule(complex selector) .entry__root .b */
             .root :global(.b) {}
+
+            /* @rule(complex global) div.c */
+            :global(div.c) {}
         `);
 
         const { meta, exports } = sheets['/entry.st.css'];
@@ -178,10 +188,19 @@ describe(`features/css-class`, () => {
         // symbols
         expect(CSSClass.get(meta, `a`), `a symbol`).to.equal(undefined);
         expect(CSSClass.get(meta, `b`), `b symbol`).to.equal(undefined);
+        expect(CSSClass.get(meta, `c`), `c symbol`).to.equal(undefined);
+
+        // meta.globals
+        expect(meta.globals).to.eql({
+            a: true,
+            b: true,
+            c: true,
+        });
 
         // JS exports
         expect(exports.classes.a, `a JS export`).to.eql(undefined);
         expect(exports.classes.b, `b JS export`).to.eql(undefined);
+        expect(exports.classes.c, `c JS export`).to.eql(undefined);
     });
     it(`should escape`, () => {
         const { sheets } = testStylableCore(
