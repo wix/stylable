@@ -7,12 +7,7 @@ import type { Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
 import { setStateToNode, stateErrors } from './pseudo-states';
-import {
-    walkSelector,
-    parseSelectorWithCache,
-    stringifySelector,
-    flattenFunctionalSelector,
-} from './helpers/selector';
+import { parseSelectorWithCache, stringifySelector } from './helpers/selector';
 import {
     SelectorNode,
     Selector,
@@ -148,18 +143,19 @@ export class StylableTransformer {
             stVars: {},
             keyframes: {},
         };
-        const ast = this.resetTransformProperties(meta);
-        STImport.hooks.transformInit({
-            context: {
-                meta,
-                diagnostics: this.diagnostics,
-                resolver: this.resolver,
-                evaluator: this.evaluator,
-            },
-        });
+        meta.transformedScopes = null;
+        meta.outputAst = meta.ast.clone();
+        const context = {
+            meta,
+            diagnostics: this.diagnostics,
+            resolver: this.resolver,
+            evaluator: this.evaluator,
+        };
+        STImport.hooks.transformInit({ context });
+        STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
-        this.transformAst(ast, meta, metaExports);
-        this.transformGlobals(ast, meta);
+        this.transformAst(meta.outputAst, meta, metaExports);
+        STGlobal.hooks.transformCleanup({ context });
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -301,20 +297,6 @@ export class StylableTransformer {
             prop = cssVarsMapping[prop];
         }
         return prop;
-    }
-    public transformGlobals(ast: postcss.Root, meta: StylableMeta) {
-        ast.walkRules((r) => {
-            const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
-            walkSelector(selectorAst, (node) => {
-                if (node.type === 'pseudo_class' && node.value === 'global') {
-                    STGlobal.addGlobals(meta, [node]);
-                    flattenFunctionalSelector(node);
-                    return walkSelector.skipNested;
-                }
-                return;
-            });
-            r.selector = stringifySelector(selectorAst);
-        });
     }
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
@@ -664,11 +646,6 @@ export class StylableTransformer {
                 );
             }
         }
-    }
-    private resetTransformProperties(meta: StylableMeta) {
-        meta.globals = {};
-        meta.transformedScopes = null;
-        return (meta.outputAst = meta.ast.clone());
     }
 }
 

@@ -1,6 +1,11 @@
 import { createFeature } from './feature';
 import { plugableRecord } from '../helpers/plugable-record';
-import { walkSelector, stringifySelector } from '../helpers/selector';
+import {
+    walkSelector,
+    stringifySelector,
+    parseSelectorWithCache,
+    flattenFunctionalSelector,
+} from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
 import type { SelectorNode, ImmutablePseudoClass } from '@tokey/css-selector-parser';
 
@@ -29,6 +34,23 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         }
         return walkSelector.skipNested;
     },
+    transformInit({ context }) {
+        context.meta.globals = {};
+    },
+    transformCleanup({ context: { meta } }) {
+        meta.outputAst!.walkRules((r) => {
+            const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
+            walkSelector(selectorAst, (node) => {
+                if (node.type === 'pseudo_class' && node.value === 'global') {
+                    addGlobals(meta, [node]);
+                    flattenFunctionalSelector(node);
+                    return walkSelector.skipNested;
+                }
+                return;
+            });
+            r.selector = stringifySelector(selectorAst);
+        });
+    },
 });
 
 // API
@@ -37,7 +59,7 @@ export function addGlobals(meta: StylableMeta, selectorAst: SelectorNode[]) {
     for (const ast of selectorAst) {
         walkSelector(ast, (inner) => {
             if (inner.type === 'class') {
-                // ToDo: move to css-class feature
+                // ToDo: consider if to move to css-class feature.
                 meta.globals[inner.value] = true;
             }
         });
