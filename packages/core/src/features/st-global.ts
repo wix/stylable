@@ -28,7 +28,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
             return;
         }
         if (node.nodes && node.nodes?.length > 1) {
-            context.diagnostics.info(rule, diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(), {
+            context.diagnostics.error(rule, diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(), {
                 word: stringifySelector(node.nodes),
             });
         }
@@ -39,11 +39,16 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
     },
     transformLastPass({ context: { meta } }) {
         meta.outputAst!.walkRules((r) => {
+            if (!r.selector.includes(`:global(`)) {
+                return;
+            }
             const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
             walkSelector(selectorAst, (node) => {
                 if (node.type === 'pseudo_class' && node.value === 'global') {
                     addGlobals(meta, [node]);
-                    flattenFunctionalSelector(node);
+                    if (node.nodes?.length === 1) {
+                        flattenFunctionalSelector(node);
+                    }
                     return walkSelector.skipNested;
                 }
                 return;
