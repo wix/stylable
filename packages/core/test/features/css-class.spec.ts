@@ -44,6 +44,16 @@ describe(`features/css-class`, () => {
 
             /* @rule(complex) .entry__d .entry__e*/
             .d .e {}
+            
+            @media {
+                /* @rule(complex) .entry__f*/
+                .f {}
+            }
+
+            @st-scope body {
+                /* @rule(complex) body .entry__g */
+                .g {}
+            }
         `);
 
         const { meta, exports } = sheets['/entry.st.css'];
@@ -52,28 +62,28 @@ describe(`features/css-class`, () => {
 
         // symbols
         expect(CSSClass.get(meta, `root`), `default root symbol`).to.contain({
-            _kind: `class`,
             name: 'root',
         });
         expect(CSSClass.get(meta, `a`), `a symbol`).to.contain({
-            _kind: `class`,
             name: 'a',
         });
         expect(CSSClass.get(meta, `b`), `b symbol`).to.contain({
-            _kind: `class`,
             name: 'b',
         });
         expect(CSSClass.get(meta, `c`), `c symbol`).to.contain({
-            _kind: `class`,
             name: 'c',
         });
         expect(CSSClass.get(meta, `d`), `d symbol`).to.contain({
-            _kind: `class`,
             name: 'd',
         });
         expect(CSSClass.get(meta, `e`), `e symbol`).to.contain({
-            _kind: `class`,
             name: 'e',
+        });
+        expect(CSSClass.get(meta, `f`), `f symbol`).to.contain({
+            name: 'f',
+        });
+        expect(CSSClass.get(meta, `g`), `g symbol`).to.contain({
+            name: 'g',
         });
 
         // public API
@@ -83,6 +93,19 @@ describe(`features/css-class`, () => {
         expect(meta.getClass(`c`), `c meta.getClass`).to.equal(CSSClass.get(meta, `c`));
         expect(meta.getClass(`d`), `d meta.getClass`).to.equal(CSSClass.get(meta, `d`));
         expect(meta.getClass(`e`), `e meta.getClass`).to.equal(CSSClass.get(meta, `e`));
+        expect(meta.getClass(`f`), `f meta.getClass`).to.equal(CSSClass.get(meta, `f`));
+        expect(meta.getClass(`g`), `g meta.getClass`).to.equal(CSSClass.get(meta, `g`));
+        expect(meta.getAllClasses(), `meta.getAllClasses()`).to.eql({
+            root: CSSClass.get(meta, `root`),
+            a: CSSClass.get(meta, `a`),
+            b: CSSClass.get(meta, `b`),
+            c: CSSClass.get(meta, `c`),
+            d: CSSClass.get(meta, `d`),
+            e: CSSClass.get(meta, `e`),
+            f: CSSClass.get(meta, `f`),
+            g: CSSClass.get(meta, `g`),
+        });
+        expect(CSSClass.getAll(meta), `CSSClass.getAll(meta)`).to.eql(meta.getAllClasses());
 
         // JS exports
         expect(exports.classes.root, `root JS export`).to.eql(`entry__root`);
@@ -91,6 +114,8 @@ describe(`features/css-class`, () => {
         expect(exports.classes.c, `c JS export`).to.eql(`entry__c`);
         expect(exports.classes.d, `d JS export`).to.eql(`entry__d`);
         expect(exports.classes.e, `e JS export`).to.eql(`entry__e`);
+        expect(exports.classes.f, `f JS export`).to.eql(`entry__f`);
+        expect(exports.classes.g, `g JS export`).to.eql(`entry__g`);
 
         // deprecation
         ignoreDeprecationWarn(() => {
@@ -101,33 +126,10 @@ describe(`features/css-class`, () => {
                 c: CSSClass.get(meta, `c`),
                 d: CSSClass.get(meta, `d`),
                 e: CSSClass.get(meta, `e`),
+                f: CSSClass.get(meta, `f`),
+                g: CSSClass.get(meta, `g`),
             });
         });
-    });
-    it(`should add to general symbols`, () => {
-        const { sheets } = testStylableCore(`
-            /* @rule .entry__btn */
-            .btn {}
-            /* @rule .entry__icon */
-            .icon {}
-        `);
-
-        const { meta } = sheets['/entry.st.css'];
-
-        expect(CSSClass.get(meta, `root`), `root general symbol`).to.equal(
-            STSymbol.get(meta, `root`)
-        );
-        expect(STSymbol.get(meta, `btn`), `btn general symbol`).to.equal(CSSClass.get(meta, `btn`));
-        expect(STSymbol.get(meta, `icon`), `icon general symbol`).to.equal(
-            CSSClass.get(meta, `icon`)
-        );
-
-        expect(meta.getAllClasses(), `meta.getAllClasses()`).to.eql({
-            root: CSSClass.get(meta, `root`),
-            btn: CSSClass.get(meta, `btn`),
-            icon: CSSClass.get(meta, `icon`),
-        });
-        expect(CSSClass.getAll(meta), `CSSClass.getAll(meta)`).to.eql(meta.getAllClasses());
     });
     it(`should override with -st-global value`, () => {
         const { sheets } = testStylableCore(`
@@ -306,7 +308,7 @@ describe(`features/css-class`, () => {
         expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
     });
     describe(`st-global`, () => {
-        it(`should override with :global() value`, () => {
+        it(`should inline :global() content without collecting classes`, () => {
             const { sheets } = testStylableCore(`
                 /* @rule(simple selector) .a */
                 :global(.a) {}
@@ -552,7 +554,7 @@ describe(`features/css-class`, () => {
             });
 
             // JS exports
-            expect(exports.classes.iRoot, `root alias JS export`).to.eql(undefined);
+            expect(exports.classes, `no root alias JS export`).to.not.haveOwnProperty(`iRoot`);
             expect(exports.classes.iPart, `class alias JS export`).to.eql(`p`);
         });
         it(`should handle -st-extends of imported class `, () => {

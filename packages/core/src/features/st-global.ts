@@ -37,7 +37,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
     transformInit({ context }) {
         context.meta.globals = {};
     },
-    transformCleanup({ context: { meta } }) {
+    transformLastPass({ context: { meta } }) {
         meta.outputAst!.walkRules((r) => {
             const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
             walkSelector(selectorAst, (node) => {

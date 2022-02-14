@@ -155,7 +155,7 @@ export class StylableTransformer {
         STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(meta.outputAst, meta, metaExports);
-        STGlobal.hooks.transformCleanup({ context });
+        STGlobal.hooks.transformLastPass({ context });
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -176,23 +176,14 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
         };
-        const metaParts = this.getMetaParts(meta);
-        const cssClassResolve = CSSClass.hooks.transformResolve({
+        const transformResolveOptions = {
             context: transformContext,
-            metaParts,
-        });
-        const stVarResolve = STVar.hooks.transformResolve({
-            context: transformContext,
-            metaParts,
-        });
-        const keyframesResolve = CSSKeyframes.hooks.transformResolve({
-            context: transformContext,
-            metaParts,
-        });
-        const cssVarsMapping = CSSCustomProperty.hooks.transformResolve({
-            context: transformContext,
-            metaParts,
-        });
+            metaParts: this.getMetaParts(meta),
+        };
+        const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
+        const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
+        const keyframesResolve = CSSKeyframes.hooks.transformResolve(transformResolveOptions);
+        const cssVarsMapping = CSSCustomProperty.hooks.transformResolve(transformResolveOptions);
 
         ast.walkRules((rule) => {
             if (isChildOfAtRule(rule, 'keyframes')) {

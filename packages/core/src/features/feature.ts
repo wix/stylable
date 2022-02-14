@@ -71,7 +71,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         data: EvalValueData;
     }) => void;
     transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
-    transformCleanup: (options: { context: FeatureTransformContext }) => void;
+    transformLastPass: (options: { context: FeatureTransformContext }) => void;
 }
 const defaultHooks: FeatureHooks<NodeTypes> = {
     metaInit() {
@@ -110,7 +110,7 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
     transformJSExports() {
         /**/
     },
-    transformCleanup() {
+    transformLastPass() {
         /**/
     },
 };
