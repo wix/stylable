@@ -13,6 +13,14 @@ describe(`features/st-global`, () => {
 
             /* @rule(complex global) div.c .d */
             :global(div.c .d) {}
+
+            .root {
+                -st-states: isOn;
+            }
+            .part {}
+            
+            /* @rule(custom pseudo) .entry__root.entry--isOn .entry__part.root:isOn::part */
+            .root:isOn::part:global(.root:isOn::part) {}
         `);
 
         const { meta } = sheets['/entry.st.css'];
@@ -20,11 +28,12 @@ describe(`features/st-global`, () => {
         shouldReportNoDiagnostics(meta);
 
         // meta.globals
-        expect(meta.globals, `collect class ids`).to.eql({
+        expect(meta.globals, `collect global class ids`).to.eql({
             a: true,
             b: true,
             c: true,
             d: true,
+            root: true,
         });
     });
     it(`should handle only a single selector in :global()`, () => {
