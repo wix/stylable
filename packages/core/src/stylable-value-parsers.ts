@@ -5,6 +5,8 @@ import { processPseudoStates } from './pseudo-states';
 import { parseSelectorWithCache } from './helpers/selector';
 import { getNamedArgs, strategies } from './helpers/value';
 import type { StateParsedValue } from './types';
+import type { SelectorNodes } from '@tokey/css-selector-parser';
+import { CSSClass } from './features';
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
@@ -83,13 +85,17 @@ export const SBTypesParsers = {
     '-st-root'(value: string) {
         return value === 'false' ? false : true;
     },
-    '-st-global'(decl: postcss.Declaration, _diagnostics: Diagnostics) {
-        // Experimental
+    '-st-global'(decl: postcss.Declaration, diagnostics: Diagnostics): SelectorNodes | undefined {
         const selector = parseSelectorWithCache(
             decl.value.replace(/^['"]/, '').replace(/['"]$/, ''),
             { clone: true }
         );
-        // ToDo: handle or warn on multiple selectors
+        if (!selector[0]) {
+            diagnostics.error(decl, CSSClass.diagnostics.EMPTY_ST_GLOBAL());
+            return;
+        } else if (selector.length > 1) {
+            diagnostics.error(decl, CSSClass.diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL());
+        }
         return selector[0].nodes;
     },
     '-st-states'(value: string, decl: postcss.Declaration, diagnostics: Diagnostics) {
