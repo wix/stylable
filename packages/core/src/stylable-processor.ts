@@ -14,7 +14,15 @@ import {
     STVar,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
-import { FeatureContext, STSymbol, STImport, CSSClass, CSSType, CSSKeyframes } from './features';
+import {
+    FeatureContext,
+    STSymbol,
+    STImport,
+    STGlobal,
+    CSSClass,
+    CSSType,
+    CSSKeyframes,
+} from './features';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
@@ -281,6 +289,13 @@ export class StylableProcessor implements FeatureContext {
                         rule,
                         walkContext: nodeContext,
                     });
+                } else if (node.value === `global`) {
+                    return STGlobal.hooks.analyzeSelectorNode({
+                        context: this,
+                        node,
+                        rule,
+                        walkContext: nodeContext,
+                    });
                 } else if (!knownPseudoClassesWithNestedSelectors.includes(node.value)) {
                     return walkSelector.skipNested;
                 }
@@ -499,7 +514,10 @@ export class StylableProcessor implements FeatureContext {
         const name = rule.selector.replace('.', '');
         const classSymbol = CSSClass.get(this.meta, name);
         if (classSymbol) {
-            classSymbol[valueMapping.global] = parseGlobal(decl, this.diagnostics);
+            const globalSelectorAst = parseGlobal(decl, this.diagnostics);
+            if (globalSelectorAst) {
+                classSymbol[valueMapping.global] = globalSelectorAst;
+            }
         }
     }
 
