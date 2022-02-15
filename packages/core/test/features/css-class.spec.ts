@@ -382,26 +382,19 @@ describe(`features/css-class`, () => {
             expect(exports.classes.after, `after JS export`).to.eql(`classes__after`);
             expect(exports.classes.unused, `unused JS export`).to.eql(undefined);
         });
-        it(`should resolve imported alias classes`, () => {
+        it(`should handle unknown imported class`, () => {
             const { sheets } = testStylableCore({
-                '/classes.st.css': `
-                    .imported-part {}
-                `,
+                '/classes.st.css': ``,
                 '/entry.st.css': `
-                    @st-import [imported-part, unknown-alias] from './classes.st.css';
-
-                    /*
-                        @rule(alias) .classes__imported-part
-                    */
-                    .imported-part {}
+                    @st-import [unknown] from './classes.st.css';
 
                     /* 
-                        @rule .entry__unknown-alias
-                        @transform-error(unresolved alias) word(unknown-alias) ${CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(
-                            `unknown-alias`
+                        @rule .entry__unknown
+                        @transform-error(unresolved alias) word(unknown) ${CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(
+                            `unknown`
                         )} 
                     */
-                    .unknown-alias {}
+                    .unknown {}
                 `,
             });
 
@@ -409,22 +402,14 @@ describe(`features/css-class`, () => {
 
             // symbols
             const importDef = meta.getImportStatements()[0];
-            expect(CSSClass.get(meta, `imported-part`), `imported-part symbol`).to.eql({
+            expect(CSSClass.get(meta, `unknown`), `unknown symbol`).to.eql({
                 _kind: `class`,
-                name: 'imported-part',
-                alias: STImport.createImportSymbol(importDef, `named`, `imported-part`, `/`),
-            });
-            expect(CSSClass.get(meta, `unknown-alias`), `unknown-alias symbol`).to.eql({
-                _kind: `class`,
-                name: 'unknown-alias',
-                alias: STImport.createImportSymbol(importDef, `named`, `unknown-alias`, `/`),
+                name: 'unknown',
+                alias: STImport.createImportSymbol(importDef, `named`, `unknown`, `/`),
             });
 
             // JS exports
-            expect(exports.classes[`imported-part`], `imported-part JS export`).to.eql(
-                `classes__imported-part`
-            );
-            expect(exports.classes[`unknown-alias`], `unknown-alias JS export`).to.eql(
+            expect(exports.classes[`unknown`], `unknown JS export`).to.eql(
                 undefined // ToDo: consider exporting `entry__unknown-alias`
             );
         });
@@ -641,52 +626,121 @@ describe(`features/css-class`, () => {
             expect(exports.classes.root, `root extended JS export`).to.eql(`entry__root`);
             expect(exports.classes.class, `class extended JS export`).to.eql(`entry__class`);
         });
-        it(`should handle -st-extends of deep imports`, () => {
+        it(`should handle -st-extends of deep imported class`, () => {
             const { sheets } = testStylableCore({
                 '/classes.st.css': `
                     .imported {}
                 `,
                 '/middle.st.css': `
-                    @st-import [imported] from './classes.st.css';
-                    .imported {}
-                    .extended {
-                        -st-extends: imported;
+                    @st-import [imported as importedAlias] from './classes.st.css';
+                    .importedAlias {}
+                    .importedExtend {
+                        -st-extends: importedAlias;
                     }
                 `,
-                '/entry.st.css': `
-                    @st-import [imported, extended] from './middle.st.css';
+                '/extended.st.css': `
+                    @st-import [importedExtend] from './middle.st.css';
 
-                    /* @rule(pass through) .entry__a */
-                    .a {
-                        -st-extends: imported;
+                    /* @rule .extended__root */
+                    .root {
+                        -st-extends: importedExtend;
                     }
-                    
-                    /* @rule(extended import) .entry__b */
-                    .b {
-                        -st-extends: extended;
+
+                    /* @rule .extended__class */
+                    .class {
+                        -st-extends: importedExtend;
                     }
-                    
-                    /* @rule(extended local) .entry__c */
-                    .c {
-                        -st-extends: b;
+                `,
+                '/aliased.st.css': `
+                    @st-import [importedAlias] from './middle.st.css';
+
+                    /* @rule .aliased__root */
+                    .root {
+                        -st-extends: importedAlias;
+                    }
+
+                    /* @rule .aliased__class */
+                    .class {
+                        -st-extends: importedAlias;
                     }
                 `,
             });
 
-            const { meta, exports } = sheets['/entry.st.css'];
+            const extended = sheets['/extended.st.css'];
+            const aliased = sheets['/aliased.st.css'];
 
-            shouldReportNoDiagnostics(meta);
+            shouldReportNoDiagnostics(extended.meta);
+            shouldReportNoDiagnostics(aliased.meta);
 
             // JS exports
-            expect(exports.classes.a, `a JS export`).to.eql(`entry__a classes__imported`);
-            expect(exports.classes.b, `b JS export`).to.eql(
-                `entry__b middle__extended classes__imported`
+            expect(extended.exports.classes.root, `root extended`).to.eql(
+                `extended__root middle__importedExtend classes__imported`
             );
-            expect(exports.classes.c, `c JS export`).to.eql(
-                `entry__c entry__b middle__extended classes__imported`
+            expect(extended.exports.classes.class, `class extended`).to.eql(
+                `extended__class middle__importedExtend classes__imported`
+            );
+            expect(aliased.exports.classes.root, `root aliased`).to.eql(
+                `aliased__root classes__imported`
+            );
+            expect(aliased.exports.classes.class, `class aliased`).to.eql(
+                `aliased__class classes__imported`
             );
         });
-        it(`should handle un-supported -st-extends imported cases`, () => {
+        it(`should handle -st-extends of deep imported root`, () => {
+            const { sheets } = testStylableCore({
+                '/deep.st.css': ``,
+                '/middle.st.css': `
+                    @st-import [root as DeepAlias] from './deep.st.css';
+                    .DeepAlias {}
+                    .deepExtend {
+                        -st-extends: DeepAlias;
+                    }
+                `,
+                '/extended.st.css': `
+                    @st-import [deepExtend] from './middle.st.css';
+
+                    /* @rule .extended__root */
+                    .root {
+                        -st-extends: deepExtend;
+                    }
+
+                    /* @rule .extended__class */
+                    .class {
+                        -st-extends: deepExtend;
+                    }
+                `,
+                '/aliased.st.css': `
+                    @st-import [DeepAlias] from './middle.st.css';
+
+                    /* @rule .aliased__root */
+                    .root {
+                        -st-extends: DeepAlias;
+                    }
+
+                    /* @rule .aliased__class */
+                    .class {
+                        -st-extends: DeepAlias;
+                    }
+                `,
+            });
+
+            const extended = sheets['/extended.st.css'];
+            const aliased = sheets['/aliased.st.css'];
+
+            shouldReportNoDiagnostics(extended.meta);
+            shouldReportNoDiagnostics(aliased.meta);
+
+            // JS exports
+            expect(extended.exports.classes.root, `root extended`).to.eql(
+                `extended__root middle__deepExtend`
+            );
+            expect(extended.exports.classes.class, `class extended`).to.eql(
+                `extended__class middle__deepExtend`
+            );
+            expect(aliased.exports.classes.root, `root aliased`).to.eql(`aliased__root`);
+            expect(aliased.exports.classes.class, `class aliased`).to.eql(`aliased__class`);
+        });
+        it(`should handle -st-extends of un-supported imported cases`, () => {
             testStylableCore({
                 '/code.js': ``,
                 '/sheet.st.css': `
