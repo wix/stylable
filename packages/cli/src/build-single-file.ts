@@ -68,14 +68,14 @@ export function buildSingleFile({
     diagnosticsManager = new DiagnosticsManager({ log }),
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve, isAbsolute } = fs;
-    const outSrcPath = join(fullOutDir, relative(fullSrcDir, filePath));
-    const outPath = outSrcPath + '.js';
+    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath));
+    const outPath = targetFilePath + '.js';
     const fileDirectory = dirname(filePath);
     const outDirPath = dirname(outPath);
     const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
-        filename: basename(outSrcPath, '.st.css'),
+        filename: basename(targetFilePath, '.st.css'),
     });
-    const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
+    const cssAssetOutPath = join(dirname(targetFilePath), cssAssetFilename);
     const outputLogs: string[] = [];
     log(mode, filePath);
 
@@ -113,20 +113,23 @@ export function buildSingleFile({
 
     // st.css
     if (outputSources) {
-        if (outSrcPath === filePath) {
-            throw new Error(`Attempt to override source file ${outSrcPath}`);
+        if (targetFilePath === filePath) {
+            throw new Error(`Attempt to override source file ${targetFilePath}`);
         }
         if (useNamespaceReference && !content.includes('st-namespace-reference')) {
-            const relativePathToSource = relative(dirname(outSrcPath), filePath).replace(
+            const relativePathToSource = relative(dirname(targetFilePath), filePath).replace(
                 /\\/gm,
                 '/'
             );
             const srcNamespaceAnnotation = `\n/* st-namespace-reference="${relativePathToSource}" */`;
             content += srcNamespaceAnnotation;
         }
-        generated.add(outSrcPath);
+        generated.add(targetFilePath);
         outputLogs.push(`.st.css source`);
-        tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
+        tryRun(
+            () => fs.writeFileSync(targetFilePath, content),
+            `Write File Error: ${targetFilePath}`
+        );
     }
     // st.css.js
     moduleFormats.forEach((format) => {
@@ -145,7 +148,7 @@ export function buildSingleFile({
                 ),
             `Transform Error: ${filePath}`
         );
-        const outFilePath = outSrcPath + (format === 'esm' ? '.mjs' : '.js');
+        const outFilePath = targetFilePath + (format === 'esm' ? '.mjs' : '.js');
         generated.add(outFilePath);
         tryRun(() => fs.writeFileSync(outFilePath, code), `Write File Error: ${outFilePath}`);
     });
@@ -165,7 +168,7 @@ export function buildSingleFile({
     // .d.ts
     if (dts) {
         const dtsContent = generateDTSContent(res);
-        const dtsPath = outSrcPath + '.d.ts';
+        const dtsPath = targetFilePath + '.d.ts';
 
         generated.add(dtsPath);
         outputLogs.push('output .d.ts');
@@ -176,8 +179,8 @@ export function buildSingleFile({
         // if not explicitly defined, assumed true with "--dts" parent scope
         if (dtsSourceMap !== false) {
             const relativeTargetFilePath = relative(
-                dirname(outSrcPath),
-                outputSources ? outSrcPath : filePath
+                dirname(targetFilePath),
+                outputSources ? targetFilePath : filePath
             );
 
             const dtsMappingContent = generateDTSSourceMap(
@@ -189,7 +192,7 @@ export function buildSingleFile({
                     : relativeTargetFilePath.replace(/\\/g, '/')
             );
 
-            const dtsMapPath = outSrcPath + '.d.ts.map';
+            const dtsMapPath = targetFilePath + '.d.ts.map';
 
             generated.add(dtsMapPath);
             outputLogs.push('output .d.ts.mp');
@@ -226,27 +229,27 @@ export function removeBuildProducts({
     dtsSourceMap,
 }: BuildCommonOptions) {
     const { basename, dirname, join, relative } = fs;
-    const outSrcPath = join(fullOutDir, relative(fullSrcDir, filePath));
+    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath));
     const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
-        filename: basename(outSrcPath, '.st.css'),
+        filename: basename(targetFilePath, '.st.css'),
     });
-    const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
+    const cssAssetOutPath = join(dirname(targetFilePath), cssAssetFilename);
     const outputLogs: string[] = [];
     log(mode, filePath);
 
     // st.css
     if (outputSources) {
-        if (outSrcPath === filePath) {
-            throw new Error(`Attempt to remove source file ${outSrcPath}`);
+        if (targetFilePath === filePath) {
+            throw new Error(`Attempt to remove source file ${targetFilePath}`);
         }
-        generated.delete(outSrcPath);
+        generated.delete(targetFilePath);
         outputLogs.push(`.st.css source`);
-        tryRun(() => fs.unlinkSync(outSrcPath), `Unlink File Error: ${outSrcPath}`);
+        tryRun(() => fs.unlinkSync(targetFilePath), `Unlink File Error: ${targetFilePath}`);
     }
     // st.css.js
     moduleFormats.forEach((format) => {
         outputLogs.push(`${format} module`);
-        const outFilePath = outSrcPath + (format === 'esm' ? '.mjs' : '.js');
+        const outFilePath = targetFilePath + (format === 'esm' ? '.mjs' : '.js');
         generated.delete(outFilePath);
         tryRun(() => fs.unlinkSync(outFilePath), `Unlink File Error: ${outFilePath}`);
     });
@@ -258,14 +261,14 @@ export function removeBuildProducts({
     }
     // .d.ts
     if (dts) {
-        const dtsPath = `${outSrcPath}.d.ts`;
+        const dtsPath = `${targetFilePath}.d.ts`;
         generated.delete(dtsPath);
         outputLogs.push('generated .d.ts');
         tryRun(() => fs.unlinkSync(dtsPath), `Unlink File Error: ${dtsPath}`);
     }
     // .d.ts.map
     if (dtsSourceMap) {
-        const dtsMapPath = `${outSrcPath}.d.ts.map`;
+        const dtsMapPath = `${targetFilePath}.d.ts.map`;
         generated.delete(dtsMapPath);
         outputLogs.push('generated .d.ts.map');
         tryRun(() => fs.unlinkSync(dtsMapPath), `Unlink File Error: ${dtsMapPath}`);
