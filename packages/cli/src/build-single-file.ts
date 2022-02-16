@@ -121,8 +121,8 @@ export function buildSingleFile({
                 /\\/gm,
                 '/'
             );
-            const srcNamespaceAnnotation = `/* st-namespace-reference="${relativePathToSource}" */\n`;
-            content = srcNamespaceAnnotation + content;
+            const srcNamespaceAnnotation = `\n/* st-namespace-reference="${relativePathToSource}" */`;
+            content += srcNamespaceAnnotation;
         }
         generated.add(outSrcPath);
         outputLogs.push(`.st.css source`);

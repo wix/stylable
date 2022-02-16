@@ -136,9 +136,9 @@ describe('Stylable Cli', function () {
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent['dist/style.st.css'];
 
-        expect(
-            stylesheetContent.startsWith('/* st-namespace-reference="../style.st.css" */')
-        ).equal(true);
+        expect(stylesheetContent.endsWith('/* st-namespace-reference="../style.st.css" */')).equal(
+            true
+        );
     });
 
     it('build .st.css.d.ts alongside source files with source-maps on by default', () => {
