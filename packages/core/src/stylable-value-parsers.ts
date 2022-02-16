@@ -3,15 +3,14 @@ import postcssValueParser, { FunctionNode, WordNode } from 'postcss-value-parser
 import type { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelectorWithCache } from './helpers/selector';
-import { getNamedArgs, getFormatterArgs } from './helpers/value';
+import { getNamedArgs, strategies } from './helpers/value';
 import type { StateParsedValue } from './types';
+import type { SelectorNodes } from '@tokey/css-selector-parser';
+import { CSSClass } from './features';
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
         return 'value can not be a string (remove quotes?)';
-    },
-    CSS_MIXIN_FORCE_NAMED_PARAMS() {
-        return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")';
     },
 };
 
@@ -86,13 +85,17 @@ export const SBTypesParsers = {
     '-st-root'(value: string) {
         return value === 'false' ? false : true;
     },
-    '-st-global'(decl: postcss.Declaration, _diagnostics: Diagnostics) {
-        // Experimental
+    '-st-global'(decl: postcss.Declaration, diagnostics: Diagnostics): SelectorNodes | undefined {
         const selector = parseSelectorWithCache(
             decl.value.replace(/^['"]/, '').replace(/['"]$/, ''),
             { clone: true }
         );
-        // ToDo: handle or warn on multiple selectors
+        if (!selector[0]) {
+            diagnostics.error(decl, CSSClass.diagnostics.EMPTY_ST_GLOBAL());
+            return;
+        } else if (selector.length > 1) {
+            diagnostics.error(decl, CSSClass.diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL());
+        }
         return selector[0].nodes;
     },
     '-st-states'(value: string, decl: postcss.Declaration, diagnostics: Diagnostics) {
@@ -180,40 +183,3 @@ export const SBTypesParsers = {
         });
     },
 };
-
-export const strategies = {
-    named: (node: any, reportWarning?: ReportWarning) => {
-        const named: Record<string, string> = {};
-        getNamedArgs(node).forEach((mixinArgsGroup) => {
-            const argsDivider = mixinArgsGroup[1];
-            if (mixinArgsGroup.length < 3 || (argsDivider && argsDivider.type !== 'space')) {
-                if (reportWarning) {
-                    const argValue = mixinArgsGroup[0];
-                    reportWarning(valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(), {
-                        word: argValue.value,
-                    });
-                }
-                return;
-            }
-            named[mixinArgsGroup[0].value] = stringifyParam(mixinArgsGroup.slice(2));
-        });
-        return named;
-    },
-    args: (node: any, reportWarning?: ReportWarning) => {
-        return getFormatterArgs(node, true, reportWarning).map((value) => ({ value }));
-    },
-};
-
-function stringifyParam(nodes: any) {
-    return postcssValueParser.stringify(nodes, (n: any) => {
-        if (n.type === 'function') {
-            return postcssValueParser.stringify(n);
-        } else if (n.type === 'div') {
-            return null;
-        } else if (n.type === 'string') {
-            return n.value;
-        } else {
-            return undefined;
-        }
-    });
-}

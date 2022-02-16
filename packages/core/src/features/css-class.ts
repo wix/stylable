@@ -6,7 +6,8 @@ import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import * as STGlobal from './st-global';
 import { getOriginDefinition } from '../helpers/resolve';
-import { namespaceEscape } from '../helpers/escape';
+import { namespace } from '../helpers/namespace';
+import { namespaceEscape, unescapeCSS } from '../helpers/escape';
 import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
 import { valueMapping } from '../stylable-value-parsers';
@@ -32,6 +33,12 @@ export const diagnostics = {
     UNSCOPED_CLASS(name: string) {
         return `unscoped class "${name}" will affect all elements of the same type in the document`;
     },
+    EMPTY_ST_GLOBAL() {
+        return `-st-global must contain a valid selector`;
+    },
+    UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL() {
+        return `unsupported multi selector in -st-global`;
+    },
     // -st-extends
     IMPORT_ISNT_EXTENDABLE() {
         return 'import is not extendable';
@@ -49,7 +56,11 @@ export const diagnostics = {
 
 // HOOKS
 
-export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: ImmutableClass }>({
+export const hooks = createFeature<{
+    SELECTOR: Class;
+    IMMUTABLE_SELECTOR: ImmutableClass;
+    RESOLVED: Record<string, string>;
+}>({
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
             // error on functional class
@@ -62,6 +73,52 @@ export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: Immuta
             );
         }
         addClass(context, node.value, rule);
+    },
+    transformResolve({ metaParts }) {
+        const locals: Record<string, string> = {};
+        for (const [localName, resolved] of Object.entries(metaParts.class)) {
+            const exportedClasses = [];
+            let first = true;
+            // collect list of css classes for exports
+            for (const { meta, symbol } of resolved) {
+                if (!first && symbol[valueMapping.root]) {
+                    // extended stylesheet root: stop collection as root is expected to
+                    // be placed by inner component, for example in <Button class={classes.primaryBtn} />
+                    // `primaryBtn` shouldn't contain `button__root` as it is placed by the Button component
+                    break;
+                }
+                first = false;
+                if (symbol[`-st-global`]) {
+                    // collect global override just in case of
+                    // compound set of CSS classes
+                    let isOnlyClasses = true;
+                    const globalClasses = symbol[`-st-global`].reduce<string[]>(
+                        (globalClasses, node) => {
+                            if (node.type === `class`) {
+                                globalClasses.push(node.value);
+                            } else {
+                                isOnlyClasses = false;
+                            }
+                            return globalClasses;
+                        },
+                        []
+                    );
+                    if (isOnlyClasses) {
+                        exportedClasses.push(...globalClasses);
+                    }
+                    continue;
+                }
+                if (symbol.alias && !symbol[valueMapping.extends]) {
+                    continue;
+                }
+                exportedClasses.push(namespace(symbol.name, meta.namespace));
+            }
+            const classNames = unescapeCSS(exportedClasses.join(' '));
+            if (classNames) {
+                locals[localName] = classNames;
+            }
+        }
+        return locals;
     },
     transformSelectorNode({ context, selectorContext, node }) {
         const { originMeta, resolver } = selectorContext;
@@ -83,6 +140,9 @@ export const hooks = createFeature<{ SELECTOR: Class; IMMUTABLE_SELECTOR: Immuta
             );
         }
         namespaceClass(meta, symbol, node, originMeta);
+    },
+    transformJSExports({ exports, resolved }) {
+        Object.assign(exports.classes, resolved);
     },
 });
 

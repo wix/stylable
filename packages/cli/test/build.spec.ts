@@ -1,9 +1,9 @@
 import { expect } from 'chai';
-import { Stylable, functionWarnings, processorWarnings, murmurhash3_32_gc } from '@stylable/core';
+import { Stylable, processorWarnings, murmurhash3_32_gc } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
-import { STImport } from '@stylable/core/dist/features';
+import { STImport, STVar } from '@stylable/core/dist/features';
 
 const log = () => {
     /**/
@@ -187,7 +187,7 @@ describe('build stand alone', () => {
         expect(messages[1].message).to.contain(
             STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
         );
-        expect(messages[2].message).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
+        expect(messages[2].message).to.contain(STVar.diagnostics.UNKNOWN_VAR('missingVar'));
     });
 
     it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', async () => {

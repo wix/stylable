@@ -90,7 +90,6 @@ export {
     stKeys,
     stValues,
     stValuesMap,
-    strategies,
     valueMapping,
     valueParserWarnings,
 } from './stylable-value-parsers';
@@ -191,6 +190,7 @@ export {
     groupValues,
     listOptions,
     validateAllowedNodesUntil,
+    strategies,
 } from './helpers/value';
 
 // *** deprecated ***

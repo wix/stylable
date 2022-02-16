@@ -3,7 +3,6 @@ import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import type { MappedStates, MixinValue } from '../stylable-value-parsers';
 import type { SelectorNode } from '@tokey/css-selector-parser';
-import type * as postcss from 'postcss';
 
 // ToDo: distribute types to features
 
@@ -17,13 +16,4 @@ export interface StylableDirectives {
 export interface RefedMixin {
     mixin: MixinValue;
     ref: ImportSymbol | ClassSymbol;
-}
-
-export interface VarSymbol {
-    _kind: 'var';
-    name: string;
-    value: string;
-    text: string;
-    valueType: string | null;
-    node: postcss.Node;
 }
