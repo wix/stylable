@@ -64,9 +64,9 @@ describe('.d.ts source-maps', () => {
         });
 
         const dtsText = generateDTSContent(res);
-        const sourcemapText = generateDTSSourceMap(dtsText, res.meta, './src/entry.st.css');
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta, 'src/entry.st.css');
 
-        expect(JSON.parse(sourcemapText).sources).to.eql(['./src/entry.st.css']);
+        expect(JSON.parse(sourcemapText).sources).to.eql(['src/entry.st.css']);
     });
 
     it('maps the "root" class in the ".d.ts" to its position in the original ".st.css" file', async () => {
