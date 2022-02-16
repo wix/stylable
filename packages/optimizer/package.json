@@ -11,7 +11,7 @@
     "@stylable/core": "^4.10.3",
     "@tokey/css-selector-parser": "^0.5.1",
     "csso": "^5.0.2",
-    "postcss": "^8.4.5"
+    "postcss": "^8.4.6"
   },
   "files": [
     "dist",

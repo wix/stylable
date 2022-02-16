@@ -2,6 +2,7 @@ import { generateStylableResult } from '@stylable/core-test-kit';
 import { generateDTSSourceMap, generateDTSContent } from '@stylable/module-utils';
 import { expect } from 'chai';
 import deindent from 'deindent';
+import { join } from 'path';
 import { SourceMapConsumer } from 'source-map';
 
 function getPosition(content: string, query: string) {
@@ -42,12 +43,31 @@ describe('.d.ts source-maps', () => {
         const dtsText = generateDTSContent(res);
         const sourcemapText = generateDTSSourceMap(dtsText, res.meta);
 
+        expect(JSON.parse(sourcemapText).sources).to.eql(['entry.st.css']);
+
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const originalPosition = sourceMapConsumer.originalPositionFor(
             getPosition(dtsText, 'root":') // source mapping starts after the first double quote
         );
 
         expect(originalPosition).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
+    });
+
+    it('should generate source maps and set specific file path as the source file path', () => {
+        const res = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: ``,
+                },
+            },
+        });
+
+        const dtsText = generateDTSContent(res);
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta, 'src');
+
+        expect(JSON.parse(sourcemapText).sources).to.eql([join('src', 'entry.st.css')]);
     });
 
     it('maps the "root" class in the ".d.ts" to its position in the original ".st.css" file', async () => {

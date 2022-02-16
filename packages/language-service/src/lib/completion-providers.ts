@@ -1473,7 +1473,7 @@ export const ValueCompletionProvider: CompletionProvider = {
                 .trim();
 
             const comps: Completion[] = [];
-            meta.vars.forEach((v) => {
+            Object.values(meta.getAllStVars()).forEach((v) => {
                 if (v.name.startsWith(inner)) {
                     const value = evalDeclarationValue(stylable.resolver, v.text, meta, v.node);
                     comps.push(
@@ -1497,7 +1497,9 @@ export const ValueCompletionProvider: CompletionProvider = {
             meta.getImportStatements().forEach((imp) => {
                 try {
                     const resolvedPath = stylable.resolvePath(dirname(meta.source), imp.request);
-                    stylable.fileProcessor.process(resolvedPath).vars.forEach((v) =>
+                    Object.values(
+                        stylable.fileProcessor.process(resolvedPath).getAllStVars()
+                    ).forEach((v) =>
                         importVars.push({
                             name: v.name,
                             value: v.text,

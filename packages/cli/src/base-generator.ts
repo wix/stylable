@@ -106,10 +106,13 @@ export function reExportsAllSymbols(filePath: string, generator: IndexGenerator)
             acc[className] = `${rootExport}__${className}`;
             return acc;
         }, {});
-    const stVars = meta.vars.reduce<Record<string, string>>((acc, { name }) => {
-        acc[name] = `${rootExport}__${name}`;
-        return acc;
-    }, {});
+    const stVars = Object.values(meta.getAllStVars()).reduce<Record<string, string>>(
+        (acc, { name }) => {
+            acc[name] = `${rootExport}__${name}`;
+            return acc;
+        },
+        {}
+    );
     const vars = Object.keys(STSymbol.getAllByType(meta, `cssVar`)).reduce<Record<string, string>>(
         (acc, varName) => {
             acc[varName] = `--${rootExport}__${varName.slice(2)}`;

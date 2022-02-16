@@ -147,3 +147,45 @@ export function validateAllowedNodesUntil(
 
     return true;
 }
+
+export const valueDiagnostics = {
+    INVALID_NAMED_PARAMS: () =>
+        `invalid named parameters (e.g. "func(name value, [name value, ...])")`,
+};
+
+export const strategies = {
+    named: (node: any, reportWarning?: ReportWarning) => {
+        const named: Record<string, string> = {};
+        getNamedArgs(node).forEach((mixinArgsGroup) => {
+            const argsDivider = mixinArgsGroup[1];
+            if (mixinArgsGroup.length < 3 || (argsDivider && argsDivider.type !== 'space')) {
+                if (reportWarning) {
+                    const argValue = mixinArgsGroup[0];
+                    reportWarning(valueDiagnostics.INVALID_NAMED_PARAMS(), {
+                        word: argValue.value,
+                    });
+                }
+                return;
+            }
+            named[mixinArgsGroup[0].value] = stringifyParam(mixinArgsGroup.slice(2));
+        });
+        return named;
+    },
+    args: (node: any, reportWarning?: ReportWarning) => {
+        return getFormatterArgs(node, true, reportWarning).map((value) => ({ value }));
+    },
+};
+
+function stringifyParam(nodes: any) {
+    return postcssValueParser.stringify(nodes, (n: any) => {
+        if (n.type === 'function') {
+            return postcssValueParser.stringify(n);
+        } else if (n.type === 'div') {
+            return null;
+        } else if (n.type === 'string') {
+            return n.value;
+        } else {
+            return undefined;
+        }
+    });
+}

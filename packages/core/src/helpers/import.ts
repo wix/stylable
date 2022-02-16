@@ -4,7 +4,7 @@ import { Diagnostics } from '../diagnostics';
 import type { Imported } from '../features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { rootValueMapping, valueMapping } from '../stylable-value-parsers';
-import { stripQuotation } from '../utils';
+import { stripQuotation } from '../helpers/string';
 import { isCompRoot } from './selector';
 import type { ParsedValue } from '../types';
 import type * as postcss from 'postcss';

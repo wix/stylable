@@ -2,6 +2,9 @@ export const buildMessages = {
     START_WATCHING() {
         return 'Start watching...';
     },
+    STOP_WATCHING() {
+        return 'Stop watching.';
+    },
     CONTINUE_WATCH() {
         return `Watching files...`;
     },

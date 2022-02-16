@@ -1,3 +1,4 @@
+import fs from '@file-services/node';
 import {
     INpmPackage,
     resolveWorkspacePackages,
@@ -11,7 +12,7 @@ export const resolveNpmRequests: ResolveRequests = (entities, { rootDir }) => {
 
     for (const entity of entities) {
         const { request } = entity;
-        const workspacePackages = resolveWorkspacePackages(rootDir, [request]);
+        const workspacePackages = resolveWorkspacePackages(rootDir, [request], fs);
 
         if (!workspacePackages.length) {
             throw new Error(`Stylable CLI config can not resolve project request "${request}"`);
