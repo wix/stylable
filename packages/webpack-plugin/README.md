@@ -100,7 +100,7 @@ interface StylableWebpackPluginOptions {
      * Allow to disable specific diagnostics reports
      */
     unsafeMuteDiagnostics?: {
-        DUPLICATE_MODULE_NAMESPACE?: boolean;
+        DUPLICATE_MODULE_NAMESPACE?: boolean | 'warn';
     };
     /**
      * Set the strategy of how to spit the extracted css
@@ -116,6 +116,33 @@ interface StylableWebpackPluginOptions {
     assetFilter?: (url: string, context: string) => boolean;
 }
 
+```
+
+### Stylable config
+`StylableWebpackPlugin` will attempt to load the nearest `stylable.config.js` file and use it as override.
+Stylable config file should export `webpackPlugin` function with the following type:
+```ts
+type webpackPlugin = (pluginOptions: StylableWebpackPluginOptions) => StylableWebpackPluginOptions;
+```
+
+Example of a `stylable.config.js` file:
+```js
+module.exports.webpackPlugin = (defaultPluginOptions) => {
+  return {
+    ...defaultPluginOptions,
+    stylableConfig(defaultStylableConfig) {
+      return {
+        ...defaultStylableConfig,
+        // Example override the namespace generation strategy
+        // resolveNamespace: (ns)=> `prefix-${ns}` 
+      }
+    }
+    // Example to unsafely ignore duplicate namespace errors 
+    // unsafeMuteDiagnostics: {
+    //   DUPLICATE_MODULE_NAMESPACE: 'warn'
+    // }
+  }
+}
 ```
 
 ### Default development configuration
