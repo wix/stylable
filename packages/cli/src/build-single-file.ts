@@ -282,13 +282,16 @@ export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
 
-    return diagnostics.map((diagnostic) => {
-        const err = diagnostic.node.error(diagnostic.message, diagnostic.options);
-
-        return {
-            type: diagnostic.type,
-            message: `${diagnostic.message}\n${err.showSourceCode(true)}`,
-            offset: diagnostic.node.source?.start?.offset,
+    return diagnostics.map((rawDiagnostic) => {
+        const err = rawDiagnostic.node.error(rawDiagnostic.message, rawDiagnostic.options);
+        const diagnostic: Diagnostic = {
+            type: rawDiagnostic.type,
+            message: `${rawDiagnostic.message}\n${err.showSourceCode(true)}`,
+            offset: rawDiagnostic.node.source?.start?.offset,
+            line: rawDiagnostic.node.source?.start?.line,
+            column: rawDiagnostic.node.source?.start?.column,
         };
+
+        return diagnostic;
     });
 }

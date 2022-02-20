@@ -35,10 +35,12 @@ export async function buildStylable(
         fileProcessorCache = {},
         diagnosticsManager = new DiagnosticsManager({
             log,
-            onFatalDiagnostics() {
-                if (!watch) {
-                    process.exitCode = 1;
-                }
+            hooks: {
+                postReport(_diagnostics, hasFatalDiagnostic) {
+                    if (hasFatalDiagnostic && !watch) {
+                        process.exitCode = 1;
+                    }
+                },
             },
         }),
         outputFiles = new Map(),
@@ -77,7 +79,7 @@ export async function buildStylable(
                 fileProcessorCache,
             });
 
-            const { service } = await build(buildOptions, {
+            const { service, generatedFiles } = await build(buildOptions, {
                 watch,
                 stylable,
                 log,
@@ -89,7 +91,7 @@ export async function buildStylable(
                 diagnosticsManager,
             });
 
-            watchHandler.register({ service, identifier, stylable });
+            watchHandler.register({ service, identifier, stylable, generatedFiles });
         }
     }
 
@@ -99,5 +101,5 @@ export async function buildStylable(
         watchHandler.start();
     }
 
-    return { watchHandler };
+    return { watchHandler, diagnosticsManager, outputFiles };
 }

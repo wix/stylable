@@ -10,12 +10,13 @@ export type DiagnosticsMode = 'auto' | 'strict' | 'loose';
 /**
  * Helper function to report diagnostics for every diagnosticsMode
  */
-function reportDiagnostic(
+export function reportDiagnostic(
     ctx: EmitDiagnosticsContext,
     diagnosticsMode: DiagnosticsMode,
-    { message, type }: { message: string; type: DiagnosticType }
+    { message, type }: { message: string; type: DiagnosticType },
+    from?: string
 ) {
-    const error = new Error(message);
+    const error = new Error(from ? `[${from}]:\n\n${message}` : message);
 
     if (type === 'info') {
         ctx.emitWarning(error);

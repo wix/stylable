@@ -28,6 +28,8 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
 
     const varType = this.target === 'oldie' ? 'var' : 'const';
 
+    this.onLoaderFinished();
+
     return `
 ${imports.join('\n')}
 export ${varType} namespace = ${getReplacementToken('namespace')};

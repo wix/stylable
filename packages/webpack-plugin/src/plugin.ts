@@ -49,6 +49,8 @@ import type {
 } from './types';
 import { parse } from 'postcss';
 import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
+import { STCBuilder } from './stc-builder';
+import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -163,6 +165,8 @@ export class StylableWebpackPlugin {
     stylable!: Stylable;
     options!: Required<StylableWebpackPluginOptions>;
     entities!: StylableWebpackEntities;
+    stcBuilder!: STCBuilder;
+
     constructor(
         private userOptions: StylableWebpackPluginOptions = {},
         private injectConfigHooks = true
@@ -187,6 +191,26 @@ export class StylableWebpackPlugin {
             this.processOptions(compiler);
             this.createStylable(compiler);
         });
+
+        /**
+         * In case the user uses STC we can run his config in this process.
+         */
+        this.stcBuilder = new STCBuilder(compiler);
+
+        if (this.stcBuilder.config) {
+            compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
+                await this.stcBuilder.build();
+            });
+            compiler.hooks.watchRun.tapPromise(
+                {
+                    name: StylableWebpackPlugin.name,
+                    stage: 0,
+                },
+                async () => {
+                    await this.stcBuilder.build();
+                }
+            );
+        }
 
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
@@ -248,7 +272,7 @@ export class StylableWebpackPlugin {
                 return isWebpackConfigProcessor(config)
                     ? config.webpackPlugin(defaults, compiler)
                     : undefined;
-            }) || defaults;
+            })?.config || defaults;
 
         this.options = options;
     }
@@ -349,6 +373,44 @@ export class StylableWebpackPlugin {
                         module.addDependency(
                             new this.entities.StylableRuntimeDependency(stylableBuildMeta)
                         );
+                    };
+
+                    loaderContext.onLoaderFinished = () => {
+                        /**
+                         * If Stylable Builder is runnning in background we need to add the relavent files to webpack file dependencies watcher.
+                         */
+                        if (this.stcBuilder.outputFiles) {
+                            const sources = this.stcBuilder.outputFiles.get(module.resource);
+
+                            if (sources) {
+                                /**
+                                 * Remove output file diagnostics only if has source files
+                                 */
+                                module.clearWarningsAndErrors();
+
+                                for (const sourceFilePath of sources) {
+                                    compilation.fileDependencies.add(sourceFilePath);
+
+                                    const diagnostics =
+                                        this.stcBuilder.diagnosticsMessages.get(sourceFilePath);
+
+                                    if (diagnostics) {
+                                        for (const diagnostic of diagnostics) {
+                                            reportDiagnostic(
+                                                loaderContext,
+                                                this.options.diagnosticsMode,
+                                                diagnostic,
+                                                `${sourceFilePath}${
+                                                    diagnostic.line && diagnostic.column
+                                                        ? `:${diagnostic.line}:${diagnostic.column}`
+                                                        : ''
+                                                }`
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     };
                 }
             }

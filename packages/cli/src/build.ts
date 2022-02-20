@@ -202,7 +202,7 @@ export async function build(
         log(mode, buildMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined));
     }
 
-    return { service };
+    return { service, generatedFiles: buildGeneratedFiles };
 
     function buildFiles(filesToBuild: Set<string>, generated: Set<string>) {
         for (const filePath of filesToBuild) {

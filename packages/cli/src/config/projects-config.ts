@@ -19,10 +19,10 @@ export async function projectsConfig(
     overrideBuildOptions: Partial<BuildOptions>,
     defaultOptions: BuildOptions = createDefaultOptions()
 ): Promise<STCConfig> {
-    const configFile = resolveConfigFile(rootDir);
+    const { config } = resolveConfigFile(rootDir) || {};
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
-        configFile?.options,
+        config?.options,
         overrideBuildOptions
     );
 
@@ -30,15 +30,15 @@ export async function projectsConfig(
 
     let projects: STCConfig;
 
-    if (isMultpleConfigProject(configFile)) {
-        const { entities } = processProjects(configFile, {
+    if (isMultpleConfigProject(config)) {
+        const { entities } = processProjects(config, {
             defaultOptions: topLevelOptions,
         });
 
         projects = await resolveProjectsRequests({
             rootDir,
             entities,
-            resolveRequests: configFile.projectsOptions?.resolveRequests ?? resolveNpmRequests,
+            resolveRequests: config.projectsOptions?.resolveRequests ?? resolveNpmRequests,
         });
     } else {
         projects = [

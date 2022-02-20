@@ -24,6 +24,10 @@ export interface Build {
     stylable: Stylable;
 }
 
+export interface RegisteredBuild extends Build {
+    generatedFiles: Set<string>;
+}
+
 type File = {
     generated?: boolean;
 } & IWatchEvent;
@@ -42,11 +46,11 @@ export class WatchHandler {
             this.options.diagnosticsManager ?? new DiagnosticsManager({ log: this.log });
     }
 
-    private listener: WatchEventListener = async (event) => {
+    public readonly listener = async (event: IWatchEvent) => {
         this.log(buildMessages.CHANGE_EVENT_TRIGGERED(event.path));
 
         if (this.generatedFiles.has(event.path)) {
-            buildMessages.SKIP_GENERATED_FILE(event.path);
+            this.log(buildMessages.SKIP_GENERATED_FILE(event.path));
             return;
         }
 
@@ -108,19 +112,23 @@ export class WatchHandler {
         }
     };
 
-    public register(process: Build) {
-        this.builds.push(process);
+    public register({ generatedFiles, ...build }: RegisteredBuild) {
+        this.builds.push(build);
+
+        for (const file of generatedFiles) {
+            this.generatedFiles.add(file);
+        }
     }
 
     public start() {
         this.log(buildMessages.START_WATCHING(), levels.info);
-        this.fileSystem.watchService.addGlobalListener(this.listener);
+        this.fileSystem.watchService.addGlobalListener(this.listener as WatchEventListener);
     }
 
     public async stop() {
         this.log(buildMessages.STOP_WATCHING(), levels.info);
         this.diagnosticsManager.clear();
-        this.fileSystem.watchService.removeGlobalListener(this.listener);
+        this.fileSystem.watchService.removeGlobalListener(this.listener as WatchEventListener);
 
         for (const { service } of this.builds) {
             await service.dispose();
