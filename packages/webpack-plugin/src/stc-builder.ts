@@ -19,8 +19,6 @@ export class STCBuilder {
     public outputFiles: Map<string, Set<string>> | undefined;
     public diagnosticsMessages: DiagnosticMessages = new Map();
 
-    private fileStatsCache = new Map<string, number>();
-
     constructor(private compiler: Compiler) {
         this.config = loadStylableConfig(this.compiler.context, (c) => c);
         this.rootDir ??= this.config?.path ? dirname(this.config.path) : undefined;
