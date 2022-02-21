@@ -1,9 +1,6 @@
 import findConfig from 'find-config';
 
-export function loadStylableConfig<T>(
-    context: string,
-    extract: (config: any) => T
-): { path: string; config: T } | undefined {
+export function loadStylableConfig<T>(context: string, extract: (config: any) => T): T | undefined {
     const path = findConfig('stylable.config.js', { cwd: context });
     let config;
     if (path) {
@@ -19,10 +16,7 @@ export function loadStylableConfig<T>(
                 `Stylable configuration loaded from ${path} but no exported configuration found`
             );
         }
-        return {
-            path,
-            config: extract(config),
-        };
+        return extract(config);
     }
     return undefined;
 }
