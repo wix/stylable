@@ -10,7 +10,7 @@ export {
     BuildOptions,
     Configuration,
     ConfigurationProvider,
-    STCConfig,
+    STCProjects,
     ResolveRequests,
     typedConfiguration,
 } from './types';

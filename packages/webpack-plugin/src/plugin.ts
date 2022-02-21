@@ -195,22 +195,31 @@ export class StylableWebpackPlugin {
         /**
          * In case the user uses STC we can run his config in this process.
          */
-        this.stcBuilder = new STCBuilder(compiler);
+        this.stcBuilder = new STCBuilder(compiler.context);
 
         if (this.stcBuilder.config) {
             compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
                 await this.stcBuilder.build();
             });
             compiler.hooks.watchRun.tapPromise(
-                {
-                    name: StylableWebpackPlugin.name,
-                    stage: 0,
-                },
+                { name: StylableWebpackPlugin.name, stage: 0 },
                 async () => {
-                    await this.stcBuilder.build();
+                    await this.stcBuilder.build([
+                        ...(compiler.modifiedFiles ?? []),
+                        ...(compiler.removedFiles ?? []),
+                    ]);
                 }
             );
         }
+
+        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation) => {
+            /**
+             * Register STC projects directories as dependencies
+             */
+            if (this.stcBuilder.projects) {
+                compilation.contextDependencies.addAll(this.stcBuilder.getProjectsSources());
+            }
+        });
 
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,

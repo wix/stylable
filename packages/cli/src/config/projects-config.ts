@@ -8,7 +8,7 @@ import type {
     RawProjectEntity,
     ResolveProjectsContext,
     ResolveRequests,
-    STCConfig,
+    STCProjects,
 } from '../types';
 import { processProjects } from './process-projects';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
@@ -18,7 +18,7 @@ export async function projectsConfig(
     rootDir: string,
     overrideBuildOptions: Partial<BuildOptions>,
     defaultOptions: BuildOptions = createDefaultOptions()
-): Promise<STCConfig> {
+): Promise<STCProjects> {
     const { config } = resolveConfigFile(rootDir) || {};
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
@@ -28,7 +28,7 @@ export async function projectsConfig(
 
     validateOptions(topLevelOptions);
 
-    let projects: STCConfig;
+    let projects: STCProjects;
 
     if (isMultpleConfigProject(config)) {
         const { entities } = processProjects(config, {
@@ -86,7 +86,7 @@ async function resolveProjectsRequests({
     rootDir: string;
     entities: Array<RawProjectEntity>;
     resolveRequests: ResolveRequests;
-}): Promise<STCConfig> {
+}): Promise<STCProjects> {
     const context: ResolveProjectsContext = { rootDir };
 
     return resolveRequests(entities, context);

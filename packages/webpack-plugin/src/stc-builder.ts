@@ -4,12 +4,12 @@ import {
     createLogger,
     createWatchEvent,
     DiagnosticsManager,
+    STCProjects,
     WatchHandler,
 } from '@stylable/cli';
 import type { DiagnosticMessages } from '@stylable/cli/dist/report-diagnostics';
-import { realpathSync } from 'fs';
-import { dirname } from 'path';
-import type { Compiler } from 'webpack';
+import { existsSync, realpathSync } from 'fs';
+import { dirname, join } from 'path';
 
 export class STCBuilder {
     private diagnosticsManager: DiagnosticsManager;
@@ -18,9 +18,10 @@ export class STCBuilder {
     public config: { path: string; config: any } | undefined;
     public outputFiles: Map<string, Set<string>> | undefined;
     public diagnosticsMessages: DiagnosticMessages = new Map();
+    public projects: STCProjects | undefined;
 
-    constructor(private compiler: Compiler) {
-        this.config = loadStylableConfig(this.compiler.context, (c) => c);
+    constructor(context: string) {
+        this.config = loadStylableConfig(context, (c) => c);
         this.rootDir ??= this.config?.path ? dirname(this.config.path) : undefined;
         this.diagnosticsManager = new DiagnosticsManager({
             log: createNoopLogger(),
@@ -32,7 +33,7 @@ export class STCBuilder {
         });
     }
 
-    public build = async () => {
+    public build = async (modifiedFiles?: Iterable<string>) => {
         if (!this.config || !this.rootDir) {
             throw new Error(
                 'Stylable Builder Error: can not build when config or rootDir is undefined'
@@ -40,10 +41,13 @@ export class STCBuilder {
         }
 
         if (this.watchHandler) {
-            if (this.compiler.modifiedFiles) {
-                for (const filePath of this.compiler.modifiedFiles) {
-                    const file = createWatchEvent(realpathSync(filePath));
-                    await this.watchHandler.listener(file);
+            if (modifiedFiles) {
+                for (const filePath of modifiedFiles) {
+                    const event = createWatchEvent(
+                        existsSync(filePath) ? realpathSync(filePath) : filePath
+                    );
+
+                    await this.watchHandler.listener(event);
                 }
             }
         } else {
@@ -54,7 +58,26 @@ export class STCBuilder {
 
             this.watchHandler = buildOutput.watchHandler;
             this.outputFiles = buildOutput.outputFiles;
+            this.projects = buildOutput.projects;
         }
+    };
+
+    public getProjectsSources = () => {
+        if (!this.projects) {
+            throw new Error(
+                'Stylable Builder Error: Can not get projects sources when projects is undefined, did you run build()?'
+            );
+        }
+
+        const sourcesPaths = new Set<string>();
+
+        for (const { projectRoot, options } of this.projects) {
+            for (const optionEntity of options) {
+                sourcesPaths.add(join(projectRoot, optionEntity.srcDir));
+            }
+        }
+
+        return sourcesPaths;
     };
 }
 
