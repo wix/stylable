@@ -1,4 +1,3 @@
-import { loadStylableConfig } from '@stylable/build-tools';
 import {
     buildStylable,
     createLogger,
@@ -9,20 +8,16 @@ import {
 } from '@stylable/cli';
 import type { DiagnosticMessages } from '@stylable/cli/dist/report-diagnostics';
 import { existsSync, realpathSync } from 'fs';
-import { dirname, join } from 'path';
+import { join } from 'path';
 
 export class STCBuilder {
     private diagnosticsManager: DiagnosticsManager;
     private watchHandler: WatchHandler | undefined;
-    private rootDir: string | undefined;
-    public config: { path: string; config: any } | undefined;
     public outputFiles: Map<string, Set<string>> | undefined;
     public diagnosticsMessages: DiagnosticMessages = new Map();
     public projects: STCProjects | undefined;
 
-    constructor(context: string) {
-        this.config = loadStylableConfig(context, (c) => c);
-        this.rootDir ??= this.config?.path ? dirname(this.config.path) : undefined;
+    constructor(private rootDir: string, private configFilePath?: string) {
         this.diagnosticsManager = new DiagnosticsManager({
             log: createNoopLogger(),
             hooks: {
@@ -34,12 +29,6 @@ export class STCBuilder {
     }
 
     public build = async (modifiedFiles?: Iterable<string>) => {
-        if (!this.config || !this.rootDir) {
-            throw new Error(
-                'Stylable Builder Error: can not build when config or rootDir is undefined'
-            );
-        }
-
         if (this.watchHandler) {
             if (modifiedFiles) {
                 for (const filePath of modifiedFiles) {
@@ -54,6 +43,7 @@ export class STCBuilder {
             const buildOutput = await buildStylable(this.rootDir, {
                 diagnosticsManager: this.diagnosticsManager,
                 log: createNoopLogger(),
+                configFilePath: this.configFilePath,
             });
 
             this.watchHandler = buildOutput.watchHandler;

@@ -51,6 +51,7 @@ import { parse } from 'postcss';
 import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
 import { STCBuilder } from './stc-builder';
 import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
+import { resolveConfig } from '@stylable/cli';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -113,6 +114,12 @@ export interface StylableWebpackPluginOptions {
         DUPLICATE_MODULE_NAMESPACE?: boolean | 'warn';
     };
     /**
+     * Runs "stc" programmatically with the webpack compilation.
+     * true - it will automatically detect the closest "stylable.config.js" file and use it.
+     * string - it will use the provided string as the "stcConfig" file path.
+     */
+    stcConfig?: boolean | string;
+    /**
      * Set the strategy of how to spit the extracted css
      * This option is only used when cssInjection is set to 'css'
      * single - extract all css to a single file
@@ -159,6 +166,7 @@ const defaultOptions = (
     target: userOptions.target ?? 'modern',
     assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
+    stcConfig: userOptions.stcConfig ?? false,
 });
 
 export class StylableWebpackPlugin {
@@ -190,35 +198,7 @@ export class StylableWebpackPlugin {
         compiler.hooks.afterPlugins.tap(StylableWebpackPlugin.name, () => {
             this.processOptions(compiler);
             this.createStylable(compiler);
-        });
-
-        /**
-         * In case the user uses STC we can run his config in this process.
-         */
-        this.stcBuilder = new STCBuilder(compiler.context);
-
-        if (this.stcBuilder.config) {
-            compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
-                await this.stcBuilder.build();
-            });
-            compiler.hooks.watchRun.tapPromise(
-                { name: StylableWebpackPlugin.name, stage: 0 },
-                async () => {
-                    await this.stcBuilder.build([
-                        ...(compiler.modifiedFiles ?? []),
-                        ...(compiler.removedFiles ?? []),
-                    ]);
-                }
-            );
-        }
-
-        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation) => {
-            /**
-             * Register STC projects directories as dependencies
-             */
-            if (this.stcBuilder.projects) {
-                compilation.contextDependencies.addAll(this.stcBuilder.getProjectsSources());
-            }
+            this.createStcBuilder(compiler);
         });
 
         compiler.hooks.compilation.tap(
@@ -284,6 +264,53 @@ export class StylableWebpackPlugin {
             })?.config || defaults;
 
         this.options = options;
+    }
+    private createStcBuilder(compiler: Compiler) {
+        if (!this.options.stcConfig) {
+            return;
+        }
+
+        const configuration = resolveConfig(
+            compiler.context,
+            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined
+        );
+
+        if (!configuration) {
+            throw new Error(
+                `Could not find "stcConfig"${
+                    typeof this.options.stcConfig === 'string'
+                        ? ` at "${this.options.stcConfig}"`
+                        : ''
+                }`
+            );
+        }
+
+        /**
+         * In case the user uses STC we can run his config in this process.
+         */
+        this.stcBuilder = new STCBuilder(compiler.context, configuration.path);
+
+        compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
+            await this.stcBuilder.build();
+        });
+        compiler.hooks.watchRun.tapPromise(
+            { name: StylableWebpackPlugin.name, stage: 0 },
+            async () => {
+                await this.stcBuilder.build([
+                    ...(compiler.modifiedFiles ?? []),
+                    ...(compiler.removedFiles ?? []),
+                ]);
+            }
+        );
+
+        /**
+         * Register STC projects directories as dependencies
+         */
+        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation) => {
+            if (this.stcBuilder.projects) {
+                compilation.contextDependencies.addAll(this.stcBuilder.getProjectsSources());
+            }
+        });
     }
     private createStylable(compiler: Compiler) {
         if (this.stylable) {
