@@ -51,7 +51,7 @@ import { parse } from 'postcss';
 import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
 import { STCBuilder } from './stc-builder';
 import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
-import { resolveConfig } from '@stylable/cli';
+import { resolveConfig as resolveStcConfig } from '@stylable/cli';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -201,6 +201,29 @@ export class StylableWebpackPlugin {
             this.createStcBuilder(compiler);
         });
 
+        compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
+            await this.stcBuilder.build();
+        });
+
+        compiler.hooks.watchRun.tapPromise(
+            { name: StylableWebpackPlugin.name, stage: 0 },
+            async () => {
+                await this.stcBuilder.build([
+                    ...(compiler.modifiedFiles ?? []),
+                    ...(compiler.removedFiles ?? []),
+                ]);
+            }
+        );
+
+        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation) => {
+            /**
+             * Register STC projects directories as dependencies
+             */
+            if (this.stcBuilder.projects) {
+                compilation.contextDependencies.addAll(this.stcBuilder.getProjectsSources());
+            }
+        });
+
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
             (compilation, { normalModuleFactory }) => {
@@ -270,7 +293,7 @@ export class StylableWebpackPlugin {
             return;
         }
 
-        const configuration = resolveConfig(
+        const configuration = resolveStcConfig(
             compiler.context,
             typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined
         );
@@ -289,28 +312,6 @@ export class StylableWebpackPlugin {
          * In case the user uses STC we can run his config in this process.
          */
         this.stcBuilder = new STCBuilder(compiler.context, configuration.path);
-
-        compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
-            await this.stcBuilder.build();
-        });
-        compiler.hooks.watchRun.tapPromise(
-            { name: StylableWebpackPlugin.name, stage: 0 },
-            async () => {
-                await this.stcBuilder.build([
-                    ...(compiler.modifiedFiles ?? []),
-                    ...(compiler.removedFiles ?? []),
-                ]);
-            }
-        );
-
-        /**
-         * Register STC projects directories as dependencies
-         */
-        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation) => {
-            if (this.stcBuilder.projects) {
-                compilation.contextDependencies.addAll(this.stcBuilder.getProjectsSources());
-            }
-        });
     }
     private createStylable(compiler: Compiler) {
         if (this.stylable) {
@@ -415,38 +416,7 @@ export class StylableWebpackPlugin {
                         /**
                          * If Stylable Builder is runnning in background we need to add the relavent files to webpack file dependencies watcher.
                          */
-                        if (this.stcBuilder.outputFiles) {
-                            const sources = this.stcBuilder.outputFiles.get(module.resource);
-
-                            if (sources) {
-                                /**
-                                 * Remove output file diagnostics only if has source files
-                                 */
-                                module.clearWarningsAndErrors();
-
-                                for (const sourceFilePath of sources) {
-                                    compilation.fileDependencies.add(sourceFilePath);
-
-                                    const diagnostics =
-                                        this.stcBuilder.diagnosticsMessages.get(sourceFilePath);
-
-                                    if (diagnostics) {
-                                        for (const diagnostic of diagnostics) {
-                                            reportDiagnostic(
-                                                loaderContext,
-                                                this.options.diagnosticsMode,
-                                                diagnostic,
-                                                `${sourceFilePath}${
-                                                    diagnostic.line && diagnostic.column
-                                                        ? `:${diagnostic.line}:${diagnostic.column}`
-                                                        : ''
-                                                }`
-                                            );
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        this.handleStcFiles(module, compilation, loaderContext);
                     };
                 }
             }
@@ -569,6 +539,52 @@ export class StylableWebpackPlugin {
             }
         });
     }
+    private handleStcFiles(
+        module: NormalModule,
+        compilation: Compilation,
+        loaderContext: StylableLoaderContext
+    ) {
+        if (!this.stcBuilder.outputFiles) {
+            return;
+        }
+
+        const sources = this.stcBuilder.outputFiles.get(module.resource);
+
+        if (sources) {
+            /**
+             * Remove output file diagnostics only if has source files
+             */
+            module.clearWarningsAndErrors();
+
+            for (const sourceFilePath of sources) {
+                /**
+                 * Register the source file as a dependency
+                 */
+                compilation.fileDependencies.add(sourceFilePath);
+
+                const diagnostics = this.stcBuilder.diagnosticsMessages.get(sourceFilePath);
+
+                if (diagnostics) {
+                    for (const diagnostic of diagnostics) {
+                        /**
+                         * Add source file diagnostic to the output file module (more accurate diagnostic)
+                         */
+                        reportDiagnostic(
+                            loaderContext,
+                            this.options.diagnosticsMode,
+                            diagnostic,
+                            `${sourceFilePath}${
+                                diagnostic.line && diagnostic.column
+                                    ? `:${diagnostic.line}:${diagnostic.column}`
+                                    : ''
+                            }`
+                        );
+                    }
+                }
+            }
+        }
+    }
+
     private chunksIntegration(
         webpack: Compiler['webpack'],
         compilation: Compilation,
