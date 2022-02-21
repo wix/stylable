@@ -173,7 +173,7 @@ export class StylableWebpackPlugin {
     stylable!: Stylable;
     options!: Required<StylableWebpackPluginOptions>;
     entities!: StylableWebpackEntities;
-    stcBuilder!: STCBuilder;
+    stcBuilder: STCBuilder | undefined;
 
     constructor(
         private userOptions: StylableWebpackPluginOptions = {},
@@ -202,13 +202,13 @@ export class StylableWebpackPlugin {
         });
 
         compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
-            await this.stcBuilder.build();
+            await this.stcBuilder?.build();
         });
 
         compiler.hooks.watchRun.tapPromise(
             { name: StylableWebpackPlugin.name, stage: 0 },
             async () => {
-                await this.stcBuilder.build([
+                await this.stcBuilder?.build([
                     ...(compiler.modifiedFiles ?? []),
                     ...(compiler.removedFiles ?? []),
                 ]);
@@ -219,7 +219,7 @@ export class StylableWebpackPlugin {
             /**
              * Register STC projects directories as dependencies
              */
-            if (this.stcBuilder.projects) {
+            if (this.stcBuilder?.projects) {
                 compilation.contextDependencies.addAll(this.stcBuilder.getProjectsSources());
             }
         });
@@ -544,7 +544,7 @@ export class StylableWebpackPlugin {
         compilation: Compilation,
         loaderContext: StylableLoaderContext
     ) {
-        if (!this.stcBuilder.outputFiles) {
+        if (!this.stcBuilder?.outputFiles) {
             return;
         }
 
