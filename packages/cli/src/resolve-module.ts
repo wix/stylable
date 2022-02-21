@@ -1,8 +1,9 @@
-import type { IFileSystem } from '@file-services/types';
-import { createRequestResolver } from '@file-services/resolve';
+import { createRequestResolver, IResolutionFileSystem } from '@file-services/resolve';
 import type { StylableConfig } from '@stylable/core';
 
-export function createDefaultResolveModule(fs: IFileSystem): StylableConfig['resolveModule'] {
+export function createDefaultResolveModule(
+    fs: IResolutionFileSystem
+): StylableConfig['resolveModule'] {
     const moduleResolver = createRequestResolver({ fs });
 
     return (context, request) => {
