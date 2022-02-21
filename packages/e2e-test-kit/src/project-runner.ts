@@ -9,6 +9,7 @@ import { symlinkSync, existsSync, realpathSync } from 'fs';
 import { deferred } from 'promise-assist';
 import { runServer } from './run-server';
 import { createTempDirectorySync } from 'create-temp-directory';
+import { loadDirSync } from './file-system-helpers';
 
 export interface Options {
     projectDir: string;
@@ -172,6 +173,9 @@ export class ProjectRunner {
         }
         await page.goto(this.serverUrl, { waitUntil: captureResponses ? 'networkidle' : 'load' });
         return { page, responses };
+    }
+    public getProjectFiles() {
+        return loadDirSync(this.testDir);
     }
     public getBuildWarningMessages(): webpack.Compilation['warnings'] {
         return this.stats!.compilation.warnings.slice();
