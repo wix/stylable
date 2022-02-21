@@ -41,6 +41,7 @@ After installing `@stylable/cli`, the `stc` command will be available, running `
 | `--dts`                   |        | output definition files for the stylable source files (`.st.css.d.ts`)                 | `false`          |
 | `--dtsSourceMap`          |        | output source-maps for the definitions of stylable source files (`.st.css.d.ts.map`)   | `true` if `--dts` is true, otherwise `false` |
 | `--watch`                 |  `w`   | enable watch mode                                                                      | `false`          |
+| `--config`                 |  `c`   | The path to a config file specifying how to build and output Stylable stylesheets                                                                      | The directory containing the config file is assumed to be the "rootDir" for the project named "stylable.config.js"         |
 | `--useNamespaceReference` | `unsr` | mark output stylable source files with relative path for namespacing purposes (\*)     | `false`          |
 | `--customGenerator`       |        | path of a custom index file generator                                                  | -                |
 | `--ext`                   |        | extension of stylable css files                                                        | `.st.css`        |

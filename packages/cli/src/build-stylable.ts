@@ -21,6 +21,7 @@ export interface BuildStylableContext
     outputFiles?: Map<string, Set<string>>;
     defaultOptions?: BuildOptions;
     overrideBuildOptions?: Partial<BuildOptions>;
+    configFilePath?: string;
 }
 
 export async function buildStylable(
@@ -46,9 +47,15 @@ export async function buildStylable(
         outputFiles = new Map(),
         requireModule = require,
         resolveNamespace = requireModule(NAMESPACE_RESOLVER_MODULE_REQUEST).resolveNamespace,
+        configFilePath,
     }: BuildStylableContext = {}
 ) {
-    const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions);
+    const projects = await projectsConfig(
+        rootDir,
+        overrideBuildOptions,
+        defaultOptions,
+        configFilePath
+    );
     const watchHandler = new WatchHandler(fileSystem, {
         log,
         resolverCache,

@@ -17,9 +17,13 @@ import { resolveNpmRequests } from './resolve-requests';
 export async function projectsConfig(
     rootDir: string,
     overrideBuildOptions: Partial<BuildOptions>,
-    defaultOptions: BuildOptions = createDefaultOptions()
+    defaultOptions: BuildOptions = createDefaultOptions(),
+    configFilePath?: string
 ): Promise<STCProjects> {
-    const { config } = resolveConfigFile(rootDir) || {};
+    const config = configFilePath
+        ? requireConfigFile(configFilePath, rootDir)
+        : resolveConfigFile(rootDir);
+
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
         config?.options,
@@ -52,17 +56,24 @@ export async function projectsConfig(
     return projects;
 }
 
-export function resolveConfigFile(context: string) {
-    return loadStylableConfig(context, (config) =>
-        tryRun(
-            () =>
-                isSTCConfig(config)
-                    ? typeof config.stcConfig === 'function'
-                        ? config.stcConfig()
-                        : config.stcConfig
-                    : undefined,
-            'Failed to evaluate "stcConfig"'
-        )
+function requireConfigFile(filePath: string, rootDir: string) {
+    const config = require(require.resolve(filePath, { paths: [rootDir] }));
+    return resolveConfig(config);
+}
+
+function resolveConfigFile(context: string) {
+    return loadStylableConfig(context, (config) => resolveConfig(config));
+}
+
+function resolveConfig(config: any) {
+    return tryRun(
+        () =>
+            isSTCConfig(config)
+                ? typeof config.stcConfig === 'function'
+                    ? config.stcConfig()
+                    : config.stcConfig
+                : undefined,
+        'Failed to evaluate "stcConfig"'
     );
 }
 

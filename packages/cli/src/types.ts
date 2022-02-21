@@ -106,6 +106,7 @@ export interface CliArguments {
     diagnosticsMode: string | undefined;
     watch: boolean;
     preserveWatchOutput: boolean;
+    config: string | undefined;
 }
 
 export interface BuildOptions {
