@@ -8,14 +8,16 @@ export {
 } from './webpack-in-memory-test';
 export {
     createCliTester,
-    loadDirSync,
-    populateDirectorySync,
     runCliCodeMod,
     runCliSync,
     runFormatCliSync,
-    writeToExistingFile,
     escapeRegExp,
-    symlinkSymbol,
 } from './cli-test-kit';
+export {
+    loadDirSync,
+    populateDirectorySync,
+    writeToExistingFile,
+    symlinkSymbol,
+} from './file-system-helpers';
 export { runServer } from './run-server';
 export { DTSKit } from './dts-kit';
