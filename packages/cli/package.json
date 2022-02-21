@@ -12,6 +12,7 @@
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 25000"
   },
   "dependencies": {
+    "@file-services/resolve": "^5.7.1",
     "@file-services/node": "^5.7.1",
     "@file-services/types": "^5.7.1",
     "@stylable/build-tools": "^4.10.3",

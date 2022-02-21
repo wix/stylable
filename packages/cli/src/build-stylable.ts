@@ -9,12 +9,13 @@ import {
 } from './config/resolve-options';
 import { DiagnosticsManager } from './diagnostics-manager';
 import { createDefaultLogger } from './logger';
+import { createDefaultResolveModule } from './resolve-module';
 import type { BuildContext, BuildOptions } from './types';
 import { WatchHandler } from './watch-handler';
 
 export interface BuildStylableContext
     extends Partial<Pick<BuildContext, 'fs' | 'watch' | 'log'>>,
-        Partial<Pick<StylableConfig, 'resolveNamespace' | 'requireModule'>> {
+        Partial<Pick<StylableConfig, 'resolveNamespace' | 'requireModule' | 'resolveModule'>> {
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: StylableConfig['fileProcessorCache'];
     diagnosticsManager?: DiagnosticsManager;
@@ -44,6 +45,7 @@ export async function buildStylable(
         outputFiles = new Map(),
         requireModule = require,
         resolveNamespace = requireModule(NAMESPACE_RESOLVER_MODULE_REQUEST).resolveNamespace,
+        resolveModule = createDefaultResolveModule(fileSystem),
     }: BuildStylableContext = {}
 ) {
     const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions);
@@ -75,6 +77,7 @@ export async function buildStylable(
                 resolveNamespace,
                 resolverCache,
                 fileProcessorCache,
+                resolveModule,
             });
 
             const { service } = await build(buildOptions, {
