@@ -101,5 +101,5 @@ export async function buildStylable(
         watchHandler.start();
     }
 
-    return { watchHandler, diagnosticsManager, outputFiles, projects };
+    return { watchHandler, outputFiles, projects };
 }
