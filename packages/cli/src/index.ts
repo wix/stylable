@@ -14,6 +14,7 @@ export {
     ResolveRequests,
     typedConfiguration,
 } from './types';
+export { resolveConfig } from './config/projects-config';
 export type { WatchHandler } from './watch-handler';
 export { DiagnosticsManager } from './diagnostics-manager';
 export {

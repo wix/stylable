@@ -20,9 +20,7 @@ export async function projectsConfig(
     defaultOptions: BuildOptions = createDefaultOptions(),
     configFilePath?: string
 ): Promise<STCProjects> {
-    const config = configFilePath
-        ? requireConfigFile(configFilePath, rootDir)
-        : resolveConfigFile(rootDir);
+    const { config } = resolveConfig(rootDir, configFilePath) || {};
 
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
@@ -56,16 +54,21 @@ export async function projectsConfig(
     return projects;
 }
 
-function requireConfigFile(filePath: string, rootDir: string) {
-    const config = require(require.resolve(filePath, { paths: [rootDir] }));
-    return resolveConfig(config);
+export function resolveConfig(context: string, request?: string) {
+    return request ? requireConfigFile(request, context) : resolveConfigFile(context);
+}
+
+function requireConfigFile(request: string, context: string) {
+    const path = require.resolve(request, { paths: [context] });
+    const config = resolveConfigValue(require(path));
+    return config ? { config, path } : undefined;
 }
 
 function resolveConfigFile(context: string) {
-    return loadStylableConfig(context, (config) => resolveConfig(config));
+    return loadStylableConfig(context, (config) => resolveConfigValue(config));
 }
 
-function resolveConfig(config: any) {
+function resolveConfigValue(config: any) {
     return tryRun(
         () =>
             isSTCConfig(config)
