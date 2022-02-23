@@ -22,5 +22,6 @@ export {
     DirectoryProcessServiceOptions,
     createWatchEvent,
 } from './directory-process-service/directory-process-service';
+export { STCBuilder } from './stc-builder';
 export { BuildStylableContext, buildStylable } from './build-stylable';
 export type { CodeMod } from './code-mods/types';

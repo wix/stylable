@@ -49,9 +49,8 @@ import type {
 } from './types';
 import { parse } from 'postcss';
 import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
-import { STCBuilder } from './stc-builder';
 import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
-import { resolveConfig as resolveStcConfig } from '@stylable/cli';
+import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -202,16 +201,20 @@ export class StylableWebpackPlugin {
         });
 
         compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
-            await this.stcBuilder?.build();
+            await this.stcBuilder?.build(compiler.watchMode);
         });
 
         compiler.hooks.watchRun.tapPromise(
             { name: StylableWebpackPlugin.name, stage: 0 },
             async () => {
-                await this.stcBuilder?.build([
-                    ...(compiler.modifiedFiles ?? []),
-                    ...(compiler.removedFiles ?? []),
-                ]);
+                if (this.stcBuilder?.watchHandler) {
+                    await this.stcBuilder.handleWatchedFiles([
+                        ...(compiler.modifiedFiles ?? []),
+                        ...(compiler.removedFiles ?? []),
+                    ]);
+                } else {
+                    await this.stcBuilder?.build(compiler.watchMode);
+                }
             }
         );
 
