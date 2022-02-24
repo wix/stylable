@@ -355,7 +355,12 @@ describe('Stylable Cli Watch - Single project', () => {
         expect(files['style.st.css']).to.include('.root{ color: blue; }');
     });
 
-    it('should re-build indexes', async () => {
+    it('should re-build indexes', async function () {
+        /**
+         * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
+         */
+        this.retries(2);
+
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
         });

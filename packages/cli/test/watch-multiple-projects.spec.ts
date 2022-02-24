@@ -158,7 +158,12 @@ describe('Stylable Cli Watch - Multiple projects', () => {
         ).to.eql(false);
     });
 
-    it('should re-build index files', async () => {
+    it('should re-build index files', async function () {
+        /**
+         * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
+         */
+        this.retries(2);
+
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'stylable.config.js': `
@@ -252,24 +257,6 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     msg: buildMessages.CHANGE_DETECTED(
                         join(tempDir.path, 'packages', 'project-b', 'foo.st.css')
                     ),
-                    async action() {
-                        /**
-                         * Trying to always trigger fs watch event with renaming output directory.
-                         * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
-                         */
-
-                        const projectBPath = join(tempDir.path, 'packages', 'project-b');
-
-                        await promises.rename(
-                            join(projectBPath, 'dist'),
-                            join(projectBPath, 'dist-renamed')
-                        );
-
-                        await promises.rename(
-                            join(projectBPath, 'dist-renamed'),
-                            join(projectBPath, 'dist')
-                        );
-                    },
                 },
                 {
                     msg: buildMessages.CHANGE_EVENT_TRIGGERED(
