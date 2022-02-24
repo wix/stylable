@@ -212,7 +212,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
             },
         });
 
-        await run({
+        const { output } = await run({
             dirPath: tempDir.path,
             args: ['-w'],
             steps: [
@@ -257,6 +257,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                          * Trying to always trigger fs watch event with renaming the index file.
                          * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
                          */
+
                         const indexDirPath = join(tempDir.path, 'packages', 'project-b', 'dist');
 
                         await promises.rename(
@@ -279,12 +280,14 @@ describe('Stylable Cli Watch - Multiple projects', () => {
         });
 
         const files = loadDirSync(tempDir.path);
-        expect(files['packages/project-a/dist/style.css']).to.match(
-            /foo[0-9]+__foo {color: red;}/g
-        );
-        expect(files['packages/project-a/dist/style.css']).to.match(
-            /foo[0-9]+__bar {color: blue;}/g
-        );
+        expect(
+            files['packages/project-a/dist/style.css'],
+            `Expected styling to apply.\nBuild output:\n\n${output()}`
+        ).to.match(/foo[0-9]+__foo {color: red;}/g);
+        expect(
+            files['packages/project-a/dist/style.css'],
+            `Expected styling to apply.\nBuild output:\n\n${output()}`
+        ).to.match(/foo[0-9]+__bar {color: blue;}/g);
     });
 
     it('should trigger build when changing js mixin', async () => {
