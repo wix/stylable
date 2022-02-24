@@ -254,20 +254,20 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                     ),
                     async action() {
                         /**
-                         * Trying to always trigger fs watch event with renaming the index file.
+                         * Trying to always trigger fs watch event with renaming output directory.
                          * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
                          */
 
-                        const indexDirPath = join(tempDir.path, 'packages', 'project-b', 'dist');
+                        const projectBPath = join(tempDir.path, 'packages', 'project-b');
 
                         await promises.rename(
-                            join(indexDirPath, 'index.st.css'),
-                            join(indexDirPath, 'index-renamed.st.css')
+                            join(projectBPath, 'dist'),
+                            join(projectBPath, 'dist-renamed')
                         );
 
                         await promises.rename(
-                            join(indexDirPath, 'index-renamed.st.css'),
-                            join(indexDirPath, 'index.st.css')
+                            join(projectBPath, 'dist-renamed'),
+                            join(projectBPath, 'dist')
                         );
                     },
                 },
