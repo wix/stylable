@@ -66,14 +66,13 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
         ? {
               meta: {
                   outputAst: result,
-                  rawAst: null as unknown as StylableMeta['rawAst'],
+                  rawAst: result,
                   diagnostics: null as unknown as StylableMeta['diagnostics'],
                   transformDiagnostics: null as unknown as StylableMeta['transformDiagnostics'],
               },
           }
         : result;
-    // ToDo: support analyze mode
-    const rootAst = context.meta.outputAst!;
+    const rootAst = context.meta.rawAst;
     const expectedTestAmount =
         expectedTestInput ??
         (rootAst.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))?.length || 0);
@@ -82,10 +81,10 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
     // collect checks
     rootAst.walkComments((comment) => {
         const input = comment.text.split(/@/gm);
-        const testCommentTarget = comment;
-        const testCommentSrc = isDeprecatedInput
+        const testCommentSrc = comment;
+        const testCommentTarget = isDeprecatedInput
             ? comment
-            : getSourceComment(context.meta, comment) || comment;
+            : getTargetComment(context.meta, comment) || comment;
         const nodeTarget = testCommentTarget.next() as AST;
         const nodeSrc = testCommentSrc.next() as AST;
         const isRemoved = isRemovedFromTarget(nodeTarget, nodeSrc);
@@ -423,14 +422,17 @@ function diagnosticTest(
     return result;
 }
 
-function getSourceComment(meta: Context['meta'], { source }: postcss.Comment) {
+function getTargetComment(meta: Context['meta'], { source }: postcss.Comment) {
     let match: postcss.Comment | undefined = undefined;
-    meta.rawAst.walkComments((srcComment) => {
+    if (!meta.outputAst) {
+        return;
+    }
+    meta.outputAst.walkComments((outputComment) => {
         if (
-            srcComment.source?.start?.offset === source?.start?.offset &&
-            srcComment.source?.end?.offset === source?.end?.offset
+            outputComment.source?.start?.offset === source?.start?.offset &&
+            outputComment.source?.end?.offset === source?.end?.offset
         ) {
-            match = srcComment;
+            match = outputComment;
             return false;
         }
         return;

@@ -4,8 +4,7 @@ import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
-import { processorWarnings } from '@stylable/core';
-import { STImport } from '@stylable/core/dist/features';
+import { STImport, STVar } from '@stylable/core/dist/features';
 
 describe('Stylable Cli', function () {
     this.timeout(25000);
@@ -136,9 +135,9 @@ describe('Stylable Cli', function () {
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent['dist/style.st.css'];
 
-        expect(
-            stylesheetContent.startsWith('/* st-namespace-reference="../style.st.css" */')
-        ).equal(true);
+        expect(stylesheetContent.endsWith('/* st-namespace-reference="../style.st.css" */')).equal(
+            true
+        );
     });
 
     it('build .st.css.d.ts alongside source files with source-maps on by default', () => {
@@ -162,6 +161,56 @@ describe('Stylable Cli', function () {
         expect(
             dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
         ).to.equal(true);
+    });
+
+    it('build .st.css.d.ts source-map and target the source file path relatively', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            src: { 'style.st.css': srcContent },
+        });
+
+        runCliSync(['--rootDir', tempDir.path, '--srcDir', './src', '--outDir', 'dist', '--dts']);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+        ).to.equal(true);
+        expect(dtsSourceMapContent).to.contain(
+            `"sources": [\n        "../src/style.st.css"\n    ]`,
+            `expected to contain source file path for "${dtsSourceMapContent}"`
+        );
+    });
+
+    it('build .st.css.d.ts source-map and target the output source file path', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            src: { 'style.st.css': srcContent },
+            'stylable.config.js': `
+            exports.stcConfig = {
+                options: {
+                    outDir: './dist',
+                    srcDir: './src',
+                    outputSources: true,
+                    cjs: false,
+                    dts: true,
+                }
+            };
+        `,
+        });
+
+        runCliSync(['--rootDir', tempDir.path]);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+        ).to.equal(true);
+        expect(dtsSourceMapContent).to.contain(`"sources": [\n        "style.st.css"\n    ]`);
     });
 
     it('build .st.css.d.ts alongside source files with source-maps on by default (config file)', () => {
@@ -319,7 +368,7 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(
                 new RegExp(
-                    `\\[info\\]: ${processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
+                    `\\[info\\]: ${STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         'stArray',
                         'st-array'
                     )}`

@@ -20,6 +20,7 @@ import {
     STSymbol,
     STImport,
     STGlobal,
+    STVar,
     CSSClass,
     CSSType,
     CSSCustomProperty,
@@ -28,7 +29,16 @@ import {
 
 export const RESERVED_ROOT_NAME = 'root';
 
-const features = [STSymbol, STImport, STGlobal, CSSClass, CSSType, CSSCustomProperty, CSSKeyframes];
+const features = [
+    STSymbol,
+    STImport,
+    STGlobal,
+    STVar,
+    CSSClass,
+    CSSType,
+    CSSCustomProperty,
+    CSSKeyframes,
+];
 
 export class StylableMeta {
     public data: PlugableRecord = {};
@@ -38,6 +48,7 @@ export class StylableMeta {
     public namespace = '';
     /** @deprecated use meta.getImportStatements() */
     public imports: Imported[] = [];
+    /** @deprecated use meta.getAllStVars() or meta.getStVar(name) */
     public vars: VarSymbol[] = [];
     /** @deprecated */
     public cssVars: Record<string, CSSVarSymbol> = {};
@@ -95,6 +106,12 @@ export class StylableMeta {
     getImportStatements() {
         return STImport.getImportStatements(this);
     }
+    getStVar(name: string) {
+        return STSymbol.get(this, name, `var`);
+    }
+    getAllStVars() {
+        return STSymbol.getAllByType(this, `var`);
+    }
 }
 setFieldForDeprecation(StylableMeta.prototype, `elements`, {
     objectType: `stylableMeta`,
@@ -127,4 +144,9 @@ setFieldForDeprecation(StylableMeta.prototype, `mappedKeyframes`, {
 setFieldForDeprecation(StylableMeta.prototype, `cssVars`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
+});
+setFieldForDeprecation(StylableMeta.prototype, `vars`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
+    pleaseUse: `meta.getAllStVars() or meta.getStVar(name)`,
 });

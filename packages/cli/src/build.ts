@@ -44,7 +44,7 @@ export async function build(
         diagnosticsManager = new DiagnosticsManager({ log }),
     }: BuildContext
 ) {
-    const { join, realpathSync } = fs;
+    const { join, realpathSync, relative } = fs;
     const projectRoot = realpathSync(_projectRoot);
     const rootDir = realpathSync(_rootDir);
     const fullSrcDir = join(projectRoot, srcDir);
@@ -152,7 +152,10 @@ export async function build(
             for (const filePath of affectedFiles) {
                 if (!indexFile) {
                     // map st output file path to src file path
-                    outputFiles.set(filePath.replace(fullSrcDir, fullOutDir), new Set([filePath]));
+                    outputFiles.set(
+                        join(fullOutDir, relative(fullSrcDir, filePath)),
+                        new Set([filePath])
+                    );
                 }
 
                 // remove assets from the affected files (handled in buildAggregatedEntities)

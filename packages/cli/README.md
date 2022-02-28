@@ -110,7 +110,9 @@ export interface BuildOptions {
     minify?: boolean;
     /** should generate .d.ts definitions for every stylesheet */
     dts?: boolean;
-    /** should generate .d.ts.map files for every .d.ts mapping back to the source .st.css */
+    /** should generate .d.ts.map files for every .d.ts mapping back to the source .st.css.
+     * It will use the origin file path unless `outputSources` is true, then it will use the outputted file path as the source-map source.
+     */
     dtsSourceMap?: boolean;
     /** should emit diagnostics */
     diagnostics?: boolean;

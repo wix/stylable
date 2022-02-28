@@ -1,6 +1,6 @@
 import { FeatureContext, createFeature } from './feature';
-import type { VarSymbol } from './types';
 import type { ImportSymbol } from './st-import';
+import type { VarSymbol } from './st-var';
 import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import type { CSSVarSymbol } from './css-custom-property';

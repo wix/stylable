@@ -1,4 +1,4 @@
-import { functionWarnings, nativeFunctionsDic, processorWarnings } from '@stylable/core';
+import { functionWarnings, nativeFunctionsDic } from '@stylable/core';
 import { expectTransformDiagnostics, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
@@ -173,6 +173,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
         });
 
         it('should parse arguments passed to a formatter, seperated by commas', () => {
+            // ToDo: move to formatter / value feature spec
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -246,6 +247,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should pass-through native css functions', () => {
+                // ToDo: move to formatter feature spec
                 const result = generateStylableRoot({
                     entry: `/style.st.css`,
                     files: {
@@ -293,27 +295,6 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             content: `
                                 @font-face {
                                     src: url(/test.woff) format('woff');
-                                }
-                            `,
-                        },
-                    },
-                });
-
-                const rule = result.nodes[0] as postcss.Rule;
-                expect(rule.nodes[0].toString()).to.equal("src: url(/test.woff) format('woff')");
-            });
-
-            it('should perserve native format function quotation with stylable var', () => {
-                const result = generateStylableRoot({
-                    entry: `/style.st.css`,
-                    files: {
-                        '/style.st.css': {
-                            content: `
-                                :vars {
-                                    fontType: "'woff'";
-                                }
-                                @font-face {
-                                    src: url(/test.woff) format(value(fontType));
                                 }
                             `,
                         },
@@ -412,6 +393,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
         });
 
         it('passes through cyclic vars', () => {
+            // ToDo: check if this test is necessary
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -444,115 +426,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
             expect(rule.nodes[0].toString()).to.equal('border: value(a)');
         });
 
-        it('passes through cyclic vars through multiple files', () => {
-            const result = generateStylableRoot({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        content: `
-                        :import {
-                            -st-from: "./style1.st.css";
-                            -st-named: color2;
-                        }
-                        :vars {
-                            color1: 1px value(color2);
-                        }
-                        .container {
-                            background: value(color2);
-                        }
-                    `,
-                    },
-                    '/style1.st.css': {
-                        content: `
-                            :import {
-                                -st-from: "./style.st.css";
-                                -st-named: color1
-                            }
-                            :vars {
-                                color2: value(color1)
-                            }
-                        `,
-                    },
-                },
-            });
-
-            const rule = result.nodes[0] as postcss.Rule;
-            expect(rule.nodes[0].toString()).to.equal('background: 1px value(color2)');
-        });
-
-        it('should support using formatters in variable declarations', () => {
-            const result = generateStylableRoot({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        content: `
-                            :import {
-                                -st-from: "./formatter";
-                                -st-default: myBorder;
-                            }
-                            :vars {
-                                border: myBorder(5, 1);
-                            }
-                            .container {
-                                border: value(border);
-                            }
-                        `,
-                    },
-                    '/formatter.js': {
-                        content: `
-                            module.exports = function myBorder(amount, size) {
-                                return (Number(size) + Number(amount)) + 'px';
-                            }
-                        `,
-                    },
-                },
-            });
-
-            const rule = result.nodes[0] as postcss.Rule;
-            expect(rule.nodes[0].toString()).to.equal('border: 6px');
-        });
-
-        it('should support using formatters in an imported variable declarations', () => {
-            const result = generateStylableRoot({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        content: `
-                            :import {
-                                -st-from: "./vars.st.css";
-                                -st-named: color1;
-                            }
-                            .container {
-                                background: value(color1);
-                            }
-                        `,
-                    },
-                    '/vars.st.css': {
-                        content: `
-                            :import {
-                                -st-from: "./formatter";
-                                -st-default: getGreen;
-                            }
-                            :vars {
-                                color1: getGreen();
-                            }
-                        `,
-                    },
-                    '/formatter.js': {
-                        content: `
-                            module.exports = function getGreen() {
-                                return 'green';
-                            }
-                        `,
-                    },
-                },
-            });
-
-            const rule = result.nodes[0] as postcss.Rule;
-            expect(rule.nodes[0].toString()).to.equal('background: green');
-        });
-
         it('should support using formatters in a complex multi file scenario', () => {
+            // ToDo: move to css-value feature spec
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -615,6 +490,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
         });
 
         it('should support using a formatter in a media query param', () => {
+            // ToDo: move to css-media-query feature
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -642,405 +518,6 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
             const rule = result.nodes[0] as postcss.AtRule;
             expect(rule.params).to.equal('max-width: 1850px');
-        });
-
-        it('should gracefully fail when a formatter throws an error and return the source', () => {
-            const result = generateStylableRoot({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        content: `
-                            :import {
-                                -st-from: "./formatter";
-                                -st-default: fail;
-                            }
-                            :vars {
-                                param1: red;
-                            }
-                            .some-class {
-                                color: fail(a, value(param1), c);
-                            }
-                        `,
-                    },
-                    '/formatter.js': {
-                        content: `
-                            module.exports = function fail() {
-                                throw new Error("FAIL FAIL FAIL");
-                            }
-                        `,
-                    },
-                },
-            });
-
-            const rule = result.nodes[0] as postcss.Rule;
-            expect(rule.nodes[0].toString()).to.equal('color: fail(a, red, c)');
-        });
-    });
-
-    describe('diagnostics', () => {
-        describe('deprecation', () => {
-            it('should return a warning when using deprecated "stMap" syntax', () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                                :vars {
-                                    |color1: $stMap$(key1 red)|;
-                                }
-
-                            `,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
-                                'stMap',
-                                'st-map'
-                            ),
-                            file: '/style.st.css',
-                            severity: 'info',
-                        },
-                    ]
-                );
-            });
-
-            it('should return a warning when using deprecated "stArray" syntax', () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                                :vars {
-                                    |color1: $stArray$(red, blue)|;
-                                }
-                            `,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
-                                'stArray',
-                                'st-array'
-                            ),
-                            file: '/style.st.css',
-                            severity: 'info',
-                        },
-                    ]
-                );
-            });
-
-            it('should return a warning when using a nested deprecated "stArray" or "stMap" syntax', () => {
-                const config = {
-                    entry: '/style.st.css',
-                    files: {
-                        '/style.st.css': {
-                            content: `
-                            :vars {
-                                |color1: stArray(
-                                    red, 
-                                    stMap(key1 blue)|
-                                );
-                            }
-                        `,
-                        },
-                    },
-                };
-
-                expectTransformDiagnostics(config, [
-                    {
-                        message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME(
-                            'stArray',
-                            'st-array'
-                        ),
-                        file: '/style.st.css',
-                        severity: 'info',
-                    },
-                    {
-                        message: processorWarnings.DEPRECATED_ST_FUNCTION_NAME('stMap', 'st-map'),
-                        skip: true,
-                        file: '/style.st.css',
-                        severity: 'info',
-                    },
-                ]);
-            });
-        });
-
-        describe('value()', () => {
-            it('should return a warning when passing more than one argument to a value() function', () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                            :vars {
-                                color1: red;
-                                color2: gold;
-                            }
-                            .my-class {
-                                |color:value(color1, color2)|;
-                            }
-                            `,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            message: functionWarnings.MULTI_ARGS_IN_VALUE('color1, color2'),
-                            file: '/style.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should return a warning when trying to access unknown custom-value entries', () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                            :vars {
-                                myVar: st-map(
-                                    key1 red,
-                                    key2 st-map(
-                                        key3 green
-                                    )
-                                );   
-                            }
-                            .root {
-                                color: value(myVar, key1);
-                                color: value(myVar, key2, key3);
-                                |color: value(myVar, key2, key4)|;
-                            }
-                            `,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            message: functionWarnings.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
-                            file: '/style.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should return multiple warnings for unknown custom-value keys and too many arguments in a simple var', () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                            :vars {
-                                v1: red;
-                                v2: green;
-                                myVar: st-map(
-                                    key1 red,
-                                    key2 st-map(
-                                        key3 green
-                                    )
-                                );
-                            }
-                            .root {
-                                |background: value(myVar, key2, key4), value(v1, v2)|;
-                            }
-                            `,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            message: functionWarnings.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
-                            file: '/style.st.css',
-                        },
-                        {
-                            message: functionWarnings.MULTI_ARGS_IN_VALUE('v1, v2'),
-                            file: '/style.st.css',
-                        },
-                    ]
-                );
-            });
-
-            it('should return a warning when passing more than one argument to custom value with working fallback', () => {
-                const { meta } = expectTransformDiagnostics(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                            :vars {
-                                v1: key3;
-                                v2: key4;
-                                myVar: st-map(
-                                    key1 red,
-                                    key2 st-map(
-                                        key3 green
-                                    )
-                                );
-                            }
-                            .root {
-                                |background: value(myVar, key2, value(v1, v2))|;
-                            }
-                            `,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            message: functionWarnings.MULTI_ARGS_IN_VALUE('v1, v2'),
-                            file: '/style.st.css',
-                        },
-                    ]
-                );
-
-                expect(
-                    ((meta.outputAst!.nodes[0] as postcss.Rule).nodes[0] as postcss.Declaration)
-                        .value
-                ).to.eql('green');
-            });
-
-            it('should return warning for unknown var on transform', () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                            .gaga{
-                                |color:value($myColor$)|;
-                            }
-                            `,
-                            },
-                        },
-                    },
-                    [{ message: functionWarnings.UNKNOWN_VAR('myColor'), file: '/style.st.css' }]
-                );
-            });
-
-            it('class cannot be used as var', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :import{
-                                -st-from:"./style.st.css";
-                                -st-named:my-class;
-                            }
-                            .root{
-                                |color:value($my-class$)|;
-                            }
-                          `,
-                        },
-                        '/style.st.css': {
-                            content: `
-                                .my-class {}
-                            `,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    {
-                        message: functionWarnings.CANNOT_USE_AS_VALUE('class', 'my-class'),
-                        file: '/main.st.css',
-                    },
-                ]);
-            });
-
-            it('stylesheet cannot be used as var', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :import{
-                                -st-from:"./file.st.css";
-                                -st-default:Comp;
-                            }
-                            .root{
-                                |color:value($Comp$)|;
-                            }
-                          `,
-                        },
-                        '/file.st.css': {
-                            content: '',
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    {
-                        message: functionWarnings.CANNOT_USE_AS_VALUE('stylesheet', 'Comp'),
-                        file: '/main.st.css',
-                    },
-                ]);
-            });
-
-            it('JS imports cannot be used as vars', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :import{
-                                -st-from:"./mixins";
-                                -st-default:my-mixin;
-                            }
-                            .root{
-                                |color:value($my-mixin$)|;
-                            }
-                          `,
-                        },
-                        '/mixins.js': {
-                            content: `module.exports = function myMixin() {};`,
-                        },
-                    },
-                };
-                expectTransformDiagnostics(config, [
-                    {
-                        message: functionWarnings.CANNOT_USE_JS_AS_VALUE('my-mixin'),
-                        file: '/main.st.css',
-                    },
-                ]);
-            });
-
-            it('should warn when encountering a cyclic dependency in a var definition', () => {
-                const config = {
-                    entry: '/main.st.css',
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :vars {
-                                a: value(b);
-                                b: value(c);
-                                |c: value(a)|;
-                            }
-                            .root{
-                                color: value(a);
-                            }
-                          `,
-                        },
-                    },
-                };
-                const mainPath = '/main.st.css';
-                expectTransformDiagnostics(config, [
-                    {
-                        message: functionWarnings.CYCLIC_VALUE([
-                            `${mainPath}: a`,
-                            `${mainPath}: b`,
-                            `${mainPath}: c`,
-                            `${mainPath}: a`,
-                        ]),
-                        file: mainPath,
-                    },
-                ]);
-            });
         });
 
         describe('formatters', () => {
@@ -1101,29 +578,6 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         file: '/main.st.css',
                     },
                 ]);
-            });
-
-            it('should handle empty functions', () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: `/style.st.css`,
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                                :vars {
-                                    a: 100px;
-                                    b: "max-width: 100px";
-                                }
-                                .x{font-family: (aaa)}
-                                @media screen (max-width: 100px) {}
-                                @media screen (max-width: value(a)) {}
-                                @media screen (value(b)) {}
-                            `,
-                            },
-                        },
-                    },
-                    []
-                );
             });
         });
 

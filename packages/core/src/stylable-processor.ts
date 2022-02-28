@@ -1,6 +1,5 @@
 import path from 'path';
 import * as postcss from 'postcss';
-import { deprecatedStFunctions } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
 import { murmurhash3_32_gc } from './murmurhash';
@@ -12,10 +11,18 @@ import {
     ElementSymbol,
     RefedMixin,
     StylableDirectives,
-    VarSymbol,
+    STVar,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
-import { FeatureContext, STSymbol, STImport, CSSClass, CSSType, CSSKeyframes } from './features';
+import {
+    FeatureContext,
+    STSymbol,
+    STImport,
+    STGlobal,
+    CSSClass,
+    CSSType,
+    CSSKeyframes,
+} from './features';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
@@ -35,8 +42,8 @@ import {
     stValuesMap,
     valueMapping,
 } from './stylable-value-parsers';
-import { deprecated, filename2varname, stripQuotation } from './utils';
-import { ignoreDeprecationWarn } from './helpers/deprecation';
+import { stripQuotation, filename2varname } from './helpers/string';
+import { ignoreDeprecationWarn, warnOnce } from './helpers/deprecation';
 
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
@@ -76,9 +83,6 @@ export const processorWarnings = {
     EMPTY_NAMESPACE_DEF() {
         return '@namespace must contain at least one character or digit';
     },
-    NO_VARS_DEF_IN_ST_SCOPE() {
-        return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`;
-    },
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" missing scoping selector parameter';
     },
@@ -87,9 +91,6 @@ export const processorWarnings = {
     },
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
-    },
-    DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
-        return `"${name}" is deprecated, use "${alternativeName}"`;
     },
 };
 
@@ -234,28 +235,12 @@ export class StylableProcessor implements FeatureContext {
         );
     }
 
-    private handleStFunctions(decl: postcss.Declaration) {
-        processDeclarationFunctions(
-            decl,
-            (node) => {
-                if (node.type === 'nested-item' && deprecatedStFunctions[node.name]) {
-                    const { alternativeName } = deprecatedStFunctions[node.name];
-                    this.diagnostics.info(
-                        decl,
-                        processorWarnings.DEPRECATED_ST_FUNCTION_NAME(node.name, alternativeName),
-                        {
-                            word: node.name,
-                        }
-                    );
-                }
-            },
-            false
-        );
-    }
-
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
-        for (const node of this.meta.ast.nodes) {
+        let length = this.meta.ast.nodes.length;
+
+        while(length--) {
+            const node = this.meta.ast.nodes[length];
             if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
                 const i = node.text.indexOf('=');
                 if (i === -1) {
@@ -301,26 +286,19 @@ export class StylableProcessor implements FeatureContext {
                         walkContext: nodeContext,
                     });
                 } else if (node.value === 'vars') {
-                    if (rule.selector === rootValueMapping.vars) {
-                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
-                            this.diagnostics.warn(
-                                rule,
-                                processorWarnings.NO_VARS_DEF_IN_ST_SCOPE()
-                            );
-                            rule.remove();
-                            return walkSelector.stopAll;
-                        }
-
-                        this.addVarSymbols(rule);
-                        return walkSelector.stopAll;
-                    } else {
-                        this.diagnostics.warn(
-                            rule,
-                            generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                rootValueMapping.vars
-                            )
-                        );
-                    }
+                    return STVar.hooks.analyzeSelectorNode({
+                        context: this,
+                        node,
+                        rule,
+                        walkContext: nodeContext,
+                    });
+                } else if (node.value === `global`) {
+                    return STGlobal.hooks.analyzeSelectorNode({
+                        context: this,
+                        node,
+                        rule,
+                        walkContext: nodeContext,
+                    });
                 } else if (!knownPseudoClassesWithNestedSelectors.includes(node.value)) {
                     return walkSelector.skipNested;
                 }
@@ -407,38 +385,6 @@ export class StylableProcessor implements FeatureContext {
         if (!isRootValid(selectorAst)) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
-    }
-
-    protected addVarSymbols(rule: postcss.Rule) {
-        rule.walkDecls((decl) => {
-            this.collectUrls(decl);
-            this.handleStFunctions(decl);
-            let type = null;
-
-            const prev = decl.prev() as postcss.Comment;
-            if (prev && prev.type === 'comment') {
-                const typeMatch = prev.text.match(/^@type (.+)$/);
-                if (typeMatch) {
-                    type = typeMatch[1];
-                }
-            }
-
-            const varSymbol: VarSymbol = {
-                _kind: 'var',
-                name: decl.prop,
-                value: '',
-                text: decl.value,
-                node: decl,
-                valueType: type,
-            };
-            this.meta.vars.push(varSymbol);
-            STSymbol.addSymbol({
-                context: this,
-                symbol: varSymbol,
-                node: decl,
-            });
-        });
-        rule.remove();
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
@@ -571,7 +517,10 @@ export class StylableProcessor implements FeatureContext {
         const name = rule.selector.replace('.', '');
         const classSymbol = CSSClass.get(this.meta, name);
         if (classSymbol) {
-            classSymbol[valueMapping.global] = parseGlobal(decl, this.diagnostics);
+            const globalSelectorAst = parseGlobal(decl, this.diagnostics);
+            if (globalSelectorAst) {
+                classSymbol[valueMapping.global] = globalSelectorAst;
+            }
         }
     }
 
@@ -626,7 +575,7 @@ export function validateScopingSelector(
 }
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
-    deprecated(
+    warnOnce(
         'createEmptyMeta is deprecated and will be removed in the next version. Use "new StylableMeta()"'
     );
     return new StylableMeta(root, diagnostics);

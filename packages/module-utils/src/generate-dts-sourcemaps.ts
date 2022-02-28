@@ -51,7 +51,7 @@ function getVarsSrcPosition(varName: string, meta: StylableMeta): Position | und
 }
 
 function getStVarsSrcPosition(varName: string, meta: StylableMeta): Position | undefined {
-    const stVar = meta.vars.find((v) => v.name === varName);
+    const stVar = Object.values(meta.getAllStVars()).find((v) => v.name === varName);
 
     if (stVar?.node.source?.start) {
         return {
@@ -240,7 +240,11 @@ function getClassSourceName(targetName: string, classTokens: ClassesToken): stri
     return;
 }
 
-export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
+export function generateDTSSourceMap(
+    dtsContent: string,
+    meta: StylableMeta,
+    targetFilePath?: string
+) {
     const tokens = tokenizeDTS(dtsContent);
     const mapping: Record<number, LineMapping> = {};
     const lines = dtsContent.split('\n');
@@ -312,7 +316,7 @@ export function generateDTSSourceMap(dtsContent: string, meta: StylableMeta) {
         {
             version: 3,
             file: `${stylesheetName}.d.ts`,
-            sources: [stylesheetName],
+            sources: [targetFilePath ?? stylesheetName],
             names: [],
             mappings: Object.values(mapping)
                 .map((segment) => (segment.length ? segment.map((s) => encode(s)).join(',') : ''))
