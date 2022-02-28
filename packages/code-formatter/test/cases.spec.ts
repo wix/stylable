@@ -178,10 +178,6 @@ describe('Formatting - Decl', () => {
         expect(formatCSS('.root {--x:;}')).to.equal(`.root {\n    --x:;\n}\n`);
     });
 
-    it.skip('Broken parsing', () => {
-        expect(formatCSS('.root {--x: /*a*/}')).to.equal(``);
-    });
-
     it('keep spaces in side strings', () => {
         expect(formatCSS('.root {--x:"  ";}')).to.equal(`.root {\n    --x:"  ";\n}\n`);
     });
@@ -202,9 +198,9 @@ describe('Formatting - Decl', () => {
         expect(formatCSS('.root {--x:\n}')).to.equal(`.root {\n    --x: ;\n}\n`);
     });
 
-    // enable with new version of postcss >8.4.5
     it('css custom property (no semi colon) with space and comment after', () => {
-        expect(formatCSS('.root {--x:/*a*/ }')).to.equal(`.root {\n    --x:/*a*/;\n}\n`);
+        expect(formatCSS('.root {--x: /*a*/}')).to.equal(`.root {\n    --x: /*a*/;\n}\n`);
+        expect(formatCSS('.root {--x:/*a*/ }')).to.equal(`.root {\n    --x:/*a*/ ;\n}\n`);
         expect(formatCSS('.root {--x: /*a*/   }')).to.equal(`.root {\n    --x: /*a*/ ;\n}\n`);
     });
 
