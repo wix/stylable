@@ -94,20 +94,19 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 values,
                 valueHasNewline ? ',' + NL /* only NL needed indentation taken care after */ : ', '
             );
-
             ast.value = groups
-                .map((groupedValue) => {
+                .map((groupedValue, i) => {
                     return groupedValue
                         .split(/\r?\n/gm)
-                        .map((part, i) => {
-                            if (!hasNewLineBeforeValue && i === 0) {
+                        .map((part, j) => {
+                            if (!hasNewLineBeforeValue && i === 0 && j === 0) {
                                 return part.trim();
                             }
                             return ' '.repeat(warpLineIndentSize) + part.trim();
                         })
                         .join(NL);
                 })
-                .join(',' + NL + ' '.repeat(warpLineIndentSize));
+                .join(',' + NL);
             if (ast.raws.value /* The postcss type does not represent the reality */) {
                 delete (ast.raws as any).value;
             }

@@ -199,19 +199,13 @@ describe('Formatting - Decl', () => {
     });
 
     it('css custom property (no semi colon) and newline become one space', () => {
-        expect(formatCSS('.root {--x:\n}')).to.equal(
-            `.root {\n    --x: ;\n}\n`
-        );
+        expect(formatCSS('.root {--x:\n}')).to.equal(`.root {\n    --x: ;\n}\n`);
     });
 
     // enable with new version of postcss >8.4.5
-    it.skip('css custom property (no semi colon) with space and comment after', () => {
-        expect(formatCSS('.root {--x:/*a*/ }')).to.equal(
-            `.root {\n    --x:/*a*/;\n}\n`
-        );
-        expect(formatCSS('.root {--x: /*a*/   }')).to.equal(
-            `.root {\n    --x: /*a*/ ;\n}\n`
-        );
+    it('css custom property (no semi colon) with space and comment after', () => {
+        expect(formatCSS('.root {--x:/*a*/ }')).to.equal(`.root {\n    --x:/*a*/;\n}\n`);
+        expect(formatCSS('.root {--x: /*a*/   }')).to.equal(`.root {\n    --x: /*a*/ ;\n}\n`);
     });
 
     it('remove css variable space after decl props and place in new line', () => {
@@ -274,6 +268,13 @@ describe('Formatting - Decl', () => {
                 declIndent
             )}${'B'.repeat(50)},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
         );
+    });
+
+    it('preserve/keep correct indent between value groups', () => {
+        const css = `.root {\n    -st-states:\n        ${'A'.repeat(9)},\n        ${'B'.repeat(
+            60
+        )},\n        ${'C'.repeat(15)},\n        ${'D'.repeat(35)};\n}\n`;
+        expect(formatCSS(css)).to.equal(css);
     });
 
     it('preserve new line after colon and indent value +1', () => {
@@ -397,7 +398,7 @@ describe('Formatting - AtRule', () => {
     });
 });
 
-// xdescribe('Formatting From cases', () => {
+// describe('Formatting From cases', () => {
 //     const casesDir = join(
 //         require.resolve('@stylable/code-formatter/package.json'),
 //         '../test',
