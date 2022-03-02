@@ -1,4 +1,10 @@
-import type { Stylable, StylableExports, StylableMeta } from '@stylable/core';
+import type {
+    DiagnosticsMode,
+    Stylable,
+    StylableExports,
+    StylableMeta,
+    EmitDiagnosticsContext,
+} from '@stylable/core';
 import type { PluginContext } from 'rollup';
 import type { StylableRollupPluginOptions } from './index';
 import { processUrlDependencies } from '@stylable/build-tools';
@@ -6,6 +12,8 @@ import fs from 'fs';
 import { basename, extname } from 'path';
 import { createHash } from 'crypto';
 import { getType } from 'mime';
+import type { STCBuilder } from '@stylable/cli';
+import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
 
 const runtimePath = JSON.stringify(require.resolve('@stylable/rollup-plugin/runtime'));
 const runtimeImport = `import { stc, sts } from ${runtimePath};`;
@@ -97,4 +105,57 @@ export function getDefaultMode(): 'development' | 'production' {
         return 'development';
     }
     return 'production';
+}
+
+export function reportStcSourcesDiagnostics(
+    context: EmitDiagnosticsContext,
+    id: string,
+    diagnosticsMode: DiagnosticsMode,
+    stcBuilder: STCBuilder
+) {
+    if (!stcBuilder.outputFiles) {
+        return;
+    }
+
+    const sources = stcBuilder.outputFiles.get(id)!;
+
+    for (const sourceFilePath of sources) {
+        const diagnostics = stcBuilder.diagnosticsMessages.get(sourceFilePath);
+
+        if (diagnostics) {
+            for (const diagnostic of diagnostics) {
+                reportDiagnostic(
+                    context,
+                    diagnosticsMode,
+                    diagnostic,
+                    `${sourceFilePath}${
+                        diagnostic.line && diagnostic.column
+                            ? `:${diagnostic.line}:${diagnostic.column}`
+                            : ''
+                    }`
+                );
+            }
+        }
+    }
+}
+
+export function reportStcDiagnostics(
+    context: EmitDiagnosticsContext,
+    stcBuilder: STCBuilder | undefined,
+    diagnosticsMode: DiagnosticsMode
+) {
+    for (const [filePath, diagnostics] of stcBuilder!.diagnosticsMessages) {
+        for (const diagnostic of diagnostics) {
+            reportDiagnostic(
+                context,
+                diagnosticsMode,
+                diagnostic,
+                `${filePath}${
+                    diagnostic.line && diagnostic.column
+                        ? `:${diagnostic.line}:${diagnostic.column}`
+                        : ''
+                }`
+            );
+        }
+    }
 }

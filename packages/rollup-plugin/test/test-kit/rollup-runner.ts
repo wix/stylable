@@ -1,6 +1,6 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { RollupWatcherEvent, watch } from 'rollup';
-import { runServer } from '@stylable/e2e-test-kit';
+import { loadDirSync, runServer } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
 import { stylableRollupPlugin, StylableRollupPluginOptions } from '@stylable/rollup-plugin';
 import { createTempProject, actAndWaitForBuild, waitForWatcherFinish } from './test-helpers';
@@ -101,6 +101,9 @@ export function rollupRunner({
         ready,
         async act(action: (done: Promise<RollupWatcherEvent>) => Promise<void> | void) {
             return await actAndWaitForBuild(watcher, action);
+        },
+        getOutputFiles() {
+            return loadDirSync(dist);
         },
     };
 }

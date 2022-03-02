@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@stylable/build-tools": "^4.10.3",
+    "@stylable/cli": "^4.10.3",
     "@stylable/node": "^4.10.3",
     "@stylable/optimizer": "^4.10.3",
     "@stylable/runtime": "^4.10.3",

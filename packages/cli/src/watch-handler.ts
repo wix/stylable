@@ -30,7 +30,7 @@ export interface RegisteredBuild extends Build {
 }
 
 export interface Hooks {
-    triggered?: (event: IWatchEvent) => void;
+    triggered?: (event: IWatchEvent) => { skip?: boolean } | void;
     start?: (event: IWatchEvent) => void;
     finished?: (event: IWatchEvent, files: Map<string, File>, foundChanges: boolean) => void;
 }
@@ -57,9 +57,10 @@ export class WatchHandler {
 
     public readonly listener = async (event: IWatchEvent) => {
         this.log(buildMessages.CHANGE_EVENT_TRIGGERED(event.path));
-        this.hooks.triggered?.(event);
 
-        if (this.generatedFiles.has(event.path)) {
+        const { skip } = this.hooks.triggered?.(event) || {};
+
+        if (skip || this.generatedFiles.has(event.path)) {
             this.log(buildMessages.SKIP_GENERATED_FILE(event.path));
             return;
         }

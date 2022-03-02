@@ -21,7 +21,10 @@ import {
     generateCssString,
     generateStylableModuleCode,
     getDefaultMode,
+    reportStcDiagnostics,
+    reportStcSourcesDiagnostics,
 } from './plugin-utils';
+import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
 export interface StylableRollupPluginOptions {
     optimization?: {
@@ -32,6 +35,12 @@ export interface StylableRollupPluginOptions {
     mode?: 'development' | 'production';
     diagnosticsMode?: DiagnosticsMode;
     resolveNamespace?: typeof resolveNamespaceNode;
+    /**
+     * Runs "stc" programmatically with the webpack compilation.
+     * true - it will automatically detect the closest "stylable.config.js" file and use it.
+     * string - it will use the provided string as the "stcConfig" file path.
+     */
+    stcConfig?: boolean | string;
 }
 
 const requireModuleCache = new Set<string>();
@@ -56,30 +65,69 @@ export function stylableRollupPlugin({
     diagnosticsMode = 'strict',
     mode = getDefaultMode(),
     resolveNamespace = resolveNamespaceNode,
+    stcConfig,
 }: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
     let emittedAssets!: Map<string, string>;
     let outputCSS = '';
+    let stcBuilder: STCBuilder | undefined;
 
     return {
         name: 'Stylable',
-        buildStart(rollupOptions) {
-            extracted = extracted || new Map();
-            emittedAssets = emittedAssets || new Map();
+
+        async buildStart(rollupOptions) {
+            extracted ||= new Map();
+            emittedAssets ||= new Map();
+            const context =
+                rollupOptions.context === 'undefined' ? process.cwd() : rollupOptions.context;
+
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
             } else {
                 stylable = Stylable.create({
                     fileSystem: fs,
-                    projectRoot: rollupOptions.context,
+                    projectRoot: context,
                     mode,
                     resolveNamespace,
                     optimizer: new StylableOptimizer(),
                     resolverCache: new Map(),
                     requireModule,
                 });
+            }
+
+            if (stcConfig && !stcBuilder) {
+                const configuration = resolveStcConfig(
+                    context,
+                    typeof stcConfig === 'string' ? stcConfig : undefined
+                );
+
+                if (!configuration) {
+                    throw new Error(
+                        `Could not find "stcConfig"${
+                            typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
+                        }`
+                    );
+                }
+
+                stcBuilder = new STCBuilder(context, configuration.path);
+                await stcBuilder.build(this.meta.watchMode);
+
+                reportStcDiagnostics(
+                    {
+                        emitError: (e) => this.error(e),
+                        emitWarning: (e) => this.warn(e),
+                    },
+                    stcBuilder,
+                    diagnosticsMode
+                );
+
+                if (this.meta.watchMode) {
+                    for (const sourceDirectory of stcBuilder.getProjectsSources()) {
+                        this.addWatchFile(sourceDirectory);
+                    }
+                }
             }
         },
         load(id) {
@@ -112,14 +160,16 @@ export function stylableRollupPlugin({
                 stylable.createResolver()
             );
 
-            emitDiagnostics(
-                {
-                    emitError: (e) => this.error(e),
-                    emitWarning: (e) => this.warn(e),
-                },
-                meta,
-                diagnosticsMode
-            );
+            const emitDiagnosticContext = {
+                emitError: (e: Error) => this.error(e),
+                emitWarning: (e: Error) => this.warn(e),
+            };
+
+            if (stcBuilder?.outputFiles?.has(id)) {
+                reportStcSourcesDiagnostics(emitDiagnosticContext, id, diagnosticsMode, stcBuilder);
+            } else {
+                emitDiagnostics(emitDiagnosticContext, meta, diagnosticsMode);
+            }
 
             return {
                 code: generateStylableModuleCode(meta, exports, moduleImports),

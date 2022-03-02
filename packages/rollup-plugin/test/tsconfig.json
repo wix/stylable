@@ -6,6 +6,7 @@
   },
   "references": [
     { "path": "../../core/src" },
+    { "path": "../../cli/src" },
     { "path": "../../optimizer/src" },
     { "path": "../src" }
   ]
