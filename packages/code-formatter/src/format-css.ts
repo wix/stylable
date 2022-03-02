@@ -15,7 +15,7 @@ export interface FormatOptions {
 export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
     const ast = parse(css);
     const lineEndings = options.lineEndings ?? getLineEnding(css);
-    const indent = options.indent ?? '    ';
+    const indent = options.indent ?? ' '.repeat(4);
     const indentLevel = options.indentLevel ?? 0;
     const linesBetween = options.linesBetween ?? 1;
     for (let i = 0; i < ast.nodes.length; i++) {
@@ -124,7 +124,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
 
         ast.raws.before =
             index !== 0 || indentLevel > 0
-                ? NL.repeat(separation + 1) + indent.repeat(indentLevel)
+                ? NL.repeat(index !== 0 ? separation + 1 : 1) + indent.repeat(indentLevel)
                 : '';
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
         ast.raws.afterName = ast.params.length
