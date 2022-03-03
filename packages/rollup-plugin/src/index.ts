@@ -112,7 +112,10 @@ export function stylableRollupPlugin({
                         );
                     }
 
-                    stcBuilder = new STCBuilder(context, configuration.path);
+                    stcBuilder = STCBuilder.create({
+                        rootDir: context,
+                        configFilePath: configuration.path,
+                    });
                     await stcBuilder.build(this.meta.watchMode);
 
                     reportStcDiagnostics(

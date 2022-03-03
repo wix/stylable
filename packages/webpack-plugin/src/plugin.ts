@@ -314,7 +314,10 @@ export class StylableWebpackPlugin {
         /**
          * In case the user uses STC we can run his config in this process.
          */
-        this.stcBuilder = new STCBuilder(compiler.context, configuration.path);
+        this.stcBuilder = STCBuilder.create({
+            rootDir: compiler.context,
+            configFilePath: configuration.path,
+        });
     }
     private createStylable(compiler: Compiler) {
         if (this.stylable) {

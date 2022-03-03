@@ -2,12 +2,20 @@ import { nodeFs } from '@file-services/node';
 import { buildStylable } from './build-stylable';
 import { DiagnosticsManager } from './diagnostics-manager';
 import { createWatchEvent } from './directory-process-service/directory-process-service';
-import { createLogger } from './logger';
+import { createLogger, Log } from './logger';
+import type { IFileSystem } from '@file-services/types';
 import type { DiagnosticMessages } from './report-diagnostics';
 import type { STCProjects } from './types';
 import type { WatchHandler } from './watch-handler';
 
-const { existsSync, realpathSync, join } = nodeFs;
+export type STCBuilderFileSystem = Pick<IFileSystem, 'existsSync' | 'realpathSync' | 'join'>;
+
+export interface STCBuilderOptions {
+    rootDir: string;
+    configFilePath?: string;
+    log?: Log;
+    fs?: STCBuilderFileSystem;
+}
 
 export class STCBuilder {
     private diagnosticsManager: DiagnosticsManager;
@@ -16,9 +24,23 @@ export class STCBuilder {
     public diagnosticsMessages: DiagnosticMessages = new Map();
     public projects: STCProjects | undefined;
 
-    constructor(private rootDir: string, private configFilePath?: string) {
+    static create({
+        rootDir,
+        configFilePath,
+        log = createNoopLogger(),
+        fs = nodeFs,
+    }: STCBuilderOptions) {
+        return new this(rootDir, configFilePath, log, fs);
+    }
+
+    private constructor(
+        private rootDir: string,
+        private configFilePath?: string,
+        private log = createNoopLogger(),
+        private fs: STCBuilderFileSystem = nodeFs
+    ) {
         this.diagnosticsManager = new DiagnosticsManager({
-            log: createNoopLogger(),
+            log: this.log,
             hooks: {
                 preReport: (diagnosticsMessages) => {
                     this.diagnosticsMessages = diagnosticsMessages;
@@ -30,13 +52,13 @@ export class STCBuilder {
     public handleWatchedFiles = async (modifiedFiles: Iterable<string>) => {
         if (!this.watchHandler) {
             throw new Error(
-                'Stylable Builder Error: handleWatchedFiles called before watchHandler is set, did you run build?'
+                'Stylable Builder Error: handleWatchedFiles called before watchHandler is set, did you run build()?'
             );
         }
 
         for (const filePath of modifiedFiles) {
             const event = createWatchEvent(
-                existsSync(filePath) ? realpathSync(filePath) : filePath
+                this.fs.existsSync(filePath) ? this.fs.realpathSync(filePath) : filePath
             );
 
             await this.watchHandler.listener(event);
@@ -46,7 +68,7 @@ export class STCBuilder {
     public build = async (watchMode?: boolean) => {
         const buildOutput = await buildStylable(this.rootDir, {
             diagnosticsManager: this.diagnosticsManager,
-            log: createNoopLogger(),
+            log: this.log,
             configFilePath: this.configFilePath,
             watchMode,
         });
@@ -67,7 +89,7 @@ export class STCBuilder {
 
         for (const { projectRoot, options } of this.projects) {
             for (const optionEntity of options) {
-                sourcesPaths.add(join(projectRoot, optionEntity.srcDir));
+                sourcesPaths.add(this.fs.join(projectRoot, optionEntity.srcDir));
             }
         }
 
