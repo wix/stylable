@@ -15,6 +15,7 @@ export interface STCBuilderOptions {
     configFilePath?: string;
     log?: Log;
     fs?: STCBuilderFileSystem;
+    watchMode?: boolean;
 }
 
 export class STCBuilder {
@@ -26,18 +27,20 @@ export class STCBuilder {
 
     static create({
         rootDir,
+        fs = nodeFs,
         configFilePath,
         log = createNoopLogger(),
-        fs = nodeFs,
+        watchMode = false,
     }: STCBuilderOptions) {
-        return new this(rootDir, configFilePath, log, fs);
+        return new this(rootDir, fs, configFilePath, log, watchMode);
     }
 
     private constructor(
         private rootDir: string,
+        private fs: STCBuilderFileSystem,
         private configFilePath?: string,
-        private log = createNoopLogger(),
-        private fs: STCBuilderFileSystem = nodeFs
+        private log?: Log,
+        private watchMode?: boolean
     ) {
         this.diagnosticsManager = new DiagnosticsManager({
             log: this.log,
@@ -65,12 +68,12 @@ export class STCBuilder {
         }
     };
 
-    public build = async (watchMode?: boolean) => {
+    public build = async () => {
         const buildOutput = await buildStylable(this.rootDir, {
             diagnosticsManager: this.diagnosticsManager,
             log: this.log,
             configFilePath: this.configFilePath,
-            watchMode,
+            watchMode: this.watchMode,
         });
 
         this.watchHandler = buildOutput.watchHandler;

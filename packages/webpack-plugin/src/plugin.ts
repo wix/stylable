@@ -201,7 +201,7 @@ export class StylableWebpackPlugin {
         });
 
         compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
-            await this.stcBuilder?.build(compiler.watchMode);
+            await this.stcBuilder?.build();
         });
 
         compiler.hooks.watchRun.tapPromise(
@@ -213,7 +213,7 @@ export class StylableWebpackPlugin {
                         ...(compiler.removedFiles ?? []),
                     ]);
                 } else {
-                    await this.stcBuilder?.build(compiler.watchMode);
+                    await this.stcBuilder?.build();
                 }
             }
         );
@@ -316,6 +316,7 @@ export class StylableWebpackPlugin {
          */
         this.stcBuilder = STCBuilder.create({
             rootDir: compiler.context,
+            watchMode: compiler.watchMode,
             configFilePath: configuration.path,
         });
     }
@@ -420,7 +421,7 @@ export class StylableWebpackPlugin {
 
                     loaderContext.onLoaderFinished = () => {
                         /**
-                         * If Stylable Builder is runnning in background we need to add the relavent files to webpack file dependencies watcher.
+                         * If STC Builder is runnning in background we need to add the relavent files to webpack file dependencies watcher.
                          */
                         this.handleStcFiles(module, compilation, loaderContext);
                     };
