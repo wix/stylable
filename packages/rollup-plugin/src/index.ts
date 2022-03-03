@@ -79,6 +79,10 @@ export function stylableRollupPlugin({
         async buildStart(rollupOptions) {
             extracted ||= new Map();
             emittedAssets ||= new Map();
+            /**
+             * Sometimes rollupOptions.context is the string 'undefined'.
+             * So we would fallback to the process.cwd()
+             */
             const context =
                 rollupOptions.context === 'undefined' ? process.cwd() : rollupOptions.context;
 
@@ -120,8 +124,13 @@ export function stylableRollupPlugin({
 
                     reportStcDiagnostics(
                         {
-                            emitError: (e) => this.error(e),
-                            emitWarning: (e) => this.warn(e),
+                            emitWarning: (e) => console.warn(e),
+                            emitError: (e) => {
+                                console.error(e);
+                                if (!this.meta.watchMode) {
+                                    process.exitCode = 1;
+                                }
+                            },
                         },
                         stcBuilder,
                         diagnosticsMode
@@ -141,8 +150,8 @@ export function stylableRollupPlugin({
 
                 reportStcDiagnostics(
                     {
-                        emitError: (e) => this.error(e),
-                        emitWarning: (e) => this.warn(e),
+                        emitError: (e) => console.error(e),
+                        emitWarning: (e) => console.warn(e),
                     },
                     stcBuilder,
                     diagnosticsMode
