@@ -4,7 +4,7 @@ import { STSymbol } from '@stylable/core/dist/features';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { basename, relative } from 'path';
-import { normalizeRelative, ensureDirectory } from './build-tools';
+import { normalizeRelative, ensureDirectory, tryRun } from './build-tools';
 import type { Log } from './logger';
 
 export interface ReExports {
@@ -47,11 +47,11 @@ export class IndexGenerator {
     public async generateIndexFile(fs: IFileSystem, indexFileTargetPath: string) {
         const indexFileContent = this.generateIndexSource(indexFileTargetPath);
         ensureDirectory(fs.dirname(indexFileTargetPath), fs);
-        try {
-            await fs.promises.writeFile(indexFileTargetPath, '\n' + indexFileContent + '\n');
-        } catch {
-            throw new Error(`Failed to write index file: ${indexFileTargetPath}`);
-        }
+
+        await tryRun(
+            () => fs.promises.writeFile(indexFileTargetPath, '\n' + indexFileContent + '\n'),
+            'Write Index File Error'
+        );
 
         this.log('[Generator Index]', 'creating index file: ' + indexFileTargetPath);
     }
