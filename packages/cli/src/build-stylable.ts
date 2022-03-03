@@ -10,7 +10,7 @@ import {
 import { DiagnosticsManager } from './diagnostics-manager';
 import { createDefaultLogger } from './logger';
 import type { BuildContext, BuildOptions } from './types';
-import { WatchHandler, Hooks } from './watch-handler';
+import { WatchHandler } from './watch-handler';
 
 export interface BuildStylableContext
     extends Partial<Pick<BuildContext, 'fs' | 'watch' | 'log'>>,
@@ -23,7 +23,6 @@ export interface BuildStylableContext
     overrideBuildOptions?: Partial<BuildOptions>;
     configFilePath?: string;
     watchMode?: boolean;
-    watchHooks?: Hooks;
 }
 
 export async function buildStylable(
@@ -51,7 +50,6 @@ export async function buildStylable(
         requireModule = require,
         resolveNamespace = requireModule(NAMESPACE_RESOLVER_MODULE_REQUEST).resolveNamespace,
         configFilePath,
-        watchHooks,
     }: BuildStylableContext = {}
 ) {
     const projects = await projectsConfig(
@@ -66,7 +64,6 @@ export async function buildStylable(
         outputFiles,
         rootDir,
         diagnosticsManager,
-        hooks: watchHooks,
     });
 
     for (const { projectRoot, options } of projects) {

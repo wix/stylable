@@ -16,7 +16,6 @@ export interface WatchHandlerOptions {
     outputFiles?: BuildContext['outputFiles'];
     rootDir?: string;
     diagnosticsManager?: DiagnosticsManager;
-    hooks?: Hooks;
 }
 
 export interface Build {
@@ -29,12 +28,6 @@ export interface RegisteredBuild extends Build {
     generatedFiles: Set<string>;
 }
 
-export interface Hooks {
-    triggered?: (event: IWatchEvent) => { skip?: boolean } | void;
-    start?: (event: IWatchEvent) => void;
-    finished?: (event: IWatchEvent, files: Map<string, File>, foundChanges: boolean) => void;
-}
-
 type File = {
     generated?: boolean;
 } & IWatchEvent;
@@ -45,28 +38,23 @@ export class WatchHandler {
     private log: Log;
     private diagnosticsManager: DiagnosticsManager;
     private generatedFiles = new Set<string>();
-    public hooks: Hooks = {};
 
     constructor(private fileSystem: IFileSystem, private options: WatchHandlerOptions = {}) {
         this.resolverCache = this.options.resolverCache ?? new Map();
         this.log = this.options.log ?? createDefaultLogger();
         this.diagnosticsManager =
             this.options.diagnosticsManager ?? new DiagnosticsManager({ log: this.log });
-        this.hooks = this.options.hooks ?? {};
     }
 
     public readonly listener = async (event: IWatchEvent) => {
         this.log(buildMessages.CHANGE_EVENT_TRIGGERED(event.path));
 
-        const { skip } = this.hooks.triggered?.(event) || {};
-
-        if (skip || this.generatedFiles.has(event.path)) {
+        if (this.generatedFiles.has(event.path)) {
             this.log(buildMessages.SKIP_GENERATED_FILE(event.path));
             return;
         }
 
         this.invalidateCache(event.path);
-        this.hooks.start?.(event);
 
         let foundChanges = false;
         const files = new Map<string, File>();
@@ -122,8 +110,6 @@ export class WatchHandler {
                 this.log(buildMessages.CONTINUE_WATCH(), levels.info);
             }
         }
-
-        this.hooks.finished?.(event, files, foundChanges);
     };
 
     public register({ generatedFiles, ...build }: RegisteredBuild) {
