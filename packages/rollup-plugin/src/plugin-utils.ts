@@ -110,8 +110,8 @@ export function getDefaultMode(): 'development' | 'production' {
 export function reportStcSourcesDiagnostics(
     context: EmitDiagnosticsContext,
     id: string,
-    diagnosticsMode: DiagnosticsMode,
-    stcBuilder: STCBuilder
+    stcBuilder: STCBuilder,
+    diagnosticsMode: DiagnosticsMode
 ) {
     if (!stcBuilder.outputFiles) {
         return;

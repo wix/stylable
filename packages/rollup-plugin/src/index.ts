@@ -97,22 +97,44 @@ export function stylableRollupPlugin({
                 });
             }
 
-            if (stcConfig && !stcBuilder) {
-                const configuration = resolveStcConfig(
-                    context,
-                    typeof stcConfig === 'string' ? stcConfig : undefined
-                );
+            if (stcConfig) {
+                if (!stcBuilder) {
+                    const configuration = resolveStcConfig(
+                        context,
+                        typeof stcConfig === 'string' ? stcConfig : undefined
+                    );
 
-                if (!configuration) {
-                    throw new Error(
-                        `Could not find "stcConfig"${
-                            typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
-                        }`
+                    if (!configuration) {
+                        throw new Error(
+                            `Could not find "stcConfig"${
+                                typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
+                            }`
+                        );
+                    }
+
+                    stcBuilder = new STCBuilder(context, configuration.path);
+                    await stcBuilder.build(this.meta.watchMode);
+
+                    reportStcDiagnostics(
+                        {
+                            emitError: (e) => this.error(e),
+                            emitWarning: (e) => this.warn(e),
+                        },
+                        stcBuilder,
+                        diagnosticsMode
                     );
                 }
 
-                stcBuilder = new STCBuilder(context, configuration.path);
-                await stcBuilder.build(this.meta.watchMode);
+                if (this.meta.watchMode) {
+                    for (const sourceDirectory of stcBuilder.getProjectsSources()) {
+                        this.addWatchFile(sourceDirectory);
+                    }
+                }
+            }
+        },
+        async watchChange(id) {
+            if (stcBuilder) {
+                await stcBuilder.handleWatchedFiles([id]);
 
                 reportStcDiagnostics(
                     {
@@ -122,12 +144,6 @@ export function stylableRollupPlugin({
                     stcBuilder,
                     diagnosticsMode
                 );
-
-                if (this.meta.watchMode) {
-                    for (const sourceDirectory of stcBuilder.getProjectsSources()) {
-                        this.addWatchFile(sourceDirectory);
-                    }
-                }
             }
         },
         load(id) {
@@ -166,7 +182,7 @@ export function stylableRollupPlugin({
             };
 
             if (stcBuilder?.outputFiles?.has(id)) {
-                reportStcSourcesDiagnostics(emitDiagnosticContext, id, diagnosticsMode, stcBuilder);
+                reportStcSourcesDiagnostics(emitDiagnosticContext, id, stcBuilder, diagnosticsMode);
             } else {
                 emitDiagnostics(emitDiagnosticContext, meta, diagnosticsMode);
             }

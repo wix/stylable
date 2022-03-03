@@ -4,7 +4,14 @@ import { nodeFs } from '@file-services/node';
 import { createTempDirectorySync } from 'create-temp-directory';
 import { deferred } from 'promise-assist';
 
-export function waitForWatcherFinish(watcher: RollupWatcher) {
+export interface ActAndWaitOptions {
+    strict?: boolean;
+}
+
+export function waitForWatcherFinish(
+    watcher: RollupWatcher,
+    { strict = true }: ActAndWaitOptions = {}
+) {
     const current = deferred<RollupWatcherEvent & { code: 'BUNDLE_END' }>();
 
     let bundleEnd: RollupWatcherEvent & { code: 'BUNDLE_END' };
@@ -17,9 +24,13 @@ export function waitForWatcherFinish(watcher: RollupWatcher) {
             current.resolve(bundleEnd);
         }
         if (e.code === 'ERROR') {
-            console.log('stop');
-            watcher.off('event', handler);
-            current.reject(e);
+            if (strict) {
+                console.log('stop');
+                watcher.off('event', handler);
+                current.reject(e);
+            } else {
+                console.log(`Rollup Error emitted:\n${e.error}`);
+            }
         }
     };
     watcher.on('event', handler);
@@ -29,9 +40,10 @@ export function waitForWatcherFinish(watcher: RollupWatcher) {
 
 export async function actAndWaitForBuild(
     watcher: RollupWatcher,
-    action: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void
+    action: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void,
+    options: ActAndWaitOptions = {}
 ) {
-    const done = waitForWatcherFinish(watcher);
+    const done = waitForWatcherFinish(watcher, options);
     await action(done);
     return await done;
 }

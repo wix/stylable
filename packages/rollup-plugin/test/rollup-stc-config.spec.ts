@@ -24,12 +24,15 @@ describe('StylableRollupPlugin', function () {
         ]);
 
         // Simaulte error by using value function without a symbol.
-        await runner.act(async () => {
-            await nodeFs.promises.writeFile(
-                nodeFs.join(runner.projectDir, 'src', 'index.st.css'),
-                '.root { color: value(); }'
-            );
-        });
+        await runner.act(
+            async () => {
+                await nodeFs.promises.writeFile(
+                    nodeFs.join(runner.projectDir, 'src', 'index.st.css'),
+                    '.root { color: value(); }'
+                );
+            },
+            { strict: false }
+        );
 
         // Revert error to normal.
         await runner.act(async () => {
