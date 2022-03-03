@@ -135,9 +135,9 @@ describe('Stylable Cli', function () {
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent['dist/style.st.css'];
 
-        expect(
-            stylesheetContent.startsWith('/* st-namespace-reference="../style.st.css" */')
-        ).equal(true);
+        expect(stylesheetContent.endsWith('/* st-namespace-reference="../style.st.css" */')).equal(
+            true
+        );
     });
 
     it('build .st.css.d.ts alongside source files with source-maps on by default', () => {
@@ -179,7 +179,8 @@ describe('Stylable Cli', function () {
             dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
         ).to.equal(true);
         expect(dtsSourceMapContent).to.contain(
-            `"sources": [\n        ${JSON.stringify(join('..', 'src', 'style.st.css'))}\n    ]`
+            `"sources": [\n        "../src/style.st.css"\n    ]`,
+            `expected to contain source file path for "${dtsSourceMapContent}"`
         );
     });
 
