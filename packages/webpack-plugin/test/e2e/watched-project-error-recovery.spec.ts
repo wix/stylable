@@ -1,7 +1,9 @@
-import { writeFileSync } from 'fs';
+import { promises } from 'fs';
 import { dirname, join } from 'path';
 import { expect } from 'chai';
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
+
+const { writeFile } = promises;
 
 const project = 'watched-project-error-recovery';
 const projectDir = dirname(
@@ -30,8 +32,8 @@ describe(`(${project})`, () => {
 
         await projectRunner.actAndWaitForRecompile(
             'make a change',
-            () => {
-                writeFileSync(
+            async () => {
+                return writeFile(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
                     '.root{ color: green; }'
                 );
@@ -45,8 +47,8 @@ describe(`(${project})`, () => {
 
         await projectRunner.actAndWaitForRecompile(
             'break the output',
-            () => {
-                writeFileSync(
+            async () => {
+                return writeFile(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
                     '.root{ color:: blue; }'
                 );
@@ -68,7 +70,7 @@ describe(`(${project})`, () => {
         await projectRunner.actAndWaitForRecompile(
             'fix the output',
             () => {
-                writeFileSync(
+                return writeFile(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
                     '.root{ color: blue; }'
                 );

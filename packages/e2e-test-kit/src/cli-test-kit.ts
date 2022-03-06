@@ -1,4 +1,5 @@
 import {
+    promises,
     readdirSync,
     readFileSync,
     statSync,
@@ -12,11 +13,13 @@ import { on } from 'events';
 import { join, relative } from 'path';
 import type { Readable } from 'stream';
 
+const { writeFile } = promises;
+
+type ActionResponse = void | { sleep?: number };
+
 interface Step {
     msg: string;
-    action?: () => void | {
-        sleep?: number;
-    };
+    action?: () => ActionResponse | Promise<ActionResponse>;
 }
 
 interface ProcessCliOutputParams {
@@ -73,7 +76,7 @@ export function createCliTester() {
                     });
 
                     if (step.action) {
-                        const { sleep } = step.action() || {};
+                        const { sleep } = (await step.action()) || {};
 
                         if (typeof sleep === 'number') {
                             await onTimeout(sleep);
@@ -118,7 +121,7 @@ async function* readLines(readable: Readable) {
 
 export function writeToExistingFile(filePath: string, content: string) {
     if (existsSync(filePath)) {
-        writeFileSync(filePath, content);
+        return writeFile(filePath, content);
     } else {
         throw new Error(`file ${filePath} does not exist`);
     }
