@@ -115,7 +115,7 @@ export function processDeclarationValue(
     args: string[] = []
 ): EvalValueResult {
     const evaluator = new StylableEvaluator({ tsVarOverride: variableOverride });
-    const customValues = resolveCustomValues(meta, resolver);
+    const customValues = resolveCustomValues(getResolvedSymbols(meta));
     const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;

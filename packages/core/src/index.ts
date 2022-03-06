@@ -138,7 +138,6 @@ export {
     createCustomValue,
     getBoxValue,
     isCustomValue,
-    resolveCustomValues,
     stTypes,
     unbox,
 } from './custom-values';

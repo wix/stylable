@@ -1,10 +1,8 @@
 import cloneDeepWith from 'lodash.clonedeepwith';
 import postcssValueParser from 'postcss-value-parser';
-import type { StylableMeta } from './stylable-meta';
-import type { StylableResolver } from './stylable-resolver';
+import type { MetaParts } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
 import type { ParsedValue } from './types';
-import { STSymbol } from './features';
 
 export interface Box<Type extends string, Value> {
     type: Type;
@@ -158,21 +156,14 @@ interface ExtensionApi<Value, Args> {
     };
 }
 
-export function resolveCustomValues(meta: StylableMeta, resolver: StylableResolver) {
+export function resolveCustomValues(resolvedSymbols: MetaParts) {
     const customValues = { ...stTypes };
-    for (const [symbolName, symbol] of Object.entries(STSymbol.getAll(meta))) {
-        if (symbol._kind !== 'import') {
-            continue;
-        }
-        const ss = resolver.resolveImport(symbol);
-        if (!ss || ss._kind === 'css') {
-            continue;
-        }
-        if (ss.symbol && isCustomValue(ss.symbol)) {
+    for (const [symbolName, jsRef] of Object.entries(resolvedSymbols.js)) {
+        if (isCustomValue(jsRef.symbol)) {
             if (customValues[symbolName]) {
                 // TODO: report reserved name.!
             } else {
-                customValues[symbolName] = ss.symbol.register(symbolName);
+                customValues[symbolName] = jsRef.symbol.register(symbolName);
             }
         }
     }
@@ -235,5 +226,5 @@ export function getBoxValue(
 }
 
 export function isCustomValue(symbol: any): symbol is JSValueExtension<unknown> {
-    return symbol._kind === 'CustomValue';
+    return symbol?._kind === 'CustomValue';
 }
