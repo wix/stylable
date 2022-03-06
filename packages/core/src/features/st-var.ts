@@ -2,8 +2,8 @@ import { createFeature, FeatureContext, FeatureTransformContext } from './featur
 import { deprecatedStFunctions } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
-import type { StylableSymbol } from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
+import type { CSSResolve, JSResolve } from '../stylable-resolver';
 import type { EvalValueData, EvalValueResult } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
 import { walkSelector } from '../helpers/selector';
@@ -47,7 +47,6 @@ export const diagnostics = {
         `${type} "${varName}" cannot be used as a variable`,
     CANNOT_USE_JS_AS_VALUE: (varName: string) =>
         `JavaScript import "${varName}" cannot be used as a variable`,
-    CANNOT_FIND_IMPORTED_VAR: (varName: string) => `cannot use unknown imported "${varName}"`,
     UNKNOWN_VAR: (name: string) => `unknown var "${name}"`,
 };
 
@@ -203,24 +202,27 @@ function evaluateValueCall(
             return;
         }
         // check cyclic
-        const refUniqID = createUniqID(context.meta.source, varName);
+        const refUniqID = createUniqID(data.meta.source, varName);
         if (passedThrough.includes(refUniqID)) {
             // TODO: move diagnostic to original value usage instead of the end of the cyclic chain
             handleCyclicValues(context, passedThrough, refUniqID, data.node, value, parsedNode);
             return;
         }
         // resolve
-        const varSymbol = STSymbol.get(context.meta, varName);
-        if (varSymbol && varSymbol._kind === 'var') {
-            // evaluate local var
+        const resolvedSymbols = context.getResolvedSymbols(data.meta);
+        const resolvedVar = resolvedSymbols.var[varName];
+        const resolvedSymbol = resolvedVar?.symbol;
+        const possibleNonSTVarSymbol = STSymbol.get(context.meta, varName);
+        if (resolvedSymbol && resolvedSymbol._kind === `var`) {
             const { outputValue, topLevelType, typeError } = context.evaluator.evaluateValue(
                 context,
                 {
                     ...data,
-                    passedThrough: passedThrough.concat(createUniqID(context.meta.source, varName)),
-                    value: stripQuotation(varSymbol.text),
+                    passedThrough: passedThrough.concat(refUniqID),
+                    value: stripQuotation(resolvedSymbol.text),
                     args: restArgs,
-                    node: varSymbol.node,
+                    node: resolvedSymbol.node,
+                    meta: resolvedVar.meta,
                 }
             );
             // report errors
@@ -239,60 +241,41 @@ function evaluateValueCall(
             parsedNode.resolvedValue = data.valueHook
                 ? data.valueHook(outputValue, varName, true, passedThrough)
                 : outputValue;
-        } else if (varSymbol && varSymbol._kind === 'import') {
-            // evaluate imported var
-            const resolvedVar = context.resolver.deepResolve(varSymbol);
-            if (resolvedVar && resolvedVar.symbol) {
-                const resolvedVarSymbol = resolvedVar.symbol;
-                if (resolvedVar._kind === 'css') {
-                    if (resolvedVarSymbol._kind === 'var') {
-                        // var from stylesheet
-                        const { outputValue } = context.evaluator.evaluateValue(context, {
-                            ...data,
-                            passedThrough: passedThrough.concat(
-                                createUniqID(context.meta.source, varName)
-                            ),
-                            value: stripQuotation(resolvedVarSymbol.text),
-                            meta: resolvedVar.meta,
-                            node: resolvedVarSymbol.node,
-                            args: restArgs,
-                        });
-                        parsedNode.resolvedValue = data.valueHook
-                            ? data.valueHook(outputValue, varName, false, passedThrough)
-                            : outputValue;
-                    } else {
-                        reportUnsupportedSymbolInValue(context, varName, resolvedVarSymbol, node);
-                    }
-                } else if (resolvedVar._kind === 'js' && typeof resolvedVar.symbol === 'string') {
-                    // value from Javascript
+        } else if (possibleNonSTVarSymbol) {
+            const type = resolvedSymbols.mainNamespace[varName];
+            if (type === `js`) {
+                const deepResolve = resolvedSymbols[type][varName];
+                if (typeof deepResolve.symbol === 'string') {
                     parsedNode.resolvedValue = data.valueHook
-                        ? data.valueHook(resolvedVar.symbol, varName, false, passedThrough)
-                        : resolvedVar.symbol;
-                } else if (resolvedVar._kind === 'js' && node) {
+                        ? data.valueHook(deepResolve.symbol, varName, false, passedThrough)
+                        : deepResolve.symbol;
+                } else if (node) {
                     // unsupported Javascript value
                     // ToDo: provide actual exported id (default/named as x)
                     context.diagnostics.warn(node, diagnostics.CANNOT_USE_JS_AS_VALUE(varName), {
                         word: varName,
                     });
                 }
-            } else {
-                // missing imported symbol
-                const importAst = varSymbol.import.rule;
-                const foundImport =
-                    importAst.type === `atrule`
-                        ? importAst
-                        : importAst.nodes.find((node) => {
-                              return node.type === 'decl' && node.prop === `-st-named`;
-                          });
-                if (foundImport && node) {
-                    // ToDo: provide actual exported id (default/named as x)
-                    context.diagnostics.error(node, diagnostics.CANNOT_FIND_IMPORTED_VAR(varName), {
-                        word: varName,
-                    });
+            } else if (type) {
+                // report mismatch type
+                const deepResolve = resolvedSymbols[type][varName];
+                let finalResolve: CSSResolve | JSResolve = {
+                    _kind: `css`,
+                    meta: data.meta,
+                    symbol: possibleNonSTVarSymbol,
+                };
+                if (deepResolve instanceof Array) {
+                    finalResolve = deepResolve[deepResolve.length - 1];
+                } else if (deepResolve._kind === `css`) {
+                    finalResolve = deepResolve;
                 }
+                reportUnsupportedSymbolInValue(context, varName, finalResolve, node);
+            } else if (node) {
+                // report unknown var
+                context.diagnostics.error(node, diagnostics.UNKNOWN_VAR(varName), {
+                    word: varName,
+                });
             }
-        } else if (varSymbol) {
-            reportUnsupportedSymbolInValue(context, varName, varSymbol, node);
         } else if (node) {
             context.diagnostics.warn(node, diagnostics.UNKNOWN_VAR(varName), {
                 word: varName,
@@ -304,10 +287,16 @@ function evaluateValueCall(
 function reportUnsupportedSymbolInValue(
     context: FeatureTransformContext,
     name: string,
-    symbol: StylableSymbol,
+    resolve: CSSResolve | JSResolve,
     node: postcss.Node | undefined
 ) {
-    const errorKind = symbol._kind === 'class' && symbol[`-st-root`] ? 'stylesheet' : symbol._kind;
+    const symbol = resolve.symbol;
+    const errorKind =
+        resolve._kind === `css`
+            ? symbol._kind === 'class' && symbol[`-st-root`]
+                ? 'stylesheet'
+                : symbol._kind
+            : `Javascript`; // ToDo report value type
     if (node) {
         context.diagnostics.warn(node, diagnostics.CANNOT_USE_AS_VALUE(errorKind, name), {
             word: name,

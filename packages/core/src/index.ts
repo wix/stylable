@@ -125,7 +125,6 @@ export {
     ValueFormatter,
     evalDeclarationValue,
     functionWarnings,
-    processDeclarationValue,
     resolveArgumentsValue,
 } from './functions';
 export {

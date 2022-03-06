@@ -852,7 +852,7 @@ describe(`features/st-var`, () => {
 
                         /* 
                             @decl(unknown) prop: value(unknown)
-                            @transform-error(unknown) word(unknown) ${STVar.diagnostics.CANNOT_FIND_IMPORTED_VAR(
+                            @transform-error(unknown) word(unknown) ${STVar.diagnostics.UNKNOWN_VAR(
                                 `unknown`
                             )} 
                         */

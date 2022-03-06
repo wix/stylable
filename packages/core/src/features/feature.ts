@@ -20,6 +20,7 @@ export interface FeatureContext {
 export interface FeatureTransformContext extends FeatureContext {
     resolver: StylableResolver;
     evaluator: StylableEvaluator;
+    getResolvedSymbols: (meta: StylableMeta) => MetaParts;
 }
 
 export interface NodeTypes {
@@ -46,10 +47,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
-    transformResolve: (options: {
-        context: FeatureTransformContext;
-        metaParts: MetaParts;
-    }) => T['RESOLVED'];
+    transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
     transformAtRuleNode: (options: {
         context: FeatureTransformContext;
         atRule: postcss.AtRule;

@@ -6,7 +6,13 @@ import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
-import type { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
+import {
+    CSSResolve,
+    JSResolve,
+    StylableResolver,
+    createSymbolResolverWithCache,
+    MetaParts,
+} from './stylable-resolver';
 import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
 import type { ParsedValue } from './types';
@@ -44,6 +50,7 @@ export class StylableEvaluator {
     ) {
         return processDeclarationValue(
             context.resolver,
+            context.getResolvedSymbols,
             data.value,
             data.meta,
             data.node,
@@ -96,6 +103,7 @@ export function resolveArgumentsValue(
 
 export function processDeclarationValue(
     resolver: StylableResolver,
+    getResolvedSymbols: (meta: StylableMeta) => MetaParts,
     value: string,
     meta: StylableMeta,
     node?: postcss.Node,
@@ -120,6 +128,7 @@ export function processDeclarationValue(
                             diagnostics,
                             resolver,
                             evaluator,
+                            getResolvedSymbols,
                         },
                         data: {
                             value,
@@ -191,6 +200,7 @@ export function processDeclarationValue(
                                 diagnostics,
                                 resolver,
                                 evaluator,
+                                getResolvedSymbols,
                             },
                             data: {
                                 value,
@@ -256,10 +266,15 @@ export function evalDeclarationValue(
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
-    args: string[] = []
+    args: string[] = [],
+    getResolvedSymbols: (meta: StylableMeta) => MetaParts = createSymbolResolverWithCache(
+        resolver,
+        diagnostics || new Diagnostics()
+    )
 ): string {
     return processDeclarationValue(
         resolver,
+        getResolvedSymbols,
         value,
         meta,
         node,

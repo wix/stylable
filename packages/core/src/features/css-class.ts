@@ -74,7 +74,8 @@ export const hooks = createFeature<{
         }
         addClass(context, node.value, rule);
     },
-    transformResolve({ metaParts }) {
+    transformResolve({ context }) {
+        const metaParts = context.getResolvedSymbols(context.meta);
         const locals: Record<string, string> = {};
         for (const [localName, resolved] of Object.entries(metaParts.class)) {
             const exportedClasses = [];
