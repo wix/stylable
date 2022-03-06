@@ -23,7 +23,6 @@ import {
     getDefaultMode,
     registerStcProjectsToWatcher,
     reportStcDiagnostics,
-    reportStcSourcesDiagnostics,
 } from './plugin-utils';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
@@ -184,15 +183,18 @@ export function stylableRollupPlugin({
                 stylable.createResolver()
             );
 
-            const emitDiagnosticContext = {
-                emitWarning: (e: Error) => this.warn(e),
-                emitError: (e: Error) => this.error(e),
-            };
-
-            if (stcBuilder?.outputFiles?.has(id)) {
-                reportStcSourcesDiagnostics(emitDiagnosticContext, id, stcBuilder, diagnosticsMode);
-            } else {
-                emitDiagnostics(emitDiagnosticContext, meta, diagnosticsMode);
+            /**
+             * Incase this Stylable module has sources the diagnostics will be emitted in `watchChange` hook.
+             */
+            if (!stcBuilder?.outputFiles?.has(id)) {
+                emitDiagnostics(
+                    {
+                        emitWarning: (e: Error) => this.warn(e),
+                        emitError: (e: Error) => this.error(e),
+                    },
+                    meta,
+                    diagnosticsMode
+                );
             }
 
             return {
