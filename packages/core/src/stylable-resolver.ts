@@ -309,9 +309,8 @@ export class StylableResolver {
             import: {},
         };
         for (const [name, symbol] of Object.entries(meta.getAllSymbols())) {
-            // let targetSymbol: StylableSymbol = symbol;
             let deepResolved: CSSResolve | JSResolve | null;
-            if (symbol._kind === `import`) {
+            if (symbol._kind === `import` || (symbol._kind === `cssVar` && symbol.alias)) {
                 deepResolved = this.deepResolve(symbol);
                 if (!deepResolved || !deepResolved.symbol) {
                     // ToDo: handle...
@@ -322,8 +321,9 @@ export class StylableResolver {
                     continue;
                 } else {
                     if (
-                        deepResolved.symbol._kind === `class` ||
-                        deepResolved.symbol._kind === `element`
+                        symbol._kind !== `cssVar` &&
+                        (deepResolved.symbol._kind === `class` ||
+                            deepResolved.symbol._kind === `element`)
                     ) {
                         // virtual alias
                         deepResolved = {
@@ -355,6 +355,9 @@ export class StylableResolver {
                     break;
                 case `var`:
                     resolvedSymbols.var[name] = deepResolved as CSSResolve<VarSymbol>;
+                    break;
+                case `cssVar`:
+                    resolvedSymbols.cssVar[name] = deepResolved as CSSResolve<CSSVarSymbol>;
                     break;
             }
             resolvedSymbols.mainNamespace[name] = deepResolved.symbol._kind;
