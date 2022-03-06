@@ -21,6 +21,7 @@ import {
     generateCssString,
     generateStylableModuleCode,
     getDefaultMode,
+    registerStcProjectsToWatcher,
     reportStcDiagnostics,
     reportStcSourcesDiagnostics,
 } from './plugin-utils';
@@ -121,27 +122,21 @@ export function stylableRollupPlugin({
                         configFilePath: configuration.path,
                         watchMode: this.meta.watchMode,
                     });
+
                     await stcBuilder.build();
+
+                    registerStcProjectsToWatcher(this, stcBuilder);
 
                     reportStcDiagnostics(
                         {
-                            emitWarning: (e) => console.warn(e),
-                            emitError: (e) => {
-                                console.error(e);
-                                if (!this.meta.watchMode) {
-                                    process.exitCode = 1;
-                                }
-                            },
+                            emitWarning: (e) => this.warn(e),
+                            emitError: (e) => this.error(e),
                         },
                         stcBuilder,
                         diagnosticsMode
                     );
-                }
-
-                if (this.meta.watchMode) {
-                    for (const sourceDirectory of stcBuilder.getProjectsSources()) {
-                        this.addWatchFile(sourceDirectory);
-                    }
+                } else {
+                    registerStcProjectsToWatcher(this, stcBuilder);
                 }
             }
         },
@@ -151,8 +146,8 @@ export function stylableRollupPlugin({
 
                 reportStcDiagnostics(
                     {
-                        emitError: (e) => console.error(e),
-                        emitWarning: (e) => console.warn(e),
+                        emitWarning: (e) => this.warn(e),
+                        emitError: (e) => this.error(e),
                     },
                     stcBuilder,
                     diagnosticsMode
@@ -190,8 +185,8 @@ export function stylableRollupPlugin({
             );
 
             const emitDiagnosticContext = {
-                emitError: (e: Error) => this.error(e),
                 emitWarning: (e: Error) => this.warn(e),
+                emitError: (e: Error) => this.error(e),
             };
 
             if (stcBuilder?.outputFiles?.has(id)) {

@@ -81,8 +81,8 @@ export class STCBuilder {
         this.projects = buildOutput.projects;
     };
 
-    public getProjectsSources = () => {
-        if (!this.projects) {
+    public getProjectsSources = (projects = this.projects) => {
+        if (!projects) {
             throw new Error(
                 'Stylable Builder Error: Can not get projects sources when projects is undefined, did you run build()?'
             );
@@ -90,7 +90,7 @@ export class STCBuilder {
 
         const sourcesPaths = new Set<string>();
 
-        for (const { projectRoot, options } of this.projects) {
+        for (const { projectRoot, options } of projects) {
             for (const optionEntity of options) {
                 sourcesPaths.add(this.fs.join(projectRoot, optionEntity.srcDir));
             }

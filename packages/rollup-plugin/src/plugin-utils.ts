@@ -12,7 +12,7 @@ import fs from 'fs';
 import { basename, extname } from 'path';
 import { createHash } from 'crypto';
 import { getType } from 'mime';
-import type { STCBuilder } from '@stylable/cli';
+import type { STCBuilder, STCProjects } from '@stylable/cli';
 import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
 
 const runtimePath = JSON.stringify(require.resolve('@stylable/rollup-plugin/runtime'));
@@ -157,5 +157,15 @@ export function reportStcDiagnostics(
                 }`
             );
         }
+    }
+}
+
+export function registerStcProjectsToWatcher(
+    ctx: PluginContext,
+    stcBuilder: STCBuilder,
+    projects?: STCProjects
+) {
+    for (const sourceDirectory of stcBuilder.getProjectsSources(projects)) {
+        ctx.addWatchFile(sourceDirectory);
     }
 }
