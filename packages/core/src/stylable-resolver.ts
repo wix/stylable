@@ -12,6 +12,7 @@ import {
     VarSymbol,
     CSSVarSymbol,
     KeyframesSymbol,
+    CSSKeyframes,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
@@ -308,6 +309,7 @@ export class StylableResolver {
             cssVar: {},
             import: {},
         };
+        // resolve main namespace
         for (const [name, symbol] of Object.entries(meta.getAllSymbols())) {
             let deepResolved: CSSResolve | JSResolve | null;
             if (symbol._kind === `import` || (symbol._kind === `cssVar` && symbol.alias)) {
@@ -361,6 +363,17 @@ export class StylableResolver {
                     break;
             }
             resolvedSymbols.mainNamespace[name] = deepResolved.symbol._kind;
+        }
+        // resolve keyframes
+        for (const [name, symbol] of Object.entries(CSSKeyframes.getAll(meta))) {
+            const result = CSSKeyframes.resolveKeyframes(meta, symbol, this);
+            if (result) {
+                resolvedSymbols.keyframes[name] = {
+                    _kind: `css`,
+                    meta: result.meta,
+                    symbol: result.symbol,
+                };
+            }
         }
         return resolvedSymbols;
     }

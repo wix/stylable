@@ -142,8 +142,9 @@ export const hooks = createFeature<{
     transformResolve({ context }) {
         const symbols = STSymbol.getAllByType(context.meta, `keyframes`);
         const resolved: Record<string, KeyframesResolve> = {};
+        const resolvedSymbols = context.getResolvedSymbols(context.meta);
         for (const [name, symbol] of Object.entries(symbols)) {
-            const res = resolveKeyframes(context.meta, symbol, context.resolver);
+            const res = resolvedSymbols.keyframes[name];
             if (res) {
                 resolved[name] = res;
             } else if (symbol.import) {
@@ -286,8 +287,12 @@ function addKeyframesDeclaration(
     return isFirstInPath && !isImportedBefore;
 }
 
-function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {
-    let current = { meta, symbol };
+export function resolveKeyframes(
+    meta: StylableMeta,
+    symbol: KeyframesSymbol,
+    resolver: StylableResolver
+) {
+    const current = { meta, symbol };
     while (current.symbol?.import) {
         const res = resolver.resolveImported(
             current.symbol.import,
@@ -295,11 +300,7 @@ function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver:
             'mappedKeyframes' // ToDo: refactor out of resolver
         );
         if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
-            const { meta, symbol } = res;
-            current = {
-                meta,
-                symbol,
-            };
+            ({ meta: current.meta, symbol: current.symbol } = res);
         } else {
             return undefined;
         }
