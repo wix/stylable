@@ -6,8 +6,11 @@ import {
     statSync,
     symlinkSync,
     writeFileSync,
+    promises,
 } from 'fs';
 import { join, relative } from 'path';
+
+const { writeFile } = promises;
 
 export interface Files {
     [filepath: string]: string;
@@ -93,7 +96,7 @@ export function loadDirSync(rootPath: string, dirPath: string = rootPath): Files
 
 export function writeToExistingFile(filePath: string, content: string) {
     if (existsSync(filePath)) {
-        writeFileSync(filePath, content);
+        return writeFile(filePath, content);
     } else {
         throw new Error(`file ${filePath} does not exist`);
     }

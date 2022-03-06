@@ -2,11 +2,11 @@ import { fork, spawnSync, ChildProcess } from 'child_process';
 import { on } from 'events';
 import type { Readable } from 'stream';
 
+type ActionResponse = void | { sleep?: number };
+
 interface Step {
     msg: string;
-    action?: () => void | {
-        sleep?: number;
-    };
+    action?: () => ActionResponse | Promise<ActionResponse>;
 }
 
 interface ProcessCliOutputParams {
@@ -63,7 +63,7 @@ export function createCliTester() {
                     });
 
                     if (step.action) {
-                        const { sleep } = step.action() || {};
+                        const { sleep } = (await step.action()) || {};
 
                         if (typeof sleep === 'number') {
                             await onTimeout(sleep);
