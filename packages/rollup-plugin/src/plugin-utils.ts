@@ -107,38 +107,6 @@ export function getDefaultMode(): 'development' | 'production' {
     return 'production';
 }
 
-export function reportStcSourcesDiagnostics(
-    context: EmitDiagnosticsContext,
-    id: string,
-    stcBuilder: STCBuilder,
-    diagnosticsMode: DiagnosticsMode
-) {
-    if (!stcBuilder.outputFiles) {
-        return;
-    }
-
-    const sources = stcBuilder.outputFiles.get(id)!;
-
-    for (const sourceFilePath of sources) {
-        const diagnostics = stcBuilder.diagnosticsMessages.get(sourceFilePath);
-
-        if (diagnostics) {
-            for (const diagnostic of diagnostics) {
-                reportDiagnostic(
-                    context,
-                    diagnosticsMode,
-                    diagnostic,
-                    `${sourceFilePath}${
-                        diagnostic.line && diagnostic.column
-                            ? `:${diagnostic.line}:${diagnostic.column}`
-                            : ''
-                    }`
-                );
-            }
-        }
-    }
-}
-
 export function reportStcDiagnostics(
     context: EmitDiagnosticsContext,
     stcBuilder: STCBuilder | undefined,
