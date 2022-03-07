@@ -60,7 +60,7 @@ export interface JSResolve {
     meta: null;
 }
 
-export interface MetaParts {
+export interface MetaResolvedSymbols {
     mainNamespace: Record<string, StylableSymbol['_kind'] | 'js'>;
     class: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
     element: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
@@ -299,7 +299,7 @@ export class StylableResolver {
     }
 
     public resolveSymbols(meta: StylableMeta, diagnostics: Diagnostics) {
-        const resolvedSymbols: MetaParts = {
+        const resolvedSymbols: MetaResolvedSymbols = {
             mainNamespace: {},
             class: {},
             element: {},
@@ -501,8 +501,8 @@ export function createSymbolResolverWithCache(
     resolver: StylableResolver,
     diagnostics: Diagnostics
 ) {
-    const cache = new Map<StylableMeta, MetaParts>();
-    return (meta: StylableMeta): MetaParts => {
+    const cache = new Map<StylableMeta, MetaResolvedSymbols>();
+    return (meta: StylableMeta): MetaResolvedSymbols => {
         let symbols = cache.get(meta);
         if (!symbols) {
             symbols = resolver.resolveSymbols(meta, diagnostics);

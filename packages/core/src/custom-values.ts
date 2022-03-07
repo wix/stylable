@@ -1,6 +1,6 @@
 import cloneDeepWith from 'lodash.clonedeepwith';
 import postcssValueParser from 'postcss-value-parser';
-import type { MetaParts } from './stylable-resolver';
+import type { MetaResolvedSymbols } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
 import type { ParsedValue } from './types';
 
@@ -156,7 +156,7 @@ interface ExtensionApi<Value, Args> {
     };
 }
 
-export function resolveCustomValues(resolvedSymbols: MetaParts) {
+export function resolveCustomValues(resolvedSymbols: MetaResolvedSymbols) {
     const customValues = { ...stTypes };
     for (const [symbolName, jsRef] of Object.entries(resolvedSymbols.js)) {
         if (isCustomValue(jsRef.symbol)) {

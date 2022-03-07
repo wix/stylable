@@ -11,7 +11,7 @@ import {
     JSResolve,
     StylableResolver,
     createSymbolResolverWithCache,
-    MetaParts,
+    MetaResolvedSymbols,
 } from './stylable-resolver';
 import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
@@ -103,7 +103,7 @@ export function resolveArgumentsValue(
 
 export function processDeclarationValue(
     resolver: StylableResolver,
-    getResolvedSymbols: (meta: StylableMeta) => MetaParts,
+    getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols,
     value: string,
     meta: StylableMeta,
     node?: postcss.Node,
@@ -266,7 +266,7 @@ export function evalDeclarationValue(
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
     args: string[] = [],
-    getResolvedSymbols: (meta: StylableMeta) => MetaParts = createSymbolResolverWithCache(
+    getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols = createSymbolResolverWithCache(
         resolver,
         diagnostics || new Diagnostics()
     )

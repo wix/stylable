@@ -37,7 +37,6 @@ import {
     CSSResolve,
     StylableResolverCache,
     StylableResolver,
-    MetaParts,
     createSymbolResolverWithCache,
 } from './stylable-resolver';
 import { isCSSVarProp } from './helpers/css-custom-property';
@@ -325,13 +324,13 @@ export class StylableTransformer {
         // group compound selectors: .a.b .c:hover, a .c:hover -> [[[.a.b], [.c:hover]], [[.a], [.c:hover]]]
         const selectorList = groupCompoundSelectors(selectorAst);
         // resolve meta classes and elements
-        context.metaParts = this.getResolvedSymbols(originMeta);
+        const resolvedSymbols = this.getResolvedSymbols(originMeta);
         // set stylesheet root as the global anchor
         if (!context.currentAnchor) {
             context.initRootAnchor({
                 name: originMeta.root,
                 type: 'class',
-                resolved: context.metaParts.class[originMeta.root],
+                resolved: resolvedSymbols.class[originMeta.root],
             });
         }
         const startedAnchor = context.currentAnchor!;
@@ -370,7 +369,8 @@ export class StylableTransformer {
         return outputAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
-        const { currentAnchor, metaParts, node, originMeta } = context;
+        const { currentAnchor, node, originMeta } = context;
+        const resolvedSymbols = this.getResolvedSymbols(originMeta);
         const transformerContext = {
             meta: originMeta,
             diagnostics: this.diagnostics,
@@ -536,7 +536,7 @@ export class StylableTransformer {
             context.setCurrentAnchor({
                 name: origin.name,
                 type: 'class',
-                resolved: metaParts.class[origin.name],
+                resolved: resolvedSymbols.class[origin.name],
             });
         }
     }
@@ -606,8 +606,8 @@ export class StylableTransformer {
         }
     }
     private addDevRules(meta: StylableMeta) {
-        const metaParts = this.getResolvedSymbols(meta);
-        for (const [className, resolved] of Object.entries(metaParts.class)) {
+        const resolvedSymbols = this.getResolvedSymbols(meta);
+        for (const [className, resolved] of Object.entries(resolvedSymbols.class)) {
             if (resolved.length > 1) {
                 meta.outputAst!.walkRules(
                     '.' + namespaceEscape(className, meta.namespace),
@@ -730,7 +730,6 @@ export class ScopeContext {
     public additionalSelectors: Array<() => Selector> = [];
     public selectorIndex = -1;
     public elements: any[] = [];
-    public metaParts?: MetaParts;
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];

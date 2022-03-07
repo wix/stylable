@@ -75,9 +75,9 @@ export const hooks = createFeature<{
         addClass(context, node.value, rule);
     },
     transformResolve({ context }) {
-        const metaParts = context.getResolvedSymbols(context.meta);
+        const resolvedSymbols = context.getResolvedSymbols(context.meta);
         const locals: Record<string, string> = {};
-        for (const [localName, resolved] of Object.entries(metaParts.class)) {
+        for (const [localName, resolved] of Object.entries(resolvedSymbols.class)) {
             const exportedClasses = [];
             let first = true;
             // collect list of css classes for exports
@@ -123,7 +123,8 @@ export const hooks = createFeature<{
     },
     transformSelectorNode({ context, selectorContext, node }) {
         const { originMeta, resolver } = selectorContext;
-        const resolved = selectorContext.metaParts.class[node.value] || [
+        const resolvedSymbols = context.getResolvedSymbols(context.meta);
+        const resolved = resolvedSymbols.class[node.value] || [
             // used to namespace classes from js mixins since js mixins
             // are scoped in the context of the mixed-in stylesheet
             // which might not have a definition for the mixed-in class
