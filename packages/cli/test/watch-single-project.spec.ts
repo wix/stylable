@@ -14,7 +14,12 @@ import { join, sep } from 'path';
 
 const { writeFile } = promises;
 
-describe('Stylable Cli Watch - Single project', () => {
+describe('Stylable Cli Watch - Single project', function () {
+    /**
+     * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
+     */
+    this.retries(2);
+
     let tempDir: ITempDirectory;
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
@@ -355,12 +360,7 @@ describe('Stylable Cli Watch - Single project', () => {
         expect(files['style.st.css']).to.include('.root{ color: blue; }');
     });
 
-    it('should re-build indexes', async function () {
-        /**
-         * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
-         */
-        this.retries(2);
-
+    it('should re-build indexes', async () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
         });
