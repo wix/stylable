@@ -33,7 +33,7 @@ export function processProjects<P extends string>(
             );
         }
     } else if (typeof projects === 'object') {
-        for (const entry of Object.entries<ProjectEntryValues<P>>(projects)) {
+        for (const entry of Object.entries(projects)) {
             entities.push(resolveProjectEntry(entry, defaultOptions, presets));
         }
     }
