@@ -257,7 +257,15 @@ export class StylableTransformer {
             this.addDevRules(meta);
         }
         ast.walkRules((rule) =>
-            appendMixins(this, rule as SRule, meta, tsVarOverride || {}, cssVarsMapping, path)
+            appendMixins(
+                transformContext,
+                this,
+                rule as SRule,
+                meta,
+                tsVarOverride || {},
+                cssVarsMapping,
+                path
+            )
         );
 
         if (metaExports) {

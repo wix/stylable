@@ -218,7 +218,6 @@ export function processDeclarationValue(
                 });
             }
         }
-        return;
     }, true);
 
     let outputValue = '';

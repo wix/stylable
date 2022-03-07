@@ -108,7 +108,7 @@ export {
     StateParsedValue,
     StateTypeValidator,
 } from './types';
-export { appendMixin, appendMixins, mixinWarnings } from './stylable-mixins';
+export { mixinWarnings } from './stylable-mixins';
 export {
     OnUrlCallback,
     UrlNode,

@@ -497,7 +497,9 @@ describe('diagnostics: warnings and errors', () => {
                         },
                         '/imported.js': {
                             content: `
-
+                                module.exports = {
+                                    myMixin: "not a function",
+                                }
                             `,
                         },
                     },
