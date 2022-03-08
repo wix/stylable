@@ -156,6 +156,21 @@ describe(`features/css-type`, () => {
                 root: `entry__root`,
             });
         });
+        it(`should resolve deep imported element type`, () => {
+            testStylableCore({
+                '/base.st.css': ``,
+                '/middle.st.css': `
+                    @st-import Base from "./base.st.css";
+                    Base {}
+                `,
+                '/entry.st.css': `
+                    @st-import [Base] from './middle.st.css';
+
+                    /* @rule .base__root */
+                    Base {}
+                `,
+            });
+        });
         it(`should report unscoped imported element type`, () => {
             testStylableCore({
                 '/classes.st.css': `
