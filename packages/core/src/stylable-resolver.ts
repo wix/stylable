@@ -253,50 +253,6 @@ export class StylableResolver {
         }
         return null;
     }
-    public resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
-        return this.resolveName(meta, symbol, false);
-    }
-
-    public resolveName(
-        meta: StylableMeta,
-        symbol: StylableSymbol,
-        isElement: boolean
-    ): CSSResolve<ClassSymbol | ElementSymbol> | null {
-        const type = isElement ? 'element' : 'class';
-        let finalSymbol;
-        let finalMeta;
-        if (symbol._kind === type) {
-            finalSymbol = symbol;
-            finalMeta = meta;
-        } else if (symbol._kind === 'import') {
-            const resolved = this.deepResolve(symbol);
-            if (resolved && resolved._kind === 'css' && resolved.symbol) {
-                if (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') {
-                    finalSymbol = resolved.symbol;
-                    finalMeta = resolved.meta;
-                } else {
-                    // TODO: warn
-                }
-            } else {
-                // TODO: warn
-            }
-        } else {
-            // TODO: warn
-        }
-
-        if (finalMeta && finalSymbol) {
-            return {
-                _kind: 'css',
-                symbol: finalSymbol,
-                meta: finalMeta,
-            };
-        } else {
-            return null;
-        }
-    }
-    public resolveElement(meta: StylableMeta, symbol: StylableSymbol) {
-        return this.resolveName(meta, symbol, true);
-    }
 
     public resolveSymbols(meta: StylableMeta, diagnostics: Diagnostics) {
         const resolvedSymbols: MetaResolvedSymbols = {
