@@ -84,7 +84,7 @@ function createRunParameters({ integrations, packages, corePackages, all, glob }
         runParameters = {
             glob: createTestFilesGlob(`{${integrationsList.join(',')}}`),
         };
-    } else if (packages?.length) {
+    } else if (packages && packages.length) {
         const packagesList =
             packages.length === 1
                 ? stripStylablePrefix(packages[0])
