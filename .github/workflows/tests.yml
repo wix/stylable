@@ -19,5 +19,5 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run lint
-      - run: npm test:core-packages
-      - run: npm test:stylable-integrations
+      - run: npm run test:core-packages
+      - run: npm run test:integrations
