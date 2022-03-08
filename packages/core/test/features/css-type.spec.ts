@@ -1,223 +1,196 @@
 import { STImport, CSSType, STSymbol } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import {
-    generateStylableResult,
-    expectAnalyzeDiagnostics,
-    generateStylableRoot,
-    testInlineExpects,
-} from '@stylable/core-test-kit';
+import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe(`features/css-type`, () => {
-    describe(`meta`, () => {
-        it(`should collect component types definition (capital letter)`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            Btn {}
-                            div {}
-                        `,
-                    },
-                },
+    it(`should process element types`, () => {
+        const { sheets } = testStylableCore(`
+            /* @rule(native) div */
+            div {}
+
+            /* @rule(custom) Btn */
+            Btn {}
+
+            /* @rule(complex selector) .entry__root Gallery, Btn, div */
+            .root Gallery, Btn, div {}
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        // symbols
+        expect(CSSType.get(meta, `Btn`), `collect capital letters`).to.contain({
+            _kind: `element`,
+            name: 'Btn',
+        });
+        expect(CSSType.get(meta, `div`), `ignore lowercase`).to.eql(undefined);
+        expect(STSymbol.get(meta, `Btn`), `general symbols`).to.equal(CSSType.get(meta, `Btn`));
+        expect(CSSType.getAll(meta), `getAll`).to.eql({
+            Btn: CSSType.get(meta, `Btn`),
+            Gallery: CSSType.get(meta, `Gallery`),
+        });
+
+        // public API
+        expect(meta.getTypeElement(`Btn`), `meta.getTypeElement`).to.equal(
+            CSSType.get(meta, `Btn`)
+        );
+        expect(meta.getAllTypeElements(), `meta.getAllTypeElements`).to.eql(CSSType.getAll(meta));
+
+        // deprecation
+        expect(
+            ignoreDeprecationWarn(() => meta.elements),
+            `deprecated 'meta.elements'`
+        ).to.eql({
+            Btn: CSSType.get(meta, `Btn`),
+            Gallery: CSSType.get(meta, `Gallery`),
+        });
+    });
+    it(`should report invalid cases`, () => {
+        testStylableCore(`
+            /* 
+                @rule(functional element type) div()
+                @analyze-error(functional element type) ${CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
+                    `div`,
+                    `type`
+                )}
+            */
+            div() {}
+        `);
+    });
+    it(`should report unscoped native element type`, () => {
+        /*
+        ToDo: consider to accept as scoped when local symbol exists
+        anywhere in the selector: "div .local span"
+        */
+        const { sheets } = testStylableCore(`
+                /* @analyze-warn word(button) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                    `button`
+                )} */
+                button {}
+
+                /* NO ERROR - locally scoped */
+                .local button {}
+                button.local {}
+            `);
+
+        const { meta } = sheets[`/entry.st.css`];
+
+        expect(meta.diagnostics.reports.length, `only unscoped diagnostic`).to.equal(1);
+    });
+    describe(`st-import`, () => {
+        it(`should resolve imported root as element type`, () => {
+            const { sheets } = testStylableCore({
+                '/before.st.css': ``,
+                '/after.st.css': ``,
+                '/entry.st.css': `
+                    /* @check .entry__root .before__root */
+                    .root Before {}
+
+                    @st-import Before from './before.st.css';
+                    @st-import After from './after.st.css';
+
+                    /* @check .entry__root .after__root */
+                    .root After {}
+                `,
             });
 
-            expect(CSSType.get(meta, `Btn`), `Btn`).to.contain({
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            const importBeforeDef = meta.getImportStatements()[0];
+            const importAfterDef = meta.getImportStatements()[1];
+            expect(CSSType.get(meta, `Before`), `before type symbol`).to.eql({
                 _kind: `element`,
-                name: 'Btn',
+                name: 'Before',
+                alias: STImport.createImportSymbol(importBeforeDef, `default`, `default`, `/`),
             });
-            expect(CSSType.get(meta, `div`), `div`).to.eql(undefined);
-            expect(meta.getTypeElement(`a`), `meta.getTypeElement`).to.equal(
-                CSSType.get(meta, `a`)
-            );
-            // deprecation
-            expect(
-                ignoreDeprecationWarn(() => meta.elements),
-                `deprecated 'meta.elements'`
-            ).to.eql({ Btn: CSSType.get(meta, `Btn`) });
-        });
-        it(`should add to general symbols`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            Comp {}
-                        `,
-                    },
-                },
+            expect(CSSType.get(meta, `After`), `after type symbol`).to.eql({
+                _kind: `element`,
+                name: 'After',
+                alias: STImport.createImportSymbol(importAfterDef, `default`, `default`, `/`),
             });
 
-            expect(CSSType.get(meta, `Comp`)).to.equal(STSymbol.get(meta, `Comp`));
+            // JS exports
+            expect(exports.classes, `not added as classes exports`).to.eql({
+                root: `entry__root`,
+            });
         });
-        it(`should return collected symbols`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            Btn {}
-                            Gallery {}
-                        `,
-                    },
-                },
+        it(`should resolve imported named as element type`, () => {
+            const { sheets } = testStylableCore({
+                '/before.st.css': `.part {}`,
+                '/after.st.css': `.part {}`,
+                '/entry.st.css': `
+                    /* @check .entry__root .before__part */
+                    .root BeforePart {}
+
+                    @st-import [part as BeforePart] from './before.st.css';
+                    @st-import [part as AfterPart] from './after.st.css';
+
+                    /* @check .entry__root .after__part */
+                    .root AfterPart {}
+                `,
             });
 
-            expect(CSSType.getAll(meta)).to.eql({
-                Btn: CSSType.get(meta, `Btn`),
-                Gallery: CSSType.get(meta, `Gallery`),
-            });
-            expect(meta.getAllTypeElements(), `meta.getAllTypeElements`).to.eql(
-                CSSType.getAll(meta)
-            );
-        });
-        describe(`st-import`, () => {
-            it(`should mark type as import alias`, () => {
-                const { meta } = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: `entry`,
-                            content: `
-                                .root Before {}
-                                @st-import Before from './before.st.css';
-                                @st-import After from './after.st.css';
-                                .root After {}
-                            `,
-                        },
-                        '/before.st.css': {
-                            namespace: `before`,
-                            content: ``,
-                        },
-                        '/after.st.css': {
-                            namespace: `after`,
-                            content: ``,
-                        },
-                    },
-                });
+            const { meta, exports } = sheets['/entry.st.css'];
 
-                const importBeforeDef = meta.getImportStatements()[0];
-                const importAfterDef = meta.getImportStatements()[1];
-                expect(CSSType.get(meta, `Before`), `before type symbol`).to.eql({
-                    _kind: `element`,
-                    name: 'Before',
-                    alias: STImport.createImportSymbol(importBeforeDef, `default`, `default`, `/`),
-                });
-                expect(CSSType.get(meta, `After`), `after type symbol`).to.eql({
-                    _kind: `element`,
-                    name: 'After',
-                    alias: STImport.createImportSymbol(importAfterDef, `default`, `default`, `/`),
-                });
-                expect(meta.diagnostics.reports, `diagnostics`).to.eql([]);
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            const importBeforeDef = meta.getImportStatements()[0];
+            const importAfterDef = meta.getImportStatements()[1];
+            expect(CSSType.get(meta, `BeforePart`), `before type symbol`).to.eql({
+                _kind: `element`,
+                name: 'BeforePart',
+                alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
+            });
+            expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql({
+                _kind: `element`,
+                name: 'AfterPart',
+                alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
+            });
+
+            // JS exports
+            expect(exports.classes, `not add as classes exports`).to.eql({
+                root: `entry__root`,
+            });
+        });
+        it(`should report unscoped imported element type`, () => {
+            testStylableCore({
+                '/classes.st.css': `
+                    .importedPart {}
+                `,
+                '/entry.st.css': `
+                    @st-import [importedPart] from "./classes.st.css";
+
+                    /* @analyze-warn word(importedPart) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                        `importedPart`
+                    )} */
+                    importedPart {}
+                `,
             });
         });
     });
-    describe(`transform`, () => {
-        it(`should transform imported root or part element`, () => {
-            const result = generateStylableRoot({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        namespace: 'ns',
-                        content: `
-                            @st-import Imported, [part as Part] from "./imported.st.css";
-
-                            /* @check .imported__root */
-                            Imported {}
-                            /* @check .imported__part */
-                            Part {}
-                        `,
-                    },
-                    '/imported.st.css': {
-                        namespace: 'imported',
-                        content: `
-                            .root {}
-                            .part {}
-                        `,
-                    },
-                },
-            });
-
-            testInlineExpects(result);
-        });
-        describe(`-st-global`, () => {
-            it(`should replace imported type`, () => {
-                const result = generateStylableRoot({
-                    entry: `/style.st.css`,
-                    files: {
-                        '/style.st.css': {
-                            namespace: 'ns',
-                            content: `
-                                @st-import Container from "./inner.st.css";
+    describe(`css-class`, () => {
+        it(`should transform according to -st-global`, () => {
+            const { sheets } = testStylableCore({
+                '/other.st.css': `
+                .root {
+                    -st-global: ".x";
+                }
+                `,
+                '/entry.st.css': `
+                    @st-import Container from "./other.st.css";
                                 
-                                /* @check .x */
-                                Container {}
-                            `,
-                        },
-                        '/inner.st.css': {
-                            namespace: 'ns1',
-                            content: `
-                                .root {
-                                    -st-global: ".x";
-                                }
-                            `,
-                        },
-                    },
-                });
+                    /* @check .entry__root .x */
+                    .root Container {}
+                `,
+            });
 
-                testInlineExpects(result);
-            });
-        });
-    });
-    describe(`diagnostics`, () => {
-        it(`should error on unsupported functional class`, () => {
-            expectAnalyzeDiagnostics(
-                `|$div()$| {}`,
-                [
-                    {
-                        file: `/entry.st.css`,
-                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`div`, `type`),
-                        severity: `error`,
-                    },
-                ],
-                { partial: true }
-            );
-        });
-        describe(`scoping`, () => {
-            it(`should warn on unscoped native type`, () => {
-                expectAnalyzeDiagnostics(`|$button$| {}`, [
-                    {
-                        file: `/entry.st.css`,
-                        message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`button`),
-                        severity: `warning`,
-                    },
-                ]);
-            });
-            it(`should warn on unscoped imported default type`, () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    @st-import Imported from "./imported.st.css";
-                    |$Imported$|{}
-                    `,
-                    [
-                        {
-                            file: `/entry.st.css`,
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`Imported`),
-                            severity: `warning`,
-                        },
-                    ]
-                );
-            });
-            it(`should not warn if the selector is scoped before imported class`, () => {
-                expectAnalyzeDiagnostics(`.local div {}`, []);
-            });
-            it(`should not warn if a later part of the compound selector is scoped`, () => {
-                expectAnalyzeDiagnostics(`div.local {}`, []);
-            });
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
         });
     });
 });
