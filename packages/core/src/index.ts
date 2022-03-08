@@ -108,7 +108,6 @@ export {
     StateParsedValue,
     StateTypeValidator,
 } from './types';
-export { mixinWarnings } from './stylable-mixins';
 export {
     OnUrlCallback,
     UrlNode,

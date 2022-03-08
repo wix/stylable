@@ -315,7 +315,8 @@ export class StylableResolver {
             if (symbol._kind === `import` || (symbol._kind === `cssVar` && symbol.alias)) {
                 deepResolved = this.deepResolve(symbol);
                 if (!deepResolved || !deepResolved.symbol) {
-                    // ToDo: handle...
+                    // diagnostics for unresolved imports are reported
+                    // as part of st-import validateImports
                     continue;
                 } else if (deepResolved?._kind === `js`) {
                     resolvedSymbols.js[name] = deepResolved;

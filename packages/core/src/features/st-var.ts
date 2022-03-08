@@ -3,7 +3,7 @@ import { deprecatedStFunctions } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
-import type { CSSResolve, JSResolve } from '../stylable-resolver';
+import type { CSSResolve } from '../stylable-resolver';
 import type { EvalValueData, EvalValueResult } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
 import { walkSelector } from '../helpers/selector';
@@ -45,8 +45,8 @@ export const diagnostics = {
         `value function accepts only a single argument: "value(${args})"`,
     CANNOT_USE_AS_VALUE: (type: string, varName: string) =>
         `${type} "${varName}" cannot be used as a variable`,
-    CANNOT_USE_JS_AS_VALUE: (varName: string) =>
-        `JavaScript import "${varName}" cannot be used as a variable`,
+    CANNOT_USE_JS_AS_VALUE: (type: string, varName: string) =>
+        `JavaScript ${type} import "${varName}" cannot be used as a variable`,
     UNKNOWN_VAR: (name: string) => `unknown var "${name}"`,
 };
 
@@ -245,26 +245,33 @@ function evaluateValueCall(
             const type = resolvedSymbols.mainNamespace[varName];
             if (type === `js`) {
                 const deepResolve = resolvedSymbols[type][varName];
-                if (typeof deepResolve.symbol === 'string') {
+                const importedType = typeof deepResolve.symbol;
+                if (importedType === 'string') {
                     parsedNode.resolvedValue = data.valueHook
                         ? data.valueHook(deepResolve.symbol, varName, false, passedThrough)
                         : deepResolve.symbol;
                 } else if (node) {
                     // unsupported Javascript value
                     // ToDo: provide actual exported id (default/named as x)
-                    context.diagnostics.warn(node, diagnostics.CANNOT_USE_JS_AS_VALUE(varName), {
-                        word: varName,
-                    });
+                    context.diagnostics.warn(
+                        node,
+                        diagnostics.CANNOT_USE_JS_AS_VALUE(importedType, varName),
+                        {
+                            word: varName,
+                        }
+                    );
                 }
             } else if (type) {
                 // report mismatch type
                 const deepResolve = resolvedSymbols[type][varName];
-                let finalResolve: CSSResolve | JSResolve = {
+                let finalResolve: CSSResolve = {
                     _kind: `css`,
                     meta: data.meta,
                     symbol: possibleNonSTVarSymbol,
                 };
                 if (deepResolve instanceof Array) {
+                    // take the deep resolved in order to
+                    // print the actual mismatched type
                     finalResolve = deepResolve[deepResolve.length - 1];
                 } else if (deepResolve._kind === `css`) {
                     finalResolve = deepResolve;
@@ -287,16 +294,11 @@ function evaluateValueCall(
 function reportUnsupportedSymbolInValue(
     context: FeatureTransformContext,
     name: string,
-    resolve: CSSResolve | JSResolve,
+    resolve: CSSResolve,
     node: postcss.Node | undefined
 ) {
     const symbol = resolve.symbol;
-    const errorKind =
-        resolve._kind === `css`
-            ? symbol._kind === 'class' && symbol[`-st-root`]
-                ? 'stylesheet'
-                : symbol._kind
-            : `Javascript`; // ToDo report value type
+    const errorKind = symbol._kind === 'class' && symbol[`-st-root`] ? 'stylesheet' : symbol._kind;
     if (node) {
         context.diagnostics.warn(node, diagnostics.CANNOT_USE_AS_VALUE(errorKind, name), {
             word: name,
