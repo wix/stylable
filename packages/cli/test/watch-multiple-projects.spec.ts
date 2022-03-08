@@ -13,7 +13,12 @@ import { join, sep } from 'path';
 
 const { writeFile } = promises;
 
-describe('Stylable Cli Watch - Multiple projects', () => {
+describe('Stylable Cli Watch - Multiple projects', function () {
+    /**
+     * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
+     */
+    this.retries(2);
+
     let tempDir: ITempDirectory;
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
@@ -158,12 +163,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
         ).to.eql(false);
     });
 
-    it('should re-build index files', async function () {
-        /**
-         * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
-         */
-        this.retries(2);
-
+    it('should re-build index files', async () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'stylable.config.js': `
