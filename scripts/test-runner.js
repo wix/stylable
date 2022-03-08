@@ -60,7 +60,7 @@ let {
     timeout = 10000,
 } = createRunParameters({ all, corePackages, glob, integrations, packages });
 
-timeout = timeoutOverride ?? timeout;
+timeout = timeoutOverride !== null && timeoutOverride !== undefined ? timeoutOverride : timeout;
 
 spawn(
     getMochaRunner(),
@@ -82,7 +82,7 @@ function createRunParameters({ integrations, packages, corePackages, all, glob }
 
     if (integrations) {
         runParameters = {
-            glob: `./packages/{${integrationsList.join(',')}}/dist/test/**/*.spec.js`,
+            glob: createTestFilesGlob(`{${integrationsList.join(',')}}`),
         };
     } else if (packages?.length) {
         const packagesList =
@@ -91,13 +91,13 @@ function createRunParameters({ integrations, packages, corePackages, all, glob }
                 : `{${packages.map(stripStylablePrefix).join()}}`;
 
         runParameters = {
-            glob: `./packages/${packagesList}/dist/test/**/*.spec.js`,
+            glob: createTestFilesGlob(packagesList),
             timeout: 20000,
             parallel: false,
         };
     } else if (corePackages) {
         runParameters = {
-            glob: `./packages/!(${integrationsList.join('|')})/dist/test/**/*.spec.js`,
+            glob: createTestFilesGlob(`!(${integrationsList.join('|')})`),
         };
     } else if (glob) {
         runParameters = {
@@ -105,7 +105,7 @@ function createRunParameters({ integrations, packages, corePackages, all, glob }
         };
     } else if (all) {
         runParameters = {
-            glob: './packages/*/dist/test/**/*.spec.js',
+            glob: createTestFilesGlob('*'),
         };
     }
 
@@ -125,4 +125,8 @@ function getMochaRunner() {
     const mochaFilePath = require.resolve('mocha', { paths: [topLevelDirectory] });
 
     return join(dirname(mochaFilePath), 'bin', '_mocha');
+}
+
+function createTestFilesGlob(packagesPattern) {
+    return `./packages/${packagesPattern}/dist/test/**/*.spec.js`;
 }
