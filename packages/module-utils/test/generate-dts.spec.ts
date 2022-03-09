@@ -289,7 +289,7 @@ describe('Generate DTS', function () {
         it('should warn on type mis-match in multiple states', () => {
             tk.populate({
                 'test.st.css': `.root { -st-states: state1; }
-                .part { -st-states: state1(string) }`,
+                .part { -st-states: state1(string); }`,
                 'test.ts': `
                     import { st, classes } from "./test.st.css";
                     
@@ -302,9 +302,9 @@ describe('Generate DTS', function () {
             expect(diagnostics).to.include(
                 "Type 'string' is not assignable to type 'boolean | undefined'"
             );
-            expect(diagnostics).to.include(
-                "Type 'true' is not assignable to type 'string | undefined'"
-            );
+            // changing error message to comply with typescript v4.6
+            // https://github.com/microsoft/TypeScript/issues/48083
+            expect(diagnostics).to.include("Type 'boolean' is not assignable to type 'string'");
         });
 
         describe('state overrides', () => {
@@ -335,8 +335,10 @@ describe('Generate DTS', function () {
                     `,
                 });
 
+                // changing error message to comply with typescript v4.6
+                // https://github.com/microsoft/TypeScript/issues/48083
                 expect(tk.typecheck('test.ts')).to.include(
-                    `Type 'true' is not assignable to type 'string | undefined'`
+                    `Type 'boolean' is not assignable to type 'string'`
                 );
             });
 

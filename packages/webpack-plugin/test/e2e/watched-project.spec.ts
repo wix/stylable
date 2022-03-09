@@ -1,7 +1,9 @@
-import { writeFileSync, renameSync } from 'fs';
+import { promises } from 'fs';
 import { dirname, join } from 'path';
 import { expect } from 'chai';
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
+
+const { writeFile, rename } = promises;
 
 const project = 'watched-project';
 const projectDir = dirname(
@@ -40,7 +42,7 @@ describe(`(${project})`, () => {
         await projectRunner.actAndWaitForRecompile(
             'invalidate dependency',
             () => {
-                writeFileSync(
+                return writeFile(
                     join(projectRunner.testDir, 'src', 'mixin-b.st.css'),
                     '.b{ color: green; }'
                 );
@@ -64,7 +66,7 @@ describe(`(${project})`, () => {
         await projectRunner.actAndWaitForRecompile(
             'rename files with invalid dependencies',
             () => {
-                renameSync(
+                return rename(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
                     join(projectRunner.testDir, 'src', 'xxx.st.css')
                 );

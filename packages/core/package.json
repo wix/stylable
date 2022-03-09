@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "4.10.3",
+  "version": "4.10.4",
   "description": "CSS for Components",
   "main": "dist/index.js",
   "scripts": {
@@ -11,17 +11,17 @@
     "module": "./dist/module-with-extensions.js"
   },
   "dependencies": {
-    "@tokey/css-selector-parser": "^0.5.1",
-    "@tokey/imports-parser": "^0.0.2",
+    "@tokey/css-selector-parser": "^0.6.0",
+    "@tokey/imports-parser": "^0.1.0",
     "balanced-match": "^2.0.0",
     "css-selector-tokenizer": "^0.8.0",
     "cssesc": "^3.0.0",
     "deindent": "^0.1.0",
-    "enhanced-resolve": "^5.9.0",
+    "enhanced-resolve": "^5.9.2",
     "is-vendor-prefixed": "^4.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.clonedeepwith": "^4.5.0",
-    "postcss": "^8.4.6",
+    "postcss": "^8.4.8",
     "postcss-js": "^4.0.0",
     "postcss-nested": "^5.0.6",
     "postcss-safe-parser": "^6.0.0",
