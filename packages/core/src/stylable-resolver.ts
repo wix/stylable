@@ -456,7 +456,7 @@ export function createSymbolResolverWithCache(
     resolver: StylableResolver,
     diagnostics: Diagnostics
 ) {
-    const cache = new Map<StylableMeta, MetaResolvedSymbols>();
+    const cache = new WeakMap<StylableMeta, MetaResolvedSymbols>();
     return (meta: StylableMeta): MetaResolvedSymbols => {
         let symbols = cache.get(meta);
         if (!symbols) {
