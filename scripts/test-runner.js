@@ -69,7 +69,7 @@ spawn(
         ...(parallel !== undefined ? ['--parallel'] : []),
         ...(timeout !== undefined ? ['--timeout', timeout] : []),
     ],
-    { stdio: 'inherit' }
+    { stdio: 'inherit', shell: true }
 ).on('exit', (code) => {
     process.exit(code);
 });
