@@ -5,13 +5,13 @@ import {
     findTestLocations,
 } from '@stylable/core-test-kit';
 import {
-    mixinWarnings,
     valueMapping,
     processorWarnings,
     transformerWarnings,
     nativePseudoElements,
     valueParserWarnings,
 } from '@stylable/core';
+import { mixinWarnings } from '@stylable/core/dist/stylable-mixins';
 import { valueDiagnostics } from '@stylable/core/dist/helpers/value';
 import { STImport, CSSClass, CSSType, STVar } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
@@ -497,7 +497,9 @@ describe('diagnostics: warnings and errors', () => {
                         },
                         '/imported.js': {
                             content: `
-
+                                module.exports = {
+                                    myMixin: "not a function",
+                                }
                             `,
                         },
                     },

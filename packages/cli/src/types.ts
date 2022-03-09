@@ -57,10 +57,11 @@ export type Projects<P extends string> =
 export interface SingleProjectConfig {
     options: PartialBuildOptions;
 }
-export interface MultipleProjectsConfig<P extends string> {
+
+export interface MultipleProjectsConfig<P extends string, PresetRecord = Presets<P>> {
+    projects: PresetRecord extends Presets<infer T> ? Projects<T> : never;
+    presets?: PresetRecord;
     options?: PartialBuildOptions;
-    presets?: Presets<P>;
-    projects: Projects<P>;
     projectsOptions?: {
         resolveRequests?: ResolveRequests;
     };

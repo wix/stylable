@@ -63,6 +63,7 @@ describe('Exports to js', () => {
             });
             expect(cssExports.classes).to.eql({
                 root: 'entry__root',
+                x: 'middle__x',
                 z: 'entry__z',
             });
         });

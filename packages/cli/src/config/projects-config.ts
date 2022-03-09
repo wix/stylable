@@ -32,7 +32,7 @@ export async function projectsConfig(
 
     let projects: STCProjects;
 
-    if (isMultpleConfigProject(config)) {
+    if (isMultipleConfigProject(config)) {
         const { entities } = processProjects(config, {
             defaultOptions: topLevelOptions,
         });
@@ -88,7 +88,7 @@ function isSTCConfig(config: any): config is { stcConfig: Configuration | Config
     );
 }
 
-function isMultpleConfigProject(config: any): config is MultipleProjectsConfig<string> {
+function isMultipleConfigProject(config: any): config is MultipleProjectsConfig<string> {
     return Boolean(config?.projects);
 }
 

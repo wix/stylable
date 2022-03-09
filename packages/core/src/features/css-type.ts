@@ -52,7 +52,8 @@ export const hooks = createFeature<{
         addType(context, node.value, rule);
     },
     transformSelectorNode({ context, node, selectorContext }): void {
-        const resolved = selectorContext.metaParts.element[node.value] || [
+        const resolvedSymbols = context.getResolvedSymbols(context.meta);
+        const resolved = resolvedSymbols.element[node.value] || [
             // provides resolution for native elements
             // that are not collected by parts
             // or elements that are added by js mixin

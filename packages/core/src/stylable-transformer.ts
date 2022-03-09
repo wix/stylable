@@ -37,7 +37,7 @@ import {
     CSSResolve,
     StylableResolverCache,
     StylableResolver,
-    MetaParts,
+    createSymbolResolverWithCache,
 } from './stylable-resolver';
 import { isCSSVarProp } from './helpers/css-custom-property';
 import { valueMapping } from './stylable-value-parsers';
@@ -119,7 +119,7 @@ export class StylableTransformer {
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
     private evaluator: StylableEvaluator = new StylableEvaluator();
-    private metaParts = new WeakMap<StylableMeta, MetaParts>();
+    private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
 
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
@@ -135,6 +135,7 @@ export class StylableTransformer {
             options.resolverCache || new Map()
         );
         this.mode = options.mode || 'production';
+        this.getResolvedSymbols = createSymbolResolverWithCache(this.resolver, this.diagnostics);
     }
     public transform(meta: StylableMeta): StylableResults {
         const metaExports: StylableExports = {
@@ -150,6 +151,7 @@ export class StylableTransformer {
             diagnostics: this.diagnostics,
             resolver: this.resolver,
             evaluator: this.evaluator,
+            getResolvedSymbols: this.getResolvedSymbols,
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
@@ -175,10 +177,10 @@ export class StylableTransformer {
             diagnostics: this.diagnostics,
             resolver: this.resolver,
             evaluator: this.evaluator,
+            getResolvedSymbols: this.getResolvedSymbols,
         };
         const transformResolveOptions = {
             context: transformContext,
-            metaParts: this.getMetaParts(meta),
         };
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
@@ -255,7 +257,15 @@ export class StylableTransformer {
             this.addDevRules(meta);
         }
         ast.walkRules((rule) =>
-            appendMixins(this, rule as SRule, meta, tsVarOverride || {}, cssVarsMapping, path)
+            appendMixins(
+                transformContext,
+                this,
+                rule as SRule,
+                meta,
+                tsVarOverride || {},
+                cssVarsMapping,
+                path
+            )
         );
 
         if (metaExports) {
@@ -322,13 +332,13 @@ export class StylableTransformer {
         // group compound selectors: .a.b .c:hover, a .c:hover -> [[[.a.b], [.c:hover]], [[.a], [.c:hover]]]
         const selectorList = groupCompoundSelectors(selectorAst);
         // resolve meta classes and elements
-        context.metaParts = this.getMetaParts(originMeta);
+        const resolvedSymbols = this.getResolvedSymbols(originMeta);
         // set stylesheet root as the global anchor
         if (!context.currentAnchor) {
             context.initRootAnchor({
                 name: originMeta.root,
                 type: 'class',
-                resolved: context.metaParts.class[originMeta.root],
+                resolved: resolvedSymbols.class[originMeta.root],
             });
         }
         const startedAnchor = context.currentAnchor!;
@@ -367,26 +377,24 @@ export class StylableTransformer {
         return outputAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
-        const { currentAnchor, metaParts, node, originMeta } = context;
+        const { currentAnchor, node, originMeta } = context;
+        const resolvedSymbols = this.getResolvedSymbols(originMeta);
+        const transformerContext = {
+            meta: originMeta,
+            diagnostics: this.diagnostics,
+            resolver: this.resolver,
+            evaluator: this.evaluator,
+            getResolvedSymbols: this.getResolvedSymbols,
+        };
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({
-                context: {
-                    meta: originMeta,
-                    diagnostics: this.diagnostics,
-                    resolver: this.resolver,
-                    evaluator: this.evaluator,
-                },
+                context: transformerContext,
                 selectorContext: context,
                 node,
             });
         } else if (node.type === 'type') {
             CSSType.hooks.transformSelectorNode({
-                context: {
-                    meta: originMeta,
-                    diagnostics: this.diagnostics,
-                    resolver: this.resolver,
-                    evaluator: this.evaluator,
-                },
+                context: transformerContext,
                 selectorContext: context,
                 node,
             });
@@ -428,7 +436,7 @@ export class StylableTransformer {
                     continue;
                 }
 
-                resolved = this.getMetaParts(meta).class[node.value];
+                resolved = this.getResolvedSymbols(meta).class[node.value];
 
                 // first definition of a part in the extends/alias chain
                 context.setCurrentAnchor({
@@ -536,7 +544,7 @@ export class StylableTransformer {
             context.setCurrentAnchor({
                 name: origin.name,
                 type: 'class',
-                resolved: metaParts.class[origin.name],
+                resolved: resolvedSymbols.class[origin.name],
             });
         }
     }
@@ -605,17 +613,9 @@ export class StylableTransformer {
             );
         }
     }
-    private getMetaParts(meta: StylableMeta): MetaParts {
-        let metaParts = this.metaParts.get(meta);
-        if (!metaParts) {
-            metaParts = this.resolver.resolveParts(meta, this.diagnostics);
-            this.metaParts.set(meta, metaParts);
-        }
-        return metaParts;
-    }
     private addDevRules(meta: StylableMeta) {
-        const metaParts = this.getMetaParts(meta);
-        for (const [className, resolved] of Object.entries(metaParts.class)) {
+        const resolvedSymbols = this.getResolvedSymbols(meta);
+        for (const [className, resolved] of Object.entries(resolvedSymbols.class)) {
             if (resolved.length > 1) {
                 meta.outputAst!.walkRules(
                     '.' + namespaceEscape(className, meta.namespace),
@@ -738,7 +738,6 @@ export class ScopeContext {
     public additionalSelectors: Array<() => Selector> = [];
     public selectorIndex = -1;
     public elements: any[] = [];
-    public metaParts?: MetaParts;
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];

@@ -60,12 +60,7 @@ export function rollupRunner({
     });
     const ready = waitForWatcherFinish(watcher);
 
-    const disposables: Array<() => Promise<void> | void> = [
-        removeProject,
-        () => {
-            watcher.close();
-        },
-    ];
+    const disposables: Array<() => Promise<void> | void> = [removeProject, () => watcher.close()];
 
     async function dispose() {
         for (const dispose of disposables.reverse()) {
