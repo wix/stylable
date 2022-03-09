@@ -211,17 +211,17 @@ function evaluateValueCall(
         // resolve
         const resolvedSymbols = context.getResolvedSymbols(data.meta);
         const resolvedVar = resolvedSymbols.var[varName];
-        const resolvedSymbol = resolvedVar?.symbol;
+        const resolvedVarSymbol = resolvedVar?.symbol;
         const possibleNonSTVarSymbol = STSymbol.get(context.meta, varName);
-        if (resolvedSymbol && resolvedSymbol._kind === `var`) {
+        if (resolvedVarSymbol) {
             const { outputValue, topLevelType, typeError } = context.evaluator.evaluateValue(
                 context,
                 {
                     ...data,
                     passedThrough: passedThrough.concat(refUniqID),
-                    value: stripQuotation(resolvedSymbol.text),
+                    value: stripQuotation(resolvedVarSymbol.text),
                     args: restArgs,
-                    node: resolvedSymbol.node,
+                    node: resolvedVarSymbol.node,
                     meta: resolvedVar.meta,
                 }
             );
@@ -244,7 +244,7 @@ function evaluateValueCall(
         } else if (possibleNonSTVarSymbol) {
             const type = resolvedSymbols.mainNamespace[varName];
             if (type === `js`) {
-                const deepResolve = resolvedSymbols[type][varName];
+                const deepResolve = resolvedSymbols.js[varName];
                 const importedType = typeof deepResolve.symbol;
                 if (importedType === 'string') {
                     parsedNode.resolvedValue = data.valueHook

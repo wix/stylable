@@ -80,7 +80,7 @@ export function appendMixin(
         );
     } else {
         const resolvedSymbols = context.getResolvedSymbols(meta);
-        const symbolName = mix.mixin.type; //valueNode.value
+        const symbolName = mix.mixin.type;
         const resolvedType = resolvedSymbols.mainNamespace[symbolName];
         if (resolvedType === `class`) {
             const resolveChain = resolvedSymbols.class[symbolName];

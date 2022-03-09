@@ -3,7 +3,6 @@ import * as STSymbol from './st-symbol';
 import * as STImport from './st-import';
 import type { Imported } from './st-import';
 import type { StylableMeta } from '../stylable-meta';
-import type { StylableResolver } from '../stylable-resolver';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { isInConditionalGroup } from '../helpers/rule';
@@ -285,30 +284,6 @@ function addKeyframesDeclaration(
         imports.push(name);
     }
     return isFirstInPath && !isImportedBefore;
-}
-
-export function resolveKeyframes(
-    meta: StylableMeta,
-    symbol: KeyframesSymbol,
-    resolver: StylableResolver
-) {
-    const current = { meta, symbol };
-    while (current.symbol?.import) {
-        const res = resolver.resolveImported(
-            current.symbol.import,
-            current.symbol.name,
-            'mappedKeyframes' // ToDo: refactor out of resolver
-        );
-        if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
-            ({ meta: current.meta, symbol: current.symbol } = res);
-        } else {
-            return undefined;
-        }
-    }
-    if (current.symbol) {
-        return current;
-    }
-    return undefined;
 }
 
 function getTransformedName({ symbol, meta }: KeyframesResolve) {

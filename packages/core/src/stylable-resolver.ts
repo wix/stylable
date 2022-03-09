@@ -278,23 +278,21 @@ export class StylableResolver {
                     resolvedSymbols.js[name] = deepResolved;
                     resolvedSymbols.mainNamespace[name] = `js`;
                     continue;
-                } else {
-                    if (
-                        symbol._kind !== `cssVar` &&
-                        (deepResolved.symbol._kind === `class` ||
-                            deepResolved.symbol._kind === `element`)
-                    ) {
-                        // virtual alias
-                        deepResolved = {
-                            _kind: `css`,
-                            meta,
-                            symbol: {
-                                _kind: 'class',
-                                name,
-                                alias: symbol,
-                            },
-                        };
-                    }
+                } else if (
+                    symbol._kind !== `cssVar` &&
+                    (deepResolved.symbol._kind === `class` ||
+                        deepResolved.symbol._kind === `element`)
+                ) {
+                    // virtual alias
+                    deepResolved = {
+                        _kind: `css`,
+                        meta,
+                        symbol: {
+                            _kind: 'class',
+                            name,
+                            alias: symbol,
+                        },
+                    };
                 }
             } else {
                 deepResolved = { _kind: `css`, meta, symbol };
@@ -323,7 +321,7 @@ export class StylableResolver {
         }
         // resolve keyframes
         for (const [name, symbol] of Object.entries(CSSKeyframes.getAll(meta))) {
-            const result = CSSKeyframes.resolveKeyframes(meta, symbol, this);
+            const result = resolveKeyframes(meta, symbol, this);
             if (result) {
                 resolvedSymbols.keyframes[name] = {
                     _kind: `css`,
@@ -467,4 +465,24 @@ export function createSymbolResolverWithCache(
         }
         return symbols;
     };
+}
+
+function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {
+    const current = { meta, symbol };
+    while (current.symbol?.import) {
+        const res = resolver.resolveImported(
+            current.symbol.import,
+            current.symbol.name,
+            'mappedKeyframes' // ToDo: refactor out of resolver
+        );
+        if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
+            ({ meta: current.meta, symbol: current.symbol } = res);
+        } else {
+            return undefined;
+        }
+    }
+    if (current.symbol) {
+        return current;
+    }
+    return undefined;
 }
