@@ -1,5 +1,5 @@
 const yargs = require('yargs');
-const { spawn } = require('child_process');
+const { fork } = require('child_process');
 const { join, dirname } = require('path');
 
 const integrationsList = [
@@ -62,14 +62,14 @@ let {
 
 timeout = timeoutOverride !== null && timeoutOverride !== undefined ? timeoutOverride : timeout;
 
-spawn(
+fork(
     getMochaRunner(),
     [
         globPath,
         ...(parallel !== undefined ? ['--parallel'] : []),
         ...(timeout !== undefined ? ['--timeout', timeout] : []),
     ],
-    { stdio: 'inherit', shell: true }
+    { stdio: 'inherit' }
 ).on('exit', (code) => {
     process.exit(code);
 });
