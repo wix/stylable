@@ -3,7 +3,6 @@ import * as STSymbol from './st-symbol';
 import * as STImport from './st-import';
 import type { Imported } from './st-import';
 import type { StylableMeta } from '../stylable-meta';
-import type { StylableResolver } from '../stylable-resolver';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { isInConditionalGroup } from '../helpers/rule';
@@ -142,8 +141,9 @@ export const hooks = createFeature<{
     transformResolve({ context }) {
         const symbols = STSymbol.getAllByType(context.meta, `keyframes`);
         const resolved: Record<string, KeyframesResolve> = {};
+        const resolvedSymbols = context.getResolvedSymbols(context.meta);
         for (const [name, symbol] of Object.entries(symbols)) {
-            const res = resolveKeyframes(context.meta, symbol, context.resolver);
+            const res = resolvedSymbols.keyframes[name];
             if (res) {
                 resolved[name] = res;
             } else if (symbol.import) {
@@ -284,30 +284,6 @@ function addKeyframesDeclaration(
         imports.push(name);
     }
     return isFirstInPath && !isImportedBefore;
-}
-
-function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {
-    let current = { meta, symbol };
-    while (current.symbol?.import) {
-        const res = resolver.resolveImported(
-            current.symbol.import,
-            current.symbol.name,
-            'mappedKeyframes' // ToDo: refactor out of resolver
-        );
-        if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
-            const { meta, symbol } = res;
-            current = {
-                meta,
-                symbol,
-            };
-        } else {
-            return undefined;
-        }
-    }
-    if (current.symbol) {
-        return current;
-    }
-    return undefined;
 }
 
 function getTransformedName({ symbol, meta }: KeyframesResolve) {

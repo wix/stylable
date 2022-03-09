@@ -124,32 +124,19 @@ export const hooks = createFeature<{
             analyzeDeclValueVarCalls(context, decl);
         }
     },
-    transformResolve({ context: { meta, resolver } }) {
+    transformResolve({ context: { meta, getResolvedSymbols } }) {
         const customPropsMapping: Record<string, string> = {};
-        for (const [localVarName, cssVar] of Object.entries(
+        const resolvedSymbols = getResolvedSymbols(meta);
+        for (const [localVarName, localSymbol] of Object.entries(
             STSymbol.getAllByType(meta, `cssVar`)
         )) {
-            if (cssVar.alias) {
-                const resolved = resolver.deepResolve(cssVar.alias);
-                const unresolved =
-                    !resolved || resolved._kind !== `css` || resolved.symbol?._kind !== `cssVar`;
+            const resolve = resolvedSymbols.cssVar[localVarName] || {
                 // fallback to local namespace
-                customPropsMapping[localVarName] = getTransformedName(
-                    unresolved
-                        ? {
-                              _kind: `css`,
-                              symbol: cssVar,
-                              meta,
-                          }
-                        : (resolved as CSSResolve<CSSVarSymbol>)
-                );
-            } else {
-                customPropsMapping[localVarName] = getTransformedName({
-                    _kind: `css`,
-                    symbol: cssVar,
-                    meta,
-                });
-            }
+                _kind: `css`,
+                symbol: localSymbol,
+                meta,
+            };
+            customPropsMapping[localVarName] = getTransformedName(resolve);
         }
 
         return customPropsMapping;
