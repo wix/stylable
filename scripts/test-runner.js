@@ -128,5 +128,5 @@ function getMochaRunner() {
 }
 
 function createTestFilesGlob(packagesPattern) {
-    return `./packages/${packagesPattern}/dist/test/**/*.spec.js`;
+    return `"./packages/${packagesPattern}/dist/test/**/*.spec.js"`;
 }
