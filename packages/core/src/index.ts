@@ -108,7 +108,6 @@ export {
     StateParsedValue,
     StateTypeValidator,
 } from './types';
-export { appendMixin, appendMixins, mixinWarnings } from './stylable-mixins';
 export {
     OnUrlCallback,
     UrlNode,
@@ -125,7 +124,6 @@ export {
     ValueFormatter,
     evalDeclarationValue,
     functionWarnings,
-    processDeclarationValue,
     resolveArgumentsValue,
 } from './functions';
 export {
@@ -139,7 +137,6 @@ export {
     createCustomValue,
     getBoxValue,
     isCustomValue,
-    resolveCustomValues,
     stTypes,
     unbox,
 } from './custom-values';

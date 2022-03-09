@@ -380,7 +380,7 @@ describe(`features/css-class`, () => {
             // JS exports
             expect(exports.classes.before, `before JS export`).to.eql(`classes__before`);
             expect(exports.classes.after, `after JS export`).to.eql(`classes__after`);
-            expect(exports.classes.unused, `unused JS export`).to.eql(undefined);
+            expect(exports.classes.unused, `unused JS export`).to.eql(`classes__unused`);
         });
         it(`should handle unknown imported class`, () => {
             const { sheets } = testStylableCore({
@@ -586,7 +586,9 @@ describe(`features/css-class`, () => {
             expect(exports.classes.class, `class compose JS export`).to.eql(
                 `entry__class classes__imported`
             );
-            expect(exports.classes.imported, `no imported JS export`).to.eql(undefined);
+            expect(exports.classes.imported, `used only by extends JS export`).to.eql(
+                `classes__imported`
+            );
         });
         it(`should handle -st-extends of imported root `, () => {
             const { sheets } = testStylableCore({

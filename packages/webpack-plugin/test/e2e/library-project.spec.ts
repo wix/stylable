@@ -26,6 +26,6 @@ describe(`(${project})`, () => {
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
         new Function('self', projectRunner.getBuildAsset('main.js'))(global);
 
-        expect(Object.keys(global.Library)).to.eql(['Label', 'Button']);
+        expect(Object.keys(global.Library)).to.eql(['Button', 'Label']);
     });
 });
