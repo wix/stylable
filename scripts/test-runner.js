@@ -1,6 +1,8 @@
+//@ts-check
 const yargs = require('yargs');
 const { fork } = require('child_process');
 const { join, dirname } = require('path');
+const { once } = require('events');
 
 const integrationsList = [
     '*-plugin',
@@ -11,69 +13,76 @@ const integrationsList = [
     'experimental-loader',
 ];
 
-const {
-    all,
-    integrations,
-    corePackages,
-    packages,
-    glob,
-    timeout: timeoutOverride,
-} = yargs
-    .usage('$0 [options]')
-    .option('all', {
-        alias: 'a',
-        type: 'boolean',
-        describe: 'Run all tests',
-        default: true,
-    })
-    .option('integrations', {
-        alias: 'i',
-        type: 'boolean',
-        describe: 'Run Stylable integrations tests',
-    })
-    .option('corePackages', {
-        alias: 'cp',
-        type: 'boolean',
-        describe: 'Run Stylable core packages tests',
-    })
-    .option('packages', {
-        alias: 'p',
-        type: 'array',
-        describe: 'Run tests for specific packages',
-    })
-    .option('glob', {
-        type: 'string',
-        describe: 'glob to test files',
-    })
-    .options('timeout', {
-        type: 'number',
-        describe: 'timeout for each test',
-    })
-    .alias('h', 'help')
-    .help()
-    .strict()
-    .wrap(yargs.terminalWidth())
-    .parse();
-
-let {
-    glob: globPath,
-    parallel = true,
-    timeout = 10000,
-} = createRunParameters({ all, corePackages, glob, integrations, packages });
-
-timeout = timeoutOverride !== null && timeoutOverride !== undefined ? timeoutOverride : timeout;
-
-fork(
-    getMochaRunner(),
-    [
-        globPath,
-        ...(parallel !== undefined ? ['--parallel'] : []),
-        ...(timeout !== undefined ? ['--timeout', timeout] : []),
-    ],
-    { stdio: 'inherit' }
-).on('exit', (code) => {
-    process.exit(code);
+run().catch((error) => {
+    console.error(error);
+    process.exit(1);
 });
+
+async function run() {
+    const {
+        all,
+        integrations,
+        corePackages,
+        packages,
+        glob,
+        timeout: timeoutOverride,
+    } = await yargs
+        .usage('$0 [options]')
+        .option('all', {
+            alias: 'a',
+            type: 'boolean',
+            describe: 'Run all tests',
+            default: true,
+        })
+        .option('integrations', {
+            alias: 'i',
+            type: 'boolean',
+            describe: 'Run Stylable integrations tests',
+        })
+        .option('corePackages', {
+            alias: 'cp',
+            type: 'boolean',
+            describe: 'Run Stylable core packages tests',
+        })
+        .option('packages', {
+            alias: 'p',
+            type: 'array',
+            describe: 'Run tests for specific packages',
+        })
+        .option('glob', {
+            type: 'string',
+            describe: 'glob to test files',
+        })
+        .options('timeout', {
+            type: 'number',
+            describe: 'timeout for each test',
+        })
+        .alias('h', 'help')
+        .help()
+        .strict()
+        .wrap(yargs.terminalWidth())
+        .parse();
+
+    let {
+        glob: globPath,
+        parallel = true,
+        timeout = 10000,
+    } = createRunParameters({ all, corePackages, glob, integrations, packages });
+
+    timeout = timeoutOverride !== null && timeoutOverride !== undefined ? timeoutOverride : timeout;
+
+    const childProcess = fork(
+        getMochaRunner(),
+        [
+            globPath,
+            ...(parallel !== undefined ? ['--parallel'] : []),
+            ...(timeout !== undefined ? ['--timeout', String(timeout)] : []),
+        ],
+        { stdio: 'inherit' }
+    );
+
+    return once(childProcess, 'exit');
+}
 
 function createRunParameters({ integrations, packages, corePackages, all, glob }) {
     /**
