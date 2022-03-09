@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@stylable/core": "^4.10.4",
-    "@tokey/css-selector-parser": "^0.5.1",
+    "@tokey/css-selector-parser": "^0.6.0",
     "csso": "^5.0.2",
-    "postcss": "^8.4.7"
+    "postcss": "^8.4.8"
   },
   "files": [
     "dist",

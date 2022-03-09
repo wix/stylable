@@ -6,12 +6,18 @@ import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
-import type { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
+import {
+    CSSResolve,
+    JSResolve,
+    StylableResolver,
+    createSymbolResolverWithCache,
+    MetaResolvedSymbols,
+} from './stylable-resolver';
 import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
 import type { ParsedValue } from './types';
 import type { FeatureTransformContext } from './features/feature';
-import { CSSCustomProperty, STSymbol, STVar } from './features';
+import { CSSCustomProperty, STVar } from './features';
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
@@ -44,6 +50,7 @@ export class StylableEvaluator {
     ) {
         return processDeclarationValue(
             context.resolver,
+            context.getResolvedSymbols,
             data.value,
             data.meta,
             data.node,
@@ -96,6 +103,7 @@ export function resolveArgumentsValue(
 
 export function processDeclarationValue(
     resolver: StylableResolver,
+    getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols,
     value: string,
     meta: StylableMeta,
     node?: postcss.Node,
@@ -107,118 +115,109 @@ export function processDeclarationValue(
     args: string[] = []
 ): EvalValueResult {
     const evaluator = new StylableEvaluator({ tsVarOverride: variableOverride });
-    const customValues = resolveCustomValues(meta, resolver);
+    const resolvedSymbols = getResolvedSymbols(meta);
+    const customValues = resolveCustomValues(resolvedSymbols);
     const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;
-        switch (type) {
-            case 'function':
-                if (value === 'value') {
-                    STVar.hooks.transformValue({
-                        context: {
-                            meta,
-                            diagnostics,
-                            resolver,
-                            evaluator,
-                        },
-                        data: {
-                            value,
-                            passedThrough,
-                            node,
-                            valueHook,
-                            meta,
-                            tsVarOverride: variableOverride,
-                            cssVarsMapping,
-                            args,
-                        },
-                        node: parsedNode,
-                    });
-                } else if (value === '') {
-                    parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                } else if (customValues[value]) {
-                    // no op resolved at the bottom
-                } else if (value === 'url') {
-                    // postcss-value-parser treats url differently:
-                    // https://github.com/TrySound/postcss-value-parser/issues/34
-
-                    const url = parsedNode.nodes[0];
-                    if (
-                        (url.type === 'word' || url.type === 'string') &&
-                        url.value.startsWith('~')
-                    ) {
-                        const sourceDir = dirname(meta.source);
-                        url.value = assureRelativeUrlPrefix(
-                            relative(
-                                sourceDir,
-                                resolver.resolvePath(sourceDir, url.value.slice(1))
-                            ).replace(/\\/gm, '/')
+        if (type === `function`) {
+            if (value === 'value') {
+                STVar.hooks.transformValue({
+                    context: {
+                        meta,
+                        diagnostics,
+                        resolver,
+                        evaluator,
+                        getResolvedSymbols,
+                    },
+                    data: {
+                        value,
+                        passedThrough,
+                        node,
+                        valueHook,
+                        meta,
+                        tsVarOverride: variableOverride,
+                        cssVarsMapping,
+                        args,
+                    },
+                    node: parsedNode,
+                });
+            } else if (value === '') {
+                parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+            } else if (customValues[value]) {
+                // no op resolved at the bottom
+            } else if (value === 'url') {
+                // postcss-value-parser treats url differently:
+                // https://github.com/TrySound/postcss-value-parser/issues/34
+                const url = parsedNode.nodes[0];
+                if ((url.type === 'word' || url.type === 'string') && url.value.startsWith('~')) {
+                    const sourceDir = dirname(meta.source);
+                    url.value = assureRelativeUrlPrefix(
+                        relative(
+                            sourceDir,
+                            resolver.resolvePath(sourceDir, url.value.slice(1))
+                        ).replace(/\\/gm, '/')
+                    );
+                }
+            } else if (value === 'format') {
+                // preserve native format function quotation
+                parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
+            } else if (resolvedSymbols.js[value]) {
+                const formatter = resolvedSymbols.js[value];
+                const formatterArgs = getFormatterArgs(parsedNode);
+                try {
+                    parsedNode.resolvedValue = formatter.symbol.apply(null, formatterArgs);
+                    if (valueHook && typeof parsedNode.resolvedValue === 'string') {
+                        parsedNode.resolvedValue = valueHook(
+                            parsedNode.resolvedValue,
+                            { name: parsedNode.value, args: formatterArgs },
+                            true,
+                            passedThrough
                         );
                     }
-                } else if (value === 'format') {
-                    // preserve native format function quotation
-                    parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
-                } else {
-                    const formatter = resolver.deepResolve(STSymbol.get(meta, value));
-                    if (formatter && formatter._kind === 'js') {
-                        const formatterArgs = getFormatterArgs(parsedNode);
-                        try {
-                            parsedNode.resolvedValue = formatter.symbol.apply(null, formatterArgs);
-                            if (valueHook && typeof parsedNode.resolvedValue === 'string') {
-                                parsedNode.resolvedValue = valueHook(
-                                    parsedNode.resolvedValue,
-                                    { name: parsedNode.value, args: formatterArgs },
-                                    true,
-                                    passedThrough
-                                );
-                            }
-                        } catch (error) {
-                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                            if (diagnostics && node) {
-                                diagnostics.warn(
-                                    node,
-                                    functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
-                                        parsedNode.resolvedValue,
-                                        (error as Error)?.message
-                                    ),
-                                    { word: (node as postcss.Declaration).value }
-                                );
-                            }
-                        }
-                    } else if (value === 'var') {
-                        CSSCustomProperty.hooks.transformValue({
-                            context: {
-                                meta,
-                                diagnostics,
-                                resolver,
-                                evaluator,
-                            },
-                            data: {
-                                value,
-                                passedThrough,
-                                node,
-                                valueHook,
-                                meta,
-                                tsVarOverride: variableOverride,
-                                cssVarsMapping,
-                                args,
-                            },
-                            node: parsedNode,
-                        });
-                    } else if (isCssNativeFunction(value)) {
-                        parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                    } else if (diagnostics && node) {
-                        parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                        diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
-                            word: value,
-                        });
+                } catch (error) {
+                    parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+                    if (diagnostics && node) {
+                        diagnostics.warn(
+                            node,
+                            functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
+                                parsedNode.resolvedValue,
+                                (error as Error)?.message
+                            ),
+                            { word: (node as postcss.Declaration).value }
+                        );
                     }
                 }
-                break;
-            default: {
-                return postcssValueParser.stringify(parsedNode as postcssValueParser.Node);
+            } else if (value === 'var') {
+                CSSCustomProperty.hooks.transformValue({
+                    context: {
+                        meta,
+                        diagnostics,
+                        resolver,
+                        evaluator,
+                        getResolvedSymbols,
+                    },
+                    data: {
+                        value,
+                        passedThrough,
+                        node,
+                        valueHook,
+                        meta,
+                        tsVarOverride: variableOverride,
+                        cssVarsMapping,
+                        args,
+                    },
+                    node: parsedNode,
+                });
+            } else if (isCssNativeFunction(value)) {
+                parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+            } else if (node) {
+                parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+                diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
+                    word: value,
+                });
             }
         }
-        return;
     }, true);
 
     let outputValue = '';
@@ -256,10 +255,15 @@ export function evalDeclarationValue(
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
-    args: string[] = []
+    args: string[] = [],
+    getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols = createSymbolResolverWithCache(
+        resolver,
+        diagnostics || new Diagnostics()
+    )
 ): string {
     return processDeclarationValue(
         resolver,
+        getResolvedSymbols,
         value,
         meta,
         node,
