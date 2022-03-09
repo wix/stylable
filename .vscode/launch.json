@@ -26,28 +26,6 @@
         "FILE": "${file}",
         "CLI_WATCH_TEST_TIMEOUT": "999999"
       }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Plugin Mocha Tests",
-      "preLaunchTask": "npm: build",
-      "runtimeArgs": ["--enable-source-maps"],
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/scripts/test-runner.js",
-      "args": ["--packages", "webpack-plugin", "--timeout", "999999"],
-      "internalConsoleOptions": "openOnSessionStart"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "runtimeArgs": ["--enable-source-maps"],
-      "name": "CLI Mocha Tests",
-      "preLaunchTask": "npm: build",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/scripts/test-runner.js",
-      "args": ["--packages", "cli", "--timeout", "999999"],
-      "internalConsoleOptions": "openOnSessionStart"
     }
   ]
 }
