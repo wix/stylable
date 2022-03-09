@@ -8,6 +8,7 @@ const integrationsList = [
     'eslint-plugin-stylable',
     'webpack-extensions',
     'uni-driver',
+    'experimental-loader',
 ];
 
 const {
