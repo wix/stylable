@@ -109,7 +109,8 @@ export function stylableRollupPlugin({
                 (dep) => {
                     this.addWatchFile(dep.source);
                 },
-                stylable.createResolver()
+                stylable.createResolver(),
+                (resolvedPath) => this.addWatchFile(resolvedPath)
             );
 
             emitDiagnostics(

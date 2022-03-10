@@ -83,7 +83,8 @@ const stylableLoader: LoaderDefinition = function (content) {
     visitMetaCSSDependenciesBFS(
         meta,
         ({ source }) => this.addDependency(source),
-        stylable.resolver
+        stylable.resolver,
+        (resolvedPath) => this.addDependency(resolvedPath)
     );
 
     addBuildInfo(this, meta.namespace);

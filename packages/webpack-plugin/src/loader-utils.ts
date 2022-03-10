@@ -37,7 +37,8 @@ export function getImports(
         ({ source }) => {
             buildDependencies.push(source);
         },
-        stylable.resolver
+        stylable.resolver,
+        (resolvedPath) => buildDependencies.push(resolvedPath)
     );
 
     /**
