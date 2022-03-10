@@ -23,7 +23,7 @@ describe('StylableRollupPlugin', function () {
             'index.st.css', // stc output
         ]);
 
-        // Simaulte error by using value function without a symbol.
+        // Simulate error by using value function without a symbol.
         await runner.act(
             async () => {
                 await nodeFs.promises.writeFile(
