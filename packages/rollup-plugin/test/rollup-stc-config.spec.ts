@@ -25,23 +25,21 @@ describe('StylableRollupPlugin', function () {
 
         // Simulate error by using value function without a symbol.
         await runner.act(
-            async () => {
-                await nodeFs.promises.writeFile(
+            () =>
+                nodeFs.promises.writeFile(
                     nodeFs.join(runner.projectDir, 'src', 'index.st.css'),
                     '.root { color: value(); }'
-                );
-            },
+                ),
             { strict: false }
         );
 
         // Revert error to normal.
-        await runner.act(async () => {
-            await nodeFs.promises.writeFile(
+        await runner.act(() =>
+            nodeFs.promises.writeFile(
                 nodeFs.join(runner.projectDir, 'src', 'index.st.css'),
                 '.root {color: green;}'
-            );
-        });
-
+            )
+        );
         const outputFiles = runner.getOutputFiles();
         expect(outputFiles['index.st.css'], '"stc" watch has been triggered').to.eql(
             '.root {color: green;}'

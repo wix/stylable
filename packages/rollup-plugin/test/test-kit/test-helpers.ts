@@ -8,10 +8,7 @@ export interface ActAndWaitOptions {
     strict?: boolean;
 }
 
-export function waitForWatcherFinish(
-    watcher: RollupWatcher,
-    { strict = true }: ActAndWaitOptions = {}
-) {
+export function waitForWatcherFinish(watcher: RollupWatcher) {
     const current = deferred<RollupWatcherEvent & { code: 'BUNDLE_END' }>();
 
     let bundleEnd: RollupWatcherEvent & { code: 'BUNDLE_END' };
@@ -24,13 +21,9 @@ export function waitForWatcherFinish(
             current.resolve(bundleEnd);
         }
         if (e.code === 'ERROR') {
-            if (strict) {
-                console.log('stop');
-                watcher.off('event', handler);
-                current.reject(e);
-            } else {
-                console.log(`Rollup Error emitted:\n${e.error}`);
-            }
+            watcher.off('event', handler);
+            console.log(`Rollup Error emitted:\n${e.error}`);
+            current.reject(e);
         }
     };
     watcher.on('event', handler);
@@ -43,9 +36,16 @@ export async function actAndWaitForBuild(
     action: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void,
     options: ActAndWaitOptions = {}
 ) {
-    const done = waitForWatcherFinish(watcher, options);
+    const done = waitForWatcherFinish(watcher);
     await action(done);
-    return await done;
+    try {
+        return await done;
+    } catch (e) {
+        if (options.strict) {
+            throw e;
+        }
+        return;
+    }
 }
 export function createTempProject(projectToCopy: string, nodeModulesToLink: string, entry: string) {
     const tempDir = createTempDirectorySync('local-rollup-test');
