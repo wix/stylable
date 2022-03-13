@@ -95,6 +95,7 @@ describe(`features/st-import`, () => {
             type: 'named',
             name: `c`,
         });
+        expect(meta.getSymbol(`c`), `mapped origin`).to.equal(undefined);
     });
     it(`should only be defined at top level`, () => {
         const { sheets } = testStylableCore(`
@@ -126,7 +127,7 @@ describe(`features/st-import`, () => {
 
         shouldReportNoDiagnostics(sheets[`/entry.st.css`].meta);
     });
-    it(`should warn on default lowercase default import from css file`, () => {
+    it(`should warn on lowercase default import from css file`, () => {
         const { sheets } = testStylableCore(`
             /* @analyze-warn word(sheetError) ${STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
             @st-import sheetError from "./a.st.css";
@@ -372,7 +373,7 @@ describe(`features/st-import`, () => {
 
             shouldReportNoDiagnostics(sheets[`/entry.st.css`].meta);
         });
-        it(`should warn on default lowercase default import from css file`, () => {
+        it(`should warn on lowercase default import from css file`, () => {
             const { sheets } = testStylableCore(`
                 :import{
                     -st-from:"./a.st.css";

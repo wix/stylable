@@ -78,7 +78,7 @@ describe(`features/css-type`, () => {
         expect(meta.diagnostics.reports.length, `only unscoped diagnostic`).to.equal(1);
     });
     describe(`st-import`, () => {
-        it(`should resolve imported root as element type`, () => {
+        it(`should resolve imported root (default) as element type`, () => {
             const { sheets } = testStylableCore({
                 '/before.st.css': ``,
                 '/after.st.css': ``,
@@ -172,6 +172,7 @@ describe(`features/css-type`, () => {
             });
         });
         it(`should report unscoped imported element type`, () => {
+            // Todo: consider dropping support for class usage as an element type
             testStylableCore({
                 '/classes.st.css': `
                     .importedPart {}
