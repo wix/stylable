@@ -49,6 +49,7 @@ export function rollupRunner({
         plugins: [
             nodeResolve(),
             stylableRollupPlugin({
+                projectRoot: context,
                 inlineAssets: false,
                 resolveNamespace(ns) {
                     return ns;
