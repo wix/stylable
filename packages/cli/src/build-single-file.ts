@@ -285,11 +285,9 @@ export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
     return diagnostics.map(({ message, node, options, type }) => {
         const err = node.error(message, options);
         const diagnostic: Diagnostic = {
-            type: type,
+            type,
             message: `${message}\n${err.showSourceCode(true)}`,
-            offset: node.source?.start?.offset,
-            line: node.source?.start?.line,
-            column: node.source?.start?.column,
+            ...(node.source?.start && {}),
         };
 
         return diagnostic;
