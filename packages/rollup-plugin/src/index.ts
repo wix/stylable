@@ -41,6 +41,7 @@ export interface StylableRollupPluginOptions {
      * string - it will use the provided string as the "stcConfig" file path.
      */
     stcConfig?: boolean | string;
+    projectRoot?: string;
 }
 
 const requireModuleCache = new Set<string>();
@@ -66,6 +67,7 @@ export function stylableRollupPlugin({
     mode = getDefaultMode(),
     resolveNamespace = resolveNamespaceNode,
     stcConfig,
+    projectRoot = process.cwd(),
 }: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
@@ -75,24 +77,16 @@ export function stylableRollupPlugin({
 
     return {
         name: 'Stylable',
-
-        async buildStart(rollupOptions) {
-            extracted ||= new Map();
-            emittedAssets ||= new Map();
-            /**
-             * Sometimes rollupOptions.context is the string 'undefined'.
-             * So we would fallback to the process.cwd()
-             */
-            const context =
-                rollupOptions.context === 'undefined' ? process.cwd() : rollupOptions.context;
-
+        async buildStart() {
+            extracted = extracted || new Map();
+            emittedAssets = emittedAssets || new Map();
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
             } else {
                 stylable = Stylable.create({
                     fileSystem: fs,
-                    projectRoot: context,
+                    projectRoot,
                     mode,
                     resolveNamespace,
                     optimizer: new StylableOptimizer(),
@@ -104,7 +98,7 @@ export function stylableRollupPlugin({
             if (stcConfig) {
                 if (!stcBuilder) {
                     const configuration = resolveStcConfig(
-                        context,
+                        projectRoot,
                         typeof stcConfig === 'string' ? stcConfig : undefined
                     );
 
@@ -117,7 +111,7 @@ export function stylableRollupPlugin({
                     }
 
                     stcBuilder = STCBuilder.create({
-                        rootDir: context,
+                        rootDir: projectRoot,
                         configFilePath: configuration.path,
                         watchMode: this.meta.watchMode,
                     });
