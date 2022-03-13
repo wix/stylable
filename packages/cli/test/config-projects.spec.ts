@@ -420,7 +420,7 @@ describe('Stylable CLI config multiple projects', function () {
     });
 
     describe('Projects validation', () => {
-        it.only('should dedup and sort diagnostics across build processes', () => {
+        it('should dedup and sort diagnostics across build processes', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': JSON.stringify({
                     name: 'workspace',
