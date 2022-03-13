@@ -55,13 +55,21 @@ export class STCBuilder {
             log: this.log,
             hooks: {
                 preReport: (diagnosticsMessages) => {
+                    /**
+                     * Update the diagnostics messages every `build` execution.
+                     */
                     this.diagnosticsMessages = diagnosticsMessages;
                 },
             },
         });
     }
 
-    public handleWatchedFiles = async (modifiedFiles: Iterable<string>) => {
+    /**
+     * Executes an incremental build of modified files.
+     * Stylable saves information about the files that were built in each execution, then this can be used to rebuild only the relevant files.
+     * @param modifiedFiles {Iterable<string>} list of absolute file path that have been modified since the last build execution.
+     */
+    public rebuildModifiedFiles = async (modifiedFiles: Iterable<string>) => {
         if (!this.watchHandler) {
             throw createSTCBuilderError(diagnostics.INVALID_WATCH_HANDLER('handleWatchedFiles'));
         }
@@ -75,6 +83,9 @@ export class STCBuilder {
         }
     };
 
+    /**
+     * Executes a fresh build of the Stylable project.
+     */
     public build = async () => {
         const buildOutput = await buildStylable(this.rootDir, {
             diagnosticsManager: this.diagnosticsManager,

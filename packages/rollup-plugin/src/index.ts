@@ -138,7 +138,7 @@ export function stylableRollupPlugin({
         },
         async watchChange(id) {
             if (stcBuilder) {
-                await stcBuilder.handleWatchedFiles([id]);
+                await stcBuilder.rebuildModifiedFiles([id]);
 
                 reportStcDiagnostics(
                     {

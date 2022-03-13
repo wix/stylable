@@ -208,7 +208,7 @@ export class StylableWebpackPlugin {
             { name: StylableWebpackPlugin.name, stage: 0 },
             async () => {
                 if (this.stcBuilder?.watchHandler) {
-                    await this.stcBuilder.handleWatchedFiles([
+                    await this.stcBuilder.rebuildModifiedFiles([
                         ...(compiler.modifiedFiles ?? []),
                         ...(compiler.removedFiles ?? []),
                     ]);
