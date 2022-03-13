@@ -36,6 +36,7 @@ interface StylableRollupPluginOptions {
     fileName?: string;
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
     resolveNamespace?: (namespace: string, source: string) => string;
+    projectRoot?: string; // default is process.cwd()
 }
 ```
 

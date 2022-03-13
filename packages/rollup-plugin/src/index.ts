@@ -32,6 +32,7 @@ export interface StylableRollupPluginOptions {
     mode?: 'development' | 'production';
     diagnosticsMode?: DiagnosticsMode;
     resolveNamespace?: typeof resolveNamespaceNode;
+    projectRoot?: string;
 }
 
 const requireModuleCache = new Set<string>();
@@ -56,6 +57,7 @@ export function stylableRollupPlugin({
     diagnosticsMode = 'strict',
     mode = getDefaultMode(),
     resolveNamespace = resolveNamespaceNode,
+    projectRoot = process.cwd(),
 }: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
@@ -64,7 +66,7 @@ export function stylableRollupPlugin({
 
     return {
         name: 'Stylable',
-        buildStart(rollupOptions) {
+        buildStart() {
             extracted = extracted || new Map();
             emittedAssets = emittedAssets || new Map();
             if (stylable) {
@@ -73,7 +75,7 @@ export function stylableRollupPlugin({
             } else {
                 stylable = Stylable.create({
                     fileSystem: fs,
-                    projectRoot: rollupOptions.context,
+                    projectRoot,
                     mode,
                     resolveNamespace,
                     optimizer: new StylableOptimizer(),
