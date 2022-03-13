@@ -18,6 +18,15 @@ export interface STCBuilderOptions {
     watchMode?: boolean;
 }
 
+const diagnostics = {
+    INVALID_WATCH_HANDLER(method: string) {
+        return `"${method}" called before the watchHandler is set, did you run build()?`;
+    },
+    INVALID_PROJECTS_SOURCES() {
+        return 'Can not get projects sources, did you run build()?';
+    },
+};
+
 export class STCBuilder {
     private diagnosticsManager: DiagnosticsManager;
     public watchHandler: WatchHandler | undefined;
@@ -54,9 +63,7 @@ export class STCBuilder {
 
     public handleWatchedFiles = async (modifiedFiles: Iterable<string>) => {
         if (!this.watchHandler) {
-            throw new Error(
-                'Stylable Builder Error: handleWatchedFiles called before watchHandler is set, did you run build()?'
-            );
+            throw createSTCBuilderError(diagnostics.INVALID_WATCH_HANDLER('handleWatchedFiles'));
         }
 
         for (const filePath of modifiedFiles) {
@@ -81,16 +88,14 @@ export class STCBuilder {
         this.projects = buildOutput.projects;
     };
 
-    public getProjectsSources = (projects = this.projects) => {
-        if (!projects) {
-            throw new Error(
-                'Stylable Builder Error: Can not get projects sources when projects is undefined, did you run build()?'
-            );
+    public getProjectsSources = () => {
+        if (!this.projects) {
+            throw createSTCBuilderError(diagnostics.INVALID_PROJECTS_SOURCES());
         }
 
         const sourcesPaths = new Set<string>();
 
-        for (const { projectRoot, options } of projects) {
+        for (const { projectRoot, options } of this.projects) {
             for (const optionEntity of options) {
                 sourcesPaths.add(this.fs.join(projectRoot, optionEntity.srcDir));
             }
@@ -109,4 +114,8 @@ function createNoopLogger() {
             return;
         }
     );
+}
+
+function createSTCBuilderError(message: string) {
+    return new Error(`Stylable Builder Error: ${message}`);
 }

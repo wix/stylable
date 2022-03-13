@@ -21,7 +21,6 @@ import {
     generateCssString,
     generateStylableModuleCode,
     getDefaultMode,
-    registerStcProjectsToWatcher,
     reportStcDiagnostics,
 } from './plugin-utils';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
@@ -96,7 +95,11 @@ export function stylableRollupPlugin({
             }
 
             if (stcConfig) {
-                if (!stcBuilder) {
+                if (stcBuilder) {
+                    for (const sourceDirectory of stcBuilder.getProjectsSources()) {
+                        this.addWatchFile(sourceDirectory);
+                    }
+                } else {
                     const configuration = resolveStcConfig(
                         projectRoot,
                         typeof stcConfig === 'string' ? stcConfig : undefined
@@ -118,7 +121,9 @@ export function stylableRollupPlugin({
 
                     await stcBuilder.build();
 
-                    registerStcProjectsToWatcher(this, stcBuilder);
+                    for (const sourceDirectory of stcBuilder.getProjectsSources()) {
+                        this.addWatchFile(sourceDirectory);
+                    }
 
                     reportStcDiagnostics(
                         {
@@ -128,8 +133,6 @@ export function stylableRollupPlugin({
                         stcBuilder,
                         diagnosticsMode
                     );
-                } else {
-                    registerStcProjectsToWatcher(this, stcBuilder);
                 }
             }
         },

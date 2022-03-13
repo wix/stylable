@@ -421,7 +421,7 @@ export class StylableWebpackPlugin {
 
                     loaderContext.onLoaderFinished = () => {
                         /**
-                         * If STC Builder is runnning in background we need to add the relavent files to webpack file dependencies watcher.
+                         * If STC Builder is running in background we need to add the relevant files to webpack file dependencies watcher.
                          */
                         this.handleStcFiles(module, compilation, loaderContext);
                     };
