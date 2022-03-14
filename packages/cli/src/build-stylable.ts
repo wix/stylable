@@ -22,7 +22,9 @@ export interface BuildStylableContext
     defaultOptions?: BuildOptions;
     overrideBuildOptions?: Partial<BuildOptions>;
     configFilePath?: string;
-    watchMode?: boolean;
+    watchOptions?: {
+        lazy?: boolean;
+    };
 }
 
 export async function buildStylable(
@@ -32,8 +34,7 @@ export async function buildStylable(
         overrideBuildOptions = {},
         fs: fileSystem = fs,
         log = createDefaultLogger(),
-        watch: runWatch = false,
-        watchMode: watch = runWatch,
+        watch = false,
         resolverCache = new Map(),
         fileProcessorCache = {},
         diagnosticsManager = new DiagnosticsManager({
@@ -50,6 +51,7 @@ export async function buildStylable(
         requireModule = require,
         resolveNamespace = requireModule(NAMESPACE_RESOLVER_MODULE_REQUEST).resolveNamespace,
         configFilePath,
+        watchOptions = {},
     }: BuildStylableContext = {}
 ) {
     const projects = await projectsConfig(
@@ -106,7 +108,7 @@ export async function buildStylable(
 
     diagnosticsManager.report();
 
-    if (runWatch) {
+    if (watch && !watchOptions.lazy) {
         watchHandler.start();
     }
 

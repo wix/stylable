@@ -93,7 +93,10 @@ export class STCBuilder {
             diagnosticsManager: this.diagnosticsManager,
             log: this.log,
             configFilePath: this.configFilePath,
-            watchMode: this.watchMode,
+            watch: this.watchMode,
+            watchOptions: {
+                lazy: true,
+            },
         });
 
         this.watchHandler = buildOutput.watchHandler;
