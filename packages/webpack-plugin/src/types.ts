@@ -30,7 +30,6 @@ export interface StylableLoaderContext extends LoaderContext<{}> {
     target: 'oldie' | 'modern';
     assetFilter: (url: string, context: string) => boolean;
     flagStylableModule: (loaderData: LoaderData) => void;
-    onLoaderFinished: () => void;
 }
 
 /* webpack missing types */

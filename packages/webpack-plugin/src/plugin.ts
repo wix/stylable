@@ -49,7 +49,6 @@ import type {
 } from './types';
 import { parse } from 'postcss';
 import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
-import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
 type OptimizeOptions = OptimizeConfig & {
@@ -218,7 +217,7 @@ export class StylableWebpackPlugin {
             /**
              * Register STC projects directories as dependencies
              */
-            if (this.stcBuilder?.projects) {
+            if (this.stcBuilder) {
                 compilation.contextDependencies.addAll(this.stcBuilder.getProjectsSources());
             }
         });
@@ -413,13 +412,35 @@ export class StylableWebpackPlugin {
                         module.addDependency(
                             new this.entities.StylableRuntimeDependency(stylableBuildMeta)
                         );
-                    };
 
-                    loaderContext.onLoaderFinished = () => {
                         /**
-                         * If STC Builder is running in background we need to add the relevant files to webpack file dependencies watcher.
+                         * If STC Builder is running in background we need to add the relevant files to webpack file dependencies watcher,
+                         * and emit diagnostics from the sources and not from the output.
                          */
-                        this.handleStcFiles(module, compilation, loaderContext);
+                        const sources = this.stcBuilder?.getSourcesFiles(module.resource);
+
+                        if (sources) {
+                            /**
+                             * Remove output file diagnostics only if has source files
+                             */
+                            module.clearWarningsAndErrors();
+
+                            for (const sourceFilePath of sources) {
+                                /**
+                                 * Register the source file as a dependency
+                                 */
+                                compilation.fileDependencies.add(sourceFilePath);
+
+                                /**
+                                 * Add source file diagnostics to the output file module (more accurate diagnostic)
+                                 */
+                                this.stcBuilder!.reportDiagnostic(
+                                    sourceFilePath,
+                                    loaderContext,
+                                    this.options.diagnosticsMode
+                                );
+                            }
+                        }
                     };
                 }
             }
@@ -541,51 +562,6 @@ export class StylableWebpackPlugin {
                 }
             }
         });
-    }
-    private handleStcFiles(
-        module: NormalModule,
-        compilation: Compilation,
-        loaderContext: StylableLoaderContext
-    ) {
-        if (!this.stcBuilder?.outputFiles) {
-            return;
-        }
-
-        const sources = this.stcBuilder.outputFiles.get(module.resource);
-
-        if (sources) {
-            /**
-             * Remove output file diagnostics only if has source files
-             */
-            module.clearWarningsAndErrors();
-
-            for (const sourceFilePath of sources) {
-                /**
-                 * Register the source file as a dependency
-                 */
-                compilation.fileDependencies.add(sourceFilePath);
-
-                const diagnostics = this.stcBuilder.diagnosticsMessages.get(sourceFilePath);
-
-                if (diagnostics) {
-                    for (const diagnostic of diagnostics) {
-                        /**
-                         * Add source file diagnostic to the output file module (more accurate diagnostic)
-                         */
-                        reportDiagnostic(
-                            loaderContext,
-                            this.options.diagnosticsMode,
-                            diagnostic,
-                            `${sourceFilePath}${
-                                diagnostic.line && diagnostic.column
-                                    ? `:${diagnostic.line}:${diagnostic.column}`
-                                    : ''
-                            }`
-                        );
-                    }
-                }
-            }
-        }
     }
 
     private chunksIntegration(

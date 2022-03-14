@@ -21,7 +21,6 @@ import {
     generateCssString,
     generateStylableModuleCode,
     getDefaultMode,
-    reportStcDiagnostics,
 } from './plugin-utils';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
@@ -125,12 +124,11 @@ export function stylableRollupPlugin({
                         this.addWatchFile(sourceDirectory);
                     }
 
-                    reportStcDiagnostics(
+                    stcBuilder.reportDiagnostics(
                         {
                             emitWarning: (e) => this.warn(e),
                             emitError: (e) => this.error(e),
                         },
-                        stcBuilder,
                         diagnosticsMode
                     );
                 }
@@ -138,14 +136,13 @@ export function stylableRollupPlugin({
         },
         async watchChange(id) {
             if (stcBuilder) {
-                await stcBuilder.rebuildModifiedFiles([id]);
+                await stcBuilder.rebuild([id]);
 
-                reportStcDiagnostics(
+                stcBuilder.reportDiagnostics(
                     {
                         emitWarning: (e) => this.warn(e),
                         emitError: (e) => this.error(e),
                     },
-                    stcBuilder,
                     diagnosticsMode
                 );
             }
@@ -181,9 +178,9 @@ export function stylableRollupPlugin({
             );
 
             /**
-             * Incase this Stylable module has sources the diagnostics will be emitted in `watchChange` hook.
+             * In case this Stylable module has sources the diagnostics will be emitted in `watchChange` hook.
              */
-            if (!stcBuilder?.outputFiles?.has(id)) {
+            if (!stcBuilder?.getSourcesFiles(id)) {
                 emitDiagnostics(
                     {
                         emitWarning: (e: Error) => this.warn(e),

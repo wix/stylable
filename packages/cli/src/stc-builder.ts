@@ -7,6 +7,8 @@ import type { IFileSystem } from '@file-services/types';
 import type { DiagnosticMessages } from './report-diagnostics';
 import type { STCProjects } from './types';
 import type { WatchHandler } from './watch-handler';
+import type { DiagnosticsMode, EmitDiagnosticsContext } from '@stylable/core';
+import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
 
 export type STCBuilderFileSystem = Pick<IFileSystem, 'existsSync' | 'realpathSync' | 'join'>;
 
@@ -22,17 +24,14 @@ const diagnostics = {
     INVALID_WATCH_HANDLER(method: string) {
         return `"${method}" called before the watchHandler is set, did you run build()?`;
     },
-    INVALID_PROJECTS_SOURCES() {
-        return 'Can not get projects sources, did you run build()?';
-    },
 };
 
 export class STCBuilder {
     private diagnosticsManager: DiagnosticsManager;
-    public watchHandler: WatchHandler | undefined;
-    public outputFiles: Map<string, Set<string>> | undefined;
-    public diagnosticsMessages: DiagnosticMessages = new Map();
-    public projects: STCProjects | undefined;
+    private outputFiles: Map<string, Set<string>> | undefined;
+    private diagnosticsMessages: DiagnosticMessages = new Map();
+    private watchHandler: WatchHandler | undefined;
+    private projects: STCProjects | undefined;
 
     static create({
         rootDir,
@@ -65,6 +64,14 @@ export class STCBuilder {
     }
 
     /**
+     * Provide the sources files for given output file path.
+     * @param outputFilePath {string}
+     */
+    public getSourcesFiles = (outputFilePath: string) => {
+        return this.outputFiles?.get(outputFilePath);
+    };
+
+    /**
      * Executes a rebuild. It will build all files if "build" was never called or perform a rebuild of provided modified files.
      * Stylable saves information about the files that were built in each execution, then this can be used to rebuild only the relevant files.
      *
@@ -75,24 +82,6 @@ export class STCBuilder {
             return this.rebuildModifiedFiles(modifiedFiles);
         } else {
             return this.build();
-        }
-    };
-
-    /**
-     * Executes an incremental build of modified files.
-     * @param modifiedFiles {Iterable<string>} list of absolute file path that have been modified since the last build execution.
-     */
-    private rebuildModifiedFiles = async (modifiedFiles: Iterable<string>) => {
-        if (!this.watchHandler) {
-            throw createSTCBuilderError(diagnostics.INVALID_WATCH_HANDLER('handleWatchedFiles'));
-        }
-
-        for (const filePath of modifiedFiles) {
-            const event = createWatchEvent(
-                this.fs.existsSync(filePath) ? this.fs.realpathSync(filePath) : filePath
-            );
-
-            await this.watchHandler.listener(event);
         }
     };
 
@@ -112,12 +101,16 @@ export class STCBuilder {
         this.projects = buildOutput.projects;
     };
 
-    public getProjectsSources = () => {
-        if (!this.projects) {
-            throw createSTCBuilderError(diagnostics.INVALID_PROJECTS_SOURCES());
-        }
-
+    /**
+     * Returns the absolute paths of the source directory that were resolved in the last build execution.
+     * @returns {Iterable<string>} list of absolute directory path of the Stylable projects.
+     */
+    public getProjectsSources = (): Iterable<string> => {
         const sourcesPaths = new Set<string>();
+
+        if (!this.projects) {
+            return sourcesPaths;
+        }
 
         for (const { projectRoot, options } of this.projects) {
             for (const optionEntity of options) {
@@ -126,6 +119,69 @@ export class STCBuilder {
         }
 
         return sourcesPaths;
+    };
+
+    /**
+     * Reports diagnostics messages aggregated from the last build execution.
+     * @param context {EmitDiagnosticsContext}
+     * @param diagnosticsMode {DiagnosticsMode}
+     */
+    public reportDiagnostics = (
+        context: EmitDiagnosticsContext,
+        diagnosticsMode: DiagnosticsMode
+    ) => {
+        for (const [filePath] of this.diagnosticsMessages.keys()) {
+            this.reportDiagnostic(filePath, context, diagnosticsMode);
+        }
+    };
+
+    /**
+     * Reports diagnostics messages for a given file from the last build execution.
+     * @param filePath {string}
+     * @param context {EmitDiagnosticsContext}
+     * @param diagnosticsMode {DiagnosticsMode}
+     */
+    public reportDiagnostic = (
+        filePath: string,
+        context: EmitDiagnosticsContext,
+        diagnosticsMode: DiagnosticsMode
+    ) => {
+        const diagnostics = this.diagnosticsMessages.get(filePath);
+
+        if (!diagnostics) {
+            return;
+        }
+
+        for (const diagnostic of diagnostics) {
+            reportDiagnostic(
+                context,
+                diagnosticsMode,
+                diagnostic,
+                `${filePath}${
+                    diagnostic.line && diagnostic.column
+                        ? `:${diagnostic.line}:${diagnostic.column}`
+                        : ''
+                }`
+            );
+        }
+    };
+
+    /**
+     * Executes an incremental build of modified files.
+     * @param modifiedFiles {Iterable<string>} list of absolute file path that have been modified since the last build execution.
+     */
+    private rebuildModifiedFiles = async (modifiedFiles: Iterable<string>) => {
+        if (!this.watchHandler) {
+            throw createSTCBuilderError(diagnostics.INVALID_WATCH_HANDLER('handleWatchedFiles'));
+        }
+
+        for (const filePath of modifiedFiles) {
+            const event = createWatchEvent(
+                this.fs.existsSync(filePath) ? this.fs.realpathSync(filePath) : filePath
+            );
+
+            await this.watchHandler.listener(event);
+        }
     };
 }
 
