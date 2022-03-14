@@ -13,10 +13,13 @@ const integrationsList = [
     'experimental-loader',
 ];
 
-run().catch((error) => {
-    console.error(error);
-    process.exit(1);
-});
+run()
+    .then(([exitCode]) => {
+        process.exitCode = exitCode;
+    })
+    .catch((error) => {
+        console.error(error);
+    });
 
 async function run() {
     const {
