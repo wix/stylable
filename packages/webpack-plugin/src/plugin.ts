@@ -206,15 +206,11 @@ export class StylableWebpackPlugin {
 
         compiler.hooks.watchRun.tapPromise(
             { name: StylableWebpackPlugin.name, stage: 0 },
-            async () => {
-                if (this.stcBuilder?.watchHandler) {
-                    await this.stcBuilder.rebuildModifiedFiles([
-                        ...(compiler.modifiedFiles ?? []),
-                        ...(compiler.removedFiles ?? []),
-                    ]);
-                } else {
-                    await this.stcBuilder?.build();
-                }
+            async (compiler) => {
+                await this.stcBuilder?.rebuild([
+                    ...(compiler.modifiedFiles ?? []),
+                    ...(compiler.removedFiles ?? []),
+                ]);
             }
         );
 

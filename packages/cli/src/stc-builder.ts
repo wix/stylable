@@ -65,11 +65,24 @@ export class STCBuilder {
     }
 
     /**
-     * Executes an incremental build of modified files.
+     * Executes a rebuild. It will build all files if "build" was never called or perform a rebuild of provided modified files.
      * Stylable saves information about the files that were built in each execution, then this can be used to rebuild only the relevant files.
+     *
      * @param modifiedFiles {Iterable<string>} list of absolute file path that have been modified since the last build execution.
      */
-    public rebuildModifiedFiles = async (modifiedFiles: Iterable<string>) => {
+    public rebuild = async (modifiedFiles: Iterable<string> = []): Promise<void> => {
+        if (this.watchHandler) {
+            return this.rebuildModifiedFiles(modifiedFiles);
+        } else {
+            return this.build();
+        }
+    };
+
+    /**
+     * Executes an incremental build of modified files.
+     * @param modifiedFiles {Iterable<string>} list of absolute file path that have been modified since the last build execution.
+     */
+    private rebuildModifiedFiles = async (modifiedFiles: Iterable<string>) => {
         if (!this.watchHandler) {
             throw createSTCBuilderError(diagnostics.INVALID_WATCH_HANDLER('handleWatchedFiles'));
         }
