@@ -100,13 +100,13 @@ export class DiagnosticsManager {
         this.options.hooks?.preReport?.(diagnosticMessages);
 
         if (diagnosticMessages.size) {
-            const hasFatalDiangostics = reportDiagnostics(
+            const hasFatalDiagnostics = reportDiagnostics(
                 this.log,
                 diagnosticMessages,
                 diagnosticMode
             );
 
-            this.options.hooks?.postReport?.(diagnosticMessages, hasFatalDiangostics);
+            this.options.hooks?.postReport?.(diagnosticMessages, hasFatalDiagnostics);
         }
 
         return Boolean(diagnosticMessages.size);
