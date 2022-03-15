@@ -18,6 +18,7 @@ run()
         process.exitCode = exitCode;
     })
     .catch((error) => {
+        process.exitCode = 1;
         console.error(error);
     });
 
