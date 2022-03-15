@@ -14,6 +14,7 @@ import {
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
 import { warnOnce } from './helpers/deprecation';
+import { STVar } from './features';
 
 export interface StylableConfig {
     projectRoot: string;
@@ -100,6 +101,9 @@ export class Stylable {
         });
 
         this.resolver = this.createResolver();
+    }
+    public getComputedStVars(meta: StylableMeta) {
+        return STVar.getComputed(this, meta);
     }
     public initCache({ filter }: InitCacheParams = {}) {
         if (filter && this.resolverCache) {

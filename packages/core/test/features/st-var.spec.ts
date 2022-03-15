@@ -1,9 +1,13 @@
+import chaiSubset from 'chai-subset';
 import { STSymbol, STVar } from '@stylable/core/dist/features';
+import { functionWarnings } from '@stylable/core/dist/functions';
 import { stTypes, box } from '@stylable/core/dist/custom-values';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
 import postcssValueParser from 'postcss-value-parser';
+
+chai.use(chaiSubset);
 
 describe(`features/st-var`, () => {
     it(`should process :vars definitions`, () => {
@@ -1255,4 +1259,89 @@ describe(`features/st-var`, () => {
         });
     });
     it.skip(`should provide valid var path introspection - value(var, ...path)`);
+
+    describe('introspection', () => {
+        it('should get computed st-vars', () => {
+            const { stylable, sheets } = testStylableCore(`
+            :vars {
+                a: red;
+                b: blue;
+                c: st-array(value(a), gold);
+            }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+            const computedVars = stylable.getComputedStVars(meta);
+
+            expect(Object.keys(computedVars)).to.eql(['a', 'b', 'c']);
+
+            expect(
+                Object.values(computedVars).every(
+                    ({ diagnostics }) => diagnostics.reports.length === 0
+                ),
+                'should not have any diagnostics'
+            ).to.be.true;
+
+            expect(computedVars.a.value).to.eql('red');
+            expect(computedVars.b.value).to.eql('blue');
+            expect(computedVars.c.value).to.eql(['red', 'gold']);
+        });
+
+        it('should get imported computed st-vars', () => {
+            const { stylable, sheets } = testStylableCore({
+                '/entry.st.css': `
+                @st-import [imported-var as imported] from './imported.st.css';
+
+                :vars {
+                    a: value(imported);
+                    b: st-map(a value(imported));
+                }
+                `,
+                'imported.st.css': `
+                :vars {
+                    imported-var: red;
+                }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+            const computedVars = stylable.getComputedStVars(meta);
+
+            expect(Object.keys(computedVars)).to.eql(['imported', 'a', 'b']);
+
+            expect(
+                Object.values(computedVars).every(
+                    ({ diagnostics }) => diagnostics.reports.length === 0
+                ),
+                'should not have any diagnostics'
+            ).to.be.true;
+
+            expect(computedVars['imported'].value).to.eql('red');
+            expect(computedVars.a.value).to.eql('red');
+            expect(computedVars.b.value).to.eql({ a: 'red' });
+        });
+
+        it('should emit diagnostics only on invalid computed st-vars', () => {
+            const { stylable, sheets } = testStylableCore(
+                `
+                :vars {
+                    validBefore: red;
+                    invalid: invalid-func(imported);
+                    validAfter: green;
+                }
+                `
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            const computedVars = stylable.getComputedStVars(meta);
+
+            expect(computedVars.validBefore.diagnostics.reports.length).to.eql(0);
+            expect(computedVars.validAfter.diagnostics.reports.length).to.eql(0);
+            expect(computedVars.invalid.diagnostics.reports[0]).to.containSubset({
+                message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
+                type: 'warning',
+            });
+        });
+    });
 });

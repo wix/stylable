@@ -3,8 +3,8 @@ import { deprecatedStFunctions } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
-import type { CSSResolve } from '../stylable-resolver';
-import type { EvalValueData, EvalValueResult } from '../functions';
+import { createSymbolResolverWithCache, CSSResolve } from '../stylable-resolver';
+import { EvalValueData, EvalValueResult, StylableEvaluator } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
 import { walkSelector } from '../helpers/selector';
 import { stringifyFunction, getStringValue, strategies } from '../helpers/value';
@@ -16,6 +16,8 @@ import { processDeclarationFunctions } from '../process-declaration-functions';
 import { Diagnostics } from '../diagnostics';
 import { unbox } from '../custom-values';
 import type { ParsedValue } from '../types';
+import type { Stylable } from '../stylable';
+import type { RuntimeStVar } from '../stylable-transformer';
 
 export interface VarSymbol {
     _kind: 'var';
@@ -25,6 +27,13 @@ export interface VarSymbol {
     valueType: string | null;
     node: postcss.Node;
 }
+
+export interface ComputedStVar {
+    value: RuntimeStVar;
+    diagnostics: Diagnostics;
+}
+
+export type ComputedStVars = Record<string, ComputedStVar>;
 
 export const diagnostics = {
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
@@ -326,4 +335,38 @@ function handleCyclicValues(
 
 function createUniqID(source: string, varName: string) {
     return `${source}: ${varName}`;
+}
+
+export function getComputed(stylable: Stylable, meta: StylableMeta) {
+    const diagnostics = new Diagnostics();
+    const evaluator = new StylableEvaluator();
+    const getResolvedSymbols = createSymbolResolverWithCache(stylable.resolver, diagnostics);
+    const { var: stVars } = getResolvedSymbols(meta);
+
+    const computed: ComputedStVars = {};
+
+    for (const [localName, resolvedVar] of Object.entries(stVars)) {
+        const variableDiagnostics = new Diagnostics();
+        const { outputValue, topLevelType } = evaluator.evaluateValue(
+            {
+                getResolvedSymbols,
+                resolver: stylable.resolver,
+                evaluator,
+                meta,
+                diagnostics: variableDiagnostics,
+            },
+            {
+                meta: resolvedVar.meta,
+                value: stripQuotation(resolvedVar.symbol.text),
+                node: resolvedVar.symbol.node,
+            }
+        );
+
+        computed[localName] = {
+            value: topLevelType ? unbox(topLevelType) : outputValue,
+            diagnostics: variableDiagnostics,
+        };
+    }
+
+    return computed;
 }
