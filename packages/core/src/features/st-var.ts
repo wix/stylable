@@ -31,6 +31,7 @@ export interface VarSymbol {
 export interface ComputedStVar {
     value: RuntimeStVar;
     diagnostics: Diagnostics;
+    rawValue?: any;
 }
 
 export type ComputedStVars = Record<string, ComputedStVar>;
@@ -341,7 +342,7 @@ export function getComputed(stylable: Stylable, meta: StylableMeta) {
     const diagnostics = new Diagnostics();
     const evaluator = new StylableEvaluator();
     const getResolvedSymbols = createSymbolResolverWithCache(stylable.resolver, diagnostics);
-    const { var: stVars } = getResolvedSymbols(meta);
+    const { var: stVars, customValues } = getResolvedSymbols(meta);
 
     const computed: ComputedStVars = {};
 
@@ -362,10 +363,20 @@ export function getComputed(stylable: Stylable, meta: StylableMeta) {
             }
         );
 
-        computed[localName] = {
-            value: topLevelType ? unbox(topLevelType) : outputValue,
+        const customValue = customValues[topLevelType?.type];
+        const computedStVar: ComputedStVar = {
+            /**
+             * In case of custom value that could be flat we will use the "outputValue" which is flat value.
+             */
+            value: topLevelType && !customValue?.flattenValue ? unbox(topLevelType) : outputValue,
             diagnostics: variableDiagnostics,
         };
+
+        if (customValue?.flattenValue) {
+            computedStVar.rawValue = unbox(topLevelType);
+        }
+
+        computed[localName] = computedStVar;
     }
 
     return computed;

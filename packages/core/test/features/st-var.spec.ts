@@ -1287,6 +1287,62 @@ describe(`features/st-var`, () => {
             expect(computedVars.c.value).to.eql(['red', 'gold']);
         });
 
+        it('should get computed custom value st-var', () => {
+            const { stylable, sheets } = testStylableCore({
+                '/entry.st.css': `
+                @st-import [stBorder] from './st-border.js';
+
+                :vars {
+                    border: stBorder(1px, solid, red);
+                }
+                `,
+                // Stylable custom value
+                '/st-border.js': `
+                    const { createCustomValue, CustomValueStrategy } = require("@stylable/core");
+                    exports.stBorder = createCustomValue({
+                        processArgs: (node, customTypes) => {
+                            return CustomValueStrategy.args(node, customTypes);
+                        },
+                        createValue: ([size, style, color]) => {
+                            return {
+                                size,
+                                style,
+                                color,
+                            };
+                        },
+                        getValue: (value, index) => {
+                            return value[index];
+                        },
+                        flattenValue: ({ value: { size, style, color } }) => {
+                            return {
+                                delimiter: ' ',
+                                parts: [size, style, color],
+                            };
+                        },
+                    })
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+            const computedVars = stylable.getComputedStVars(meta);
+
+            expect(Object.keys(computedVars)).to.eql(['border']);
+
+            expect(
+                Object.values(computedVars).every(
+                    ({ diagnostics }) => diagnostics.reports.length === 0
+                ),
+                'should not have any diagnostics'
+            ).to.be.true;
+
+            expect(computedVars.border.value).to.eql('1px solid red');
+            expect(computedVars.border.rawValue).to.eql({
+                color: 'red',
+                size: '1px',
+                style: 'solid',
+            });
+        });
+
         it('should get imported computed st-vars', () => {
             const { stylable, sheets } = testStylableCore({
                 '/entry.st.css': `
