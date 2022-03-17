@@ -22,6 +22,9 @@ describe(`(${project})`, () => {
     );
 
     it('reports warnings', () => {
+        // TESTING FAILURE
+        expect(1).to.eql(2);
+
         const warnings = projectRunner.getBuildWarningMessages();
         // const expected = [/could not resolve "unknown"/, /unknown var "xxx"/];
 
