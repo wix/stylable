@@ -7,6 +7,9 @@ import postcssValueParser from 'postcss-value-parser';
 
 describe(`features/st-var`, () => {
     it(`should process :vars definitions`, () => {
+        // TESTING FAILURE
+        expect(1).to.eql(2);
+
         const { sheets } = testStylableCore(`
             /* @transform-remove */
             :vars {
