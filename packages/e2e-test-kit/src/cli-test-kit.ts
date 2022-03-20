@@ -272,12 +272,6 @@ export interface ITempDirectory {
     remove(): Promise<void>;
 }
 
-/**
- * Create an empty, unique directory in the current OS's temp directory.
- *
- * @param prefix optional prefix to add to the random name. (default: "temp-")
- * @returns an absolute `path` and a `remove()` function.
- */
 export async function createTempDirectory(prefix = 'temp-'): Promise<ITempDirectory> {
     const path = join(rootTempDir, prefix + Math.random().toString(36).substring(2));
     await mkdir(path, { recursive: true });
