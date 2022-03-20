@@ -169,7 +169,8 @@ export class StylableTransformer {
         metaExports?: StylableExports,
         tsVarOverride?: Record<string, string>,
         path: string[] = [],
-        mixinTransform = false
+        mixinTransform = false,
+        mixinClassName = ``
     ) {
         this.evaluator.tsVarOverride = tsVarOverride;
         const transformContext = {
@@ -191,7 +192,7 @@ export class StylableTransformer {
             if (isChildOfAtRule(rule, 'keyframes')) {
                 return;
             }
-            rule.selector = this.scopeRule(meta, rule);
+            rule.selector = this.scopeRule(meta, rule, mixinClassName);
         });
 
         ast.walkAtRules((atRule) => {
@@ -302,8 +303,8 @@ export class StylableTransformer {
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
-    public scopeRule(meta: StylableMeta, rule: postcss.Rule): string {
-        return this.scopeSelector(meta, rule.selector, rule).selector;
+    public scopeRule(meta: StylableMeta, rule: postcss.Rule, mixinClassName = ``): string {
+        return this.scopeSelector(meta, rule.selector, rule, mixinClassName).selector;
     }
     public scope(name: string, ns: string, delimiter: string = this.delimiter) {
         return namespace(name, ns, delimiter);
@@ -311,7 +312,8 @@ export class StylableTransformer {
     public scopeSelector(
         originMeta: StylableMeta,
         selector: string,
-        rule?: postcss.Rule
+        rule?: postcss.Rule,
+        mixinClassName?: string
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
         const context = new ScopeContext(
             originMeta,
@@ -319,6 +321,9 @@ export class StylableTransformer {
             parseSelectorWithCache(selector, { clone: true }),
             rule || postcss.rule({ selector })
         );
+        if (mixinClassName) {
+            context.mixinClassName = mixinClassName;
+        }
         const targetSelectorAst = this.scopeSelectorAst(context);
         return {
             targetSelectorAst,
@@ -377,7 +382,7 @@ export class StylableTransformer {
         return outputAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
-        const { currentAnchor, node, originMeta } = context;
+        const { currentAnchor, node, originMeta, mixinClassName } = context;
         const resolvedSymbols = this.getResolvedSymbols(originMeta);
         const transformerContext = {
             meta: originMeta,
@@ -540,7 +545,10 @@ export class StylableTransformer {
              * the general `st-symbol` feature because the actual symbol can
              * be a type-element symbol that is actually an imported root in a mixin
              */
-            const origin = STSymbol.get(originMeta, originMeta.root) as ClassSymbol;
+            const origin = STSymbol.get(
+                originMeta,
+                mixinClassName || originMeta.root
+            ) as ClassSymbol;
             context.setCurrentAnchor({
                 name: origin.name,
                 type: 'class',
@@ -742,6 +750,7 @@ export class ScopeContext {
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
     public currentAnchor?: ScopeAnchor;
+    public mixinClassName?: string;
     constructor(
         public originMeta: StylableMeta,
         public resolver: StylableResolver,

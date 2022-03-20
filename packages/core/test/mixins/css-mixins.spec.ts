@@ -8,33 +8,11 @@ import {
     matchRuleAndDeclaration,
     testInlineExpects,
     testStylableCore,
+    shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
 import { processorWarnings } from '@stylable/core';
 
 describe('CSS Mixins', () => {
-    it.only('apply simple class mixins declarations', () => {
-        testStylableCore({
-            '/mixin.st.css': `
-                .root {
-                    -st-states: x;
-                }
-                
-                .root:x.override {
-                    z-index: 1;
-                }
-            `,
-            'entry.st.css': `
-                @st-import [override] from "./mixin.st.css";
-
-                /* @rule[1] .entry__y.mixin__root.mixin--x  */
-                .y {
-                    -st-mixin: override;
-                }
-            `,
-        });
-
-    });
-
     it('apply simple class mixins declarations', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
@@ -206,6 +184,30 @@ describe('CSS Mixins', () => {
         });
 
         testInlineExpects(result);
+    });
+
+    it('should mix root state with mixed-in part', () => {
+        const { sheets } = testStylableCore({
+            '/mixin.st.css': `
+                .root {
+                    -st-states: x;
+                }
+                
+                .root:x.override {
+                    z-index: 1;
+                }
+            `,
+            'entry.st.css': `
+                @st-import [override] from "./mixin.st.css";
+
+                /* @rule[1] .entry__y.mixin__root.mixin--x  */
+                .y {
+                    -st-mixin: override;
+                }
+            `,
+        });
+
+        shouldReportNoDiagnostics(sheets[`/entry.st.css`].meta);
     });
 
     it.skip('mixin with multiple rules in keyframes', () => {

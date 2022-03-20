@@ -234,7 +234,8 @@ function createMixinRootFromCSSResolve(
         undefined,
         resolvedArgs,
         path.concat(symbolName + ' from ' + meta.source),
-        true
+        true,
+        resolvedClass.symbol.name
     );
 
     fixRelativeUrls(mixinRoot, mixinMeta.source, meta.source);
@@ -338,21 +339,17 @@ function handleLocalClassMixin(
         undefined,
         resolvedArgs,
         path.concat(mix.mixin.type + ' from ' + meta.source),
-        true
+        true,
+        mix.ref.name
     );
     mergeRules(mixinRoot, rule);
 }
 
-function createInheritedMeta({ meta, symbol }: CSSResolve) {
+function createInheritedMeta({ meta }: CSSResolve) {
     const mixinMeta: StylableMeta = Object.create(meta);
     mixinMeta.data = { ...meta.data };
     mixinMeta.parent = meta;
     STSymbol.inheritSymbols(meta, mixinMeta);
-    STSymbol.forceSetSymbol({
-        meta: mixinMeta,
-        symbol: STSymbol.getAll(mixinMeta)[symbol.name], // ToDo: check as an alternative: `symbol`;
-        localName: meta.root,
-    });
     return mixinMeta;
 }
 

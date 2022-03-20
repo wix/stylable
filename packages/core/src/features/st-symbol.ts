@@ -185,23 +185,8 @@ export function reportRedeclare(context: FeatureContext) {
     }
 }
 
-/* inheritSymbols/forceSetSymbol are used for creating a copy meta with mixin root */
+/* inheritSymbols are used for creating a copy meta with mixin root */
 export function inheritSymbols(originMeta: StylableMeta, targetMeta: StylableMeta) {
     const originData = plugableRecord.getUnsafe(originMeta.data, dataKey);
     plugableRecord.set(targetMeta.data, dataKey, createState(originData));
-}
-export function forceSetSymbol({
-    meta,
-    symbol,
-    localName,
-}: {
-    meta: StylableMeta;
-    symbol: filterSymbols<NamespaceToSymbolType['main']>;
-    localName?: string;
-}) {
-    const { byNS, byNSFlat, byType } = plugableRecord.getUnsafe(meta.data, dataKey);
-    const name = localName || symbol.name;
-    byNS.main.push({ name, symbol, safeRedeclare: false, ast: undefined });
-    byNSFlat.main[name] = symbol;
-    byType[symbol._kind][name] = symbol;
 }
