@@ -5,9 +5,10 @@ import {
     loadDirSync,
     populateDirectorySync,
     writeToExistingFile,
+    createTempDirectory,
+    ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { realpathSync, promises } from 'fs';
 import { join, sep } from 'path';
 

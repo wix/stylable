@@ -8,7 +8,7 @@ import { nodeFs } from '@file-services/node';
 import { symlinkSync, existsSync, realpathSync } from 'fs';
 import { deferred } from 'promise-assist';
 import { runServer } from './run-server';
-import { createTempDirectorySync } from 'create-temp-directory';
+import { createTempDirectorySync } from './cli-test-kit';
 
 export interface Options {
     projectDir: string;

@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
 import StylableLint from 'eslint-plugin-stylable/dist/stylable-es-lint';
-import { createTempDirectorySync } from 'create-temp-directory';
+import { createTempDirectorySync } from '@stylable/e2e-test-kit';
 
 // mock afterAll for RuleTester (should be fixed in next version)
 (globalThis as any).afterAll = (globalThis as any).after;

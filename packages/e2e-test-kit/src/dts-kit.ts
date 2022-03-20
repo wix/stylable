@@ -2,7 +2,7 @@ import fs, { readFileSync, symlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { Stylable } from '@stylable/core';
 import { generateDTSContent } from '@stylable/module-utils';
-import { createTempDirectorySync, ITempDirectorySync } from 'create-temp-directory';
+import { createTempDirectorySync, ITempDirectorySync } from './cli-test-kit';
 import {
     createProgram,
     ModuleKind,
