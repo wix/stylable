@@ -7,7 +7,11 @@ import {
     matchTypeAndValue,
     isSimpleSelector,
 } from './selector';
-import type { Selector, ImmutableSelectorNode } from '@tokey/css-selector-parser';
+import {
+    Selector,
+    ImmutableSelectorNode,
+    groupCompoundSelectors,
+} from '@tokey/css-selector-parser';
 import { valueMapping } from '../stylable-value-parsers';
 import * as postcss from 'postcss';
 import { ignoreDeprecationWarn } from './deprecation';
@@ -95,7 +99,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 const selector = stringifySelector(
                     matchesSelectors.map((selectorNode) => {
                         if (!isRoot) {
-                            fixChunkOrdering(selectorNode, prefixType);
+                            selectorNode = fixChunkOrdering(selectorNode, prefixType);
                         }
                         replaceTargetWithNesting(selectorNode, prefixType);
                         return selectorNode;
@@ -145,21 +149,24 @@ function replaceTargetWithNesting(selectorNode: Selector, prefixType: ImmutableS
 }
 
 function fixChunkOrdering(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
-    let startChunkIndex = 0;
-    let moved = false;
-    walkSelector(selectorNode, (node, index, nodes) => {
-        if (node.type === `combinator`) {
-            startChunkIndex = index + 1;
-            moved = false;
-        } else if (matchTypeAndValue(node, prefixType)) {
-            if (index > 0 && !moved) {
-                moved = true;
-                nodes.splice(index, 1);
-                nodes.splice(startChunkIndex, 0, node);
+    const compound = groupCompoundSelectors(selectorNode, {
+        deep: true,
+        splitPseudoElements: false,
+    });
+    walkSelector(compound, (node) => {
+        if (node.type === `compound_selector`) {
+            const simpleNodes = node.nodes;
+            for (let i = 1; i < simpleNodes.length; i++) {
+                const childNode = simpleNodes[i];
+                if (matchTypeAndValue(childNode, prefixType)) {
+                    const chunk = simpleNodes.splice(i, simpleNodes.length - i);
+                    simpleNodes.unshift(...chunk);
+                    break;
+                }
             }
         }
-        return undefined;
     });
+    return compound;
 }
 
 function containsMatchInFirstChunk(
@@ -171,6 +178,14 @@ function containsMatchInFirstChunk(
         if (node.type === `combinator`) {
             return walkSelector.stopAll;
         } else if (node.type === 'pseudo_class') {
+            // TODO: support nested match :is(.mixin)
+            // if (node.nodes) {
+            //     for (const innerSelectorNode of node.nodes) {
+            //         if (containsMatchInFirstChunk(prefixType, innerSelectorNode)) {
+            //             isMatch = true;
+            //         }
+            //     }
+            // }
             return walkSelector.skipNested;
         } else if (matchTypeAndValue(node, prefixType)) {
             isMatch = true;
