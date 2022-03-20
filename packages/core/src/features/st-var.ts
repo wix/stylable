@@ -339,22 +339,26 @@ function createUniqID(source: string, varName: string) {
 }
 
 export function getComputed(stylable: Stylable, meta: StylableMeta) {
-    const diagnostics = new Diagnostics();
+    const topLevelDiagnostics = new Diagnostics();
     const evaluator = new StylableEvaluator();
-    const getResolvedSymbols = createSymbolResolverWithCache(stylable.resolver, diagnostics);
+    const getResolvedSymbols = createSymbolResolverWithCache(
+        stylable.resolver,
+        topLevelDiagnostics
+    );
+
     const { var: stVars, customValues } = getResolvedSymbols(meta);
 
     const computed: ComputedStVars = {};
 
     for (const [localName, resolvedVar] of Object.entries(stVars)) {
-        const variableDiagnostics = new Diagnostics();
+        const diagnostics = new Diagnostics();
         const { outputValue, topLevelType } = evaluator.evaluateValue(
             {
                 getResolvedSymbols,
                 resolver: stylable.resolver,
                 evaluator,
                 meta,
-                diagnostics: variableDiagnostics,
+                diagnostics,
             },
             {
                 meta: resolvedVar.meta,
@@ -369,7 +373,7 @@ export function getComputed(stylable: Stylable, meta: StylableMeta) {
              * In case of custom value that could be flat, we will use the "outputValue" which is a flat value.
              */
             value: topLevelType && !customValue?.flattenValue ? unbox(topLevelType) : outputValue,
-            diagnostics: variableDiagnostics,
+            diagnostics,
         };
 
         if (customValue?.flattenValue) {

@@ -77,7 +77,7 @@ testStylableCore.errors = {
 function createJavascriptRequireModule(fs: IFileSystem) {
     const requireModule = (id: string): any => {
         if (id === '@stylable/core') {
-            return require('@stylable/core');
+            return require(id);
         }
 
         const _module = {
