@@ -184,9 +184,3 @@ export function reportRedeclare(context: FeatureContext) {
         }
     }
 }
-
-/* inheritSymbols are used for creating a copy meta with mixin root */
-export function inheritSymbols(originMeta: StylableMeta, targetMeta: StylableMeta) {
-    const originData = plugableRecord.getUnsafe(originMeta.data, dataKey);
-    plugableRecord.set(targetMeta.data, dataKey, createState(originData));
-}

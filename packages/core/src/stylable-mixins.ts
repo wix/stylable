@@ -223,9 +223,7 @@ function createMixinRootFromCSSResolve(
         cssVarsMapping
     );
 
-    const mixinMeta: StylableMeta = isRootMixin
-        ? resolvedClass.meta
-        : createInheritedMeta(resolvedClass);
+    const mixinMeta: StylableMeta = resolvedClass.meta;
     const symbolName = isRootMixin ? 'default' : mix.mixin.type;
 
     transformer.transformAst(
@@ -335,7 +333,7 @@ function handleLocalClassMixin(
 
     transformer.transformAst(
         mixinRoot,
-        isRootMixin ? meta : createInheritedMeta({ meta, symbol: mix.ref, _kind: 'css' }),
+        meta,
         undefined,
         resolvedArgs,
         path.concat(mix.mixin.type + ' from ' + meta.source),
@@ -343,14 +341,6 @@ function handleLocalClassMixin(
         mix.ref.name
     );
     mergeRules(mixinRoot, rule);
-}
-
-function createInheritedMeta({ meta }: CSSResolve) {
-    const mixinMeta: StylableMeta = Object.create(meta);
-    mixinMeta.data = { ...meta.data };
-    mixinMeta.parent = meta;
-    STSymbol.inheritSymbols(meta, mixinMeta);
-    return mixinMeta;
 }
 
 function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefined {
