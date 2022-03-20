@@ -1,6 +1,5 @@
 import cloneDeepWith from 'lodash.clonedeepwith';
 import postcssValueParser from 'postcss-value-parser';
-import type { MetaResolvedSymbols } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
 import type { ParsedValue } from './types';
 
@@ -35,6 +34,7 @@ export type BoxedValueArray = Array<string | Box<string, unknown>>;
 type CustomTypes = Record<string, CustomValueExtension<any>>;
 
 export interface CustomValueExtension<T> {
+    flattenValue?: FlattenValue<T>;
     evalVarAst(
         valueAst: ParsedValue,
         customTypes: {
@@ -146,28 +146,16 @@ export interface JSValueExtension<Value> {
     register(localTypeSymbol: string): CustomValueExtension<Value>;
 }
 
+type FlattenValue<Value> = (v: Box<string, Value>) => {
+    parts: Array<string | Box<string, unknown>>;
+    delimiter: ',' | ' ';
+};
+
 interface ExtensionApi<Value, Args> {
     processArgs: (fnNode: ParsedValue, customTypes: CustomTypes) => Args;
     createValue: (args: Args) => Value;
     getValue: (v: Value, key: string) => string | Box<string, unknown>;
-    flattenValue?: (v: Box<string, Value>) => {
-        parts: Array<string | Box<string, unknown>>;
-        delimiter: ',' | ' ';
-    };
-}
-
-export function resolveCustomValues(resolvedSymbols: MetaResolvedSymbols) {
-    const customValues = { ...stTypes };
-    for (const [symbolName, jsRef] of Object.entries(resolvedSymbols.js)) {
-        if (isCustomValue(jsRef.symbol)) {
-            if (customValues[symbolName]) {
-                // TODO: report reserved name.!
-            } else {
-                customValues[symbolName] = jsRef.symbol.register(symbolName);
-            }
-        }
-    }
-    return customValues;
+    flattenValue?: FlattenValue<Value>;
 }
 
 export function createCustomValue<Value, Args>({
@@ -180,6 +168,7 @@ export function createCustomValue<Value, Args>({
         _kind: 'CustomValue',
         register(localTypeSymbol: string) {
             return {
+                flattenValue,
                 evalVarAst(fnNode: ParsedValue, customTypes: CustomTypes) {
                     const args = processArgs(fnNode, customTypes);
                     return box(localTypeSymbol, createValue(args));

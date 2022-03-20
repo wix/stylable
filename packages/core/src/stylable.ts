@@ -14,6 +14,7 @@ import {
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
 import { warnOnce } from './helpers/deprecation';
+import { STVar } from './features';
 
 export interface StylableConfig {
     projectRoot: string;
@@ -73,6 +74,7 @@ export class Stylable {
     }
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
+    public stVar = new STVar.StylablePublicApi(this);
     constructor(
         public projectRoot: string,
         protected fileSystem: MinimalFS,

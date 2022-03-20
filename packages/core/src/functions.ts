@@ -1,7 +1,6 @@
 import { dirname, relative } from 'path';
 import postcssValueParser from 'postcss-value-parser';
 import type * as postcss from 'postcss';
-import { resolveCustomValues } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
@@ -116,7 +115,6 @@ export function processDeclarationValue(
 ): EvalValueResult {
     const evaluator = new StylableEvaluator({ tsVarOverride: variableOverride });
     const resolvedSymbols = getResolvedSymbols(meta);
-    const customValues = resolveCustomValues(resolvedSymbols);
     const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;
@@ -144,7 +142,7 @@ export function processDeclarationValue(
                 });
             } else if (value === '') {
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-            } else if (customValues[value]) {
+            } else if (resolvedSymbols.customValues[value]) {
                 // no op resolved at the bottom
             } else if (value === 'url') {
                 // postcss-value-parser treats url differently:
@@ -225,12 +223,17 @@ export function processDeclarationValue(
     let typeError: Error | undefined = undefined;
     for (const n of parsedValue.nodes) {
         if (n.type === 'function') {
-            const matchingType = customValues[n.value];
+            const matchingType = resolvedSymbols.customValues[n.value];
 
             if (matchingType) {
-                topLevelType = matchingType.evalVarAst(n, customValues);
+                topLevelType = matchingType.evalVarAst(n, resolvedSymbols.customValues);
                 try {
-                    outputValue += matchingType.getValue(args, topLevelType, n, customValues);
+                    outputValue += matchingType.getValue(
+                        args,
+                        topLevelType,
+                        n,
+                        resolvedSymbols.customValues
+                    );
                 } catch (e) {
                     typeError = e as Error;
                     // catch broken variable resolutions

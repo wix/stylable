@@ -18,6 +18,7 @@ import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { findRule } from './helpers/rule';
 import type { ModuleResolver } from './types';
+import { CustomValueExtension, isCustomValue, stTypes } from './custom-values';
 
 export type JsModule = {
     default?: unknown;
@@ -66,6 +67,7 @@ export interface MetaResolvedSymbols {
     element: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
     var: Record<string, CSSResolve<VarSymbol>>;
     js: Record<string, JSResolve>;
+    customValues: Record<string, CustomValueExtension<any>>;
     cssVar: Record<string, CSSResolve<CSSVarSymbol>>;
     keyframes: Record<string, CSSResolve<KeyframesSymbol>>;
     import: Record<string, CSSResolve<ImportSymbol>>;
@@ -261,6 +263,7 @@ export class StylableResolver {
             element: {},
             var: {},
             js: {},
+            customValues: { ...stTypes },
             keyframes: {},
             cssVar: {},
             import: {},
@@ -277,6 +280,12 @@ export class StylableResolver {
                 } else if (deepResolved?._kind === `js`) {
                     resolvedSymbols.js[name] = deepResolved;
                     resolvedSymbols.mainNamespace[name] = `js`;
+
+                    const customValueSymbol = deepResolved.symbol;
+                    if (isCustomValue(customValueSymbol)) {
+                        resolvedSymbols.customValues[name] = customValueSymbol.register(name);
+                    }
+
                     continue;
                 } else if (
                     symbol._kind !== `cssVar` &&
