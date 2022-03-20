@@ -35,7 +35,7 @@ export function createCliTester() {
             throw new Error('no stdout on cli process');
         }
 
-        // save the output lines to not depened on the reabline async await.
+        // save the output lines to not depend on the readline async await.
         process.stdout.on('data', (e) => lines.push(e.toString()));
 
         const found: { message: string; time: number }[] = [];
