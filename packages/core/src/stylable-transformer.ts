@@ -170,7 +170,7 @@ export class StylableTransformer {
         tsVarOverride?: Record<string, string>,
         path: string[] = [],
         mixinTransform = false,
-        mixinClassName = ``
+        topNestClassName = ``
     ) {
         this.evaluator.tsVarOverride = tsVarOverride;
         const transformContext = {
@@ -192,7 +192,7 @@ export class StylableTransformer {
             if (isChildOfAtRule(rule, 'keyframes')) {
                 return;
             }
-            rule.selector = this.scopeRule(meta, rule, mixinClassName);
+            rule.selector = this.scopeRule(meta, rule, topNestClassName);
         });
 
         ast.walkAtRules((atRule) => {
@@ -303,8 +303,8 @@ export class StylableTransformer {
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
-    public scopeRule(meta: StylableMeta, rule: postcss.Rule, mixinClassName = ``): string {
-        return this.scopeSelector(meta, rule.selector, rule, mixinClassName).selector;
+    public scopeRule(meta: StylableMeta, rule: postcss.Rule, topNestClassName?: string): string {
+        return this.scopeSelector(meta, rule.selector, rule, topNestClassName).selector;
     }
     public scope(name: string, ns: string, delimiter: string = this.delimiter) {
         return namespace(name, ns, delimiter);
@@ -313,17 +313,15 @@ export class StylableTransformer {
         originMeta: StylableMeta,
         selector: string,
         rule?: postcss.Rule,
-        mixinClassName?: string
+        topNestClassName?: string
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
         const context = new ScopeContext(
             originMeta,
             this.resolver,
             parseSelectorWithCache(selector, { clone: true }),
-            rule || postcss.rule({ selector })
+            rule || postcss.rule({ selector }),
+            topNestClassName
         );
-        if (mixinClassName) {
-            context.mixinClassName = mixinClassName;
-        }
         const targetSelectorAst = this.scopeSelectorAst(context);
         return {
             targetSelectorAst,
@@ -382,7 +380,7 @@ export class StylableTransformer {
         return outputAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
-        const { currentAnchor, node, originMeta, mixinClassName } = context;
+        const { currentAnchor, node, originMeta, topNestClassName } = context;
         const resolvedSymbols = this.getResolvedSymbols(originMeta);
         const transformerContext = {
             meta: originMeta,
@@ -547,7 +545,7 @@ export class StylableTransformer {
              */
             const origin = STSymbol.get(
                 originMeta,
-                mixinClassName || originMeta.root
+                topNestClassName || originMeta.root
             ) as ClassSymbol;
             context.setCurrentAnchor({
                 name: origin.name,
@@ -750,12 +748,12 @@ export class ScopeContext {
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
     public currentAnchor?: ScopeAnchor;
-    public mixinClassName?: string;
     constructor(
         public originMeta: StylableMeta,
         public resolver: StylableResolver,
         public selectorAst: SelectorList,
-        public rule: postcss.Rule
+        public rule: postcss.Rule,
+        public topNestClassName: string = ``
     ) {}
     public initRootAnchor(anchor: ScopeAnchor) {
         this.currentAnchor = anchor;
@@ -789,7 +787,13 @@ export class ScopeContext {
         }
     }
     public createNestedContext(selectorAst: SelectorList) {
-        const ctx = new ScopeContext(this.originMeta, this.resolver, selectorAst, this.rule);
+        const ctx = new ScopeContext(
+            this.originMeta,
+            this.resolver,
+            selectorAst,
+            this.rule,
+            this.topNestClassName
+        );
         Object.assign(ctx, this);
         ctx.selectorAst = selectorAst;
 
