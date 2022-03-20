@@ -20,7 +20,7 @@ export type {
 } from './features';
 export { reservedKeyFrames } from './features/css-keyframes';
 export { scopeCSSVar } from './features/css-custom-property';
-export type { ComputedStVar, ComputedStVars } from './features/st-var';
+export type { ComputedStVar } from './features/st-var';
 export {
     StylableProcessor,
     createEmptyMeta,

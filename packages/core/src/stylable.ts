@@ -74,6 +74,7 @@ export class Stylable {
     }
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
+    public stVar = new STVar.StylablePublicApi(this);
     constructor(
         public projectRoot: string,
         protected fileSystem: MinimalFS,
@@ -101,9 +102,6 @@ export class Stylable {
         });
 
         this.resolver = this.createResolver();
-    }
-    public getComputedStVars(meta: StylableMeta) {
-        return STVar.getComputed(this, meta);
     }
     public initCache({ filter }: InitCacheParams = {}) {
         if (filter && this.resolverCache) {

@@ -1258,8 +1258,6 @@ describe(`features/st-var`, () => {
             );
         });
     });
-    it.skip(`should provide valid var path introspection - value(var, ...path)`);
-
     describe('introspection', () => {
         it('should get computed st-vars', () => {
             const { stylable, sheets } = testStylableCore(`
@@ -1271,20 +1269,24 @@ describe(`features/st-var`, () => {
             `);
 
             const { meta } = sheets['/entry.st.css'];
-            const computedVars = stylable.getComputedStVars(meta);
+            const computedVars = stylable.stVar.getComputed(meta);
 
             expect(Object.keys(computedVars)).to.eql(['a', 'b', 'c']);
-
-            expect(
-                Object.values(computedVars).every(
-                    ({ diagnostics }) => diagnostics.reports.length === 0
-                ),
-                'should not have any diagnostics'
-            ).to.be.true;
-
-            expect(computedVars.a.value).to.eql('red');
-            expect(computedVars.b.value).to.eql('blue');
-            expect(computedVars.c.value).to.eql(['red', 'gold']);
+            expect(computedVars.a).to.containSubset({
+                value: 'red',
+                input: undefined,
+                diagnostics: { reports: [] },
+            });
+            expect(computedVars.b).to.containSubset({
+                value: 'blue',
+                input: undefined,
+                diagnostics: { reports: [] },
+            });
+            expect(computedVars.c).to.containSubset({
+                value: ['red', 'gold'],
+                input: undefined,
+                diagnostics: { reports: [] },
+            });
         });
 
         it('should get computed custom value st-var', () => {
@@ -1324,22 +1326,17 @@ describe(`features/st-var`, () => {
             });
 
             const { meta } = sheets['/entry.st.css'];
-            const computedVars = stylable.getComputedStVars(meta);
+            const computedVars = stylable.stVar.getComputed(meta);
 
             expect(Object.keys(computedVars)).to.eql(['border']);
-
-            expect(
-                Object.values(computedVars).every(
-                    ({ diagnostics }) => diagnostics.reports.length === 0
-                ),
-                'should not have any diagnostics'
-            ).to.be.true;
-
-            expect(computedVars.border.value).to.eql('1px solid red');
-            expect(computedVars.border.rawValue).to.eql({
-                color: 'red',
-                size: '1px',
-                style: 'solid',
+            expect(computedVars.border).to.containSubset({
+                value: '1px solid red',
+                input: {
+                    color: 'red',
+                    size: '1px',
+                    style: 'solid',
+                },
+                diagnostics: { reports: [] },
             });
         });
 
@@ -1361,20 +1358,24 @@ describe(`features/st-var`, () => {
             });
 
             const { meta } = sheets['/entry.st.css'];
-            const computedVars = stylable.getComputedStVars(meta);
+            const computedVars = stylable.stVar.getComputed(meta);
 
             expect(Object.keys(computedVars)).to.eql(['imported', 'a', 'b']);
-
-            expect(
-                Object.values(computedVars).every(
-                    ({ diagnostics }) => diagnostics.reports.length === 0
-                ),
-                'should not have any diagnostics'
-            ).to.be.true;
-
-            expect(computedVars['imported'].value).to.eql('red');
-            expect(computedVars.a.value).to.eql('red');
-            expect(computedVars.b.value).to.eql({ a: 'red' });
+            expect(computedVars.imported).to.containSubset({
+                value: 'red',
+                input: undefined,
+                diagnostics: { reports: [] },
+            });
+            expect(computedVars.a).to.containSubset({
+                value: 'red',
+                input: undefined,
+                diagnostics: { reports: [] },
+            });
+            expect(computedVars.b).to.containSubset({
+                value: { a: 'red' },
+                input: undefined,
+                diagnostics: { reports: [] },
+            });
         });
 
         it('should emit diagnostics only on invalid computed st-vars', () => {
@@ -1390,13 +1391,30 @@ describe(`features/st-var`, () => {
 
             const { meta } = sheets['/entry.st.css'];
 
-            const computedVars = stylable.getComputedStVars(meta);
+            const computedVars = stylable.stVar.getComputed(meta);
 
-            expect(computedVars.validBefore.diagnostics.reports.length).to.eql(0);
-            expect(computedVars.validAfter.diagnostics.reports.length).to.eql(0);
-            expect(computedVars.invalid.diagnostics.reports[0]).to.containSubset({
-                message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
-                type: 'warning',
+            expect(Object.keys(computedVars)).to.eql(['validBefore', 'invalid', 'validAfter']);
+            expect(computedVars.validBefore).to.containSubset({
+                value: 'red',
+                input: undefined,
+                diagnostics: { reports: [] },
+            });
+            expect(computedVars.validAfter).to.containSubset({
+                value: 'green',
+                input: undefined,
+                diagnostics: { reports: [] },
+            });
+            expect(computedVars.invalid).to.containSubset({
+                value: 'invalid-func(imported)',
+                input: undefined,
+                diagnostics: {
+                    reports: [
+                        {
+                            message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
+                            type: 'warning',
+                        },
+                    ],
+                },
             });
         });
     });
