@@ -7,6 +7,8 @@ import {
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration,
     testInlineExpects,
+    testStylableCore,
+    shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
 import { processorWarnings } from '@stylable/core';
 
@@ -182,6 +184,48 @@ describe('CSS Mixins', () => {
         });
 
         testInlineExpects(result);
+    });
+
+    it('should reorder selector to context', () => {
+        const { sheets } = testStylableCore({
+            '/mixin.st.css': `
+                .root {
+                    -st-states: x;
+                }
+                .mixin {-st-states: mix-state;}
+                .root:x.mixin:mix-state {
+                    z-index: 1;
+                }
+                .root:x.mixin:mix-state[attr].y {
+                    z-index: 1;
+                }
+                .mixin:is(.y.mixin:mix-state) {
+                    z-index: 1;
+                }
+                .x.mixin[a] .y.mixin[b] {
+                    z-index: 1;
+                } 
+                :is(.x.mixin:is(.y.mixin)) {
+                    z-index: 1;
+                }
+
+            `,
+            'entry.st.css': `
+                @st-import [mixin] from "./mixin.st.css";
+
+                /* 
+                    @rule[1] .entry__y.mixin--mix-state.mixin__root.mixin--x  
+                    @rule[2] .entry__y.mixin--mix-state[attr].mixin__y.mixin__root.mixin--x    
+                    @rule[3] .entry__y:is(.entry__y.mixin--mix-state.mixin__y)
+                    @rule[4] .entry__y[a].mixin__x .entry__y[b].mixin__y
+                */
+                .y {
+                    -st-mixin: mixin;
+                }
+            `,
+        });
+        //@TODO-rule[5] :is(.entry__y:is(.entry__y.mixin__y).mixin__x)
+        shouldReportNoDiagnostics(sheets[`/entry.st.css`].meta);
     });
 
     it.skip('mixin with multiple rules in keyframes', () => {

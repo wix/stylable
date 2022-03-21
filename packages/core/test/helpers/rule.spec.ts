@@ -62,7 +62,7 @@ describe(`helpers/rule`, () => {
                 { selector: '& .y' },
                 { selector: '&:not(.x)' },
                 { selector: '& &.x:hover' },
-                { selector: '&.x.y' },
+                { selector: '&.y.x' },
                 { selector: '&&' }, // TODO: check if possible
                 { selector: '&' },
             ];
