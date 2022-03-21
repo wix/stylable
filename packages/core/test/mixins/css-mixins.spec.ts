@@ -10,7 +10,7 @@ import {
     testStylableCore,
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
-import { processorWarnings } from '@stylable/core';
+import { STMixin } from '@stylable/core/dist/features';
 
 describe('CSS Mixins', () => {
     it('apply simple class mixins declarations', () => {
@@ -59,7 +59,7 @@ describe('CSS Mixins', () => {
         });
 
         const report = result.meta.diagnostics.reports[0];
-        expect(report.message).to.equal(processorWarnings.OVERRIDE_MIXIN('-st-mixin'));
+        expect(report.message).to.equal(STMixin.diagnostics.OVERRIDE_MIXIN('-st-mixin'));
         testInlineExpects(result.meta.outputAst!);
     });
 

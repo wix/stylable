@@ -92,7 +92,6 @@ export {
     stValues,
     stValuesMap,
     valueMapping,
-    valueParserWarnings,
 } from './stylable-value-parsers';
 export { createStylableFileProcessor } from './create-stylable-processor';
 export { CreateProcessorOptions, Stylable, StylableConfig } from './stylable';

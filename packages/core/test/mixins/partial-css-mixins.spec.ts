@@ -4,7 +4,7 @@ import {
     generateStylableRoot,
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
-import { processorWarnings } from '@stylable/core';
+import { STMixin } from '@stylable/core/dist/features';
 
 describe('Partial CSS Mixins', () => {
     it('should warn on partial mixins with no override arguments', () => {
@@ -27,7 +27,7 @@ describe('Partial CSS Mixins', () => {
 
         const report = result.meta.diagnostics.reports[0];
         expect(report.message).to.equal(
-            processorWarnings.PARTIAL_MIXIN_MISSING_ARGUMENTS('my-mixin')
+            STMixin.diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS('my-mixin')
         );
         matchRuleAndDeclaration(
             result.meta.outputAst!,

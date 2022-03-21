@@ -25,8 +25,8 @@ const parsePartialMixin = (mixinValue: string) => {
     return mix;
 };
 
-describe('stylable-value-parsers', () => {
-    describe('-st-mixin', () => {
+describe('helpers/mixin', () => {
+    describe('-st-mixin parse', () => {
         it('named arguments with no params', () => {
             expect(parseMixin('Button')).to.eql([
                 { type: 'Button', options: {}, valueNode: postcssValueParser('Button').nodes[0] },
@@ -90,7 +90,7 @@ describe('stylable-value-parsers', () => {
         });
     });
 
-    it('partial mixin annotation', () => {
+    it('partial mixin annotation parse', () => {
         expect(parsePartialMixin('Button(border 1px solid red)')).to.eql([
             {
                 type: 'Button',

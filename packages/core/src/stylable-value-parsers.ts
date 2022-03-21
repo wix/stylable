@@ -3,16 +3,11 @@ import postcssValueParser from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelectorWithCache } from './helpers/selector';
-import { getNamedArgs, strategies } from './helpers/value';
+import { parseStMixin, parseStPartialMixin } from './helpers/mixin';
+import { getNamedArgs } from './helpers/value';
 import type { StateParsedValue } from './types';
 import type { SelectorNodes } from '@tokey/css-selector-parser';
-import { CSSClass, MixinValue } from './features';
-
-export const valueParserWarnings = {
-    VALUE_CANNOT_BE_STRING() {
-        return 'value can not be a string (remove quotes?)';
-    },
-};
+import { CSSClass } from './features';
 
 export interface MappedStates {
     [s: string]: StateParsedValue | string | null;
@@ -50,8 +45,8 @@ export const valueMapping = {
     root: '-st-root' as const,
     states: '-st-states' as const,
     extends: '-st-extends' as const,
-    mixin: '-st-mixin' as const,
-    partialMixin: '-st-partial-mixin' as const,
+    mixin: '-st-mixin' as const, // ToDo: change to STMixin.MixinType.ALL,
+    partialMixin: '-st-partial-mixin' as const, // ToDo: change to STMixin.MixinType.PARTIAL,
     global: '-st-global' as const,
 };
 
@@ -125,53 +120,6 @@ export const SBTypesParsers = {
             types,
         };
     },
-    '-st-mixin'(
-        mixinNode: postcss.Declaration,
-        strategy: (type: string) => 'named' | 'args',
-        diagnostics?: Diagnostics,
-        emitStrategyDiagnostics = true
-    ) {
-        const ast = postcssValueParser(mixinNode.value);
-        const mixins: Array<MixinValue> = [];
-
-        function reportWarning(message: string, options?: { word: string }) {
-            if (emitStrategyDiagnostics) {
-                diagnostics?.warn(mixinNode, message, options);
-            }
-        }
-
-        ast.nodes.forEach((node) => {
-            if (node.type === 'function') {
-                mixins.push({
-                    type: node.value,
-                    options: strategies[strategy(node.value)](node, reportWarning),
-                    valueNode: node,
-                    originDecl: mixinNode,
-                });
-            } else if (node.type === 'word') {
-                mixins.push({
-                    type: node.value,
-                    options: strategy(node.value) === 'named' ? {} : [],
-                    valueNode: node,
-                    originDecl: mixinNode,
-                });
-            } else if (node.type === 'string') {
-                diagnostics?.error(mixinNode, valueParserWarnings.VALUE_CANNOT_BE_STRING(), {
-                    word: mixinNode.value,
-                });
-            }
-        });
-
-        return mixins;
-    },
-    '-st-partial-mixin'(
-        mixinNode: postcss.Declaration,
-        strategy: (type: string) => 'named' | 'args',
-        diagnostics?: Diagnostics
-    ) {
-        return SBTypesParsers['-st-mixin'](mixinNode, strategy, diagnostics).map((mixin) => {
-            mixin.partial = true;
-            return mixin;
-        });
-    },
+    '-st-mixin': parseStMixin,
+    '-st-partial-mixin': parseStPartialMixin,
 };

@@ -9,11 +9,10 @@ import {
     processorWarnings,
     transformerWarnings,
     nativePseudoElements,
-    valueParserWarnings,
 } from '@stylable/core';
 import { mixinWarnings } from '@stylable/core/dist/stylable-mixins';
 import { valueDiagnostics } from '@stylable/core/dist/helpers/value';
-import { STImport, CSSClass, CSSType, STVar } from '@stylable/core/dist/features';
+import { STImport, CSSClass, CSSType, STVar, STMixin } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
 describe('findTestLocations', () => {
@@ -349,7 +348,7 @@ describe('diagnostics: warnings and errors', () => {
                         |-st-mixin: $myMixin$|;
                     }
                 `,
-                    [{ message: processorWarnings.UNKNOWN_MIXIN('myMixin'), file: 'main.css' }]
+                    [{ message: STMixin.diagnostics.UNKNOWN_MIXIN('myMixin'), file: 'main.css' }]
                 );
             });
 
@@ -531,7 +530,7 @@ describe('diagnostics: warnings and errors', () => {
                     },
                 };
                 expectTransformDiagnostics(config, [
-                    { message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' },
+                    { message: STMixin.diagnostics.VALUE_CANNOT_BE_STRING(), file: '/main.css' },
                 ]);
             });
 
@@ -650,7 +649,7 @@ describe('diagnostics: warnings and errors', () => {
                 },
             };
             expectTransformDiagnostics(config, [
-                { message: processorWarnings.OVERRIDE_MIXIN('-st-mixin'), file: '/main.css' },
+                { message: STMixin.diagnostics.OVERRIDE_MIXIN('-st-mixin'), file: '/main.css' },
             ]);
         });
     });
