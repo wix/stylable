@@ -1,12 +1,12 @@
 import type * as postcss from 'postcss';
-import postcssValueParser, { FunctionNode, WordNode } from 'postcss-value-parser';
+import postcssValueParser from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelectorWithCache } from './helpers/selector';
 import { getNamedArgs, strategies } from './helpers/value';
 import type { StateParsedValue } from './types';
 import type { SelectorNodes } from '@tokey/css-selector-parser';
-import { CSSClass } from './features';
+import { CSSClass, MixinValue } from './features';
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
@@ -23,14 +23,6 @@ export interface TypedClass {
     '-st-root'?: boolean;
     '-st-states'?: string[] | MappedStates;
     '-st-extends'?: string;
-}
-
-export interface MixinValue {
-    type: string;
-    options: Array<{ value: string }> | Record<string, string>;
-    partial?: boolean;
-    valueNode?: FunctionNode | WordNode;
-    originDecl?: postcss.Declaration;
 }
 
 export interface ArgValue {
