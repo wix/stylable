@@ -167,12 +167,12 @@ export class StylableTransformer {
         ast: postcss.Root,
         meta: StylableMeta,
         metaExports?: StylableExports,
-        tsVarOverride?: Record<string, string>,
+        stVarOverride?: Record<string, string>,
         path: string[] = [],
         mixinTransform = false,
         topNestClassName = ``
     ) {
-        this.evaluator.tsVarOverride = tsVarOverride;
+        this.evaluator.stVarOverride = stVarOverride;
         const transformContext = {
             meta,
             diagnostics: this.diagnostics,

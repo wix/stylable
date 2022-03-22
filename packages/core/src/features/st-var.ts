@@ -246,7 +246,7 @@ function evaluateValueCall(
     parsedNode: ParsedValue,
     data: EvalValueData
 ): void {
-    const { tsVarOverride, passedThrough, value, node } = data;
+    const { stVarOverride, passedThrough, value, node } = data;
     const parsedArgs = strategies.args(parsedNode).map((x) => x.value);
     const varName = parsedArgs[0];
     const restArgs = parsedArgs.slice(1);
@@ -260,8 +260,8 @@ function evaluateValueCall(
         }
     } else if (parsedArgs.length >= 1) {
         // override with value
-        if (tsVarOverride?.[varName]) {
-            parsedNode.resolvedValue = tsVarOverride?.[varName];
+        if (stVarOverride?.[varName]) {
+            parsedNode.resolvedValue = stVarOverride?.[varName];
             return;
         }
         // check cyclic
