@@ -1340,6 +1340,61 @@ describe(`features/st-var`, () => {
             });
         });
 
+        it('should get deep computed custom value st-var', () => {
+            const { stylable, sheets } = testStylableCore({
+                '/entry.st.css': `
+                @st-import [stBorder] from './st-border.js';
+
+                :vars {
+                    map: st-map(border stBorder(1px, solid, red));
+                }
+                `,
+                // Stylable custom value
+                '/st-border.js': `
+                    const { createCustomValue, CustomValueStrategy } = require("@stylable/core");
+                    exports.stBorder = createCustomValue({
+                        processArgs: (node, customTypes) => {
+                            return CustomValueStrategy.args(node, customTypes);
+                        },
+                        createValue: ([size, style, color]) => {
+                            return {
+                                size,
+                                style,
+                                color,
+                            };
+                        },
+                        getValue: (value, index) => {
+                            return value[index];
+                        },
+                        flattenValue: ({ value: { size, style, color } }) => {
+                            return {
+                                delimiter: ' ',
+                                parts: [size, style, color],
+                            };
+                        },
+                    })
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+            const computedVars = stylable.stVar.getComputed(meta);
+
+            expect(Object.keys(computedVars)).to.eql(['map']);
+            expect(computedVars.map).to.containSubset({
+                value: {
+                    border: '1px solid red',
+                },
+                input: {
+                    border: {
+                        color: 'red',
+                        size: '1px',
+                        style: 'solid',
+                    },
+                },
+                diagnostics: { reports: [] },
+            });
+        });
+
         it('should get imported computed st-vars', () => {
             const { stylable, sheets } = testStylableCore({
                 '/entry.st.css': `

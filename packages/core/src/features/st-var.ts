@@ -154,17 +154,15 @@ export class StylablePublicApi {
                 }
             );
 
-            const customValue = customValues[topLevelType?.type];
             const computedStVar: ComputedStVar = {
                 /**
                  * In case of custom value that could be flat, we will use the "outputValue" which is a flat value.
                  */
-                value:
-                    topLevelType && !customValue?.flattenValue ? unbox(topLevelType) : outputValue,
+                value: topLevelType ? unbox(topLevelType, customValues) : outputValue,
                 diagnostics,
             };
 
-            if (customValue?.flattenValue) {
+            if (topLevelType) {
                 computedStVar.input = unbox(topLevelType);
             }
 

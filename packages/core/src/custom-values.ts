@@ -15,13 +15,19 @@ export function box<Type extends string, Value>(type: Type, value: Value): Box<T
     };
 }
 
-const { hasOwnProperty } = Object.prototype;
-
-export function unbox<B extends Box<string, unknown>>(boxed: B | string): any {
+export function unbox<B extends Box<string, unknown>>(
+    boxed: B | string,
+    customValues?: CustomTypes
+): any {
     if (typeof boxed === 'string') {
         return boxed;
-    } else if (typeof boxed === 'object' && boxed.type && hasOwnProperty.call(boxed, 'value')) {
-        return cloneDeepWith(boxed.value, unbox);
+    } else if (typeof boxed === 'object' && boxed?.type) {
+        const customValue = customValues?.[boxed.type];
+        let value = boxed.value;
+        if (customValue?.flattenValue) {
+            value = customValue.getValue([], boxed, null, customValues!);
+        }
+        return cloneDeepWith(value, (v) => unbox(v, customValues));
     }
 }
 
@@ -44,7 +50,7 @@ export interface CustomValueExtension<T> {
     getValue(
         path: string[],
         value: Box<string, T>,
-        node: ParsedValue,
+        node: ParsedValue | null,
         customTypes: CustomTypes
     ): string;
 }
