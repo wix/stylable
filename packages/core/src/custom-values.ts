@@ -6,12 +6,18 @@ import type { ParsedValue } from './types';
 export interface Box<Type extends string, Value> {
     type: Type;
     value: Value;
+    flatValue: string | undefined;
 }
 
-export function box<Type extends string, Value>(type: Type, value: Value): Box<Type, Value> {
+export function box<Type extends string, Value>(
+    type: Type,
+    value: Value,
+    flatValue?: string
+): Box<Type, Value> {
     return {
         type,
         value,
+        flatValue,
     };
 }
 
@@ -177,7 +183,19 @@ export function createCustomValue<Value, Args>({
                 flattenValue,
                 evalVarAst(fnNode: ParsedValue, customTypes: CustomTypes) {
                     const args = processArgs(fnNode, customTypes);
-                    return box(localTypeSymbol, createValue(args));
+                    const value = createValue(args);
+                    let flatValue: string | undefined;
+
+                    if (flattenValue) {
+                        flatValue = getFlatValue(
+                            flattenValue,
+                            box(localTypeSymbol, value),
+                            fnNode,
+                            customTypes
+                        );
+                    }
+
+                    return box(localTypeSymbol, value, flatValue);
                 },
                 getValue(
                     path: string[],
@@ -187,10 +205,7 @@ export function createCustomValue<Value, Args>({
                 ): string {
                     if (path.length === 0) {
                         if (flattenValue) {
-                            const { delimiter, parts } = flattenValue(obj);
-                            return parts
-                                .map((v) => getBoxValue([], v, fallbackNode, customTypes))
-                                .join(delimiter);
+                            return getFlatValue(flattenValue, obj, fallbackNode, customTypes);
                         } else {
                             // TODO: add diagnostics
                             return getStringValue([fallbackNode]);
@@ -202,6 +217,16 @@ export function createCustomValue<Value, Args>({
             };
         },
     };
+}
+
+function getFlatValue<Value>(
+    flattenValue: FlattenValue<Value>,
+    obj: Box<string, Value>,
+    fallbackNode: ParsedValue,
+    customTypes: CustomTypes
+) {
+    const { delimiter, parts } = flattenValue(obj);
+    return parts.map((v) => getBoxValue([], v, fallbackNode, customTypes)).join(delimiter);
 }
 
 export function getBoxValue(

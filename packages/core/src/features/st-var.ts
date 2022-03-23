@@ -1,5 +1,5 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import { deprecatedStFunctions } from '../custom-values';
+import { Box, deprecatedStFunctions } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
@@ -28,10 +28,12 @@ export interface VarSymbol {
     node: postcss.Node;
 }
 
+type Input = Box<string, Input | Record<string, Input | string> | Array<Input | string>>;
+
 export interface ComputedStVar {
     value: RuntimeStVar;
     diagnostics: Diagnostics;
-    input?: any;
+    input?: Input;
 }
 
 export const diagnostics = {
@@ -163,7 +165,7 @@ export class StylablePublicApi {
             };
 
             if (topLevelType) {
-                computedStVar.input = unbox(topLevelType);
+                computedStVar.input = topLevelType;
             }
 
             computed[localName] = computedStVar;

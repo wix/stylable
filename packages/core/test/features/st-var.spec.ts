@@ -1284,7 +1284,42 @@ describe(`features/st-var`, () => {
             });
             expect(computedVars.c).to.containSubset({
                 value: ['red', 'gold'],
-                input: undefined,
+                input: {
+                    type: 'st-array',
+                    value: ['red', 'gold'],
+                },
+                diagnostics: { reports: [] },
+            });
+        });
+
+        it('should get deep computed complex st-vars', () => {
+            const { stylable, sheets } = testStylableCore(`
+            :vars {
+                map: st-map(a st-map(b red));
+            }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+            const computedVars = stylable.stVar.getComputed(meta);
+
+            expect(Object.keys(computedVars)).to.eql(['map']);
+            expect(computedVars.map).to.containSubset({
+                value: {
+                    a: {
+                        b: 'red',
+                    },
+                },
+                input: {
+                    type: 'st-map',
+                    value: {
+                        a: {
+                            type: 'st-map',
+                            value: {
+                                b: 'red',
+                            },
+                        },
+                    },
+                },
                 diagnostics: { reports: [] },
             });
         });
@@ -1332,9 +1367,13 @@ describe(`features/st-var`, () => {
             expect(computedVars.border).to.containSubset({
                 value: '1px solid red',
                 input: {
-                    color: 'red',
-                    size: '1px',
-                    style: 'solid',
+                    type: 'stBorder',
+                    flatValue: '1px solid red',
+                    value: {
+                        color: 'red',
+                        size: '1px',
+                        style: 'solid',
+                    },
                 },
                 diagnostics: { reports: [] },
             });
@@ -1346,7 +1385,8 @@ describe(`features/st-var`, () => {
                 @st-import [stBorder] from './st-border.js';
 
                 :vars {
-                    map: st-map(border stBorder(1px, solid, red));
+                    array: st-array(red, stBorder(1px, solid, blue));
+                    map: st-map(border stBorder(1px, solid, value(array, 0)));
                 }
                 `,
                 // Stylable custom value
@@ -1379,16 +1419,44 @@ describe(`features/st-var`, () => {
             const { meta } = sheets['/entry.st.css'];
             const computedVars = stylable.stVar.getComputed(meta);
 
-            expect(Object.keys(computedVars)).to.eql(['map']);
+            expect(Object.keys(computedVars)).to.eql(['array', 'map']);
+            expect(computedVars.array).to.containSubset({
+                value: ['red', '1px solid blue'],
+                input: {
+                    type: 'st-array',
+                    flatValue: undefined,
+                    value: [
+                        'red',
+                        {
+                            type: 'stBorder',
+                            flatValue: '1px solid blue',
+                            value: {
+                                color: 'blue',
+                                size: '1px',
+                                style: 'solid',
+                            },
+                        },
+                    ],
+                },
+                diagnostics: { reports: [] },
+            });
             expect(computedVars.map).to.containSubset({
                 value: {
                     border: '1px solid red',
                 },
                 input: {
-                    border: {
-                        color: 'red',
-                        size: '1px',
-                        style: 'solid',
+                    type: 'st-map',
+                    flatValue: undefined,
+                    value: {
+                        border: {
+                            type: 'stBorder',
+                            flatValue: '1px solid red',
+                            value: {
+                                color: 'red',
+                                size: '1px',
+                                style: 'solid',
+                            },
+                        },
                     },
                 },
                 diagnostics: { reports: [] },
@@ -1428,7 +1496,12 @@ describe(`features/st-var`, () => {
             });
             expect(computedVars.b).to.containSubset({
                 value: { a: 'red' },
-                input: undefined,
+                input: {
+                    type: 'st-map',
+                    value: {
+                        a: 'red',
+                    },
+                },
                 diagnostics: { reports: [] },
             });
         });
