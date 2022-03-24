@@ -4,7 +4,7 @@ import { rollupRunner } from './test-kit/rollup-runner';
 import { getProjectPath } from './test-kit/test-helpers';
 
 describe('StylableRollupPlugin', function () {
-    this.timeout(20000);
+    this.timeout(30000);
 
     const project = 'stc-config';
 
@@ -22,24 +22,22 @@ describe('StylableRollupPlugin', function () {
         expect(Object.keys(runner.getOutputFiles()), 'initial build ran "stc"').to.contain.members([
             'index.st.css', // stc output
         ]);
+    });
+
+    it('should recovers in watch mode when broken "stc" source file is invalid', async () => {
+        await runner.ready;
+
+        const indexFilePath = nodeFs.join(runner.projectDir, 'src', 'index.st.css');
 
         // Simulate error by using value function without a symbol.
         await runner.act(
-            () =>
-                nodeFs.promises.writeFile(
-                    nodeFs.join(runner.projectDir, 'src', 'index.st.css'),
-                    '.root { color: value(); }'
-                ),
+            () => nodeFs.promises.writeFile(indexFilePath, '.root { color: value(); }'),
             { strict: false }
         );
 
         // Revert error to normal.
-        await runner.act(() =>
-            nodeFs.promises.writeFile(
-                nodeFs.join(runner.projectDir, 'src', 'index.st.css'),
-                '.root {color: green;}'
-            )
-        );
+        await runner.act(() => nodeFs.promises.writeFile(indexFilePath, '.root {color: green;}'));
+
         const outputFiles = runner.getOutputFiles();
         expect(outputFiles['index.st.css'], '"stc" watch has been triggered').to.eql(
             '.root {color: green;}'
