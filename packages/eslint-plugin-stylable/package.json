@@ -10,9 +10,6 @@
     "@stylable/core": "^4.11.0",
     "@typescript-eslint/experimental-utils": "^5.16.0"
   },
-  "devDependencies": {
-    "create-temp-directory": "^1.1.1"
-  },
   "keywords": [
     "eslint",
     "stylable",

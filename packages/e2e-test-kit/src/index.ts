@@ -16,6 +16,10 @@ export {
     writeToExistingFile,
     escapeRegExp,
     symlinkSymbol,
+    ITempDirectory,
+    ITempDirectorySync,
+    createTempDirectory,
+    createTempDirectorySync,
 } from './cli-test-kit';
 export { runServer } from './run-server';
 export { DTSKit } from './dts-kit';
