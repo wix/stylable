@@ -40,13 +40,22 @@ describe(`(${project})`, () => {
 
         await projectRunner.actAndWaitForRecompile(
             'new source file',
-            async () => {
-                await writeFile(
+            () =>
+                writeFile(
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
                     '.b{ color: green; }'
+                ),
+            () => {
+                expect(projectRunner.getProjectFiles()['style-output/style-b.st.css']).to.eql(
+                    '.b{ color: green; }'
                 );
+            }
+        );
 
-                await writeFile(
+        await projectRunner.actAndWaitForRecompile(
+            'update existing file',
+            () =>
+                writeFile(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
                     `
                     @st-import [b] from '../style-output/style-b.st.css';
@@ -56,8 +65,7 @@ describe(`(${project})`, () => {
                         z-index: 1;
                     }
                 `
-                );
-            },
+                ),
             async () => {
                 const { page } = await projectRunner.openInBrowser();
                 const styleElements = await page.evaluate(
