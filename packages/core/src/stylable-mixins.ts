@@ -223,9 +223,7 @@ function createMixinRootFromCSSResolve(
         cssVarsMapping
     );
 
-    const mixinMeta: StylableMeta = isRootMixin
-        ? resolvedClass.meta
-        : createInheritedMeta(resolvedClass);
+    const mixinMeta: StylableMeta = resolvedClass.meta;
     const symbolName = isRootMixin ? 'default' : mix.mixin.type;
 
     transformer.transformAst(
@@ -234,7 +232,8 @@ function createMixinRootFromCSSResolve(
         undefined,
         resolvedArgs,
         path.concat(symbolName + ' from ' + meta.source),
-        true
+        true,
+        resolvedClass.symbol.name
     );
 
     fixRelativeUrls(mixinRoot, mixinMeta.source, meta.source);
@@ -334,26 +333,14 @@ function handleLocalClassMixin(
 
     transformer.transformAst(
         mixinRoot,
-        isRootMixin ? meta : createInheritedMeta({ meta, symbol: mix.ref, _kind: 'css' }),
+        meta,
         undefined,
         resolvedArgs,
         path.concat(mix.mixin.type + ' from ' + meta.source),
-        true
+        true,
+        mix.ref.name
     );
     mergeRules(mixinRoot, rule);
-}
-
-function createInheritedMeta({ meta, symbol }: CSSResolve) {
-    const mixinMeta: StylableMeta = Object.create(meta);
-    mixinMeta.data = { ...meta.data };
-    mixinMeta.parent = meta;
-    STSymbol.inheritSymbols(meta, mixinMeta);
-    STSymbol.forceSetSymbol({
-        meta: mixinMeta,
-        symbol: STSymbol.getAll(mixinMeta)[symbol.name], // ToDo: check as an alternative: `symbol`;
-        localName: meta.root,
-    });
-    return mixinMeta;
 }
 
 function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefined {

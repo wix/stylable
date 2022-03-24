@@ -1,8 +1,13 @@
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
+import {
+    loadDirSync,
+    populateDirectorySync,
+    runCliSync,
+    createTempDirectory,
+    ITempDirectory,
+} from '@stylable/e2e-test-kit';
 
 describe('Stylable CLI config file options', function () {
     this.timeout(25000);

@@ -3,8 +3,8 @@ import { deprecatedStFunctions } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
-import type { CSSResolve } from '../stylable-resolver';
-import type { EvalValueData, EvalValueResult } from '../functions';
+import { createSymbolResolverWithCache, CSSResolve } from '../stylable-resolver';
+import { EvalValueData, EvalValueResult, StylableEvaluator } from '../functions';
 import { isChildOfAtRule } from '../helpers/rule';
 import { walkSelector } from '../helpers/selector';
 import { stringifyFunction, getStringValue, strategies } from '../helpers/value';
@@ -16,6 +16,8 @@ import { processDeclarationFunctions } from '../process-declaration-functions';
 import { Diagnostics } from '../diagnostics';
 import { unbox } from '../custom-values';
 import type { ParsedValue } from '../types';
+import type { Stylable } from '../stylable';
+import type { RuntimeStVar } from '../stylable-transformer';
 
 export interface VarSymbol {
     _kind: 'var';
@@ -24,6 +26,12 @@ export interface VarSymbol {
     text: string;
     valueType: string | null;
     node: postcss.Node;
+}
+
+export interface ComputedStVar {
+    value: RuntimeStVar;
+    diagnostics: Diagnostics;
+    input?: any;
 }
 
 export const diagnostics = {
@@ -110,6 +118,61 @@ export const hooks = createFeature<{
 
 export function get(meta: StylableMeta, name: string): VarSymbol | undefined {
     return STSymbol.get(meta, name, `var`);
+}
+
+// Stylable StVar Public APIs
+
+export class StylablePublicApi {
+    constructor(private stylable: Stylable) {}
+
+    public getComputed(meta: StylableMeta) {
+        const topLevelDiagnostics = new Diagnostics();
+        const evaluator = new StylableEvaluator();
+        const getResolvedSymbols = createSymbolResolverWithCache(
+            this.stylable.resolver,
+            topLevelDiagnostics
+        );
+
+        const { var: stVars, customValues } = getResolvedSymbols(meta);
+
+        const computed: Record<string, ComputedStVar> = {};
+
+        for (const [localName, resolvedVar] of Object.entries(stVars)) {
+            const diagnostics = new Diagnostics();
+            const { outputValue, topLevelType } = evaluator.evaluateValue(
+                {
+                    getResolvedSymbols,
+                    resolver: this.stylable.resolver,
+                    evaluator,
+                    meta,
+                    diagnostics,
+                },
+                {
+                    meta: resolvedVar.meta,
+                    value: stripQuotation(resolvedVar.symbol.text),
+                    node: resolvedVar.symbol.node,
+                }
+            );
+
+            const customValue = customValues[topLevelType?.type];
+            const computedStVar: ComputedStVar = {
+                /**
+                 * In case of custom value that could be flat, we will use the "outputValue" which is a flat value.
+                 */
+                value:
+                    topLevelType && !customValue?.flattenValue ? unbox(topLevelType) : outputValue,
+                diagnostics,
+            };
+
+            if (customValue?.flattenValue) {
+                computedStVar.input = unbox(topLevelType);
+            }
+
+            computed[localName] = computedStVar;
+        }
+
+        return computed;
+    }
 }
 
 function collectVarSymbols(context: FeatureContext, rule: postcss.Rule) {

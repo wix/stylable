@@ -18,6 +18,10 @@ export {
     populateDirectorySync,
     writeToExistingFile,
     symlinkSymbol,
+    ITempDirectory,
+    ITempDirectorySync,
+    createTempDirectory,
+    createTempDirectorySync,
 } from './file-system-helpers';
 export { runServer } from './run-server';
 export { DTSKit } from './dts-kit';

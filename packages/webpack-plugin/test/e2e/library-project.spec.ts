@@ -21,11 +21,12 @@ describe(`(${project})`, () => {
     );
 
     it('eval bundle exports', () => {
-        const global = { Library: {} };
+        const global = { Library: {} as Record<string, unknown> };
 
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
         new Function('self', projectRunner.getBuildAsset('main.js'))(global);
 
-        expect(Object.keys(global.Library)).to.eql(['Button', 'Label']);
+        expect(typeof global.Library.Button).to.eql('object');
+        expect(typeof global.Library.Label).to.eql('object');
     });
 });

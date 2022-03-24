@@ -1,11 +1,12 @@
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { join } from 'path';
 import {
     symlinkSymbol,
     loadDirSync,
     populateDirectorySync,
     runCliSync,
+    createTempDirectory,
+    ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { STVar } from '@stylable/core/dist/features';
 

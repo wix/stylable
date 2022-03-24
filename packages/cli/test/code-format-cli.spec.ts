@@ -1,7 +1,12 @@
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { join } from 'path';
-import { loadDirSync, populateDirectorySync, runFormatCliSync } from '@stylable/e2e-test-kit';
+import {
+    loadDirSync,
+    populateDirectorySync,
+    runFormatCliSync,
+    createTempDirectory,
+    ITempDirectory,
+} from '@stylable/e2e-test-kit';
 
 describe('Stylable Code Format Cli', function () {
     let tempDir: ITempDirectory;
