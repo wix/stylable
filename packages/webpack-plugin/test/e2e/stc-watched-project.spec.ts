@@ -1,7 +1,9 @@
-import { writeFileSync } from 'fs';
+import { promises } from 'fs';
 import { dirname, join } from 'path';
 import { expect } from 'chai';
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
+
+const { writeFile } = promises;
 
 const project = 'stc-watched-project';
 const projectDir = dirname(
@@ -38,13 +40,13 @@ describe(`(${project})`, () => {
 
         await projectRunner.actAndWaitForRecompile(
             'new source file',
-            () => {
-                writeFileSync(
+            async () => {
+                await writeFile(
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
                     '.b{ color: green; }'
                 );
 
-                writeFileSync(
+                await writeFile(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
                     `
                     @st-import [b] from '../style-output/style-b.st.css';
@@ -72,8 +74,8 @@ describe(`(${project})`, () => {
 
         await projectRunner.actAndWaitForRecompile(
             'update new source file and expect the new style to be applied on the consumer',
-            () => {
-                writeFileSync(
+            async () => {
+                await writeFile(
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
                     '.b{ color: blue; }'
                 );
