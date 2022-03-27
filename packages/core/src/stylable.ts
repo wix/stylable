@@ -20,11 +20,7 @@ export interface StylableConfig {
     projectRoot: string;
     fileSystem: MinimalFS;
     requireModule?: (path: string) => any;
-    /** @deprecated */
-    delimiter?: string;
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
-    /** @deprecated */
-    diagnostics?: Diagnostics;
     hooks?: TransformHooks;
     resolveOptions?: {
         alias?: any;
@@ -48,56 +44,51 @@ interface InitCacheParams {
 export type CreateProcessorOptions = Pick<StylableConfig, 'resolveNamespace'>;
 
 export class Stylable {
-    public static create(config: StylableConfig) {
-        return new this(
-            config.projectRoot,
-            config.fileSystem,
-            (id) => {
-                if (config.requireModule) {
-                    return config.requireModule(id);
-                }
-                throw new Error('Javascript files are not supported without requireModule options');
-            },
-            config.delimiter,
-            config.onProcess,
-            config.diagnostics,
-            config.hooks,
-            config.resolveOptions,
-            config.optimizer,
-            config.mode,
-            config.resolveNamespace,
-            config.resolveModule,
-            config.cssParser,
-            config.resolverCache,
-            config.fileProcessorCache
-        );
-    }
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
     public stVar = new STVar.StylablePublicApi(this);
-    constructor(
-        public projectRoot: string,
-        protected fileSystem: MinimalFS,
-        protected requireModule: (path: string) => any,
-        public delimiter: string = '__',
-        protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
-        protected diagnostics = new Diagnostics(),
-        protected hooks: TransformHooks = {},
-        protected resolveOptions: any = {},
-        public optimizer?: IStylableOptimizer,
-        protected mode: 'production' | 'development' = 'production',
-        public resolveNamespace?: typeof processNamespace,
-        public resolvePath: ModuleResolver = createDefaultResolver(fileSystem, resolveOptions),
-        protected cssParser: CssParser = cssParse,
-        protected resolverCache?: StylableResolverCache,
-        // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
-        protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>
-    ) {
+    //
+    public projectRoot: string;
+    protected fileSystem: MinimalFS;
+    protected requireModule: (path: string) => any;
+    public delimiter = '__'; // ToDo: remove
+    protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
+    protected diagnostics = new Diagnostics();
+    protected hooks: TransformHooks;
+    protected resolveOptions: any;
+    public optimizer?: IStylableOptimizer;
+    protected mode: 'production' | 'development';
+    public resolveNamespace?: typeof processNamespace;
+    public resolvePath: ModuleResolver;
+    protected cssParser: CssParser;
+    protected resolverCache?: StylableResolverCache;
+    // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
+    protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
+    constructor(config: StylableConfig) {
+        this.projectRoot = config.projectRoot;
+        this.fileSystem = config.fileSystem;
+        this.requireModule =
+            config.requireModule ||
+            (() => {
+                throw new Error('Javascript files are not supported without requireModule options');
+            });
+        this.onProcess = config.onProcess;
+        this.hooks = config.hooks || {};
+        this.resolveOptions = config.resolveOptions || {};
+        this.optimizer = config.optimizer;
+        this.mode = config.mode || `production`;
+        this.resolveNamespace = config.resolveNamespace;
+        this.resolvePath =
+            config.resolveModule || createDefaultResolver(this.fileSystem, this.resolveOptions);
+        this.cssParser = config.cssParser || cssParse;
+        this.resolverCache = config.resolverCache;
+        this.fileProcessorCache = config.fileProcessorCache;
+
         this.fileProcessor = createStylableFileProcessor({
-            fileSystem,
-            onProcess,
+            fileSystem: this.fileSystem,
+            onProcess: this.onProcess,
             resolveNamespace: this.resolveNamespace,
-            cssParser,
+            cssParser: this.cssParser,
             cache: this.fileProcessorCache,
         });
 

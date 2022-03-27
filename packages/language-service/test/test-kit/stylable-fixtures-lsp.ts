@@ -16,7 +16,7 @@ function requireModule(request: string) {
 
 export const stylableLSP = new StylableLanguageService({
     fs,
-    stylable: Stylable.create({
+    stylable: new Stylable({
         fileSystem: fs,
         requireModule,
         projectRoot: CASES_PATH,

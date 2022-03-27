@@ -33,7 +33,7 @@ export function testStylableCore(
     const fs =
         options.stylableConfig?.filesystem ||
         createMemoryFs(typeof input === `string` ? { '/entry.st.css': input } : input);
-    const stylable = Stylable.create({
+    const stylable = new Stylable({
         fileSystem: fs,
         projectRoot: '/',
         resolveNamespace: (ns) => ns,

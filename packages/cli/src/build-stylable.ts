@@ -68,7 +68,7 @@ export async function buildStylable(
 
             log('[Project]', projectRoot, buildOptions);
 
-            const stylable = Stylable.create({
+            const stylable = new Stylable({
                 fileSystem,
                 requireModule,
                 projectRoot,

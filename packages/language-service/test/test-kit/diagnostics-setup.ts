@@ -7,7 +7,7 @@ export function createDiagnostics(files: { [filePath: string]: string }, filePat
 
     const stylableLSP = new StylableLanguageService({
         fs,
-        stylable: Stylable.create({
+        stylable: new Stylable({
             fileSystem: fs,
             requireModule: require,
             projectRoot: '/',

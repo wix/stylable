@@ -264,7 +264,7 @@ export class StylableWebpackPlugin {
                 compiler.options.resolve.aliasFields,
         };
 
-        this.stylable = Stylable.create(
+        this.stylable = new Stylable(
             this.options.stylableConfig(
                 {
                     projectRoot: compiler.context,

@@ -133,7 +133,7 @@ export function generateStylableEnvironment(
 ) {
     const fs = createMemoryFs(content);
 
-    const stylable = Stylable.create({
+    const stylable = new Stylable({
         fileSystem: fs,
         projectRoot: '/',
         resolveNamespace: (ns) => ns,

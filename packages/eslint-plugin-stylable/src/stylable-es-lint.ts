@@ -29,7 +29,7 @@ export default createRule({
         const [{ exposeDiagnosticsReports, resolveOptions }] = options as Options;
         const moduleResolver = createDefaultResolver(fs, resolveOptions);
 
-        const stylable = Stylable.create({
+        const stylable = new Stylable({
             fileSystem: fs,
             projectRoot: process.cwd(),
             resolveModule: moduleResolver,

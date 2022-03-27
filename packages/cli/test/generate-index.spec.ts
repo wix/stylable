@@ -19,7 +19,11 @@ describe('build index', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -57,7 +61,11 @@ describe('build index', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -95,7 +103,11 @@ describe('build index', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -137,7 +149,11 @@ describe('build index', () => {
             },
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -178,7 +194,11 @@ describe('build index', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -219,7 +239,11 @@ describe('build index', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -259,7 +283,11 @@ describe('build index', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
         await build(
             {
                 outDir: './some-dir/other-dir/',
@@ -291,7 +319,11 @@ describe('build index', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
         const diagnosticsManager = new DiagnosticsManager();
 
         await build(

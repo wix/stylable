@@ -36,7 +36,7 @@ describe('diagnostics', () => {
 
         const stylableLSP = new StylableLanguageService({
             fs,
-            stylable: Stylable.create({
+            stylable: new Stylable({
                 fileSystem: fs,
                 requireModule: require,
                 projectRoot: '/',

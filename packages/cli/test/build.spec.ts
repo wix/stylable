@@ -29,7 +29,11 @@ describe('build stand alone', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -79,7 +83,7 @@ describe('build stand alone', () => {
             `,
         });
 
-        const stylable = Stylable.create({
+        const stylable = new Stylable({
             projectRoot: '/',
             fileSystem: fs,
             resolveNamespace(n, s) {
@@ -159,7 +163,11 @@ describe('build stand alone', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
         const diagnosticsManager = new DiagnosticsManager();
 
         await build(
@@ -203,7 +211,11 @@ describe('build stand alone', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -238,7 +250,7 @@ describe('build stand alone', () => {
             `,
         });
 
-        const stylable = Stylable.create({
+        const stylable = new Stylable({
             projectRoot: '/',
             fileSystem: fs,
             resolveNamespace() {
@@ -278,7 +290,11 @@ describe('build stand alone', () => {
             `,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -311,7 +327,11 @@ describe('build stand alone', () => {
                 .part {}`,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -349,7 +369,11 @@ describe('build stand alone', () => {
                 .enum   { -st-states: z(enum(on, off, default)); }`,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {
@@ -401,7 +425,11 @@ describe('build stand alone', () => {
                 .enum   { -st-states: z(enum(on, off, default)); }`,
         });
 
-        const stylable = new Stylable('/', fs, () => ({}));
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
 
         await build(
             {

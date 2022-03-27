@@ -73,7 +73,7 @@ export function stylableRollupPlugin({
                 clearRequireCache();
                 stylable.initCache();
             } else {
-                stylable = Stylable.create({
+                stylable = new Stylable({
                     fileSystem: fs,
                     projectRoot,
                     mode,

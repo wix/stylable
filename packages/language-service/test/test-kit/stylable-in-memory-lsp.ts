@@ -6,7 +6,7 @@ export function getInMemoryLSP() {
     const fs = createMemoryFs();
     const lsp = new StylableLanguageService({
         fs,
-        stylable: Stylable.create({ fileSystem: fs, projectRoot: '/' }),
+        stylable: new Stylable({ fileSystem: fs, projectRoot: '/' }),
     });
 
     return { fs, lsp };

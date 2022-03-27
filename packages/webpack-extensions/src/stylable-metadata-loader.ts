@@ -49,7 +49,7 @@ function createStylable(
     if (!loader._compiler) {
         throw new Error('Stylable metadata loader requires a compiler instance');
     }
-    return Stylable.create({
+    return new Stylable({
         projectRoot: loader.rootContext,
         fileSystem: loader.fs as unknown as MinimalFS,
         mode: loader._compiler.options.mode === 'development' ? 'development' : 'production',

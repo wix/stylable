@@ -21,7 +21,7 @@ export class DTSKit {
         };
         this.tmp = createTempDirectorySync('dts-gen');
 
-        this.stylable = Stylable.create({
+        this.stylable = new Stylable({
             projectRoot: this.tmp.path,
             fileSystem: fs,
             resolveNamespace(ns) {
