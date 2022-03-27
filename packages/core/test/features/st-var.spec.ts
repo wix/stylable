@@ -10,6 +10,31 @@ import postcssValueParser from 'postcss-value-parser';
 chai.use(chaiSubset);
 
 describe(`features/st-var`, () => {
+    const stBorderDefinitionMock = `
+        const { createCustomValue, CustomValueStrategy } = require("@stylable/core");
+        exports.stBorder = createCustomValue({
+            processArgs: (node, customTypes) => {
+                return CustomValueStrategy.args(node, customTypes);
+            },
+            createValue: ([size, style, color]) => {
+                return {
+                    size,
+                    style,
+                    color,
+                };
+            },
+            getValue: (value, index) => {
+                return value[index];
+            },
+            flattenValue: ({ value: { size, style, color } }) => {
+                return {
+                    delimiter: ' ',
+                    parts: [size, style, color],
+                };
+            },
+        })
+    `;
+
     it(`should process :vars definitions`, () => {
         const { sheets } = testStylableCore(`
             /* @transform-remove */
@@ -1327,37 +1352,14 @@ describe(`features/st-var`, () => {
         it('should get computed custom value st-var', () => {
             const { stylable, sheets } = testStylableCore({
                 '/entry.st.css': `
-                @st-import [stBorder] from './st-border.js';
+                @st-import [stBorder as createBorder] from './st-border.js';
 
                 :vars {
-                    border: stBorder(1px, solid, red);
+                    border: createBorder(1px, solid, red);
                 }
                 `,
                 // Stylable custom value
-                '/st-border.js': `
-                    const { createCustomValue, CustomValueStrategy } = require("@stylable/core");
-                    exports.stBorder = createCustomValue({
-                        processArgs: (node, customTypes) => {
-                            return CustomValueStrategy.args(node, customTypes);
-                        },
-                        createValue: ([size, style, color]) => {
-                            return {
-                                size,
-                                style,
-                                color,
-                            };
-                        },
-                        getValue: (value, index) => {
-                            return value[index];
-                        },
-                        flattenValue: ({ value: { size, style, color } }) => {
-                            return {
-                                delimiter: ' ',
-                                parts: [size, style, color],
-                            };
-                        },
-                    })
-                `,
+                '/st-border.js': stBorderDefinitionMock,
             });
 
             const { meta } = sheets['/entry.st.css'];
@@ -1390,30 +1392,7 @@ describe(`features/st-var`, () => {
                 }
                 `,
                 // Stylable custom value
-                '/st-border.js': `
-                    const { createCustomValue, CustomValueStrategy } = require("@stylable/core");
-                    exports.stBorder = createCustomValue({
-                        processArgs: (node, customTypes) => {
-                            return CustomValueStrategy.args(node, customTypes);
-                        },
-                        createValue: ([size, style, color]) => {
-                            return {
-                                size,
-                                style,
-                                color,
-                            };
-                        },
-                        getValue: (value, index) => {
-                            return value[index];
-                        },
-                        flattenValue: ({ value: { size, style, color } }) => {
-                            return {
-                                delimiter: ' ',
-                                parts: [size, style, color],
-                            };
-                        },
-                    })
-                `,
+                '/st-border.js': stBorderDefinitionMock,
             });
 
             const { meta } = sheets['/entry.st.css'];
