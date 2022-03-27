@@ -6,7 +6,6 @@ import type { ElementSymbol } from './css-type';
 import type { CSSVarSymbol } from './css-custom-property';
 import type { KeyframesSymbol } from './css-keyframes';
 import { plugableRecord } from '../helpers/plugable-record';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
 
@@ -152,12 +151,6 @@ export function addSymbol({
     byNS[nsName].push({ name, symbol, ast: node, safeRedeclare });
     byNSFlat[nsName][name] = symbol;
     typeTable[name] = symbol;
-    // deprecated
-    if (nsName === `main`) {
-        ignoreDeprecationWarn(() => {
-            context.meta.mappedSymbols[name] = symbol;
-        });
-    }
 }
 
 export function reportRedeclare(context: FeatureContext) {

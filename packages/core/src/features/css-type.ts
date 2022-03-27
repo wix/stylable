@@ -7,7 +7,6 @@ import * as CSSClass from './css-class';
 import type { StylableMeta } from '../stylable-meta';
 import { isCompRoot, stringifySelector } from '../helpers/selector';
 import { getOriginDefinition } from '../helpers/resolve';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 
@@ -98,10 +97,6 @@ export function addType(context: FeatureContext, name: string, rule?: postcss.Ru
             },
             node: rule,
             safeRedeclare: !!alias,
-        });
-        // deprecated
-        ignoreDeprecationWarn(() => {
-            context.meta.elements[name] = STSymbol.get(context.meta, name, `element`)!;
         });
     }
     return STSymbol.get(context.meta, name, `element`)!;

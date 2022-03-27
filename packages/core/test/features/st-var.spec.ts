@@ -2,7 +2,6 @@ import chaiSubset from 'chai-subset';
 import { STSymbol, STVar } from '@stylable/core/dist/features';
 import { functionWarnings } from '@stylable/core/dist/functions';
 import { stTypes, box } from '@stylable/core/dist/custom-values';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import postcssValueParser from 'postcss-value-parser';
@@ -44,14 +43,6 @@ describe(`features/st-var`, () => {
         // JS exports
         expect(exports.stVars.varA, `varA JS export`).to.eql(`a-val`);
         expect(exports.stVars.varB, `varB JS export`).to.eql(`b-val`);
-
-        // deprecation
-        ignoreDeprecationWarn(() => {
-            expect(meta.vars, `deprecated 'meta.vars'`).to.eql([
-                STVar.get(meta, `varA`),
-                STVar.get(meta, `varB`),
-            ]);
-        });
     });
     it(`should process multiple :vars definitions`, () => {
         const { sheets } = testStylableCore(`

@@ -4,7 +4,6 @@ import * as STImport from './st-import';
 import type { Imported } from './st-import';
 import type { StylableMeta } from '../stylable-meta';
 import { plugableRecord } from '../helpers/plugable-record';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { isInConditionalGroup } from '../helpers/rule';
 import { namespace } from '../helpers/namespace';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
@@ -107,8 +106,6 @@ export const hooks = createFeature<{
         // save keyframes declarations
         const { statements: keyframesAsts } = plugableRecord.getUnsafe(context.meta.data, dataKey);
         keyframesAsts.push(atRule);
-        // deprecated
-        ignoreDeprecationWarn(() => context.meta.keyframes.push(atRule));
         // validate name
         if (!name) {
             context.diagnostics.warn(atRule, diagnostics.MISSING_KEYFRAMES_NAME());
@@ -246,10 +243,6 @@ function addKeyframes({
             import: importDef,
         },
         safeRedeclare,
-    });
-    // deprecated
-    ignoreDeprecationWarn(() => {
-        context.meta.mappedKeyframes[name] = STSymbol.get(context.meta, name, `keyframes`)!;
     });
 }
 

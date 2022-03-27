@@ -12,7 +12,6 @@ import { convertToSelector, convertToClass, stringifySelector } from '../helpers
 import type { StylableMeta } from '../stylable-meta';
 import { valueMapping } from '../stylable-value-parsers';
 import { validateRuleStateDefinition } from '../helpers/custom-state';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type {
     ImmutableClass,
     Class,
@@ -173,10 +172,6 @@ export function addClass(context: FeatureContext, name: string, rule?: postcss.R
             },
             node: rule,
             safeRedeclare: !!alias,
-        });
-        // deprecated
-        ignoreDeprecationWarn(() => {
-            context.meta.classes[name] = STSymbol.get(context.meta, name, `class`)!;
         });
     }
     return STSymbol.get(context.meta, name, `class`)!;

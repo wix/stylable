@@ -1,5 +1,4 @@
 import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
@@ -54,11 +53,6 @@ describe(`features/css-keyframes`, () => {
             CSSKeyframes.getKeyframesStatements(meta),
             `CSSKeyframes.getKeyframesStatements(meta)`
         ).to.containSubset([meta.ast.nodes[1], meta.ast.nodes[3]]);
-
-        // deprecation
-        ignoreDeprecationWarn(() => {
-            expect(meta.keyframes).to.eql(CSSKeyframes.getKeyframesStatements(meta));
-        });
     });
     it(`should namespace "animation" and "animation-name" declarations`, () => {
         const { sheets } = testStylableCore(`

@@ -1,5 +1,4 @@
 import { STImport, STSymbol } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
@@ -59,11 +58,6 @@ describe(`features/st-import`, () => {
         expect(meta.getImportStatements(), `meta.getImportStatements()`).to.eql(
             STImport.getImportStatements(meta)
         );
-        // deprecation
-        expect(
-            ignoreDeprecationWarn(() => meta.imports),
-            `deprecated 'meta.imports'`
-        ).to.eql(meta.getImportStatements());
     });
     it(`should process imported symbols`, () => {
         const { sheets } = testStylableCore({
@@ -295,11 +289,6 @@ describe(`features/st-import`, () => {
             expect(meta.getImportStatements(), `meta.getImportStatements()`).to.eql(
                 STImport.getImportStatements(meta)
             );
-            // deprecation
-            expect(
-                ignoreDeprecationWarn(() => meta.imports),
-                `deprecated 'meta.imports'`
-            ).to.eql(meta.getImportStatements());
         });
         it(`should process imported symbols`, () => {
             const { sheets } = testStylableCore({

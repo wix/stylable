@@ -1,5 +1,4 @@
 import { STImport, CSSType, STSymbol } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
@@ -35,15 +34,6 @@ describe(`features/css-type`, () => {
             CSSType.get(meta, `Btn`)
         );
         expect(meta.getAllTypeElements(), `meta.getAllTypeElements`).to.eql(CSSType.getAll(meta));
-
-        // deprecation
-        expect(
-            ignoreDeprecationWarn(() => meta.elements),
-            `deprecated 'meta.elements'`
-        ).to.eql({
-            Btn: CSSType.get(meta, `Btn`),
-            Gallery: CSSType.get(meta, `Gallery`),
-        });
     });
     it(`should report invalid cases`, () => {
         testStylableCore(`

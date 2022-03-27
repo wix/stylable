@@ -1,5 +1,4 @@
 import { STImport, CSSCustomProperty, STSymbol } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { generateScopedCSSVar } from '@stylable/core/dist/helpers/css-custom-property';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
@@ -37,14 +36,6 @@ describe(`features/css-custom-property`, () => {
         // JS exports
         expect(exports.vars.propA, `propA JS export`).to.eql(`--entry-propA`);
         expect(exports.vars.propB, `propB JS export`).to.eql(`--entry-propB`);
-
-        // deprecation
-        ignoreDeprecationWarn(() => {
-            expect(meta.cssVars, `deprecated 'meta.cssVars'`).to.eql({
-                '--propA': CSSCustomProperty.get(meta, `--propA`),
-                '--propB': CSSCustomProperty.get(meta, `--propB`),
-            });
-        });
     });
     it(`should process css declaration value var()`, () => {
         const { sheets } = testStylableCore(`

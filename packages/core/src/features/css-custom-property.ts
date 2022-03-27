@@ -7,7 +7,6 @@ import {
     generateScopedCSSVar,
     atPropertyValidationWarnings,
 } from '../helpers/css-custom-property';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import { plugableRecord } from '../helpers/plugable-record';
@@ -223,10 +222,6 @@ function addCSSProperty({
         safeRedeclare: !final || !!alias,
         node,
     });
-    // deprecated
-    ignoreDeprecationWarn(
-        () => (context.meta.cssVars[name] = STSymbol.get(context.meta, name, `cssVar`)!)
-    );
 }
 
 function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declaration) {

@@ -3,7 +3,6 @@ import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
 import { isCSSVarProp } from '../helpers/css-custom-property';
 import type { StylableMeta } from '../stylable-meta';
@@ -90,9 +89,6 @@ export const hooks = createFeature<{
                     ? parseStImport(node, dirContext, context.diagnostics)
                     : parsePseudoImport(node, dirContext, context.diagnostics);
             imports.push(parsedImport);
-            ignoreDeprecationWarn(() => {
-                context.meta.imports.push(parsedImport);
-            });
             addImportSymbols(parsedImport, context, dirContext);
         }
     },

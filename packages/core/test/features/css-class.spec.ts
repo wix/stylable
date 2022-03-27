@@ -1,5 +1,4 @@
 import { STImport, CSSClass, STSymbol } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
@@ -116,20 +115,6 @@ describe(`features/css-class`, () => {
         expect(exports.classes.e, `e JS export`).to.eql(`entry__e`);
         expect(exports.classes.f, `f JS export`).to.eql(`entry__f`);
         expect(exports.classes.g, `g JS export`).to.eql(`entry__g`);
-
-        // deprecation
-        ignoreDeprecationWarn(() => {
-            expect(meta.classes, `deprecated 'meta.classes'`).to.eql({
-                root: CSSClass.get(meta, `root`),
-                a: CSSClass.get(meta, `a`),
-                b: CSSClass.get(meta, `b`),
-                c: CSSClass.get(meta, `c`),
-                d: CSSClass.get(meta, `d`),
-                e: CSSClass.get(meta, `e`),
-                f: CSSClass.get(meta, `f`),
-                g: CSSClass.get(meta, `g`),
-            });
-        });
     });
     it(`should override with -st-global value`, () => {
         const { sheets } = testStylableCore(`

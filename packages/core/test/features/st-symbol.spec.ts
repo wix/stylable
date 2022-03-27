@@ -8,7 +8,6 @@ import {
     ImportSymbol,
     KeyframesSymbol,
 } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { Diagnostics } from '@stylable/core/dist/diagnostics';
 import { testStylableCore } from '@stylable/core-test-kit';
 import * as postcss from 'postcss';
@@ -29,14 +28,6 @@ describe(`features/st-symbol`, () => {
         expect(meta.getSymbol(`a`), `meta.getSymbol`).to.equal(STSymbol.get(meta, `a`));
         expectType<TypeEqual<StylableSymbol | undefined, typeof savedSymbol>>(true);
         expectType<TypeEqual<ClassSymbol | undefined, typeof savedSymbol>>(false);
-        // deprecation
-        expect(
-            ignoreDeprecationWarn(() => meta.mappedSymbols),
-            `deprecated 'meta.mappedSymbols'`
-        ).to.eql({
-            root: STSymbol.get(meta, `root`),
-            a: STSymbol.get(meta, `a`),
-        });
     });
     it(`should keep track of symbols by type`, () => {
         const { sheets } = testStylableCore(``);
