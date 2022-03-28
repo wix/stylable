@@ -8,6 +8,7 @@
   },
   "peerDependencies": {
     "@stylable/core": "^4.2.0",
+    "postcss": "^8.4.12",
     "webpack": "^5.30.0"
   },
   "dependencies": {
