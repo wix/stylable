@@ -9,11 +9,16 @@ import {
     StylableSymbol,
     CSSClass,
     STSymbol,
+    VarSymbol,
+    CSSVarSymbol,
+    KeyframesSymbol,
+    CSSKeyframes,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { findRule } from './helpers/rule';
 import type { ModuleResolver } from './types';
+import { CustomValueExtension, isCustomValue, stTypes } from './custom-values';
 
 export type JsModule = {
     default?: unknown;
@@ -56,9 +61,16 @@ export interface JSResolve {
     meta: null;
 }
 
-export interface MetaParts {
+export interface MetaResolvedSymbols {
+    mainNamespace: Record<string, StylableSymbol['_kind'] | 'js'>;
     class: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
     element: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
+    var: Record<string, CSSResolve<VarSymbol>>;
+    js: Record<string, JSResolve>;
+    customValues: Record<string, CustomValueExtension<any>>;
+    cssVar: Record<string, CSSResolve<CSSVarSymbol>>;
+    keyframes: Record<string, CSSResolve<KeyframesSymbol>>;
+    import: Record<string, CSSResolve<ImportSymbol>>;
 }
 
 export type ReportError = (
@@ -243,107 +255,106 @@ export class StylableResolver {
         }
         return null;
     }
-    public resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
-        return this.resolveName(meta, symbol, false);
-    }
 
-    public resolveName(
-        meta: StylableMeta,
-        symbol: StylableSymbol,
-        isElement: boolean
-    ): CSSResolve<ClassSymbol | ElementSymbol> | null {
-        const type = isElement ? 'element' : 'class';
-        let finalSymbol;
-        let finalMeta;
-        if (symbol._kind === type) {
-            finalSymbol = symbol;
-            finalMeta = meta;
-        } else if (symbol._kind === 'import') {
-            const resolved = this.deepResolve(symbol);
-            if (resolved && resolved._kind === 'css' && resolved.symbol) {
-                if (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') {
-                    finalSymbol = resolved.symbol;
-                    finalMeta = resolved.meta;
-                } else {
-                    // TODO: warn
+    public resolveSymbols(meta: StylableMeta, diagnostics: Diagnostics) {
+        const resolvedSymbols: MetaResolvedSymbols = {
+            mainNamespace: {},
+            class: {},
+            element: {},
+            var: {},
+            js: {},
+            customValues: { ...stTypes },
+            keyframes: {},
+            cssVar: {},
+            import: {},
+        };
+        // resolve main namespace
+        for (const [name, symbol] of Object.entries(meta.getAllSymbols())) {
+            let deepResolved: CSSResolve | JSResolve | null;
+            if (symbol._kind === `import` || (symbol._kind === `cssVar` && symbol.alias)) {
+                deepResolved = this.deepResolve(symbol);
+                if (!deepResolved || !deepResolved.symbol) {
+                    // diagnostics for unresolved imports are reported
+                    // as part of st-import validateImports
+                    continue;
+                } else if (deepResolved?._kind === `js`) {
+                    resolvedSymbols.js[name] = deepResolved;
+                    resolvedSymbols.mainNamespace[name] = `js`;
+
+                    const customValueSymbol = deepResolved.symbol;
+                    if (isCustomValue(customValueSymbol)) {
+                        resolvedSymbols.customValues[name] = customValueSymbol.register(name);
+                    }
+
+                    continue;
+                } else if (
+                    symbol._kind !== `cssVar` &&
+                    (deepResolved.symbol._kind === `class` ||
+                        deepResolved.symbol._kind === `element`)
+                ) {
+                    // virtual alias
+                    deepResolved = {
+                        _kind: `css`,
+                        meta,
+                        symbol: {
+                            _kind: 'class',
+                            name,
+                            alias: symbol,
+                        },
+                    };
                 }
             } else {
-                // TODO: warn
+                deepResolved = { _kind: `css`, meta, symbol };
             }
-        } else {
-            // TODO: warn
+            switch (deepResolved.symbol._kind) {
+                case `class`:
+                    resolvedSymbols.class[name] = this.resolveExtends(
+                        meta,
+                        deepResolved.symbol,
+                        false,
+                        undefined,
+                        validateClassResolveExtends(meta, name, diagnostics, deepResolved)
+                    );
+                    break;
+                case `element`:
+                    resolvedSymbols.element[name] = this.resolveExtends(meta, name, true);
+                    break;
+                case `var`:
+                    resolvedSymbols.var[name] = deepResolved as CSSResolve<VarSymbol>;
+                    break;
+                case `cssVar`:
+                    resolvedSymbols.cssVar[name] = deepResolved as CSSResolve<CSSVarSymbol>;
+                    break;
+            }
+            resolvedSymbols.mainNamespace[name] = deepResolved.symbol._kind;
         }
-
-        if (finalMeta && finalSymbol) {
-            return {
-                _kind: 'css',
-                symbol: finalSymbol,
-                meta: finalMeta,
-            };
-        } else {
-            return null;
+        // resolve keyframes
+        for (const [name, symbol] of Object.entries(CSSKeyframes.getAll(meta))) {
+            const result = resolveKeyframes(meta, symbol, this);
+            if (result) {
+                resolvedSymbols.keyframes[name] = {
+                    _kind: `css`,
+                    meta: result.meta,
+                    symbol: result.symbol,
+                };
+            }
         }
-    }
-    public resolveElement(meta: StylableMeta, symbol: StylableSymbol) {
-        return this.resolveName(meta, symbol, true);
-    }
-    public resolveParts(meta: StylableMeta, diagnostics: Diagnostics) {
-        const resolvedClasses: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> = {};
-        for (const [className, classSymbol] of Object.entries(meta.getAllClasses())) {
-            resolvedClasses[className] = this.resolveExtends(
-                meta,
-                className,
-                false,
-                undefined,
-                (res, extend) => {
-                    const decl = findRule(meta.ast, '.' + className);
-                    if (decl) {
-                        // ToDo: move to STExtends
-                        if (res && res._kind === 'js') {
-                            diagnostics.error(decl, CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
-                                word: decl.value,
-                            });
-                        } else if (res && !res.symbol) {
-                            diagnostics.error(
-                                decl,
-                                CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name),
-                                { word: decl.value }
-                            );
-                        } else {
-                            diagnostics.error(decl, CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
-                                word: decl.value,
-                            });
-                        }
-                    } else {
-                        if (classSymbol.alias) {
-                            meta.ast.walkRules(new RegExp('\\.' + className), (rule) => {
-                                diagnostics.error(
-                                    rule,
-                                    CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(className),
-                                    { word: className }
-                                );
-                                return false;
-                            });
-                        }
-                    }
-                }
-            );
-        }
-
-        const resolvedElements: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> = {};
-        for (const k of Object.keys(meta.getAllTypeElements())) {
-            resolvedElements[k] = this.resolveExtends(meta, k, true);
-        }
-        return { class: resolvedClasses, element: resolvedElements };
+        return resolvedSymbols;
     }
     public resolveExtends(
         meta: StylableMeta,
-        name: string,
+        nameOrSymbol: string | ClassSymbol | ElementSymbol,
         isElement = false,
         transformer?: StylableTransformer,
         reportError?: ReportError
     ): CSSResolvePath {
-        const symbol = isElement ? meta.getTypeElement(name) : meta.getClass(name);
+        const name = typeof nameOrSymbol === `string` ? nameOrSymbol : nameOrSymbol.name;
+        const symbol =
+            typeof nameOrSymbol === `string`
+                ? isElement
+                    ? meta.getTypeElement(nameOrSymbol)
+                    : meta.getClass(nameOrSymbol)
+                : nameOrSymbol;
 
         const customSelector = isElement ? null : meta.customSelectors[':--' + name];
 
@@ -411,4 +422,76 @@ export class StylableResolver {
 
         return extendPath;
     }
+}
+function validateClassResolveExtends(
+    meta: StylableMeta,
+    name: string,
+    diagnostics: Diagnostics,
+    deepResolved: CSSResolve<StylableSymbol> | JSResolve | null
+): ReportError | undefined {
+    return (res, extend) => {
+        const decl = findRule(meta.ast, '.' + name);
+        if (decl) {
+            // ToDo: move to STExtends
+            if (res && res._kind === 'js') {
+                diagnostics.error(decl, CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
+                    word: decl.value,
+                });
+            } else if (res && !res.symbol) {
+                diagnostics.error(
+                    decl,
+                    CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name),
+                    { word: decl.value }
+                );
+            } else {
+                diagnostics.error(decl, CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
+                    word: decl.value,
+                });
+            }
+        } else {
+            if (deepResolved?.symbol.alias) {
+                meta.ast.walkRules(new RegExp('\\.' + name), (rule) => {
+                    diagnostics.error(rule, CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
+                        word: name,
+                    });
+                    return false;
+                });
+            }
+        }
+    };
+}
+
+export function createSymbolResolverWithCache(
+    resolver: StylableResolver,
+    diagnostics: Diagnostics
+) {
+    const cache = new WeakMap<StylableMeta, MetaResolvedSymbols>();
+    return (meta: StylableMeta): MetaResolvedSymbols => {
+        let symbols = cache.get(meta);
+        if (!symbols) {
+            symbols = resolver.resolveSymbols(meta, diagnostics);
+            cache.set(meta, symbols);
+        }
+        return symbols;
+    };
+}
+
+function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {
+    const current = { meta, symbol };
+    while (current.symbol?.import) {
+        const res = resolver.resolveImported(
+            current.symbol.import,
+            current.symbol.name,
+            'mappedKeyframes' // ToDo: refactor out of resolver
+        );
+        if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
+            ({ meta: current.meta, symbol: current.symbol } = res);
+        } else {
+            return undefined;
+        }
+    }
+    if (current.symbol) {
+        return current;
+    }
+    return undefined;
 }

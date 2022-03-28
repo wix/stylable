@@ -5,13 +5,21 @@ import {
     loadDirSync,
     populateDirectorySync,
     writeToExistingFile,
+    createTempDirectory,
+    ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { realpathSync, writeFileSync } from 'fs';
+import { realpathSync, promises } from 'fs';
 import { join, sep } from 'path';
 
-describe('Stylable Cli Watch - Multiple projects', () => {
+const { writeFile } = promises;
+
+describe('Stylable Cli Watch - Multiple projects', function () {
+    /**
+     * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
+     */
+    this.retries(2);
+
     let tempDir: ITempDirectory;
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
@@ -52,7 +60,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                             '.root{ color:yellow; }'
                         );
@@ -123,7 +131,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, './packages/project-b/src/depend.st.css'),
                             `:vars {
                                     color: blue;
@@ -210,14 +218,14 @@ describe('Stylable Cli Watch - Multiple projects', () => {
             },
         });
 
-        await run({
+        const { output } = await run({
             dirPath: tempDir.path,
             args: ['-w'],
             steps: [
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeFileSync(
+                        return writeFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                             `
                             @st-import [Foo] from "../project-b/dist/index.st.css";
@@ -237,7 +245,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                         join(tempDir.path, 'packages', 'project-a', 'style.st.css')
                     ),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-b', 'foo.st.css'),
                             `
                                 .foo {}
@@ -260,12 +268,14 @@ describe('Stylable Cli Watch - Multiple projects', () => {
         });
 
         const files = loadDirSync(tempDir.path);
-        expect(files['packages/project-a/dist/style.css']).to.match(
-            /foo[0-9]+__foo {color: red;}/g
-        );
-        expect(files['packages/project-a/dist/style.css']).to.match(
-            /foo[0-9]+__bar {color: blue;}/g
-        );
+        expect(
+            files['packages/project-a/dist/style.css'],
+            `Expected styling to apply.\nBuild output:\n\n${output()}`
+        ).to.match(/foo[0-9]+__foo {color: red;}/g);
+        expect(
+            files['packages/project-a/dist/style.css'],
+            `Expected styling to apply.\nBuild output:\n\n${output()}`
+        ).to.match(/foo[0-9]+__bar {color: blue;}/g);
     });
 
     it('should trigger build when changing js mixin', async () => {
@@ -321,7 +331,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, './packages/project-b/mixin.js'),
                             `module.exports = {
                                     color: 'blue'
@@ -367,7 +377,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                             '.root{ color:yellow; {} }'
                         );
@@ -382,7 +392,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: '[error]: nesting of rules within rules is not supported',
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                             '.root{ color:blue; }'
                         );
@@ -445,7 +455,7 @@ describe('Stylable Cli Watch - Multiple projects', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
                             `
                                 @st-import Module from './does-not-exist.st.css';

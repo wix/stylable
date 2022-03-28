@@ -20,6 +20,7 @@ export type {
 } from './features';
 export { reservedKeyFrames } from './features/css-keyframes';
 export { scopeCSSVar } from './features/css-custom-property';
+export type { ComputedStVar } from './features/st-var';
 export {
     StylableProcessor,
     createEmptyMeta,
@@ -108,7 +109,6 @@ export {
     StateParsedValue,
     StateTypeValidator,
 } from './types';
-export { appendMixin, appendMixins, mixinWarnings } from './stylable-mixins';
 export {
     OnUrlCallback,
     UrlNode,
@@ -125,7 +125,6 @@ export {
     ValueFormatter,
     evalDeclarationValue,
     functionWarnings,
-    processDeclarationValue,
     resolveArgumentsValue,
 } from './functions';
 export {
@@ -139,7 +138,6 @@ export {
     createCustomValue,
     getBoxValue,
     isCustomValue,
-    resolveCustomValues,
     stTypes,
     unbox,
 } from './custom-values';

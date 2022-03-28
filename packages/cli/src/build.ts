@@ -105,7 +105,7 @@ export async function build(
                 throw error;
             }
         },
-        processFiles(_, affectedFiles, deletedFiles, changeOrigin) {
+        async processFiles(_, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
                 // handle deleted files by removing their generated content
                 if (deletedFiles.size) {
@@ -169,7 +169,7 @@ export async function build(
             // rewire invalidations
             updateWatcherDependencies(affectedFiles);
             // rebuild assets from aggregated content: index files and assets
-            buildAggregatedEntities(affectedFiles, processGeneratedFiles);
+            await buildAggregatedEntities(affectedFiles, processGeneratedFiles);
 
             if (!diagnostics) {
                 diagnosticsManager.delete(identifier);
@@ -284,11 +284,11 @@ export async function build(
         });
     }
 
-    function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
+    async function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
         if (indexFile) {
             const indexFilePath = join(fullOutDir, indexFile);
             generated.add(indexFilePath);
-            generator.generateIndexFile(fs, indexFilePath);
+            await generator.generateIndexFile(fs, indexFilePath);
 
             outputFiles.set(indexFilePath, affectedFiles);
         } else {

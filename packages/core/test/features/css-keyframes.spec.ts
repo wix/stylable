@@ -1,724 +1,478 @@
 import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import {
-    testStylableCore,
-    generateStylableRoot,
-    generateStylableResult,
-    generateStylableExports,
-    testInlineExpects,
-    expectAnalyzeDiagnostics,
-    expectTransformDiagnostics,
-} from '@stylable/core-test-kit';
+import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
 chai.use(chaiSubset);
 
 describe(`features/css-keyframes`, () => {
-    describe(`meta`, () => {
-        it('should collect @keyframes statements', () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                        @keyframes name {
-                            from{}
-                            to{}
-                        }
-                        @keyframes anther-name {
-                            from{}
-                            to{}
-                        }
-                        `,
-                    },
-                },
-            });
+    it(`should process @keyframes`, () => {
+        const { sheets } = testStylableCore(`
+            /* @atrule entry__frames-a */
+            @keyframes frames-a {
+                from{}
+                to{}
+            }
+            
+            /* @atrule entry__frames-b */
+            @keyframes frames-b {
+                from{}
+                to{}
+            }
+        `);
 
-            expect(
-                CSSKeyframes.getKeyframesStatements(meta),
-                `CSSKeyframes.getKeyframesStatements(meta)`
-            ).to.containSubset([meta.ast.nodes[0], meta.ast.nodes[1]]);
+        const { meta, exports } = sheets['/entry.st.css'];
 
-            // deprecation
-            ignoreDeprecationWarn(() => {
-                expect(meta.keyframes).to.eql(CSSKeyframes.getKeyframesStatements(meta));
-            });
+        shouldReportNoDiagnostics(meta);
+
+        // symbols
+        expect(CSSKeyframes.get(meta, `frames-a`), `frames-a symbol`).to.eql({
+            _kind: 'keyframes',
+            alias: 'frames-a',
+            name: 'frames-a',
+            global: undefined,
+            import: undefined,
         });
-        it(`should add keyframes symbols`, () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                            @keyframes a {}
-                            @keyframes b {}
-                        `,
-                    },
-                },
-            });
-            expect(CSSKeyframes.get(meta, `a`), `a`).to.eql({
-                _kind: 'keyframes',
-                alias: 'a',
-                name: 'a',
-                global: undefined,
-                import: undefined,
-            });
-            expect(CSSKeyframes.get(meta, `b`), `b`).to.eql({
-                _kind: 'keyframes',
-                alias: 'b',
-                name: 'b',
-                global: undefined,
-                import: undefined,
-            });
-            expect(CSSKeyframes.getAll(meta), `CSSKeyframes.getAll`).to.eql({
-                a: CSSKeyframes.get(meta, `a`),
-                b: CSSKeyframes.get(meta, `b`),
-            });
-            // deprecation
-            ignoreDeprecationWarn(() => {
-                expect(meta.mappedKeyframes.a, `deprecated`).to.equal(CSSKeyframes.get(meta, `a`));
-            });
+        expect(CSSKeyframes.get(meta, `frames-b`), `frames-b symbol`).to.eql({
+            _kind: 'keyframes',
+            alias: 'frames-b',
+            name: 'frames-b',
+            global: undefined,
+            import: undefined,
         });
-        it('should collect global keyframes symbols', () => {
-            const { meta } = generateStylableResult({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: `entry`,
-                        content: `
-                        @keyframes st-global(name) {
-                            from{}
-                            to{}
-                        }
-                    `,
-                    },
-                },
-            });
-
-            expect(CSSKeyframes.get(meta, `name`)).to.eql({
-                _kind: 'keyframes',
-                alias: 'name',
-                name: 'name',
-                global: true,
-                import: undefined,
-            });
+        expect(CSSKeyframes.getAll(meta), `CSSKeyframes.getAll`).to.eql({
+            'frames-a': CSSKeyframes.get(meta, `frames-a`),
+            'frames-b': CSSKeyframes.get(meta, `frames-b`),
         });
-        describe(`st-import`, () => {
-            it(`should add imported keyframes symbols`, () => {
-                const { meta } = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: `entry`,
-                            content: `
-                            @st-import [keyframes(a, b-origin as b-local)] from "./path";
-                            `,
-                        },
-                    },
-                });
 
-                expect(CSSKeyframes.get(meta, `a`)).to.include({
-                    _kind: 'keyframes',
-                    name: 'a',
-                });
-                expect(CSSKeyframes.get(meta, `b-local`)).to.include({
-                    _kind: 'keyframes',
-                    name: 'b-origin',
-                    alias: 'b-local',
-                    global: undefined,
-                    import: meta.getImportStatements()[0],
-                });
-            });
+        // JS exports
+        expect(exports.keyframes[`frames-a`]).to.eql(`entry__frames-a`);
+        expect(exports.keyframes[`frames-b`]).to.eql(`entry__frames-b`);
+
+        // statements
+        expect(
+            CSSKeyframes.getKeyframesStatements(meta),
+            `CSSKeyframes.getKeyframesStatements(meta)`
+        ).to.containSubset([meta.ast.nodes[1], meta.ast.nodes[3]]);
+
+        // deprecation
+        ignoreDeprecationWarn(() => {
+            expect(meta.keyframes).to.eql(CSSKeyframes.getKeyframesStatements(meta));
         });
     });
-    describe(`transform`, () => {
-        it('should namespace @keyframes statements and "animation-name" values', () => {
-            const result = generateStylableRoot({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            /* @check(a statement) entry__a */
-                            @keyframes a {
-                                from {}
-                                to {}
-                            }
-                            
-                            /* @check(b statement) entry__b */
-                            @keyframes b {
-                                from {}
-                                to {}
-                            }
+    it(`should namespace "animation" and "animation-name" declarations`, () => {
+        const { sheets } = testStylableCore(`
+            .root {
+                /* @decl(name) animation-name: entry__abc */
+                animation-name: abc;
 
-                            /* @check(animation-name longhand) .entry__x {
-                                animation-name: entry__a;
-                            }*/
-                            .x {
-                                animation-name: a;
-                            }
+                /* @decl(single) animation: entry__abc */
+                animation: abc;
 
-                            /* @check(animation shorthand) .entry__x {
-                                animation: 2s entry__a infinite, 1s entry__b infinite;
-                            }*/
-                            .x {
-                                animation: 2s a infinite, 1s b infinite;
-                            }
-                        `,
-                    },
-                },
-            });
+                /* @decl(multiple) animation: 2s entry__abc infinite, 1s entry__def infinite */
+                animation: 2s abc infinite, 1s def infinite;
+            }
+            
+            @keyframes abc {
+                from{}
+                to{}
+            }
+            @keyframes def {
+                from{}
+                to{}
+            }
+        `);
 
-            testInlineExpects(result);
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it(`should mark as global`, () => {
+        const { sheets } = testStylableCore(`
+            /* @atrule name */
+            @keyframes st-global(name) {}    
+        
+            .root {
+                /* @decl animation-name: name */
+                animation-name: name;
+
+                /* @decl(single) animation: name */
+                animation: name;
+            }
+        `);
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+
+        // symbols
+        expect(CSSKeyframes.get(meta, `name`), `symbol`).to.eql({
+            _kind: 'keyframes',
+            alias: 'name',
+            name: 'name',
+            global: true,
+            import: undefined,
         });
-        it('should not namespace nested rules within keyframes', () => {
-            // ToDo: move transform filtering into feature
-            // ToDo: missing check for the nested rules filter in processor
-            // ToDo: make sure this is actually testing anything: "from" and "to" wouldn't be namespaces anyhow
-            const result = generateStylableRoot({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            @keyframes name {
-                                /* @check from */
-                                from {}
-                                /* @check to */
-                                to {}
-                            }
-                        `,
-                    },
-                },
-            });
 
-            testInlineExpects(result);
-        });
-        it('should not transform global keyframes', () => {
-            const result = generateStylableRoot({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        namespace: 'style',
-                        content: `
-                        /* @check global-name */
-                        @keyframes st-global(global-name) {
-                            from {}
-                            to {}
-                        }
-                        `,
-                    },
-                },
-            });
+        // JS exports
+        expect(exports.keyframes.name, `JS export`).to.eql(`name`);
+    });
+    it('should report invalid cases', () => {
+        const { sheets } = testStylableCore(`
+            /* @analyze-warn(empty name) ${CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME()} */
+            @keyframes {}
+            
+            /* @analyze-warn(empty global) ${CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL()} */
+            @keyframes st-global() {}
+        `);
 
-            testInlineExpects(result);
-        });
-        it('should report malformed syntax', () => {
-            const { sheets } = testStylableCore(`
-                /* @analyze-warn(empty name) ${CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME()} */
-                @keyframes {}
+        const { meta } = sheets['/entry.st.css'];
+
+        expect(meta.outputAst?.nodes[1]?.toString()).to.eql(`@keyframes {}`);
+    });
+    it('should report reserved @keyframes names', () => {
+        CSSKeyframes.reservedKeyFrames.map((reserved) => {
+            testStylableCore(`
+                /* @analyze-error(${reserved}) word(${reserved}) ${CSSKeyframes.diagnostics.KEYFRAME_NAME_RESERVED(
+                reserved
+            )} */
+                @keyframes ${reserved} {}
             `);
+        });
+    });
+    it(`should not namespace nested rules within @keyframes`, () => {
+        // ToDo: move transform filtering into feature
+        // ToDo: missing check for the nested rules filter in processor
+        // ToDo: make sure this is actually testing anything: "from" and "to" wouldn't be namespaces anyhow
+        const { sheets } = testStylableCore(`
+            @keyframes name {
+                /* @check from */
+                from {}
+                /* @check to */
+                to {}
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it(`should only be placed under root or conditional rules`, () => {
+        const { sheets } = testStylableCore(`
+            @keyframes on-root {}
+
+            @media (width-min: 1px) {
+                @keyframes on-media {}
+            }
+
+            @supports (display: grid) {
+                @keyframes on-supports {}
+            }
+
+            .root {
+                /* @analyze-error ${CSSKeyframes.diagnostics.ILLEGAL_KEYFRAMES_NESTING()} */
+                @keyframes not-valid {}
+            }
+        `);
+
+        expect(sheets[`/entry.st.css`].meta.diagnostics.reports.length).to.eql(1);
+    });
+    it.skip(`should escape invalid inputs`, () => {
+        const { sheets } = testStylableCore(
+            `
+            /* @check(statement) a\\|a__a */
+            @keyframes a {
+                from {}
+                to {}
+            }
+            
+            /* @check(decl) .a\\|a__x {
+                animation-name: a\\|a__a;
+            }*/
+            .x {
+                animation-name: a;
+            }
+        `,
+            {
+                stylableConfig: {
+                    resolveNamespace() {
+                        return `a|a`;
+                    },
+                },
+            }
+        );
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+
+        // JS exports
+        expect(exports.keyframes, `JS export`).to.eql({
+            a: 'a\\|a__a',
+        });
+    });
+    it(`should not conflict with other symbol types`, () => {
+        const { sheets } = testStylableCore(`
+            @keyframes anim {}
+
+            /* @rule .entry__anim */
+            .anim {
+                /* @decl animation: entry__anim */
+                animation: anim;
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    describe(`multiple @keyframes`, () => {
+        it(`should warn on redeclare keyframes in root`, () => {
+            testStylableCore(`
+                /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                @keyframes a {}
+
+                /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                @keyframes a {}
+            `);
+        });
+        it(`should warn on redeclare keyframes in identical @media nesting`, () => {
+            testStylableCore(`
+                @media (max-width: 1px) {
+                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    @keyframes a {}
+                }
+                @media (max-width: 1px) {
+                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    @keyframes a {}
+
+                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    @keyframes a {}
+                }
+            `);
+        });
+        it(`should not warn on redeclare keyframes under different @media`, () => {
+            const { sheets } = testStylableCore(`
+                @keyframes a {}
+
+                @media (max-width: 1px) {
+                    @keyframes a {}
+                }
+
+                @media (max-width: 2px) {
+                    @keyframes a {}
+                }
+            `);
+
+            shouldReportNoDiagnostics(sheets[`/entry.st.css`].meta);
+        });
+    });
+    describe(`st-import`, () => {
+        it(`should resolve imported @keyframes`, () => {
+            const { sheets } = testStylableCore({
+                '/imported.st.css': `
+                    @keyframes anim1 {}
+                    @keyframes anim2 {}
+                `,
+                '/entry.st.css': `
+                    @st-import [keyframes(anim1, anim2 as local-anim)] from './imported.st.css';
+
+                    .selector {
+                        /* @decl(direct) animation: imported__anim1 */
+                        animation: anim1;
+
+                        /* @decl(mapped) animation: imported__anim2 */
+                        animation: local-anim;
+                    }
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            expect(CSSKeyframes.get(meta, `anim1`), `anim1 symbol`).to.include({
+                _kind: 'keyframes',
+                name: 'anim1',
+                alias: 'anim1',
+                global: undefined,
+                import: meta.getImportStatements()[0],
+            });
+            expect(CSSKeyframes.get(meta, `local-anim`), `local-anim symbol`).to.include({
+                _kind: 'keyframes',
+                name: 'anim2',
+                alias: 'local-anim',
+                global: undefined,
+                import: meta.getImportStatements()[0],
+            });
+
+            // JS exports
+            expect(exports.keyframes, `JS exports`).to.eql({
+                anim1: `imported__anim1`,
+                'local-anim': `imported__anim2`,
+            });
+        });
+        it(`should resolve imported global @keyframes`, () => {
+            const { sheets } = testStylableCore({
+                '/imported.st.css': `
+                    @keyframes st-global(anim1) {}
+                    @keyframes st-global(anim2) {}
+                `,
+                '/entry.st.css': `
+                    @st-import [keyframes(anim1, anim2 as local-anim)] from './imported.st.css';
+
+                    .selector {
+                        /* @decl(direct) animation: anim1 */
+                        animation: anim1;
+
+                        /* @decl(mapped) animation: anim2 */
+                        animation: local-anim;
+                    }
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            expect(CSSKeyframes.get(meta, `anim1`), `anim1 symbol`).to.include({
+                _kind: 'keyframes',
+                name: 'anim1',
+                alias: 'anim1',
+                global: undefined,
+                import: meta.getImportStatements()[0],
+            });
+            expect(CSSKeyframes.get(meta, `local-anim`), `local-anim symbol`).to.include({
+                _kind: 'keyframes',
+                name: 'anim2',
+                alias: 'local-anim',
+                global: undefined,
+                import: meta.getImportStatements()[0],
+            });
+
+            // JS exports
+            expect(exports.keyframes, `JS exports`).to.eql({
+                anim1: `anim1`,
+                'local-anim': `anim2`,
+            });
+        });
+        it(`should override imported with local @keyframes`, () => {
+            const { sheets } = testStylableCore({
+                '/imported.st.css': `
+                    @keyframes before {}
+                    @keyframes after {}
+                `,
+                '/entry.st.css': `
+                    .root {
+                        /* @decl(before decl) animation: entry__before */
+                        animation: before;
+                    }
+
+                    /* 
+                        @atrule entry__before
+                        @analyze-warn(local before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                            `before`
+                        )}
+                    */
+                    @keyframes before {}
+                    
+                    /*
+                        @analyze-warn(import before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                            `before`
+                        )}
+                        @analyze-warn(import after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                            `after`
+                        )}
+                    */
+                    @st-import [keyframes(before, after)] from './import.st.css';
+                    
+                    /* 
+                        @atrule entry__after
+                        @analyze-warn(local after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                            `after`
+                        )}
+                    */
+                    @keyframes after {}
+
+                    .root {
+                        /* @decl(after decl) animation: entry__after */
+                        animation: after;
+                    }
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            // symbols
+            expect(CSSKeyframes.get(meta, `before`), `before symbol`).to.eql({
+                _kind: 'keyframes',
+                alias: 'before',
+                name: 'before',
+                global: undefined,
+                import: undefined,
+            });
+            expect(CSSKeyframes.get(meta, `after`), `after symbol`).to.eql({
+                _kind: 'keyframes',
+                alias: 'after',
+                name: 'after',
+                global: undefined,
+                import: undefined,
+            });
+
+            // JS exports
+            expect(exports.keyframes, `JS exports`).to.eql({
+                before: `entry__before`,
+                after: `entry__after`,
+            });
+        });
+        it(`should report unknown @keyframes import`, () => {
+            const { sheets } = testStylableCore({
+                '/imported.st.css': ``,
+                '/entry.st.css': `
+                    /* @transform-error word(unknown) ${CSSKeyframes.diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
+                        `unknown`,
+                        `./imported.st.css`
+                    )} */
+                    @st-import [keyframes(unknown as local)] from './imported.st.css';
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            // symbols
+            expect(CSSKeyframes.get(meta, `local`), `symbol`).to.include({
+                _kind: 'keyframes',
+                name: 'unknown',
+                alias: 'local',
+                global: undefined,
+                import: meta.getImportStatements()[0],
+            });
+
+            // JS exports
+            expect(exports.keyframes, `JS exports`).to.eql({});
+        });
+        it(`should not conflict with other imported symbol types`, () => {
+            const { sheets } = testStylableCore({
+                '/imported.st.css': `
+                    .anim {}
+                    @keyframes anim {}
+                `,
+                '/entry.st.css': `
+                    @st-import [anim, keyframes(anim)] from './imported.st.css';
+                    
+                    /* @rule .entry__root .imported__anim */
+                    .root .anim {
+                        /* @decl animation: imported__anim */
+                        animation: anim;
+                    }
+                `,
+            });
 
             const { meta } = sheets['/entry.st.css'];
 
-            expect(meta.outputAst?.nodes[1]?.toString()).to.eql(`@keyframes {}`);
-        });
-        describe(`st-import`, () => {
-            it('should namespace imported animation and animation name', () => {
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                @st-import [keyframes(anim1, anim2 as anim3)] from './imported.st.css';
-                                /* @check .entry__selector {
-                                    animation: 2s imported__anim1 infinite, 1s imported__anim2 infinite;
-                                    animation-name: imported__anim1
-                                } */
-                                .selector {
-                                    animation: 2s anim1 infinite, 1s anim3 infinite;
-                                    animation-name: anim1;
-                                }
-    
-                            `,
-                        },
-                        '/imported.st.css': {
-                            namespace: 'imported',
-                            content: `
-                                @keyframes anim1 {
-                                    from {}
-                                    to {}
-                                }
-    
-                                @keyframes anim2 {
-                                    from {}
-                                    to {}
-                                }
-    
-                            `,
-                        },
-                    },
-                });
-
-                testInlineExpects(result);
-            });
-            it('should import global keyframes', () => {
-                const config = {
-                    entry: `/style.st.css`,
-                    files: {
-                        '/style.st.css': {
-                            namespace: 'style',
-                            content: `
-                            @st-import [keyframes(globalName)] from "./a.st.css";
-    
-                            /* @check .style__x {animation-name: globalName;} */
-                            .x {
-                                animation-name: globalName;
-                            }
-                            `,
-                        },
-                        '/a.st.css': {
-                            namespace: 'a',
-                            content: `
-                            @keyframes st-global(globalName) {
-                                from {}
-                                to {}
-                            }
-                            `,
-                        },
-                    },
-                };
-
-                testInlineExpects(generateStylableRoot(config));
-                expectTransformDiagnostics(config, []);
-            });
-            it('should import global keyframes with mapped local name', () => {
-                const config = {
-                    entry: `/style.st.css`,
-                    files: {
-                        '/style.st.css': {
-                            namespace: 'style',
-                            content: `
-                            @st-import [keyframes(globalName as bar)] from "./a.st.css";
-    
-                            /* @check .style__foo {animation-name: globalName;} */
-                            .foo {
-                                animation-name: bar;
-                            }
-                            `,
-                        },
-                        '/a.st.css': {
-                            namespace: 'a',
-                            content: `
-                            @keyframes st-global(globalName) {
-                                from {}
-                                to {}
-                            }
-                            
-                            `,
-                        },
-                    },
-                };
-
-                testInlineExpects(generateStylableRoot(config));
-                expectTransformDiagnostics(config, []);
-            });
-            it('should not conflict with other named parts', () => {
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                @st-import [anim1, keyframes(anim1)] from './imported.st.css';
-                                /* @check .entry__selector {
-                                    animation: 2s imported__anim1 infinite;
-                                    animation-name: imported__anim1;
-                                } */
-                                .selector {
-                                    animation: 2s anim1 infinite;
-                                    animation-name: anim1;
-                                }
-                                /* @check .imported__anim1 */
-                                .anim1{}
-                            `,
-                        },
-                        '/imported.st.css': {
-                            namespace: 'imported',
-                            content: `
-                                @keyframes anim1 {
-                                    from {}
-                                    to {}
-                                }
-                                .anim1 {}
-                            `,
-                        },
-                    },
-                });
-                testInlineExpects(result);
-            });
-            it(`should override import with local statement`, () => {
-                const root = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: `entry`,
-                            content: `
-                                /* @check entry__before */
-                                @keyframes before {}
-
-                                @st-import [keyframes(before, after)] from './import.st.css';
-                                
-                                /* @check entry__after */
-                                @keyframes after {}
-                            `,
-                        },
-                        '/import.st.css': {
-                            namespace: `import`,
-                            content: `
-                            @keyframes before {}
-                            @keyframes after {}`,
-                        },
-                    },
-                });
-
-                testInlineExpects(root);
-            });
-            describe(`JS exports`, () => {
-                it('should contain local keyframes', () => {
-                    const cssExports = generateStylableExports({
-                        entry: '/entry.st.css',
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    @keyframes name {
-        
-                                    }
-                                `,
-                            },
-                        },
-                    });
-
-                    expect(cssExports.keyframes).to.eql({
-                        name: 'entry__name',
-                    });
-                });
-                it('should contain imported keyframes', () => {
-                    const cssExports = generateStylableExports({
-                        entry: '/entry.st.css',
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    @st-import [keyframes(name)] from "./imported.st.css";
-                                `,
-                            },
-                            '/imported.st.css': {
-                                namespace: 'imported',
-                                content: `
-                                    @keyframes name {}
-                                `,
-                            },
-                        },
-                    });
-
-                    expect(cssExports.keyframes).to.eql({
-                        name: 'imported__name',
-                    });
-                });
-                it('should contain imported keyframe with mapped local name', () => {
-                    const cssExports = generateStylableExports({
-                        entry: '/entry.st.css',
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    @st-import [keyframes(name as myName)] from "./imported.st.css";
-                                `,
-                            },
-                            '/imported.st.css': {
-                                namespace: 'imported',
-                                content: `
-                                    @keyframes name {}
-                                `,
-                            },
-                        },
-                    });
-
-                    expect(cssExports.keyframes).to.eql({
-                        myName: 'imported__name',
-                    });
-                });
-                it('should have local keyframes override imported ones', () => {
-                    const cssExports = generateStylableExports({
-                        entry: '/entry.st.css',
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                    @st-import [keyframes(name)] from "./imported.st.css";
-                                    @keyframes name {}
-                                `,
-                            },
-                            '/imported.st.css': {
-                                namespace: 'imported',
-                                content: `
-                                    @keyframes name {}
-                                `,
-                            },
-                        },
-                    });
-
-                    expect(cssExports.keyframes).to.eql({
-                        name: 'entry__name',
-                    });
-                });
-                it('should not namespace imported global keyframes', () => {
-                    const config = {
-                        entry: `/style.st.css`,
-                        files: {
-                            '/style.st.css': {
-                                namespace: 'style',
-                                content: `
-                                @keyframes st-global(globalName) {
-                                    from {}
-                                    to {}
-                                }
-                                `,
-                            },
-                        },
-                    };
-
-                    const cssExports = generateStylableExports(config);
-
-                    expect(cssExports.keyframes).to.eql({
-                        globalName: 'globalName',
-                    });
-                });
-            });
-        });
-        describe(`escape`, () => {
-            it.skip(`should escape invalid inputs`, () => {
-                const { meta, exports } = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'a|a',
-                            content: `
-                                /* @check(statement) a\\|a__a */
-                                @keyframes a {
-                                    from {}
-                                    to {}
-                                }
-                                
-                                /* @check(decl) .a\\|a__x {
-                                    animation-name: a\\|a__a;
-                                }*/
-                                .x {
-                                    animation-name: a;
-                                }
-                            `,
-                        },
-                    },
-                });
-
-                testInlineExpects(meta.outputAst!);
-                expect(exports.keyframes, `JS export`).to.eql({
-                    a: 'a\\|a__a',
-                });
-            });
-        });
-    });
-    describe(`diagnostics`, () => {
-        it('should warn on missing keyframes name', () => {
-            expectAnalyzeDiagnostics(`|@keyframes |{}`, [
-                {
-                    message: CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME(),
-                    severity: `warning`,
-                    file: '/entry.st.css',
-                },
-            ]);
-        });
-        it('should not allow reserved words as @keyframes name', () => {
-            CSSKeyframes.reservedKeyFrames.map((key) => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |@keyframes $${key}$| {
-                        from {}
-                        to {}
-                    },
-                `,
-                    [
-                        {
-                            message: CSSKeyframes.diagnostics.KEYFRAME_NAME_RESERVED(key),
-                            severity: `error`,
-                            file: '/entry.st.css',
-                        },
-                    ]
-                );
-            });
-        });
-        it('should warn on missing keyframes parameter inside st-global', () => {
-            const meta = expectAnalyzeDiagnostics(`|@keyframes st-global()| {}`, [
-                {
-                    message: CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(),
-                    severity: `warning`,
-                    file: '/entry.st.css',
-                },
-            ]);
-            expect(CSSKeyframes.getAll(meta), `no keyframes symbols`).to.eql({});
-        });
-        it('should error when not directly placed under root or conditional rules', () => {
-            expectAnalyzeDiagnostics(
-                `
-                @keyframes on-root {}
-                @media (width-min: 1px) {
-                    @keyframes on-media {}
-                }
-                @supports (display: grid) {
-                    @keyframes on-supports {}
-                }
-                .root {
-                    |@keyframes not-valid| {}
-                }
-                `,
-                [
-                    {
-                        message: CSSKeyframes.diagnostics.ILLEGAL_KEYFRAMES_NESTING(),
-                        severity: `error`,
-                        file: '/entry.st.css',
-                    },
-                ]
-            );
-        });
-        it('should warn on redeclare keyframes in root', () => {
-            expectAnalyzeDiagnostics(
-                `
-                |@keyframes a|{}
-                @keyframes a{}
-                `,
-                [
-                    {
-                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
-                        severity: `warning`,
-                        file: '/entry.st.css',
-                    },
-                    {
-                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
-                        severity: `warning`,
-                        file: '/entry.st.css',
-                        skipLocationCheck: true,
-                    },
-                ]
-            );
-        });
-        it('should warn on redeclare keyframes in the identical @media nesting', () => {
-            expectAnalyzeDiagnostics(
-                `
-                @media (max-width: 1px) {
-                    |@keyframes a|{}
-                }
-                @media (max-width: 1px) {
-                    @keyframes a{}
-                    @keyframes a{}
-                }
-                `,
-                [
-                    {
-                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
-                        severity: `warning`,
-                        file: '/entry.st.css',
-                    },
-                    {
-                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
-                        severity: `warning`,
-                        file: '/entry.st.css',
-                        skipLocationCheck: true,
-                    },
-                    {
-                        message: STSymbol.diagnostics.REDECLARE_SYMBOL(`a`),
-                        severity: `warning`,
-                        file: '/entry.st.css',
-                        skipLocationCheck: true,
-                    },
-                ]
-            );
-        });
-        it('should not warn on redeclare keyframes under different @media at-rules', () => {
-            expectAnalyzeDiagnostics(
-                `
-                @keyframes a{}
-                @media (max-width: 1px) {
-                    @keyframes a{}
-                }
-                @media (max-width: 2px) {
-                    @keyframes a{}
-                }
-                `,
-                []
-            );
-        });
-        describe(`st-import`, () => {
-            it(`should warn on conflict with local @keyframes`, () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |@st-import [keyframes(a)] from "./x.st.css"|;
-                    @keyframes a{}
-                    @media (max-width: 1px) {
-                        @keyframes a{}
-                    }`,
-                    [
-                        {
-                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
-                            severity: `warning`,
-                            file: '/entry.st.css',
-                        },
-                        {
-                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
-                            severity: `warning`,
-                            file: '/entry.st.css',
-                            skipLocationCheck: true,
-                        },
-                        {
-                            message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
-                            severity: `warning`,
-                            file: '/entry.st.css',
-                            skipLocationCheck: true,
-                        },
-                    ]
-                );
-            });
-            it(`should error on unknown imported keyframes symbol`, () => {
-                expectTransformDiagnostics(
-                    {
-                        entry: `/main.st.css`,
-                        files: {
-                            '/main.st.css': {
-                                content: `
-                                |@st-import [keyframes($unknown$ as local)] from "./import.st.css"|;
-                            `,
-                            },
-                            '/import.st.css': {
-                                content: ``,
-                            },
-                        },
-                    },
-                    [
-                        {
-                            message: CSSKeyframes.diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
-                                `unknown`,
-                                `./import.st.css`
-                            ),
-                            severity: `error`,
-                            file: `/main.st.css`,
-                        },
-                    ]
-                );
-            });
+            shouldReportNoDiagnostics(meta);
         });
     });
 });

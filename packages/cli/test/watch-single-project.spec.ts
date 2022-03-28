@@ -6,13 +6,21 @@ import {
     loadDirSync,
     populateDirectorySync,
     writeToExistingFile,
+    createTempDirectory,
+    ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { realpathSync, renameSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
+import { realpathSync, renameSync, rmdirSync, unlinkSync, promises } from 'fs';
 import { join, sep } from 'path';
 
-describe('Stylable Cli Watch - Single project', () => {
+const { writeFile } = promises;
+
+describe('Stylable Cli Watch - Single project', function () {
+    /**
+     * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
+     */
+    this.retries(2);
+
     let tempDir: ITempDirectory;
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
@@ -44,7 +52,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'depend.st.css'),
                             '.root{ color:yellow; }'
                         );
@@ -85,7 +93,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'deep.st.css'),
                             ':vars { color: green; }'
                         );
@@ -112,7 +120,10 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
+                        return writeFile(
+                            join(tempDir.path, 'style.st.css'),
+                            `.root{ color:green }`
+                        );
                     },
                 },
                 {
@@ -144,7 +155,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeFileSync(join(tempDir.path, 'asset.svg'), getSvgContent(NEW_SIZE));
+                        return writeFile(join(tempDir.path, 'asset.svg'), getSvgContent(NEW_SIZE));
                     },
                 },
                 {
@@ -329,7 +340,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
                             ` 
                                 /* The import stays so it should get reported again */
@@ -362,13 +373,16 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
+                        return writeFile(
+                            join(tempDir.path, 'style.st.css'),
+                            `.root{ color:green }`
+                        );
                     },
                 },
                 {
                     msg: buildMessages.FINISHED_PROCESSING(1),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
                             `.root{ color:blue }`
                         );
@@ -377,7 +391,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.FINISHED_PROCESSING(1),
                     action() {
-                        writeFileSync(join(tempDir.path, 'comp.st.css'), `.root{ color:green }`);
+                        return writeFile(join(tempDir.path, 'comp.st.css'), `.root{ color:green }`);
                     },
                 },
                 {
@@ -438,7 +452,7 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'src', 'style.st.css'),
                             `.root{ 
                                 color:red;
@@ -495,13 +509,13 @@ describe('Stylable Cli Watch - Single project', () => {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        writeToExistingFile(join(tempDir.path, 'style.st.css'), `.root;{}`);
+                        return writeToExistingFile(join(tempDir.path, 'style.st.css'), `.root;{}`);
                     },
                 },
                 {
                     msg: errorMessages.STYLABLE_PROCESS(join(tempDir.path, 'style.st.css')),
                     action() {
-                        writeToExistingFile(
+                        return writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
                             `.root{ color:green }`
                         );

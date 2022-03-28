@@ -1,10 +1,7 @@
 import cloneDeepWith from 'lodash.clonedeepwith';
 import postcssValueParser from 'postcss-value-parser';
-import type { StylableMeta } from './stylable-meta';
-import type { StylableResolver } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
 import type { ParsedValue } from './types';
-import { STSymbol } from './features';
 
 export interface Box<Type extends string, Value> {
     type: Type;
@@ -37,6 +34,7 @@ export type BoxedValueArray = Array<string | Box<string, unknown>>;
 type CustomTypes = Record<string, CustomValueExtension<any>>;
 
 export interface CustomValueExtension<T> {
+    flattenValue?: FlattenValue<T>;
     evalVarAst(
         valueAst: ParsedValue,
         customTypes: {
@@ -148,35 +146,16 @@ export interface JSValueExtension<Value> {
     register(localTypeSymbol: string): CustomValueExtension<Value>;
 }
 
+type FlattenValue<Value> = (v: Box<string, Value>) => {
+    parts: Array<string | Box<string, unknown>>;
+    delimiter: ',' | ' ';
+};
+
 interface ExtensionApi<Value, Args> {
     processArgs: (fnNode: ParsedValue, customTypes: CustomTypes) => Args;
     createValue: (args: Args) => Value;
     getValue: (v: Value, key: string) => string | Box<string, unknown>;
-    flattenValue?: (v: Box<string, Value>) => {
-        parts: Array<string | Box<string, unknown>>;
-        delimiter: ',' | ' ';
-    };
-}
-
-export function resolveCustomValues(meta: StylableMeta, resolver: StylableResolver) {
-    const customValues = { ...stTypes };
-    for (const [symbolName, symbol] of Object.entries(STSymbol.getAll(meta))) {
-        if (symbol._kind !== 'import') {
-            continue;
-        }
-        const ss = resolver.resolveImport(symbol);
-        if (!ss || ss._kind === 'css') {
-            continue;
-        }
-        if (ss.symbol && isCustomValue(ss.symbol)) {
-            if (customValues[symbolName]) {
-                // TODO: report reserved name.!
-            } else {
-                customValues[symbolName] = ss.symbol.register(symbolName);
-            }
-        }
-    }
-    return customValues;
+    flattenValue?: FlattenValue<Value>;
 }
 
 export function createCustomValue<Value, Args>({
@@ -189,6 +168,7 @@ export function createCustomValue<Value, Args>({
         _kind: 'CustomValue',
         register(localTypeSymbol: string) {
             return {
+                flattenValue,
                 evalVarAst(fnNode: ParsedValue, customTypes: CustomTypes) {
                     const args = processArgs(fnNode, customTypes);
                     return box(localTypeSymbol, createValue(args));
@@ -235,5 +215,5 @@ export function getBoxValue(
 }
 
 export function isCustomValue(symbol: any): symbol is JSValueExtension<unknown> {
-    return symbol._kind === 'CustomValue';
+    return symbol?._kind === 'CustomValue';
 }

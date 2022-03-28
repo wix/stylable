@@ -15,8 +15,8 @@
       "type": "pwa-node",
       "request": "launch",
       "name": "Mocha Current",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": ["--timeout", "999999", "packages/*/dist/**/${fileBasenameNoExtension}.js"],
+      "program": "${workspaceFolder}/scripts/test-runner.js",
+      "args": ["--glob", "packages/*/dist/**/${fileBasenameNoExtension}.js", "--timeout", "999999"],
       "runtimeArgs": ["--enable-source-maps"],
       "preLaunchTask": "npm: build",
       "internalConsoleOptions": "openOnSessionStart",
@@ -26,27 +26,6 @@
         "FILE": "${file}",
         "CLI_WATCH_TEST_TIMEOUT": "999999"
       }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Plugin Mocha Tests",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": [
-        "${workspaceFolder}/packages/webpack-plugin/test/**/**.spec.{ts,tsx}",
-        "--timeout",
-        "999999"
-      ],
-      "internalConsoleOptions": "openOnSessionStart"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "CLI Mocha Tests",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "cwd": "${workspaceFolder}/packages/cli",
-      "args": ["${workspaceFolder}/packages/cli/test/**/**.spec.{ts,tsx}", "--timeout", "999999"],
-      "internalConsoleOptions": "openOnSessionStart"
     }
   ]
 }

@@ -1,4 +1,5 @@
 import {
+    promises,
     readdirSync,
     readFileSync,
     statSync,
@@ -11,12 +12,20 @@ import { fork, spawnSync, ChildProcess } from 'child_process';
 import { on } from 'events';
 import { join, relative } from 'path';
 import type { Readable } from 'stream';
+import rimrafCb from 'rimraf';
+import { promisify } from 'util';
+
+const { writeFile, mkdir } = promises;
+
+const rimraf = promisify(rimrafCb);
+
+const rootTempDir = join(__dirname, '..', '..', '..', '.temp');
+
+type ActionResponse = void | { sleep?: number };
 
 interface Step {
     msg: string;
-    action?: () => void | {
-        sleep?: number;
-    };
+    action?: () => ActionResponse | Promise<ActionResponse>;
 }
 
 interface ProcessCliOutputParams {
@@ -73,7 +82,7 @@ export function createCliTester() {
                     });
 
                     if (step.action) {
-                        const { sleep } = step.action() || {};
+                        const { sleep } = (await step.action()) || {};
 
                         if (typeof sleep === 'number') {
                             await onTimeout(sleep);
@@ -118,7 +127,7 @@ async function* readLines(readable: Readable) {
 
 export function writeToExistingFile(filePath: string, content: string) {
     if (existsSync(filePath)) {
-        writeFileSync(filePath, content);
+        return writeFile(filePath, content);
     } else {
         throw new Error(`file ${filePath} does not exist`);
     }
@@ -228,4 +237,47 @@ export function populateDirectorySync(
 
 export function escapeRegExp(str: string) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export interface ITempDirectorySync {
+    /**
+     * Absolute path to created directory.
+     */
+    path: string;
+
+    /**
+     * Remove the directory and all its contents.
+     */
+    remove(): void;
+}
+
+export function createTempDirectorySync(prefix = 'temp-'): ITempDirectorySync {
+    const tempDir = join(rootTempDir, prefix + Math.random().toString(36).substring(2));
+    mkdirSync(tempDir, { recursive: true });
+    return {
+        path: tempDir,
+        remove: () => rimrafCb.sync(tempDir),
+    };
+}
+
+export interface ITempDirectory {
+    /**
+     * Absolute path to created directory.
+     */
+    path: string;
+
+    /**
+     * Remove the directory and all its contents.
+     */
+    remove(): Promise<void>;
+}
+
+export async function createTempDirectory(prefix = 'temp-'): Promise<ITempDirectory> {
+    const path = join(rootTempDir, prefix + Math.random().toString(36).substring(2));
+    await mkdir(path, { recursive: true });
+
+    return {
+        path,
+        remove: () => rimraf(path),
+    };
 }
