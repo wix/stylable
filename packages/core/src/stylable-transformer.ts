@@ -19,8 +19,7 @@ import {
 import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
 import { namespace } from './helpers/namespace';
 import { getOriginDefinition } from './helpers/resolve';
-import { appendMixins } from './stylable-mixins';
-import type { ClassSymbol, ElementSymbol } from './features';
+import { ClassSymbol, ElementSymbol, STMixin } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
@@ -32,7 +31,7 @@ import {
     CSSKeyframes,
     CSSCustomProperty,
 } from './features';
-import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
+import type { SDecl } from './deprecated/postcss-ast-extension';
 import {
     CSSResolve,
     StylableResolverCache,
@@ -157,7 +156,6 @@ export class StylableTransformer {
         STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(meta.outputAst, meta, metaExports);
-        STGlobal.hooks.transformLastPass({ context });
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -257,17 +255,18 @@ export class StylableTransformer {
         if (!mixinTransform && meta.outputAst && this.mode === 'development') {
             this.addDevRules(meta);
         }
-        ast.walkRules((rule) =>
-            appendMixins(
-                transformContext,
-                this,
-                rule as SRule,
-                meta,
-                tsVarOverride || {},
-                cssVarsMapping,
-                path
-            )
-        );
+
+        const lastPathParams = {
+            context: transformContext,
+            ast,
+            transformer: this,
+            cssVarsMapping,
+            path,
+        };
+        STMixin.hooks.transformLastPass(lastPathParams);
+        if (!mixinTransform) {
+            STGlobal.hooks.transformLastPass(lastPathParams);
+        }
 
         if (metaExports) {
             CSSClass.hooks.transformJSExports({

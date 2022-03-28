@@ -10,7 +10,6 @@ import {
     transformerWarnings,
     nativePseudoElements,
 } from '@stylable/core';
-import { mixinWarnings } from '@stylable/core/dist/stylable-mixins';
 import { valueDiagnostics } from '@stylable/core/dist/helpers/value';
 import { STImport, CSSClass, CSSType, STVar, STMixin } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
@@ -410,7 +409,10 @@ describe('diagnostics: warnings and errors', () => {
                         skip: true,
                         skipLocationCheck: true,
                     },
-                    { message: mixinWarnings.UNKNOWN_MIXIN_SYMBOL('my-mixin'), file: '/main.css' },
+                    {
+                        message: STMixin.mixinWarnings.UNKNOWN_MIXIN_SYMBOL('my-mixin'),
+                        file: '/main.css',
+                    },
                 ]);
             });
 
@@ -435,12 +437,12 @@ describe('diagnostics: warnings and errors', () => {
                 const yPath = [`x from ${mainPath}`, `y from ${mainPath}`];
                 expectTransformDiagnostics(config, [
                     {
-                        message: mixinWarnings.CIRCULAR_MIXIN(xPath),
+                        message: STMixin.mixinWarnings.CIRCULAR_MIXIN(xPath),
                         file: '/main.css',
                         skipLocationCheck: true,
                     },
                     {
-                        message: mixinWarnings.CIRCULAR_MIXIN(yPath),
+                        message: STMixin.mixinWarnings.CIRCULAR_MIXIN(yPath),
                         file: '/main.css',
                         skipLocationCheck: true,
                     },
@@ -473,7 +475,7 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectTransformDiagnostics(config, [
                     {
-                        message: mixinWarnings.FAILED_TO_APPLY_MIXIN('bug in mixin'),
+                        message: STMixin.mixinWarnings.FAILED_TO_APPLY_MIXIN('bug in mixin'),
                         file: '/main.css',
                     },
                 ]);
@@ -505,7 +507,7 @@ describe('diagnostics: warnings and errors', () => {
                 };
 
                 expectTransformDiagnostics(config, [
-                    { message: mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' },
+                    { message: STMixin.mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' },
                 ]);
             });
 
