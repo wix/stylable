@@ -34,7 +34,7 @@ export function unbox<B extends Box<string, unknown>>(
     node?: ParsedValue
 ): any {
     if (typeof boxed === 'string') {
-        return unboxPrimitives ? boxed : box('string', boxed);
+        return unboxPrimitives ? boxed : box('string', boxed, boxed);
     } else if (typeof boxed === 'object' && boxed !== null) {
         const customValue = customValues?.[boxed.type];
         let value = boxed.value;

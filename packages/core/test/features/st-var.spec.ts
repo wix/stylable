@@ -1300,7 +1300,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.a).to.containSubset({
                 value: 'red',
                 input: {
-                    flatValue: undefined,
+                    flatValue: 'red',
                     type: 'string',
                     value: 'red',
                 },
@@ -1309,7 +1309,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.b).to.containSubset({
                 value: 'blue',
                 input: {
-                    flatValue: undefined,
+                    flatValue: 'blue',
                     type: 'string',
                     value: 'blue',
                 },
@@ -1321,12 +1321,12 @@ describe(`features/st-var`, () => {
                     type: 'st-array',
                     value: [
                         {
-                            flatValue: undefined,
+                            flatValue: 'red',
                             type: 'string',
                             value: 'red',
                         },
                         {
-                            flatValue: undefined,
+                            flatValue: 'gold',
                             type: 'string',
                             value: 'gold',
                         },
@@ -1362,7 +1362,7 @@ describe(`features/st-var`, () => {
                         flatValue: undefined,
                         value: {
                             b: {
-                                flatValue: undefined,
+                                flatValue: 'red',
                                 type: 'string',
                                 value: 'red',
                             },
@@ -1433,7 +1433,7 @@ describe(`features/st-var`, () => {
                     flatValue: undefined,
                     value: [
                         {
-                            flatValue: undefined,
+                            flatValue: 'blue',
                             type: 'string',
                             value: 'blue',
                         },
@@ -1497,7 +1497,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.imported).to.containSubset({
                 value: 'red',
                 input: {
-                    flatValue: undefined,
+                    flatValue: 'red',
                     type: 'string',
                     value: 'red',
                 },
@@ -1506,7 +1506,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.a).to.containSubset({
                 value: 'red',
                 input: {
-                    flatValue: undefined,
+                    flatValue: 'red',
                     type: 'string',
                     value: 'red',
                 },
@@ -1543,7 +1543,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.validBefore).to.containSubset({
                 value: 'red',
                 input: {
-                    flatValue: undefined,
+                    flatValue: 'red',
                     type: 'string',
                     value: 'red',
                 },
@@ -1552,7 +1552,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.validAfter).to.containSubset({
                 value: 'green',
                 input: {
-                    flatValue: undefined,
+                    flatValue: 'green',
                     type: 'string',
                     value: 'green',
                 },
@@ -1561,7 +1561,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.invalid).to.containSubset({
                 value: 'invalid-func(imported)',
                 input: {
-                    flatValue: undefined,
+                    flatValue: 'invalid-func(imported)',
                     type: 'string',
                     value: 'invalid-func(imported)',
                 },
@@ -1596,7 +1596,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.border).to.containSubset({
                 value: '',
                 input: {
-                    flatValue: undefined,
+                    flatValue: '',
                     type: 'string',
                     value: '',
                 },
