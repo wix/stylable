@@ -1299,19 +1299,38 @@ describe(`features/st-var`, () => {
             expect(Object.keys(computedVars)).to.eql(['a', 'b', 'c']);
             expect(computedVars.a).to.containSubset({
                 value: 'red',
-                input: undefined,
+                input: {
+                    flatValue: undefined,
+                    type: 'string',
+                    value: 'red',
+                },
                 diagnostics: { reports: [] },
             });
             expect(computedVars.b).to.containSubset({
                 value: 'blue',
-                input: undefined,
+                input: {
+                    flatValue: undefined,
+                    type: 'string',
+                    value: 'blue',
+                },
                 diagnostics: { reports: [] },
             });
             expect(computedVars.c).to.containSubset({
                 value: ['red', 'gold'],
                 input: {
                     type: 'st-array',
-                    value: ['red', 'gold'],
+                    value: [
+                        {
+                            flatValue: undefined,
+                            type: 'string',
+                            value: 'red',
+                        },
+                        {
+                            flatValue: undefined,
+                            type: 'string',
+                            value: 'gold',
+                        },
+                    ],
                 },
                 diagnostics: { reports: [] },
             });
@@ -1328,24 +1347,28 @@ describe(`features/st-var`, () => {
             const computedVars = stylable.stVar.getComputed(meta);
 
             expect(Object.keys(computedVars)).to.eql(['map']);
-            expect(computedVars.map).to.containSubset({
+            expect(computedVars.map.diagnostics.reports.length).to.eql(0);
+            expect(computedVars.map.value).to.eql({
+                a: {
+                    b: 'red',
+                },
+            });
+            expect(computedVars.map.input).to.eql({
+                type: 'st-map',
+                flatValue: undefined,
                 value: {
                     a: {
-                        b: 'red',
-                    },
-                },
-                input: {
-                    type: 'st-map',
-                    value: {
-                        a: {
-                            type: 'st-map',
-                            value: {
-                                b: 'red',
+                        type: 'st-map',
+                        flatValue: undefined,
+                        value: {
+                            b: {
+                                flatValue: undefined,
+                                type: 'string',
+                                value: 'red',
                             },
                         },
                     },
                 },
-                diagnostics: { reports: [] },
             });
         });
 
@@ -1369,7 +1392,7 @@ describe(`features/st-var`, () => {
             expect(computedVars.border).to.containSubset({
                 value: '1px solid red',
                 input: {
-                    type: 'stBorder',
+                    type: 'createBorder',
                     flatValue: '1px solid red',
                     value: {
                         color: 'red',
@@ -1387,8 +1410,12 @@ describe(`features/st-var`, () => {
                 @st-import [stBorder] from './st-border.js';
 
                 :vars {
-                    array: st-array(red, stBorder(1px, solid, blue));
-                    map: st-map(border stBorder(1px, solid, value(array, 0)));
+                    array: st-array(blue, stBorder(1px, solid, blue));
+                    map: st-map(
+                            border stBorder(value(array, 1, size), 
+                            solid, 
+                            value(array, 0))
+                        );
                 }
                 `,
                 // Stylable custom value
@@ -1400,12 +1427,16 @@ describe(`features/st-var`, () => {
 
             expect(Object.keys(computedVars)).to.eql(['array', 'map']);
             expect(computedVars.array).to.containSubset({
-                value: ['red', '1px solid blue'],
+                value: ['blue', '1px solid blue'],
                 input: {
                     type: 'st-array',
                     flatValue: undefined,
                     value: [
-                        'red',
+                        {
+                            flatValue: undefined,
+                            type: 'string',
+                            value: 'blue',
+                        },
                         {
                             type: 'stBorder',
                             flatValue: '1px solid blue',
@@ -1421,7 +1452,7 @@ describe(`features/st-var`, () => {
             });
             expect(computedVars.map).to.containSubset({
                 value: {
-                    border: '1px solid red',
+                    border: '1px solid blue',
                 },
                 input: {
                     type: 'st-map',
@@ -1429,9 +1460,9 @@ describe(`features/st-var`, () => {
                     value: {
                         border: {
                             type: 'stBorder',
-                            flatValue: '1px solid red',
+                            flatValue: '1px solid blue',
                             value: {
-                                color: 'red',
+                                color: 'blue',
                                 size: '1px',
                                 style: 'solid',
                             },
@@ -1465,12 +1496,20 @@ describe(`features/st-var`, () => {
             expect(Object.keys(computedVars)).to.eql(['imported', 'a', 'b']);
             expect(computedVars.imported).to.containSubset({
                 value: 'red',
-                input: undefined,
+                input: {
+                    flatValue: undefined,
+                    type: 'string',
+                    value: 'red',
+                },
                 diagnostics: { reports: [] },
             });
             expect(computedVars.a).to.containSubset({
                 value: 'red',
-                input: undefined,
+                input: {
+                    flatValue: undefined,
+                    type: 'string',
+                    value: 'red',
+                },
                 diagnostics: { reports: [] },
             });
             expect(computedVars.b).to.containSubset({
@@ -1503,21 +1542,68 @@ describe(`features/st-var`, () => {
             expect(Object.keys(computedVars)).to.eql(['validBefore', 'invalid', 'validAfter']);
             expect(computedVars.validBefore).to.containSubset({
                 value: 'red',
-                input: undefined,
+                input: {
+                    flatValue: undefined,
+                    type: 'string',
+                    value: 'red',
+                },
                 diagnostics: { reports: [] },
             });
             expect(computedVars.validAfter).to.containSubset({
                 value: 'green',
-                input: undefined,
+                input: {
+                    flatValue: undefined,
+                    type: 'string',
+                    value: 'green',
+                },
                 diagnostics: { reports: [] },
             });
             expect(computedVars.invalid).to.containSubset({
                 value: 'invalid-func(imported)',
-                input: undefined,
+                input: {
+                    flatValue: undefined,
+                    type: 'string',
+                    value: 'invalid-func(imported)',
+                },
                 diagnostics: {
                     reports: [
                         {
                             message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
+                            type: 'warning',
+                        },
+                    ],
+                },
+            });
+        });
+
+        it('should emit diagnostics only on invalid custom st-vars', () => {
+            const { stylable, sheets } = testStylableCore({
+                '/entry.st.css': `
+                    @st-import [stBorder] from './st-border.js';
+
+                    :vars {
+                        border: stBorder(st-array(1px, 2px), solid, red);
+                    }
+                `,
+                // Stylable custom value
+                '/st-border.js': stBorderDefinitionMock,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            const computedVars = stylable.stVar.getComputed(meta);
+
+            expect(computedVars.border).to.containSubset({
+                value: '',
+                input: {
+                    flatValue: undefined,
+                    type: 'string',
+                    value: '',
+                },
+                diagnostics: {
+                    reports: [
+                        {
+                            message: STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(),
                             type: 'warning',
                         },
                     ],

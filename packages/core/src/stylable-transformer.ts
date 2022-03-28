@@ -204,6 +204,7 @@ export class StylableTransformer {
                     node: atRule,
                     valueHook: this.replaceValueHook,
                     passedThrough: path.slice(),
+                    evaluatorNode: atRule,
                 }).outputValue;
             } else if (name === 'property') {
                 CSSCustomProperty.hooks.transformAtRuleNode({

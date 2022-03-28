@@ -1,5 +1,5 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import { Box, deprecatedStFunctions } from '../custom-values';
+import { unbox, Box, deprecatedStFunctions } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
@@ -14,7 +14,6 @@ import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-pars
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
 import { Diagnostics } from '../diagnostics';
-import { unbox } from '../custom-values';
 import type { ParsedValue } from '../types';
 import type { Stylable } from '../stylable';
 import type { RuntimeStVar } from '../stylable-transformer';
@@ -28,12 +27,12 @@ export interface VarSymbol {
     node: postcss.Node;
 }
 
-type Input = Box<string, Input | Record<string, Input | string> | Array<Input | string>>;
+export type Input = Box<string, Input | Record<string, Input | string> | Array<Input | string>>;
 
 export interface ComputedStVar {
     value: RuntimeStVar;
     diagnostics: Diagnostics;
-    input?: Input;
+    input: Input;
 }
 
 export const diagnostics = {
@@ -49,8 +48,8 @@ export const diagnostics = {
             .map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s)
             .join('\n')}"`,
     MISSING_VAR_IN_VALUE: () => `invalid value() with no var identifier`,
-    COULD_NOT_RESOLVE_VALUE: (args: string) =>
-        `cannot resolve value function using the arguments provided: "${args}"`,
+    COULD_NOT_RESOLVE_VALUE: (args?: string) =>
+        `cannot resolve value function${args ? ` using the arguments provided: "${args}"` : ''}`,
     MULTI_ARGS_IN_VALUE: (args: string) =>
         `value function accepts only a single argument: "value(${args})"`,
     CANNOT_USE_AS_VALUE: (type: string, varName: string) =>
@@ -135,13 +134,13 @@ export class StylablePublicApi {
             topLevelDiagnostics
         );
 
-        const { var: stVars, customValues } = getResolvedSymbols(meta);
+        const { var: stVars } = getResolvedSymbols(meta);
 
         const computed: Record<string, ComputedStVar> = {};
 
         for (const [localName, resolvedVar] of Object.entries(stVars)) {
             const diagnostics = new Diagnostics();
-            const { outputValue, topLevelType } = evaluator.evaluateValue(
+            const { outputValue, topLevelType, runtimeValue } = evaluator.evaluateValue(
                 {
                     getResolvedSymbols,
                     resolver: this.stylable.resolver,
@@ -157,16 +156,10 @@ export class StylablePublicApi {
             );
 
             const computedStVar: ComputedStVar = {
-                /**
-                 * In case of custom value that could be flat, we will use the "outputValue" which is a flat value.
-                 */
-                value: topLevelType ? unbox(topLevelType, customValues) : outputValue,
+                value: runtimeValue ?? outputValue,
+                input: topLevelType ?? unbox(outputValue, false),
                 diagnostics,
             };
-
-            if (topLevelType) {
-                computedStVar.input = topLevelType;
-            }
 
             computed[localName] = computedStVar;
         }
@@ -286,17 +279,14 @@ function evaluateValueCall(
                     args: restArgs,
                     node: resolvedVarSymbol.node,
                     meta: resolvedVar.meta,
+                    rootArgument: varName,
+                    evaluatorNode: node,
                 }
             );
             // report errors
             if (node) {
                 const argsAsString = parsedArgs.join(', ');
-                if (typeError) {
-                    context.diagnostics.warn(
-                        node,
-                        diagnostics.COULD_NOT_RESOLVE_VALUE(argsAsString)
-                    );
-                } else if (!topLevelType && parsedArgs.length > 1) {
+                if (!typeError && !topLevelType && parsedArgs.length > 1) {
                     context.diagnostics.warn(node, diagnostics.MULTI_ARGS_IN_VALUE(argsAsString));
                 }
             }
