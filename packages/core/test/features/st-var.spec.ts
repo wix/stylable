@@ -1284,330 +1284,569 @@ describe(`features/st-var`, () => {
         });
     });
     describe('introspection', () => {
-        it('should get computed st-vars', () => {
-            const { stylable, sheets } = testStylableCore(`
-            :vars {
-                a: red;
-                b: blue;
-                c: st-array(value(a), gold);
-            }
-            `);
+        describe('getComputed', () => {
+            it('should get computed st-vars', () => {
+                const { stylable, sheets } = testStylableCore(`
+                :vars {
+                    a: red;
+                    b: blue;
+                    c: st-array(value(a), gold);
+                }
+                `);
 
-            const { meta } = sheets['/entry.st.css'];
-            const computedVars = stylable.stVar.getComputed(meta);
+                const { meta } = sheets['/entry.st.css'];
+                const computedVars = stylable.stVar.getComputed(meta);
 
-            expect(Object.keys(computedVars)).to.eql(['a', 'b', 'c']);
-            expect(computedVars.a).to.containSubset({
-                value: 'red',
-                input: {
-                    flatValue: 'red',
-                    type: 'string',
+                expect(Object.keys(computedVars)).to.eql(['a', 'b', 'c']);
+                expect(computedVars.a).to.containSubset({
                     value: 'red',
-                },
-                diagnostics: { reports: [] },
-            });
-            expect(computedVars.b).to.containSubset({
-                value: 'blue',
-                input: {
-                    flatValue: 'blue',
-                    type: 'string',
+                    input: {
+                        flatValue: 'red',
+                        type: 'string',
+                        value: 'red',
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.b).to.containSubset({
                     value: 'blue',
-                },
-                diagnostics: { reports: [] },
-            });
-            expect(computedVars.c).to.containSubset({
-                value: ['red', 'gold'],
-                input: {
-                    type: 'st-array',
-                    value: [
-                        {
-                            flatValue: 'red',
-                            type: 'string',
-                            value: 'red',
-                        },
-                        {
-                            flatValue: 'gold',
-                            type: 'string',
-                            value: 'gold',
-                        },
-                    ],
-                },
-                diagnostics: { reports: [] },
-            });
-        });
-
-        it('should get deep computed complex st-vars', () => {
-            const { stylable, sheets } = testStylableCore(`
-            :vars {
-                map: st-map(a st-map(b red));
-            }
-            `);
-
-            const { meta } = sheets['/entry.st.css'];
-            const computedVars = stylable.stVar.getComputed(meta);
-
-            expect(Object.keys(computedVars)).to.eql(['map']);
-            expect(computedVars.map.diagnostics.reports.length).to.eql(0);
-            expect(computedVars.map.value).to.eql({
-                a: {
-                    b: 'red',
-                },
-            });
-            expect(computedVars.map.input).to.eql({
-                type: 'st-map',
-                flatValue: undefined,
-                value: {
-                    a: {
-                        type: 'st-map',
-                        flatValue: undefined,
-                        value: {
-                            b: {
+                    input: {
+                        flatValue: 'blue',
+                        type: 'string',
+                        value: 'blue',
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.c).to.containSubset({
+                    value: ['red', 'gold'],
+                    input: {
+                        type: 'st-array',
+                        value: [
+                            {
                                 flatValue: 'red',
                                 type: 'string',
                                 value: 'red',
                             },
-                        },
-                    },
-                },
-            });
-        });
-
-        it('should get computed custom value st-var', () => {
-            const { stylable, sheets } = testStylableCore({
-                '/entry.st.css': `
-                @st-import [stBorder as createBorder] from './st-border.js';
-
-                :vars {
-                    border: createBorder(1px, solid, red);
-                }
-                `,
-                // Stylable custom value
-                '/st-border.js': stBorderDefinitionMock,
-            });
-
-            const { meta } = sheets['/entry.st.css'];
-            const computedVars = stylable.stVar.getComputed(meta);
-
-            expect(Object.keys(computedVars)).to.eql(['border']);
-            expect(computedVars.border).to.containSubset({
-                value: '1px solid red',
-                input: {
-                    type: 'createBorder',
-                    flatValue: '1px solid red',
-                    value: {
-                        color: 'red',
-                        size: '1px',
-                        style: 'solid',
-                    },
-                },
-                diagnostics: { reports: [] },
-            });
-        });
-
-        it('should get deep computed custom value st-var', () => {
-            const { stylable, sheets } = testStylableCore({
-                '/entry.st.css': `
-                @st-import [stBorder] from './st-border.js';
-
-                :vars {
-                    array: st-array(blue, stBorder(1px, solid, blue));
-                    map: st-map(
-                            border stBorder(value(array, 1, size), 
-                            solid, 
-                            value(array, 0))
-                        );
-                }
-                `,
-                // Stylable custom value
-                '/st-border.js': stBorderDefinitionMock,
-            });
-
-            const { meta } = sheets['/entry.st.css'];
-            const computedVars = stylable.stVar.getComputed(meta);
-
-            expect(Object.keys(computedVars)).to.eql(['array', 'map']);
-            expect(computedVars.array).to.containSubset({
-                value: ['blue', '1px solid blue'],
-                input: {
-                    type: 'st-array',
-                    flatValue: undefined,
-                    value: [
-                        {
-                            flatValue: 'blue',
-                            type: 'string',
-                            value: 'blue',
-                        },
-                        {
-                            type: 'stBorder',
-                            flatValue: '1px solid blue',
-                            value: {
-                                color: 'blue',
-                                size: '1px',
-                                style: 'solid',
+                            {
+                                flatValue: 'gold',
+                                type: 'string',
+                                value: 'gold',
                             },
-                        },
-                    ],
-                },
-                diagnostics: { reports: [] },
+                        ],
+                    },
+                    diagnostics: { reports: [] },
+                });
             });
-            expect(computedVars.map).to.containSubset({
-                value: {
-                    border: '1px solid blue',
-                },
-                input: {
+
+            it('should get deep computed complex st-vars', () => {
+                const { stylable, sheets } = testStylableCore(`
+                :vars {
+                    map: st-map(a st-map(b red));
+                }
+                `);
+
+                const { meta } = sheets['/entry.st.css'];
+                const computedVars = stylable.stVar.getComputed(meta);
+
+                expect(Object.keys(computedVars)).to.eql(['map']);
+                expect(computedVars.map.diagnostics.reports.length).to.eql(0);
+                expect(computedVars.map.value).to.eql({
+                    a: {
+                        b: 'red',
+                    },
+                });
+                expect(computedVars.map.input).to.eql({
                     type: 'st-map',
                     flatValue: undefined,
                     value: {
-                        border: {
-                            type: 'stBorder',
-                            flatValue: '1px solid blue',
+                        a: {
+                            type: 'st-map',
+                            flatValue: undefined,
                             value: {
-                                color: 'blue',
-                                size: '1px',
-                                style: 'solid',
+                                b: {
+                                    flatValue: 'red',
+                                    type: 'string',
+                                    value: 'red',
+                                },
                             },
                         },
                     },
-                },
-                diagnostics: { reports: [] },
-            });
-        });
-
-        it('should get imported computed st-vars', () => {
-            const { stylable, sheets } = testStylableCore({
-                '/entry.st.css': `
-                @st-import [imported-var as imported] from './imported.st.css';
-
-                :vars {
-                    a: value(imported);
-                    b: st-map(a value(imported));
-                }
-                `,
-                'imported.st.css': `
-                :vars {
-                    imported-var: red;
-                }
-                `,
+                });
             });
 
-            const { meta } = sheets['/entry.st.css'];
-            const computedVars = stylable.stVar.getComputed(meta);
-
-            expect(Object.keys(computedVars)).to.eql(['imported', 'a', 'b']);
-            expect(computedVars.imported).to.containSubset({
-                value: 'red',
-                input: {
-                    flatValue: 'red',
-                    type: 'string',
-                    value: 'red',
-                },
-                diagnostics: { reports: [] },
-            });
-            expect(computedVars.a).to.containSubset({
-                value: 'red',
-                input: {
-                    flatValue: 'red',
-                    type: 'string',
-                    value: 'red',
-                },
-                diagnostics: { reports: [] },
-            });
-            expect(computedVars.b).to.containSubset({
-                value: { a: 'red' },
-                input: {
-                    type: 'st-map',
-                    value: {
-                        a: 'red',
-                    },
-                },
-                diagnostics: { reports: [] },
-            });
-        });
-
-        it('should emit diagnostics only on invalid computed st-vars', () => {
-            const { stylable, sheets } = testStylableCore(
-                `
-                :vars {
-                    validBefore: red;
-                    invalid: invalid-func(imported);
-                    validAfter: green;
-                }
-                `
-            );
-
-            const { meta } = sheets['/entry.st.css'];
-
-            const computedVars = stylable.stVar.getComputed(meta);
-
-            expect(Object.keys(computedVars)).to.eql(['validBefore', 'invalid', 'validAfter']);
-            expect(computedVars.validBefore).to.containSubset({
-                value: 'red',
-                input: {
-                    flatValue: 'red',
-                    type: 'string',
-                    value: 'red',
-                },
-                diagnostics: { reports: [] },
-            });
-            expect(computedVars.validAfter).to.containSubset({
-                value: 'green',
-                input: {
-                    flatValue: 'green',
-                    type: 'string',
-                    value: 'green',
-                },
-                diagnostics: { reports: [] },
-            });
-            expect(computedVars.invalid).to.containSubset({
-                value: 'invalid-func(imported)',
-                input: {
-                    flatValue: 'invalid-func(imported)',
-                    type: 'string',
-                    value: 'invalid-func(imported)',
-                },
-                diagnostics: {
-                    reports: [
-                        {
-                            message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
-                            type: 'warning',
-                        },
-                    ],
-                },
-            });
-        });
-
-        it('should emit diagnostics only on invalid custom st-vars', () => {
-            const { stylable, sheets } = testStylableCore({
-                '/entry.st.css': `
-                    @st-import [stBorder] from './st-border.js';
-
+            it('should get computed custom value st-var', () => {
+                const { stylable, sheets } = testStylableCore({
+                    '/entry.st.css': `
+                    @st-import [stBorder as createBorder] from './st-border.js';
+    
                     :vars {
-                        border: stBorder(st-array(1px, 2px), solid, red);
+                        border: createBorder(1px, solid, red);
                     }
-                `,
-                // Stylable custom value
-                '/st-border.js': stBorderDefinitionMock,
+                    `,
+                    // Stylable custom value
+                    '/st-border.js': stBorderDefinitionMock,
+                });
+
+                const { meta } = sheets['/entry.st.css'];
+                const computedVars = stylable.stVar.getComputed(meta);
+
+                expect(Object.keys(computedVars)).to.eql(['border']);
+                expect(computedVars.border).to.containSubset({
+                    value: '1px solid red',
+                    input: {
+                        type: 'createBorder',
+                        flatValue: '1px solid red',
+                        value: {
+                            color: 'red',
+                            size: '1px',
+                            style: 'solid',
+                        },
+                    },
+                    diagnostics: { reports: [] },
+                });
             });
 
-            const { meta } = sheets['/entry.st.css'];
+            it('should get deep computed custom value st-var', () => {
+                const { stylable, sheets } = testStylableCore({
+                    '/entry.st.css': `
+                    @st-import [stBorder] from './st-border.js';
+    
+                    :vars {
+                        array: st-array(blue, stBorder(1px, solid, blue));
+                        map: st-map(
+                                border stBorder(value(array, 1, size), 
+                                solid, 
+                                value(array, 0))
+                            );
+                    }
+                    `,
+                    // Stylable custom value
+                    '/st-border.js': stBorderDefinitionMock,
+                });
 
-            const computedVars = stylable.stVar.getComputed(meta);
+                const { meta } = sheets['/entry.st.css'];
+                const computedVars = stylable.stVar.getComputed(meta);
 
-            expect(computedVars.border).to.containSubset({
-                value: '',
-                input: {
-                    flatValue: '',
-                    type: 'string',
-                    value: '',
-                },
-                diagnostics: {
-                    reports: [
-                        {
-                            message: STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(),
-                            type: 'warning',
+                expect(Object.keys(computedVars)).to.eql(['array', 'map']);
+                expect(computedVars.array).to.containSubset({
+                    value: ['blue', '1px solid blue'],
+                    input: {
+                        type: 'st-array',
+                        flatValue: undefined,
+                        value: [
+                            {
+                                flatValue: 'blue',
+                                type: 'string',
+                                value: 'blue',
+                            },
+                            {
+                                type: 'stBorder',
+                                flatValue: '1px solid blue',
+                                value: {
+                                    color: 'blue',
+                                    size: '1px',
+                                    style: 'solid',
+                                },
+                            },
+                        ],
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.map).to.containSubset({
+                    value: {
+                        border: '1px solid blue',
+                    },
+                    input: {
+                        type: 'st-map',
+                        flatValue: undefined,
+                        value: {
+                            border: {
+                                type: 'stBorder',
+                                flatValue: '1px solid blue',
+                                value: {
+                                    color: 'blue',
+                                    size: '1px',
+                                    style: 'solid',
+                                },
+                            },
                         },
-                    ],
-                },
+                    },
+                    diagnostics: { reports: [] },
+                });
+            });
+
+            it('should get imported computed st-vars', () => {
+                const { stylable, sheets } = testStylableCore({
+                    '/entry.st.css': `
+                    @st-import [imported-var as imported] from './imported.st.css';
+    
+                    :vars {
+                        a: value(imported);
+                        b: st-map(a value(imported));
+                    }
+                    `,
+                    'imported.st.css': `
+                    :vars {
+                        imported-var: red;
+                    }
+                    `,
+                });
+
+                const { meta } = sheets['/entry.st.css'];
+                const computedVars = stylable.stVar.getComputed(meta);
+
+                expect(Object.keys(computedVars)).to.eql(['imported', 'a', 'b']);
+                expect(computedVars.imported).to.containSubset({
+                    value: 'red',
+                    input: {
+                        flatValue: 'red',
+                        type: 'string',
+                        value: 'red',
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.a).to.containSubset({
+                    value: 'red',
+                    input: {
+                        flatValue: 'red',
+                        type: 'string',
+                        value: 'red',
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.b).to.containSubset({
+                    value: { a: 'red' },
+                    input: {
+                        type: 'st-map',
+                        value: {
+                            a: 'red',
+                        },
+                    },
+                    diagnostics: { reports: [] },
+                });
+            });
+
+            it('should emit diagnostics only on invalid computed st-vars', () => {
+                const { stylable, sheets } = testStylableCore(
+                    `
+                    :vars {
+                        validBefore: red;
+                        invalid: invalid-func(imported);
+                        validAfter: green;
+                    }
+                    `
+                );
+
+                const { meta } = sheets['/entry.st.css'];
+
+                const computedVars = stylable.stVar.getComputed(meta);
+
+                expect(Object.keys(computedVars)).to.eql(['validBefore', 'invalid', 'validAfter']);
+                expect(computedVars.validBefore).to.containSubset({
+                    value: 'red',
+                    input: {
+                        flatValue: 'red',
+                        type: 'string',
+                        value: 'red',
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.validAfter).to.containSubset({
+                    value: 'green',
+                    input: {
+                        flatValue: 'green',
+                        type: 'string',
+                        value: 'green',
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.invalid).to.containSubset({
+                    value: 'invalid-func(imported)',
+                    input: {
+                        flatValue: 'invalid-func(imported)',
+                        type: 'string',
+                        value: 'invalid-func(imported)',
+                    },
+                    diagnostics: {
+                        reports: [
+                            {
+                                message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
+                                type: 'warning',
+                            },
+                        ],
+                    },
+                });
+            });
+
+            it('should emit diagnostics only on invalid custom st-vars', () => {
+                const { stylable, sheets } = testStylableCore({
+                    '/entry.st.css': `
+                        @st-import [stBorder] from './st-border.js';
+    
+                        :vars {
+                            border: stBorder(st-array(1px, 2px), solid, red);
+                        }
+                    `,
+                    // Stylable custom value
+                    '/st-border.js': stBorderDefinitionMock,
+                });
+
+                const { meta } = sheets['/entry.st.css'];
+
+                const computedVars = stylable.stVar.getComputed(meta);
+
+                expect(computedVars.border).to.containSubset({
+                    value: '',
+                    input: {
+                        flatValue: '',
+                        type: 'string',
+                        value: '',
+                    },
+                    diagnostics: {
+                        reports: [
+                            {
+                                message: STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(),
+                                type: 'warning',
+                            },
+                        ],
+                    },
+                });
+            });
+        });
+
+        describe('flatten', () => {
+            it('should flat simple st vars', () => {
+                const { stylable, sheets } = testStylableCore(`
+                    :vars {
+                        a: red;
+                        b: blue;
+                    }
+                `);
+
+                const meta = sheets['/entry.st.css'].meta;
+                const flattenStVars = stylable.stVar.flatten(meta);
+
+                expect(flattenStVars).to.eql([
+                    {
+                        symbol: 'a',
+                        value: 'red',
+                        path: ['a'],
+                    },
+                    {
+                        symbol: 'b',
+                        value: 'blue',
+                        path: ['b'],
+                    },
+                ]);
+            });
+            it('should not flat native css function inside st vars', () => {
+                const { stylable, sheets } = testStylableCore(`
+                    :vars {
+                        a: linear-gradient(to right, red, blue);
+                    }
+                `);
+
+                const meta = sheets['/entry.st.css'].meta;
+                const flattenStVars = stylable.stVar.flatten(meta);
+
+                expect(flattenStVars).to.eql([
+                    {
+                        path: ['a'],
+                        symbol: 'a',
+                        value: 'linear-gradient(to right, red, blue)',
+                    },
+                ]);
+            });
+            it('should flat imported simple st vars', () => {
+                const { stylable, sheets } = testStylableCore({
+                    '/entry.st.css': `
+                        @st-import [color as myColor] from './imported.st.css';
+                        .root { color: value(myColor); }
+                    `,
+                    '/imported.st.css': `
+                        :vars {
+                            color: red;
+                        }
+                    `,
+                });
+
+                const meta = sheets['/entry.st.css'].meta;
+                const flattenStVars = stylable.stVar.flatten(meta);
+
+                expect(flattenStVars).to.eql([
+                    {
+                        symbol: 'myColor',
+                        value: 'red',
+                        path: ['myColor'],
+                    },
+                ]);
+            });
+
+            it('should flat st-array st vars', () => {
+                const { stylable, sheets } = testStylableCore(
+                    `
+                    :vars {
+                        array: st-array(1px, 2px);
+                    }
+
+                    `
+                );
+
+                const meta = sheets['/entry.st.css'].meta;
+                const flattenStVars = stylable.stVar.flatten(meta);
+
+                expect(flattenStVars).to.eql([
+                    {
+                        symbol: 'array[0]',
+                        value: '1px',
+                        path: ['array', '0'],
+                    },
+                    {
+                        symbol: 'array[1]',
+                        value: '2px',
+                        path: ['array', '1'],
+                    },
+                ]);
+            });
+
+            it('should flat st-map st vars', () => {
+                const { stylable, sheets } = testStylableCore(
+                    `
+                    :vars {
+                        map: st-map(first 1px,second 2px);
+                    }
+
+                    `
+                );
+
+                const meta = sheets['/entry.st.css'].meta;
+                const flattenStVars = stylable.stVar.flatten(meta);
+
+                expect(flattenStVars).to.eql([
+                    {
+                        symbol: 'map.first',
+                        value: '1px',
+                        path: ['map', 'first'],
+                    },
+                    {
+                        symbol: 'map.second',
+                        value: '2px',
+                        path: ['map', 'second'],
+                    },
+                ]);
+            });
+
+            it('should flat custom value st vars', () => {
+                const { stylable, sheets } = testStylableCore({
+                    '/entry.st.css': `
+                        @st-import [stBorder] from './st-border.js';
+
+                        :vars {
+                            border: stBorder(1px, solid, red);
+                        }
+                    `,
+                    '/st-border.js': stBorderDefinitionMock,
+                });
+
+                const meta = sheets['/entry.st.css'].meta;
+                const flattenStVars = stylable.stVar.flatten(meta);
+
+                expect(flattenStVars).to.eql([
+                    {
+                        symbol: 'border',
+                        value: '1px solid red',
+                        path: ['border'],
+                    },
+                ]);
+            });
+            it('should flat nested st-array st vars', () => {
+                const { stylable, sheets } = testStylableCore(
+                    `
+                    :vars {
+                        nestedArray: st-array(
+                            red,
+                            st-array(red, green),
+                            st-map(color1 gold, color2 blue),
+                        );
+                    }
+
+                    `
+                );
+
+                const meta = sheets['/entry.st.css'].meta;
+                const flattenStVars = stylable.stVar.flatten(meta);
+
+                expect(flattenStVars).to.eql([
+                    {
+                        symbol: 'nestedArray[0]',
+                        value: 'red',
+                        path: ['nestedArray', '0'],
+                    },
+                    {
+                        symbol: 'nestedArray[1][0]',
+                        value: 'red',
+                        path: ['nestedArray', '1', '0'],
+                    },
+                    {
+                        symbol: 'nestedArray[1][1]',
+                        value: 'green',
+                        path: ['nestedArray', '1', '1'],
+                    },
+                    {
+                        symbol: 'nestedArray[2].color1',
+                        value: 'gold',
+                        path: ['nestedArray', '2', 'color1'],
+                    },
+                    {
+                        symbol: 'nestedArray[2].color2',
+                        value: 'blue',
+                        path: ['nestedArray', '2', 'color2'],
+                    },
+                ]);
+            });
+            it('should flat nested st-map st vars', () => {
+                const { stylable, sheets } = testStylableCore(
+                    `
+                    :vars {
+                        nestedMap: st-map(
+                            simple red,
+                            array st-array(red, green),
+                            map st-map(color1 gold, color2 blue)
+                        );
+                    }
+
+                    `
+                );
+
+                const meta = sheets['/entry.st.css'].meta;
+                const flattenStVars = stylable.stVar.flatten(meta);
+
+                expect(flattenStVars).to.eql([
+                    {
+                        symbol: 'nestedMap.simple',
+                        value: 'red',
+                        path: ['nestedMap', 'simple'],
+                    },
+                    {
+                        symbol: 'nestedMap.array[0]',
+                        value: 'red',
+                        path: ['nestedMap', 'array', '0'],
+                    },
+                    {
+                        symbol: 'nestedMap.array[1]',
+                        value: 'green',
+                        path: ['nestedMap', 'array', '1'],
+                    },
+                    {
+                        symbol: 'nestedMap.map.color1',
+                        value: 'gold',
+                        path: ['nestedMap', 'map', 'color1'],
+                    },
+                    {
+                        symbol: 'nestedMap.map.color2',
+                        value: 'blue',
+                        path: ['nestedMap', 'map', 'color2'],
+                    },
+                ]);
             });
         });
     });

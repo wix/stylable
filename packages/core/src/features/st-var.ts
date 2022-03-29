@@ -35,6 +35,12 @@ export interface ComputedStVar {
     input: Input;
 }
 
+export interface FlatComputedStVar {
+    value: string;
+    symbol: string;
+    path: string[];
+}
+
 export const diagnostics = {
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
     NO_VARS_DEF_IN_ST_SCOPE() {
@@ -165,6 +171,46 @@ export class StylablePublicApi {
         }
 
         return computed;
+    }
+
+    public flatten(meta: StylableMeta) {
+        const computed = this.getComputed(meta);
+
+        const flatStVars: FlatComputedStVar[] = [];
+
+        for (const [symbol, stVar] of Object.entries(computed)) {
+            flatStVars.push(...this.flatSingle(stVar.input, symbol, [symbol]));
+        }
+
+        return flatStVars;
+    }
+
+    private flatSingle(input: Input, sourcePath: string, path: string[]) {
+        const currentVars: FlatComputedStVar[] = [];
+
+        if (input.flatValue) {
+            currentVars.push({
+                symbol: sourcePath,
+                value: input.flatValue,
+                path,
+            });
+        }
+
+        if (typeof input.value === `object` && input.value !== null) {
+            for (const [key, innerInput] of Object.entries(input.value)) {
+                currentVars.push(
+                    ...this.flatSingle(
+                        innerInput,
+                        Array.isArray(input.value)
+                            ? `${sourcePath}[${key}]`
+                            : `${sourcePath}.${key}`,
+                        [...path, key]
+                    )
+                );
+            }
+        }
+
+        return currentVars;
     }
 }
 
