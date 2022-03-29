@@ -230,7 +230,10 @@ function ruleTest(
             );
         }
         if (declarationCheck === `full`) {
-            const actualDecl = testNode.nodes.map((x) => x.toString()).join(`; `);
+            const actualDecl = testNode.nodes
+                .filter((x) => x.type !== `comment`)
+                .map((x) => x.toString())
+                .join(`; `);
             const expectedDecl = expectedDeclarations
                 .map(([prop, value]) => `${prop}: ${value}`)
                 .join(`; `);

@@ -1,9 +1,7 @@
 import { create } from '@stylable/runtime';
 import { stylableModuleFactory, Options } from '@stylable/module-utils';
 import type { IDirectoryContents } from '@file-services/types';
-import { createMemoryFs, IMemFileSystem } from '@file-services/memory';
-import { readdirSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { createMemoryFs } from '@file-services/memory';
 
 function evalModule(id: string, source: string, requireModule: (s: string) => any) {
     if (!source) {
@@ -34,7 +32,6 @@ export function evalStylableModule<T = unknown>(source: string, fullPath: string
 
 export function moduleFactoryTestKit(files: IDirectoryContents, options: Partial<Options> = {}) {
     const fs = createMemoryFs(files);
-    addStylableRuntimeToMemFs(fs);
     const factory = stylableModuleFactory(
         {
             resolveNamespace: (namespace) => namespace,
@@ -49,16 +46,4 @@ export function moduleFactoryTestKit(files: IDirectoryContents, options: Partial
         factory,
         evalStylableModule,
     };
-}
-
-function addStylableRuntimeToMemFs(fs: IMemFileSystem) {
-    const runtimeDir = dirname(require.resolve('@stylable/runtime'));
-    for (const item of readdirSync(runtimeDir, { withFileTypes: true })) {
-        if (item.isDirectory()) {
-            continue;
-        }
-        const filePath = join(runtimeDir, item.name);
-        fs.ensureDirectorySync(dirname(filePath));
-        fs.writeFileSync(filePath, readFileSync(filePath, 'utf8'));
-    }
 }
