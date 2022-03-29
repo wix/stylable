@@ -1302,7 +1302,7 @@ describe(`features/st-var`, () => {
                     value: 'red',
                     input: {
                         flatValue: 'red',
-                        type: 'string',
+                        type: 'st-string',
                         value: 'red',
                     },
                     diagnostics: { reports: [] },
@@ -1311,7 +1311,7 @@ describe(`features/st-var`, () => {
                     value: 'blue',
                     input: {
                         flatValue: 'blue',
-                        type: 'string',
+                        type: 'st-string',
                         value: 'blue',
                     },
                     diagnostics: { reports: [] },
@@ -1323,12 +1323,12 @@ describe(`features/st-var`, () => {
                         value: [
                             {
                                 flatValue: 'red',
-                                type: 'string',
+                                type: 'st-string',
                                 value: 'red',
                             },
                             {
                                 flatValue: 'gold',
-                                type: 'string',
+                                type: 'st-string',
                                 value: 'gold',
                             },
                         ],
@@ -1364,7 +1364,7 @@ describe(`features/st-var`, () => {
                             value: {
                                 b: {
                                     flatValue: 'red',
-                                    type: 'string',
+                                    type: 'st-string',
                                     value: 'red',
                                 },
                             },
@@ -1413,9 +1413,11 @@ describe(`features/st-var`, () => {
                     :vars {
                         array: st-array(blue, stBorder(1px, solid, blue));
                         map: st-map(
-                                border stBorder(value(array, 1, size), 
-                                solid, 
-                                value(array, 0))
+                                border stBorder(
+                                    value(array, 1, size), 
+                                    solid, 
+                                    value(array, 0)
+                                )
                             );
                     }
                     `,
@@ -1435,7 +1437,7 @@ describe(`features/st-var`, () => {
                         value: [
                             {
                                 flatValue: 'blue',
-                                type: 'string',
+                                type: 'st-string',
                                 value: 'blue',
                             },
                             {
@@ -1499,7 +1501,7 @@ describe(`features/st-var`, () => {
                     value: 'red',
                     input: {
                         flatValue: 'red',
-                        type: 'string',
+                        type: 'st-string',
                         value: 'red',
                     },
                     diagnostics: { reports: [] },
@@ -1508,7 +1510,7 @@ describe(`features/st-var`, () => {
                     value: 'red',
                     input: {
                         flatValue: 'red',
-                        type: 'string',
+                        type: 'st-string',
                         value: 'red',
                     },
                     diagnostics: { reports: [] },
@@ -1545,7 +1547,7 @@ describe(`features/st-var`, () => {
                     value: 'red',
                     input: {
                         flatValue: 'red',
-                        type: 'string',
+                        type: 'st-string',
                         value: 'red',
                     },
                     diagnostics: { reports: [] },
@@ -1554,7 +1556,7 @@ describe(`features/st-var`, () => {
                     value: 'green',
                     input: {
                         flatValue: 'green',
-                        type: 'string',
+                        type: 'st-string',
                         value: 'green',
                     },
                     diagnostics: { reports: [] },
@@ -1563,7 +1565,7 @@ describe(`features/st-var`, () => {
                     value: 'invalid-func(imported)',
                     input: {
                         flatValue: 'invalid-func(imported)',
-                        type: 'string',
+                        type: 'st-string',
                         value: 'invalid-func(imported)',
                     },
                     diagnostics: {
@@ -1598,7 +1600,7 @@ describe(`features/st-var`, () => {
                     value: '',
                     input: {
                         flatValue: '',
-                        type: 'string',
+                        type: 'st-string',
                         value: '',
                     },
                     diagnostics: {
@@ -1627,12 +1629,10 @@ describe(`features/st-var`, () => {
 
                 expect(flattenStVars).to.eql([
                     {
-                        symbol: 'a',
                         value: 'red',
                         path: ['a'],
                     },
                     {
-                        symbol: 'b',
                         value: 'blue',
                         path: ['b'],
                     },
@@ -1651,7 +1651,6 @@ describe(`features/st-var`, () => {
                 expect(flattenStVars).to.eql([
                     {
                         path: ['a'],
-                        symbol: 'a',
                         value: 'linear-gradient(to right, red, blue)',
                     },
                 ]);
@@ -1674,7 +1673,6 @@ describe(`features/st-var`, () => {
 
                 expect(flattenStVars).to.eql([
                     {
-                        symbol: 'myColor',
                         value: 'red',
                         path: ['myColor'],
                     },
@@ -1696,12 +1694,10 @@ describe(`features/st-var`, () => {
 
                 expect(flattenStVars).to.eql([
                     {
-                        symbol: 'array[0]',
                         value: '1px',
                         path: ['array', '0'],
                     },
                     {
-                        symbol: 'array[1]',
                         value: '2px',
                         path: ['array', '1'],
                     },
@@ -1723,12 +1719,10 @@ describe(`features/st-var`, () => {
 
                 expect(flattenStVars).to.eql([
                     {
-                        symbol: 'map.first',
                         value: '1px',
                         path: ['map', 'first'],
                     },
                     {
-                        symbol: 'map.second',
                         value: '2px',
                         path: ['map', 'second'],
                     },
@@ -1752,9 +1746,20 @@ describe(`features/st-var`, () => {
 
                 expect(flattenStVars).to.eql([
                     {
-                        symbol: 'border',
                         value: '1px solid red',
                         path: ['border'],
+                    },
+                    {
+                        value: '1px',
+                        path: ['border', 'size'],
+                    },
+                    {
+                        value: 'solid',
+                        path: ['border', 'style'],
+                    },
+                    {
+                        value: 'red',
+                        path: ['border', 'color'],
                     },
                 ]);
             });
@@ -1777,27 +1782,22 @@ describe(`features/st-var`, () => {
 
                 expect(flattenStVars).to.eql([
                     {
-                        symbol: 'nestedArray[0]',
                         value: 'red',
                         path: ['nestedArray', '0'],
                     },
                     {
-                        symbol: 'nestedArray[1][0]',
                         value: 'red',
                         path: ['nestedArray', '1', '0'],
                     },
                     {
-                        symbol: 'nestedArray[1][1]',
                         value: 'green',
                         path: ['nestedArray', '1', '1'],
                     },
                     {
-                        symbol: 'nestedArray[2].color1',
                         value: 'gold',
                         path: ['nestedArray', '2', 'color1'],
                     },
                     {
-                        symbol: 'nestedArray[2].color2',
                         value: 'blue',
                         path: ['nestedArray', '2', 'color2'],
                     },
@@ -1822,27 +1822,22 @@ describe(`features/st-var`, () => {
 
                 expect(flattenStVars).to.eql([
                     {
-                        symbol: 'nestedMap.simple',
                         value: 'red',
                         path: ['nestedMap', 'simple'],
                     },
                     {
-                        symbol: 'nestedMap.array[0]',
                         value: 'red',
                         path: ['nestedMap', 'array', '0'],
                     },
                     {
-                        symbol: 'nestedMap.array[1]',
                         value: 'green',
                         path: ['nestedMap', 'array', '1'],
                     },
                     {
-                        symbol: 'nestedMap.map.color1',
                         value: 'gold',
                         path: ['nestedMap', 'map', 'color1'],
                     },
                     {
-                        symbol: 'nestedMap.map.color2',
                         value: 'blue',
                         path: ['nestedMap', 'map', 'color2'],
                     },

@@ -3,7 +3,7 @@ import postcssValueParser from 'postcss-value-parser';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
 import type { ParsedValue } from './types';
 
-export class ValueError extends Error {
+export class CustomValueError extends Error {
     constructor(message: string, public fallbackValue: string) {
         super(message);
     }
@@ -27,6 +27,10 @@ export function box<Type extends string, Value>(
     };
 }
 
+export function boxString(value: string) {
+    return box('st-string', value, value);
+}
+
 export function unbox<B extends Box<string, unknown>>(
     boxed: B | string,
     unboxPrimitives = true,
@@ -34,8 +38,8 @@ export function unbox<B extends Box<string, unknown>>(
     node?: ParsedValue
 ): any {
     if (typeof boxed === 'string') {
-        return unboxPrimitives ? boxed : box('string', boxed, boxed);
-    } else if (typeof boxed === 'object' && boxed !== null) {
+        return unboxPrimitives ? boxed : boxString(boxed);
+    } else if (typeof boxed === 'object' && boxed) {
         const customValue = customValues?.[boxed.type];
         let value = boxed.value;
         if (customValue?.flattenValue && node) {
@@ -101,6 +105,7 @@ export const stTypes: CustomTypes = {
     stMap: createStMapCustomFunction().register('stMap'),
     'st-array': createStArrayCustomFunction().register('st-array'),
     'st-map': createStMapCustomFunction().register('st-map'),
+    'st-string': createStMapCustomFunction().register('st-string'),
 } as const;
 
 export const deprecatedStFunctions: Record<string, { alternativeName: string }> = {
@@ -218,7 +223,7 @@ export function createCustomValue<Value, Args>({
                         } else {
                             const stringifiedValue = getStringValue([fallbackNode]);
 
-                            throw new ValueError(
+                            throw new CustomValueError(
                                 `/* Error trying to flat -> */${stringifiedValue}`,
                                 stringifiedValue
                             );
@@ -252,7 +257,7 @@ export function getBoxValue(
         return value;
     } else if (value && customTypes[value.type]) {
         return customTypes[value.type].getValue(path, value, node, customTypes);
-    } else if (value.type === 'string') {
+    } else if (value.type === 'st-string') {
         return (value as Box<'string', string>).value;
     } else {
         throw new Error('Unknown Type ' + JSON.stringify(value));

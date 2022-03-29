@@ -17,7 +17,7 @@ import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/v
 import type { ParsedValue } from './types';
 import type { FeatureTransformContext } from './features/feature';
 import { CSSCustomProperty, STVar } from './features';
-import { unbox, ValueError } from './custom-values';
+import { unbox, CustomValueError } from './custom-values';
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
@@ -32,7 +32,7 @@ export interface EvalValueData {
     cssVarsMapping?: Record<string, string>;
     args?: string[];
     rootArgument?: string;
-    evaluatorNode?: postcss.Node;
+    initialNode?: postcss.Node;
 }
 
 export interface EvalValueResult {
@@ -64,7 +64,7 @@ export class StylableEvaluator {
             data.cssVarsMapping,
             data.args,
             data.rootArgument,
-            data.evaluatorNode
+            data.initialNode
         );
     }
 }
@@ -119,7 +119,7 @@ export function processDeclarationValue(
     cssVarsMapping: Record<string, string> = {},
     args: string[] = [],
     rootArgument?: string,
-    evaluatorNode?: postcss.Node
+    initialNode?: postcss.Node
 ): EvalValueResult {
     const evaluator = new StylableEvaluator({ tsVarOverride: variableOverride });
     const resolvedSymbols = getResolvedSymbols(meta);
@@ -146,7 +146,7 @@ export function processDeclarationValue(
                         cssVarsMapping,
                         args,
                         rootArgument,
-                        evaluatorNode,
+                        initialNode,
                     },
                     node: parsedNode,
                 });
@@ -215,7 +215,7 @@ export function processDeclarationValue(
                         cssVarsMapping,
                         args,
                         rootArgument,
-                        evaluatorNode,
+                        initialNode,
                     },
                     node: parsedNode,
                 });
@@ -250,7 +250,7 @@ export function processDeclarationValue(
                             resolvedSymbols.customValues
                         );
                     } catch (error) {
-                        if (error instanceof ValueError) {
+                        if (error instanceof CustomValueError) {
                             outputValue += error.fallbackValue;
                         } else {
                             throw error;
@@ -259,7 +259,7 @@ export function processDeclarationValue(
                 } catch (e) {
                     typeError = e as Error;
 
-                    const invalidNode = evaluatorNode || node;
+                    const invalidNode = initialNode || node;
 
                     if (invalidNode) {
                         diagnostics.warn(

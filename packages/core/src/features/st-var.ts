@@ -1,5 +1,5 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import { unbox, Box, deprecatedStFunctions } from '../custom-values';
+import { unbox, Box, deprecatedStFunctions, boxString } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
@@ -27,17 +27,19 @@ export interface VarSymbol {
     node: postcss.Node;
 }
 
-export type Input = Box<string, Input | Record<string, Input | string> | Array<Input | string>>;
+export type CustomValueInput = Box<
+    string,
+    CustomValueInput | Record<string, CustomValueInput | string> | Array<CustomValueInput | string>
+>;
 
 export interface ComputedStVar {
     value: RuntimeStVar;
     diagnostics: Diagnostics;
-    input: Input;
+    input: CustomValueInput;
 }
 
 export interface FlatComputedStVar {
     value: string;
-    symbol: string;
     path: string[];
 }
 
@@ -179,18 +181,17 @@ export class StylablePublicApi {
         const flatStVars: FlatComputedStVar[] = [];
 
         for (const [symbol, stVar] of Object.entries(computed)) {
-            flatStVars.push(...this.flatSingle(stVar.input, symbol, [symbol]));
+            flatStVars.push(...this.flatSingle(stVar.input, [symbol]));
         }
 
         return flatStVars;
     }
 
-    private flatSingle(input: Input, sourcePath: string, path: string[]) {
+    private flatSingle(input: CustomValueInput, path: string[]) {
         const currentVars: FlatComputedStVar[] = [];
 
         if (input.flatValue) {
             currentVars.push({
-                symbol: sourcePath,
                 value: input.flatValue,
                 path,
             });
@@ -200,10 +201,7 @@ export class StylablePublicApi {
             for (const [key, innerInput] of Object.entries(input.value)) {
                 currentVars.push(
                     ...this.flatSingle(
-                        innerInput,
-                        Array.isArray(input.value)
-                            ? `${sourcePath}[${key}]`
-                            : `${sourcePath}.${key}`,
+                        typeof innerInput === 'string' ? boxString(innerInput) : innerInput,
                         [...path, key]
                     )
                 );
@@ -326,7 +324,7 @@ function evaluateValueCall(
                     node: resolvedVarSymbol.node,
                     meta: resolvedVar.meta,
                     rootArgument: varName,
-                    evaluatorNode: node,
+                    initialNode: node,
                 }
             );
             // report errors
