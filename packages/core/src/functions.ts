@@ -242,19 +242,22 @@ export function processDeclarationValue(
                 try {
                     topLevelType = matchingType.evalVarAst(n, resolvedSymbols.customValues, true);
                     runtimeValue = unbox(topLevelType, true, resolvedSymbols.customValues, n);
-                    outputValue += matchingType.getValue(
-                        args,
-                        topLevelType,
-                        n,
-                        resolvedSymbols.customValues
-                    );
-                } catch (e) {
-                    if (e instanceof ValueError) {
-                        outputValue += e.fallbackValue;
-                        typeError = e;
-                    } else {
-                        typeError = e as Error;
+                    try {
+                        outputValue += matchingType.getValue(
+                            args,
+                            topLevelType,
+                            n,
+                            resolvedSymbols.customValues
+                        );
+                    } catch (error) {
+                        if (error instanceof ValueError) {
+                            outputValue += error.fallbackValue;
+                        } else {
+                            throw error;
+                        }
                     }
+                } catch (e) {
+                    typeError = e as Error;
 
                     const invalidNode = evaluatorNode || node;
 
