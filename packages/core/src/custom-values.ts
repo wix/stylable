@@ -253,12 +253,10 @@ export function getBoxValue(
     node: ParsedValue,
     customTypes: CustomTypes
 ): string {
-    if (typeof value === 'string') {
-        return value;
+    if (typeof value === 'string' || value.type === 'st-string') {
+        return unbox(value, true, customTypes);
     } else if (value && customTypes[value.type]) {
         return customTypes[value.type].getValue(path, value, node, customTypes);
-    } else if (value.type === 'st-string') {
-        return (value as Box<'string', string>).value;
     } else {
         throw new Error('Unknown Type ' + JSON.stringify(value));
         // return JSON.stringify(value);
