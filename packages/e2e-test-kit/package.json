@@ -9,7 +9,6 @@
   "dependencies": {
     "@stylable/runtime": "^4.11.0",
     "express": "^4.17.3",
-    "memory-fs": "^0.5.0",
     "node-eval": "^2.0.0",
     "playwright-core": "^1.20.0",
     "rimraf": "^3.0.2"
