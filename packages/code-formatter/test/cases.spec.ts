@@ -328,6 +328,35 @@ describe('Formatting - Decl', () => {
             `.root {\n    box-shadow:\n${indent}0px\n${indent}0px\n${indent}0px\n${indent}black,\n${indent}1px\n${indent}1px\n${indent}1px\n${indent}black;\n}\n`
         );
     });
+    describe('nested functions', () => {
+        it('value function with a single value', () => {
+            const indent = ' '.repeat(4);
+            expect(formatCSS(`.root {background:someFunc(someValue);}\n`)).to.equal(
+                `.root {\n${indent}background: someFunc(someValue);\n}\n`
+            );
+        });
+        it('value function with a single top level nested function', () => {
+            const indent = ' '.repeat(4);
+
+            expect(
+                formatCSS(
+                    `.root {background:someFunc(otherFunc(someValue1, someValue2, someValue3));}\n`
+                )
+            ).to.equal(
+                `.root {\nbackground: someFunc(\n${indent}otherFunc(\n${indent}${indent}someValue1,\n${indent}${indent}someValue2,\n${indent}${indent}someValue3\n${indent})\n);\n}\n`
+            );
+        });
+        it('value with multiple top level nested functions', () => {
+            const indent = ' '.repeat(4);
+            expect(
+                formatCSS(
+                    `.root {background: filledBtn(bg-hover var(--background-hover-color, red), text-hover lighten(var(--color-accent-1),10%)),filledBtn(bg-hover var(--background-hover-color), text-hover var(--color-accent-1));}\n`
+                )
+            ).to.equal(
+                `${indent}${indent}filledBtn(\n${indent}${indent}${indent}bg-hover var(--background-hover-color, red),\n${indent}${indent}${indent}text-hover lighten(\n${indent}${indent}${indent}${indent}var(--color-accent-1),\n${indent}${indent}${indent}${indent}10%\n${indent}${indent}${indent})\n${indent}${indent}),\n${indent}${indent}filledBtn(\n${indent}${indent}${indent}bg-hover var(--background-hover-color),\n${indent}${indent}${indent}text-hover var(--color-accent-1)\n${indent}${indent});\n}\n`
+            );
+        });
+    });
 });
 
 describe('Formatting - AtRule', () => {
