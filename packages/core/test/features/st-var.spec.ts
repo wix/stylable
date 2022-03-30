@@ -679,13 +679,15 @@ describe(`features/st-var`, () => {
              */
             testStylableCore(`
                 :vars {
-                    /* @transform-error ${STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
-                        `keyWithoutValue`
-                    ) /** TODO - add custom diagnostic for this case */}*/
+                    /* @transform-error ${
+                        STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
+                            `keyWithoutValue`
+                        ) /** TODO - add custom diagnostic for this case */
+                    }*/
                     keyWithoutValueMap: stMap(keyWithoutValue);
                 }
             `);
-        })
+        });
         it(`*** st-map and st-array contract test ***`, () => {
             const test = ({
                 label,
@@ -1551,24 +1553,7 @@ describe(`features/st-var`, () => {
                     `
                 );
 
-<<<<<<< Updated upstream
                 const { meta } = sheets['/entry.st.css'];
-=======
-                :vars {
-                    array: st-array(blue, stBorder(1px, solid, blue));
-                    map: st-map(
-                            border stBorder(
-                                    value(array, 1, size), 
-                                    solid, 
-                                    value(array, 0)
-                               )   
-                        );  
-                }
-                `,
-                // Stylable custom value
-                '/st-border.js': stBorderDefinitionMock,
-            });
->>>>>>> Stashed changes
 
                 const computedVars = stylable.stVar.getComputed(meta);
 
