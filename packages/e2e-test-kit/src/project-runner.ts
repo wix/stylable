@@ -22,6 +22,7 @@ export interface Options {
     watchMode?: boolean;
     useTempDir?: boolean;
     tempDirPath?: string;
+    debounceWatchTimeout?: number;
 }
 
 type MochaHook = import('mocha').HookFunction;
@@ -110,8 +111,21 @@ export class ProjectRunner {
         );
 
         await firstCompile.promise;
+
+        let timeout: NodeJS.Timeout | undefined;
+
         compiler.hooks.afterDone.tap('waitForRecompile', () => {
-            this.doneListeners.forEach((listener) => listener());
+            if (this.options.debounceWatchTimeout === undefined) {
+                this.doneListeners.forEach((listener) => listener());
+            } else {
+                if (timeout) {
+                    clearTimeout(timeout);
+                }
+
+                timeout = setTimeout(() => {
+                    this.doneListeners.forEach((listener) => listener());
+                }, this.options.debounceWatchTimeout);
+            }
         });
 
         this.log('Finished Initial Compile');

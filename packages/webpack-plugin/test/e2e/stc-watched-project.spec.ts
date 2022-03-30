@@ -19,6 +19,7 @@ describe(`(${project})`, () => {
             },
             watchMode: true,
             useTempDir: true,
+            debounceWatchTimeout: 300,
         },
         before,
         afterEach,
