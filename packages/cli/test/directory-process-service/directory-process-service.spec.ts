@@ -186,7 +186,7 @@ describe('DirectoryWatchService', () => {
             });
         });
 
-        it('should handle delete dirs', async () => {
+        it.only('should handle delete dirs', async () => {
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
@@ -217,7 +217,7 @@ describe('DirectoryWatchService', () => {
                 expect(fs.readFileSync('/dist/test/a.txt', 'utf8')).to.equal('A()');
             });
 
-            fs.removeSync('test');
+            fs.rmSync('test', { recursive: true, force: true });
 
             await waitFor(() => {
                 expectInvalidationMap(watcher, {});
