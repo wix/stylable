@@ -1,5 +1,5 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import { deprecatedStFunctions } from '../custom-values';
+import { unbox, Box, deprecatedStFunctions, boxString } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableMeta } from '../stylable-meta';
@@ -14,7 +14,6 @@ import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-pars
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
 import { Diagnostics } from '../diagnostics';
-import { unbox } from '../custom-values';
 import type { ParsedValue } from '../types';
 import type { Stylable } from '../stylable';
 import type { RuntimeStVar } from '../stylable-transformer';
@@ -28,10 +27,20 @@ export interface VarSymbol {
     node: postcss.Node;
 }
 
+export type CustomValueInput = Box<
+    string,
+    CustomValueInput | Record<string, CustomValueInput | string> | Array<CustomValueInput | string>
+>;
+
 export interface ComputedStVar {
     value: RuntimeStVar;
     diagnostics: Diagnostics;
-    input?: any;
+    input: CustomValueInput;
+}
+
+export interface FlatComputedStVar {
+    value: string;
+    path: string[];
 }
 
 export const diagnostics = {
@@ -47,8 +56,8 @@ export const diagnostics = {
             .map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s)
             .join('\n')}"`,
     MISSING_VAR_IN_VALUE: () => `invalid value() with no var identifier`,
-    COULD_NOT_RESOLVE_VALUE: (args: string) =>
-        `cannot resolve value function using the arguments provided: "${args}"`,
+    COULD_NOT_RESOLVE_VALUE: (args?: string) =>
+        `cannot resolve value function${args ? ` using the arguments provided: "${args}"` : ''}`,
     MULTI_ARGS_IN_VALUE: (args: string) =>
         `value function accepts only a single argument: "value(${args})"`,
     CANNOT_USE_AS_VALUE: (type: string, varName: string) =>
@@ -133,13 +142,13 @@ export class StylablePublicApi {
             topLevelDiagnostics
         );
 
-        const { var: stVars, customValues } = getResolvedSymbols(meta);
+        const { var: stVars } = getResolvedSymbols(meta);
 
         const computed: Record<string, ComputedStVar> = {};
 
         for (const [localName, resolvedVar] of Object.entries(stVars)) {
             const diagnostics = new Diagnostics();
-            const { outputValue, topLevelType } = evaluator.evaluateValue(
+            const { outputValue, topLevelType, runtimeValue } = evaluator.evaluateValue(
                 {
                     getResolvedSymbols,
                     resolver: this.stylable.resolver,
@@ -154,24 +163,52 @@ export class StylablePublicApi {
                 }
             );
 
-            const customValue = customValues[topLevelType?.type];
             const computedStVar: ComputedStVar = {
-                /**
-                 * In case of custom value that could be flat, we will use the "outputValue" which is a flat value.
-                 */
-                value:
-                    topLevelType && !customValue?.flattenValue ? unbox(topLevelType) : outputValue,
+                value: runtimeValue ?? outputValue,
+                input: topLevelType ?? unbox(outputValue, false),
                 diagnostics,
             };
-
-            if (customValue?.flattenValue) {
-                computedStVar.input = unbox(topLevelType);
-            }
 
             computed[localName] = computedStVar;
         }
 
         return computed;
+    }
+
+    public flatten(meta: StylableMeta) {
+        const computed = this.getComputed(meta);
+
+        const flatStVars: FlatComputedStVar[] = [];
+
+        for (const [symbol, stVar] of Object.entries(computed)) {
+            flatStVars.push(...this.flatSingle(stVar.input, [symbol]));
+        }
+
+        return flatStVars;
+    }
+
+    private flatSingle(input: CustomValueInput, path: string[]) {
+        const currentVars: FlatComputedStVar[] = [];
+
+        if (input.flatValue) {
+            currentVars.push({
+                value: input.flatValue,
+                path,
+            });
+        }
+
+        if (typeof input.value === `object` && input.value !== null) {
+            for (const [key, innerInput] of Object.entries(input.value)) {
+                currentVars.push(
+                    ...this.flatSingle(
+                        typeof innerInput === 'string' ? boxString(innerInput) : innerInput,
+                        [...path, key]
+                    )
+                );
+            }
+        }
+
+        return currentVars;
     }
 }
 
@@ -286,17 +323,14 @@ function evaluateValueCall(
                     args: restArgs,
                     node: resolvedVarSymbol.node,
                     meta: resolvedVar.meta,
+                    rootArgument: varName,
+                    initialNode: node,
                 }
             );
             // report errors
             if (node) {
                 const argsAsString = parsedArgs.join(', ');
-                if (typeError) {
-                    context.diagnostics.warn(
-                        node,
-                        diagnostics.COULD_NOT_RESOLVE_VALUE(argsAsString)
-                    );
-                } else if (!topLevelType && parsedArgs.length > 1) {
+                if (!typeError && !topLevelType && parsedArgs.length > 1) {
                     context.diagnostics.warn(node, diagnostics.MULTI_ARGS_IN_VALUE(argsAsString));
                 }
             }
