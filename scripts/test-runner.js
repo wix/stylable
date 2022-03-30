@@ -30,6 +30,7 @@ async function run() {
         packages,
         glob,
         timeout: timeoutOverride,
+        parallel,
     } = await yargs
         .usage('$0 [options]')
         .option('all', {
@@ -61,17 +62,23 @@ async function run() {
             type: 'number',
             describe: 'timeout for each test',
         })
+        .option('parallel', {
+            type: 'boolean',
+            describe: 'run tests in parallel',
+        })
         .alias('h', 'help')
         .help()
         .strict()
         .wrap(yargs.terminalWidth())
         .parse();
 
-    let {
-        glob: globPath,
-        parallel = true,
-        timeout = 10000,
-    } = createRunParameters({ all, corePackages, glob, integrations, packages });
+    let { glob: globPath, timeout = 10000 } = createRunParameters({
+        all,
+        corePackages,
+        glob,
+        integrations,
+        packages,
+    });
 
     timeout = timeoutOverride !== null && timeoutOverride !== undefined ? timeoutOverride : timeout;
 
@@ -79,7 +86,7 @@ async function run() {
         getMochaRunner(),
         [
             globPath,
-            ...(parallel !== undefined ? ['--parallel'] : []),
+            ...(parallel ? ['--parallel'] : []),
             ...(timeout !== undefined ? ['--timeout', String(timeout)] : []),
         ],
         { stdio: 'inherit' }
@@ -90,7 +97,7 @@ async function run() {
 
 function createRunParameters({ integrations, packages, corePackages, all, glob }) {
     /**
-     * @type {{ glob: string; timeout?: number; parallel?: boolean}}
+     * @type {{ glob: string; timeout?: number }}
      */
     let runParameters;
 
@@ -107,7 +114,6 @@ function createRunParameters({ integrations, packages, corePackages, all, glob }
         runParameters = {
             glob: createTestFilesGlob(packagesList),
             timeout: 20000,
-            parallel: false,
         };
     } else if (corePackages) {
         runParameters = {
