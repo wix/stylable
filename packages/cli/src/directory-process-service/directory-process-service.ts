@@ -134,7 +134,7 @@ export class DirectoryProcessService {
                 }
             } else if (!event.stats) {
                 // handle deleted directory
-                const fileSet = new Set<string>([event.path]);
+                const fileSet = new Set<string>();
                 for (const [dirPath, files] of this.watchedDirectoryFiles) {
                     if (dirPath.startsWith(event.path)) {
                         for (const filePath of files) {
