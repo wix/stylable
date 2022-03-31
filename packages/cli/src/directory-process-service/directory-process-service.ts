@@ -118,6 +118,7 @@ export class DirectoryProcessService {
             if (this.options.fileFilter?.(event.path) ?? true) {
                 if (event.stats) {
                     this.registerInvalidateOnChange(event.path);
+                    this.addFileToWatchedDirectory(event.path);
                     affectedFiles.add(event.path);
                 } else {
                     this.invalidationMap.delete(event.path);
@@ -133,7 +134,7 @@ export class DirectoryProcessService {
                 }
             } else if (!event.stats) {
                 // handle deleted directory
-                const fileSet = new Set<string>();
+                const fileSet = new Set<string>([event.path]);
                 for (const [dirPath, files] of this.watchedDirectoryFiles) {
                     if (dirPath.startsWith(event.path)) {
                         for (const filePath of files) {

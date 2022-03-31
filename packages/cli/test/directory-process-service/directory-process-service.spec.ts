@@ -186,7 +186,7 @@ describe('DirectoryWatchService', () => {
             });
         });
 
-        it.only('should handle delete dirs', async () => {
+        it('should handle delete dirs', async () => {
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
@@ -207,10 +207,11 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            fs.ensureDirectorySync('/test');
+            fs.ensureDirectorySync('/test/deep');
 
             fs.writeFileSync('test/0.template.js', 'output(`0()`)');
             fs.writeFileSync('test/a.template.js', 'output(`A()`)');
+            fs.writeFileSync('test/deep/b.template.js', 'output(`A()`)');
 
             await waitFor(() => {
                 expect(fs.readFileSync('/dist/test/0.txt', 'utf8')).to.equal('0()');
@@ -436,9 +437,9 @@ function expectInvalidationMap(
     watcher: DirectoryProcessService,
     expected: Record<string, string[]>
 ) {
-    const acutal: Record<string, string[]> = {};
+    const actual: Record<string, string[]> = {};
     for (const [key, invalidationSet] of watcher.invalidationMap) {
-        acutal[key] = Array.from(invalidationSet);
+        actual[key] = Array.from(invalidationSet);
     }
-    expect(acutal).to.eql(expected);
+    expect(actual).to.eql(expected);
 }
