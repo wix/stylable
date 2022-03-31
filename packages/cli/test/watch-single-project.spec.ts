@@ -10,7 +10,7 @@ import {
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { realpathSync, renameSync, rmSync, unlinkSync, promises } from 'fs';
+import { realpathSync, renameSync, rmdirSync, unlinkSync, promises } from 'fs';
 import { join, sep } from 'path';
 
 const { writeFile } = promises;
@@ -208,7 +208,7 @@ describe('Stylable Cli Watch - Single project', function () {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        rmSync(join(tempDir.path, 'styles'), { recursive: true });
+                        rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
@@ -237,7 +237,7 @@ describe('Stylable Cli Watch - Single project', function () {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        rmSync(join(tempDir.path, 'styles'), { recursive: true });
+                        rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
