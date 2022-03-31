@@ -2,6 +2,7 @@ import { promises } from 'fs';
 import { dirname, join } from 'path';
 import { expect } from 'chai';
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
+import { waitFor } from 'promise-assist';
 
 const { writeFile } = promises;
 
@@ -46,11 +47,12 @@ describe(`(${project})`, () => {
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
                     '.b{ color: green; }'
                 ),
-            () => {
-                expect(projectRunner.getProjectFiles()['style-output/style-b.st.css']).to.eql(
-                    '.b{ color: green; }'
-                );
-            }
+            () =>
+                waitFor(() => {
+                    expect(projectRunner.getProjectFiles()['style-output/style-b.st.css']).to.eql(
+                        '.b{ color: green; }'
+                    );
+                })
         );
 
         await projectRunner.actAndWaitForRecompile(
@@ -67,18 +69,19 @@ describe(`(${project})`, () => {
                     }
                 `
                 ),
-            async () => {
-                const { page } = await projectRunner.openInBrowser();
-                const styleElements = await page.evaluate(
-                    browserFunctions.getStyleElementsMetadata,
-                    {
-                        includeCSSContent: true,
-                    }
-                );
-                expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-                    /\.index\d+__root \{ color: green; z-index: 1; \}/
-                );
-            }
+            () =>
+                waitFor(async () => {
+                    await page.reload();
+                    const styleElements = await page.evaluate(
+                        browserFunctions.getStyleElementsMetadata,
+                        {
+                            includeCSSContent: true,
+                        }
+                    );
+                    expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
+                        /\.index\d+__root \{ color: green; z-index: 1; \}/
+                    );
+                })
         );
 
         await projectRunner.actAndWaitForRecompile(
@@ -89,18 +92,19 @@ describe(`(${project})`, () => {
                     '.b{ color: blue; }'
                 );
             },
-            async () => {
-                const { page } = await projectRunner.openInBrowser();
-                const styleElements = await page.evaluate(
-                    browserFunctions.getStyleElementsMetadata,
-                    {
-                        includeCSSContent: true,
-                    }
-                );
-                expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-                    /\.index\d+__root \{ color: blue; z-index: 1; \}/
-                );
-            }
+            () =>
+                waitFor(async () => {
+                    await page.reload();
+                    const styleElements = await page.evaluate(
+                        browserFunctions.getStyleElementsMetadata,
+                        {
+                            includeCSSContent: true,
+                        }
+                    );
+                    expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
+                        /\.index\d+__root \{ color: blue; z-index: 1; \}/
+                    );
+                })
         );
     });
 });
