@@ -131,10 +131,11 @@ export class STCBuilder {
      */
     public reportDiagnostics = (
         context: EmitDiagnosticsContext,
-        diagnosticsMode: DiagnosticsMode
+        diagnosticsMode: DiagnosticsMode,
+        remove = false
     ) => {
-        for (const [filePath] of this.diagnosticsMessages.keys()) {
-            this.reportDiagnostic(filePath, context, diagnosticsMode);
+        for (const [filePath] of this.diagnosticsMessages.entries()) {
+            this.reportDiagnostic(filePath, context, diagnosticsMode, remove);
         }
     };
 
@@ -147,7 +148,8 @@ export class STCBuilder {
     public reportDiagnostic = (
         filePath: string,
         context: EmitDiagnosticsContext,
-        diagnosticsMode: DiagnosticsMode
+        diagnosticsMode: DiagnosticsMode,
+        remove = false
     ) => {
         const diagnostics = this.diagnosticsMessages.get(filePath);
 
@@ -166,6 +168,10 @@ export class STCBuilder {
                         : ''
                 }`
             );
+        }
+
+        if (remove) {
+            this.diagnosticsMessages.delete(filePath);
         }
     };
 

@@ -222,6 +222,24 @@ export class StylableWebpackPlugin {
             }
         });
 
+        compiler.hooks.afterDone.tap(StylableWebpackPlugin.name, () => {
+            /**
+             * If there are diagnostics left, report them.
+             */
+            if (this.stcBuilder) {
+                const logger = compiler.getInfrastructureLogger(StylableWebpackPlugin.name);
+
+                this.stcBuilder.reportDiagnostics(
+                    {
+                        emitError: (e) => logger.error(e),
+                        emitWarning: (w) => logger.warn(w),
+                    },
+                    this.options.diagnosticsMode,
+                    true
+                );
+            }
+        });
+
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
             (compilation, { normalModuleFactory }) => {
@@ -437,7 +455,8 @@ export class StylableWebpackPlugin {
                                 this.stcBuilder!.reportDiagnostic(
                                     sourceFilePath,
                                     loaderContext,
-                                    this.options.diagnosticsMode
+                                    this.options.diagnosticsMode,
+                                    true
                                 );
                             }
                         }

@@ -16,7 +16,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
     for (const dep of buildDependencies) {
         this.addDependency(dep);
     }
-    emitDiagnostics(this, meta, this.diagnosticsMode);
+    emitDiagnostics(this, meta, this.diagnosticsMode, this.resourcePath);
 
     const varType = this.target === 'oldie' ? 'var' : 'const';
 

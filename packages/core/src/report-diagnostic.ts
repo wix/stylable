@@ -39,12 +39,13 @@ export function reportDiagnostic(
 export function emitDiagnostics(
     ctx: EmitDiagnosticsContext,
     meta: StylableMeta,
-    diagnosticsMode: DiagnosticsMode
+    diagnosticsMode: DiagnosticsMode,
+    filePath?: string
 ) {
     meta.diagnostics?.reports.forEach(handleReport);
     meta.transformDiagnostics?.reports.forEach(handleReport);
 
     function handleReport(diagnostic: Diagnostic) {
-        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
+        reportDiagnostic(ctx, diagnosticsMode, diagnostic, filePath);
     }
 }
