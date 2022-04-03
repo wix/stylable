@@ -51,14 +51,15 @@ export class DirectoryProcessService {
                 this.registerInvalidateOnChange(item.path);
             }
         }
-        if (affectedFiles.size === 0) {
-            return;
+        if (affectedFiles.size) {
+            try {
+                await this.options.processFiles?.(this, affectedFiles, new Set());
+            } catch (error) {
+                this.options.onError?.(error as Error);
+            }
         }
-        try {
-            await this.options.processFiles?.(this, affectedFiles, new Set());
-        } catch (error) {
-            this.options.onError?.(error as Error);
-        }
+
+        return affectedFiles;
     }
     private addFileToWatchedDirectory(filePath: string) {
         const dirName = this.fs.dirname(filePath);
@@ -110,7 +111,9 @@ export class DirectoryProcessService {
         for (const event of files.values()) {
             if (event.stats?.isDirectory()) {
                 if (this.options.directoryFilter?.(event.path) ?? true) {
-                    await this.init(event.path);
+                    for (const filePath of await this.init(event.path)) {
+                        affectedFiles.add(filePath);
+                    }
                 }
                 continue;
             }
