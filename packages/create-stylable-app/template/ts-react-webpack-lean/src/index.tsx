@@ -1,11 +1,10 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './globals.st.css';
 import { App } from './app';
 
-ReactDOM.render(
+createRoot(document.body.appendChild(document.createElement('div'))).render(
     <React.StrictMode>
         <App />
-    </React.StrictMode>,
-    document.body.appendChild(document.createElement('div'))
+    </React.StrictMode>
 );

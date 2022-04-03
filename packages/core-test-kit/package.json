@@ -7,7 +7,7 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/memory": "^5.7.1",
+    "@file-services/memory": "^6.0.0",
     "@stylable/core": "^4.11.0",
     "chai": "^4.3.6",
     "flat": "^5.0.2",
