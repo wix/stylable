@@ -102,7 +102,7 @@ export class WatchHandler {
 
             if (!reported) {
                 this.log(
-                    buildMessages.NO_DIANGOSTICS(),
+                    buildMessages.NO_DIAGNOSTICS(),
                     buildMessages.CONTINUE_WATCH(),
                     levels.info
                 );

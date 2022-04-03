@@ -273,14 +273,14 @@ export async function build(
     }
 
     function setFileErrorDiagnostic(filePath: string, error: any) {
-        const diangostic: Diagnostic = {
+        const diagnostic: Diagnostic = {
             type: 'error',
             message: error instanceof Error ? error.message : String(error),
         };
 
         diagnosticsManager.set(identifier, filePath, {
             diagnosticsMode,
-            diagnostics: [diangostic],
+            diagnostics: [diagnostic],
         });
     }
 
