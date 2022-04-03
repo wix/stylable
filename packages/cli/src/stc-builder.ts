@@ -57,7 +57,7 @@ export class STCBuilder {
                     /**
                      * Update the diagnostics messages every `build` execution.
                      */
-                    this.diagnosticsMessages = diagnosticsMessages;
+                    this.diagnosticsMessages = new Map(diagnosticsMessages);
                 },
             },
         });
