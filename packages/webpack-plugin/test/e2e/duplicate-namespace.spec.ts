@@ -31,7 +31,7 @@ describe(`(${project})`, () => {
     });
 
     it('should only load one copy of duplicated module with same content and depth ', async () => {
-        const { page } = await projectRunner.openInBrowser();
+        const { page } = await projectRunner.openInBrowser({ captureResponses: true });
 
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
             includeCSSContent: false,
@@ -39,7 +39,7 @@ describe(`(${project})`, () => {
 
         expect(styleElements).to.eql([
             { id: './src/same-index.st.css', depth: '1' }, // same content, different depth
-            { id: './src/same-v1.st.css', depth: '1' }, // duplicated only one survived 
+            { id: './src/same-v1.st.css', depth: '1' }, // duplicated only one survived
             { id: './src/index.st.css', depth: '2' }, // component import +1 depth
         ]);
     });

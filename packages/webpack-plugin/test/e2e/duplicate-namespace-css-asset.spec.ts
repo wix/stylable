@@ -32,7 +32,7 @@ describe(`(${project})`, () => {
     });
 
     it('should only load one copy of duplicated module with same content and depth ', async () => {
-        const { page } = await projectRunner.openInBrowser();
+        const { page } = await projectRunner.openInBrowser({ captureResponses: true });
 
         const { rulesLength, stylesLength } = await page.evaluate(() => {
             const stylesLength = document.styleSheets.length;
@@ -43,7 +43,10 @@ describe(`(${project})`, () => {
             };
         });
 
-        expect(stylesLength, 'stylable.css should exist').to.equal(1);
-        expect(rulesLength, 'sheet has 3 rules (one is omitted because duplication)').to.equal(3);
+        expect(stylesLength, 'stylable.css should exist').to.have.lengthOf(1);
+        expect(
+            rulesLength,
+            'sheet has 3 rules (one is omitted because duplication)'
+        ).to.have.lengthOf(3);
     });
 });
