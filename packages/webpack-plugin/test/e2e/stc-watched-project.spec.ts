@@ -85,25 +85,27 @@ describe(`(${project})`, () => {
 
         await projectRunner.actAndWaitForRecompile(
             'update new source file and expect the new style to be applied on the consumer',
-            async () => {
-                await writeFile(
+            () =>
+                writeFile(
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
                     '.b{ color: blue; }'
-                );
-            },
+                ),
             () =>
-                waitFor(async () => {
-                    await page.reload();
-                    const styleElements = await page.evaluate(
-                        browserFunctions.getStyleElementsMetadata,
-                        {
-                            includeCSSContent: true,
-                        }
-                    );
-                    expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-                        /\.index\d+__root \{ color: blue; z-index: 1; \}/
-                    );
-                })
+                waitFor(
+                    async () => {
+                        await page.reload();
+                        const styleElements = await page.evaluate(
+                            browserFunctions.getStyleElementsMetadata,
+                            {
+                                includeCSSContent: true,
+                            }
+                        );
+                        expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
+                            /\.index\d+__root \{ color: blue; z-index: 1; \}/
+                        );
+                    },
+                    { timeout: 5_000 }
+                )
         );
     });
 });
