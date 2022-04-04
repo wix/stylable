@@ -25,7 +25,7 @@ describe(`(${project})`, () => {
         afterEach,
         after
     );
-    it('build "stc" and webpack out in the correct order', async () => {
+    it('build "stc" and webpack in the correct order', async () => {
         const { page } = await projectRunner.openInBrowser();
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
             includeCSSContent: true,
@@ -93,6 +93,10 @@ describe(`(${project})`, () => {
             () =>
                 waitFor(
                     async () => {
+                        expect(
+                            projectRunner.getProjectFiles()['style-output/style-b.st.css']
+                        ).to.eql('.b{ color: blue; }');
+
                         await page.reload();
                         const styleElements = await page.evaluate(
                             browserFunctions.getStyleElementsMetadata,
@@ -104,7 +108,7 @@ describe(`(${project})`, () => {
                             /\.index\d+__root \{ color: blue; z-index: 1; \}/
                         );
                     },
-                    { timeout: 5_000 }
+                    { timeout: 5_000, delay: 0 }
                 )
         );
     });
