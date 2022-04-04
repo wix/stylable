@@ -23,7 +23,7 @@ import {
     findIfStylableModuleUsed,
     staticCSSWith,
     getStylableBuildMeta,
-    reportNamespaceCollision,
+    handleNamespaceCollision,
     createOptimizationMapping,
     getTopLevelInputFilesystem,
     createDecacheRequire,
@@ -51,7 +51,15 @@ import { parse } from 'postcss';
 import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
 
 type OptimizeOptions = OptimizeConfig & {
+    /**
+     * Enable css minification
+     */
     minify?: boolean;
+    /**
+     * @experimental
+     * Remove modules with the same target css and same depth from output
+     */
+    dedupe?: boolean;
 };
 
 export interface StylableWebpackPluginOptions {
@@ -136,6 +144,7 @@ const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
     shortNamespaces: isProd,
     removeEmptyNodes: isProd,
     minify: isProd,
+    dedupe: false,
 });
 
 const defaultOptions = (
@@ -321,6 +330,7 @@ export class StylableWebpackPlugin {
                         const stylableBuildMeta: StylableBuildMeta = {
                             depth: 0,
                             isUsed: undefined,
+                            isDuplicate: false,
                             ...loaderData,
                         };
                         module.buildMeta.stylable = stylableBuildMeta;
@@ -418,6 +428,7 @@ export class StylableWebpackPlugin {
                     css,
                     isUsed: module.buildMeta.stylable.isUsed,
                     depth: module.buildMeta.stylable.depth,
+                    isDuplicate: module.buildMeta.stylable.isDuplicate,
                 });
             }
         });
@@ -434,12 +445,14 @@ export class StylableWebpackPlugin {
             const { usageMapping, namespaceMapping, namespaceToFileMapping } =
                 createOptimizationMapping(sortedModules, optimizer);
 
-            reportNamespaceCollision(
+            handleNamespaceCollision(
+                stylableModules,
                 namespaceToFileMapping,
                 compilation,
                 normalizeNamespaceCollisionOption(
                     this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE
-                )
+                ),
+                optimizeOptions.dedupe
             );
 
             for (const module of sortedModules) {
@@ -509,7 +522,10 @@ export class StylableWebpackPlugin {
                             getEntryPointModules(entryPoint, compilation.chunkGraph, (module) => {
                                 const m = module as NormalModule;
                                 if (stylableModules.has(m)) {
-                                    modules.set(m, getStylableBuildData(stylableModules, m));
+                                    const buildData = getStylableBuildData(stylableModules, m);
+                                    if (!buildData.isDuplicate) {
+                                        modules.set(m, buildData);
+                                    }
                                 }
                             });
                             if (modules.size) {

@@ -255,7 +255,10 @@ export function createStaticCSS(
     dependencyTemplates: DependencyTemplates
 ) {
     const cssChunks = Array.from(stylableModules.keys())
-        .filter((m) => getStylableBuildMeta(m).isUsed !== false)
+        .filter((m) => {
+            const buildMeta = getStylableBuildMeta(m);
+            return buildMeta.isUsed !== false && !buildMeta.isDuplicate;
+        })
         .sort((m1, m2) => getStylableBuildMeta(m1).depth - getStylableBuildMeta(m2).depth)
         .map((m) => {
             return replaceMappedCSSAssetPlaceholders({
@@ -365,27 +368,49 @@ export function getSortedModules(stylableModules: Map<NormalModule, BuildData | 
     });
 }
 
-export function reportNamespaceCollision(
+export function handleNamespaceCollision(
+    stylableModules: Map<NormalModule, BuildData | null>,
     namespaceToFileMapping: Map<string, Set<NormalModule>>,
     compilation: Compilation,
-    mode: 'ignore' | 'warnings' | 'errors'
+    mode: 'ignore' | 'warnings' | 'errors',
+    enableDedupe?: boolean
 ) {
     if (mode === 'ignore') {
         return;
     }
     for (const [namespace, resources] of namespaceToFileMapping) {
         if (resources.size > 1) {
-            const resourcesReport = [...resources]
-                .map((module) => getModuleRequestPath(module, compilation))
-                .join('\n');
+            const modules = [...resources];
 
-            const error = new compilation.compiler.webpack.WebpackError(
-                `Duplicate namespace ${JSON.stringify(
-                    namespace
-                )} found in multiple different resources:\n${resourcesReport}\nThis issue indicates multiple versions of the same library in the compilation, or different paths importing the same stylesheet like: "esm" or "cjs".`
-            );
-            error.hideStack = true;
-            compilation[mode].push(error);
+            let common: { css: string; depth: number };
+            const shouldReport = modules.some((mod) => {
+                const { css, depth } = getStylableBuildData(stylableModules, mod);
+                if (!common) {
+                    common = { css, depth };
+                } else if (common.css !== css || common.depth !== depth) {
+                    return true;
+                }
+                return false;
+            });
+            if (shouldReport) {
+                const resourcesReport = modules
+                    .map((module) => getModuleRequestPath(module, compilation))
+                    .join('\n');
+
+                const error = new compilation.compiler.webpack.WebpackError(
+                    `Duplicate namespace ${JSON.stringify(
+                        namespace
+                    )} found in multiple different resources:\n${resourcesReport}\nThis issue indicates multiple versions of the same library in the compilation, or different paths importing the same stylesheet like: "esm" or "cjs".`
+                );
+                error.hideStack = true;
+                compilation[mode].push(error);
+            } else if (enableDedupe) {
+                // we keep the first one start index from 1
+                for (let i = 1; i < modules.length; i++) {
+                    getStylableBuildMeta(modules[i]).isDuplicate = true;
+                    getStylableBuildData(stylableModules, modules[i]).isDuplicate = true;
+                }
+            }
         }
     }
 }

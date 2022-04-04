@@ -29,6 +29,10 @@ export function injectCssModules(
         const chunkGraph = compilation.chunkGraph;
 
         for (const [module] of stylableModules) {
+            const stylableBuildData = getStylableBuildData(stylableModules, module);
+            if (stylableBuildData.isDuplicate) {
+                continue;
+            }
             const cssModule = new CssModule({
                 context: module.context,
                 identifier: module.resource.replace(/\.st\.css$/, '.css') + '?stylable-css-inject',
@@ -42,7 +46,7 @@ export function injectCssModules(
                         dependencyTemplates,
                         runtime: 'CSS' /*runtime*/,
                         runtimeTemplate,
-                        stylableBuildData: getStylableBuildData(stylableModules, module),
+                        stylableBuildData,
                     })
                 ),
             });

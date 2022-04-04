@@ -30,7 +30,6 @@ export {
     provideStylableModules,
     replaceCSSAssetPlaceholders,
     replaceMappedCSSAssetPlaceholders,
-    reportNamespaceCollision,
     staticCSSWith,
     uniqueFilterMap,
 } from './plugin-utils';

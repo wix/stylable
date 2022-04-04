@@ -147,7 +147,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
             }: DependencyTemplateContext
         ) {
             const stylableBuildData = getStylableBuildData(this.stylableModules, module);
-            if (!stylableBuildData.isUsed) {
+            if (!stylableBuildData.isUsed || stylableBuildData.isDuplicate) {
                 return;
             }
             if (this.cssInjection === 'js') {

@@ -10,11 +10,12 @@ export interface StylableBuildMeta {
     isUsed: undefined | boolean;
     globals: Record<string, boolean>;
     unusedImports: string[];
+    isDuplicate: boolean;
 }
 
 export type BuildData = Pick<
     StylableBuildMeta,
-    'css' | 'namespace' | 'depth' | 'exports' | 'isUsed' | 'urls'
+    'css' | 'namespace' | 'depth' | 'exports' | 'isUsed' | 'urls' | 'isDuplicate'
 >;
 
 export type LoaderData = Pick<
