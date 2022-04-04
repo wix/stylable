@@ -1,0 +1,8 @@
+@st-import [--color] from "wix-ui-tpa";
+@st-import [fn] from "st-utils";
+
+
+.root {
+    background: var(--color);
+    color: fn();
+}

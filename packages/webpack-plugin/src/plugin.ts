@@ -264,6 +264,8 @@ export class StylableWebpackPlugin {
                 compiler.options.resolve.aliasFields,
         };
 
+        resolverOptions.mainFields?.unshift('stylable-module');
+
         this.stylable = Stylable.create(
             this.options.stylableConfig(
                 {
