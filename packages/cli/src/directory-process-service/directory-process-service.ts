@@ -118,6 +118,7 @@ export class DirectoryProcessService {
             if (this.options.fileFilter?.(event.path) ?? true) {
                 if (event.stats) {
                     this.registerInvalidateOnChange(event.path);
+                    this.addFileToWatchedDirectory(event.path);
                     affectedFiles.add(event.path);
                 } else {
                     this.invalidationMap.delete(event.path);

@@ -1,6 +1,11 @@
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { populateDirectorySync, loadDirSync, runCliCodeMod } from '@stylable/e2e-test-kit';
+import {
+    populateDirectorySync,
+    loadDirSync,
+    runCliCodeMod,
+    createTempDirectory,
+    ITempDirectory,
+} from '@stylable/e2e-test-kit';
 import type { CodeMod } from '@stylable/cli';
 
 describe('Stylable Cli Code Mods', () => {
