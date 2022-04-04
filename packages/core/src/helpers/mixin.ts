@@ -1,10 +1,11 @@
 import type { Diagnostics } from '../diagnostics';
-import { strategies } from './value';
+import { strategies, valueDiagnostics } from './value';
 import type { MixinValue } from '../features';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 
 export const diagnostics = {
+    INVALID_NAMED_PARAMS: valueDiagnostics.INVALID_NAMED_PARAMS,
     VALUE_CANNOT_BE_STRING() {
         return 'value can not be a string (remove quotes?)';
     },

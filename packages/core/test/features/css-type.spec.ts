@@ -188,6 +188,39 @@ describe(`features/css-type`, () => {
             });
         });
     });
+    describe(`st-mixin`, () => {
+        it(`should mix element type`, () => {
+            const { sheets } = testStylableCore({
+                '/mixin.st.css': `
+                    Mix {
+                        color: green;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import MixRoot, [Mix as mixType] from './mixin.st.css';
+
+                    /* 
+                        @rule(type) .entry__a { color: green } 
+                    */
+                    .a {
+                        -st-mixin: mixType;
+                    }
+
+                    /* 
+                        @rule(root.0)[0] .entry__a { } 
+                        @rule(root.1)[1] .entry__a Mix { color: green } 
+                    */
+                    .a {
+                        -st-mixin: MixRoot;
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
     describe(`css-class`, () => {
         it(`should transform according to -st-global`, () => {
             const { sheets } = testStylableCore({

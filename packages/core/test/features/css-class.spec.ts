@@ -774,4 +774,258 @@ describe(`features/css-class`, () => {
             });
         });
     });
+    describe(`css-pseudo-class`, () => {
+        // ToDo: move to css-pseudo-class spec once feature is created
+        describe(`st-mixin`, () => {
+            it(`should mix custom state`, () => {
+                const { sheets } = testStylableCore({
+                    '/base.st.css': `
+                        .root {
+                            -st-states: toggled;
+                        }
+                        .root:toggled {
+                            value: from base;
+                        }
+                    `,
+                    '/extend.st.css': `
+                        @st-import Base from './base.st.css';
+                        Base {}
+                        .root {
+                            -st-extends: Base;
+                        }
+                        .root:toggled {
+                            value: from extend;
+                        }
+                    `,
+                    '/entry.st.css': `
+                        @st-import Extend, [Base] from './extend.st.css';
+    
+                        /* @rule[1] 
+                        .entry__a.base--toggled {
+                            value: from base;
+                        } */
+                        .a {
+                            -st-mixin: Base;
+                        }
+
+                        /* 
+                        ToDo: change to 1 once empty AST is filtered
+                        @rule[2] 
+                        .entry__a.base--toggled {
+                            value: from extend;
+                        } */
+                        .a {
+                            -st-mixin: Extend;
+                        }
+                    `,
+                });
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
+            it(`should mix imported class with custom-pseudo-state`, () => {
+                // ToDo: fix case where extend.st.css has .root between mix rules: https://shorturl.at/cwBMP
+                // ToDo: fix crash when enrich uses `MixRoot::part` - https://shorturl.at/jsRU4
+                const { sheets } = testStylableCore({
+                    '/base.st.css': `
+                        .root {
+                            /* not going to be mixed through -st-extends */
+                            id: base-root;
+                            -st-states: state;
+                        }
+                    `,
+                    '/extend.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root {
+                            -st-extends: Base;
+                        }
+                        .mix {
+                            -st-extends: Base;
+                            id: extend-mix;
+                        }
+                        .mix:state {
+                            id: extend-mix-state;
+                        };
+                        .root:state {
+                            id: extend-root-state;
+                        }
+                        
+                    `,
+                    '/enrich.st.css': `
+                        @st-import MixRoot, [mix as mixClass] from './extend.st.css';
+                        MixRoot {
+                            id: enrich-MixRoot;
+                        }
+                        /* bug: causes crash:
+                        MixRoot:state {
+                            id: enrich-MixRoot-state;
+                        }
+                        */
+                        .mixClass {
+                            id: enrich-mixClass;
+                        }
+                        .mixClass:state {
+                            id: enrich-mixClass-state;
+                        }
+                    `,
+                    '/entry.st.css': `
+                        @st-import [MixRoot, mixClass] from './enrich.st.css';
+
+                        /* 
+                            @rule[0] .entry__a { -st-extends: Base; id: extend-mix; } 
+                            @rule[1] .entry__a.base--state { id: extend-mix-state; } 
+                            @rule[2] .entry__a { id: enrich-mixClass; } 
+                            @rule[3] .entry__a.base--state { id: enrich-mixClass-state; } 
+                        */
+                        .a {
+                            -st-mixin: mixClass;
+                        }
+
+                        /* 
+                            @rule[0] .entry__a { -st-extends: Base; }
+                            @rule[1] .entry__a .extend__mix { -st-extends: Base; id: extend-mix; } 
+                            @rule[2] .entry__a .extend__mix.base--state { id: extend-mix-state; } 
+                            @rule[3] .entry__a.base--state { id: extend-root-state; } 
+                            @rule[4] .entry__a { id: enrich-MixRoot; }
+                        */
+                        .a {
+                            -st-mixin: MixRoot;
+                        }
+                    `,
+                });
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
+        });
+    });
+    describe(`css-pseudo-element`, () => {
+        // ToDo: move to css-pseudo-element spec once feature is created
+        describe(`st-mixin`, () => {
+            it(`should mix local class with pseudo-element`, () => {
+                const { sheets } = testStylableCore({
+                    '/base.st.css': `
+                        .part { prop: a; }
+                    `,
+                    '/extend.st.css': `
+                        @st-import Base from './base.st.css';
+                        Base { prop: b; }
+                        .part {prop: c; /* override part */}
+                    `,
+                    '/entry.st.css': `
+                        @st-import Extend, [Base] from './extend.st.css';
+                    
+                        .mix-base {
+                            -st-extends: Base;
+                            prop: d;
+                        }
+                        .mix-base::part { prop: e; }
+
+                        /* 
+                            @rule(base)[1] .entry__a .base__part { prop: e; } 
+                        */
+                        .a {
+                            -st-mixin: mix-base;
+                        }
+
+                        .mix-extend {
+                            -st-extends: Extend;
+                            prop: f;
+                        }
+                        .mix-extend::part { prop: g; }
+
+                        /* 
+                            @rule(extend)[1] .entry__a .extend__part { prop: g; } 
+                        */
+                        .a {
+                            -st-mixin: mix-extend;
+                        }
+                    `,
+                });
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
+            it(`should mix imported class with pseudo-element`, () => {
+                // ToDo: fix case where extend.st.css has .root between mix rules: https://shorturl.at/cwBMP
+                // ToDo: fix crash when enrich uses `MixRoot::part` - https://shorturl.at/jsRU4
+                const { sheets } = testStylableCore({
+                    '/base.st.css': `
+                        .part {
+                            /* not going to be mixed through -st-extends */
+                            id: base-part;
+                        }
+                    `,
+                    '/extend.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root {
+                            -st-extends: Base;
+                        }
+                        .part { id: extend-part; }
+                        .mix {
+                            -st-extends: Base;
+                            id: extend-mix;
+                        }
+                        .mix::part .part {
+                            id: extend-mix-part;
+                        };
+                        .root::part .part{
+                            id: extend-root-part;
+                        }
+                        
+                    `,
+                    '/enrich.st.css': `
+                        @st-import MixRoot, [mix as mixClass] from './extend.st.css';
+                        .part { id: enrich-part; }
+                        MixRoot {
+                            id: enrich-MixRoot;
+                        }
+                        /* bug: causes crash:
+                        MixRoot::part {
+                            id: enrich-MixRoot-part;
+                        }
+                        */
+                        .mixClass {
+                            id: enrich-mixClass;
+                        }
+                        .mixClass::part .part {
+                            id: enrich-mixClass-part
+                        }
+                    `,
+                    '/entry.st.css': `
+                        @st-import [MixRoot, mixClass] from './enrich.st.css';
+
+                        /* 
+                            @rule[0] .entry__a { -st-extends: Base; id: extend-mix; } 
+                            @rule[1] .entry__a .base__part .extend__part { id: extend-mix-part; } 
+                            @rule[2] .entry__a { id: enrich-mixClass; } 
+                            @rule[3] .entry__a .base__part .enrich__part { id: enrich-mixClass-part; } 
+                        */
+                        .a {
+                            -st-mixin: mixClass;
+                        }
+
+                        /* 
+                            @rule[0] .entry__a { -st-extends: Base; } 
+                            @rule[1] .entry__a .extend__part { id: extend-part; } 
+                            @rule[2] .entry__a .extend__mix { -st-extends: Base; id: extend-mix; } 
+                            @rule[3] .entry__a .extend__mix .base__part .extend__part { id: extend-mix-part; } 
+                            @rule[4] .entry__a .base__part .extend__part { id: extend-root-part; } 
+                            @rule[5] .entry__a { id: enrich-MixRoot; }
+                        */
+                        .a {
+                            -st-mixin: MixRoot;
+                        }
+                    `,
+                });
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
+        });
+    });
 });

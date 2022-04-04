@@ -475,4 +475,140 @@ describe(`features/css-keyframes`, () => {
             shouldReportNoDiagnostics(meta);
         });
     });
+    describe(`st-mixin`, () => {
+        it(`should mix local class referring to local @keyframes`, () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    animation: jump;
+                }
+                @keyframes jump {}
+                
+                /* 
+                @rule .entry__a { animation: entry__jump; } 
+                */
+                .a {
+                    -st-mixin: mix;
+                }
+            `);
+
+            expect(
+                sheets[`/entry.st.css`].meta.outputAst?.toString().match(/@keyframes/g)!.length,
+                `only original @keyframes`
+            ).to.eql(1);
+        });
+        it(`should mix class with mixin context @keyframes`, () => {
+            const { sheets } = testStylableCore({
+                '/imported.st.css': `
+                    .mix {
+                        animation: jump;
+                    }
+                    @keyframes jump {}
+                `,
+                '/entry.st.css': `
+                    @st-import [mix] from './imported.st.css';
+                    
+                    /* 
+                    @rule .entry__a { animation: imported__jump; } 
+                    */
+                    .a {
+                        -st-mixin: mix;
+                    }
+                `,
+            });
+
+            expect(
+                sheets[`/entry.st.css`].meta.outputAst?.toString(),
+                `@keyframes referenced & not copied`
+            ).to.not.include(`@keyframes`);
+        });
+        it(`should mix root with with copy of @keyframes`, () => {
+            // ToDo(bug): fix copied @keyframes to be namespaced by entry or use reference
+            // should be `animation: entry__jump` and `@keyframes entry__jump` or reference to imported__jump
+            const { sheets } = testStylableCore({
+                '/imported.st.css': `
+                    .root {
+                        animation: jump;
+                    }
+                    @keyframes jump {}
+                `,
+                '/entry.st.css': `
+                    @st-import Mix from './imported.st.css';
+                    
+                    /* 
+                    @rule(reference animation name) .entry__a { animation: imported__jump; } 
+                    @rule[1](mixed-in @keyframes) imported__jump
+                    */
+                    .a {
+                        -st-mixin: Mix;
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it(`should handle @keyframes in Javascript mixin`, () => {
+            // ToDo: fix symbols inside mixin - animation-name
+            // should match between @keyframes and declarations.
+            testStylableCore({
+                '/mixin.js': `
+                    module.exports = function() {
+                        return {
+                            "animation": [
+                                "unknown",
+                                "conflict",
+                                "global-name",
+                            ],
+                            "@keyframes unknown": {},
+                            "@keyframes conflict": {},
+                            "@keyframes st-global(global-name)": {},
+                        }
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import mix from './mixin';
+                    
+                    /* @atrule(stay global) conflict */
+                    @keyframes st-global(conflict) {}
+
+                    /* 
+                        @rule[0] .entry__a {
+                            animation: unknown;
+                            animation: conflict;
+                            animation: global-name;
+                        }
+                        @rule(ns for sheet)[1] entry__unknown
+                        @rule(global by sheet)[2] conflict
+                        @rule(global by mixin)[3] global-name
+                    */
+                    .a {
+                        -st-mixin: mix;
+                    }
+                `,
+            });
+        });
+        it.skip(`should not mix  @keyframes`, () => {
+            // ToDo: report mixin of selector !== `&`
+            testStylableCore(`
+                .x {
+                    color: green;
+                }
+                .x:hover {
+                    color: red;
+                }
+
+                @keyframes my-name {
+                    /* @rule 0% {
+                        color: green;
+                        bug: ".x:hover mixed-in"
+                    } */
+                    0% {
+                        -st-mixin: x;
+                    }
+                    100% {}
+                }
+            `);
+        });
+    });
 });

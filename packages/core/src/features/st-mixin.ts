@@ -33,6 +33,7 @@ export const MixinType = {
 
 export const diagnostics = {
     VALUE_CANNOT_BE_STRING: MixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
+    INVALID_NAMED_PARAMS: MixinHelperDiagnostics.INVALID_NAMED_PARAMS,
     PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
         return `"${MixinType.PARTIAL}" can only be used with override arguments provided, missing overrides on "${type}"`;
     },
@@ -527,11 +528,13 @@ function filterPartialMixinDecl(
             if (parent?.nodes?.length === 0) {
                 parent.remove();
             } else if (parent) {
-                if (decl.prop === valueMapping.mixin) {
-                    parent.mixins = parent.mixins!.filter(partialsOnly);
-                } else if (decl.prop === valueMapping.partialMixin) {
-                    parent.mixins = parent.mixins!.filter(nonPartials);
-                }
+                ignoreDeprecationWarn(() => {
+                    if (decl.prop === valueMapping.mixin) {
+                        parent.mixins = parent.mixins!.filter(partialsOnly);
+                    } else if (decl.prop === valueMapping.partialMixin) {
+                        parent.mixins = parent.mixins!.filter(nonPartials);
+                    }
+                });
             }
         }
     });
