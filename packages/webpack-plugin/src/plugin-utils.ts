@@ -373,7 +373,7 @@ export function handleNamespaceCollision(
     namespaceToFileMapping: Map<string, Set<NormalModule>>,
     compilation: Compilation,
     mode: 'ignore' | 'warnings' | 'errors',
-    enableDedupe?: boolean
+    dedupeSimilarStylesheets?: boolean
 ) {
     if (mode === 'ignore') {
         return;
@@ -382,16 +382,10 @@ export function handleNamespaceCollision(
         if (resources.size > 1) {
             const modules = [...resources];
 
-            let common: { css: string; depth: number };
-            const shouldReport = modules.some((mod) => {
-                const { css, depth } = getStylableBuildData(stylableModules, mod);
-                if (!common) {
-                    common = { css, depth };
-                } else if (common.css !== css || common.depth !== depth) {
-                    return true;
-                }
-                return false;
-            });
+            const shouldReport = dedupeSimilarStylesheets
+                ? areAllModulesTheSameCssAndDepth(stylableModules, modules)
+                : true;
+
             if (shouldReport) {
                 const resourcesReport = modules
                     .map((module) => getModuleRequestPath(module, compilation))
@@ -404,7 +398,7 @@ export function handleNamespaceCollision(
                 );
                 error.hideStack = true;
                 compilation[mode].push(error);
-            } else if (enableDedupe) {
+            } else if (dedupeSimilarStylesheets) {
                 // we keep the first one start index from 1
                 for (let i = 1; i < modules.length; i++) {
                     getStylableBuildMeta(modules[i]).isDuplicate = true;
@@ -413,6 +407,22 @@ export function handleNamespaceCollision(
             }
         }
     }
+}
+
+function areAllModulesTheSameCssAndDepth(
+    stylableModules: Map<NormalModule, BuildData | null>,
+    modules: NormalModule[]
+) {
+    let common: { css: string; depth: number };
+    return modules.some((mod) => {
+        const { css, depth } = getStylableBuildData(stylableModules, mod);
+        if (!common) {
+            common = { css, depth };
+        } else if (common.css !== css || common.depth !== depth) {
+            return true;
+        }
+        return false;
+    });
 }
 
 export function normalizeNamespaceCollisionOption(opt?: boolean | 'warn') {
