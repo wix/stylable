@@ -826,7 +826,6 @@ describe(`features/css-class`, () => {
             });
             it(`should mix imported class with custom-pseudo-state`, () => {
                 // ToDo: fix case where extend.st.css has .root between mix rules: https://shorturl.at/cwBMP
-                // ToDo: fix crash when enrich uses `MixRoot::part` - https://shorturl.at/jsRU4
                 const { sheets } = testStylableCore({
                     '/base.st.css': `
                         .root {
@@ -850,18 +849,16 @@ describe(`features/css-class`, () => {
                         .root:state {
                             id: extend-root-state;
                         }
-                        
+
                     `,
                     '/enrich.st.css': `
                         @st-import MixRoot, [mix as mixClass] from './extend.st.css';
                         MixRoot {
                             id: enrich-MixRoot;
                         }
-                        /* bug: causes crash:
                         MixRoot:state {
                             id: enrich-MixRoot-state;
                         }
-                        */
                         .mixClass {
                             id: enrich-mixClass;
                         }
@@ -872,22 +869,23 @@ describe(`features/css-class`, () => {
                     '/entry.st.css': `
                         @st-import [MixRoot, mixClass] from './enrich.st.css';
 
-                        /* 
-                            @rule[0] .entry__a { -st-extends: Base; id: extend-mix; } 
-                            @rule[1] .entry__a.base--state { id: extend-mix-state; } 
-                            @rule[2] .entry__a { id: enrich-mixClass; } 
-                            @rule[3] .entry__a.base--state { id: enrich-mixClass-state; } 
+                        /*
+                            @rule[0] .entry__a { -st-extends: Base; id: extend-mix; }
+                            @rule[1] .entry__a.base--state { id: extend-mix-state; }
+                            @rule[2] .entry__a { id: enrich-mixClass; }
+                            @rule[3] .entry__a.base--state { id: enrich-mixClass-state; }
                         */
                         .a {
                             -st-mixin: mixClass;
                         }
 
-                        /* 
+                        /*
                             @rule[0] .entry__a { -st-extends: Base; }
-                            @rule[1] .entry__a .extend__mix { -st-extends: Base; id: extend-mix; } 
-                            @rule[2] .entry__a .extend__mix.base--state { id: extend-mix-state; } 
-                            @rule[3] .entry__a.base--state { id: extend-root-state; } 
+                            @rule[1] .entry__a .extend__mix { -st-extends: Base; id: extend-mix; }
+                            @rule[2] .entry__a .extend__mix.base--state { id: extend-mix-state; }
+                            @rule[3] .entry__a.base--state { id: extend-root-state; }
                             @rule[4] .entry__a { id: enrich-MixRoot; }
+                            @rule[5] .entry__a.base--state { id: enrich-MixRoot-state; }
                         */
                         .a {
                             -st-mixin: MixRoot;
@@ -951,7 +949,6 @@ describe(`features/css-class`, () => {
             });
             it(`should mix imported class with pseudo-element`, () => {
                 // ToDo: fix case where extend.st.css has .root between mix rules: https://shorturl.at/cwBMP
-                // ToDo: fix crash when enrich uses `MixRoot::part` - https://shorturl.at/jsRU4
                 const { sheets } = testStylableCore({
                     '/base.st.css': `
                         .part {
@@ -983,11 +980,9 @@ describe(`features/css-class`, () => {
                         MixRoot {
                             id: enrich-MixRoot;
                         }
-                        /* bug: causes crash:
-                        MixRoot::part {
+                        MixRoot::part .part {
                             id: enrich-MixRoot-part;
                         }
-                        */
                         .mixClass {
                             id: enrich-mixClass;
                         }
@@ -1015,6 +1010,7 @@ describe(`features/css-class`, () => {
                             @rule[3] .entry__a .extend__mix .base__part .extend__part { id: extend-mix-part; } 
                             @rule[4] .entry__a .base__part .extend__part { id: extend-root-part; } 
                             @rule[5] .entry__a { id: enrich-MixRoot; }
+                            @rule[6] .entry__a .extend__part .enrich__part { id: enrich-MixRoot-part; }
                         */
                         .a {
                             -st-mixin: MixRoot;

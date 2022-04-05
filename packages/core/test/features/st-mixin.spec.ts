@@ -591,7 +591,6 @@ describe(`features/st-mixin`, () => {
             shouldReportNoDiagnostics(meta);
         });
         it(`should append nested partial mixins`, () => {
-            // ToDo: in case of v2 override
             const { sheets } = testStylableCore(`
                 :vars {
                     v1: red;
@@ -934,7 +933,6 @@ describe(`features/st-mixin`, () => {
             shouldReportNoDiagnostics(meta);
         });
         it(`should append multiple mixins`, () => {
-            // ToDo: fix ":global(.part)" to transform with mixin root
             const { sheets } = testStylableCore({
                 '/mixin.js': `
                     module.exports = function(params) {
@@ -1133,7 +1131,6 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        // ToDo: handle error in formatter
     });
     describe(`st-var`, () => {
         it(`should resolve mixin vars in mixin origin context `, () => {
@@ -1476,12 +1473,10 @@ describe(`features/st-mixin`, () => {
                 );
             });
             it(`should mix @media queries for nested JS mixin`, () => {
-                // ToDo: fix JS mixin dropping the before nesting
                 const { sheets } = testStylableCore({
                     '/mixin.js': `
                         module.exports = function() {
                             return {
-                                // "&": { id: "before" },
                                 "@media screen": {
                                     "&": { id: "nested" }
                                 },
@@ -1493,7 +1488,6 @@ describe(`features/st-mixin`, () => {
                         @st-import js-mix from './mixin.js';
 
                         /*
-                            @skip-rule[1] .entry__a { id: before }
                             @rule[1] screen
                             @rule[2] .entry__a { id: after }
                         */
@@ -1584,12 +1578,10 @@ describe(`features/st-mixin`, () => {
                 );
             });
             it(`should mix @supports queries for nested JS mixin`, () => {
-                // ToDo: fix JS mixin dropping the before nesting
                 const { sheets } = testStylableCore({
                     '/mixin.js': `
                         module.exports = function() {
                             return {
-                                // "&": { id: "before" },
                                 "@supports (color: green)": {
                                     "&": { id: "nested" }
                                 },
@@ -1601,7 +1593,6 @@ describe(`features/st-mixin`, () => {
                         @st-import js-mix from './mixin.js';
 
                         /*
-                            @skip-rule[1] .entry__a { id: before }
                             @rule[1] (color: green)
                             @rule[2] .entry__a { id: after }
                         */

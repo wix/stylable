@@ -543,14 +543,13 @@ export class StylableTransformer {
              * the general `st-symbol` feature because the actual symbol can
              * be a type-element symbol that is actually an imported root in a mixin
              */
-            const origin = STSymbol.get(
-                originMeta,
-                topNestClassName || originMeta.root
-            ) as ClassSymbol;
+            const origin = STSymbol.get(originMeta, topNestClassName || originMeta.root) as
+                | ClassSymbol
+                | ElementSymbol; // ToDo: handle other cases
             context.setCurrentAnchor({
                 name: origin.name,
-                type: 'class',
-                resolved: resolvedSymbols.class[origin.name],
+                type: origin._kind,
+                resolved: resolvedSymbols[origin._kind][origin.name],
             });
         }
     }
