@@ -4,6 +4,8 @@ import { levels, Log } from './logger';
 export interface Diagnostic {
     message: string;
     type: DiagnosticType;
+    line?: number;
+    column?: number;
     offset?: number;
 }
 

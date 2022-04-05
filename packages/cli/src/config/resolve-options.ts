@@ -142,6 +142,14 @@ export function getCliArguments(): Arguments<CliArguments> {
             defaultDescription: defaults.diagnosticsMode,
             choices: ['strict', 'loose'],
         })
+        .option('config', {
+            alias: 'c',
+            type: 'string',
+            description:
+                'The path to a config file specifying how to build and output Stylable stylesheets',
+            defaultDescription:
+                'The directory containing the config file is assumed to be the "rootDir" for the project named "stylable.config.js"',
+        })
         .option('watch', {
             alias: 'w',
             type: 'boolean',

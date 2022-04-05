@@ -13,6 +13,7 @@ async function main() {
         log: shouldLog,
         namespaceResolver,
         preserveWatchOutput,
+        config,
     } = argv;
     const { resolveNamespace } = require(namespaceResolver);
     const rootDir = resolve(argv.rootDir);
@@ -44,6 +45,7 @@ async function main() {
         resolveNamespace,
         watch,
         log,
+        configFilePath: config,
     });
 
     process.on('SIGTERM', () => {

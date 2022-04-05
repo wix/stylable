@@ -21,6 +21,10 @@ export interface BuildStylableContext
     outputFiles?: Map<string, Set<string>>;
     defaultOptions?: BuildOptions;
     overrideBuildOptions?: Partial<BuildOptions>;
+    configFilePath?: string;
+    watchOptions?: {
+        lazy?: boolean;
+    };
 }
 
 export async function buildStylable(
@@ -35,18 +39,27 @@ export async function buildStylable(
         fileProcessorCache = {},
         diagnosticsManager = new DiagnosticsManager({
             log,
-            onFatalDiagnostics() {
-                if (!watch) {
-                    process.exitCode = 1;
-                }
+            hooks: {
+                postReport(_diagnostics, hasFatalDiagnostic) {
+                    if (hasFatalDiagnostic && !watch) {
+                        process.exitCode = 1;
+                    }
+                },
             },
         }),
         outputFiles = new Map(),
         requireModule = require,
         resolveNamespace = requireModule(NAMESPACE_RESOLVER_MODULE_REQUEST).resolveNamespace,
+        configFilePath,
+        watchOptions = {},
     }: BuildStylableContext = {}
 ) {
-    const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions);
+    const projects = await projectsConfig(
+        rootDir,
+        overrideBuildOptions,
+        defaultOptions,
+        configFilePath
+    );
     const watchHandler = new WatchHandler(fileSystem, {
         log,
         resolverCache,
@@ -77,7 +90,7 @@ export async function buildStylable(
                 fileProcessorCache,
             });
 
-            const { service } = await build(buildOptions, {
+            const { service, generatedFiles } = await build(buildOptions, {
                 watch,
                 stylable,
                 log,
@@ -89,15 +102,15 @@ export async function buildStylable(
                 diagnosticsManager,
             });
 
-            watchHandler.register({ service, identifier, stylable });
+            watchHandler.register({ service, identifier, stylable, generatedFiles });
         }
     }
 
     diagnosticsManager.report();
 
-    if (watch) {
+    if (watch && !watchOptions.lazy) {
         watchHandler.start();
     }
 
-    return { watchHandler };
+    return { watchHandler, outputFiles, projects, diagnosticsManager };
 }

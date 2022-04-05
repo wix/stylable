@@ -4,6 +4,10 @@ import { nodeFs } from '@file-services/node';
 import { createTempDirectorySync } from '@stylable/e2e-test-kit';
 import { deferred } from 'promise-assist';
 
+export interface ActAndWaitOptions {
+    strict?: boolean;
+}
+
 export function waitForWatcherFinish(watcher: RollupWatcher) {
     const current = deferred<RollupWatcherEvent & { code: 'BUNDLE_END' }>();
 
@@ -17,8 +21,8 @@ export function waitForWatcherFinish(watcher: RollupWatcher) {
             current.resolve(bundleEnd);
         }
         if (e.code === 'ERROR') {
-            console.log('stop');
             watcher.off('event', handler);
+            console.log(`Rollup Error emitted:\n${e.error}`);
             current.reject(e);
         }
     };
@@ -29,11 +33,19 @@ export function waitForWatcherFinish(watcher: RollupWatcher) {
 
 export async function actAndWaitForBuild(
     watcher: RollupWatcher,
-    action: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void
+    action: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void,
+    options: ActAndWaitOptions = {}
 ) {
     const done = waitForWatcherFinish(watcher);
     await action(done);
-    return await done;
+    try {
+        return await done;
+    } catch (e) {
+        if (options.strict) {
+            throw e;
+        }
+        return;
+    }
 }
 export function createTempProject(projectToCopy: string, nodeModulesToLink: string, entry: string) {
     const tempDir = createTempDirectorySync('local-rollup-test');
