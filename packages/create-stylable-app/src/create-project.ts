@@ -108,7 +108,17 @@ export async function createProjectFromTemplate({
 
     await executeWithProgress(
         `# Fetching latest .gitignore from GitHub.`,
-        () => spawnSafe('npx', ['gitignore', 'node'], spawnOptions),
+        async () => {
+            await spawnSafe('npx', ['gitignore', 'node'], spawnOptions);
+
+            const gitIgnorePath = path.join(targetDirectoryPath, '.gitignore');
+            const gitIgnoreContent = await promises.readFile(gitIgnorePath, { encoding: 'utf8' });
+
+            return promises.writeFile(
+                gitIgnorePath,
+                `${gitIgnoreContent}\n# Stylable dts files\nst-types`
+            );
+        },
         progressDotInterval
     );
 
@@ -132,7 +142,8 @@ export async function createProjectFromTemplate({
         await executeWithProgress(
             `# Running postinstall template commands.`,
             async () => {
-                for (const [command, ...params] of postinstall) {
+                for (const script of postinstall) {
+                    const [command, ...params] = script;
                     await spawnSafe(command, params, spawnOptions);
                 }
             },
