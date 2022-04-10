@@ -220,6 +220,30 @@ describe(`features/css-type`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it(`should mix element type alias`, () => {
+            testStylableCore({
+                '/mixin.st.css': `
+                    Mix {
+                        from: imported;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [Mix as MixType] from './mixin.st.css';
+                    
+                    MixType {
+                        from: local;
+                    }
+
+                    /* 
+                        @rule[0] .entry__a { from: imported; }
+                        @rule[1] .entry__a { from: local; }
+                    */
+                    .a {
+                        -st-mixin: MixType;
+                    }
+                `,
+            });
+        });
     });
     describe(`css-class`, () => {
         it(`should transform according to -st-global`, () => {

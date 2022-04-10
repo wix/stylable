@@ -301,11 +301,17 @@ describe(`features/st-mixin`, () => {
                 `,
                 '/entry.st.css': `
                     @st-import [mix] from './enriched.st.css';
+
+                    .mix:hover.local {
+                        prop: e;
+                    }
+
                     /* 
                         @rule[0] .entry__a { prop: a; } 
                         @rule[1] .entry__a:hover .base__local { prop: b; } 
                         @rule[2] .entry__a { prop: c; } 
                         @rule[3] .entry__a:hover .enriched__local { prop: d; } 
+                        @rule[4] .entry__a:hover.entry__local { prop: e; } 
                     */
                     .a {
                         -st-mixin: mix;

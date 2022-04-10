@@ -23,7 +23,7 @@ export interface MixinValue {
 
 export interface RefedMixin {
     mixin: MixinValue;
-    ref: ImportSymbol | ClassSymbol;
+    ref: ImportSymbol | ClassSymbol | ElementSymbol;
 }
 
 export const MixinType = {
@@ -79,7 +79,9 @@ export const hooks = createFeature({
             const mixinRefSymbol = STSymbol.get(meta, mixin.type);
             if (
                 mixinRefSymbol &&
-                (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
+                (mixinRefSymbol._kind === 'import' ||
+                    mixinRefSymbol._kind === 'class' ||
+                    mixinRefSymbol._kind === 'element')
             ) {
                 if (mixin.partial && Object.keys(mixin.options).length === 0) {
                     context.diagnostics.warn(
@@ -208,72 +210,55 @@ export function appendMixin(
         return;
     }
 
-    const local = STSymbol.get(meta, mix.mixin.type);
-    if (local && (local._kind === 'class' || local._kind === 'element')) {
-        handleLocalClassMixin(
-            reParseMixinNamedArgs(mix, rule, context.diagnostics),
+    const resolvedSymbols = context.getResolvedSymbols(meta);
+    const symbolName = mix.mixin.type;
+    const resolvedType = resolvedSymbols.mainNamespace[symbolName];
+    if (resolvedType === `class` || resolvedType === `element`) {
+        const resolveChain = resolvedSymbols[resolvedType][symbolName];
+        handleCSSMixin(
+            resolveChain,
             transformer,
+            reParseMixinNamedArgs(mix, rule, context.diagnostics),
+            rule,
             meta,
-            variableOverride,
-            cssVarsMapping,
             path,
-            rule
+            variableOverride,
+            cssVarsMapping
         );
-    } else {
-        const resolvedSymbols = context.getResolvedSymbols(meta);
-        const symbolName = mix.mixin.type;
-        const resolvedType = resolvedSymbols.mainNamespace[symbolName];
-        if (resolvedType === `class`) {
-            const resolveChain = resolvedSymbols.class[symbolName];
-            handleImportedCSSMixin(
-                resolveChain,
-                transformer,
-                reParseMixinNamedArgs(mix, rule, context.diagnostics),
-                rule,
-                meta,
-                path,
-                variableOverride,
-                cssVarsMapping
-            );
-            return;
-        } else if (resolvedType === `js`) {
-            const resolvedMixin = resolvedSymbols.js[symbolName];
-            if (typeof resolvedMixin.symbol === 'function') {
-                try {
-                    handleJSMixin(
-                        transformer,
-                        reParseMixinArgs(mix, rule, context.diagnostics),
-                        resolvedMixin.symbol,
-                        meta,
-                        rule,
-                        variableOverride
-                    );
-                } catch (e) {
-                    context.diagnostics.error(
-                        rule,
-                        mixinWarnings.FAILED_TO_APPLY_MIXIN(String(e)),
-                        { word: mix.mixin.type }
-                    );
-                    return;
-                }
-            } else {
-                context.diagnostics.error(rule, mixinWarnings.JS_MIXIN_NOT_A_FUNC(), {
+        return;
+    } else if (resolvedType === `js`) {
+        const resolvedMixin = resolvedSymbols.js[symbolName];
+        if (typeof resolvedMixin.symbol === 'function') {
+            try {
+                handleJSMixin(
+                    transformer,
+                    reParseMixinArgs(mix, rule, context.diagnostics),
+                    resolvedMixin.symbol,
+                    meta,
+                    rule,
+                    variableOverride
+                );
+            } catch (e) {
+                context.diagnostics.error(rule, mixinWarnings.FAILED_TO_APPLY_MIXIN(String(e)), {
                     word: mix.mixin.type,
                 });
+                return;
             }
-            return;
+        } else {
+            context.diagnostics.error(rule, mixinWarnings.JS_MIXIN_NOT_A_FUNC(), {
+                word: mix.mixin.type,
+            });
         }
+        return;
+    }
 
-        // ToDo: report on unsupported mixed in symbol type
-        const mixinDecl = getMixinDeclaration(rule);
-        if (mixinDecl) {
-            // ToDo: report on rule if decl is not found
-            context.diagnostics.error(
-                mixinDecl,
-                mixinWarnings.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value),
-                { word: mixinDecl.value }
-            );
-        }
+    // ToDo: report on unsupported mixed in symbol type
+    const mixinDecl = getMixinDeclaration(rule);
+    if (mixinDecl) {
+        // ToDo: report on rule if decl is not found
+        context.diagnostics.error(mixinDecl, mixinWarnings.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
+            word: mixinDecl.value,
+        });
     }
 }
 
@@ -365,7 +350,7 @@ function createMixinRootFromCSSResolve(
     );
 
     const mixinMeta: StylableMeta = resolvedClass.meta;
-    const symbolName = isRootMixin ? 'default' : mix.mixin.type;
+    const symbolName = isRootMixin && resolvedClass.meta !== meta ? 'default' : mix.mixin.type;
 
     transformer.transformAst(
         mixinRoot,
@@ -382,7 +367,7 @@ function createMixinRootFromCSSResolve(
     return mixinRoot;
 }
 
-function handleImportedCSSMixin(
+function handleCSSMixin(
     resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[],
     transformer: StylableTransformer,
     mix: RefedMixin,
@@ -403,8 +388,7 @@ function handleImportedCSSMixin(
     const mixinDecl = getMixinDeclaration(rule) || postcss.decl();
 
     const roots = [];
-    // start from 1 to ignore the local symbol - just mix the imported parts
-    for (let i = 1; i < resolveChain.length; ++i) {
+    for (let i = 0; i < resolveChain.length; ++i) {
         const resolved = resolveChain[i];
         roots.push(
             createMixinRootFromCSSResolve(
@@ -430,58 +414,6 @@ function handleImportedCSSMixin(
         roots.forEach((root) => mixinRoot.prepend(...root.nodes));
         mergeRules(mixinRoot, rule);
     }
-}
-
-function handleLocalClassMixin(
-    mix: RefedMixin,
-    transformer: StylableTransformer,
-    meta: StylableMeta,
-    variableOverride: ({ [key: string]: string } & object) | undefined,
-    cssVarsMapping: Record<string, string>,
-    path: string[],
-    rule: SRule
-) {
-    const isPartial = mix.mixin.partial;
-    const namedArgs = mix.mixin.options as Record<string, string>;
-    const overrideKeys = Object.keys(namedArgs);
-
-    if (isPartial && overrideKeys.length === 0) {
-        return;
-    }
-    const isRootMixin = mix.ref.name === meta.root;
-    const mixinDecl = getMixinDeclaration(rule) || postcss.decl();
-    const resolvedArgs = resolveArgumentsValue(
-        namedArgs,
-        transformer,
-        meta,
-        transformer.diagnostics,
-        mixinDecl,
-        variableOverride,
-        path,
-        cssVarsMapping
-    );
-
-    const mixinRoot = createSubsetAst<postcss.Root>(
-        meta.ast,
-        '.' + mix.ref.name,
-        undefined,
-        isRootMixin
-    );
-
-    if (isPartial) {
-        filterPartialMixinDecl(meta, mixinRoot, overrideKeys);
-    }
-
-    transformer.transformAst(
-        mixinRoot,
-        meta,
-        undefined,
-        resolvedArgs,
-        path.concat(mix.mixin.type + ' from ' + meta.source),
-        true,
-        mix.ref.name
-    );
-    mergeRules(mixinRoot, rule);
 }
 
 function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefined {
