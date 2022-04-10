@@ -35,7 +35,6 @@ describe(`features/st-mixin`, () => {
         shouldReportNoDiagnostics(meta);
     });
     it(`should append mixin rules`, () => {
-        // ToDo: fix mixin within nested selectors: `:is(.mix)` -> `.entry__root:is(.entry__root)`
         const { sheets } = testStylableCore(`
             .mix {
                 id: mix;
@@ -47,13 +46,14 @@ describe(`features/st-mixin`, () => {
                 id: mix-child;
             }
             :is(.mix) {
-                propD: is-mix;
+                id: is-mix;
             }
 
             /* 
             @rule[0] .entry__root { id: mix } 
             @rule[1] .entry__root:hover { id: mix-hover } 
             @rule[2] .entry__root .entry__child { id: mix-child }  
+            @rule[3] :is(.entry__root) { id: is-mix }  
             */
             .root {
                 -st-mixin: mix;
@@ -96,13 +96,13 @@ describe(`features/st-mixin`, () => {
                     @rule[2] .entry__y.mixin--mix-state[attr].mixin__y.mixin__root.mixin--x    
                     @rule[3] .entry__y:is(.entry__y.mixin--mix-state.mixin__y)
                     @rule[4] .entry__y[a].mixin__x .entry__y[b].mixin__y
+                    @rule[5] :is(.entry__y:is(.entry__y.mixin__y).mixin__x)
                 */
                 .y {
                     -st-mixin: mixin;
                 }
             `,
         });
-        //@TODO-rule[5] :is(.entry__y:is(.entry__y.mixin__y).mixin__x)
         shouldReportNoDiagnostics(sheets[`/entry.st.css`].meta);
     });
     it(`should append mixin within a mixin`, () => {

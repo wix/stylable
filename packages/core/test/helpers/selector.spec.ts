@@ -76,7 +76,12 @@ describe(`helpers/selector`, () => {
             {
                 scope: '.a',
                 nested: ':not(&)',
-                expected: '.a :not(.a)',
+                expected: ':not(.a)',
+            },
+            {
+                scope: '.a',
+                nested: ':nth-child(5n+2 of &)',
+                expected: ':nth-child(5n+2 of .a)',
             },
             {
                 scope: '&',
