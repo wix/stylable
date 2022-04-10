@@ -943,6 +943,50 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it(`should handle no values`, () => {
+            const { sheets } = testStylableCore({
+                '/mixin.js': `
+                    module.exports = function(params) {
+                        return {
+                            param1: params[0] || 'default',
+                            param2: params[1] || 'default',
+                        }
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import twoParams from './mixin.js';
+        
+                    /* @rule(no parans) .entry__no-parenthesis {
+                        param1: default;
+                        param2: default;
+                    } */
+                    .no-parenthesis {
+                        -st-mixin: twoParams;
+                    }
+
+                    /* @rule(empty parans) .entry__no-args {
+                        param1: default;
+                        param2: default;
+                    } */
+                    .no-args {
+                        /* - report: report useless diagnostics "argument at index 0 is empty" */
+                        -st-mixin: twoParams(); 
+                    }
+
+                    /* @rule(only first) .entry__partial {
+                        param1: v1;
+                        param2: default;
+                    } */
+                    .partial {
+                        -st-mixin: twoParams("v1"); 
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
         it(`should append multiple mixins`, () => {
             const { sheets } = testStylableCore({
                 '/mixin.js': `

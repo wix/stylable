@@ -71,7 +71,7 @@ export function getFormatterArgs(
     return argsResult;
 
     function checkEmptyArg() {
-        if (reportWarning && currentArg.trim() === '') {
+        if (reportWarning && argsResult.length && currentArg.trim() === '') {
             reportWarning(
                 `${postcssValueParser.stringify(
                     node as postcssValueParser.Node
