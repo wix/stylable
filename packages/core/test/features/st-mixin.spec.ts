@@ -48,12 +48,17 @@ describe(`features/st-mixin`, () => {
             :is(.mix) {
                 id: is-mix;
             }
+            .y:not(.mix) {
+                id: class-not-mix;
+            }
+
 
             /* 
             @rule[0] .entry__root { id: mix } 
             @rule[1] .entry__root:hover { id: mix-hover } 
             @rule[2] .entry__root .entry__child { id: mix-child }  
             @rule[3] :is(.entry__root) { id: is-mix }  
+            @rule[4] .entry__y:not(.entry__root) { id: class-not-mix }  
             */
             .root {
                 -st-mixin: mix;
