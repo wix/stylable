@@ -142,8 +142,7 @@ export async function createProjectFromTemplate({
         await executeWithProgress(
             `# Running postinstall template commands.`,
             async () => {
-                for (const script of postinstall) {
-                    const [command, ...params] = script;
+                for (const [command, ...params] of postinstall) {
                     await spawnSafe(command, params, spawnOptions);
                 }
             },
