@@ -171,9 +171,7 @@ export function stylableRollupPlugin({
 
             visitMetaCSSDependenciesBFS(
                 meta,
-                (dep) => {
-                    this.addWatchFile(dep.source);
-                },
+                (dep) => this.addWatchFile(dep.source),
                 stylable.createResolver(),
                 (resolvedPath) => this.addWatchFile(resolvedPath)
             );

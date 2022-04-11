@@ -34,9 +34,7 @@ export function getImports(
      */
     visitMetaCSSDependenciesBFS(
         meta,
-        ({ source }) => {
-            buildDependencies.push(source);
-        },
+        ({ source }) => buildDependencies.push(source),
         stylable.resolver,
         (resolvedPath) => buildDependencies.push(resolvedPath)
     );

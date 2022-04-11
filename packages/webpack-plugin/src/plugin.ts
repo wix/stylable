@@ -366,7 +366,7 @@ export class StylableWebpackPlugin {
                         compiler.options.output.hashSalt || '',
                         ''
                     ),
-                    requireModule: compiler.watchMode ? createDecacheRequire(compiler) : require,
+                    requireModule: createDecacheRequire(compiler),
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
                 },
