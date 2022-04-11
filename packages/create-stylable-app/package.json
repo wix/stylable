@@ -1,6 +1,6 @@
 {
   "name": "create-stylable-app",
-  "version": "4.10.4",
+  "version": "4.12.0",
   "description": "Quickly create a Stylable application",
   "main": "dist/index.js",
   "bin": {
@@ -10,8 +10,8 @@
     "test": "tsc -p template/ts-react-webpack --noEmit && tsc -p template/ts-react-rollup --noEmit"
   },
   "dependencies": {
-    "validate-npm-package-name": "^3.0.0",
-    "yargs": "^17.3.1"
+    "validate-npm-package-name": "^4.0.0",
+    "yargs": "^17.4.0"
   },
   "files": [
     "bin",

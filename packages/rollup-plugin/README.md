@@ -36,6 +36,13 @@ interface StylableRollupPluginOptions {
     fileName?: string;
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
     resolveNamespace?: (namespace: string, source: string) => string;
+    projectRoot?: string; // default is process.cwd()
+    /**
+     * Runs "stc" programmatically with the webpack compilation.
+     * true - it will automatically detect the closest "stylable.config.js" file and use it.
+     * string - it will use the provided string as the "stcConfig" file path.
+     */
+    stcConfig?: string | boolean;
 }
 ```
 

@@ -1,11 +1,12 @@
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { join } from 'path';
 import {
     symlinkSymbol,
     loadDirSync,
     populateDirectorySync,
     runCliSync,
+    createTempDirectory,
+    ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { STVar } from '@stylable/core/dist/features';
 
@@ -420,7 +421,7 @@ describe('Stylable CLI config multiple projects', function () {
     });
 
     describe('Projects validation', () => {
-        it('should dedup diagnostics across build processes', () => {
+        it('should dedup and sort diagnostics across build processes', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': JSON.stringify({
                     name: 'workspace',
@@ -431,12 +432,13 @@ describe('Stylable CLI config multiple projects', function () {
                     'project-a': {
                         'mixin.js': `
                         let count = 0;
+                        let errors = 0
                         module.exports = () => {
                             count++;
                             if (count === 1 || count === 4) {
                                 return 'red';
                             } else {
-                                throw new Error('error ' + count);
+                                throw new Error('error ' + ++errors);
                             }
                         }
                         `,
@@ -469,13 +471,13 @@ describe('Stylable CLI config multiple projects', function () {
 
             const { stdout } = runCliSync(['--rootDir', tempDir.path]);
 
-            const firstError = stdout.indexOf('error 3');
+            const firstError = stdout.indexOf('error 1');
+            const stylableError = stdout.indexOf(STVar.diagnostics.UNKNOWN_VAR('unknown'));
             const secondError = stdout.indexOf('error 2');
-            const thirdError = stdout.indexOf(STVar.diagnostics.UNKNOWN_VAR('unknown'));
 
             expect(firstError, 'sorted by location')
-                .to.be.lessThan(secondError)
-                .and.lessThan(thirdError);
+                .to.be.lessThan(stylableError)
+                .and.lessThan(secondError);
             expect(stdout.match(STVar.diagnostics.UNKNOWN_VAR('unknown'))?.length).to.eql(1);
         });
 

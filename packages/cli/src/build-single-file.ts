@@ -282,13 +282,14 @@ export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
 
-    return diagnostics.map((diagnostic) => {
-        const err = diagnostic.node.error(diagnostic.message, diagnostic.options);
-
-        return {
-            type: diagnostic.type,
-            message: `${diagnostic.message}\n${err.showSourceCode(true)}`,
-            offset: diagnostic.node.source?.start?.offset,
+    return diagnostics.map(({ message, node, options, type }) => {
+        const err = node.error(message, options);
+        const diagnostic: Diagnostic = {
+            type,
+            message: `${message}\n${err.showSourceCode(true)}`,
+            ...(node.source?.start && {}),
         };
+
+        return diagnostic;
     });
 }

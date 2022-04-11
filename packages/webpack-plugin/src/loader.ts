@@ -13,6 +13,13 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         this.assetsMode
     );
 
+    for (const dep of buildDependencies) {
+        this.addDependency(dep);
+    }
+    emitDiagnostics(this, meta, this.diagnosticsMode, this.resourcePath);
+
+    const varType = this.target === 'oldie' ? 'var' : 'const';
+
     this.flagStylableModule({
         css: meta.outputAst!.toString(),
         globals: meta.globals,
@@ -21,12 +28,6 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         urls,
         unusedImports,
     });
-    for (const dep of buildDependencies) {
-        this.addDependency(dep);
-    }
-    emitDiagnostics(this, meta, this.diagnosticsMode);
-
-    const varType = this.target === 'oldie' ? 'var' : 'const';
 
     return `
 ${imports.join('\n')}

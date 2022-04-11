@@ -1,8 +1,13 @@
 import { expect } from 'chai';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { loadDirSync, populateDirectorySync, runCliSync } from '@stylable/e2e-test-kit';
+import {
+    loadDirSync,
+    populateDirectorySync,
+    runCliSync,
+    createTempDirectory,
+    ITempDirectory,
+} from '@stylable/e2e-test-kit';
 
 describe('Stylable CLI config file options', function () {
     this.timeout(25000);
@@ -122,6 +127,42 @@ describe('Stylable CLI config file options', function () {
             'my-project/package.json',
             'my-project/stylable.config.js',
             'my-project/style.st.css',
+        ]);
+    });
+
+    it('should get config file from specific path', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`,
+            configs: {
+                'my-stylable-config.js': `
+                  exports.stcConfig = () => ({ 
+                      options: { 
+                            outDir: './dist',
+                            cjs: false,
+                            esm: true,
+                        } 
+                    })
+                `,
+            },
+        });
+
+        const { stdout, stderr } = runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '-c',
+            './configs/my-stylable-config.js',
+        ]);
+        const dirContent = loadDirSync(tempDir.path);
+
+        expect(stderr, 'has cli error').not.to.match(/error/i);
+        expect(stdout, 'has diagnostic error').not.to.match(/error/i);
+
+        expect(Object.keys(dirContent)).to.eql([
+            'configs/my-stylable-config.js',
+            'dist/style.st.css.mjs',
+            'package.json',
+            'style.st.css',
         ]);
     });
 

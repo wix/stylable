@@ -1,3 +1,4 @@
+// @ts-check
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -10,12 +11,5 @@ module.exports = {
         library: 'Library',
         libraryTarget: 'umd',
     },
-    plugins: [
-        new StylableWebpackPlugin({
-            bootstrap: {
-                autoInit: false,
-            },
-        }),
-        new HtmlWebpackPlugin(),
-    ],
+    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin()],
 };

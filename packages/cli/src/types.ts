@@ -36,11 +36,11 @@ export interface RawProjectEntity {
     request: string;
 }
 
-export type STCConfig = ProjectEntity[];
+export type STCProjects = ProjectEntity[];
 export type ResolveRequests = (
     projects: Array<RawProjectEntity>,
     context: ResolveProjectsContext
-) => Promise<STCConfig> | STCConfig;
+) => Promise<STCProjects> | STCProjects;
 
 export interface ResolveProjectsContext {
     rootDir: string;
@@ -107,6 +107,7 @@ export interface CliArguments {
     diagnosticsMode: string | undefined;
     watch: boolean;
     preserveWatchOutput: boolean;
+    config: string | undefined;
 }
 
 export interface BuildOptions {
