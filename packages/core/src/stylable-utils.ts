@@ -42,6 +42,9 @@ export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
+export const MISSING_MIXIN_DECL = () => {
+    return `-st-mixin is missing and is required for mixin insertion"`;
+};
 export const INVALID_MERGE_OF = (mergeValue: string) => {
     return `invalid merge of: \n"${mergeValue}"`;
 };
@@ -75,22 +78,23 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule, report?: 
 
     if (mixinAst.nodes) {
         let nextRule: postcss.Rule | postcss.AtRule = rule;
-        let mixinEntry: postcss.Declaration | null = null;
+        let mixinDecl: postcss.Declaration | null = null;
 
         rule.walkDecls(mixinDeclRegExp, (decl) => {
-            mixinEntry = decl;
+            mixinDecl = decl;
         });
-        if (!mixinEntry) {
-            throw rule.error('missing mixin entry');
+        if (!mixinDecl) {
+            report?.error(rule, MISSING_MIXIN_DECL());
+            return;
         }
         // TODO: handle rules before and after decl on entry
         mixinAst.nodes.slice().forEach((node) => {
             if (node === mixinRoot) {
                 node.walkDecls((node) => {
-                    rule.insertBefore(mixinEntry!, node);
+                    rule.insertBefore(mixinDecl!, node);
                 });
             } else if (node.type === 'decl') {
-                rule.insertBefore(mixinEntry!, node);
+                rule.insertBefore(mixinDecl!, node);
             } else if (node.type === 'rule' || node.type === 'atrule') {
                 const valid = !nestedInKeyframes;
                 if (valid) {

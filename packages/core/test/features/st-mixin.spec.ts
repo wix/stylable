@@ -234,6 +234,42 @@ describe(`features/st-mixin`, () => {
             }
         `);
     });
+    it(`should append mixin rules`, () => {
+        // This case mostly protects from a user programmatically removing
+        // `-st-mixin` declarations from the modified pre transformed AST.
+        // The mixin reports that something went wrong and mixins were not applied.
+        testStylableCore(
+            `
+            .mix {
+                id: mix;
+            }
+
+            /* 
+                @transform-error ${STMixin.diagnostics.MISSING_MIXIN_DECL()}
+                @rule .entry__mixToClass { before: a; after: z; }
+            */
+            .mixToClass {
+                before: a;
+                -st-mixin: mix;
+                after: z;
+
+            }
+        `,
+            {
+                stylableConfig: {
+                    onProcess(meta) {
+                        // remove -st-mixin origin before apply.
+                        // -st-mixin position must be preserved
+                        // in order to mix between declarations
+                        const mixToClass = meta.ast.nodes[2] as postcss.Rule;
+                        const stMixinDecl = mixToClass.nodes[1];
+                        stMixinDecl.remove();
+                        return meta;
+                    },
+                },
+            }
+        );
+    });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {
             const { sheets } = testStylableCore({

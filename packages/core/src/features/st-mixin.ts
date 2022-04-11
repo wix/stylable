@@ -10,7 +10,12 @@ import {
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import * as postcss from 'postcss';
 import type { FunctionNode, WordNode } from 'postcss-value-parser';
-import { isValidDeclaration, mergeRules, INVALID_MERGE_OF } from '../stylable-utils';
+import {
+    isValidDeclaration,
+    mergeRules,
+    MISSING_MIXIN_DECL,
+    INVALID_MERGE_OF,
+} from '../stylable-utils';
 // ToDo: deprecate - stop usage
 import type { SRule } from '../deprecated/postcss-ast-extension';
 
@@ -35,6 +40,7 @@ export const MixinType = {
 export const diagnostics = {
     VALUE_CANNOT_BE_STRING: MixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
     INVALID_NAMED_PARAMS: MixinHelperDiagnostics.INVALID_NAMED_PARAMS,
+    MISSING_MIXIN_DECL: MISSING_MIXIN_DECL,
     INVALID_MERGE_OF: INVALID_MERGE_OF,
     PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
         return `"${MixinType.PARTIAL}" can only be used with override arguments provided, missing overrides on "${type}"`;
