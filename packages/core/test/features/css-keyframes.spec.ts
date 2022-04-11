@@ -1,4 +1,4 @@
-import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
+import { STSymbol, CSSKeyframes, STMixin } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
@@ -587,6 +587,30 @@ describe(`features/css-keyframes`, () => {
                     }
                 `,
             });
+        });
+        it(`should not mix rules/atrules into keyframe`, () => {
+            testStylableCore(`
+                .mix {
+                    color: green;
+                }
+                .mix:hover {
+                    color: red;
+                }
+                
+                @keyframes move {
+                    /* 
+                        @transform-warn ${STMixin.diagnostics.INVALID_MERGE_OF(
+                            `0%:hover {
+                    color: red;
+                }`
+                        )}
+                        @rule[0] 0% { color: green } 
+                        @rule[1] 100% { } 
+                    */
+                    0% { -st-mixin: mix; }
+                    100% {}
+                }
+            `);
         });
         it.skip(`should not mix  @keyframes`, () => {
             // ToDo: report mixin of selector !== `&`

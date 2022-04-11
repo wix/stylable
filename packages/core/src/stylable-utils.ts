@@ -42,8 +42,13 @@ export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
-export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
+export const INVALID_MERGE_OF = (mergeValue: string) => {
+    return `invalid merge of: \n"${mergeValue}"`;
+};
+// ToDo: move to helpers/mixin
+export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule, report?: Diagnostics) {
     let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
+    const nestedInKeyframes = isChildOfAtRule(rule, `keyframes`);
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
         if (isChildOfAtRule(mixinRule, 'keyframes')) {
             return;
@@ -87,12 +92,17 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
             } else if (node.type === 'decl') {
                 rule.insertBefore(mixinEntry!, node);
             } else if (node.type === 'rule' || node.type === 'atrule') {
-                if (rule.parent!.last === nextRule) {
-                    rule.parent!.append(node);
+                const valid = !nestedInKeyframes;
+                if (valid) {
+                    if (rule.parent!.last === nextRule) {
+                        rule.parent!.append(node);
+                    } else {
+                        rule.parent!.insertAfter(nextRule, node);
+                    }
+                    nextRule = node;
                 } else {
-                    rule.parent!.insertAfter(nextRule, node);
+                    report?.warn(rule, INVALID_MERGE_OF(node.toString()));
                 }
-                nextRule = node;
             }
         });
     }
