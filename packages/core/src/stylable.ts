@@ -15,6 +15,7 @@ import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
 import { warnOnce } from './helpers/deprecation';
 import { STVar } from './features';
+import { MetaDependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
 
 export interface StylableConfig {
     projectRoot: string;
@@ -93,6 +94,15 @@ export class Stylable {
         });
 
         this.resolver = this.createResolver();
+    }
+    public getDependencies(meta: StylableMeta) {
+        const dependencies: MetaDependency[] = [];
+
+        for (const dependency of visitMetaCSSDependencies({ meta, resolver: this.resolver })) {
+            dependencies.push(dependency);
+        }
+
+        return dependencies;
     }
     public initCache({ filter }: InitCacheParams = {}) {
         if (filter && this.resolverCache) {

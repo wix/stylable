@@ -1,5 +1,4 @@
 import type { BuildContext, BuildOptions } from './types';
-import { visitMetaCSSDependenciesBFS } from '@stylable/core';
 import { IndexGenerator as BaseIndexGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
@@ -242,7 +241,6 @@ export async function build(
     }
 
     function updateWatcherDependencies(affectedFiles: Set<string>) {
-        const resolver = stylable.createResolver();
         for (const filePath of affectedFiles) {
             try {
                 sourceFiles.add(filePath);
@@ -250,12 +248,9 @@ export async function build(
                     () => stylable.process(filePath),
                     errorMessages.STYLABLE_PROCESS(filePath)
                 );
-                visitMetaCSSDependenciesBFS(
-                    meta,
-                    ({ source }) => registerInvalidation(source, filePath),
-                    resolver,
-                    (resolvedPath) => registerInvalidation(resolvedPath, filePath)
-                );
+                for (const dependency of stylable.getDependencies(meta)) {
+                    registerInvalidation(dependency.resolvedPath, filePath);
+                }
             } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
             }

@@ -1,11 +1,5 @@
 import postcss from 'postcss';
-import {
-    processNamespace,
-    emitDiagnostics,
-    visitMetaCSSDependenciesBFS,
-    DiagnosticsMode,
-    MinimalFS,
-} from '@stylable/core';
+import { processNamespace, emitDiagnostics, DiagnosticsMode, MinimalFS } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
@@ -80,11 +74,9 @@ const stylableLoader: LoaderDefinition = function (content) {
 
     emitDiagnostics(this, meta, diagnosticsMode);
 
-    visitMetaCSSDependenciesBFS(
-        meta,
-        ({ source }) => this.addDependency(source),
-        stylable.resolver
-    );
+    for (const dependency of stylable.getDependencies(meta)) {
+        this.addDependency(dependency.resolvedPath);
+    }
 
     addBuildInfo(this, meta.namespace);
 

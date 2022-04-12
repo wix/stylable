@@ -2,12 +2,29 @@ import type { StylableMeta } from './stylable-meta';
 import type { Imported } from './features';
 import type { StylableResolver } from './stylable-resolver';
 
-export function visitMetaCSSDependenciesBFS(
-    meta: StylableMeta,
-    onMetaDependency: (meta: StylableMeta, imported: Imported, depth: number) => void,
-    resolver: StylableResolver,
-    onJsDependency?: (resolvedPath: string, imported: Imported) => void
-): void {
+export interface CSSDependency {
+    kind: 'css';
+    resolvedPath: string;
+    imported: Imported;
+    depth: number;
+    meta: StylableMeta;
+}
+
+export interface JSDependency {
+    kind: 'js';
+    resolvedPath: string;
+    imported: Imported;
+}
+
+export type MetaDependency = CSSDependency | JSDependency;
+
+export function* visitMetaCSSDependencies({
+    meta,
+    resolver,
+}: {
+    meta: StylableMeta;
+    resolver: StylableResolver;
+}) {
     const visited = new Set<string>([meta.source]);
     const q = [[...meta.getImportStatements()]];
     let depth = -1;
@@ -23,14 +40,29 @@ export function visitMetaCSSDependenciesBFS(
 
             if (res?._kind === 'css' && !visited.has(res.meta.source)) {
                 visited.add(res.meta.source);
-                onMetaDependency(res.meta, imported, depth + 1);
+                const dependency: CSSDependency = {
+                    kind: 'css',
+                    depth: depth + 1,
+                    meta: res.meta,
+                    resolvedPath: res.meta.source,
+                    imported,
+                };
+
+                yield dependency;
+
                 q[depth + 1].push(...res.meta.getImportStatements());
-            } else if (res?._kind === 'js' && onJsDependency) {
+            } else if (res?._kind === 'js') {
                 const resolvedPath = resolver.resolvePath(imported.context, imported.request);
 
                 if (!visited.has(resolvedPath)) {
                     visited.add(resolvedPath);
-                    onJsDependency(resolvedPath, imported);
+                    const dependency: JSDependency = {
+                        kind: 'js',
+                        imported,
+                        resolvedPath,
+                    };
+
+                    yield dependency;
                 }
             }
         }

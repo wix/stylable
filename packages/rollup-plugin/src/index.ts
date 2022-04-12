@@ -1,12 +1,7 @@
 import type { Plugin } from 'rollup';
 import fs from 'fs';
 import { join, parse } from 'path';
-import {
-    Stylable,
-    visitMetaCSSDependenciesBFS,
-    emitDiagnostics,
-    DiagnosticsMode,
-} from '@stylable/core';
+import { Stylable, emitDiagnostics, DiagnosticsMode } from '@stylable/core';
 import {
     sortModulesByDepth,
     calcDepth,
@@ -106,13 +101,9 @@ export function stylableRollupPlugin({
             }
             extracted.set(id, { css });
 
-            visitMetaCSSDependenciesBFS(
-                meta,
-                (dep) => {
-                    this.addWatchFile(dep.source);
-                },
-                stylable.createResolver()
-            );
+            for (const dependency of stylable.getDependencies(meta)) {
+                this.addWatchFile(dependency.resolvedPath);
+            }
 
             emitDiagnostics(
                 {
