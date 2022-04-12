@@ -5,6 +5,7 @@
   },
   "references": [
     { "path": "../../build-tools/src" },
+    { "path": "../../cli/src" },
     { "path": "../../core/src" },
     { "path": "../../optimizer/src" },
     { "path": "../../runtime/src" }

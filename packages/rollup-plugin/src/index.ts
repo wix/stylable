@@ -17,6 +17,7 @@ import {
     generateStylableModuleCode,
     getDefaultMode,
 } from './plugin-utils';
+import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
 export interface StylableRollupPluginOptions {
     optimization?: {
@@ -27,6 +28,12 @@ export interface StylableRollupPluginOptions {
     mode?: 'development' | 'production';
     diagnosticsMode?: DiagnosticsMode;
     resolveNamespace?: typeof resolveNamespaceNode;
+    /**
+     * Runs "stc" programmatically with the webpack compilation.
+     * true - it will automatically detect the closest "stylable.config.js" file and use it.
+     * string - it will use the provided string as the "stcConfig" file path.
+     */
+    stcConfig?: boolean | string;
     projectRoot?: string;
 }
 
@@ -52,16 +59,18 @@ export function stylableRollupPlugin({
     diagnosticsMode = 'strict',
     mode = getDefaultMode(),
     resolveNamespace = resolveNamespaceNode,
+    stcConfig,
     projectRoot = process.cwd(),
 }: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
     let emittedAssets!: Map<string, string>;
     let outputCSS = '';
+    let stcBuilder: STCBuilder | undefined;
 
     return {
         name: 'Stylable',
-        buildStart() {
+        async buildStart() {
             extracted = extracted || new Map();
             emittedAssets = emittedAssets || new Map();
             if (stylable) {
@@ -77,6 +86,60 @@ export function stylableRollupPlugin({
                     resolverCache: new Map(),
                     requireModule,
                 });
+            }
+
+            if (stcConfig) {
+                if (stcBuilder) {
+                    for (const sourceDirectory of stcBuilder.getProjectsSources()) {
+                        this.addWatchFile(sourceDirectory);
+                    }
+                } else {
+                    const configuration = resolveStcConfig(
+                        projectRoot,
+                        typeof stcConfig === 'string' ? stcConfig : undefined
+                    );
+
+                    if (!configuration) {
+                        throw new Error(
+                            `Could not find "stcConfig"${
+                                typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
+                            }`
+                        );
+                    }
+
+                    stcBuilder = STCBuilder.create({
+                        rootDir: projectRoot,
+                        configFilePath: configuration.path,
+                        watchMode: this.meta.watchMode,
+                    });
+
+                    await stcBuilder.build();
+
+                    for (const sourceDirectory of stcBuilder.getProjectsSources()) {
+                        this.addWatchFile(sourceDirectory);
+                    }
+
+                    stcBuilder.reportDiagnostics(
+                        {
+                            emitWarning: (e) => this.warn(e),
+                            emitError: (e) => this.error(e),
+                        },
+                        diagnosticsMode
+                    );
+                }
+            }
+        },
+        async watchChange(id) {
+            if (stcBuilder) {
+                await stcBuilder.rebuild([id]);
+
+                stcBuilder.reportDiagnostics(
+                    {
+                        emitWarning: (e) => this.warn(e),
+                        emitError: (e) => this.error(e),
+                    },
+                    diagnosticsMode
+                );
             }
         },
         load(id) {
@@ -105,14 +168,19 @@ export function stylableRollupPlugin({
                 this.addWatchFile(dependency.resolvedPath);
             }
 
-            emitDiagnostics(
-                {
-                    emitError: (e) => this.error(e),
-                    emitWarning: (e) => this.warn(e),
-                },
-                meta,
-                diagnosticsMode
-            );
+            /**
+             * In case this Stylable module has sources the diagnostics will be emitted in `watchChange` hook.
+             */
+            if (!stcBuilder?.getSourcesFiles(id)) {
+                emitDiagnostics(
+                    {
+                        emitWarning: (e: Error) => this.warn(e),
+                        emitError: (e: Error) => this.error(e),
+                    },
+                    meta,
+                    diagnosticsMode
+                );
+            }
 
             return {
                 code: generateStylableModuleCode(meta, exports, moduleImports),

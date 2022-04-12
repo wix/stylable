@@ -1,6 +1,7 @@
-import { createMemoryFileSystemWithFiles } from '@stylable/e2e-test-kit';
 import { create } from '@stylable/runtime';
 import { stylableModuleFactory, Options } from '@stylable/module-utils';
+import type { IDirectoryContents } from '@file-services/types';
+import { createMemoryFs } from '@file-services/memory';
 
 function evalModule(id: string, source: string, requireModule: (s: string) => any) {
     if (!source) {
@@ -29,11 +30,8 @@ export function evalStylableModule<T = unknown>(source: string, fullPath: string
     }) as T;
 }
 
-export function moduleFactoryTestKit(
-    files: Record<string, string>,
-    options: Partial<Options> = {}
-) {
-    const fs = createMemoryFileSystemWithFiles(files);
+export function moduleFactoryTestKit(files: IDirectoryContents, options: Partial<Options> = {}) {
+    const fs = createMemoryFs(files);
     const factory = stylableModuleFactory(
         {
             resolveNamespace: (namespace) => namespace,

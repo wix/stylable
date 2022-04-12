@@ -12,7 +12,10 @@ type DiagnosticsStore = Map<string, Map<string, ProcessDiagnostics>>;
 
 interface DiagnosticsManagerOptions {
     log?: Log;
-    onFatalDiagnostics?: () => void;
+    hooks?: {
+        preReport?(diagnosticsMessages: DiagnosticMessages): void;
+        postReport?(diagnosticsMessages: DiagnosticMessages, hasFatalDiagnostic: boolean): void;
+    };
 }
 
 export class DiagnosticsManager {
@@ -94,16 +97,16 @@ export class DiagnosticsManager {
             }
         }
 
+        this.options.hooks?.preReport?.(diagnosticMessages);
+
         if (diagnosticMessages.size) {
-            const hasFatalDiangostics = reportDiagnostics(
+            const hasFatalDiagnostics = reportDiagnostics(
                 this.log,
                 diagnosticMessages,
                 diagnosticMode
             );
 
-            if (hasFatalDiangostics) {
-                this.options.onFatalDiagnostics?.();
-            }
+            this.options.hooks?.postReport?.(diagnosticMessages, hasFatalDiagnostics);
         }
 
         return Boolean(diagnosticMessages.size);

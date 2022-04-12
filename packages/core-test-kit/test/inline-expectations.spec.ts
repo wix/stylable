@@ -173,6 +173,28 @@ describe('inline-expectations', () => {
                 ])
             );
         });
+        it('should ignore comments between declarations', () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @rule .entry__root {first: 123; second: abc}*/
+                            .root {
+                                /* comment before */
+                                first: 123;
+                                /* comment between */
+                                second: abc;
+                                /* comment after */
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.not.throw();
+        });
         it('should throw for mismatch on nested rules', () => {
             const result = generateStylableResult({
                 entry: `/style.st.css`,

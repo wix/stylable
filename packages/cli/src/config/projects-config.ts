@@ -8,7 +8,7 @@ import type {
     RawProjectEntity,
     ResolveProjectsContext,
     ResolveRequests,
-    STCConfig,
+    STCProjects,
 } from '../types';
 import { processProjects } from './process-projects';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
@@ -17,28 +17,30 @@ import { resolveNpmRequests } from './resolve-requests';
 export async function projectsConfig(
     rootDir: string,
     overrideBuildOptions: Partial<BuildOptions>,
-    defaultOptions: BuildOptions = createDefaultOptions()
-): Promise<STCConfig> {
-    const configFile = resolveConfigFile(rootDir);
+    defaultOptions: BuildOptions = createDefaultOptions(),
+    configFilePath?: string
+): Promise<STCProjects> {
+    const { config } = resolveConfig(rootDir, configFilePath) || {};
+
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
-        configFile?.options,
+        config?.options,
         overrideBuildOptions
     );
 
     validateOptions(topLevelOptions);
 
-    let projects: STCConfig;
+    let projects: STCProjects;
 
-    if (isMultipleConfigProject(configFile)) {
-        const { entities } = processProjects(configFile, {
+    if (isMultipleConfigProject(config)) {
+        const { entities } = processProjects(config, {
             defaultOptions: topLevelOptions,
         });
 
         projects = await resolveProjectsRequests({
             rootDir,
             entities,
-            resolveRequests: configFile.projectsOptions?.resolveRequests ?? resolveNpmRequests,
+            resolveRequests: config.projectsOptions?.resolveRequests ?? resolveNpmRequests,
         });
     } else {
         projects = [
@@ -52,17 +54,29 @@ export async function projectsConfig(
     return projects;
 }
 
-export function resolveConfigFile(context: string) {
-    return loadStylableConfig(context, (config) =>
-        tryRun(
-            () =>
-                isSTCConfig(config)
-                    ? typeof config.stcConfig === 'function'
-                        ? config.stcConfig()
-                        : config.stcConfig
-                    : undefined,
-            'Failed to evaluate "stcConfig"'
-        )
+export function resolveConfig(context: string, request?: string) {
+    return request ? requireConfigFile(request, context) : resolveConfigFile(context);
+}
+
+function requireConfigFile(request: string, context: string) {
+    const path = require.resolve(request, { paths: [context] });
+    const config = resolveConfigValue(require(path));
+    return config ? { config, path } : undefined;
+}
+
+function resolveConfigFile(context: string) {
+    return loadStylableConfig(context, (config) => resolveConfigValue(config));
+}
+
+function resolveConfigValue(config: any) {
+    return tryRun(
+        () =>
+            isSTCConfig(config)
+                ? typeof config.stcConfig === 'function'
+                    ? config.stcConfig()
+                    : config.stcConfig
+                : undefined,
+        'Failed to evaluate "stcConfig"'
     );
 }
 
@@ -86,7 +100,7 @@ async function resolveProjectsRequests({
     rootDir: string;
     entities: Array<RawProjectEntity>;
     resolveRequests: ResolveRequests;
-}): Promise<STCConfig> {
+}): Promise<STCProjects> {
     const context: ResolveProjectsContext = { rootDir };
 
     return resolveRequests(entities, context);

@@ -12,11 +12,12 @@ import {
     createSymbolResolverWithCache,
     MetaResolvedSymbols,
 } from './stylable-resolver';
-import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
+import type { replaceValueHook, RuntimeStVar, StylableTransformer } from './stylable-transformer';
 import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
 import type { ParsedValue } from './types';
 import type { FeatureTransformContext } from './features/feature';
 import { CSSCustomProperty, STVar } from './features';
+import { unbox, CustomValueError } from './custom-values';
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
@@ -30,10 +31,13 @@ export interface EvalValueData {
     tsVarOverride?: Record<string, string> | null;
     cssVarsMapping?: Record<string, string>;
     args?: string[];
+    rootArgument?: string;
+    initialNode?: postcss.Node;
 }
 
 export interface EvalValueResult {
     topLevelType: any;
+    runtimeValue: RuntimeStVar;
     outputValue: string;
     typeError?: Error;
 }
@@ -58,7 +62,9 @@ export class StylableEvaluator {
             context.diagnostics,
             data.passedThrough,
             data.cssVarsMapping,
-            data.args
+            data.args,
+            data.rootArgument,
+            data.initialNode
         );
     }
 }
@@ -111,7 +117,9 @@ export function processDeclarationValue(
     diagnostics: Diagnostics = new Diagnostics(),
     passedThrough: string[] = [],
     cssVarsMapping: Record<string, string> = {},
-    args: string[] = []
+    args: string[] = [],
+    rootArgument?: string,
+    initialNode?: postcss.Node
 ): EvalValueResult {
     const evaluator = new StylableEvaluator({ tsVarOverride: variableOverride });
     const resolvedSymbols = getResolvedSymbols(meta);
@@ -137,6 +145,8 @@ export function processDeclarationValue(
                         tsVarOverride: variableOverride,
                         cssVarsMapping,
                         args,
+                        rootArgument,
+                        initialNode,
                     },
                     node: parsedNode,
                 });
@@ -204,6 +214,8 @@ export function processDeclarationValue(
                         tsVarOverride: variableOverride,
                         cssVarsMapping,
                         args,
+                        rootArgument,
+                        initialNode,
                     },
                     node: parsedNode,
                 });
@@ -220,23 +232,46 @@ export function processDeclarationValue(
 
     let outputValue = '';
     let topLevelType = null;
+    let runtimeValue = null;
     let typeError: Error | undefined = undefined;
     for (const n of parsedValue.nodes) {
         if (n.type === 'function') {
             const matchingType = resolvedSymbols.customValues[n.value];
 
             if (matchingType) {
-                topLevelType = matchingType.evalVarAst(n, resolvedSymbols.customValues);
                 try {
-                    outputValue += matchingType.getValue(
-                        args,
-                        topLevelType,
-                        n,
-                        resolvedSymbols.customValues
-                    );
+                    topLevelType = matchingType.evalVarAst(n, resolvedSymbols.customValues, true);
+                    runtimeValue = unbox(topLevelType, true, resolvedSymbols.customValues, n);
+                    try {
+                        outputValue += matchingType.getValue(
+                            args,
+                            topLevelType,
+                            n,
+                            resolvedSymbols.customValues
+                        );
+                    } catch (error) {
+                        if (error instanceof CustomValueError) {
+                            outputValue += error.fallbackValue;
+                        } else {
+                            throw error;
+                        }
+                    }
                 } catch (e) {
                     typeError = e as Error;
-                    // catch broken variable resolutions
+
+                    const invalidNode = initialNode || node;
+
+                    if (invalidNode) {
+                        diagnostics.warn(
+                            invalidNode,
+                            STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
+                                [...(rootArgument ? [rootArgument] : []), ...args].join(', ')
+                            ),
+                            { word: value }
+                        );
+                    } else {
+                        // TODO: catch broken variable resolutions without a node
+                    }
                 }
             } else {
                 outputValue += getStringValue([n]);
@@ -245,7 +280,7 @@ export function processDeclarationValue(
             outputValue += getStringValue([n]);
         }
     }
-    return { outputValue, topLevelType, typeError };
+    return { outputValue, topLevelType, typeError, runtimeValue };
 }
 
 export function evalDeclarationValue(
