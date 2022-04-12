@@ -83,9 +83,12 @@ describe('Stylable CLI config file options', function () {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `.root{color:red}`,
             'stylable.config.js': `
-                  exports.stcConfig = () => ({ options: { 
-                    outDir: './out',
-                   } })
+                    exports.stcConfig = () => ({ 
+                        options: { 
+                            cjs: true,
+                            outDir: './out',
+                        } 
+                    })
                 `,
         });
 
@@ -109,9 +112,12 @@ describe('Stylable CLI config file options', function () {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{color:red}`,
                 'stylable.config.js': `
-                        exports.stcConfig = () => ({ options: { 
-                            outDir: './dist',
-                        } })
+                        exports.stcConfig = () => ({ 
+                            options: { 
+                                cjs: true,
+                                outDir: './dist',
+                            }
+                        })
                 `,
             },
         });

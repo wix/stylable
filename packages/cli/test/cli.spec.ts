@@ -29,7 +29,7 @@ describe('Stylable Cli', function () {
             'style.st.css': `.root{color:red}`,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath]);
+        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--cjs']);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(
@@ -46,7 +46,15 @@ describe('Stylable Cli', function () {
             'style.st.css': `.root{color:red}`,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--outDir', './dist']);
+        runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--nsr',
+            testNsrPath,
+            '--outDir',
+            './dist',
+            '--cjs',
+        ]);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(Object.keys(dirContent)).to.eql([
@@ -110,7 +118,7 @@ describe('Stylable Cli', function () {
         });
 
         const nsr = require.resolve('@stylable/node');
-        runCliSync(['--rootDir', tempDir.path, '--nsr', nsr]);
+        runCliSync(['--rootDir', tempDir.path, '--nsr', nsr, '--cjs']);
 
         const dirContent = loadDirSync(tempDir.path);
 

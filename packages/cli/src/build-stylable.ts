@@ -5,10 +5,11 @@ import { projectsConfig } from './config/projects-config';
 import {
     createBuildIdentifier,
     createDefaultOptions,
+    hasStylableCSSOutput,
     NAMESPACE_RESOLVER_MODULE_REQUEST,
 } from './config/resolve-options';
 import { DiagnosticsManager } from './diagnostics-manager';
-import { createDefaultLogger } from './logger';
+import { createDefaultLogger, levels } from './logger';
 import type { BuildContext, BuildOptions } from './types';
 import { WatchHandler } from './watch-handler';
 
@@ -80,6 +81,10 @@ export async function buildStylable(
             );
 
             log('[Project]', projectRoot, buildOptions);
+
+            if (!hasStylableCSSOutput(buildOptions)) {
+                log('[Warning]', `No CSS output found for "${identifier}"`, levels.info);
+            }
 
             const stylable = new Stylable({
                 fileSystem,
