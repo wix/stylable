@@ -34,10 +34,9 @@ export function getImports(
      */
     visitMetaCSSDependenciesBFS(
         meta,
-        ({ source }) => {
-            buildDependencies.push(source);
-        },
-        stylable.resolver
+        ({ source }) => buildDependencies.push(source),
+        stylable.resolver,
+        (resolvedPath) => buildDependencies.push(resolvedPath)
     );
 
     /**
