@@ -1,9 +1,14 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { RollupWatcherEvent, watch } from 'rollup';
-import { runServer } from '@stylable/e2e-test-kit';
+import { loadDirSync, runServer } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
 import { stylableRollupPlugin, StylableRollupPluginOptions } from '@stylable/rollup-plugin';
-import { createTempProject, actAndWaitForBuild, waitForWatcherFinish } from './test-helpers';
+import {
+    createTempProject,
+    actAndWaitForBuild,
+    waitForWatcherFinish,
+    ActAndWaitOptions,
+} from './test-helpers';
 import { dirname, join } from 'path';
 import html from '@rollup/plugin-html';
 
@@ -44,6 +49,7 @@ export function rollupRunner({
         plugins: [
             nodeResolve(),
             stylableRollupPlugin({
+                projectRoot: context,
                 inlineAssets: false,
                 resolveNamespace(ns) {
                     return ns;
@@ -94,8 +100,14 @@ export function rollupRunner({
         },
         dispose,
         ready,
-        async act(action: (done: Promise<RollupWatcherEvent>) => Promise<void> | void) {
-            return await actAndWaitForBuild(watcher, action);
+        async act(
+            action: (done: Promise<RollupWatcherEvent>) => Promise<void> | void,
+            options?: ActAndWaitOptions
+        ) {
+            return await actAndWaitForBuild(watcher, action, options);
+        },
+        getOutputFiles() {
+            return loadDirSync(dist);
         },
     };
 }

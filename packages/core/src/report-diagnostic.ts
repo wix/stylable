@@ -10,12 +10,13 @@ export type DiagnosticsMode = 'auto' | 'strict' | 'loose';
 /**
  * Helper function to report diagnostics for every diagnosticsMode
  */
-function reportDiagnostic(
+export function reportDiagnostic(
     ctx: EmitDiagnosticsContext,
     diagnosticsMode: DiagnosticsMode,
-    { message, type }: { message: string; type: DiagnosticType }
+    { message, type }: { message: string; type: DiagnosticType },
+    from?: string
 ) {
-    const error = new Error(message);
+    const error = new Error(from ? `[${from}]:\n\n${message}` : message);
 
     if (type === 'info') {
         ctx.emitWarning(error);
@@ -38,12 +39,13 @@ function reportDiagnostic(
 export function emitDiagnostics(
     ctx: EmitDiagnosticsContext,
     meta: StylableMeta,
-    diagnosticsMode: DiagnosticsMode
+    diagnosticsMode: DiagnosticsMode,
+    filePath?: string
 ) {
     meta.diagnostics?.reports.forEach(handleReport);
     meta.transformDiagnostics?.reports.forEach(handleReport);
 
     function handleReport(diagnostic: Diagnostic) {
-        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
+        reportDiagnostic(ctx, diagnosticsMode, diagnostic, filePath);
     }
 }

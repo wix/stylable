@@ -6,6 +6,7 @@
   },
   "references": [
     { "path": "../../core/src" },
+    { "path": "../../cli/src" },
     { "path": "../../e2e-test-kit/src" },
     { "path": "../../optimizer/src" },
     { "path": "../src" }

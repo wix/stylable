@@ -31,7 +31,7 @@ export const buildMessages = {
     WATCH_SUMMARY(changes: number, deleted: number) {
         return `Processed ${changes} changes and ${deleted} deletions.`;
     },
-    NO_DIANGOSTICS() {
+    NO_DIAGNOSTICS() {
         return `Found 0 diagnostics.`;
     },
 };
