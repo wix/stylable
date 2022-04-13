@@ -14,7 +14,7 @@ module.exports = {
         new StylableWebpackPlugin({
             cssInjection: 'css',
             optimize: {
-                dedupe: true,
+                dedupeSimilarStylesheets: true
             },
         }),
         new HtmlWebpackPlugin(),

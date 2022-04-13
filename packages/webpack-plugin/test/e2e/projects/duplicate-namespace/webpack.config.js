@@ -9,7 +9,7 @@ module.exports = {
     plugins: [
         new StylableWebpackPlugin({
             optimize: {
-                dedupe: true,
+                dedupeSimilarStylesheets: true
             },
         }),
         new HtmlWebpackPlugin(),

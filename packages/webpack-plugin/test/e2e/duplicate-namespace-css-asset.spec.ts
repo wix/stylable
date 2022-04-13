@@ -43,10 +43,10 @@ describe(`(${project})`, () => {
             };
         });
 
-        expect(stylesLength, 'stylable.css should exist').to.have.lengthOf(1);
+        expect(stylesLength, 'only stylable.css should exist').to.equal(1);
         expect(
             rulesLength,
             'sheet has 3 rules (one is omitted because duplication)'
-        ).to.have.lengthOf(3);
+        ).to.equal(3);
     });
 });
