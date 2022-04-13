@@ -83,7 +83,7 @@ export async function buildStylable(
             log('[Project]', projectRoot, buildOptions);
 
             if (!hasStylableCSSOutput(buildOptions)) {
-                log('[Warning]', `No CSS output found for "${identifier}"`, levels.info);
+                log(`No CSS output found for "${identifier}"`, levels.info);
             }
 
             const stylable = new Stylable({
