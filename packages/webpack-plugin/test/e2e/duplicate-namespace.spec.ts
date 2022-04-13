@@ -33,9 +33,7 @@ describe(`(${project})`, () => {
     it('should only load one copy of duplicated module with same content and depth ', async () => {
         const { page } = await projectRunner.openInBrowser({ captureResponses: true });
 
-        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
-            includeCSSContent: false,
-        });
+        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
 
         expect(styleElements).to.eql([
             { id: './src/same-index.st.css', depth: '1' }, // same content, different depth

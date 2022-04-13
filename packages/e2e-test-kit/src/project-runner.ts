@@ -304,6 +304,11 @@ export class ProjectRunner {
     protected loadWebpackConfig(): webpack.Configuration {
         const config = require(join(this.testDir, this.options.configName || 'webpack.config'));
         const loadedConfig = config.default || config;
+        if (loadedConfig.output?.path) {
+            throw new Error(
+                'output.path is not allowed in webpack.config.js when running with project-runner. please use webpackOptions.output.path in the spec file instead.'
+            );
+        }
         return {
             ...loadedConfig,
             ...this.options.webpackOptions,
