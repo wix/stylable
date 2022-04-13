@@ -108,7 +108,21 @@ export class StylableResolver {
         }
 
         let entity: CachedModuleEntity;
-        const resolvedPath = this.resolvePath(context, request);
+        let resolvedPath: string;
+
+        try {
+            resolvedPath = this.resolvePath(context, request);
+        } catch (error) {
+            entity = {
+                kind: request.endsWith('css') ? 'css' : 'js',
+                value: null,
+                error,
+                request,
+                context,
+            };
+            this.cache?.set(key, entity);
+            return entity;
+        }
 
         if (resolvedPath.endsWith('.css')) {
             const kind = 'css';
