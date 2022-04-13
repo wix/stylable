@@ -10,7 +10,7 @@
     "watch": "npm run build -- -w",
     "lint": "eslint .",
     "pretest": "npm run build",
-    "test": "node scripts/test-runner.js --parallel",
+    "test": "node --enable-source-maps scripts/test-runner.js --parallel",
     "test:integrations": "npm run test -- --i",
     "test:core-packages": "npm run test -- --cp",
     "prettify": "npx prettier . --write"
@@ -43,7 +43,7 @@
     "@types/mocha": "^9.1.0",
     "@types/node": "12",
     "@types/postcss-safe-parser": "^5.0.1",
-    "@types/react": "^17.0.43",
+    "@types/react": "^18.0.3",
     "@types/react-dom": "^17.0.14",
     "@types/rimraf": "^3.0.2",
     "@types/validate-npm-package-name": "^3.0.3",
