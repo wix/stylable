@@ -94,6 +94,10 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
         get type() {
             return '@st-unused-import';
         }
+        // @ts-expect-error webpack types are wrong consider this as property
+        get category() {
+            return 'esm';
+        }
     }
 
     class NoopTemplate {

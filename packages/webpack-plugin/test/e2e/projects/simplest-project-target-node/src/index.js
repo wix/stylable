@@ -1,4 +1,4 @@
-import { Button } from 'wix-ui-tpa';
+import { Button } from 'comp-lib';
 import { classes } from './index.st.css';
 
 document.body.classList.add(classes.root);

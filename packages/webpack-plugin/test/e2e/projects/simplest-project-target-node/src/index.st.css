@@ -1,4 +1,4 @@
-@st-import [--color] from "wix-ui-tpa";
+@st-import [--color] from "comp-lib/index.st.css";
 @st-import [fn] from "st-utils";
 
 
