@@ -1,5 +1,7 @@
 import chaiSubset from 'chai-subset';
+import type { SRule } from '@stylable/core';
 import { STMixin } from '@stylable/core/dist/features';
+import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
@@ -263,6 +265,148 @@ describe(`features/st-mixin`, () => {
                 },
             }
         );
+    });
+    describe(`SRule (deprecated)`, () => {
+        // ToDo: remove in v5 when SRule is removed
+        it(`should collect mixins on rules`, () => {
+            testStylableCore(
+                `
+                .x {
+                    -st-mixin: my-mixin
+                }
+                .my-mixin {}
+            `,
+                {
+                    stylableConfig: {
+                        onProcess(meta) {
+                            const mixinRule = meta.ast.nodes[0] as SRule;
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type
+                            ).to.eql('my-mixin');
+
+                            return meta;
+                        },
+                    },
+                }
+            );
+        });
+        it(`should use last mixin deceleration`, () => {
+            testStylableCore(
+                `
+                .x {
+                    -st-mixin: my-mixin1;
+                    -st-mixin: my-mixin2;
+                }
+                .my-mixin1 {}
+                .my-mixin2 {}
+            `,
+                {
+                    stylableConfig: {
+                        onProcess(meta) {
+                            const mixinRule = meta.ast.nodes[0] as SRule;
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type
+                            ).to.eql('my-mixin2');
+
+                            return meta;
+                        },
+                    },
+                }
+            );
+        });
+        it(`should use last mixin deceleration for -st-partial-mixin`, () => {
+            testStylableCore(
+                `
+                .x {
+                    -st-partial-mixin: my-mixin1;
+                    -st-partial-mixin: my-mixin2;
+                }
+                .my-mixin1 {}
+                .my-mixin2 {}
+            `,
+                {
+                    stylableConfig: {
+                        onProcess(meta) {
+                            const mixinRule = meta.ast.nodes[0] as SRule;
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type
+                            ).to.eql('my-mixin2');
+
+                            return meta;
+                        },
+                    },
+                }
+            );
+        });
+        it(`should use mixin deceleration in order for mixed -st-mixin and -st-partial-mixin`, () => {
+            testStylableCore(
+                `
+                .x {
+                    -st-mixin: my-mixin1;
+                    -st-partial-mixin: my-mixin2;
+                }
+                .y {
+                    -st-partial-mixin: my-mixin2;
+                    -st-mixin: my-mixin1;
+                }
+                .my-mixin1 {}
+                .my-mixin2 {}
+            `,
+                {
+                    stylableConfig: {
+                        onProcess(meta) {
+                            const mixinRule1 = meta.ast.nodes[0] as SRule;
+                            const mixinRule2 = meta.ast.nodes[1] as SRule;
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule1.mixins!)[0].mixin.type
+                            ).to.eql('my-mixin1');
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule1.mixins!)[1].mixin.type
+                            ).to.eql('my-mixin2');
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule2.mixins!)[0].mixin.type
+                            ).to.eql('my-mixin2');
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule2.mixins!)[1].mixin.type
+                            ).to.eql('my-mixin1');
+
+                            return meta;
+                        },
+                    },
+                }
+            );
+        });
+        it(`should use mixin last deceleration in order for mixed -st-mixin and -st-partial-mixin with duplicates`, () => {
+            testStylableCore(
+                `
+                .x {
+                    -st-mixin: my-mixin1;
+                    -st-partial-mixin: my-mixin2;
+                    -st-mixin: my-mixin3;
+                    -st-partial-mixin: my-mixin4;
+                }
+                .my-mixin1 {}
+                .my-mixin2 {}
+                .my-mixin3 {}
+                .my-mixin4 {}
+            `,
+                {
+                    stylableConfig: {
+                        onProcess(meta) {
+                            const mixinRule = meta.ast.nodes[0] as SRule;
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type
+                            ).to.eql('my-mixin3');
+                            expect(
+                                ignoreDeprecationWarn(() => mixinRule.mixins!)[1].mixin.type
+                            ).to.eql('my-mixin4');
+
+                            return meta;
+                        },
+                    },
+                }
+            );
+        });
     });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {
