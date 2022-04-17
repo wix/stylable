@@ -1,4 +1,4 @@
-import { createFeature } from './feature';
+import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import type { ClassSymbol } from './css-class';
@@ -10,12 +10,7 @@ import {
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import * as postcss from 'postcss';
 import type { FunctionNode, WordNode } from 'postcss-value-parser';
-import {
-    isValidDeclaration,
-    mergeRules,
-    MISSING_MIXIN_DECL,
-    INVALID_MERGE_OF,
-} from '../stylable-utils';
+import { isValidDeclaration, mergeRules, INVALID_MERGE_OF } from '../stylable-utils';
 // ToDo: deprecate - stop usage
 import type { SRule } from '../deprecated/postcss-ast-extension';
 
@@ -24,7 +19,7 @@ export interface MixinValue {
     options: Array<{ value: string }> | Record<string, string>;
     partial?: boolean;
     valueNode?: FunctionNode | WordNode;
-    originDecl?: postcss.Declaration;
+    originDecl: postcss.Declaration;
 }
 
 export interface RefedMixin {
@@ -40,7 +35,6 @@ export const MixinType = {
 export const diagnostics = {
     VALUE_CANNOT_BE_STRING: MixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
     INVALID_NAMED_PARAMS: MixinHelperDiagnostics.INVALID_NAMED_PARAMS,
-    MISSING_MIXIN_DECL: MISSING_MIXIN_DECL,
     INVALID_MERGE_OF: INVALID_MERGE_OF,
     PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
         return `"${MixinType.PARTIAL}" can only be used with override arguments provided, missing overrides on "${type}"`;
@@ -57,83 +51,14 @@ export const diagnostics = {
 
 export const hooks = createFeature({
     analyzeDeclaration({ context, decl }) {
-        const parser =
-            decl.prop === MixinType.ALL
-                ? parseStMixin
-                : decl.prop === MixinType.PARTIAL
-                ? parseStPartialMixin
-                : null;
-        if (!parser) {
-            return;
-        }
-        const rule = decl.parent as SRule;
-        const { meta } = context;
-        const mixins: RefedMixin[] = [];
-        /**
-         * This functionality is broken we don't know what strategy to choose here.
-         * Should be fixed when we refactor to the new flow
-         */
-        parser(
-            decl,
-            (type) => {
-                const symbol = STSymbol.get(meta, type);
-                return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
-                    ? 'args'
-                    : 'named';
-            },
-            context.diagnostics,
-            false
-        ).forEach((mixin) => {
-            const mixinRefSymbol = STSymbol.get(meta, mixin.type);
-            if (
-                mixinRefSymbol &&
-                (mixinRefSymbol._kind === 'import' ||
-                    mixinRefSymbol._kind === 'class' ||
-                    mixinRefSymbol._kind === 'element')
-            ) {
-                if (mixin.partial && Object.keys(mixin.options).length === 0) {
-                    context.diagnostics.warn(
-                        decl,
-                        diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
-                        {
-                            word: mixin.type,
-                        }
-                    );
-                }
-                const refedMixin = {
-                    mixin,
-                    ref: mixinRefSymbol,
-                };
-                mixins.push(refedMixin);
-                ignoreDeprecationWarn(() => meta.mixins).push(refedMixin);
-            } else {
-                context.diagnostics.warn(decl, diagnostics.UNKNOWN_MIXIN(mixin.type), {
-                    word: mixin.type,
-                });
+        ignoreDeprecationWarn(() => {
+            const parentRule = decl.parent as SRule;
+            const prevMixins = ignoreDeprecationWarn(() => parentRule?.mixins || []);
+            const mixins = collectDeclMixins(context, decl, prevMixins);
+            if (mixins.length) {
+                parentRule.mixins = mixins;
             }
         });
-
-        const previousMixins = ignoreDeprecationWarn(() => rule.mixins);
-        if (previousMixins) {
-            const partials = previousMixins.filter((r) => r.mixin.partial);
-            const nonPartials = previousMixins.filter((r) => !r.mixin.partial);
-            const isInPartial = decl.prop === MixinType.PARTIAL;
-            if (
-                (partials.length && decl.prop === MixinType.PARTIAL) ||
-                (nonPartials.length && decl.prop === MixinType.ALL)
-            ) {
-                context.diagnostics.warn(decl, diagnostics.OVERRIDE_MIXIN(decl.prop));
-            }
-            if (partials.length && nonPartials.length) {
-                rule.mixins = isInPartial ? nonPartials.concat(mixins) : partials.concat(mixins);
-            } else if (partials.length) {
-                rule.mixins = isInPartial ? mixins : partials.concat(mixins);
-            } else if (nonPartials.length) {
-                rule.mixins = isInPartial ? nonPartials.concat(mixins) : mixins;
-            }
-        } else if (mixins.length) {
-            rule.mixins = mixins;
-        }
     },
     transformLastPass({ context, ast, transformer, cssVarsMapping, path }) {
         ast.walkRules((rule) =>
@@ -159,12 +84,12 @@ import { cssObjectToAst } from '../parser';
 import { fixRelativeUrls } from '../stylable-assets';
 import type { StylableMeta } from '../stylable-meta';
 import type { ElementSymbol } from './css-type';
-import type { FeatureTransformContext } from './feature';
+import type {} from './feature';
 import type { CSSResolve } from '../stylable-resolver';
 import type { StylableTransformer } from '../stylable-transformer';
 import { createSubsetAst } from '../helpers/rule';
 import { strategies } from '../helpers/value';
-import { valueMapping, mixinDeclRegExp } from '../stylable-value-parsers';
+import { valueMapping } from '../stylable-value-parsers';
 
 export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) {
@@ -190,17 +115,123 @@ export function appendMixins(
     cssVarsMapping: Record<string, string>,
     path: string[] = []
 ) {
-    const mixins = ignoreDeprecationWarn(() => rule.mixins);
+    const [decls, mixins] = collectRuleMixins(context, rule);
     if (!mixins || mixins.length === 0) {
         return;
     }
-    mixins.forEach((mix) => {
-        appendMixin(context, mix, transformer, rule, meta, variableOverride, cssVarsMapping, path);
+    for (const mixin of mixins) {
+        appendMixin(
+            context,
+            mixin,
+            transformer,
+            rule,
+            meta,
+            variableOverride,
+            cssVarsMapping,
+            path
+        );
+    }
+    mixins.length = 0; // ToDo: remove
+    for (const mixinDecl of decls) {
+        mixinDecl.remove();
+    }
+}
+
+function collectRuleMixins(
+    context: FeatureTransformContext,
+    rule: postcss.Rule
+): [decls: postcss.Declaration[], mixins: RefedMixin[]] {
+    let mixins: RefedMixin[] = [];
+    const decls: postcss.Declaration[] = [];
+    rule.walkDecls((decl) => {
+        if (decl.prop === `-st-mixin` || decl.prop === `-st-partial-mixin`) {
+            decls.push(decl);
+            mixins = collectDeclMixins(context, decl, mixins);
+        }
     });
-    mixins.length = 0;
-    rule.walkDecls(mixinDeclRegExp, (node) => {
-        node.remove();
+    return [decls, mixins];
+}
+
+function collectDeclMixins(
+    context: FeatureContext,
+    decl: postcss.Declaration,
+    previousMixins?: RefedMixin[]
+): RefedMixin[] {
+    const { meta } = context;
+    let mixins: RefedMixin[] = [];
+    const parser =
+        decl.prop === MixinType.ALL
+            ? parseStMixin
+            : decl.prop === MixinType.PARTIAL
+            ? parseStPartialMixin
+            : null;
+    if (!parser) {
+        return previousMixins || mixins;
+    }
+
+    /**
+     * This functionality is broken we don't know what strategy to choose here.
+     * Should be fixed when we refactor to the new flow
+     */
+    parser(
+        decl,
+        (type) => {
+            const symbol = STSymbol.get(meta, type);
+            return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
+                ? 'args'
+                : 'named';
+        },
+        context.diagnostics,
+        false
+    ).forEach((mixin) => {
+        const mixinRefSymbol = STSymbol.get(meta, mixin.type);
+        if (
+            mixinRefSymbol &&
+            (mixinRefSymbol._kind === 'import' ||
+                mixinRefSymbol._kind === 'class' ||
+                mixinRefSymbol._kind === 'element')
+        ) {
+            if (mixin.partial && Object.keys(mixin.options).length === 0) {
+                context.diagnostics.warn(
+                    decl,
+                    diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
+                    {
+                        word: mixin.type,
+                    }
+                );
+            }
+            const refedMixin = {
+                mixin,
+                ref: mixinRefSymbol,
+            };
+            mixins.push(refedMixin);
+            ignoreDeprecationWarn(() => meta.mixins).push(refedMixin);
+        } else {
+            context.diagnostics.warn(decl, diagnostics.UNKNOWN_MIXIN(mixin.type), {
+                word: mixin.type,
+            });
+        }
     });
+
+    if (previousMixins) {
+        const partials = previousMixins.filter((r) => r.mixin.partial);
+        const nonPartials = previousMixins.filter((r) => !r.mixin.partial);
+        const isInPartial = decl.prop === MixinType.PARTIAL;
+        if (
+            (partials.length && decl.prop === MixinType.PARTIAL) ||
+            (nonPartials.length && decl.prop === MixinType.ALL)
+        ) {
+            context.diagnostics.warn(decl, diagnostics.OVERRIDE_MIXIN(decl.prop));
+        }
+        if (partials.length && nonPartials.length) {
+            mixins = isInPartial ? nonPartials.concat(mixins) : partials.concat(mixins);
+        } else if (partials.length) {
+            mixins = isInPartial ? mixins : partials.concat(mixins);
+        } else if (nonPartials.length) {
+            mixins = isInPartial ? nonPartials.concat(mixins) : mixins;
+        }
+    }
+    return mixins;
 }
 
 export function appendMixin(
@@ -225,7 +256,7 @@ export function appendMixin(
         handleCSSMixin(
             resolveChain,
             transformer,
-            reParseMixinNamedArgs(mix, rule, context.diagnostics),
+            reParseMixinNamedArgs(mix, context.diagnostics),
             rule,
             meta,
             path,
@@ -239,7 +270,7 @@ export function appendMixin(
             try {
                 handleJSMixin(
                     transformer,
-                    reParseMixinArgs(mix, rule, context.diagnostics),
+                    reParseMixinArgs(mix, context.diagnostics),
                     resolvedMixin.symbol,
                     meta,
                     rule,
@@ -318,7 +349,7 @@ function handleJSMixin(
         meta.source
     );
 
-    mergeRules(mixinRoot, rule, transformer.diagnostics);
+    mergeRules(mixinRoot, rule, mix.mixin.originDecl, transformer.diagnostics);
 }
 
 function createMixinRootFromCSSResolve(
@@ -415,11 +446,11 @@ function handleCSSMixin(
     }
 
     if (roots.length === 1) {
-        mergeRules(roots[0], rule, transformer.diagnostics);
+        mergeRules(roots[0], rule, mix.mixin.originDecl, transformer.diagnostics);
     } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
         roots.forEach((root) => mixinRoot.prepend(...root.nodes));
-        mergeRules(mixinRoot, rule, transformer.diagnostics);
+        mergeRules(mixinRoot, rule, mix.mixin.originDecl, transformer.diagnostics);
     }
 }
 
@@ -434,12 +465,6 @@ function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefine
         }) as postcss.Declaration)
     );
 }
-const partialsOnly = ({ mixin: { partial } }: RefedMixin): boolean => {
-    return !!partial;
-};
-const nonPartials = ({ mixin: { partial } }: RefedMixin): boolean => {
-    return !partial;
-};
 
 /** we assume that mixinRoot is freshly created nodes from the ast */
 function filterPartialMixinDecl(
@@ -466,29 +491,17 @@ function filterPartialMixinDecl(
             decl.remove();
             if (parent?.nodes?.length === 0) {
                 parent.remove();
-            } else if (parent) {
-                ignoreDeprecationWarn(() => {
-                    if (decl.prop === valueMapping.mixin) {
-                        parent.mixins = parent.mixins!.filter(partialsOnly);
-                    } else if (decl.prop === valueMapping.partialMixin) {
-                        parent.mixins = parent.mixins!.filter(nonPartials);
-                    }
-                });
             }
         }
     });
 }
 
 /** this is a workaround for parsing the mixin args too early  */
-function reParseMixinNamedArgs(
-    mix: RefedMixin,
-    rule: postcss.Rule,
-    diagnostics: Diagnostics
-): RefedMixin {
+function reParseMixinNamedArgs(mix: RefedMixin, diagnostics: Diagnostics): RefedMixin {
     const options =
         mix.mixin.valueNode?.type === 'function'
             ? strategies.named(mix.mixin.valueNode, (message, options) => {
-                  diagnostics.warn(mix.mixin.originDecl || rule, message, options);
+                  diagnostics.warn(mix.mixin.originDecl, message, options);
               })
             : (mix.mixin.options as Record<string, string>) || {};
 
@@ -501,15 +514,11 @@ function reParseMixinNamedArgs(
     };
 }
 
-function reParseMixinArgs(
-    mix: RefedMixin,
-    rule: postcss.Rule,
-    diagnostics: Diagnostics
-): RefedMixin {
+function reParseMixinArgs(mix: RefedMixin, diagnostics: Diagnostics): RefedMixin {
     const options =
         mix.mixin.valueNode?.type === 'function'
             ? strategies.args(mix.mixin.valueNode, (message, options) => {
-                  diagnostics.warn(mix.mixin.originDecl || rule, message, options);
+                  diagnostics.warn(mix.mixin.originDecl, message, options);
               })
             : Array.isArray(mix.mixin.options)
             ? (mix.mixin.options as { value: string }[])

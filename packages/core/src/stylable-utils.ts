@@ -5,7 +5,7 @@ import type { Diagnostics } from './diagnostics';
 import type { Imported, ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
-import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
+import { valueMapping } from './stylable-value-parsers';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -42,14 +42,16 @@ export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
-export const MISSING_MIXIN_DECL = () => {
-    return `-st-mixin is missing and is required for mixin insertion"`;
-};
 export const INVALID_MERGE_OF = (mergeValue: string) => {
     return `invalid merge of: \n"${mergeValue}"`;
 };
 // ToDo: move to helpers/mixin
-export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule, report?: Diagnostics) {
+export function mergeRules(
+    mixinAst: postcss.Root,
+    rule: postcss.Rule,
+    mixinDecl: postcss.Declaration,
+    report?: Diagnostics
+) {
     let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
     const nestedInKeyframes = isChildOfAtRule(rule, `keyframes`);
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
@@ -78,23 +80,14 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule, report?: 
 
     if (mixinAst.nodes) {
         let nextRule: postcss.Rule | postcss.AtRule = rule;
-        let mixinDecl: postcss.Declaration | null = null;
-
-        rule.walkDecls(mixinDeclRegExp, (decl) => {
-            mixinDecl = decl;
-        });
-        if (!mixinDecl) {
-            report?.error(rule, MISSING_MIXIN_DECL());
-            return;
-        }
         // TODO: handle rules before and after decl on entry
         mixinAst.nodes.slice().forEach((node) => {
             if (node === mixinRoot) {
                 node.walkDecls((node) => {
-                    rule.insertBefore(mixinDecl!, node);
+                    rule.insertBefore(mixinDecl, node);
                 });
             } else if (node.type === 'decl') {
-                rule.insertBefore(mixinDecl!, node);
+                rule.insertBefore(mixinDecl, node);
             } else if (node.type === 'rule' || node.type === 'atrule') {
                 const valid = !nestedInKeyframes;
                 if (valid) {

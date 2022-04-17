@@ -234,10 +234,7 @@ describe(`features/st-mixin`, () => {
             }
         `);
     });
-    it(`should append mixin rules`, () => {
-        // This case mostly protects from a user programmatically removing
-        // `-st-mixin` declarations from the modified pre transformed AST.
-        // The mixin reports that something went wrong and mixins were not applied.
+    it(`should not mix mixin that is removed before transform`, () => {
         testStylableCore(
             `
             .mix {
@@ -245,7 +242,6 @@ describe(`features/st-mixin`, () => {
             }
 
             /* 
-                @transform-error ${STMixin.diagnostics.MISSING_MIXIN_DECL()}
                 @rule .entry__mixToClass { before: a; after: z; }
             */
             .mixToClass {
@@ -258,9 +254,7 @@ describe(`features/st-mixin`, () => {
             {
                 stylableConfig: {
                     onProcess(meta) {
-                        // remove -st-mixin origin before apply.
-                        // -st-mixin position must be preserved
-                        // in order to mix between declarations
+                        // remove -st-mixin origin before apply mixin.
                         const mixToClass = meta.ast.nodes[2] as postcss.Rule;
                         const stMixinDecl = mixToClass.nodes[1];
                         stMixinDecl.remove();
@@ -751,23 +745,35 @@ describe(`features/st-mixin`, () => {
                 }
 
                 /*  @rule(partial after) .entry__a {
+                    pos: before;
                     background: red;
                     width: 1px;
+                    pos: between;
                     background: green;
+                    pos: after;
                 } */
                 .a {
+                    pos: before;
                     -st-mixin: mix;
+                    pos: between;
                     -st-partial-mixin: mix(color green);
+                    pos: after;
                 }
                 
                 /*  @rule(partial before) .entry__a {
+                    pos: before;
                     background: green;
+                    pos: between;
                     background: red;
                     width: 1px;
+                    pos: after;
                 } */
                 .a {
+                    pos: before;
                     -st-partial-mixin: mix(color green);
+                    pos: between;
                     -st-mixin: mix;
+                    pos: after;
                 }
             `);
         });
