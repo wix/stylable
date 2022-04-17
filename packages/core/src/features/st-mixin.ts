@@ -54,7 +54,18 @@ export const hooks = createFeature({
         ignoreDeprecationWarn(() => {
             const parentRule = decl.parent as SRule;
             const prevMixins = ignoreDeprecationWarn(() => parentRule?.mixins || []);
-            const mixins = collectDeclMixins(context, decl, prevMixins);
+            const mixins = collectDeclMixins(
+                context,
+                decl,
+                (mixinSymbolName) => {
+                    const symbol = STSymbol.get(context.meta, mixinSymbolName);
+                    return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
+                        ? 'args'
+                        : 'named';
+                },
+                false /*dont report param signature diagnostics*/,
+                prevMixins
+            );
             if (mixins.length) {
                 parentRule.mixins = mixins;
             }
@@ -75,6 +86,8 @@ export const hooks = createFeature({
     },
 });
 
+// API
+
 // taken from "src/stylable/mixins" - ToDo: refactor
 
 import { dirname } from 'path';
@@ -88,7 +101,6 @@ import type {} from './feature';
 import type { CSSResolve } from '../stylable-resolver';
 import type { StylableTransformer } from '../stylable-transformer';
 import { createSubsetAst } from '../helpers/rule';
-import { strategies } from '../helpers/value';
 import { valueMapping } from '../stylable-value-parsers';
 
 export const mixinWarnings = {
@@ -142,11 +154,20 @@ function collectRuleMixins(
     rule: postcss.Rule
 ): [decls: postcss.Declaration[], mixins: RefedMixin[]] {
     let mixins: RefedMixin[] = [];
+    const { mainNamespace } = context.getResolvedSymbols(context.meta);
     const decls: postcss.Declaration[] = [];
     rule.walkDecls((decl) => {
         if (decl.prop === `-st-mixin` || decl.prop === `-st-partial-mixin`) {
             decls.push(decl);
-            mixins = collectDeclMixins(context, decl, mixins);
+            mixins = collectDeclMixins(
+                context,
+                decl,
+                (mixinSymbolName) => {
+                    return mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named';
+                },
+                true /* report param signature diagnostics */,
+                mixins
+            );
         }
     });
     return [decls, mixins];
@@ -155,6 +176,8 @@ function collectRuleMixins(
 function collectDeclMixins(
     context: FeatureContext,
     decl: postcss.Declaration,
+    paramSignature: (mixinSymbolName: string) => 'named' | 'args',
+    emitStrategyDiagnostics: boolean,
     previousMixins?: RefedMixin[]
 ): RefedMixin[] {
     const { meta } = context;
@@ -169,21 +192,7 @@ function collectDeclMixins(
         return previousMixins || mixins;
     }
 
-    /**
-     * This functionality is broken we don't know what strategy to choose here.
-     * Should be fixed when we refactor to the new flow
-     */
-    parser(
-        decl,
-        (type) => {
-            const symbol = STSymbol.get(meta, type);
-            return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
-                ? 'args'
-                : 'named';
-        },
-        context.diagnostics,
-        false
-    ).forEach((mixin) => {
+    parser(decl, paramSignature, context.diagnostics, emitStrategyDiagnostics).forEach((mixin) => {
         const mixinRefSymbol = STSymbol.get(meta, mixin.type);
         if (
             mixinRefSymbol &&
@@ -256,7 +265,7 @@ export function appendMixin(
         handleCSSMixin(
             resolveChain,
             transformer,
-            reParseMixinNamedArgs(mix, context.diagnostics),
+            mix,
             rule,
             meta,
             path,
@@ -268,14 +277,7 @@ export function appendMixin(
         const resolvedMixin = resolvedSymbols.js[symbolName];
         if (typeof resolvedMixin.symbol === 'function') {
             try {
-                handleJSMixin(
-                    transformer,
-                    reParseMixinArgs(mix, context.diagnostics),
-                    resolvedMixin.symbol,
-                    meta,
-                    rule,
-                    variableOverride
-                );
+                handleJSMixin(transformer, mix, resolvedMixin.symbol, meta, rule, variableOverride);
             } catch (e) {
                 context.diagnostics.error(rule, mixinWarnings.FAILED_TO_APPLY_MIXIN(String(e)), {
                     word: mix.mixin.type,
@@ -494,41 +496,4 @@ function filterPartialMixinDecl(
             }
         }
     });
-}
-
-/** this is a workaround for parsing the mixin args too early  */
-function reParseMixinNamedArgs(mix: RefedMixin, diagnostics: Diagnostics): RefedMixin {
-    const options =
-        mix.mixin.valueNode?.type === 'function'
-            ? strategies.named(mix.mixin.valueNode, (message, options) => {
-                  diagnostics.warn(mix.mixin.originDecl, message, options);
-              })
-            : (mix.mixin.options as Record<string, string>) || {};
-
-    return {
-        ...mix,
-        mixin: {
-            ...mix.mixin,
-            options,
-        },
-    };
-}
-
-function reParseMixinArgs(mix: RefedMixin, diagnostics: Diagnostics): RefedMixin {
-    const options =
-        mix.mixin.valueNode?.type === 'function'
-            ? strategies.args(mix.mixin.valueNode, (message, options) => {
-                  diagnostics.warn(mix.mixin.originDecl, message, options);
-              })
-            : Array.isArray(mix.mixin.options)
-            ? (mix.mixin.options as { value: string }[])
-            : [];
-
-    return {
-        ...mix,
-        mixin: {
-            ...mix.mixin,
-            options,
-        },
-    };
 }

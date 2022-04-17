@@ -53,9 +53,10 @@ export function parseStMixin(
 export function parseStPartialMixin(
     mixinNode: postcss.Declaration,
     strategy: (type: string) => 'named' | 'args',
-    report?: Diagnostics
+    report?: Diagnostics,
+    emitStrategyDiagnostics?: boolean
 ) {
-    return parseStMixin(mixinNode, strategy, report).map((mixin) => {
+    return parseStMixin(mixinNode, strategy, report, emitStrategyDiagnostics).map((mixin) => {
         mixin.partial = true;
         return mixin;
     });

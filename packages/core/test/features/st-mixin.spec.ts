@@ -1256,6 +1256,37 @@ describe(`features/st-mixin`, () => {
                 `,
             });
         });
+        it(`should apply on -st-partial-mixin (same as -st-mixin)`, () => {
+            const { sheets } = testStylableCore({
+                '/mixin.js': `
+                    module.exports = {
+                        addColor(params) {
+                            return {
+                                color: params || 'red'
+                            }
+                        },
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [addColor] from './mixin.js';
+        
+                    /* @rule(single) .entry__root {
+                        before: val;
+                        color: green;
+                        after: val;
+                    } */
+                    .root {
+                        before: val;
+                        -st-partial-mixin: addColor(green);
+                        after: val;
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
     });
     describe(`st-global`, () => {
         it(`should keep global selectors from mixin`, () => {
