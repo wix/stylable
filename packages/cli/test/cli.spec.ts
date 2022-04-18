@@ -364,7 +364,7 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
 
-        it.only('should report when there are no css output formats', () => {
+        it('should report when there are no css output formats', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{}`,
