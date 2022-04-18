@@ -364,6 +364,22 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
 
+        it.only('should report when there are no css output formats', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{}`,
+            });
+
+            const { stdout, status } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(
+                new RegExp(
+                    `No target output declared for "(.*?)", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`
+                )
+            );
+        });
+
         it('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,

@@ -84,7 +84,7 @@ export async function buildStylable(
 
             if (!hasStylableCSSOutput(buildOptions)) {
                 log(
-                    `No target output declared "${identifier}", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`,
+                    `No target output declared for "${identifier}", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`,
                     levels.info
                 );
             }
