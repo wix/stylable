@@ -16,7 +16,7 @@ export interface JSDependency {
     imported: Imported;
 }
 
-export type MetaDependency = CSSDependency | JSDependency;
+export type Dependency = CSSDependency | JSDependency;
 
 export function* visitMetaCSSDependencies({
     meta,

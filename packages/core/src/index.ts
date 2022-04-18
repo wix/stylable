@@ -152,7 +152,7 @@ export {
 export { noCollisionNamespace, packageNamespaceFactory } from './resolve-namespace-factories';
 export { createDefaultResolver } from './module-resolver';
 export { DiagnosticsMode, EmitDiagnosticsContext, emitDiagnostics } from './report-diagnostic';
-export { CSSDependency, JSDependency, MetaDependency } from './visit-meta-css-dependencies';
+export { CSSDependency, JSDependency, Dependency } from './visit-meta-css-dependencies';
 export { murmurhash3_32_gc } from './murmurhash';
 import {
     booleanStateDelimiter,
