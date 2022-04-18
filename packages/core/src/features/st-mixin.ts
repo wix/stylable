@@ -72,17 +72,7 @@ export const hooks = createFeature({
         });
     },
     transformLastPass({ context, ast, transformer, cssVarsMapping, path }) {
-        ast.walkRules((rule) =>
-            appendMixins(
-                context,
-                transformer,
-                rule as SRule,
-                context.meta,
-                context.evaluator.stVarOverride || {},
-                cssVarsMapping,
-                path
-            )
-        );
+        ast.walkRules((rule) => appendMixins(context, transformer, rule, cssVarsMapping, path));
     },
 });
 
@@ -91,7 +81,6 @@ export const hooks = createFeature({
 // taken from "src/stylable/mixins" - ToDo: refactor
 
 import { dirname } from 'path';
-import type { Diagnostics } from '../diagnostics';
 import { resolveArgumentsValue } from '../functions';
 import { cssObjectToAst } from '../parser';
 import { fixRelativeUrls } from '../stylable-assets';
@@ -121,10 +110,8 @@ export const mixinWarnings = {
 export function appendMixins(
     context: FeatureTransformContext,
     transformer: StylableTransformer,
-    rule: SRule,
-    meta: StylableMeta,
-    variableOverride: Record<string, string>,
-    cssVarsMapping: Record<string, string>,
+    rule: postcss.Rule,
+    cssPropertyMapping: Record<string, string>,
     path: string[] = []
 ) {
     const [decls, mixins] = collectRuleMixins(context, rule);
@@ -132,16 +119,7 @@ export function appendMixins(
         return;
     }
     for (const mixin of mixins) {
-        appendMixin(
-            context,
-            mixin,
-            transformer,
-            rule,
-            meta,
-            variableOverride,
-            cssVarsMapping,
-            path
-        );
+        appendMixin(context, { transformer, mixDef: mixin, rule, path, cssPropertyMapping });
     }
     mixins.length = 0; // ToDo: remove
     for (const mixinDecl of decls) {
@@ -243,78 +221,65 @@ function collectDeclMixins(
     return mixins;
 }
 
-export function appendMixin(
-    context: FeatureTransformContext,
-    mix: RefedMixin,
-    transformer: StylableTransformer,
-    rule: SRule,
-    meta: StylableMeta,
-    variableOverride: Record<string, string>,
-    cssVarsMapping: Record<string, string>,
-    path: string[] = []
-) {
-    if (checkRecursive(context.diagnostics, meta, mix, rule, path)) {
+interface ApplyMixinConfig {
+    transformer: StylableTransformer;
+    mixDef: RefedMixin;
+    rule: postcss.Rule;
+    path: string[];
+    cssPropertyMapping: Record<string, string>;
+}
+
+export function appendMixin(context: FeatureTransformContext, config: ApplyMixinConfig) {
+    if (checkRecursive(context, config)) {
         return;
     }
-
-    const resolvedSymbols = context.getResolvedSymbols(meta);
-    const symbolName = mix.mixin.type;
+    const resolvedSymbols = context.getResolvedSymbols(context.meta);
+    const symbolName = config.mixDef.mixin.type;
     const resolvedType = resolvedSymbols.mainNamespace[symbolName];
     if (resolvedType === `class` || resolvedType === `element`) {
         const resolveChain = resolvedSymbols[resolvedType][symbolName];
-        handleCSSMixin(
-            resolveChain,
-            transformer,
-            mix,
-            rule,
-            meta,
-            path,
-            variableOverride,
-            cssVarsMapping
-        );
+        handleCSSMixin(context, config, resolveChain);
         return;
     } else if (resolvedType === `js`) {
         const resolvedMixin = resolvedSymbols.js[symbolName];
         if (typeof resolvedMixin.symbol === 'function') {
             try {
-                handleJSMixin(transformer, mix, resolvedMixin.symbol, meta, rule, variableOverride);
+                handleJSMixin(context, config, resolvedMixin.symbol);
             } catch (e) {
-                context.diagnostics.error(rule, mixinWarnings.FAILED_TO_APPLY_MIXIN(String(e)), {
-                    word: mix.mixin.type,
-                });
+                context.diagnostics.error(
+                    config.rule,
+                    mixinWarnings.FAILED_TO_APPLY_MIXIN(String(e)),
+                    {
+                        word: config.mixDef.mixin.type,
+                    }
+                );
                 return;
             }
         } else {
-            context.diagnostics.error(rule, mixinWarnings.JS_MIXIN_NOT_A_FUNC(), {
-                word: mix.mixin.type,
+            context.diagnostics.error(config.rule, mixinWarnings.JS_MIXIN_NOT_A_FUNC(), {
+                word: config.mixDef.mixin.type,
             });
         }
         return;
     }
 
     // ToDo: report on unsupported mixed in symbol type
-    const mixinDecl = getMixinDeclaration(rule);
-    if (mixinDecl) {
-        // ToDo: report on rule if decl is not found
-        context.diagnostics.error(mixinDecl, mixinWarnings.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
-            word: mixinDecl.value,
-        });
-    }
+    const mixinDecl = config.mixDef.mixin.originDecl;
+    context.diagnostics.error(mixinDecl, mixinWarnings.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
+        word: mixinDecl.value,
+    });
 }
 
 function checkRecursive(
-    diagnostics: Diagnostics,
-    meta: StylableMeta,
-    mix: RefedMixin,
-    rule: postcss.Rule,
-    path: string[]
+    { meta, diagnostics }: FeatureTransformContext,
+    { mixDef, path, rule }: ApplyMixinConfig
 ) {
     const symbolName =
-        mix.ref.name === meta.root
-            ? mix.ref._kind === 'class'
+        mixDef.ref.name === meta.root
+            ? mixDef.ref._kind === 'class'
                 ? meta.root
                 : 'default'
-            : mix.mixin.type;
+            : mixDef.mixin.type;
     const isRecursive = path.includes(symbolName + ' from ' + meta.source);
     if (isRecursive) {
         // Todo: add test verifying word
@@ -327,14 +292,14 @@ function checkRecursive(
 }
 
 function handleJSMixin(
-    transformer: StylableTransformer,
-    mix: RefedMixin,
-    mixinFunction: (...args: any[]) => any,
-    meta: StylableMeta,
-    rule: postcss.Rule,
-    variableOverride?: Record<string, string>
+    context: FeatureTransformContext,
+    config: ApplyMixinConfig,
+    mixinFunction: (...args: any[]) => any
 ) {
-    const res = mixinFunction((mix.mixin.options as any[]).map((v) => v.value));
+    const stVarOverride = context.evaluator.stVarOverride || {};
+    const meta = context.meta;
+    const mixDef = config.mixDef;
+    const res = mixinFunction((mixDef.mixin.options as any[]).map((v) => v.value));
     const mixinRoot = cssObjectToAst(res).root;
 
     mixinRoot.walkDecls((decl) => {
@@ -343,27 +308,25 @@ function handleJSMixin(
         }
     });
 
-    transformer.transformAst(mixinRoot, meta, undefined, variableOverride, [], true);
-    const mixinPath = (mix.ref as ImportSymbol).import.request;
+    config.transformer.transformAst(mixinRoot, meta, undefined, stVarOverride, [], true);
+    const mixinPath = (mixDef.ref as ImportSymbol).import.request;
     fixRelativeUrls(
         mixinRoot,
-        transformer.resolver.resolvePath(dirname(meta.source), mixinPath),
+        context.resolver.resolvePath(dirname(meta.source), mixinPath),
         meta.source
     );
 
-    mergeRules(mixinRoot, rule, mix.mixin.originDecl, transformer.diagnostics);
+    mergeRules(mixinRoot, config.rule, mixDef.mixin.originDecl, context.diagnostics);
 }
 
 function createMixinRootFromCSSResolve(
-    transformer: StylableTransformer,
-    mix: RefedMixin,
-    meta: StylableMeta,
-    resolvedClass: CSSResolve,
-    path: string[],
-    decl: postcss.Declaration,
-    variableOverride: Record<string, string>,
-    cssVarsMapping: Record<string, string>
+    context: FeatureTransformContext,
+    config: ApplyMixinConfig,
+    resolvedClass: CSSResolve
 ) {
+    const stVarOverride = context.evaluator.stVarOverride || {};
+    const meta = context.meta;
+    const mixDef = config.mixDef;
     const isRootMixin = resolvedClass.symbol.name === resolvedClass.meta.root;
     const mixinRoot = createSubsetAst<postcss.Root>(
         resolvedClass.meta.ast,
@@ -372,32 +335,32 @@ function createMixinRootFromCSSResolve(
         isRootMixin
     );
 
-    const namedArgs = mix.mixin.options as Record<string, string>;
+    const namedArgs = mixDef.mixin.options as Record<string, string>;
 
-    if (mix.mixin.partial) {
+    if (mixDef.mixin.partial) {
         filterPartialMixinDecl(meta, mixinRoot, Object.keys(namedArgs));
     }
 
     const resolvedArgs = resolveArgumentsValue(
         namedArgs,
-        transformer,
-        meta,
-        transformer.diagnostics,
-        decl,
-        variableOverride,
-        path,
-        cssVarsMapping
+        config.transformer,
+        context.meta,
+        context.diagnostics,
+        mixDef.mixin.originDecl,
+        stVarOverride,
+        config.path,
+        config.cssPropertyMapping
     );
 
     const mixinMeta: StylableMeta = resolvedClass.meta;
-    const symbolName = isRootMixin && resolvedClass.meta !== meta ? 'default' : mix.mixin.type;
+    const symbolName = isRootMixin && resolvedClass.meta !== meta ? 'default' : mixDef.mixin.type;
 
-    transformer.transformAst(
+    config.transformer.transformAst(
         mixinRoot,
         mixinMeta,
         undefined,
         resolvedArgs,
-        path.concat(symbolName + ' from ' + meta.source),
+        config.path.concat(symbolName + ' from ' + meta.source),
         true,
         resolvedClass.symbol.name
     );
@@ -408,64 +371,34 @@ function createMixinRootFromCSSResolve(
 }
 
 function handleCSSMixin(
-    resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[],
-    transformer: StylableTransformer,
-    mix: RefedMixin,
-    rule: postcss.Rule,
-    meta: StylableMeta,
-    path: string[],
-    variableOverride: Record<string, string>,
-    cssVarsMapping: Record<string, string>
+    context: FeatureTransformContext,
+    config: ApplyMixinConfig,
+    resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[]
 ) {
-    const isPartial = mix.mixin.partial;
-    const namedArgs = mix.mixin.options as Record<string, string>;
+    const mixDef = config.mixDef;
+    const isPartial = mixDef.mixin.partial;
+    const namedArgs = mixDef.mixin.options as Record<string, string>;
     const overrideKeys = Object.keys(namedArgs);
 
     if (isPartial && overrideKeys.length === 0) {
         return;
     }
 
-    const mixinDecl = getMixinDeclaration(rule) || postcss.decl();
-
     const roots = [];
-    for (let i = 0; i < resolveChain.length; ++i) {
-        const resolved = resolveChain[i];
-        roots.push(
-            createMixinRootFromCSSResolve(
-                transformer,
-                mix,
-                meta,
-                resolved,
-                path,
-                mixinDecl,
-                variableOverride,
-                cssVarsMapping
-            )
-        );
+    for (const resolved of resolveChain) {
+        roots.push(createMixinRootFromCSSResolve(context, config, resolved));
         if (resolved.symbol[valueMapping.extends]) {
             break;
         }
     }
 
     if (roots.length === 1) {
-        mergeRules(roots[0], rule, mix.mixin.originDecl, transformer.diagnostics);
+        mergeRules(roots[0], config.rule, mixDef.mixin.originDecl, config.transformer.diagnostics);
     } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
         roots.forEach((root) => mixinRoot.prepend(...root.nodes));
-        mergeRules(mixinRoot, rule, mix.mixin.originDecl, transformer.diagnostics);
+        mergeRules(mixinRoot, config.rule, mixDef.mixin.originDecl, config.transformer.diagnostics);
     }
-}
-
-function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefined {
-    return (
-        rule.nodes &&
-        (rule.nodes.find((node) => {
-            return (
-                node.type === 'decl' &&
-                (node.prop === valueMapping.mixin || node.prop === valueMapping.partialMixin)
-            );
-        }) as postcss.Declaration)
-    );
 }
 
 /** we assume that mixinRoot is freshly created nodes from the ast */
@@ -489,7 +422,7 @@ function filterPartialMixinDecl(
 
     mixinRoot.walkDecls((decl) => {
         if (!decl.value.match(regexp)) {
-            const parent = decl.parent as SRule; // ref the parent before remove
+            const parent = decl.parent;
             decl.remove();
             if (parent?.nodes?.length === 0) {
                 parent.remove();

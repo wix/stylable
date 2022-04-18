@@ -170,6 +170,7 @@ export class StylableTransformer {
         mixinTransform = false,
         topNestClassName = ``
     ) {
+        const prevStVarOverride = this.evaluator.stVarOverride;
         this.evaluator.stVarOverride = stVarOverride;
         const transformContext = {
             meta,
@@ -287,6 +288,9 @@ export class StylableTransformer {
                 resolved: cssVarsMapping,
             });
         }
+
+        // restore evaluator state
+        this.evaluator.stVarOverride = prevStVarOverride;
     }
     /** @deprecated */
     public getScopedCSSVar(
