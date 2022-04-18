@@ -1,0 +1,6 @@
+@st-import [a] from '../style-output/style-a.st.css';
+
+.root {
+    -st-mixin: a;
+    z-index: 1;
+}

@@ -7,11 +7,12 @@
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "peerDependencies": {
-    "@stylable/core": "^4.2.0",
+    "@stylable/core": "^4.10.0",
     "webpack": "^5.30.0"
   },
   "dependencies": {
     "@stylable/build-tools": "^4.12.0",
+    "@stylable/cli": "^4.12.0",
     "@stylable/module-utils": "^4.12.0",
     "@stylable/node": "^4.12.0",
     "@stylable/optimizer": "^4.12.0",

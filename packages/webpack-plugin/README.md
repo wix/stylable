@@ -103,6 +103,12 @@ interface StylableWebpackPluginOptions {
         DUPLICATE_MODULE_NAMESPACE?: boolean | 'warn';
     };
     /**
+     * Runs "stc" programmatically with the webpack compilation.
+     * true - it will automatically detect the closest "stylable.config.js" file and use it.
+     * string - it will use the provided string as the "stcConfig" file path.
+     */
+    stcConfig?: boolean | string;
+    /**
      * Set the strategy of how to spit the extracted css
      * This option is only used when cssInjection is set to 'css'
      * single - extract all css to a single file

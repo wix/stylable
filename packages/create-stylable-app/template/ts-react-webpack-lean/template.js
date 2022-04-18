@@ -1,8 +1,10 @@
+//@ts-check
 /** @type {import('create-stylable-app').TemplateDefinition} */
 module.exports = {
     dependencies: ['react', 'react-dom'],
     devDependencies: [
         '@stylable/core',
+        '@stylable/cli',
         '@stylable/runtime',
         '@stylable/webpack-plugin',
         '@types/react',
@@ -38,4 +40,5 @@ module.exports = {
             test: 'npm run typecheck && npm run lint',
         },
     },
+    postinstall: [['npm', 'run', 'build']],
 };

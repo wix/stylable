@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@stylable/core": "^4.12.0",
-    "js-beautify": "^1.14.2"
+    "js-beautify": "^1.14.3"
   },
   "files": [
     "dist",

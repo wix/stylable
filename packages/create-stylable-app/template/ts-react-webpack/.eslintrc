@@ -11,7 +11,7 @@
     "prettier"
   ],
   "plugins": ["react-hooks"],
-  "ignorePatterns": ["node_modules", "dist"],
+  "ignorePatterns": ["node_modules", "dist", "st-types"],
   "settings": {
     "react": {
       "version": "detect"
