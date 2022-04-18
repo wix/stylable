@@ -134,7 +134,7 @@ describe(`features/st-mixin`, () => {
     it(`should handle circular mixins`, () => {
         testStylableCore(`
             /* 
-            @transform-warn(a) ${STMixin.mixinWarnings.CIRCULAR_MIXIN([
+            @transform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
                 `b from /entry.st.css`,
                 `a from /entry.st.css`,
             ])} 
@@ -149,7 +149,7 @@ describe(`features/st-mixin`, () => {
             }
 
             /* 
-            @transform-warn(a) ${STMixin.mixinWarnings.CIRCULAR_MIXIN([
+            @transform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
                 `a from /entry.st.css`,
                 `b from /entry.st.css`,
             ])} 
@@ -534,7 +534,7 @@ describe(`features/st-mixin`, () => {
                 '/sheet1.st.css': `
                     @st-import [b] from './sheet2.st.css';
                     /* 
-                    @xtransform-warn(a) ${STMixin.mixinWarnings.CIRCULAR_MIXIN([
+                    @xtransform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
                         `b from /sheet2.st.css`,
                         `a from /sheet1.st.css`,
                     ])} 
@@ -551,7 +551,7 @@ describe(`features/st-mixin`, () => {
                 '/sheet2.st.css': `
                     @st-import [a] from './sheet1.st.css';
                     /* 
-                    @xtransform-warn(a) ${STMixin.mixinWarnings.CIRCULAR_MIXIN([
+                    @xtransform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
                         `a from /sheet1.st.css`,
                         `b from /sheet2.st.css`,
                     ])} 
@@ -577,7 +577,7 @@ describe(`features/st-mixin`, () => {
                     }
 
                     .a {
-                        /* @transform-error ${STMixin.mixinWarnings.UNKNOWN_MIXIN_SYMBOL(
+                        /* @transform-error ${STMixin.diagnostics.UNKNOWN_MIXIN_SYMBOL(
                             `unresolved`
                         )} */
                         -st-mixin: unresolved;
@@ -616,7 +616,7 @@ describe(`features/st-mixin`, () => {
         it(`should report on circular mixin when mixed on local class`, () => {
             testStylableCore(`
                 /* 
-                @transform-warn ${STMixin.mixinWarnings.CIRCULAR_MIXIN([`root from /entry.st.css`])}
+                @transform-warn ${STMixin.diagnostics.CIRCULAR_MIXIN([`root from /entry.st.css`])}
                 @rule(self)[0] .entry__a {} 
                 @rule(self appended)[1] .entry__a .entry__a {}
                 @rule(other appended)[2] .entry__a .entry__b {}
@@ -1242,12 +1242,12 @@ describe(`features/st-mixin`, () => {
                 '/entry.st.css': `
                     @st-import [notAFunction, throw] from './mixins.js';
 
-                    /* @transform-error(not a function) word(notAFunction) ${STMixin.mixinWarnings.JS_MIXIN_NOT_A_FUNC()} */
+                    /* @transform-error(not a function) word(notAFunction) ${STMixin.diagnostics.JS_MIXIN_NOT_A_FUNC()} */
                     .a {
                         -st-mixin: notAFunction;
                     }
 
-                    /* @transform-error(mix throw) word(throw) ${STMixin.mixinWarnings.FAILED_TO_APPLY_MIXIN(
+                    /* @transform-error(mix throw) word(throw) ${STMixin.diagnostics.FAILED_TO_APPLY_MIXIN(
                         `bug in js mix`
                     )} */
                     .a {

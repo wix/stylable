@@ -1,16 +1,25 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
+import type { ElementSymbol } from './css-type';
 import type { ClassSymbol } from './css-class';
+import { createSubsetAst } from '../helpers/rule';
 import {
     diagnostics as MixinHelperDiagnostics,
     parseStMixin,
     parseStPartialMixin,
 } from '../helpers/mixin';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
+import { resolveArgumentsValue } from '../functions';
+import { cssObjectToAst } from '../parser';
 import * as postcss from 'postcss';
 import type { FunctionNode, WordNode } from 'postcss-value-parser';
+import { fixRelativeUrls } from '../stylable-assets';
 import { isValidDeclaration, mergeRules, INVALID_MERGE_OF } from '../stylable-utils';
+import type { StylableMeta } from '../stylable-meta';
+import type { CSSResolve } from '../stylable-resolver';
+import type { StylableTransformer } from '../stylable-transformer';
+import { dirname } from 'path';
 // ToDo: deprecate - stop usage
 import type { SRule } from '../deprecated/postcss-ast-extension';
 
@@ -45,6 +54,18 @@ export const diagnostics = {
     OVERRIDE_MIXIN(mixinType: string) {
         return `override ${mixinType} on same rule`;
     },
+    FAILED_TO_APPLY_MIXIN(error: string) {
+        return `could not apply mixin: ${error}`;
+    },
+    JS_MIXIN_NOT_A_FUNC() {
+        return `js mixin must be a function`;
+    },
+    CIRCULAR_MIXIN(circularPaths: string[]) {
+        return `circular mixin found: ${circularPaths.join(' --> ')}`;
+    },
+    UNKNOWN_MIXIN_SYMBOL(name: string) {
+        return `cannot mixin unknown symbol "${name}"`;
+    },
 };
 
 // HOOKS
@@ -77,35 +98,6 @@ export const hooks = createFeature({
 });
 
 // API
-
-// taken from "src/stylable/mixins" - ToDo: refactor
-
-import { dirname } from 'path';
-import { resolveArgumentsValue } from '../functions';
-import { cssObjectToAst } from '../parser';
-import { fixRelativeUrls } from '../stylable-assets';
-import type { StylableMeta } from '../stylable-meta';
-import type { ElementSymbol } from './css-type';
-import type {} from './feature';
-import type { CSSResolve } from '../stylable-resolver';
-import type { StylableTransformer } from '../stylable-transformer';
-import { createSubsetAst } from '../helpers/rule';
-import { valueMapping } from '../stylable-value-parsers';
-
-export const mixinWarnings = {
-    FAILED_TO_APPLY_MIXIN(error: string) {
-        return `could not apply mixin: ${error}`;
-    },
-    JS_MIXIN_NOT_A_FUNC() {
-        return `js mixin must be a function`;
-    },
-    CIRCULAR_MIXIN(circularPaths: string[]) {
-        return `circular mixin found: ${circularPaths.join(' --> ')}`;
-    },
-    UNKNOWN_MIXIN_SYMBOL(name: string) {
-        return `cannot mixin unknown symbol "${name}"`;
-    },
-};
 
 export function appendMixins(
     context: FeatureTransformContext,
@@ -248,7 +240,7 @@ export function appendMixin(context: FeatureTransformContext, config: ApplyMixin
             } catch (e) {
                 context.diagnostics.error(
                     config.rule,
-                    mixinWarnings.FAILED_TO_APPLY_MIXIN(String(e)),
+                    diagnostics.FAILED_TO_APPLY_MIXIN(String(e)),
                     {
                         word: config.mixDef.mixin.type,
                     }
@@ -256,7 +248,7 @@ export function appendMixin(context: FeatureTransformContext, config: ApplyMixin
                 return;
             }
         } else {
-            context.diagnostics.error(config.rule, mixinWarnings.JS_MIXIN_NOT_A_FUNC(), {
+            context.diagnostics.error(config.rule, diagnostics.JS_MIXIN_NOT_A_FUNC(), {
                 word: config.mixDef.mixin.type,
             });
         }
@@ -265,13 +257,13 @@ export function appendMixin(context: FeatureTransformContext, config: ApplyMixin
 
     // ToDo: report on unsupported mixed in symbol type
     const mixinDecl = config.mixDef.mixin.originDecl;
-    context.diagnostics.error(mixinDecl, mixinWarnings.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
+    context.diagnostics.error(mixinDecl, diagnostics.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
         word: mixinDecl.value,
     });
 }
 
 function checkRecursive(
-    { meta, diagnostics }: FeatureTransformContext,
+    { meta, diagnostics: report }: FeatureTransformContext,
     { mixDef, path, rule }: ApplyMixinConfig
 ) {
     const symbolName =
@@ -283,7 +275,7 @@ function checkRecursive(
     const isRecursive = path.includes(symbolName + ' from ' + meta.source);
     if (isRecursive) {
         // Todo: add test verifying word
-        diagnostics.warn(rule, mixinWarnings.CIRCULAR_MIXIN(path), {
+        report.warn(rule, diagnostics.CIRCULAR_MIXIN(path), {
             word: symbolName,
         });
         return true;
@@ -317,6 +309,37 @@ function handleJSMixin(
     );
 
     mergeRules(mixinRoot, config.rule, mixDef.mixin.originDecl, context.diagnostics);
+}
+
+function handleCSSMixin(
+    context: FeatureTransformContext,
+    config: ApplyMixinConfig,
+    resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[]
+) {
+    const mixDef = config.mixDef;
+    const isPartial = mixDef.mixin.partial;
+    const namedArgs = mixDef.mixin.options as Record<string, string>;
+    const overrideKeys = Object.keys(namedArgs);
+
+    if (isPartial && overrideKeys.length === 0) {
+        return;
+    }
+
+    const roots = [];
+    for (const resolved of resolveChain) {
+        roots.push(createMixinRootFromCSSResolve(context, config, resolved));
+        if (resolved.symbol[`-st-extends`]) {
+            break;
+        }
+    }
+
+    if (roots.length === 1) {
+        mergeRules(roots[0], config.rule, mixDef.mixin.originDecl, config.transformer.diagnostics);
+    } else if (roots.length > 1) {
+        const mixinRoot = postcss.root();
+        roots.forEach((root) => mixinRoot.prepend(...root.nodes));
+        mergeRules(mixinRoot, config.rule, mixDef.mixin.originDecl, config.transformer.diagnostics);
+    }
 }
 
 function createMixinRootFromCSSResolve(
@@ -368,37 +391,6 @@ function createMixinRootFromCSSResolve(
     fixRelativeUrls(mixinRoot, mixinMeta.source, meta.source);
 
     return mixinRoot;
-}
-
-function handleCSSMixin(
-    context: FeatureTransformContext,
-    config: ApplyMixinConfig,
-    resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[]
-) {
-    const mixDef = config.mixDef;
-    const isPartial = mixDef.mixin.partial;
-    const namedArgs = mixDef.mixin.options as Record<string, string>;
-    const overrideKeys = Object.keys(namedArgs);
-
-    if (isPartial && overrideKeys.length === 0) {
-        return;
-    }
-
-    const roots = [];
-    for (const resolved of resolveChain) {
-        roots.push(createMixinRootFromCSSResolve(context, config, resolved));
-        if (resolved.symbol[valueMapping.extends]) {
-            break;
-        }
-    }
-
-    if (roots.length === 1) {
-        mergeRules(roots[0], config.rule, mixDef.mixin.originDecl, config.transformer.diagnostics);
-    } else if (roots.length > 1) {
-        const mixinRoot = postcss.root();
-        roots.forEach((root) => mixinRoot.prepend(...root.nodes));
-        mergeRules(mixinRoot, config.rule, mixDef.mixin.originDecl, config.transformer.diagnostics);
-    }
 }
 
 /** we assume that mixinRoot is freshly created nodes from the ast */
