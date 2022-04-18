@@ -258,16 +258,16 @@ export class StylableTransformer {
             this.addDevRules(meta);
         }
 
-        const lastPathParams = {
+        const lastPassParams = {
             context: transformContext,
             ast,
             transformer: this,
             cssVarsMapping,
             path,
         };
-        STMixin.hooks.transformLastPass(lastPathParams);
+        STMixin.hooks.transformLastPass(lastPassParams);
         if (!mixinTransform) {
-            STGlobal.hooks.transformLastPass(lastPathParams);
+            STGlobal.hooks.transformLastPass(lastPassParams);
         }
 
         if (metaExports) {

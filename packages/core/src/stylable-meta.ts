@@ -83,8 +83,6 @@ export class StylableMeta {
         // set default root
         const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
         rootSymbol[valueMapping.root] = true;
-
-        // setFieldForDeprecation(this, `mixins`, { objectType: `stylableMeta` });
     }
     getSymbol(name: string) {
         return STSymbol.get(this, name);
