@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { visitMetaCSSDependenciesBFS } from '@stylable/core';
+import { visitMetaCSSDependencies } from '@stylable/core/dist/visit-meta-css-dependencies';
 import { generateInfra } from '@stylable/core-test-kit';
 
 describe('visitMetaCSSDependenciesBFS', () => {
@@ -76,16 +76,12 @@ describe('visitMetaCSSDependenciesBFS', () => {
         const entryMeta = fileProcessor.process('/entry.st.css');
         const items: { source: string; depth: number }[] = [];
 
-        visitMetaCSSDependenciesBFS(
-            entryMeta,
-            ({ source }, _, depth) => {
-                items.push({ source, depth });
-            },
-            resolver,
-            (source) => {
-                items.push({ source, depth: -1 });
-            }
-        );
+        for (const dep of visitMetaCSSDependencies({ meta: entryMeta, resolver })) {
+            items.push({
+                depth: dep.kind === 'css' ? dep.depth : -1,
+                source: dep.resolvedPath,
+            });
+        }
 
         expect(items).to.eql([
             { source: '/d1.st.css', depth: 1 },

@@ -1,4 +1,4 @@
-import { Stylable, StylableMeta, visitMetaCSSDependenciesBFS } from '@stylable/core';
+import type { Stylable, StylableMeta } from '@stylable/core';
 import { processUrlDependencies, hasImportedSideEffects } from '@stylable/build-tools';
 
 export function getReplacementToken(token: string) {
@@ -32,12 +32,9 @@ export function getImports(
     /**
      * Collect all deep dependencies since they can affect the output
      */
-    visitMetaCSSDependenciesBFS(
-        meta,
-        ({ source }) => buildDependencies.push(source),
-        stylable.resolver,
-        (resolvedPath) => buildDependencies.push(resolvedPath)
-    );
+    for (const dependency of stylable.getDependencies(meta)) {
+        buildDependencies.push(dependency.resolvedPath);
+    }
 
     /**
      * @remove
