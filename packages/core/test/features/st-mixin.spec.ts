@@ -936,11 +936,26 @@ describe(`features/st-mixin`, () => {
                             return {
                                 color: ["blue", "green"]
                             }
+                        },
+                        camelToKebab() {
+                            return {
+                                declPropName: "declValue"
+                            }
+                        },
+                        notAStringDecl() {
+                            return {
+                                number: 56,
+                                'obj-as-fallback': [
+                                    'before', 
+                                    {toString(){return "stringified decl val"}}, 
+                                    'after'
+                                ],
+                            }
                         }
                     }
                 `,
                 '/entry.st.css': `
-                    @st-import [addGreen, fallbackDecl] from './mixin.js';
+                    @st-import [addGreen, fallbackDecl, camelToKebab, notAStringDecl] from './mixin.js';
         
                     /* @rule(single) .entry__root {
                         before: val;
@@ -963,6 +978,23 @@ describe(`features/st-mixin`, () => {
                         before: val;
                         -st-mixin: fallbackDecl;
                         after: val;
+                    }
+
+                    /* @rule(fallback) .entry__root {
+                        decl-prop-name: declValue;
+                    } */
+                    .root {
+                        -st-mixin: camelToKebab;
+                    }
+
+                    /* @rule .entry__root { 
+                        number: 56px;
+                        obj-as-fallback: before;
+                        obj-as-fallback: stringified decl val;
+                        obj-as-fallback: after;
+                    } */
+                    .root {
+                        -st-mixin: notAStringDecl;
                     }
                 `,
             });
