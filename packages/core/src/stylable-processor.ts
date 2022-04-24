@@ -36,12 +36,8 @@ import {
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
-import {
-    rootValueMapping,
-    SBTypesParsers,
-    stValuesMap,
-    valueMapping,
-} from './stylable-value-parsers';
+import { SBTypesParsers, stValuesMap } from './stylable-value-parsers';
+import { rootValueMapping, valueMapping } from './deprecated/value-mapping';
 import { stripQuotation, filename2varname } from './helpers/string';
 import { warnOnce } from './helpers/deprecation';
 

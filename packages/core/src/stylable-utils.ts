@@ -5,7 +5,7 @@ import type { Diagnostics } from './diagnostics';
 import type { Imported, ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
-import { valueMapping } from './stylable-value-parsers';
+import { valueMapping } from './deprecated/value-mapping';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 

@@ -1,6 +1,6 @@
 import type { ClassSymbol, ElementSymbol } from '../features';
 import type { CSSResolve } from '../stylable-resolver';
-import { valueMapping } from '../stylable-value-parsers';
+import { valueMapping } from '../deprecated/value-mapping';
 
 export function getOriginDefinition(resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>) {
     for (const r of resolved) {

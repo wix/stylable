@@ -9,7 +9,7 @@ import {
 import type { SRule } from './postcss-ast-extension';
 import { STSymbol, Imported } from '../features';
 import type { StylableMeta } from '../stylable-meta';
-import { valueMapping } from '../stylable-value-parsers';
+import { valueMapping } from '../deprecated/value-mapping';
 import cloneDeep from 'lodash.clonedeep';
 import * as postcss from 'postcss';
 

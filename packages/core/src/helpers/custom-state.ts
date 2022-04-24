@@ -3,7 +3,7 @@ import type { Diagnostics } from '../diagnostics';
 import { parseSelectorWithCache } from './selector';
 import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver } from '../stylable-resolver';
-import { valueMapping } from '../stylable-value-parsers';
+import { valueMapping } from '../deprecated/value-mapping';
 import { validateStateArgument } from '../pseudo-states';
 import { CSSClass } from '../features';
 

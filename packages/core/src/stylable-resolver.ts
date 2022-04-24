@@ -15,7 +15,7 @@ import {
     CSSKeyframes,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
-import { valueMapping } from './stylable-value-parsers';
+import { valueMapping } from './deprecated/value-mapping';
 import { findRule } from './helpers/rule';
 import type { ModuleResolver } from './types';
 import { CustomValueExtension, isCustomValue, stTypes } from './custom-values';

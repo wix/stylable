@@ -15,7 +15,7 @@ import type { SelectorList } from '@tokey/css-selector-parser';
 import type { PlugableRecord } from './helpers/plugable-record';
 import { getSourcePath } from './stylable-utils';
 import { setFieldForDeprecation } from './helpers/deprecation';
-import { valueMapping } from './stylable-value-parsers';
+import { valueMapping } from './deprecated/value-mapping';
 import {
     STSymbol,
     STImport,

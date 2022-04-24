@@ -39,7 +39,7 @@ import {
     createSymbolResolverWithCache,
 } from './stylable-resolver';
 import { isCSSVarProp } from './helpers/css-custom-property';
-import { valueMapping } from './stylable-value-parsers';
+import { valueMapping } from './deprecated/value-mapping';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 

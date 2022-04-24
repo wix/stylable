@@ -12,7 +12,7 @@ import {
     ImmutableSelectorNode,
     groupCompoundSelectors,
 } from '@tokey/css-selector-parser';
-import { valueMapping } from '../stylable-value-parsers';
+import { valueMapping } from '../deprecated/value-mapping';
 import * as postcss from 'postcss';
 import { ignoreDeprecationWarn } from './deprecation';
 import type { SRule } from '../deprecated/postcss-ast-extension';

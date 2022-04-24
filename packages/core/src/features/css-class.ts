@@ -10,7 +10,7 @@ import { namespace } from '../helpers/namespace';
 import { namespaceEscape, unescapeCSS } from '../helpers/escape';
 import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
-import { valueMapping } from '../stylable-value-parsers';
+import { valueMapping } from '../deprecated/value-mapping';
 import { validateRuleStateDefinition } from '../helpers/custom-state';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type {

@@ -69,12 +69,14 @@ export {
     TypedClass,
     animationPropRegExp,
     mixinDeclRegExp,
-    rootValueMapping, // remove add deprecations in v4
     stKeys,
     stValues,
     stValuesMap,
-    valueMapping, // remove add deprecations in v4
 } from './stylable-value-parsers';
+export {
+    valueMapping, // remove add deprecations in v4
+    rootValueMapping, // remove add deprecations in v4
+} from './deprecated/value-mapping';
 export { createStylableFileProcessor } from './create-stylable-processor';
 export { CreateProcessorOptions } from './stylable';
 export {
