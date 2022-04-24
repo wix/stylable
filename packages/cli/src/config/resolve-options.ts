@@ -201,7 +201,7 @@ export function createDefaultOptions(): BuildOptions {
     return {
         outDir: '.',
         srcDir: '.',
-        cjs: true,
+        cjs: false,
         esm: false,
         dts: false,
         injectCSSRequest: false,
@@ -261,4 +261,14 @@ export function createBuildIdentifier(
         : isMultipleProjects
         ? projectRoot.replace(rootDir, '')
         : projectRoot;
+}
+
+export function hasStylableCSSOutput(options: BuildOptions): boolean {
+    return (
+        options.cjs ||
+        options.esm ||
+        options.outputCSS ||
+        options.outputSources ||
+        Boolean(options.indexFile)
+    );
 }

@@ -29,7 +29,7 @@ describe('Stylable Cli', function () {
             'style.st.css': `.root{color:red}`,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath]);
+        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--cjs']);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(
@@ -46,7 +46,15 @@ describe('Stylable Cli', function () {
             'style.st.css': `.root{color:red}`,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--outDir', './dist']);
+        runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--nsr',
+            testNsrPath,
+            '--outDir',
+            './dist',
+            '--cjs',
+        ]);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(Object.keys(dirContent)).to.eql([
@@ -110,7 +118,7 @@ describe('Stylable Cli', function () {
         });
 
         const nsr = require.resolve('@stylable/node');
-        runCliSync(['--rootDir', tempDir.path, '--nsr', nsr]);
+        runCliSync(['--rootDir', tempDir.path, '--nsr', nsr, '--cjs']);
 
         const dirContent = loadDirSync(tempDir.path);
 
@@ -354,6 +362,22 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
+        });
+
+        it('should report when there are no css output formats', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{}`,
+            });
+
+            const { stdout, status } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(
+                new RegExp(
+                    `No target output declared for "(.*?)", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`
+                )
+            );
         });
 
         it('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
