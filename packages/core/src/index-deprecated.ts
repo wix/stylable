@@ -1,0 +1,339 @@
+export {
+    CssParser,
+    cssObjectToAst,
+    cssParse,
+    safeParse, // use postcss postcss-safe-parser
+} from './parser';
+export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
+export type { StylableDirectives } from './features';
+export { reservedKeyFrames } from './features/css-keyframes';
+export {
+    scopeCSSVar, // replace with transformCSSProperty OR stylable.cssProperty.transform(meta, name)
+} from './features/css-custom-property';
+export {
+    StylableProcessor,
+    createEmptyMeta,
+    process, // replace with stylable.analyze
+    processorWarnings,
+    validateScopingSelector,
+} from './stylable-processor';
+
+export {
+    ensureStylableImports, // replace with static || meta.stImports.ensure || Stylable.stImport.ensureStylableImports(meta)
+} from './helpers/import';
+export {
+    isCSSVarProp, // replace with Stylable.cssCustomProperty.isValidName?
+    generateScopedCSSVar,
+} from './helpers/css-custom-property';
+export { globalValueRegExp } from './helpers/global';
+import { GLOBAL_FUNC } from './helpers/global';
+/**@deprecated*/
+export const paramMapping = {
+    global: GLOBAL_FUNC,
+};
+export { createDefaultResolver } from './module-resolver';
+export { RESERVED_ROOT_NAME } from './stylable-meta';
+export {
+    KeyFrameWithNode,
+    ResolvedElement,
+    StylableExports,
+    StylableTransformer, // replace with stylable.transformMeta / stylable.transformAST
+    TransformHooks,
+    TransformerOptions,
+    postProcessor,
+    replaceValueHook,
+    transformerWarnings,
+} from './stylable-transformer';
+export {
+    CUSTOM_SELECTOR_RE,
+    expandCustomSelectors,
+    findDeclaration,
+    getAlias,
+    getSourcePath,
+    isValidClassName,
+    isValidDeclaration,
+    mergeRules,
+    transformMatchesOnRule,
+} from './stylable-utils';
+export { JsModule, StylableResolverCache, isInPath, StylableResolver } from './stylable-resolver';
+export { DiagnosticOptions, DiagnosticType } from './diagnostics';
+export { File, MinimalFSSetup } from './memory-minimal-fs';
+export {
+    ArgValue,
+    ExtendsValue,
+    MappedStates,
+    ReportWarning,
+    SBTypesParsers,
+    STYLABLE_NAMED_MATCHER,
+    STYLABLE_VALUE_MATCHER,
+    TypedClass,
+    animationPropRegExp,
+    mixinDeclRegExp,
+    rootValueMapping, // remove add deprecations in v4
+    stKeys,
+    stValues,
+    stValuesMap,
+    valueMapping, // remove add deprecations in v4
+} from './stylable-value-parsers';
+export { createStylableFileProcessor } from './create-stylable-processor';
+export { CreateProcessorOptions } from './stylable';
+export {
+    CSSObject,
+    IStylableClassNameOptimizer,
+    IStylableNamespaceOptimizer,
+    IStylableOptimizer,
+    ModuleResolver,
+    OptimizeConfig,
+    ParsedValue, // report deprecation
+    PartialObject,
+    StateArguments,
+    StateParsedValue,
+    StateTypeValidator,
+} from './types';
+export {
+    OnUrlCallback,
+    UrlNode,
+    assureRelativeUrlPrefix,
+    collectAssets,
+    fixRelativeUrls,
+    isAsset,
+    isExternal,
+    isUrl,
+    makeAbsolute,
+} from './stylable-assets';
+export {
+    ResolvedFormatter,
+    ValueFormatter,
+    evalDeclarationValue, // replace with stylable.transformDeclValue({meta, value...})
+    functionWarnings,
+    resolveArgumentsValue,
+} from './functions';
+export {
+    Box,
+    BoxedValueArray,
+    BoxedValueMap,
+    CustomValueExtension,
+    CustomValueStrategy,
+    JSValueExtension,
+    box,
+    createCustomValue,
+    getBoxValue,
+    isCustomValue,
+    stTypes,
+    unbox,
+} from './custom-values';
+export { StateParamType, StateResult, SubValidator, systemValidators } from './state-validators';
+export {
+    isCssNativeFunction,
+    nativeFunctions,
+    nativeFunctionsDic,
+    nativePseudoClasses,
+    nativePseudoElements,
+} from './native-reserved-lists';
+export { noCollisionNamespace, packageNamespaceFactory } from './resolve-namespace-factories';
+export { DiagnosticsMode, EmitDiagnosticsContext, emitDiagnostics } from './report-diagnostic';
+export { visitMetaCSSDependenciesBFS } from './visit-meta-css-dependencies'; // replace with Stylable.getDependencies(meta)
+export { murmurhash3_32_gc } from './murmurhash';
+import {
+    booleanStateDelimiter,
+    createBooleanStateClassName,
+    createStateWithParamClassName,
+    processPseudoStates,
+    resolveStateParam,
+    setStateToNode,
+    stateErrors,
+    stateMiddleDelimiter,
+    stateWithParamDelimiter,
+    validateStateArgument,
+    validateStateDefinition,
+} from './pseudo-states';
+export const pseudoStates = {
+    // ToDo: check if any of the internal stuff we want to export
+    booleanStateDelimiter,
+    createBooleanStateClassName,
+    createStateWithParamClassName,
+    processPseudoStates,
+    resolveStateParam,
+    setStateToNode,
+    stateErrors,
+    stateMiddleDelimiter,
+    stateWithParamDelimiter,
+    validateStateArgument,
+    validateStateDefinition,
+};
+export { getRuleScopeSelector } from './helpers/rule';
+export {
+    getFormatterArgs,
+    getNamedArgs,
+    getStringValue,
+    groupValues,
+    listOptions,
+    validateAllowedNodesUntil,
+    strategies,
+} from './helpers/value';
+
+// *** deprecated ***
+
+import { wrapFunctionForDeprecation } from './helpers/deprecation';
+
+import { isCompRoot as deprecatedIsCompRoot } from './helpers/selector';
+/**@deprecated*/
+export const isCompRoot = wrapFunctionForDeprecation(deprecatedIsCompRoot, {
+    name: `isCompRoot`,
+});
+
+import {
+    isChildOfAtRule as deprecatedIsChildOfAtRule,
+    createWarningRule as deprecatedCreateWarningRule,
+} from './helpers/rule';
+/**@deprecated*/
+export const isChildOfAtRule = wrapFunctionForDeprecation(deprecatedIsChildOfAtRule, {
+    name: `isChildOfAtRule`,
+});
+/**@deprecated*/
+export const createWarningRule = wrapFunctionForDeprecation(deprecatedCreateWarningRule, {
+    name: `createWarningRule`,
+});
+
+import { getOriginDefinition as deprecatedGetOriginDefinition } from './helpers/resolve';
+/**@deprecated*/
+export const getOriginDefinition = wrapFunctionForDeprecation(deprecatedGetOriginDefinition, {
+    name: `getOriginDefinition`,
+});
+
+export type { SRule, SDecl, DeclStylableProps } from './deprecated/postcss-ast-extension';
+import { getDeclStylable as deprecatedGetDeclStylable } from './deprecated/postcss-ast-extension';
+/**@deprecated*/
+export const getDeclStylable = wrapFunctionForDeprecation(deprecatedGetDeclStylable, {
+    name: `getDeclStylable`,
+});
+
+import {
+    scopeSelector as deprecatedScopeSelector,
+    createSubsetAst as deprecatedCreateSubsetAst, // report deprecation
+    removeUnusedRules as deprecatedRemoveUnusedRules,
+    findRule as deprecatedFindRule,
+} from './deprecated/deprecated-stylable-utils';
+/**@deprecated*/
+export const scopeSelector = wrapFunctionForDeprecation(deprecatedScopeSelector, {
+    name: `scopeSelector`,
+});
+/**@deprecated*/
+export const createSubsetAst = deprecatedCreateSubsetAst;
+/**@deprecated*/
+export const removeUnusedRules = wrapFunctionForDeprecation(deprecatedRemoveUnusedRules, {
+    name: `removeUnusedRules`,
+});
+/**@deprecated*/
+export const findRule = wrapFunctionForDeprecation(deprecatedFindRule, {
+    name: `findRule`,
+});
+
+export type {
+    SelectorChunk,
+    SelectorChunk2,
+    Visitor,
+    SelectorAstNode,
+    PseudoSelectorAstNode,
+} from './deprecated/deprecated-selector-utils';
+import {
+    matchSelectorTarget as deprecatedMatchSelectorTarget,
+    fixChunkOrdering as deprecatedFixChunkOrdering,
+    filterChunkNodesByType as deprecatedFilterChunkNodesByType,
+    separateChunks as deprecatedSeparateChunks,
+    separateChunks2 as deprecatedSeparateChunks2,
+    mergeChunks as deprecatedMergeChunks,
+    matchAtMedia as deprecatedMatchAtMedia,
+    matchAtKeyframes as deprecatedMatchAtKeyframes,
+    isImport as deprecatedIsImport,
+    isSimpleSelector as deprecatedIsSimpleSelector,
+    isRootValid as deprecatedIsRootValid,
+    isGlobal as deprecatedIsGlobal,
+    createChecker as deprecatedCreateChecker,
+    isNested as deprecatedIsNested,
+    traverseNode as deprecatedTraverseNode,
+    parseSelector as deprecatedParseSelector,
+    stringifySelector as deprecatedStringifySelector,
+    isNodeMatch as deprecatedIsNodeMatch,
+    createSimpleSelectorChecker as deprecatedCreateSimpleSelectorChecker,
+} from './deprecated/deprecated-selector-utils';
+/**@deprecated*/
+export const matchSelectorTarget = deprecatedMatchSelectorTarget;
+/**@deprecated*/
+export const fixChunkOrdering = wrapFunctionForDeprecation(deprecatedFixChunkOrdering, {
+    name: `fixChunkOrdering`,
+});
+/**@deprecated*/
+export const filterChunkNodesByType = wrapFunctionForDeprecation(deprecatedFilterChunkNodesByType, {
+    name: `filterChunkNodesByType`,
+});
+/**@deprecated*/
+export const separateChunks = wrapFunctionForDeprecation(deprecatedSeparateChunks, {
+    name: `separateChunks`,
+});
+/**@deprecated*/
+export const separateChunks2 = wrapFunctionForDeprecation(deprecatedSeparateChunks2, {
+    name: `separateChunks2`,
+});
+/**@deprecated*/
+export const mergeChunks = wrapFunctionForDeprecation(deprecatedMergeChunks, {
+    name: `mergeChunks`,
+});
+/**@deprecated*/
+export const matchAtMedia = wrapFunctionForDeprecation(deprecatedMatchAtMedia, {
+    name: `matchAtMedia`,
+});
+/**@deprecated*/
+export const matchAtKeyframes = wrapFunctionForDeprecation(deprecatedMatchAtKeyframes, {
+    name: `matchAtKeyframes`,
+});
+/**@deprecated*/
+export const isImport = wrapFunctionForDeprecation(deprecatedIsImport, {
+    name: `isImport`,
+});
+/**@deprecated*/
+export const isSimpleSelector = wrapFunctionForDeprecation(deprecatedIsSimpleSelector, {
+    name: `isSimpleSelector`,
+});
+/**@deprecated*/
+export const isRootValid = wrapFunctionForDeprecation(deprecatedIsRootValid, {
+    name: `isRootValid`,
+});
+/**@deprecated*/
+export const isGlobal = wrapFunctionForDeprecation(deprecatedIsGlobal, {
+    name: `isGlobal`,
+});
+/**@deprecated*/
+export const createChecker = wrapFunctionForDeprecation(deprecatedCreateChecker, {
+    name: `createChecker`,
+});
+/**@deprecated*/
+export const isNested = wrapFunctionForDeprecation(deprecatedIsNested, {
+    name: `isNested`,
+});
+/**@deprecated*/
+export const isNodeMatch = wrapFunctionForDeprecation(deprecatedIsNodeMatch, {
+    name: `isNodeMatch`,
+});
+/**@deprecated*/
+export const traverseNode = wrapFunctionForDeprecation(deprecatedTraverseNode, {
+    name: `traverseNode`,
+    pleaseUse: `"import { walk } from '@tokey/css-selector-parser'"`,
+});
+/**@deprecated*/
+export const parseSelector = wrapFunctionForDeprecation(deprecatedParseSelector, {
+    name: `parseSelector`,
+    pleaseUse: `"import { parseCssSelector } from '@tokey/css-selector-parser'"`,
+});
+/**@deprecated*/
+export const stringifySelector = wrapFunctionForDeprecation(deprecatedStringifySelector, {
+    name: `stringifySelector`,
+    pleaseUse: `"import { stringifySelector } from '@tokey/css-selector-parser'"`,
+});
+/**@deprecated*/
+export const createSimpleSelectorChecker = wrapFunctionForDeprecation(
+    deprecatedCreateSimpleSelectorChecker,
+    {
+        name: `createSimpleSelectorChecker`,
+    }
+);
