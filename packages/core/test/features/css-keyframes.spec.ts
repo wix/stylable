@@ -612,27 +612,5 @@ describe(`features/css-keyframes`, () => {
                 }
             `);
         });
-        it.skip(`should not mix  @keyframes`, () => {
-            // ToDo: report mixin of selector !== `&`
-            testStylableCore(`
-                .x {
-                    color: green;
-                }
-                .x:hover {
-                    color: red;
-                }
-
-                @keyframes my-name {
-                    /* @rule 0% {
-                        color: green;
-                        bug: ".x:hover mixed-in"
-                    } */
-                    0% {
-                        -st-mixin: x;
-                    }
-                    100% {}
-                }
-            `);
-        });
     });
 });

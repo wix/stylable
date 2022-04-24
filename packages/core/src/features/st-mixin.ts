@@ -74,7 +74,7 @@ export const hooks = createFeature({
     analyzeDeclaration({ context, decl }) {
         ignoreDeprecationWarn(() => {
             const parentRule = decl.parent as SRule;
-            const prevMixins = ignoreDeprecationWarn(() => parentRule?.mixins || []);
+            const prevMixins = parentRule?.mixins || [];
             const mixins = collectDeclMixins(
                 context,
                 decl,
@@ -113,7 +113,6 @@ export function appendMixins(
     for (const mixin of mixins) {
         appendMixin(context, { transformer, mixDef: mixin, rule, path, cssPropertyMapping });
     }
-    mixins.length = 0; // ToDo: remove
     for (const mixinDecl of decls) {
         mixinDecl.remove();
     }
@@ -213,7 +212,7 @@ function collectDeclMixins(
     return mixins;
 }
 
-interface ApplyMixinConfig {
+interface ApplyMixinContext {
     transformer: StylableTransformer;
     mixDef: RefedMixin;
     rule: postcss.Rule;
@@ -221,7 +220,7 @@ interface ApplyMixinConfig {
     cssPropertyMapping: Record<string, string>;
 }
 
-export function appendMixin(context: FeatureTransformContext, config: ApplyMixinConfig) {
+export function appendMixin(context: FeatureTransformContext, config: ApplyMixinContext) {
     if (checkRecursive(context, config)) {
         return;
     }
@@ -264,7 +263,7 @@ export function appendMixin(context: FeatureTransformContext, config: ApplyMixin
 
 function checkRecursive(
     { meta, diagnostics: report }: FeatureTransformContext,
-    { mixDef, path, rule }: ApplyMixinConfig
+    { mixDef, path, rule }: ApplyMixinContext
 ) {
     const symbolName =
         mixDef.ref.name === meta.root
@@ -285,7 +284,7 @@ function checkRecursive(
 
 function handleJSMixin(
     context: FeatureTransformContext,
-    config: ApplyMixinConfig,
+    config: ApplyMixinContext,
     mixinFunction: (...args: any[]) => any
 ) {
     const stVarOverride = context.evaluator.stVarOverride || {};
@@ -313,7 +312,7 @@ function handleJSMixin(
 
 function handleCSSMixin(
     context: FeatureTransformContext,
-    config: ApplyMixinConfig,
+    config: ApplyMixinContext,
     resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[]
 ) {
     const mixDef = config.mixDef;
@@ -344,7 +343,7 @@ function handleCSSMixin(
 
 function createMixinRootFromCSSResolve(
     context: FeatureTransformContext,
-    config: ApplyMixinConfig,
+    config: ApplyMixinContext,
     resolvedClass: CSSResolve
 ) {
     const stVarOverride = context.evaluator.stVarOverride || {};
