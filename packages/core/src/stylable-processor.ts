@@ -9,9 +9,9 @@ import {
     ClassSymbol,
     CSSCustomProperty,
     ElementSymbol,
-    RefedMixin,
     StylableDirectives,
     STVar,
+    STMixin,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
 import {
@@ -43,7 +43,7 @@ import {
     valueMapping,
 } from './stylable-value-parsers';
 import { stripQuotation, filename2varname } from './helpers/string';
-import { ignoreDeprecationWarn, warnOnce } from './helpers/deprecation';
+import { warnOnce } from './helpers/deprecation';
 
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
@@ -65,17 +65,8 @@ export const processorWarnings = {
     CANNOT_EXTEND_IN_COMPLEX() {
         return `cannot define "${valueMapping.extends}" inside a complex selector`;
     },
-    UNKNOWN_MIXIN(name: string) {
-        return `unknown mixin: "${name}"`;
-    },
-    OVERRIDE_MIXIN(mixinType: string) {
-        return `override ${mixinType} on same rule`;
-    },
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
-    },
-    PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
-        return `"${valueMapping.partialMixin}" can only be used with override arguments provided, missing overrides on "${type}"`;
     },
     INVALID_NAMESPACE_DEF() {
         return 'invalid @namespace';
@@ -239,7 +230,7 @@ export class StylableProcessor implements FeatureContext {
         let pathToSource: string | undefined;
         let length = this.meta.ast.nodes.length;
 
-        while(length--) {
+        while (length--) {
             const node = this.meta.ast.nodes[length];
             if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
                 const i = node.text.indexOf('=');
@@ -437,73 +428,8 @@ export class StylableProcessor implements FeatureContext {
             } else {
                 this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
             }
-        } else if (decl.prop === valueMapping.mixin || decl.prop === valueMapping.partialMixin) {
-            const mixins: RefedMixin[] = [];
-            /**
-             * This functionality is broken we don't know what strategy to choose here.
-             * Should be fixed when we refactor to the new flow
-             */
-            SBTypesParsers[decl.prop](
-                decl,
-                (type) => {
-                    const symbol = STSymbol.get(this.meta, type);
-                    return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
-                        ? 'args'
-                        : 'named';
-                },
-                this.diagnostics,
-                false
-            ).forEach((mixin) => {
-                const mixinRefSymbol = STSymbol.get(this.meta, mixin.type);
-                if (
-                    mixinRefSymbol &&
-                    (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
-                ) {
-                    if (mixin.partial && Object.keys(mixin.options).length === 0) {
-                        this.diagnostics.warn(
-                            decl,
-                            processorWarnings.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
-                            {
-                                word: mixin.type,
-                            }
-                        );
-                    }
-                    const refedMixin = {
-                        mixin,
-                        ref: mixinRefSymbol,
-                    };
-                    mixins.push(refedMixin);
-                    ignoreDeprecationWarn(() => this.meta.mixins).push(refedMixin);
-                } else {
-                    this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), {
-                        word: mixin.type,
-                    });
-                }
-            });
-
-            const previousMixins = ignoreDeprecationWarn(() => rule.mixins);
-            if (previousMixins) {
-                const partials = previousMixins.filter((r) => r.mixin.partial);
-                const nonPartials = previousMixins.filter((r) => !r.mixin.partial);
-                const isInPartial = decl.prop === valueMapping.partialMixin;
-                if (
-                    (partials.length && decl.prop === valueMapping.partialMixin) ||
-                    (nonPartials.length && decl.prop === valueMapping.mixin)
-                ) {
-                    this.diagnostics.warn(decl, processorWarnings.OVERRIDE_MIXIN(decl.prop));
-                }
-                if (partials.length && nonPartials.length) {
-                    rule.mixins = isInPartial
-                        ? nonPartials.concat(mixins)
-                        : partials.concat(mixins);
-                } else if (partials.length) {
-                    rule.mixins = isInPartial ? mixins : partials.concat(mixins);
-                } else if (nonPartials.length) {
-                    rule.mixins = isInPartial ? nonPartials.concat(mixins) : mixins;
-                }
-            } else if (mixins.length) {
-                rule.mixins = mixins;
-            }
+        } else if (decl.prop === STMixin.MixinType.ALL || decl.prop === STMixin.MixinType.PARTIAL) {
+            STMixin.hooks.analyzeDeclaration({ context: this, decl });
         } else if (decl.prop === valueMapping.global) {
             if (isSimple && type !== 'type') {
                 this.setClassGlobalMapping(decl, rule);

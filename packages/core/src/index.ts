@@ -14,6 +14,7 @@ export type {
     Imported,
     KeyframesSymbol,
     RefedMixin,
+    MixinValue,
     StylableDirectives,
     StylableSymbol,
     VarSymbol,
@@ -79,7 +80,6 @@ export {
     ArgValue,
     ExtendsValue,
     MappedStates,
-    MixinValue,
     ReportWarning,
     SBTypesParsers,
     STYLABLE_NAMED_MATCHER,
@@ -92,7 +92,6 @@ export {
     stValues,
     stValuesMap,
     valueMapping,
-    valueParserWarnings,
 } from './stylable-value-parsers';
 export { createStylableFileProcessor } from './create-stylable-processor';
 export { CreateProcessorOptions, Stylable, StylableConfig } from './stylable';

@@ -28,7 +28,7 @@ export interface EvalValueData {
     node?: postcss.Node;
     valueHook?: replaceValueHook;
     meta: StylableMeta;
-    tsVarOverride?: Record<string, string> | null;
+    stVarOverride?: Record<string, string> | null;
     cssVarsMapping?: Record<string, string>;
     args?: string[];
     rootArgument?: string;
@@ -43,9 +43,9 @@ export interface EvalValueResult {
 }
 
 export class StylableEvaluator {
-    public tsVarOverride: Record<string, string> | null | undefined;
-    constructor(options: { tsVarOverride?: Record<string, string> | null } = {}) {
-        this.tsVarOverride = options.tsVarOverride;
+    public stVarOverride: Record<string, string> | null | undefined;
+    constructor(options: { stVarOverride?: Record<string, string> | null } = {}) {
+        this.stVarOverride = options.stVarOverride;
     }
     evaluateValue(
         context: FeatureTransformContext,
@@ -57,7 +57,7 @@ export class StylableEvaluator {
             data.value,
             data.meta,
             data.node,
-            data.tsVarOverride || this.tsVarOverride,
+            data.stVarOverride || this.stVarOverride,
             data.valueHook,
             context.diagnostics,
             data.passedThrough,
@@ -121,7 +121,7 @@ export function processDeclarationValue(
     rootArgument?: string,
     initialNode?: postcss.Node
 ): EvalValueResult {
-    const evaluator = new StylableEvaluator({ tsVarOverride: variableOverride });
+    const evaluator = new StylableEvaluator({ stVarOverride: variableOverride });
     const resolvedSymbols = getResolvedSymbols(meta);
     const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -142,7 +142,7 @@ export function processDeclarationValue(
                         node,
                         valueHook,
                         meta,
-                        tsVarOverride: variableOverride,
+                        stVarOverride: variableOverride,
                         cssVarsMapping,
                         args,
                         rootArgument,
@@ -211,7 +211,7 @@ export function processDeclarationValue(
                         node,
                         valueHook,
                         meta,
-                        tsVarOverride: variableOverride,
+                        stVarOverride: variableOverride,
                         cssVarsMapping,
                         args,
                         rootArgument,

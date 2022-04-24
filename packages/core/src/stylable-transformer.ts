@@ -19,8 +19,7 @@ import {
 import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
 import { namespace } from './helpers/namespace';
 import { getOriginDefinition } from './helpers/resolve';
-import { appendMixins } from './stylable-mixins';
-import type { ClassSymbol, ElementSymbol } from './features';
+import { ClassSymbol, ElementSymbol, STMixin } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
@@ -32,7 +31,7 @@ import {
     CSSKeyframes,
     CSSCustomProperty,
 } from './features';
-import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
+import type { SDecl } from './deprecated/postcss-ast-extension';
 import {
     CSSResolve,
     StylableResolverCache,
@@ -157,7 +156,6 @@ export class StylableTransformer {
         STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(meta.outputAst, meta, metaExports);
-        STGlobal.hooks.transformLastPass({ context });
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -167,12 +165,13 @@ export class StylableTransformer {
         ast: postcss.Root,
         meta: StylableMeta,
         metaExports?: StylableExports,
-        tsVarOverride?: Record<string, string>,
+        stVarOverride?: Record<string, string>,
         path: string[] = [],
         mixinTransform = false,
         topNestClassName = ``
     ) {
-        this.evaluator.tsVarOverride = tsVarOverride;
+        const prevStVarOverride = this.evaluator.stVarOverride;
+        this.evaluator.stVarOverride = stVarOverride;
         const transformContext = {
             meta,
             diagnostics: this.diagnostics,
@@ -258,17 +257,18 @@ export class StylableTransformer {
         if (!mixinTransform && meta.outputAst && this.mode === 'development') {
             this.addDevRules(meta);
         }
-        ast.walkRules((rule) =>
-            appendMixins(
-                transformContext,
-                this,
-                rule as SRule,
-                meta,
-                tsVarOverride || {},
-                cssVarsMapping,
-                path
-            )
-        );
+
+        const lastPassParams = {
+            context: transformContext,
+            ast,
+            transformer: this,
+            cssVarsMapping,
+            path,
+        };
+        STMixin.hooks.transformLastPass(lastPassParams);
+        if (!mixinTransform) {
+            STGlobal.hooks.transformLastPass(lastPassParams);
+        }
 
         if (metaExports) {
             CSSClass.hooks.transformJSExports({
@@ -288,6 +288,9 @@ export class StylableTransformer {
                 resolved: cssVarsMapping,
             });
         }
+
+        // restore evaluator state
+        this.evaluator.stVarOverride = prevStVarOverride;
     }
     /** @deprecated */
     public getScopedCSSVar(
@@ -544,14 +547,13 @@ export class StylableTransformer {
              * the general `st-symbol` feature because the actual symbol can
              * be a type-element symbol that is actually an imported root in a mixin
              */
-            const origin = STSymbol.get(
-                originMeta,
-                topNestClassName || originMeta.root
-            ) as ClassSymbol;
+            const origin = STSymbol.get(originMeta, topNestClassName || originMeta.root) as
+                | ClassSymbol
+                | ElementSymbol; // ToDo: handle other cases
             context.setCurrentAnchor({
                 name: origin.name,
-                type: 'class',
-                resolved: resolvedSymbols.class[origin.name],
+                type: origin._kind,
+                resolved: resolvedSymbols[origin._kind][origin.name],
             });
         }
     }

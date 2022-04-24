@@ -21,6 +21,7 @@ import {
     STImport,
     STGlobal,
     STVar,
+    STMixin,
     CSSClass,
     CSSType,
     CSSCustomProperty,
@@ -34,6 +35,7 @@ const features = [
     STImport,
     STGlobal,
     STVar,
+    STMixin,
     CSSClass,
     CSSType,
     CSSCustomProperty,
@@ -67,7 +69,8 @@ export class StylableMeta {
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
     public scopes: postcss.AtRule[] = [];
-    public mixins: RefedMixin[];
+    /** @deprecated */
+    public mixins: RefedMixin[] = [];
     // Generated during transform
     public outputAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
@@ -80,9 +83,6 @@ export class StylableMeta {
         // set default root
         const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
         rootSymbol[valueMapping.root] = true;
-
-        setFieldForDeprecation(this, `mixins`, { objectType: `stylableMeta` });
-        this.mixins = [];
     }
     getSymbol(name: string) {
         return STSymbol.get(this, name);
@@ -148,4 +148,8 @@ setFieldForDeprecation(StylableMeta.prototype, `vars`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
     pleaseUse: `meta.getAllStVars() or meta.getStVar(name)`,
+});
+setFieldForDeprecation(StylableMeta.prototype, `mixins`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
 });

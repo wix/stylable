@@ -178,14 +178,14 @@ function containsMatchInFirstChunk(
         if (node.type === `combinator`) {
             return walkSelector.stopAll;
         } else if (node.type === 'pseudo_class') {
-            // TODO: support nested match :is(.mixin)
-            // if (node.nodes) {
-            //     for (const innerSelectorNode of node.nodes) {
-            //         if (containsMatchInFirstChunk(prefixType, innerSelectorNode)) {
-            //             isMatch = true;
-            //         }
-            //     }
-            // }
+            // handle nested match :is(.mix)
+            if (node.nodes) {
+                for (const innerSelectorNode of node.nodes) {
+                    if (containsMatchInFirstChunk(prefixType, innerSelectorNode)) {
+                        isMatch = true;
+                    }
+                }
+            }
             return walkSelector.skipNested;
         } else if (matchTypeAndValue(node, prefixType)) {
             isMatch = true;
