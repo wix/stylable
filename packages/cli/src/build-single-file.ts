@@ -68,7 +68,7 @@ export function buildSingleFile({
     diagnosticsManager = new DiagnosticsManager({ log }),
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve, isAbsolute } = fs;
-    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath));
+    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath)) as string;
     const outPath = targetFilePath + '.js';
     const fileDirectory = dirname(filePath);
     const outDirPath = dirname(outPath);
@@ -211,6 +211,10 @@ export function buildSingleFile({
             projectAssets.add(resolve(fileDirectory, url));
         }
     }
+
+    return {
+        targetFilePath,
+    };
 }
 
 export function removeBuildProducts({
@@ -229,7 +233,7 @@ export function removeBuildProducts({
     dtsSourceMap,
 }: BuildCommonOptions) {
     const { basename, dirname, join, relative } = fs;
-    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath));
+    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath)) as string;
     const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
         filename: basename(targetFilePath, '.st.css'),
     });
@@ -275,6 +279,10 @@ export function removeBuildProducts({
     }
 
     log(mode, `removed: [${outputLogs.join(', ')}]`);
+
+    return {
+        targetFilePath,
+    };
 }
 
 export function getAllDiagnostics(res: StylableResults): Diagnostic[] {

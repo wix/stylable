@@ -85,7 +85,7 @@ export interface BuildOptions {
     outDir: string;
     /** should the build need to output manifest file */
     manifest?: string;
-    /** opt into build index file and specify the filepath for the generated index file */
+    /** Generates Stylable index file for the given name, the exports sources will be Stylable files from the `srcDir` unless the `outputSources` option is `true` then it will be the generated Stylable files from the `outDir` */
     indexFile?: string;
     /** custom cli index generator class */
     IndexGenerator?: typeof IndexGenerator;

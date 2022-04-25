@@ -117,8 +117,7 @@ export async function build(
                         }
                         diagnosticsManager.delete(identifier, deletedFile);
                         sourceFiles.delete(deletedFile);
-                        generator.removeEntryFromIndex(deletedFile, fullOutDir);
-                        removeBuildProducts({
+                        const { targetFilePath } = removeBuildProducts({
                             fullOutDir,
                             fullSrcDir,
                             filePath: deletedFile,
@@ -132,6 +131,11 @@ export async function build(
                             dts,
                             dtsSourceMap,
                         });
+
+                        generator.removeEntryFromIndex(
+                            outputSources ? targetFilePath : deletedFile,
+                            fullOutDir
+                        );
                     }
                 }
             }
@@ -149,13 +153,11 @@ export async function build(
             }
 
             for (const filePath of affectedFiles) {
-                if (!indexFile) {
-                    // map st output file path to src file path
-                    outputFiles.set(
-                        join(fullOutDir, relative(fullSrcDir, filePath)),
-                        new Set([filePath])
-                    );
-                }
+                // map st output file path to src file path
+                outputFiles.set(
+                    join(fullOutDir, relative(fullSrcDir, filePath)),
+                    new Set([filePath])
+                );
 
                 // remove assets from the affected files (handled in buildAggregatedEntities)
                 if (assets.has(filePath)) {
@@ -206,34 +208,35 @@ export async function build(
     function buildFiles(filesToBuild: Set<string>, generated: Set<string>) {
         for (const filePath of filesToBuild) {
             try {
-                if (indexFile) {
-                    generator.generateFileIndexEntry(filePath, fullOutDir);
-                } else {
-                    buildSingleFile({
-                        fullOutDir,
-                        filePath,
-                        fullSrcDir,
-                        log,
-                        fs,
-                        stylable,
-                        diagnosticsManager,
-                        diagnosticsMode,
-                        identifier,
-                        projectAssets: assets,
-                        moduleFormats,
-                        includeCSSInJS,
-                        outputCSS,
-                        outputCSSNameTemplate,
-                        outputSources,
-                        useNamespaceReference,
-                        injectCSSRequest,
-                        optimize,
-                        dts,
-                        dtsSourceMap,
-                        minify,
-                        generated,
-                    });
-                }
+                const { targetFilePath } = buildSingleFile({
+                    fullOutDir,
+                    filePath,
+                    fullSrcDir,
+                    log,
+                    fs,
+                    stylable,
+                    diagnosticsManager,
+                    diagnosticsMode,
+                    identifier,
+                    projectAssets: assets,
+                    moduleFormats,
+                    includeCSSInJS,
+                    outputCSS,
+                    outputCSSNameTemplate,
+                    outputSources,
+                    useNamespaceReference,
+                    injectCSSRequest,
+                    optimize,
+                    dts,
+                    dtsSourceMap,
+                    minify,
+                    generated,
+                });
+
+                generator.generateFileIndexEntry(
+                    outputSources ? targetFilePath : filePath,
+                    fullOutDir
+                );
             } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
             }
