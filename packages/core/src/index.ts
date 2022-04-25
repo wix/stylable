@@ -1,5 +1,5 @@
 export { Stylable, StylableConfig } from './stylable';
-export { Diagnostics, Diagnostic } from './diagnostics';
+export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
 export type {
     StylableSymbol,
     ClassSymbol,

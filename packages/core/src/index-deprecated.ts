@@ -1,9 +1,11 @@
-export {
-    CssParser,
-    cssObjectToAst,
-    cssParse,
-    safeParse, // use postcss postcss-safe-parser
-} from './parser';
+import { wrapFunctionForDeprecation } from './helpers/deprecation';
+export { CssParser, cssObjectToAst, cssParse } from './parser';
+import { safeParse as deprecatedSafeParse } from './parser';
+/**@deprecated*/
+export const safeParse = wrapFunctionForDeprecation(deprecatedSafeParse, {
+    name: `safeParse`,
+    pleaseUse: `postcss-safe-parser`,
+});
 export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
 export type { StylableDirectives } from './features';
 export { reservedKeyFrames } from './features/css-keyframes';
@@ -13,11 +15,15 @@ export {
 export {
     StylableProcessor,
     createEmptyMeta,
-    process, // replace with stylable.analyze
     processorWarnings,
     validateScopingSelector,
 } from './stylable-processor';
-
+import { process as deprecatedProcess } from './stylable-processor';
+/**@deprecated*/
+export const process = wrapFunctionForDeprecation(deprecatedProcess, {
+    name: `process`,
+    pleaseUse: `stylable.analyze`,
+});
 export {
     ensureStylableImports, // replace with static || meta.stImports.ensure || Stylable.stImport.ensureStylableImports(meta)
 } from './helpers/import';
@@ -56,7 +62,7 @@ export {
     transformMatchesOnRule,
 } from './stylable-utils';
 export { JsModule, StylableResolverCache, isInPath, StylableResolver } from './stylable-resolver';
-export { DiagnosticOptions, DiagnosticType } from './diagnostics';
+export { DiagnosticOptions } from './diagnostics';
 export { File, MinimalFSSetup } from './memory-minimal-fs';
 export {
     ArgValue,
@@ -73,10 +79,7 @@ export {
     stValues,
     stValuesMap,
 } from './stylable-value-parsers';
-export {
-    valueMapping, // remove add deprecations in v4
-    rootValueMapping, // remove add deprecations in v4
-} from './deprecated/value-mapping';
+export { valueMapping, rootValueMapping } from './deprecated/value-mapping';
 export { createStylableFileProcessor } from './create-stylable-processor';
 export { CreateProcessorOptions } from './stylable';
 export {
@@ -86,12 +89,14 @@ export {
     IStylableOptimizer,
     ModuleResolver,
     OptimizeConfig,
-    ParsedValue, // report deprecation
     PartialObject,
     StateArguments,
     StateParsedValue,
     StateTypeValidator,
 } from './types';
+import type { ParsedValue as DeprecatedParsedValue } from './types';
+/**@deprecated*/
+export type ParsedValue = DeprecatedParsedValue;
 export {
     OnUrlCallback,
     UrlNode,
@@ -134,7 +139,15 @@ export {
 } from './native-reserved-lists';
 export { noCollisionNamespace, packageNamespaceFactory } from './resolve-namespace-factories';
 export { DiagnosticsMode, EmitDiagnosticsContext, emitDiagnostics } from './report-diagnostic';
-export { visitMetaCSSDependenciesBFS } from './visit-meta-css-dependencies'; // replace with Stylable.getDependencies(meta)
+import { visitMetaCSSDependenciesBFS as deprecatedVisitMetaCSSDependenciesBFS } from './visit-meta-css-dependencies';
+/**@deprecated*/
+export const visitMetaCSSDependenciesBFS = wrapFunctionForDeprecation(
+    deprecatedVisitMetaCSSDependenciesBFS,
+    {
+        name: `visitMetaCSSDependenciesBFS`,
+        pleaseUse: `Stylable.getDependencies in v5`,
+    }
+);
 export { murmurhash3_32_gc } from './murmurhash';
 import {
     booleanStateDelimiter,
@@ -175,8 +188,6 @@ export {
 } from './helpers/value';
 
 // *** deprecated ***
-
-import { wrapFunctionForDeprecation } from './helpers/deprecation';
 
 import { isCompRoot as deprecatedIsCompRoot } from './helpers/selector';
 /**@deprecated*/

@@ -162,12 +162,17 @@ export class Stylable {
         this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);
     }
+    /**@deprecated use stylable.analyze instead*/
     public process(fullPath: string, ignoreCache = false): StylableMeta {
+        warnOnce('Stylable.process is deprecated, please use stylable.analyze instead');
         if (typeof ignoreCache === 'string') {
             warnOnce(
                 'Stylable.process with context as second arguments is deprecated please resolve the fullPath with Stylable.resolvePath before using'
             );
         }
         return this.fileProcessor.process(fullPath, ignoreCache);
+    }
+    public analyze(fullPath: string) {
+        return this.fileProcessor.process(fullPath);
     }
 }

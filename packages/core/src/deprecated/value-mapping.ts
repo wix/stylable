@@ -1,10 +1,11 @@
+/**@deprecated use string instead*/
 export const rootValueMapping = {
     vars: ':vars' as const,
     import: ':import' as const,
     stScope: 'st-scope' as const,
     namespace: 'namespace' as const,
 };
-
+/**@deprecated use string instead*/
 export const valueMapping = {
     from: '-st-from' as const,
     named: '-st-named' as const,
