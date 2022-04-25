@@ -36,7 +36,8 @@ import {
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
-import { SBTypesParsers, stValuesMap } from './stylable-value-parsers';
+import { stValuesMap } from './deprecated/value-mapping';
+import { SBTypesParsers } from './stylable-value-parsers';
 import { stripQuotation, filename2varname } from './helpers/string';
 import { warnOnce } from './helpers/deprecation';
 
@@ -115,6 +116,7 @@ export class StylableProcessor implements FeatureContext {
         });
 
         root.walkDecls((decl) => {
+            // ToDo: refactor to be hooked by features
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             }

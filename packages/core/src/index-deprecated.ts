@@ -7,7 +7,7 @@ export const safeParse = wrapFunctionForDeprecation(deprecatedSafeParse, {
     pleaseUse: `postcss-safe-parser`,
 });
 export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
-export type { StylableDirectives } from './features';
+export type { StylableDirectives, MappedStates } from './features';
 export { reservedKeyFrames } from './features/css-keyframes';
 export {
     scopeCSSVar, // replace with transformCSSProperty OR stylable.cssProperty.transform(meta, name)
@@ -64,22 +64,19 @@ export {
 export { JsModule, StylableResolverCache, isInPath, StylableResolver } from './stylable-resolver';
 export { DiagnosticOptions } from './diagnostics';
 export { File, MinimalFSSetup } from './memory-minimal-fs';
+export { ArgValue, ExtendsValue, SBTypesParsers } from './stylable-value-parsers';
 export {
-    ArgValue,
-    ExtendsValue,
-    MappedStates,
-    ReportWarning,
-    SBTypesParsers,
-    STYLABLE_NAMED_MATCHER,
-    STYLABLE_VALUE_MATCHER,
-    TypedClass,
-    animationPropRegExp,
-    mixinDeclRegExp,
+    valueMapping,
+    rootValueMapping,
     stKeys,
     stValues,
     stValuesMap,
-} from './stylable-value-parsers';
-export { valueMapping, rootValueMapping } from './deprecated/value-mapping';
+    STYLABLE_NAMED_MATCHER,
+    mixinDeclRegExp,
+    animationPropRegExp,
+    STYLABLE_VALUE_MATCHER,
+} from './deprecated/value-mapping';
+export { TypedClass } from './deprecated/leftovers';
 export { createStylableFileProcessor } from './create-stylable-processor';
 export { CreateProcessorOptions } from './stylable';
 export {
@@ -179,6 +176,7 @@ export {
     listOptions,
     validateAllowedNodesUntil,
     strategies,
+    ReportWarning,
 } from './helpers/value';
 
 // *** deprecated ***

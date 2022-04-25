@@ -2,13 +2,13 @@ import {
     ClassSymbol,
     ElementSymbol,
     ImportSymbol,
-    MappedStates,
     cssParse,
     StateParsedValue,
     StylableMeta,
     StylableProcessor,
     VarSymbol,
 } from '@stylable/core';
+import type { MappedStates } from '@stylable/core/dist/index-internal';
 import { getCssDocsForSymbol } from './cssdocs';
 import {
     MinimalPath,

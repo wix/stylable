@@ -9,7 +9,6 @@ import {
     CSSVarSymbol,
     ElementSymbol,
     evalDeclarationValue,
-    MappedStates,
     nativePseudoClasses,
     nativePseudoElements,
     ResolvedElement,
@@ -19,6 +18,7 @@ import {
     systemValidators,
     VarSymbol,
 } from '@stylable/core';
+import type { MappedStates } from '@stylable/core/dist/index-internal';
 import type { IFileSystem } from '@file-services/types';
 import {
     classCompletion,

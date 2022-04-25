@@ -26,4 +26,4 @@ export type { CSSVarSymbol } from './css-custom-property';
 export * as CSSKeyframes from './css-keyframes';
 export type { KeyframesSymbol } from './css-keyframes';
 
-export type { StylableDirectives } from './types';
+export type { StylableDirectives, MappedStates } from './types';
