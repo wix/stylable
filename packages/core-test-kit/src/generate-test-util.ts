@@ -3,7 +3,6 @@ import {
     Diagnostics,
     FileProcessor,
     postProcessor,
-    process,
     processNamespace,
     replaceValueHook,
     StylableMeta,
@@ -14,6 +13,7 @@ import {
     Stylable,
     StylableConfig,
 } from '@stylable/core';
+import { process } from '@stylable/core/dist/index-internal';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
 import { createMemoryFs } from '@file-services/memory';

@@ -5,7 +5,6 @@ import type { Diagnostics } from './diagnostics';
 import type { Imported, ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
-import { valueMapping } from './deprecated/value-mapping';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -124,7 +123,7 @@ export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
 
 export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
     if (symbol._kind === 'class' || symbol._kind === 'element') {
-        if (!symbol[valueMapping.extends]) {
+        if (!symbol[`-st-extends`]) {
             return symbol.alias;
         }
     }

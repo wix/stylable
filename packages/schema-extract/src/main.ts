@@ -7,7 +7,6 @@ import {
     StateParsedValue,
     StylableMeta,
     StylableProcessor,
-    valueMapping,
     VarSymbol,
 } from '@stylable/core';
 import { getCssDocsForSymbol } from './cssdocs';
@@ -53,7 +52,7 @@ export function generateSchema(
             if (symbol._kind === 'class' || symbol._kind === 'element') {
                 schema.properties[entry] = {};
                 const schemaEntry = schema.properties[entry] as StylableSymbolSchema;
-                const { [valueMapping.states]: states, [valueMapping.extends]: extended } = symbol;
+                const { [`-st-states`]: states, [`-st-extends`]: extended } = symbol;
 
                 if (symbol.alias && symbol.alias.import) {
                     addModuleDependency(schema, filePath, symbol.alias.import.from, basePath, path);

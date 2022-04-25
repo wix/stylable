@@ -1,5 +1,6 @@
 import { createMemoryFs } from '@file-services/memory';
-import { safeParse, Stylable } from '@stylable/core';
+import { Stylable } from '@stylable/core';
+import { safeParse } from '@stylable/core/dist/index-internal';
 import { StylableLanguageService } from '@stylable/language-service';
 
 export function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {

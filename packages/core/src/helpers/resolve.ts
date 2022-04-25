@@ -1,12 +1,11 @@
 import type { ClassSymbol, ElementSymbol } from '../features';
 import type { CSSResolve } from '../stylable-resolver';
-import { valueMapping } from '../deprecated/value-mapping';
 
 export function getOriginDefinition(resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>) {
     for (const r of resolved) {
         const { symbol } = r;
         if (symbol._kind === 'class' || symbol._kind === 'element') {
-            if (symbol.alias && !symbol[valueMapping.extends]) {
+            if (symbol.alias && !symbol[`-st-extends`]) {
                 continue;
             } else {
                 return r;

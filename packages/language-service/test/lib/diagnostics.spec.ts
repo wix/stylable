@@ -1,5 +1,6 @@
 import { createMemoryFs } from '@file-services/memory';
-import { safeParse, Stylable } from '@stylable/core';
+import { Stylable } from '@stylable/core';
+import { safeParse } from '@stylable/core/dist/index-internal';
 import { StylableLanguageService } from '@stylable/language-service';
 import { expect } from 'chai';
 import { createDiagnostics } from '../test-kit/diagnostics-setup';

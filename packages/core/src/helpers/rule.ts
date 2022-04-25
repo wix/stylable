@@ -12,7 +12,6 @@ import {
     ImmutableSelectorNode,
     groupCompoundSelectors,
 } from '@tokey/css-selector-parser';
-import { valueMapping } from '../deprecated/value-mapping';
 import * as postcss from 'postcss';
 import { ignoreDeprecationWarn } from './deprecation';
 import type { SRule } from '../deprecated/postcss-ast-extension';
@@ -200,7 +199,7 @@ function containsMatchInFirstChunk(
 export function findRule(
     root: postcss.Root,
     selector: string,
-    test: any = (statement: any) => statement.prop === valueMapping.extends
+    test: any = (statement: any) => statement.prop === `-st-extends`
 ): null | postcss.Declaration {
     let found: any = null;
     root.walkRules(selector, (rule) => {

@@ -13,7 +13,7 @@ describe('Stylable', () => {
             });
 
             stylable.initCache();
-            stylable.transform(stylable.process('/entry.st.css'));
+            stylable.transform(stylable.analyze('/entry.st.css'));
 
             fs.writeFileSync('/foo.st.css', '.bar {}');
             fs.writeFileSync(
@@ -28,7 +28,7 @@ describe('Stylable', () => {
             // invalidate cache
             stylable.initCache();
 
-            const res = stylable.transform(stylable.process('/entry.st.css'));
+            const res = stylable.transform(stylable.analyze('/entry.st.css'));
 
             expect(res.exports.classes).to.eql({
                 bar: 'foo__bar',
@@ -55,7 +55,7 @@ describe('Stylable', () => {
                 { resolverCache }
             );
 
-            stylable.transform(stylable.process('/entry.st.css'));
+            stylable.transform(stylable.analyze('/entry.st.css'));
 
             // remove foo class
             fs.writeFileSync('/foo.st.css', '');
@@ -68,7 +68,7 @@ describe('Stylable', () => {
 
             expect(resolverCache.size, 'has one cache entity').to.eql(1);
 
-            const res = stylable.transform(stylable.process('/entry.st.css'));
+            const res = stylable.transform(stylable.analyze('/entry.st.css'));
 
             expect(
                 res.meta.transformDiagnostics!.reports,

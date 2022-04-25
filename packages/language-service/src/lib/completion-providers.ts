@@ -17,7 +17,6 @@ import {
     Stylable,
     StylableMeta,
     systemValidators,
-    valueMapping,
     VarSymbol,
 } from '@stylable/core';
 import type { IFileSystem } from '@file-services/types';
@@ -525,8 +524,8 @@ export const SelectorCompletionProvider: CompletionProvider = {
 // RHS of -st-extends
 export const ExtendCompletionProvider: CompletionProvider = {
     provide({ lineChunkAtCursor, position, meta, stylable }: ProviderOptions): Completion[] {
-        if (lineChunkAtCursor.startsWith(valueMapping.extends)) {
-            const value = lineChunkAtCursor.slice((valueMapping.extends + ':').length);
+        if (lineChunkAtCursor.startsWith(`-st-extends`)) {
+            const value = lineChunkAtCursor.slice(`-st-extends:`.length);
             const spaces = value.search(/\S|$/);
             const str = value.slice(spaces);
             const comps: string[][] = [[]];
@@ -581,7 +580,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
 // RHS of -st-extends
 export const CssMixinCompletionProvider: CompletionProvider = {
     provide({ lineChunkAtCursor, meta, position, fullLineText }: ProviderOptions): Completion[] {
-        if (lineChunkAtCursor.startsWith(valueMapping.mixin + ':')) {
+        if (lineChunkAtCursor.startsWith(`-st-mixin:`)) {
             const { names, lastName } = getExistingNames(fullLineText, position);
             const symbols = meta.getAllSymbols();
             return Object.keys(symbols)
@@ -635,9 +634,9 @@ export const CodeMixinCompletionProvider: CompletionProvider = {
             meta
                 .getImportStatements()
                 .some((imp) => imp.request.endsWith('.ts') || imp.request.endsWith('.js')) &&
-            !fullLineText.trim().startsWith(valueMapping.from) &&
+            !fullLineText.trim().startsWith(`-st-from`) &&
             parentSelector &&
-            lineChunkAtCursor.startsWith(valueMapping.mixin + ':')
+            lineChunkAtCursor.startsWith(`-st-mixin:`)
         ) {
             if (fullLineText.lastIndexOf('(') > fullLineText.lastIndexOf(')')) {
                 return [];
@@ -677,13 +676,13 @@ export const FormatterCompletionProvider: CompletionProvider = {
             meta
                 .getImportStatements()
                 .some((imp) => imp.request.endsWith('.ts') || imp.request.endsWith('.js')) &&
-            !fullLineText.trim().startsWith(valueMapping.from) &&
-            !fullLineText.trim().startsWith(valueMapping.extends) &&
-            !fullLineText.trim().startsWith(valueMapping.named) &&
+            !fullLineText.trim().startsWith(`-st-from`) &&
+            !fullLineText.trim().startsWith(`-st-extends`) &&
+            !fullLineText.trim().startsWith(`-st-named`) &&
             parentSelector &&
             ~fullLineText.indexOf(':') &&
             fullLineText.indexOf(':') < position.character &&
-            !lineChunkAtCursor.startsWith(valueMapping.mixin + ':')
+            !lineChunkAtCursor.startsWith(`-st-mixin:`)
         ) {
             const { lastName } = getExistingNames(fullLineText, position);
             const symbols = meta.getAllSymbols();
@@ -735,7 +734,7 @@ export const NamedCompletionProvider: CompletionProvider & {
             ) {
                 importName = (
                     (astAtCursor as postcss.Rule).nodes.find(
-                        (n) => (n as postcss.Declaration).prop === valueMapping.from
+                        (n) => (n as postcss.Declaration).prop === `-st-from`
                     ) as postcss.Declaration
                 ).value.replace(/'|"/g, '');
             } else if (
@@ -989,7 +988,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
             }
             const states = lastNode.resolved.reduce((acc, cur) => {
                 if (cur.symbol._kind === 'class') {
-                    const symbolStates = cur.symbol[valueMapping.states];
+                    const symbolStates = cur.symbol[`-st-states`];
                     if (symbolStates) {
                         acc = acc.concat(Object.keys(symbolStates));
                     }
@@ -1013,7 +1012,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
             const colons = lineChunkAtCursor.match(/:*$/)![0].length;
 
             scope?.resolved.forEach((res) => {
-                if (!(res.symbol as ClassSymbol)[valueMapping.root]) {
+                if (!(res.symbol as ClassSymbol)[`-st-root`]) {
                     return;
                 }
 
@@ -1056,7 +1055,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
             }
             if (otherScope) {
                 otherScope.resolved.forEach((res) => {
-                    if (!(res.symbol as ClassSymbol)[valueMapping.root]) {
+                    if (!(res.symbol as ClassSymbol)[`-st-root`]) {
                         return;
                     }
 
@@ -1190,7 +1189,7 @@ export const StateTypeCompletionProvider: CompletionProvider = {
                 const stateDeclInPos = declNodes.find((decl: postcss.ChildNode) => {
                     if (
                         decl.type === 'decl' &&
-                        decl.prop === valueMapping.states &&
+                        decl.prop === `-st-states` &&
                         isPositionInDecl(position, decl)
                     ) {
                         return true;
@@ -1302,7 +1301,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
                 }
                 const symbol = cur.symbol;
                 if (symbol._kind === 'class') {
-                    const symbolStates = symbol[valueMapping.states];
+                    const symbolStates = symbol[`-st-states`];
 
                     if (symbolStates) {
                         Object.keys(symbolStates).forEach((k) => {
@@ -1318,7 +1317,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
                                     )) &&
                                 chunkyStates.every((cs) => cs !== k)
                             ) {
-                                const symbolStates = symbol[valueMapping.states];
+                                const symbolStates = symbol[`-st-states`];
                                 const stateDef = symbolStates && symbolStates[k];
 
                                 // if (stateDef) {
@@ -1405,12 +1404,11 @@ export const StateEnumCompletionProvider: CompletionProvider = {
 
                 if (Object.keys(resolvedStates).length) {
                     const resolvedStateNode = lastNode.resolved.find((node: any) => {
-                        const states = node.symbol[valueMapping.states];
+                        const states = node.symbol[`-st-states`];
                         return states && states[stateName] && states[stateName].type === 'enum';
                     });
                     if (resolvedStateNode) {
-                        const resolvedState =
-                            resolvedStateNode.symbol[valueMapping.states]![stateName];
+                        const resolvedState = resolvedStateNode.symbol[`-st-states`]![stateName];
                         let existingInput = fullLineText.slice(0, position.character);
                         existingInput = existingInput.slice(existingInput.lastIndexOf('(') + 1);
 
@@ -1547,11 +1545,11 @@ function collectStates(lastNode: ResolvedElement) {
     return lastNode.resolved.reduce<MappedStates>((acc, cur) => {
         const symbol = cur.symbol;
         if (symbol._kind === 'class') {
-            const symbolStates = symbol[valueMapping.states];
+            const symbolStates = symbol[`-st-states`];
 
             if (symbolStates) {
                 Object.keys(symbolStates).forEach((k) => {
-                    const symbolStates = symbol[valueMapping.states];
+                    const symbolStates = symbol[`-st-states`];
                     if (symbolStates && symbolStates[k] !== undefined) {
                         acc[k] = symbolStates[k];
                     }

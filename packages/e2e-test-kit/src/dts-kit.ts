@@ -102,7 +102,7 @@ export class DTSKit {
 
     private genDTS(internalPath: string) {
         const results = this.stylable.transform(
-            this.stylable.process(this.sourcePath(internalPath))
+            this.stylable.analyze(this.sourcePath(internalPath))
         );
         this.write(internalPath + '.d.ts', generateDTSContent(results));
     }

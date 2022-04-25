@@ -1,5 +1,5 @@
 import type { IFileSystem } from '@file-services/types';
-import { evalDeclarationValue, Stylable, valueMapping } from '@stylable/core';
+import { evalDeclarationValue, Stylable } from '@stylable/core';
 import { dirname } from 'path';
 import type { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
@@ -117,7 +117,7 @@ export function getColorPresentation(
         params.range.start.character + 1
     );
     let noPicker = false;
-    meta?.rawAst.walkDecls(valueMapping.named, (node) => {
+    meta?.rawAst.walkDecls(`-st-named`, (node) => {
         if (
             node &&
             ((wordStart.line === node.source!.start!.line &&

@@ -15,7 +15,6 @@ import type { SelectorList } from '@tokey/css-selector-parser';
 import type { PlugableRecord } from './helpers/plugable-record';
 import { getSourcePath } from './stylable-utils';
 import { setFieldForDeprecation } from './helpers/deprecation';
-import { valueMapping } from './deprecated/value-mapping';
 import {
     STSymbol,
     STImport,
@@ -82,7 +81,7 @@ export class StylableMeta {
         }
         // set default root
         const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
-        rootSymbol[valueMapping.root] = true;
+        rootSymbol[`-st-root`] = true;
     }
     getSymbol(name: string) {
         return STSymbol.get(this, name);

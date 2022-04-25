@@ -15,7 +15,6 @@ import { StateResult, systemValidators } from './state-validators';
 import type { StylableMeta } from './stylable-meta';
 import type { StylableResolver } from './stylable-resolver';
 import type { MappedStates } from './stylable-value-parsers';
-import { valueMapping } from './deprecated/value-mapping';
 import type { ParsedValue, StateParsedValue } from './types';
 import { CSSClass } from './features';
 import { stripQuotation } from './helpers/string';
@@ -203,7 +202,7 @@ export const validateStateDefinition = wrapFunctionForDeprecation(
                     if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
                         const className = selectorChunk[0].value;
                         const classMeta = CSSClass.get(meta, className)!;
-                        const states = classMeta[valueMapping.states];
+                        const states = classMeta[`-st-states`];
 
                         if (classMeta && classMeta._kind === 'class' && states) {
                             for (const stateName in states) {

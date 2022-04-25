@@ -247,7 +247,7 @@ export async function build(
             try {
                 sourceFiles.add(filePath);
                 const meta = tryRun(
-                    () => stylable.process(filePath),
+                    () => stylable.analyze(filePath),
                     errorMessages.STYLABLE_PROCESS(filePath)
                 );
                 visitMetaCSSDependenciesBFS(

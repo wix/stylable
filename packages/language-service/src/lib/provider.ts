@@ -9,15 +9,13 @@ import {
     CSSResolve,
     expandCustomSelectors,
     ImportSymbol,
-    process as stylableProcess,
-    safeParse,
     SRule,
     StateParsedValue,
     Stylable,
     StylableMeta,
-    valueMapping,
     JSResolve,
 } from '@stylable/core';
+import { safeParse, process as stylableProcess } from '@stylable/core/dist/index-internal';
 import type {
     Location,
     ParameterInformation,
@@ -144,7 +142,7 @@ export class Provider {
             return [];
         }
 
-        const callingMeta = this.stylable.process(filePath);
+        const callingMeta = this.stylable.analyze(filePath);
         const { word, meta } = getDefSymbol(src, position, filePath, this.stylable);
         if (!meta || !word) {
             return [];
@@ -232,7 +230,7 @@ export class Provider {
         } else if (
             Object.values(meta.getAllSymbols()).some((k) => {
                 if (k._kind === 'class') {
-                    const symbolStates = k[valueMapping.states];
+                    const symbolStates = k[`-st-states`];
 
                     if (symbolStates && Object.keys(symbolStates).some((key) => key === word)) {
                         const postcsspos = new ProviderPosition(
@@ -268,7 +266,7 @@ export class Provider {
                         } else if (
                             localSymbol &&
                             (localSymbol._kind === 'class' || localSymbol._kind === 'element') &&
-                            localSymbol[valueMapping.extends]
+                            localSymbol[`-st-extends`]
                         ) {
                             const res = this.findMyState(callingMeta, name, word);
                             if (res) {
@@ -310,7 +308,7 @@ export class Provider {
         elementName: string,
         state: string
     ): CSSResolve | null {
-        const importedSymbol = origMeta.getClass(elementName)![valueMapping.extends];
+        const importedSymbol = origMeta.getClass(elementName)![`-st-extends`];
         let res: CSSResolve | JSResolve | null = null;
 
         if (importedSymbol && importedSymbol._kind === 'import') {
@@ -321,14 +319,14 @@ export class Provider {
         if (
             res &&
             res._kind === 'css' &&
-            Object.keys((res.symbol as ClassSymbol)[valueMapping.states]!).includes(state)
+            Object.keys((res.symbol as ClassSymbol)[`-st-states`]!).includes(state)
         ) {
             return res;
         } else if (
             res &&
             res._kind === 'css' &&
             (localSymbol._kind === 'class' || localSymbol._kind === 'element') &&
-            localSymbol[valueMapping.extends]
+            localSymbol[`-st-extends`]
         ) {
             return this.findMyState(res.meta, res.symbol.name, state);
         } else {
@@ -364,17 +362,17 @@ export class Provider {
         const lastStPath = stPath[stPath.length - 1];
         if (isRoot(lastStPath)) {
             return this.getSignatureForStateWithParamSelector(meta, pos, line);
-        } else if (line.slice(0, pos.character).trim().startsWith(valueMapping.states)) {
+        } else if (line.slice(0, pos.character).trim().startsWith(`-st-states`)) {
             return this.getSignatureForStateWithParamDefinition(pos, line);
         }
 
         // If last node is not root, we're in a declaration [TODO: or a media query]
-        if (line.slice(0, pos.character).trim().startsWith(valueMapping.mixin)) {
+        if (line.slice(0, pos.character).trim().startsWith(`-st-mixin`)) {
             // TODO: handle multiple lines as well
             value = line
                 .slice(0, pos.character)
                 .trim()
-                .slice(valueMapping.mixin.length + 1)
+                .slice(`-st-mixin`.length + 1)
                 .trim();
         } else if (line.slice(0, pos.character).trim().includes(':')) {
             value = line
@@ -680,7 +678,7 @@ export class Provider {
             const transformer = this.stylable.createTransformer();
             const resolvedElements = transformer.resolveSelectorElements(meta, line);
             resolvedElements[0][0].resolved.forEach((el) => {
-                const symbolStates = (el.symbol as ClassSymbol)[valueMapping.states];
+                const symbolStates = (el.symbol as ClassSymbol)[`-st-states`];
                 if (symbolStates && typeof symbolStates[word] === 'object') {
                     stateDef = symbolStates[word];
                 }
@@ -923,9 +921,9 @@ function findRefs(
                         rs.resolved.some(
                             (inner) =>
                                 inner.meta.source === defMeta.source &&
-                                Object.keys(
-                                    (inner.symbol as ClassSymbol)[valueMapping.states]!
-                                ).includes(word)
+                                Object.keys((inner.symbol as ClassSymbol)[`-st-states`]!).includes(
+                                    word
+                                )
                         ) &&
                         rs.resolved[rs.resolved.length - 1].symbol.name ===
                             lastResolvedSelector.symbol.name
@@ -961,9 +959,7 @@ function findRefs(
         if (!decl.source || !decl.source.start) {
             return;
         }
-        const directiveRegex = new RegExp(
-            valueMapping.extends + '|' + valueMapping.named + '|' + valueMapping.default
-        );
+        const directiveRegex = new RegExp(`-st-extends` + '|' + `-st-named` + '|' + `-st-default`);
         if (directiveRegex.test(decl.prop)) {
             // Usage in -st directives
             const reg = new RegExp(valueRegex.source);
@@ -1000,7 +996,7 @@ function findRefs(
         if (!decl.source || !decl.source.start || !pos) {
             return;
         }
-        const directiveRegex = new RegExp(valueMapping.states);
+        const directiveRegex = new RegExp(`-st-states`);
         const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
         const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
         const char = isInNode(postcsspos, pfp[pfp.length - 1]) ? 1 : pos.character;
@@ -1059,7 +1055,7 @@ function findRefs(
             }
         }
     });
-    scannedMeta.rawAst.walkDecls(valueMapping.mixin, (decl) => {
+    scannedMeta.rawAst.walkDecls(`-st-mixin`, (decl) => {
         // usage in -st-mixin
         if (!decl.source || !decl.source.start) {
             return;
@@ -1076,7 +1072,7 @@ function findRefs(
                             character: index
                                 ? match.index
                                 : decl.source!.start!.column +
-                                  valueMapping.mixin.length +
+                                  `-st-mixin`.length +
                                   match.index +
                                   (decl.raws.between ? decl.raws.between.length : 0) -
                                   1,
@@ -1088,7 +1084,7 @@ function findRefs(
                                 (index
                                     ? match.index
                                     : decl.source!.start!.column +
-                                      valueMapping.mixin.length +
+                                      `-st-mixin`.length +
                                       match.index +
                                       (decl.raws.between ? decl.raws.between.length : 0) -
                                       1),
@@ -1174,7 +1170,7 @@ function newFindRefs(
     if (word.startsWith(':global(')) {
         // Global selector strings are special
         stylesheetsPath.forEach((stylesheetPath) => {
-            const scannedMeta = stylable.process(stylesheetPath);
+            const scannedMeta = stylable.analyze(stylesheetPath);
             scannedMeta.rawAst.walkRules((rule) => {
                 if (rule.selector.includes(word)) {
                     refs = refs.concat(findRefs(word, defMeta, scannedMeta, callingMeta, stylable));
@@ -1189,7 +1185,7 @@ function newFindRefs(
     if (!defSymbols[word] && !word.startsWith(word.charAt(0).toLowerCase())) {
         // Default import
         stylesheetsPath.forEach((stylesheetPath) => {
-            const scannedMeta = stylable.process(stylesheetPath);
+            const scannedMeta = stylable.analyze(stylesheetPath);
             let tmp = '';
             const scannedSymbols = scannedMeta.getAllSymbols();
             if (
@@ -1211,7 +1207,7 @@ function newFindRefs(
     } else if (defSymbols[word] && defSymbols[word]._kind === 'var') {
         // Variable
         stylesheetsPath.forEach((stylesheetPath) => {
-            const scannedMeta = stylable.process(stylesheetPath);
+            const scannedMeta = stylable.analyze(stylesheetPath);
             const scannedSymbols = scannedMeta.getAllSymbols();
             if (
                 !scannedSymbols[word] ||
@@ -1245,7 +1241,7 @@ function newFindRefs(
         const trans = stylable.createTransformer();
         const valueRegex = new RegExp('(\\.?' + word + ')\\b', 'g');
         stylesheetsPath.forEach((stylesheetPath) => {
-            const scannedMeta = stylable.process(stylesheetPath);
+            const scannedMeta = stylable.analyze(stylesheetPath);
             let done = false;
             scannedMeta.rawAst.walkRules((r) => {
                 if (valueRegex.test(r.selector) && !done) {
@@ -1271,11 +1267,11 @@ function newFindRefs(
             scannedMeta.rawAst.walkDecls((d) => {
                 if (valueRegex.test(d.value) && !done) {
                     if (
-                        d.prop === valueMapping.named &&
+                        d.prop === `-st-named` &&
                         d.parent &&
                         d.parent.nodes.find((n) => {
                             return (
-                                (n as postcss.Declaration).prop === valueMapping.from &&
+                                (n as postcss.Declaration).prop === `-st-from` &&
                                 path.resolve(
                                     path.dirname(scannedMeta.source),
                                     (n as postcss.Declaration).value.replace(/"/g, '')
@@ -1299,7 +1295,7 @@ function newFindRefs(
         });
     } else if (
         Object.values(defSymbols).some((sym) => {
-            const symbolStates = sym._kind === 'class' && sym[valueMapping.states];
+            const symbolStates = sym._kind === 'class' && sym[`-st-states`];
             // states
             return (
                 sym._kind === 'class' &&
@@ -1345,7 +1341,7 @@ function newFindRefs(
         })
     ) {
         stylesheetsPath.forEach((stylesheetPath) => {
-            const scannedMeta = stylable.process(stylesheetPath);
+            const scannedMeta = stylable.analyze(stylesheetPath);
             let done = false;
             if (defMeta.source === scannedMeta.source) {
                 refs = refs.concat(
@@ -1386,7 +1382,7 @@ function newFindRefs(
                         !!symb &&
                         symb.resolved.some((inner) => {
                             if (inner.symbol._kind === 'class') {
-                                const symbolStates = inner.symbol[valueMapping.states];
+                                const symbolStates = inner.symbol[`-st-states`];
 
                                 return (
                                     symbolStates &&
@@ -1441,7 +1437,7 @@ export function getRefs(
     fs: IFileSystem,
     stylable: Stylable
 ): Location[] {
-    const callingMeta = stylable.process(filePath);
+    const callingMeta = stylable.analyze(filePath);
 
     const symb = getDefSymbol(fs.readFileSync(filePath, 'utf8'), position, filePath, stylable);
 
@@ -1602,12 +1598,23 @@ function isInMediaQuery(path: postcss.Node[]) {
     return path.some((n) => n.type === 'atrule' && (n as postcss.AtRule).name === 'media');
 }
 
+const directives = [
+    `-st-from`,
+    `-st-named`,
+    `-st-default`,
+    `-st-root`,
+    `-st-states`,
+    `-st-extends`,
+    `-st-mixin`,
+    `-st-partial-mixin`,
+    `-st-global`,
+];
 export function isDirective(line: string) {
-    return Object.keys(valueMapping).some((k) => line.trim().startsWith((valueMapping as any)[k]));
+    return directives.some((k) => line.trim().startsWith(k));
 }
 
 function isNamedDirective(line: string) {
-    return line.includes(valueMapping.named);
+    return line.includes(`-st-named`);
 }
 
 function isStImportNamed(line: string) {
@@ -1765,13 +1772,7 @@ export function getDefSymbol(
         position.character
     );
     const directiveRegex = new RegExp(
-        valueMapping.extends +
-            '|' +
-            valueMapping.named +
-            '|' +
-            valueMapping.default +
-            '|' +
-            valueMapping.mixin
+        `-st-extends` + '|' + `-st-named` + '|' + `-st-default` + '|' + `-st-mixin`
     );
     if (lineChunkAtCursor.startsWith(':global')) {
         return { word: ':global(' + word + ')', meta };
@@ -1844,7 +1845,7 @@ export function getDefSymbol(
         reso = resolvedElements[0][resolvedElements[0].length - 1].resolved.find((res) => {
             let symbolStates;
             if (res.symbol._kind === 'class') {
-                symbolStates = res.symbol[valueMapping.states];
+                symbolStates = res.symbol[`-st-states`];
             }
             return (
                 (res.symbol.name === word.replace('.', '') && !(res.symbol as ClassSymbol).alias) ||

@@ -39,7 +39,6 @@ import {
     createSymbolResolverWithCache,
 } from './stylable-resolver';
 import { isCSSVarProp } from './helpers/css-custom-property';
-import { valueMapping } from './deprecated/value-mapping';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 
@@ -238,9 +237,9 @@ export class StylableTransformer {
             }
 
             switch (decl.prop) {
-                case valueMapping.partialMixin:
-                case valueMapping.mixin:
-                case valueMapping.states:
+                case `-st-partial-mixin`:
+                case `-st-mixin`:
+                case `-st-states`:
                     break;
                 default:
                     decl.value = this.evaluator.evaluateValue(transformContext, {
@@ -418,7 +417,7 @@ export class StylableTransformer {
             let resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>> | undefined;
             for (let i = lookupStartingPoint; i < len; i++) {
                 const { symbol, meta } = currentAnchor.resolved[i];
-                if (!symbol[valueMapping.root]) {
+                if (!symbol[`-st-root`]) {
                     continue;
                 }
                 const isFirstInSelector =
@@ -454,7 +453,7 @@ export class StylableTransformer {
 
                 const resolvedPart = getOriginDefinition(resolved);
 
-                if (!resolvedPart.symbol[valueMapping.root] && !isFirstInSelector) {
+                if (!resolvedPart.symbol[`-st-root`] && !isFirstInSelector) {
                     // insert nested combinator before internal custom element
                     context.insertDescendantCombinatorBeforePseudoElement();
                 }
@@ -488,7 +487,7 @@ export class StylableTransformer {
             // find matching custom state
             let foundCustomState = false;
             for (const { symbol, meta } of currentAnchor.resolved) {
-                const states = symbol[valueMapping.states];
+                const states = symbol[`-st-states`];
                 if (states && hasOwnProperty.call(states, node.value)) {
                     foundCustomState = true;
                     // transform custom state

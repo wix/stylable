@@ -5,7 +5,6 @@ import {
     findTestLocations,
 } from '@stylable/core-test-kit';
 import {
-    valueMapping,
     processorWarnings,
     transformerWarnings,
     nativePseudoElements,
@@ -379,7 +378,7 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message: processorWarnings.OVERRIDE_TYPED_RULE(
-                                valueMapping.extends,
+                                `-st-extends`,
                                 'root'
                             ),
                             file: 'main.css',

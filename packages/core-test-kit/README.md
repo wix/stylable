@@ -68,7 +68,7 @@ fs.writeFileSync(
     `
 );
 // transform new file
-const { meta, exports } = stylable.transform(stylable.process(`/new.st.css`));
+const { meta, exports } = stylable.transform(stylable.analyze(`/new.st.css`));
 ```
 
 ## Inline expectations syntax

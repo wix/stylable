@@ -51,14 +51,14 @@ export function testStylableCore(
         if (!isAbsolute(path || '')) {
             throw new Error(testStylableCore.errors.absoluteEntry(path));
         }
-        const meta = stylable.process(path);
+        const meta = stylable.analyze(path);
         const { exports } = stylable.transform(meta);
         sheets[path] = { meta, exports };
     }
 
     // inline test - build all and test
     for (const path of allSheets) {
-        const meta = stylable.process(path);
+        const meta = stylable.analyze(path);
         if (!meta.outputAst) {
             // ToDo: test
             stylable.transform(meta);

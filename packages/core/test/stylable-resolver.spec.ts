@@ -3,7 +3,6 @@ import type * as postcss from 'postcss';
 import { generateInfra, generateStylableResult } from '@stylable/core-test-kit';
 import {
     createMinimalFS,
-    process,
     cssParse,
     StylableResolver,
     cachedProcessFile,
@@ -11,6 +10,7 @@ import {
     StylableMeta,
     createDefaultResolver,
 } from '@stylable/core';
+import { process } from '@stylable/core/dist/index-internal';
 
 function createResolveExtendsResults(
     fs: MinimalFS,

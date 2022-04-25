@@ -140,14 +140,8 @@ export {
 export { noCollisionNamespace, packageNamespaceFactory } from './resolve-namespace-factories';
 export { DiagnosticsMode, EmitDiagnosticsContext, emitDiagnostics } from './report-diagnostic';
 import { visitMetaCSSDependenciesBFS as deprecatedVisitMetaCSSDependenciesBFS } from './visit-meta-css-dependencies';
-/**@deprecated*/
-export const visitMetaCSSDependenciesBFS = wrapFunctionForDeprecation(
-    deprecatedVisitMetaCSSDependenciesBFS,
-    {
-        name: `visitMetaCSSDependenciesBFS`,
-        pleaseUse: `Stylable.getDependencies in v5`,
-    }
-);
+/**@deprecated use Stylable.getDependencies in v5*/
+export const visitMetaCSSDependenciesBFS = deprecatedVisitMetaCSSDependenciesBFS;
 export { murmurhash3_32_gc } from './murmurhash';
 import {
     booleanStateDelimiter,
