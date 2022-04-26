@@ -51,7 +51,7 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-    it.only('should create index file importing all matched stylesheets in outDir (outputSources)', async () => {
+    it('should create index file importing all matched stylesheets in outDir (outputSources)', async () => {
         const fs = createMemoryFs({
             src: {
                 '/compA.st.css': `
