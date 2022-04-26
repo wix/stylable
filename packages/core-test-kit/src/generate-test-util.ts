@@ -7,13 +7,12 @@ import {
     replaceValueHook,
     StylableMeta,
     StylableResolver,
-    StylableTransformer,
     createStylableFileProcessor,
     createDefaultResolver,
     Stylable,
     StylableConfig,
 } from '@stylable/core';
-import { process } from '@stylable/core/dist/index-internal';
+import { process, StylableTransformer } from '@stylable/core/dist/index-internal';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
 import { createMemoryFs } from '@file-services/memory';

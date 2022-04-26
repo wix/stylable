@@ -1,5 +1,5 @@
 import type { IFileSystem } from '@file-services/types';
-import { evalDeclarationValue, Stylable } from '@stylable/core';
+import type { Stylable } from '@stylable/core';
 import { dirname } from 'path';
 import type { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
@@ -41,9 +41,7 @@ export function resolveDocumentColors(
                         '',
                         'css',
                         0,
-                        '.gaga {border: ' +
-                            evalDeclarationValue(stylable.resolver, sym.text, meta, sym.node) +
-                            '}'
+                        '.gaga {border: ' + stylable.transformDeclValue(meta, sym.text) + '}'
                     );
                     color = cssService.findColor(doc);
                 } else if (sym && sym._kind === 'import' && sym.type === 'named') {
@@ -57,12 +55,7 @@ export function resolveDocumentColors(
                             'css',
                             0,
                             '.gaga {border: ' +
-                                evalDeclarationValue(
-                                    stylable.resolver,
-                                    'value(' + sym.name + ')',
-                                    impMeta,
-                                    relevantVar.node
-                                ) +
+                                stylable.transformDeclValue(impMeta, `value(${sym.name})`) +
                                 '}'
                         );
                         color = cssService.findColor(doc);

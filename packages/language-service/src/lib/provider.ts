@@ -675,8 +675,7 @@ export class Provider {
         let stateDef = null as StateParsedValue | string | null;
 
         if (word) {
-            const transformer = this.stylable.createTransformer();
-            const resolvedElements = transformer.resolveSelectorElements(meta, line);
+            const resolvedElements = this.stylable.transformSelector(meta, line).resolved;
             resolvedElements[0][0].resolved.forEach((el) => {
                 const symbolStates = (el.symbol as ClassSymbol)[`-st-states`];
                 if (symbolStates && typeof symbolStates[word] === 'object') {
@@ -725,8 +724,6 @@ export class Provider {
         cursorPosInLine: number,
         fs: IFileSystem
     ): ProviderOptions {
-        const transformer = this.stylable.createTransformer();
-
         const path = pathFromPosition(meta.rawAst, {
             line: position.line + 1,
             character: position.character,
@@ -768,8 +765,8 @@ export class Provider {
         )
             .split(' ')
             .pop()!; // TODO: replace with selector parser
-        const resolvedElements = transformer.resolveSelectorElements(meta, expandedLine);
-        const resolvedRoot = transformer.resolveSelectorElements(meta, `.${meta.root}`)[0][0];
+        const resolvedElements = this.stylable.transformSelector(meta, expandedLine).resolved;
+        const resolvedRoot = this.stylable.transformSelector(meta, `.${meta.root}`).resolved[0][0];
 
         let resolved: CSSResolve[] = [];
         if (currentSelector && resolvedElements[0].length) {
@@ -832,7 +829,6 @@ function findRefs(
         return [];
     }
     const refs: Location[] = [];
-    const trans = stylable.createTransformer();
 
     if (word.startsWith(':global(')) {
         scannedMeta.rawAst.walkRules((rule) => {
@@ -859,7 +855,7 @@ function findRefs(
         // Usage in selector
         const filterRegex = new RegExp('(\\.?' + word + ')(\\s|$|\\:|;|\\))', 'g');
         if (filterRegex.test(rule.selector) && !!rule.source && !!rule.source.start) {
-            const resScanned = trans.resolveSelectorElements(scannedMeta, rule.selector);
+            const resScanned = stylable.transformSelector(scannedMeta, rule.selector).resolved;
             if (
                 resScanned[0].some((rl) => {
                     return (
@@ -909,10 +905,10 @@ function findRefs(
                         return false;
                     }
                     const selector = (lastStPath as postcss.Rule).selector;
-                    const selectorElement = trans.resolveSelectorElements(
+                    const selectorElement = stylable.transformSelector(
                         callingMeta,
                         selector.slice(0, selector.indexOf(word) + word.length)
-                    )[0];
+                    ).resolved[0];
                     const resolvedSelectorElement =
                         selectorElement[selectorElement.length - 1]!.resolved;
                     const lastResolvedSelector =
@@ -1005,10 +1001,10 @@ function findRefs(
             callPs.selector[callPs.target.index].text.slice(0, callPs.target.internalIndex + 1),
             (e) => !e.startsWith(':') || e.startsWith('::')
         );
-        const blargh = trans.resolveSelectorElements(
+        const blargh = stylable.transformSelector(
             callingMeta,
             (pfp[pfp.length - 1] as postcss.Rule)!.selector
-        );
+        ).resolved;
         if (
             directiveRegex.test(decl.prop) &&
             scannedMeta.source === defMeta.source &&
@@ -1238,14 +1234,13 @@ function newFindRefs(
         (defSymbols[word]._kind === 'class' || defSymbols[word]._kind === 'import')
     ) {
         // Elements
-        const trans = stylable.createTransformer();
         const valueRegex = new RegExp('(\\.?' + word + ')\\b', 'g');
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.analyze(stylesheetPath);
             let done = false;
             scannedMeta.rawAst.walkRules((r) => {
                 if (valueRegex.test(r.selector) && !done) {
-                    const resolved = trans.resolveSelectorElements(scannedMeta, r.selector);
+                    const resolved = stylable.transformSelector(scannedMeta, r.selector).resolved;
                     const resolvedInner = resolved[0].find((r) => r.name === word);
                     if (
                         resolvedInner &&
@@ -1321,8 +1316,7 @@ function newFindRefs(
                             arr,
                             (str: string) => !str.startsWith(':') || str.startsWith('::')
                         );
-                        const trans = stylable.createTransformer();
-                        const pse = trans.resolveSelectorElements(callingMeta, selec);
+                        const pse = stylable.transformSelector(callingMeta, selec).resolved;
                         name = name!.replace('.', '').replace(/:/g, '');
                         if (
                             !!pse &&
@@ -1359,7 +1353,6 @@ function newFindRefs(
             if (!pos) {
                 return;
             }
-            const trans = stylable.createTransformer();
             scannedMeta.rawAst.walkRules((r) => {
                 if (r.selector.includes(':' + word) && !done) {
                     // Won't work if word appears elsewhere in string
@@ -1376,7 +1369,7 @@ function newFindRefs(
                                   (str: string) => !str.startsWith(':') || str.startsWith('::')
                               )!.replace('.', '')
                             : (parsed.selector[parsed.target.index] as SelectorInternalChunk).name;
-                    const reso = trans.resolveSelectorElements(scannedMeta, r.selector);
+                    const reso = stylable.transformSelector(scannedMeta, r.selector).resolved;
                     const symb = reso[0].find((o) => o.name === elem);
                     if (
                         !!symb &&
@@ -1826,15 +1819,13 @@ export function getDefSymbol(
         }
     }
 
-    const transformer = stylable.createTransformer();
-
     const expandedLine: string = expandCustomSelectors(
         postcss.rule({ selector: lineChunkAtCursor }),
         meta.customSelectors
     )
         .split(' ')
         .pop()!; // TODO: replace with selector parser
-    const resolvedElements = transformer.resolveSelectorElements(meta, expandedLine);
+    const resolvedElements = stylable.transformSelector(meta, expandedLine).resolved;
 
     let reso: CSSResolve | undefined;
     if (!word.startsWith(word.charAt(0).toLowerCase())) {

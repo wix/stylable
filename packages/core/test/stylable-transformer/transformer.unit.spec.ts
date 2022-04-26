@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { createTransformer } from '@stylable/core-test-kit';
+import { testStylableCore } from '@stylable/core-test-kit';
 
 function createSpy<T extends (...args: any[]) => any>(fn?: T) {
     const spy = (...args: any[]) => {
@@ -18,38 +18,44 @@ function createSpy<T extends (...args: any[]) => any>(fn?: T) {
 
 describe('Transformer', () => {
     it('should not resolve path more then once', () => {
+        // ToDo: fix extra resolve when importing base from entry
         const onResolve = createSpy((resolved) => resolved);
-        const transformer = createTransformer(
+        testStylableCore(
             {
-                files: {
-                    '/entry.st.css': {
-                        content: `
-                        @st-import Button from "./button.st.css";
+                '/base.st.css': `
+                    :vars {
+                        color: green;
+                    }
+                `,
+                '/button.st.css': `
+                    @st-import [color] from "./base.st.css";
+                    .root {
+                        color: value(color);
+                    }
+                    .icon {
+                        background: value(color);
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import Button from "./button.st.css";
+                    /** @st-import [color] from "./base.st.css"; **/
 
-                        .root {
-                            -st-extends: Button;
-                        }
+                    .root {
+                        -st-extends: Button;
+                    }
 
-                        .myBtn {
-                            -st-mixin: Button;
-                        }
-                        `,
-                    },
-                    '/button.st.css': {
-                        content: `
-                            .root {}
-                            .icon {}
-                        `,
-                    },
-                },
+                    .myBtn {
+                        -st-mixin: Button;
+                    }
+                `,
             },
             {
-                onResolve,
+                stylableConfig: {
+                    resolveModule: onResolve,
+                },
             }
         );
 
-        transformer.transform(transformer.fileProcessor.process('/entry.st.css'));
-
-        expect(onResolve.callCount, 'call resolve only once').to.equal(1);
+        expect(onResolve.callCount, 'call resolve only once').to.equal(2);
     });
 });

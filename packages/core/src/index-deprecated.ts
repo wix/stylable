@@ -9,9 +9,12 @@ export const safeParse = wrapFunctionForDeprecation(deprecatedSafeParse, {
 export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
 export type { StylableDirectives, MappedStates } from './features';
 export { reservedKeyFrames } from './features/css-keyframes';
-export {
-    scopeCSSVar, // replace with transformCSSProperty OR stylable.cssProperty.transform(meta, name)
-} from './features/css-custom-property';
+import { scopeCSSVar as scopeCSSVarDeprecated } from './features/css-custom-property';
+/**@deprecated*/
+export const scopeCSSVar = wrapFunctionForDeprecation(scopeCSSVarDeprecated, {
+    name: `scopeCSSVar`,
+    pleaseUse: `stylable.transformCustomProperty`,
+});
 export {
     StylableProcessor,
     createEmptyMeta,
@@ -43,7 +46,8 @@ export {
     KeyFrameWithNode,
     ResolvedElement,
     StylableExports,
-    StylableTransformer, // replace with stylable.transformMeta / stylable.transformAST
+    /** @deprecated use stylable.transform / stylable.transformSelector... */
+    StylableTransformer,
     TransformHooks,
     TransformerOptions,
     postProcessor,
@@ -108,10 +112,15 @@ export {
 export {
     ResolvedFormatter,
     ValueFormatter,
-    evalDeclarationValue, // replace with stylable.transformDeclValue({meta, value...})
     functionWarnings,
     resolveArgumentsValue,
 } from './functions';
+import { evalDeclarationValue as evalDeclarationValueDeprecated } from './functions';
+/**@deprecated*/
+export const evalDeclarationValue = wrapFunctionForDeprecation(evalDeclarationValueDeprecated, {
+    name: `evalDeclarationValue`,
+    pleaseUse: `stylable.transformDeclValue`,
+});
 export {
     Box,
     BoxedValueArray,
@@ -154,7 +163,6 @@ import {
     validateStateDefinition,
 } from './pseudo-states';
 export const pseudoStates = {
-    // ToDo: check if any of the internal stuff we want to export
     booleanStateDelimiter,
     createBooleanStateClassName,
     createStateWithParamClassName,

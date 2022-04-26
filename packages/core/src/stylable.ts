@@ -6,6 +6,7 @@ import { processNamespace, StylableProcessor } from './stylable-processor';
 import type { StylableMeta } from './stylable-meta';
 import { StylableResolverCache, StylableResolver, CachedModuleEntity } from './stylable-resolver';
 import {
+    ResolvedElement,
     StylableResults,
     StylableTransformer,
     TransformerOptions,
@@ -14,7 +15,8 @@ import {
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
 import { warnOnce } from './helpers/deprecation';
-import { STVar } from './features';
+import { STVar, CSSCustomProperty } from './features';
+import * as postcss from 'postcss';
 
 export interface StylableConfig {
     projectRoot: string;
@@ -131,7 +133,11 @@ export class Stylable {
     }: CreateProcessorOptions = {}) {
         return new StylableProcessor(new Diagnostics(), resolveNamespace);
     }
-    public createTransformer(options: Partial<TransformerOptions> = {}) {
+    /**@deprecated */
+    public createTransformer(options?: Partial<TransformerOptions>) {
+        return this._createTransformer(options);
+    }
+    private _createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
             delimiter: this.delimiter,
             moduleResolver: this.resolvePath,
@@ -158,9 +164,64 @@ export class Stylable {
                 this.cssParser(meta, { from: resourcePath })
             );
         }
-        const transformer = this.createTransformer(options);
+        const transformer = this._createTransformer(options);
         this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);
+    }
+    public transformSelector(
+        pathOrMeta: string | StylableMeta,
+        selector: string,
+        options?: Partial<TransformerOptions>
+    ): { selector: string; resolved: ResolvedElement[][] } {
+        const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
+        const transformer = this._createTransformer(options);
+        const r = transformer.scopeSelector(meta, selector);
+        return {
+            selector: r.selector,
+            resolved: r.elements,
+        };
+    }
+    public transformDeclProp(
+        pathOrMeta: string | StylableMeta,
+        prop: string,
+        options?: Partial<TransformerOptions>
+    ) {
+        return this.transformDecl(pathOrMeta, prop, ``, options).prop;
+    }
+    public transformDeclValue(
+        pathOrMeta: string | StylableMeta,
+        value: string,
+        options?: Partial<TransformerOptions>
+    ) {
+        return this.transformDecl(pathOrMeta, `unknown`, value, options).value;
+    }
+    public transformCustomProperty(pathOrMeta: string | StylableMeta, prop: string) {
+        const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
+        return CSSCustomProperty.scopeCSSVar(this.resolver, meta, prop);
+    }
+    private transformDecl(
+        pathOrMeta: string | StylableMeta,
+        prop: string,
+        value: string,
+        options?: Partial<TransformerOptions>
+    ) {
+        const decl = new postcss.Declaration({ prop, value });
+        this.transformAST(
+            pathOrMeta,
+            new postcss.Root({}).append(new postcss.Rule({ selector: `.root` }).append(decl)),
+            options
+        );
+        return decl;
+    }
+    private transformAST(
+        pathOrMeta: string | StylableMeta,
+        ast: postcss.Root,
+        options?: Partial<TransformerOptions>
+    ): postcss.Root {
+        const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
+        const transformer = this._createTransformer(options);
+        transformer.transformAst(ast, meta);
+        return ast;
     }
     /**@deprecated use stylable.analyze instead*/
     public process(fullPath: string, ignoreCache = false): StylableMeta {
@@ -172,7 +233,9 @@ export class Stylable {
         }
         return this.fileProcessor.process(fullPath, ignoreCache);
     }
-    public analyze(fullPath: string) {
-        return this.fileProcessor.process(fullPath);
+    public analyze(fullPath: string, overrideSrc?: string) {
+        return overrideSrc
+            ? this.fileProcessor.processContent(overrideSrc, fullPath)
+            : this.fileProcessor.process(fullPath);
     }
 }

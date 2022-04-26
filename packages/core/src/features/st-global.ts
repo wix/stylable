@@ -37,15 +37,15 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
     transformInit({ context }) {
         context.meta.globals = {};
     },
-    transformLastPass({ context: { meta } }) {
-        meta.outputAst!.walkRules((r) => {
+    transformLastPass({ context: { meta }, ast }) {
+        ast.walkRules((r) => {
             if (!r.selector.includes(`:global(`)) {
                 return;
             }
             const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
             walkSelector(selectorAst, (node) => {
                 if (node.type === 'pseudo_class' && node.value === 'global') {
-                    addGlobals(meta, [node]);
+                    addGlobals(meta, [node]); // ToDo: don't add for disconnected ast
                     if (node.nodes?.length === 1) {
                         flattenFunctionalSelector(node);
                     }

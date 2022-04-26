@@ -8,7 +8,6 @@ import {
     CSSResolve,
     CSSVarSymbol,
     ElementSymbol,
-    evalDeclarationValue,
     nativePseudoClasses,
     nativePseudoElements,
     ResolvedElement,
@@ -1473,7 +1472,7 @@ export const ValueCompletionProvider: CompletionProvider = {
             const comps: Completion[] = [];
             Object.values(meta.getAllStVars()).forEach((v) => {
                 if (v.name.startsWith(inner)) {
-                    const value = evalDeclarationValue(stylable.resolver, v.text, meta, v.node);
+                    const value = stylable.transformDeclValue(meta, v.text); // evalDeclarationValue(stylable.resolver, v.text, meta, v.node);
                     comps.push(
                         valueCompletion(
                             v.name,
@@ -1517,7 +1516,7 @@ export const ValueCompletionProvider: CompletionProvider = {
                         .getImportStatements()
                         .some((imp) => Object.keys(imp.named).some((key) => key === v.name))
                 ) {
-                    const value = evalDeclarationValue(stylable.resolver, v.value, meta, v.node);
+                    const value = stylable.transformDeclValue(meta, v.value);
                     comps.push(
                         valueCompletion(
                             v.name,
