@@ -78,7 +78,12 @@ export {
 } from './stylable-utils';
 export { JsModule, StylableResolverCache, isInPath, StylableResolver } from './stylable-resolver';
 export { DiagnosticOptions } from './diagnostics';
-export { File, MinimalFSSetup } from './memory-minimal-fs';
+export { File, MinimalFSSetup } from './deprecated/memory-minimal-fs';
+import { createMinimalFS as createMinimalFSDeprecated } from './deprecated/memory-minimal-fs';
+/**@deprecated*/
+export const createMinimalFS = wrapFunctionForDeprecation(createMinimalFSDeprecated, {
+    name: `createMinimalFS`,
+});
 export { ArgValue, ExtendsValue, SBTypesParsers } from './stylable-value-parsers';
 export {
     valueMapping,

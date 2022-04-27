@@ -73,8 +73,7 @@ testStylableCore.errors = {
     absoluteEntry: (entry: string) => `entry must be absolute path got: ${entry}`,
 };
 
-// copied from memory-minimal
-function createJavascriptRequireModule(fs: IFileSystem) {
+export function createJavascriptRequireModule(fs: IFileSystem) {
     const requireModule = (id: string): any => {
         if (id === '@stylable/core') {
             return require(id);

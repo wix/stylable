@@ -1,5 +1,4 @@
 import {
-    createMinimalFS,
     Diagnostics,
     FileProcessor,
     postProcessor,
@@ -12,6 +11,7 @@ import {
     Stylable,
     StylableConfig,
 } from '@stylable/core';
+import { createJavascriptRequireModule } from './test-stylable-core';
 import { process, StylableTransformer } from '@stylable/core/dist/index-internal';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
@@ -33,6 +33,7 @@ export interface Config {
     entry?: string;
     files: Record<string, File>;
     usedFiles?: string[];
+    /**@deprecated defaults to false*/
     trimWS?: boolean;
     optimize?: boolean;
     resolve?: any;
@@ -41,8 +42,14 @@ export interface Config {
 
 export type RequireType = (path: string) => any;
 
+/**@deprecated use testStylableCore */
 export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = new Diagnostics()) {
-    const { fs, requireModule } = createMinimalFS(config);
+    const files: Record<string, string> = {};
+    for (const [path, { content }] of Object.entries(config.files)) {
+        files[path] = content;
+    }
+    const fs = createMemoryFs(files);
+    const requireModule = createJavascriptRequireModule(fs);
     const fileProcessor = createStylableFileProcessor({
         fileSystem: fs,
         onProcess: (meta, filePath) => {

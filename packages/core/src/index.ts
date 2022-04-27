@@ -20,7 +20,6 @@ export type { StylableResults, RuntimeStVar } from './stylable-transformer';
 
 // utils
 export type { MinimalFS } from './cached-process-file';
-export { createMinimalFS } from './memory-minimal-fs';
 export { noCollisionNamespace } from './resolve-namespace-factories';
 export { processNamespace } from './stylable-processor';
 
