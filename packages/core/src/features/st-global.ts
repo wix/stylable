@@ -7,7 +7,12 @@ import {
     flattenFunctionalSelector,
 } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
-import type { SelectorNode, ImmutablePseudoClass } from '@tokey/css-selector-parser';
+import type {
+    SelectorNode,
+    ImmutablePseudoClass,
+    SelectorList,
+    PseudoClass,
+} from '@tokey/css-selector-parser';
 
 const dataKey = plugableRecord.key<Record<string, true>>('globals');
 
@@ -43,22 +48,29 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
                 return;
             }
             const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
-            walkSelector(selectorAst, (node) => {
-                if (node.type === 'pseudo_class' && node.value === 'global') {
-                    addGlobals(meta, [node]); // ToDo: don't add for disconnected ast
-                    if (node.nodes?.length === 1) {
-                        flattenFunctionalSelector(node);
-                    }
-                    return walkSelector.skipNested;
-                }
-                return;
-            });
+            const globals = unwrapPseudoGlobals(selectorAst);
+            addGlobals(meta, globals);
             r.selector = stringifySelector(selectorAst);
         });
     },
 });
 
 // API
+
+export function unwrapPseudoGlobals(selectorAst: SelectorList) {
+    const collectedGlobals: PseudoClass[] = [];
+    walkSelector(selectorAst, (node) => {
+        if (node.type === 'pseudo_class' && node.value === 'global') {
+            collectedGlobals.push(node);
+            if (node.nodes?.length === 1) {
+                flattenFunctionalSelector(node);
+            }
+            return walkSelector.skipNested;
+        }
+        return;
+    });
+    return collectedGlobals;
+}
 
 export function addGlobals(meta: StylableMeta, selectorAst: SelectorNode[]) {
     for (const ast of selectorAst) {

@@ -306,8 +306,14 @@ export class StylableTransformer {
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
-    public scopeRule(meta: StylableMeta, rule: postcss.Rule, topNestClassName?: string): string {
-        return this.scopeSelector(meta, rule.selector, rule, topNestClassName).selector;
+    public scopeRule(
+        meta: StylableMeta,
+        rule: postcss.Rule,
+        topNestClassName?: string,
+        unwrapGlobals?: boolean
+    ): string {
+        return this.scopeSelector(meta, rule.selector, rule, topNestClassName, unwrapGlobals)
+            .selector;
     }
     public scope(name: string, ns: string, delimiter: string = this.delimiter) {
         return namespace(name, ns, delimiter);
@@ -316,7 +322,8 @@ export class StylableTransformer {
         originMeta: StylableMeta,
         selector: string,
         rule?: postcss.Rule,
-        topNestClassName?: string
+        topNestClassName?: string,
+        unwrapGlobals = false
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
         const context = new ScopeContext(
             originMeta,
@@ -326,6 +333,9 @@ export class StylableTransformer {
             topNestClassName
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
+        if (unwrapGlobals) {
+            STGlobal.unwrapPseudoGlobals(targetSelectorAst);
+        }
         return {
             targetSelectorAst,
             selector: stringifySelector(targetSelectorAst),
