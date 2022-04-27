@@ -210,14 +210,14 @@ export class Stylable {
         return ast;
     }
     /**@deprecated use stylable.analyze instead*/
-    public process(fullPath: string, ignoreCache = false): StylableMeta {
+    public process(fullPath: string, invalidateCache = false): StylableMeta {
         warnOnce('Stylable.process is deprecated, please use stylable.analyze instead');
-        if (typeof ignoreCache === 'string') {
+        if (typeof invalidateCache === 'string') {
             warnOnce(
                 'Stylable.process with context as second arguments is deprecated please resolve the fullPath with Stylable.resolvePath before using'
             );
         }
-        return this.fileProcessor.process(fullPath, ignoreCache);
+        return this.fileProcessor.process(fullPath, invalidateCache);
     }
     public analyze(fullPath: string, overrideSrc?: string) {
         return overrideSrc
