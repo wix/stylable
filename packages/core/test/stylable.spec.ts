@@ -105,29 +105,32 @@ describe('Stylable', () => {
             expect(resultFromPath.resolved, `by path`).to.eql(expectedResolve);
             expect(resultFromMeta.resolved, `by meta`).to.eql(expectedResolve);
         });
-        it(`should transform declaration prop`, () => {
+        it(`should transform declaration prop/value`, () => {
             const path = `/entry.st.css`;
             const { stylable } = testStylableCore({
-                [path]: `@property --x;`,
+                [path]: `
+                    @property --x;
+                    @keyframes jump {}
+                `,
             });
+            const meta = stylable.analyze(path);
 
-            const propFromPath = stylable.transformDeclProp(path, `--x`);
-            const propFromMeta = stylable.transformDeclProp(stylable.analyze(path), `--x`);
+            const declAnimation = stylable.transformDecl(path, `animation`, `var(--x) jump`);
+            const declFromPath = stylable.transformDecl(path, `--x`, `var(--x) jump`);
+            const declFromMeta = stylable.transformDecl(meta, `--x`, `var(--x) jump`);
 
-            expect(propFromPath, `by path`).to.eql(`--entry-x`);
-            expect(propFromMeta, `by meta`).to.eql(`--entry-x`);
-        });
-        it(`should transform declaration value`, () => {
-            const path = `/entry.st.css`;
-            const { stylable } = testStylableCore({
-                [path]: `@property --x;`,
+            expect(declAnimation, `animation context`).to.eql({
+                prop: `animation`,
+                value: `var(--entry-x) entry__jump`,
             });
-
-            const valueFromPath = stylable.transformDeclValue(path, `var(--x)`);
-            const valueFromMeta = stylable.transformDeclValue(stylable.analyze(path), `var(--x)`);
-
-            expect(valueFromPath, `by path`).to.eql(`var(--entry-x)`);
-            expect(valueFromMeta, `by meta`).to.eql(`var(--entry-x)`);
+            expect(declFromPath, `by path`).to.eql({
+                prop: `--entry-x`,
+                value: `var(--entry-x) jump`,
+            });
+            expect(declFromMeta, `by path`).to.eql({
+                prop: `--entry-x`,
+                value: `var(--entry-x) jump`,
+            });
         });
         it(`should transform custom property`, () => {
             const path = `/entry.st.css`;

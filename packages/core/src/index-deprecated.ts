@@ -130,7 +130,7 @@ import { evalDeclarationValue as evalDeclarationValueDeprecated } from './functi
 /**@deprecated*/
 export const evalDeclarationValue = wrapFunctionForDeprecation(evalDeclarationValueDeprecated, {
     name: `evalDeclarationValue`,
-    pleaseUse: `stylable.transformDeclValue`,
+    pleaseUse: `stylable.transformDecl`,
 });
 export {
     Box,

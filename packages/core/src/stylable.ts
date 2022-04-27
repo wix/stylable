@@ -181,25 +181,11 @@ export class Stylable {
             resolved: r.elements,
         };
     }
-    public transformDeclProp(
-        pathOrMeta: string | StylableMeta,
-        prop: string,
-        options?: Partial<TransformerOptions>
-    ) {
-        return this.transformDecl(pathOrMeta, prop, ``, options).prop;
-    }
-    public transformDeclValue(
-        pathOrMeta: string | StylableMeta,
-        value: string,
-        options?: Partial<TransformerOptions>
-    ) {
-        return this.transformDecl(pathOrMeta, `unknown`, value, options).value;
-    }
     public transformCustomProperty(pathOrMeta: string | StylableMeta, prop: string) {
         const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
         return CSSCustomProperty.scopeCSSVar(this.resolver, meta, prop);
     }
-    private transformDecl(
+    public transformDecl(
         pathOrMeta: string | StylableMeta,
         prop: string,
         value: string,
@@ -211,7 +197,7 @@ export class Stylable {
             new postcss.Root({}).append(new postcss.Rule({ selector: `.root` }).append(decl)),
             options
         );
-        return decl;
+        return { prop: decl.prop, value: decl.value };
     }
     private transformAST(
         pathOrMeta: string | StylableMeta,

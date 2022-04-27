@@ -41,7 +41,9 @@ export function resolveDocumentColors(
                         '',
                         'css',
                         0,
-                        '.gaga {border: ' + stylable.transformDeclValue(meta, sym.text) + '}'
+                        '.gaga {border: ' +
+                            stylable.transformDecl(meta, `unknown-prop`, sym.text).value +
+                            '}'
                     );
                     color = cssService.findColor(doc);
                 } else if (sym && sym._kind === 'import' && sym.type === 'named') {
@@ -55,7 +57,11 @@ export function resolveDocumentColors(
                             'css',
                             0,
                             '.gaga {border: ' +
-                                stylable.transformDeclValue(impMeta, `value(${sym.name})`) +
+                                stylable.transformDecl(
+                                    impMeta,
+                                    `unknown-prop`,
+                                    `value(${sym.name})`
+                                ).value +
                                 '}'
                         );
                         color = cssService.findColor(doc);

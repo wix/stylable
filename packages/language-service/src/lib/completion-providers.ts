@@ -1472,7 +1472,7 @@ export const ValueCompletionProvider: CompletionProvider = {
             const comps: Completion[] = [];
             Object.values(meta.getAllStVars()).forEach((v) => {
                 if (v.name.startsWith(inner)) {
-                    const value = stylable.transformDeclValue(meta, v.text);
+                    const value = stylable.transformDecl(meta, `unknown-prop`, v.text).value;
                     comps.push(
                         valueCompletion(
                             v.name,
@@ -1516,7 +1516,7 @@ export const ValueCompletionProvider: CompletionProvider = {
                         .getImportStatements()
                         .some((imp) => Object.keys(imp.named).some((key) => key === v.name))
                 ) {
-                    const value = stylable.transformDeclValue(meta, v.value);
+                    const value = stylable.transformDecl(meta, `unknown`, v.value).value;
                     comps.push(
                         valueCompletion(
                             v.name,
