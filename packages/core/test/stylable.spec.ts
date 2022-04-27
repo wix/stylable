@@ -20,19 +20,27 @@ describe('Stylable', () => {
         });
         it(`should accept content override to path`, () => {
             const path = `/entry.st.css`;
-            const fsContent = `.a {}`;
-            const overrideContent = `.b {}`;
+            const fsContent = `.fs {}`;
+            const overrideContent = `.override {}`;
             const { stylable } = testStylableCore({
                 [path]: fsContent,
             });
 
-            const meta = stylable.analyze(path, overrideContent);
+            const fsMetaBefore = stylable.analyze(path);
+            const overrideMeta = stylable.analyze(path, overrideContent);
+            const fsMetaAfter = stylable.analyze(path);
 
-            expect(meta, `meta field`).to.contain({
+            expect(overrideMeta.ast.toString(), `override src ast`).to.eql(`.override {}`);
+            expect(overrideMeta, `override meta`).to.contain({
                 source: path,
                 namespace: `entry`,
             });
-            expect(meta.ast.toString(), `src ast`).to.eql(`.b {}`);
+            expect(fsMetaBefore.ast.toString(), `fs before src ast`).to.eql(`.fs {}`);
+            expect(fsMetaBefore, `fs meta`).to.contain({
+                source: path,
+                namespace: `entry`,
+            });
+            expect(fsMetaAfter, `meta cached`).to.equal(fsMetaBefore);
         });
     });
     describe(`transformation`, () => {
