@@ -1472,7 +1472,7 @@ export const ValueCompletionProvider: CompletionProvider = {
             const comps: Completion[] = [];
             Object.values(meta.getAllStVars()).forEach((v) => {
                 if (v.name.startsWith(inner)) {
-                    const value = stylable.transformDeclValue(meta, v.text); // evalDeclarationValue(stylable.resolver, v.text, meta, v.node);
+                    const value = stylable.transformDeclValue(meta, v.text);
                     comps.push(
                         valueCompletion(
                             v.name,

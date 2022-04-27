@@ -69,7 +69,7 @@ describe('Stylable', () => {
             expect(resultFromPath.selector, `by path`).to.eql(`.entry__a.entry--x {}`);
             expect(resultFromMeta.selector, `by meta`).to.eql(`.entry__a.entry--x {}`);
         });
-        it(`should resolve selector elements selector`, () => {
+        it(`should resolve selector components`, () => {
             const path = `/entry.st.css`;
             const { stylable, sheets } = testStylableCore({
                 [path]: `.a {}`,
