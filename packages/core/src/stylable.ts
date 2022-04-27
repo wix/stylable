@@ -91,7 +91,7 @@ export class Stylable {
         public resolveNamespace?: typeof processNamespace,
         public resolvePath: ModuleResolver = createDefaultResolver(fileSystem, resolveOptions),
         protected cssParser: CssParser = cssParse,
-        protected resolverCache?: StylableResolverCache,
+        protected resolverCache?: StylableResolverCache, // ToDo: v5 default to `new Map()`
         // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
         protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>
     ) {

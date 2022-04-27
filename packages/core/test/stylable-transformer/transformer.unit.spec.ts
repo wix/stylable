@@ -18,7 +18,6 @@ function createSpy<T extends (...args: any[]) => any>(fn?: T) {
 
 describe('Transformer', () => {
     it('should not resolve path more then once', () => {
-        // ToDo: fix extra resolve when importing base from entry
         const onResolve = createSpy((resolved) => resolved);
         testStylableCore(
             {
@@ -38,7 +37,7 @@ describe('Transformer', () => {
                 `,
                 '/entry.st.css': `
                     @st-import Button from "./button.st.css";
-                    /** @st-import [color] from "./base.st.css"; **/
+                    @st-import [color] from "./base.st.css";
 
                     .root {
                         -st-extends: Button;
@@ -52,10 +51,11 @@ describe('Transformer', () => {
             {
                 stylableConfig: {
                     resolveModule: onResolve,
+                    resolverCache: new Map(), // ToDo: v5 this should be default : remove
                 },
             }
         );
 
-        expect(onResolve.callCount, 'call resolve only once').to.equal(2);
+        expect(onResolve.callCount, 'call resolve only once for each import path').to.equal(2);
     });
 });
