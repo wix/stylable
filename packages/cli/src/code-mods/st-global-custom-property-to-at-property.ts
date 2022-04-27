@@ -1,4 +1,4 @@
-import { CSSVarSymbol, Diagnostics, isCSSVarProp } from '@stylable/core';
+import { CSSVarSymbol, Diagnostics, validateCustomPropertyName } from '@stylable/core';
 import { CSSCustomProperty } from '@stylable/core/dist/features';
 import type { AtRule } from 'postcss';
 import type { CodeMod } from './types';
@@ -49,7 +49,7 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
     for (const entry of cssVarsByComma) {
         const cssVar = entry.trim();
 
-        if (isCSSVarProp(cssVar)) {
+        if (validateCustomPropertyName(cssVar)) {
             cssVars.push({
                 _kind: 'cssVar',
                 name: cssVar,

@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import { parse } from 'postcss';
-import { Diagnostics, ensureStylableImports } from '@stylable/core';
+import { Diagnostics, ensureModuleImport } from '@stylable/core';
 import { ensureImportsMessages, parsePseudoImportNamed } from '@stylable/core/dist/helpers/import';
 import * as postcss from 'postcss';
 
 describe(`helpers/import`, () => {
-    describe('ensureStylableImports', () => {
+    describe('ensureModuleImport', () => {
         describe('all modes', () => {
             it('should not modify when no importPatches provided', () => {
                 const root = parse(`
@@ -14,9 +14,9 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(root, [], { newImport: 'none' }, diag);
-                ensureStylableImports(root, [], { newImport: ':import' }, diag);
-                ensureStylableImports(root, [], { newImport: 'st-import' }, diag);
+                ensureModuleImport(root, [], { newImport: 'none' }, diag);
+                ensureModuleImport(root, [], { newImport: ':import' }, diag);
+                ensureModuleImport(root, [], { newImport: 'st-import' }, diag);
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
@@ -30,7 +30,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'missing', defaultExport: 'Missing' }],
                     { newImport: 'none' },
@@ -51,7 +51,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', defaultExport: 'Test' }],
                     { newImport: 'none' },
@@ -72,7 +72,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', named: { test: 'test' } }],
                     { newImport: 'none' },
@@ -91,7 +91,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', keyframes: { test: 'test' } }],
                     { newImport: 'none' },
@@ -112,7 +112,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', named: { asTest: 'test' } }],
                     { newImport: 'none' },
@@ -133,7 +133,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', keyframes: { asTest: 'test' } }],
                     { newImport: 'none' },
@@ -154,7 +154,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', named: { test: 'test', test2: 'test2' } }],
                     { newImport: 'none' },
@@ -175,7 +175,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', named: { asTest: 'test' }, defaultExport: 'Test' }],
                     { newImport: 'none' },
@@ -196,7 +196,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', named: { d: 'd', e: 'e' } }],
                     { newImport: 'none' },
@@ -217,7 +217,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', named: { a: 'a', b: 'b' }, defaultExport: 'A' }],
                     { newImport: 'none' },
@@ -238,7 +238,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [
                         {
@@ -266,7 +266,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'test', defaultExport: 'Test' }],
                     { newImport: ':import' },
@@ -285,7 +285,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'test', named: { a: 'a', c: 'b' } }],
                     { newImport: ':import' },
@@ -304,7 +304,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'test', keyframes: { a: 'a', c: 'b' } }],
                     { newImport: ':import' },
@@ -323,7 +323,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [
                         {
@@ -352,7 +352,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'test', defaultExport: 'Test' }],
                     { newImport: 'st-import' },
@@ -369,7 +369,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'test', named: { a: 'a', c: 'b' } }],
                     { newImport: 'st-import' },
@@ -388,7 +388,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'test', keyframes: { a: 'a', c: 'b' } }],
                     { newImport: 'st-import' },
@@ -407,7 +407,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [
                         {
@@ -439,7 +439,7 @@ describe(`helpers/import`, () => {
 
                 const diag = new Diagnostics();
 
-                ensureStylableImports(
+                ensureModuleImport(
                     root,
                     [{ request: 'x', named: { test: 'test' } }],
                     { newImport: 'none' },
@@ -455,7 +455,7 @@ describe(`helpers/import`, () => {
             it('should report collision diagnostics for defaultExport and not patch', () => {
                 const root = parse(`@st-import Test from "x";`);
 
-                const { diagnostics } = ensureStylableImports(
+                const { diagnostics } = ensureModuleImport(
                     root,
                     [{ request: 'x', defaultExport: 'Y' }],
                     { newImport: 'none' }
@@ -471,7 +471,7 @@ describe(`helpers/import`, () => {
             it('should report collision diagnostics for named and not patch', () => {
                 const root = parse(`@st-import [Y] from "x";`);
 
-                const { diagnostics } = ensureStylableImports(
+                const { diagnostics } = ensureModuleImport(
                     root,
                     [{ request: 'x', named: { Y: 'X' } }],
                     { newImport: 'none' }
@@ -487,7 +487,7 @@ describe(`helpers/import`, () => {
             it('should report collision diagnostics for named "as" with "as" (no patch)', () => {
                 const root = parse(`@st-import [A as Y] from "x";`);
 
-                const { diagnostics } = ensureStylableImports(
+                const { diagnostics } = ensureModuleImport(
                     root,
                     [{ request: 'x', named: { Y: 'X' } }],
                     { newImport: 'none' }
@@ -503,7 +503,7 @@ describe(`helpers/import`, () => {
             it('should report collision diagnostics for named "as" (no patch)', () => {
                 const root = parse(`@st-import [A as Y] from "x";`);
 
-                const { diagnostics } = ensureStylableImports(
+                const { diagnostics } = ensureModuleImport(
                     root,
                     [{ request: 'x', named: { Y: 'Y' } }],
                     { newImport: 'none' }

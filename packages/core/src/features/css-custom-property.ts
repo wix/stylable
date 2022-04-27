@@ -3,7 +3,7 @@ import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import {
     validateAtProperty,
-    isCSSVarProp,
+    validateCustomPropertyName,
     generateScopedCSSVar,
     atPropertyValidationWarnings,
 } from '../helpers/css-custom-property';
@@ -62,7 +62,7 @@ export const hooks = createFeature<{
         for (const [symbolName, symbol] of Object.entries(
             STSymbol.getAllByType(context.meta, `import`)
         )) {
-            if (isCSSVarProp(symbolName)) {
+            if (validateCustomPropertyName(symbolName)) {
                 const importSymbol = STSymbol.get(context.meta, symbolName, `import`);
                 if (!importSymbol) {
                     console.warn(
@@ -110,7 +110,7 @@ export const hooks = createFeature<{
     },
     analyzeDeclaration({ context, decl }) {
         // register prop
-        if (isCSSVarProp(decl.prop)) {
+        if (validateCustomPropertyName(decl.prop)) {
             addCSSProperty({
                 context,
                 node: decl,
@@ -161,7 +161,7 @@ export const hooks = createFeature<{
     transformValue({ node, data: { cssVarsMapping } }) {
         const { value } = node;
         const varWithPrefix = node.nodes[0]?.value || ``;
-        if (isCSSVarProp(varWithPrefix)) {
+        if (validateCustomPropertyName(varWithPrefix)) {
             if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
                 node.nodes[0].value = cssVarsMapping[varWithPrefix];
             }
@@ -200,7 +200,7 @@ function addCSSProperty({
     alias?: ImportSymbol;
 }) {
     // validate indent
-    if (!isCSSVarProp(name)) {
+    if (!validateCustomPropertyName(name)) {
         context.diagnostics.warn(node, diagnostics.ILLEGAL_CSS_VAR_USE(name), {
             word: name,
         });
@@ -276,7 +276,7 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
 
     for (const entry of cssVarsByComma) {
         const name = entry.trim();
-        if (isCSSVarProp(name)) {
+        if (validateCustomPropertyName(name)) {
             // ToDo: change to modify global instead of override
             addCSSProperty({
                 context,

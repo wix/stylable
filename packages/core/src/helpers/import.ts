@@ -96,7 +96,7 @@ export function createAtImportProps(
     return { name: 'st-import', params };
 }
 
-export function ensureStylableImports(
+export function ensureModuleImport(
     ast: Root,
     importPatches: Array<ImportPatch>,
     options: {
@@ -196,7 +196,7 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
     }
 }
 
-export function parseStylableImport(
+export function parseModuleImportStatement(
     node: AtRule | Rule,
     context: string,
     diagnostics: Diagnostics

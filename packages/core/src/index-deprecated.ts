@@ -27,13 +27,24 @@ export const process = wrapFunctionForDeprecation(deprecatedProcess, {
     name: `process`,
     pleaseUse: `stylable.analyze`,
 });
-export {
-    ensureStylableImports, // replace with static || meta.stImports.ensure || Stylable.stImport.ensureStylableImports(meta)
-} from './helpers/import';
-export {
-    isCSSVarProp, // replace with Stylable.cssCustomProperty.isValidName?
-    generateScopedCSSVar,
-} from './helpers/css-custom-property';
+import { ensureModuleImport, parseModuleImportStatement } from './helpers/import';
+/**@deprecated*/
+export const parseStylableImport = wrapFunctionForDeprecation(parseModuleImportStatement, {
+    name: `parseStylableImport`,
+    pleaseUse: `import { parseModuleImportStatement } from '@stylable/core'`,
+});
+/**@deprecated*/
+export const ensureStylableImports = wrapFunctionForDeprecation(ensureModuleImport, {
+    name: `ensureStylableImports`,
+    pleaseUse: `import { ensureModuleImport } from '@stylable/core'`,
+});
+export { generateScopedCSSVar } from './helpers/css-custom-property';
+import { validateCustomPropertyName } from './helpers/css-custom-property';
+/**@deprecated*/
+export const isCSSVarProp = wrapFunctionForDeprecation(validateCustomPropertyName, {
+    name: `isCSSVarProp`,
+    pleaseUse: `import { validateCustomPropertyName } from '@stylable/core'`,
+});
 export { globalValueRegExp } from './helpers/global';
 import { GLOBAL_FUNC } from './helpers/global';
 /**@deprecated*/

@@ -23,7 +23,10 @@ export type { MinimalFS } from './cached-process-file';
 export { createMinimalFS } from './memory-minimal-fs';
 export { noCollisionNamespace } from './resolve-namespace-factories';
 export { processNamespace } from './stylable-processor';
-export { parseStylableImport } from './helpers/import';
+
+// low-level api
+export { parseModuleImportStatement, ensureModuleImport } from './helpers/import';
+export { validateCustomPropertyName } from './helpers/css-custom-property';
 
 // deprecations
 export * from './index-deprecated';

@@ -38,7 +38,7 @@ import {
     StylableResolver,
     createSymbolResolverWithCache,
 } from './stylable-resolver';
-import { isCSSVarProp } from './helpers/css-custom-property';
+import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 
@@ -222,7 +222,7 @@ export class StylableTransformer {
         ast.walkDecls((decl) => {
             (decl as SDecl).stylable = { sourceValue: decl.value };
 
-            if (isCSSVarProp(decl.prop)) {
+            if (validateCustomPropertyName(decl.prop)) {
                 CSSCustomProperty.hooks.transformDeclaration({
                     context: transformContext,
                     decl,
