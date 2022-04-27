@@ -140,10 +140,13 @@ describe('Stylable', () => {
                     @property --local;`,
             });
 
-            const localFromPath = stylable.transformDeclProp(path, `--local`);
-            const localFromMeta = stylable.transformDeclProp(stylable.analyze(path), `--local`);
-            const importedFromPath = stylable.transformDeclProp(path, `--imported`);
-            const importedFromMeta = stylable.transformDeclProp(
+            const localFromPath = stylable.transformCustomProperty(path, `--local`);
+            const localFromMeta = stylable.transformCustomProperty(
+                stylable.analyze(path),
+                `--local`
+            );
+            const importedFromPath = stylable.transformCustomProperty(path, `--imported`);
+            const importedFromMeta = stylable.transformCustomProperty(
                 stylable.analyze(path),
                 `--imported`
             );
