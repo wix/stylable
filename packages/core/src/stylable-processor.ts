@@ -421,8 +421,6 @@ export class StylableProcessor implements FeatureContext {
             } else {
                 this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
             }
-            // } else if (decl.prop === STMixin.MixinType.ALL || decl.prop === STMixin.MixinType.PARTIAL) {
-            //     STMixin.hooks.analyzeDeclaration({ context: this, decl });
         } else if (decl.prop === `-st-global`) {
             if (isSimple && type !== 'type') {
                 this.setClassGlobalMapping(decl, rule);

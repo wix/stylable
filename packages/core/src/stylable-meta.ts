@@ -16,8 +16,6 @@ import {
     CSSKeyframes,
 } from './features';
 
-const RESERVED_ROOT_NAME = 'root';
-
 const features = [
     STSymbol,
     STImport,
@@ -33,7 +31,7 @@ const features = [
 export class StylableMeta {
     public data: PlugableRecord = {};
     public rawAst: postcss.Root = this.ast.clone();
-    public root: 'root' = RESERVED_ROOT_NAME;
+    public root = 'root';
     public source: string = getSourcePath(this.ast, this.diagnostics);
     public namespace = '';
     public customSelectors: Record<string, string> = {};
@@ -51,7 +49,7 @@ export class StylableMeta {
             hooks.metaInit(context);
         }
         // set default root
-        const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
+        const rootSymbol = CSSClass.addClass(context, 'root');
         rootSymbol[`-st-root`] = true;
     }
     getSymbol(name: string) {
