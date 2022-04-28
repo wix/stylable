@@ -37,8 +37,7 @@ export interface IStylableOptimizer {
     optimize(
         config: OptimizeConfig,
         stylableResult: StylableResults,
-        usageMapping: Record<string, boolean>,
-        delimiter?: string
+        usageMapping: Record<string, boolean>
     ): void;
     getNamespace(namespace: string): string;
     getClassName(className: string): string;
@@ -46,7 +45,6 @@ export interface IStylableOptimizer {
         config: OptimizeConfig,
         outputAst: postcss.Root,
         usageMapping: Record<string, boolean>,
-        delimiter: string | undefined,
         jsExports: StylableExports,
         globals: Record<string, boolean>
     ): void;

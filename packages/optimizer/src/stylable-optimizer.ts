@@ -4,6 +4,7 @@ import {
     OptimizeConfig,
     StylableExports,
     pseudoStates,
+    namespaceDelimiter as delimiter,
 } from '@stylable/core/dist/index-internal';
 import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
 import csso from 'csso';
@@ -25,8 +26,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     public optimize(
         config: OptimizeConfig,
         stylableResults: StylableResults,
-        usageMapping: Record<string, boolean>,
-        delimiter?: string
+        usageMapping: Record<string, boolean>
     ) {
         const {
             meta: { globals, outputAst: _outputAst },
@@ -34,7 +34,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         } = stylableResults;
         const outputAst = _outputAst!;
 
-        this.optimizeAst(config, outputAst, usageMapping, delimiter, jsExports, globals);
+        this.optimizeAst(config, outputAst, usageMapping, jsExports, globals);
     }
 
     public getNamespace(namespace: string) {
@@ -49,7 +49,6 @@ export class StylableOptimizer implements IStylableOptimizer {
         config: OptimizeConfig,
         outputAst: Root,
         usageMapping: Record<string, boolean>,
-        delimiter: string | undefined,
         jsExports: StylableExports,
         globals: Record<string, boolean>
     ) {
@@ -59,8 +58,8 @@ export class StylableOptimizer implements IStylableOptimizer {
         if (config.removeStylableDirectives) {
             this.removeStylableDirectives(outputAst);
         }
-        if (config.removeUnusedComponents && usageMapping && delimiter) {
-            this.removeUnusedComponents(delimiter, outputAst, usageMapping);
+        if (config.removeUnusedComponents && usageMapping) {
+            this.removeUnusedComponents(outputAst, usageMapping);
         }
         if (config.removeEmptyNodes) {
             this.removeEmptyNodes(outputAst);
@@ -71,7 +70,6 @@ export class StylableOptimizer implements IStylableOptimizer {
             undefined,
             usageMapping,
             globals,
-            delimiter,
             config.shortNamespaces,
             config.classNameOptimizations
         );
@@ -83,17 +81,11 @@ export class StylableOptimizer implements IStylableOptimizer {
         classes = Object.keys(exported),
         usageMapping: Record<string, boolean>,
         globals: Record<string, boolean> = {},
-        delimiter?: string,
         shortNamespaces?: boolean,
         classNamespaceOptimizations?: boolean
     ) {
         if (!shortNamespaces && !classNamespaceOptimizations) {
             return;
-        }
-        if (!delimiter) {
-            throw new Error(
-                'Missing delimiter when shortNamespaces or classNamespaceOptimizations is enabled'
-            );
         }
 
         ast.walkRules((rule) => {
@@ -102,8 +94,7 @@ export class StylableOptimizer implements IStylableOptimizer {
                 usageMapping,
                 globals,
                 shortNamespaces || false,
-                classNamespaceOptimizations || false,
-                delimiter
+                classNamespaceOptimizations || false
             );
         });
         const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
@@ -158,8 +149,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         usageMapping: Record<string, boolean>,
         globals: Record<string, boolean> = {},
         shortNamespaces: boolean,
-        classNamespaceOptimizations: boolean,
-        delimiter: string
+        classNamespaceOptimizations: boolean
     ) {
         const ast = parseCssSelector(selector);
 
@@ -212,7 +202,6 @@ export class StylableOptimizer implements IStylableOptimizer {
     }
 
     private removeUnusedComponents(
-        delimiter: string,
         outputAst: Root,
         usageMapping: Record<string, boolean>,
         shouldComment = false

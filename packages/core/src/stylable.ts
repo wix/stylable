@@ -53,7 +53,6 @@ export class Stylable {
     public projectRoot: string;
     protected fileSystem: MinimalFS;
     protected requireModule: (path: string) => any;
-    public delimiter = '__'; // ToDo: remove
     protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
     protected diagnostics = new Diagnostics();
     protected hooks: TransformHooks;
@@ -134,7 +133,6 @@ export class Stylable {
     }
     private createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
-            delimiter: this.delimiter,
             moduleResolver: this.resolvePath,
             diagnostics: new Diagnostics(),
             fileProcessor: this.fileProcessor,

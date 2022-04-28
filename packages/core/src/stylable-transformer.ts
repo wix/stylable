@@ -17,7 +17,6 @@ import {
     splitCompoundSelectors,
 } from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule } from './helpers/rule';
-import { namespace } from './helpers/namespace';
 import { getOriginDefinition } from './helpers/resolve';
 import { ClassSymbol, ElementSymbol, STMixin } from './features';
 import type { StylableMeta } from './stylable-meta';
@@ -88,7 +87,6 @@ export interface TransformerOptions {
     moduleResolver: ModuleResolver;
     requireModule: (modulePath: string) => any;
     diagnostics: Diagnostics;
-    delimiter?: string;
     keepValues?: boolean;
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
@@ -106,7 +104,6 @@ export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
     public diagnostics: Diagnostics;
     public resolver: StylableResolver;
-    public delimiter: string;
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
@@ -116,7 +113,6 @@ export class StylableTransformer {
 
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
-        this.delimiter = options.delimiter || '__';
         this.keepValues = options.keepValues || false;
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
@@ -295,9 +291,6 @@ export class StylableTransformer {
     ): string {
         return this.scopeSelector(meta, rule.selector, rule, topNestClassName, unwrapGlobals)
             .selector;
-    }
-    public scope(name: string, ns: string, delimiter: string = this.delimiter) {
-        return namespace(name, ns, delimiter);
     }
     public scopeSelector(
         originMeta: StylableMeta,

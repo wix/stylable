@@ -563,7 +563,6 @@ export class StylableWebpackPlugin {
                         optimizeOptions,
                         ast,
                         usageMapping,
-                        this.stylable.delimiter,
                         buildData.exports,
                         globals
                     );

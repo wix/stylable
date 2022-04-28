@@ -69,12 +69,7 @@ describe('StylableOptimizer', () => {
             [result.meta.namespace]: false,
         };
 
-        new StylableOptimizer().optimize(
-            { removeUnusedComponents: true },
-            result,
-            usageMapping,
-            '__'
-        );
+        new StylableOptimizer().optimize({ removeUnusedComponents: true }, result, usageMapping);
 
         expect(result.meta.outputAst!.toString().trim()).to.equal('');
     });

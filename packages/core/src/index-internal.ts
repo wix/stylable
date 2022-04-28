@@ -18,6 +18,7 @@ export {
     knownPseudoClassesWithNestedSelectors,
 } from './native-reserved-lists';
 export { isAsset, makeAbsolute } from './stylable-assets';
+export { namespace, namespaceDelimiter } from './helpers/namespace';
 export { emitDiagnostics, DiagnosticsMode, EmitDiagnosticsContext } from './report-diagnostic';
 export { StylableResolver, StylableResolverCache } from './stylable-resolver';
 export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
