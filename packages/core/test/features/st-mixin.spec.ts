@@ -1,5 +1,5 @@
 import chaiSubset from 'chai-subset';
-import type { SRule } from '@stylable/core';
+import type { SRule } from '@stylable/core/dist/index-internal';
 import { STMixin } from '@stylable/core/dist/features';
 import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import {

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createSubsetAst } from '@stylable/core/dist/helpers/rule';
-import { cssParse } from '@stylable/core';
+import { cssParse } from '@stylable/core/dist/index-internal';
 
 describe(`helpers/rule`, () => {
     describe('createSubsetAst', () => {

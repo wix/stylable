@@ -12,7 +12,7 @@ import {
     SRule,
     transformerWarnings,
     getRuleScopeSelector,
-} from '@stylable/core';
+} from '@stylable/core/dist/index-internal';
 
 use(flatMatch);
 

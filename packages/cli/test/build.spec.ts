@@ -1,9 +1,10 @@
 import { expect } from 'chai';
-import { Stylable, processorWarnings, murmurhash3_32_gc } from '@stylable/core';
+import { Stylable } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
 import { STImport, STVar } from '@stylable/core/dist/features';
+import { processorWarnings, murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 
 const log = () => {
     /**/

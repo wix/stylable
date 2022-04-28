@@ -1,4 +1,4 @@
-import { nativePseudoClasses, pseudoStates } from '@stylable/core';
+import { nativePseudoClasses, pseudoStates } from '@stylable/core/dist/index-internal';
 import {
     parseCssSelector,
     stringifySelectorAst,

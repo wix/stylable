@@ -1,18 +1,21 @@
 import {
     Diagnostics,
-    FileProcessor,
-    postProcessor,
     processNamespace,
-    replaceValueHook,
     StylableMeta,
-    StylableResolver,
-    createStylableFileProcessor,
-    createDefaultResolver,
     Stylable,
     StylableConfig,
 } from '@stylable/core';
 import { createJavascriptRequireModule } from './test-stylable-core';
-import { process, StylableTransformer } from '@stylable/core/dist/index-internal';
+import {
+    process,
+    FileProcessor,
+    StylableResolver,
+    StylableTransformer,
+    createStylableFileProcessor,
+    postProcessor,
+    replaceValueHook,
+    createDefaultResolver,
+} from '@stylable/core/dist/index-internal';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
 import { createMemoryFs } from '@file-services/memory';

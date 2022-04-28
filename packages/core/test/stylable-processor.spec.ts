@@ -1,8 +1,11 @@
 import { resolve } from 'path';
 import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
-import { processNamespace, processorWarnings } from '@stylable/core';
-import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
+import { processNamespace } from '@stylable/core';
+import {
+    knownPseudoClassesWithNestedSelectors,
+    processorWarnings,
+} from '@stylable/core/dist/index-internal';
 
 chai.use(flatMatch);
 

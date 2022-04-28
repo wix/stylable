@@ -1,15 +1,14 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { testStylableCore, generateStylableResult } from '@stylable/core-test-kit';
+import type { MinimalFS, StylableMeta } from '@stylable/core';
 import {
     cssParse,
+    process,
     StylableResolver,
-    cachedProcessFile,
-    MinimalFS,
-    StylableMeta,
     createDefaultResolver,
-} from '@stylable/core';
-import { process } from '@stylable/core/dist/index-internal';
+    cachedProcessFile,
+} from '@stylable/core/dist/index-internal';
 
 function createResolveExtendsResults(
     fs: MinimalFS,

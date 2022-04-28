@@ -1,11 +1,10 @@
+import { Stylable, StylableConfig } from '@stylable/core';
 import {
-    Stylable,
-    StylableConfig,
     packageNamespaceFactory,
     OptimizeConfig,
     DiagnosticsMode,
     IStylableOptimizer,
-} from '@stylable/core';
+} from '@stylable/core/dist/index-internal';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';

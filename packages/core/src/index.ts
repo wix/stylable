@@ -23,10 +23,8 @@ export type { StylableResults, RuntimeStVar } from './stylable-transformer';
 export type { MinimalFS } from './cached-process-file';
 export { noCollisionNamespace } from './resolve-namespace-factories';
 export { processNamespace } from './stylable-processor';
+export { CustomValueStrategy, createCustomValue } from './custom-values';
 
 // low-level api
 export { parseModuleImportStatement, ensureModuleImport } from './helpers/import';
 export { validateCustomPropertyName } from './helpers/css-custom-property';
-
-// deprecations
-export * from './index-deprecated';

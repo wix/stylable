@@ -4,18 +4,21 @@ import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
 import type { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
-import {
+import type {
     ClassSymbol,
     CSSResolve,
-    expandCustomSelectors,
     ImportSymbol,
-    SRule,
-    StateParsedValue,
     Stylable,
     StylableMeta,
     JSResolve,
 } from '@stylable/core';
-import { safeParse, process as stylableProcess } from '@stylable/core/dist/index-internal';
+import {
+    safeParse,
+    process as stylableProcess,
+    expandCustomSelectors,
+    SRule,
+    StateParsedValue,
+} from '@stylable/core/dist/index-internal';
 import type {
     Location,
     ParameterInformation,

@@ -1,7 +1,8 @@
 import type { Plugin } from 'rollup';
 import fs from 'fs';
 import { join, parse } from 'path';
-import { Stylable, emitDiagnostics, DiagnosticsMode } from '@stylable/core';
+import { Stylable } from '@stylable/core';
+import { emitDiagnostics, DiagnosticsMode } from '@stylable/core/dist/index-internal';
 import {
     sortModulesByDepth,
     calcDepth,

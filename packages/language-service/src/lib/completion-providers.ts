@@ -3,21 +3,23 @@ import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import type ts from 'typescript';
 
-import {
+import type {
     ClassSymbol,
     CSSResolve,
     CSSVarSymbol,
     ElementSymbol,
+    Stylable,
+    StylableMeta,
+    VarSymbol,
+} from '@stylable/core';
+import {
+    MappedStates,
     nativePseudoClasses,
     nativePseudoElements,
     ResolvedElement,
     SRule,
-    Stylable,
-    StylableMeta,
     systemValidators,
-    VarSymbol,
-} from '@stylable/core';
-import type { MappedStates } from '@stylable/core/dist/index-internal';
+} from '@stylable/core/dist/index-internal';
 import type { IFileSystem } from '@file-services/types';
 import {
     classCompletion,

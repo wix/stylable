@@ -1,5 +1,6 @@
 import { nodeFs as fs } from '@file-services/node';
-import { Stylable, StylableConfig, StylableResolverCache } from '@stylable/core';
+import { Stylable, StylableConfig } from '@stylable/core';
+import type { StylableResolverCache } from '@stylable/core/dist/index-internal';
 import { build } from './build';
 import { projectsConfig } from './config/projects-config';
 import {

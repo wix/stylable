@@ -10,7 +10,11 @@ import {
     processSource,
     testInlineExpects,
 } from '@stylable/core-test-kit';
-import { processorWarnings, nativePseudoClasses, pseudoStates } from '@stylable/core';
+import {
+    processorWarnings,
+    nativePseudoClasses,
+    pseudoStates,
+} from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
 import { CSSType } from '@stylable/core/dist/features';
 

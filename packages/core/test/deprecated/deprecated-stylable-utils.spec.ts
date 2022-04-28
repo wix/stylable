@@ -3,7 +3,7 @@ import {
     createSubsetAst,
     scopeSelector,
 } from '@stylable/core/dist/deprecated/deprecated-stylable-utils';
-import { cssParse } from '@stylable/core';
+import { cssParse } from '@stylable/core/dist/index-internal';
 
 describe('deprecated/selector-utils', () => {
     describe('scopeSelector', () => {

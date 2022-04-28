@@ -1,4 +1,5 @@
-import type { DiagnosticsMode, Stylable, StylableExports } from '@stylable/core';
+import type { Stylable } from '@stylable/core';
+import type { DiagnosticsMode, StylableExports } from '@stylable/core/dist/index-internal';
 import type { Chunk, Compilation, Compiler, LoaderContext } from 'webpack';
 
 export interface StylableBuildMeta {

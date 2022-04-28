@@ -1,6 +1,12 @@
 import { normalize } from 'path';
 import { expect } from 'chai';
-import { collectAssets, fixRelativeUrls, isAsset, makeAbsolute, cssParse } from '@stylable/core';
+import {
+    collectAssets,
+    fixRelativeUrls,
+    isAsset,
+    makeAbsolute,
+    cssParse,
+} from '@stylable/core/dist/index-internal';
 
 const css = `
     .a{

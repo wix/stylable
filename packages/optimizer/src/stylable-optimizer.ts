@@ -1,10 +1,10 @@
+import type { StylableResults } from '@stylable/core';
 import {
     IStylableOptimizer,
     OptimizeConfig,
     StylableExports,
-    StylableResults,
     pseudoStates,
-} from '@stylable/core';
+} from '@stylable/core/dist/index-internal';
 import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
 import csso from 'csso';
 import postcss, { Declaration, Root, Rule, Node, Comment, Container } from 'postcss';

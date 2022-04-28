@@ -1,4 +1,4 @@
-import { packageNamespaceFactory } from '@stylable/core';
+import { packageNamespaceFactory } from '@stylable/core/dist/index-internal';
 import { dirname, relative } from 'path';
 import findConfig from 'find-config';
 

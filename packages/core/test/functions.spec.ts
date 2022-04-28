@@ -1,4 +1,5 @@
-import { functionWarnings, nativeFunctionsDic } from '@stylable/core';
+import { functionWarnings } from '@stylable/core/dist/functions';
+import { nativeFunctionsDic } from '@stylable/core/dist/index-internal';
 import { expectTransformDiagnostics, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';

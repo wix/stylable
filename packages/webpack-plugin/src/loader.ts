@@ -1,6 +1,6 @@
 import { getImports, getReplacementToken } from './loader-utils';
 import type { StylableLoaderContext } from './types';
-import { emitDiagnostics } from '@stylable/core';
+import { emitDiagnostics } from '@stylable/core/dist/index-internal';
 
 export default function StylableWebpackLoader(this: StylableLoaderContext, source: string) {
     const { meta, exports } = this.stylable.transform(source, this.resourcePath);

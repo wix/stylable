@@ -1,4 +1,5 @@
-import { isAsset, Stylable, StylableResults } from '@stylable/core';
+import type { Stylable, StylableResults } from '@stylable/core';
+import { isAsset } from '@stylable/core/dist/index-internal';
 import {
     createModuleSource,
     generateDTSContent,

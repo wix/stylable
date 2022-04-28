@@ -1,11 +1,5 @@
-import type {
-    ClassSymbol,
-    StateParsedValue,
-    StylableMeta,
-    StylableResults,
-    StylableSymbol,
-} from '@stylable/core';
-import type { MappedStates } from '@stylable/core/dist/index-internal';
+import type { ClassSymbol, StylableMeta, StylableResults, StylableSymbol } from '@stylable/core';
+import type { MappedStates, StateParsedValue } from '@stylable/core/dist/index-internal';
 
 export const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
