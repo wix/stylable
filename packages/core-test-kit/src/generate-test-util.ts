@@ -7,8 +7,8 @@ import {
 } from '@stylable/core';
 import { createJavascriptRequireModule } from './test-stylable-core';
 import {
-    process,
     FileProcessor,
+    StylableProcessor,
     StylableResolver,
     StylableTransformer,
     createStylableFileProcessor,
@@ -107,7 +107,9 @@ export function processSource(
     options: { from?: string } = {},
     resolveNamespace?: typeof processNamespace
 ) {
-    return process(postcss.parse(source, options), undefined, resolveNamespace);
+    return new StylableProcessor(new Diagnostics(), resolveNamespace).process(
+        postcss.parse(source, options)
+    );
 }
 
 export function createProcess(

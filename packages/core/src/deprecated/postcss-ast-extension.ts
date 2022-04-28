@@ -1,4 +1,4 @@
-import { setFieldForDeprecation } from '../helpers/deprecation';
+import { setFieldForDeprecation, ignoreDeprecationWarn } from '../helpers/deprecation';
 import { Rule } from 'postcss';
 
 /**
@@ -17,4 +17,9 @@ setFieldForDeprecation(Rule.prototype, `stScopeSelector`, {
 /**@deprecated*/
 export interface SRule extends Rule {
     stScopeSelector?: string;
+}
+
+// ToDo: remove when st-scope moves to transformer
+export function getRuleScopeSelector(rule: Rule) {
+    return ignoreDeprecationWarn(() => (rule as SRule).stScopeSelector);
 }

@@ -2,7 +2,7 @@ import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
 import type { Diagnostics } from './diagnostics';
-import type { Imported, ImportSymbol, StylableSymbol } from './features';
+import type { ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
 
@@ -37,7 +37,7 @@ export function expandCustomSelectors(
     return rule.selector;
 }
 
-export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
+function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
@@ -106,11 +106,6 @@ export function mergeRules(
     return rule;
 }
 
-export function findDeclaration(importNode: Imported, test: any) {
-    const fromIndex = importNode.rule.nodes.findIndex(test);
-    return importNode.rule.nodes[fromIndex] as postcss.Declaration;
-}
-
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
     const source = (root.source && root.source.input.file) || '';
     if (!source) {
@@ -129,9 +124,4 @@ export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
     }
 
     return undefined;
-}
-
-export function isValidClassName(className: string) {
-    const test = /^-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/g; // checks valid classname
-    return !!className.match(test);
 }

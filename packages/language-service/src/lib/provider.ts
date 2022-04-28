@@ -4,17 +4,18 @@ import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
 import type { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
-import type {
+import {
     ClassSymbol,
     CSSResolve,
     ImportSymbol,
     Stylable,
     StylableMeta,
     JSResolve,
+    Diagnostics,
 } from '@stylable/core';
 import {
     safeParse,
-    process as stylableProcess,
+    StylableProcessor,
     expandCustomSelectors,
     StateParsedValue,
 } from '@stylable/core/dist/index-internal';
@@ -740,13 +741,13 @@ export class Provider {
             fakeRules.findIndex((f) => {
                 return f.selector === parentAst.selector;
             }) === -1
-                ? (parentAst)
+                ? parentAst
                 : astAtCursor &&
                   isSelector(astAtCursor) &&
                   fakeRules.findIndex((f) => {
                       return f.selector === astAtCursor.selector;
                   }) === -1
-                ? (astAtCursor)
+                ? astAtCursor
                 : null;
 
         const { lineChunkAtCursor, fixedCharIndex } = getChunkAtCursor(
@@ -1472,7 +1473,7 @@ export function createMeta(src: string, path: string) {
             fakes.push(r);
         }
 
-        meta = stylableProcess(ast);
+        meta = new StylableProcessor(new Diagnostics()).process(ast);
     } catch (error) {
         return { meta: null, fakes };
     }

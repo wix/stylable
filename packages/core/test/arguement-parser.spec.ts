@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import postcssValueParser from 'postcss-value-parser';
-import { getFormatterArgs } from '@stylable/core/dist/index-internal';
+import { getFormatterArgs } from '@stylable/core/dist/helpers/value';
 
 function test(
     desc: string,

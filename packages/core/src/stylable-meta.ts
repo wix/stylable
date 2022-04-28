@@ -16,7 +16,7 @@ import {
     CSSKeyframes,
 } from './features';
 
-export const RESERVED_ROOT_NAME = 'root';
+const RESERVED_ROOT_NAME = 'root';
 
 const features = [
     STSymbol,

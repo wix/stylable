@@ -1,12 +1,24 @@
 import { normalize } from 'path';
 import { expect } from 'chai';
-import {
-    collectAssets,
-    fixRelativeUrls,
-    isAsset,
-    makeAbsolute,
-    cssParse,
-} from '@stylable/core/dist/index-internal';
+import { cssParse, processDeclarationFunctions } from '@stylable/core/dist/index-internal';
+import { fixRelativeUrls, isAsset, makeAbsolute } from '@stylable/core/dist/stylable-assets';
+import type * as postcss from 'postcss';
+
+function collectAssets(ast: postcss.Root) {
+    const assetDependencies: string[] = [];
+    ast.walkDecls((decl) => {
+        processDeclarationFunctions(
+            decl,
+            (node) => {
+                if (node.type === 'url') {
+                    assetDependencies.push(node.url);
+                }
+            },
+            false
+        );
+    });
+    return assetDependencies;
+}
 
 const css = `
     .a{

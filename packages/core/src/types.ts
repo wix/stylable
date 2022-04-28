@@ -1,10 +1,6 @@
 import type * as postcss from 'postcss';
 import type { Box } from './custom-values';
-import type { StylableMeta } from './stylable-meta';
 import type { StylableExports, StylableResults } from './stylable-transformer';
-
-export type PartialObject<T> = Partial<T> & object;
-export type CSSObject = any & object;
 
 export interface ParsedValue {
     type: string;
@@ -55,32 +51,6 @@ export interface IStylableOptimizer {
         globals: Record<string, boolean>
     ): void;
     removeStylableDirectives(root: postcss.Root, shouldComment?: boolean): void;
-}
-
-export interface IStylableClassNameOptimizer {
-    context: {
-        names: Record<string, string>;
-    };
-    rewriteSelector(
-        selector: string,
-        usageMapping: Record<string, boolean>,
-        globals: Record<string, boolean>
-    ): string;
-    generateName(name: string): string;
-    optimizeAstAndExports(
-        ast: postcss.Root,
-        exported: Record<string, string>,
-        classes: string[],
-        usageMapping: Record<string, boolean>,
-        globals?: Record<string, boolean>
-    ): void;
-}
-
-export interface IStylableNamespaceOptimizer {
-    index: number;
-    namespacePrefix: string;
-    namespaceMapping: Record<string, string>;
-    getNamespace(meta: StylableMeta, ..._env: any[]): string;
 }
 
 export type ModuleResolver = (directoryPath: string, request: string) => string;

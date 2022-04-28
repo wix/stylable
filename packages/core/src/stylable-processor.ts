@@ -35,7 +35,6 @@ import {
 import { isChildOfAtRule } from './helpers/rule';
 import { SBTypesParsers } from './stylable-value-parsers';
 import { stripQuotation, filename2varname } from './helpers/string';
-import { warnOnce } from './helpers/deprecation';
 // ToDo: remove when moving st-scope to transformer
 import type { SRule } from './deprecated/postcss-ast-extension';
 
@@ -484,7 +483,7 @@ export class StylableProcessor implements FeatureContext {
     }
 }
 
-export function validateScopingSelector(
+function validateScopingSelector(
     atRule: postcss.AtRule,
     { selector: scopingSelector }: postcss.Rule,
     diagnostics: Diagnostics
@@ -494,21 +493,6 @@ export function validateScopingSelector(
     }
 }
 
-export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
-    warnOnce(
-        'createEmptyMeta is deprecated and will be removed in the next version. Use "new StylableMeta()"'
-    );
-    return new StylableMeta(root, diagnostics);
-}
-
 export function processNamespace(namespace: string, source: string) {
     return namespace + murmurhash3_32_gc(source); // .toString(36);
-}
-
-export function process(
-    root: postcss.Root,
-    diagnostics = new Diagnostics(),
-    resolveNamespace?: typeof processNamespace
-) {
-    return new StylableProcessor(diagnostics, resolveNamespace).process(root);
 }

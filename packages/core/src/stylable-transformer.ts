@@ -16,7 +16,7 @@ import {
     CompoundSelector,
     splitCompoundSelectors,
 } from '@tokey/css-selector-parser';
-import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
+import { createWarningRule, isChildOfAtRule } from './helpers/rule';
 import { namespace } from './helpers/namespace';
 import { getOriginDefinition } from './helpers/resolve';
 import { ClassSymbol, ElementSymbol, STMixin } from './features';
@@ -40,6 +40,7 @@ import {
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
+import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -47,11 +48,6 @@ export interface ResolvedElement {
     name: string;
     type: string;
     resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
-}
-
-export interface KeyFrameWithNode {
-    value: string;
-    node: postcss.Node;
 }
 
 export type RuntimeStVar = string | { [key: string]: RuntimeStVar } | RuntimeStVar[];
@@ -287,18 +283,6 @@ export class StylableTransformer {
 
         // restore evaluator state
         this.evaluator.stVarOverride = prevStVarOverride;
-    }
-    /** @deprecated */
-    public getScopedCSSVar(
-        decl: postcss.Declaration,
-        meta: StylableMeta,
-        cssVarsMapping: Record<string, string>
-    ) {
-        let prop = decl.prop;
-        if (CSSCustomProperty.get(meta, prop)) {
-            prop = cssVarsMapping[prop];
-        }
-        return prop;
     }
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;

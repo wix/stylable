@@ -13,8 +13,6 @@ import {
     groupCompoundSelectors,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
-import { ignoreDeprecationWarn } from './deprecation';
-import type { SRule } from '../deprecated/postcss-ast-extension';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return (
@@ -214,8 +212,4 @@ export function findRule(
         }
     });
     return found;
-}
-// ToDo: remove when st-scope moves to transformer
-export function getRuleScopeSelector(rule: postcss.Rule) {
-    return ignoreDeprecationWarn(() => (rule as SRule).stScopeSelector);
 }
