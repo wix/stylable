@@ -36,18 +36,14 @@ import {
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
-import {
-    rootValueMapping,
-    SBTypesParsers,
-    stValuesMap,
-    valueMapping,
-} from './stylable-value-parsers';
+import { stValuesMap } from './deprecated/value-mapping';
+import { SBTypesParsers } from './stylable-value-parsers';
 import { stripQuotation, filename2varname } from './helpers/string';
 import { warnOnce } from './helpers/deprecation';
 
-const parseStates = SBTypesParsers[valueMapping.states];
-const parseGlobal = SBTypesParsers[valueMapping.global];
-const parseExtends = SBTypesParsers[valueMapping.extends];
+const parseStates = SBTypesParsers[`-st-states`];
+const parseGlobal = SBTypesParsers[`-st-global`];
+const parseExtends = SBTypesParsers[`-st-extends`];
 
 export const processorWarnings = {
     ROOT_AFTER_SPACING() {
@@ -60,10 +56,10 @@ export const processorWarnings = {
         return 'cannot define pseudo states inside complex selectors';
     },
     CANNOT_RESOLVE_EXTEND(name: string) {
-        return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
+        return `cannot resolve '-st-extends' type for '${name}'`;
     },
     CANNOT_EXTEND_IN_COMPLEX() {
-        return `cannot define "${valueMapping.extends}" inside a complex selector`;
+        return `cannot define "-st-extends" inside a complex selector`;
     },
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
@@ -105,7 +101,7 @@ export class StylableProcessor implements FeatureContext {
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
                 this.handleCustomSelectors(rule);
-                this.handleRule(rule as SRule, isChildOfAtRule(rule, rootValueMapping.stScope));
+                this.handleRule(rule as SRule, isChildOfAtRule(rule, `st-scope`));
             }
             const parent = rule.parent;
             if (parent?.type === 'rule') {
@@ -120,6 +116,7 @@ export class StylableProcessor implements FeatureContext {
         });
 
         root.walkDecls((decl) => {
+            // ToDo: refactor to be hooked by features
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             }
@@ -384,12 +381,12 @@ export class StylableProcessor implements FeatureContext {
             return !accType ? type : accType !== type ? `complex` : type;
         }, `` as typeof isSimplePerSelector[number]['type']);
         const isSimple = type !== `complex`;
-        if (decl.prop === valueMapping.states) {
+        if (decl.prop === `-st-states`) {
             if (isSimple && type !== 'type') {
                 this.extendTypedRule(
                     decl,
                     rule.selector,
-                    valueMapping.states,
+                    `-st-states`,
                     parseStates(decl.value, decl, this.diagnostics)
                 );
             } else {
@@ -399,7 +396,7 @@ export class StylableProcessor implements FeatureContext {
                     this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_COMPLEX());
                 }
             }
-        } else if (decl.prop === valueMapping.extends) {
+        } else if (decl.prop === `-st-extends`) {
             if (isSimple) {
                 const parsed = parseExtends(decl.value);
                 const symbolName = parsed.types[0] && parsed.types[0].symbolName;
@@ -415,7 +412,7 @@ export class StylableProcessor implements FeatureContext {
                     this.extendTypedRule(
                         decl,
                         rule.selector,
-                        valueMapping.extends,
+                        `-st-extends`,
                         getAlias(extendsRefSymbol) || extendsRefSymbol
                     );
                 } else {
@@ -430,7 +427,7 @@ export class StylableProcessor implements FeatureContext {
             }
         } else if (decl.prop === STMixin.MixinType.ALL || decl.prop === STMixin.MixinType.PARTIAL) {
             STMixin.hooks.analyzeDeclaration({ context: this, decl });
-        } else if (decl.prop === valueMapping.global) {
+        } else if (decl.prop === `-st-global`) {
             if (isSimple && type !== 'type') {
                 this.setClassGlobalMapping(decl, rule);
             } else {
@@ -445,7 +442,7 @@ export class StylableProcessor implements FeatureContext {
         if (classSymbol) {
             const globalSelectorAst = parseGlobal(decl, this.diagnostics);
             if (globalSelectorAst) {
-                classSymbol[valueMapping.global] = globalSelectorAst;
+                classSymbol[`-st-global`] = globalSelectorAst;
             }
         }
     }

@@ -5,20 +5,8 @@ import { processPseudoStates } from './pseudo-states';
 import { parseSelectorWithCache } from './helpers/selector';
 import { parseStMixin, parseStPartialMixin } from './helpers/mixin';
 import { getNamedArgs } from './helpers/value';
-import type { StateParsedValue } from './types';
 import type { SelectorNodes } from '@tokey/css-selector-parser';
 import { CSSClass } from './features';
-
-export interface MappedStates {
-    [s: string]: StateParsedValue | string | null;
-}
-
-// TODO: remove
-export interface TypedClass {
-    '-st-root'?: boolean;
-    '-st-states'?: string[] | MappedStates;
-    '-st-extends'?: string;
-}
 
 export interface ArgValue {
     type: string;
@@ -28,45 +16,6 @@ export interface ExtendsValue {
     symbolName: string;
     args: ArgValue[][] | null;
 }
-
-export type ReportWarning = (message: string, options?: { word: string }) => void;
-
-export const rootValueMapping = {
-    vars: ':vars' as const,
-    import: ':import' as const,
-    stScope: 'st-scope' as const,
-    namespace: 'namespace' as const,
-};
-
-export const valueMapping = {
-    from: '-st-from' as const,
-    named: '-st-named' as const,
-    default: '-st-default' as const,
-    root: '-st-root' as const,
-    states: '-st-states' as const,
-    extends: '-st-extends' as const,
-    mixin: '-st-mixin' as const, // ToDo: change to STMixin.MixinType.ALL,
-    partialMixin: '-st-partial-mixin' as const, // ToDo: change to STMixin.MixinType.PARTIAL,
-    global: '-st-global' as const,
-};
-
-export const mixinDeclRegExp = new RegExp(`(${valueMapping.mixin})|(${valueMapping.partialMixin})`);
-
-export type stKeys = keyof typeof valueMapping;
-
-export const stValues: string[] = Object.keys(valueMapping).map(
-    (key) => valueMapping[key as stKeys]
-);
-
-export const animationPropRegExp = /animation$|animation-name$/;
-
-export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce((acc, key) => {
-    acc[valueMapping[key as stKeys]] = true;
-    return acc;
-}, {} as Record<string, boolean>);
-
-export const STYLABLE_VALUE_MATCHER = /^-st-/;
-export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
 
 export const SBTypesParsers = {
     '-st-root'(value: string) {

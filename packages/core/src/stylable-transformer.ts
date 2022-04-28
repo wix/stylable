@@ -38,8 +38,7 @@ import {
     StylableResolver,
     createSymbolResolverWithCache,
 } from './stylable-resolver';
-import { isCSSVarProp } from './helpers/css-custom-property';
-import { valueMapping } from './stylable-value-parsers';
+import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 
@@ -223,7 +222,7 @@ export class StylableTransformer {
         ast.walkDecls((decl) => {
             (decl as SDecl).stylable = { sourceValue: decl.value };
 
-            if (isCSSVarProp(decl.prop)) {
+            if (validateCustomPropertyName(decl.prop)) {
                 CSSCustomProperty.hooks.transformDeclaration({
                     context: transformContext,
                     decl,
@@ -238,9 +237,9 @@ export class StylableTransformer {
             }
 
             switch (decl.prop) {
-                case valueMapping.partialMixin:
-                case valueMapping.mixin:
-                case valueMapping.states:
+                case `-st-partial-mixin`:
+                case `-st-mixin`:
+                case `-st-states`:
                     break;
                 default:
                     decl.value = this.evaluator.evaluateValue(transformContext, {
@@ -307,8 +306,14 @@ export class StylableTransformer {
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
-    public scopeRule(meta: StylableMeta, rule: postcss.Rule, topNestClassName?: string): string {
-        return this.scopeSelector(meta, rule.selector, rule, topNestClassName).selector;
+    public scopeRule(
+        meta: StylableMeta,
+        rule: postcss.Rule,
+        topNestClassName?: string,
+        unwrapGlobals?: boolean
+    ): string {
+        return this.scopeSelector(meta, rule.selector, rule, topNestClassName, unwrapGlobals)
+            .selector;
     }
     public scope(name: string, ns: string, delimiter: string = this.delimiter) {
         return namespace(name, ns, delimiter);
@@ -317,7 +322,8 @@ export class StylableTransformer {
         originMeta: StylableMeta,
         selector: string,
         rule?: postcss.Rule,
-        topNestClassName?: string
+        topNestClassName?: string,
+        unwrapGlobals = false
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
         const context = new ScopeContext(
             originMeta,
@@ -327,6 +333,9 @@ export class StylableTransformer {
             topNestClassName
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
+        if (unwrapGlobals) {
+            STGlobal.unwrapPseudoGlobals(targetSelectorAst);
+        }
         return {
             targetSelectorAst,
             selector: stringifySelector(targetSelectorAst),
@@ -418,7 +427,7 @@ export class StylableTransformer {
             let resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>> | undefined;
             for (let i = lookupStartingPoint; i < len; i++) {
                 const { symbol, meta } = currentAnchor.resolved[i];
-                if (!symbol[valueMapping.root]) {
+                if (!symbol[`-st-root`]) {
                     continue;
                 }
                 const isFirstInSelector =
@@ -454,7 +463,7 @@ export class StylableTransformer {
 
                 const resolvedPart = getOriginDefinition(resolved);
 
-                if (!resolvedPart.symbol[valueMapping.root] && !isFirstInSelector) {
+                if (!resolvedPart.symbol[`-st-root`] && !isFirstInSelector) {
                     // insert nested combinator before internal custom element
                     context.insertDescendantCombinatorBeforePseudoElement();
                 }
@@ -488,7 +497,7 @@ export class StylableTransformer {
             // find matching custom state
             let foundCustomState = false;
             for (const { symbol, meta } of currentAnchor.resolved) {
-                const states = symbol[valueMapping.states];
+                const states = symbol[`-st-states`];
                 if (states && hasOwnProperty.call(states, node.value)) {
                     foundCustomState = true;
                     // transform custom state

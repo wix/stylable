@@ -98,7 +98,7 @@ export class IndexGenerator {
 }
 
 export function reExportsAllSymbols(filePath: string, generator: IndexGenerator): ReExports {
-    const meta = generator.stylable.process(filePath);
+    const meta = generator.stylable.analyze(filePath);
     const rootExport = generator.filename2varname(filePath);
     const classes = Object.keys(meta.getAllClasses())
         .filter((name) => name !== meta.root)

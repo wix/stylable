@@ -1024,4 +1024,20 @@ describe(`features/css-class`, () => {
             });
         });
     });
+    describe(`stylable (public API)`, () => {
+        it(`should not modify globals when transforming external selector`, () => {
+            const { stylable, sheets } = testStylableCore(`
+                .a :global(.a) {}
+            `);
+            const { meta } = sheets[`/entry.st.css`];
+
+            const { selector } = stylable.transformSelector(meta, `.a :global(.b)`);
+
+            expect(selector, `selector result`).to.eql(`.entry__a .b`);
+            expect(meta.globals, `meta globals`).to.eql({
+                a: true,
+                /*b is not collected*/
+            });
+        });
+    });
 });

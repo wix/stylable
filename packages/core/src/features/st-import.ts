@@ -5,7 +5,7 @@ import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
-import { isCSSVarProp } from '../helpers/css-custom-property';
+import { validateCustomPropertyName } from '../helpers/css-custom-property';
 import type { StylableMeta } from '../stylable-meta';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
@@ -188,7 +188,7 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
 
 function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {
     for (const [local, imported] of Object.entries(importDef.named)) {
-        if (isCSSVarProp(imported) && !isCSSVarProp(local)) {
+        if (validateCustomPropertyName(imported) && !validateCustomPropertyName(local)) {
             context.diagnostics.warn(
                 importDef.rule,
                 diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local)

@@ -40,7 +40,7 @@ describe(`testStylableCore()`, () => {
             .part {}
             `
         );
-        const newMeta = stylable.process(`/new.st.css`);
+        const newMeta = stylable.analyze(`/new.st.css`);
         stylable.transform(newMeta);
 
         expect(newMeta.outputAst?.toString().trim()).to.equal(`.entry__part {}`);

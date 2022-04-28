@@ -1,5 +1,5 @@
 import { basename } from 'path';
-import { ClassSymbol, StylableMeta, valueMapping } from '@stylable/core';
+import type { ClassSymbol, StylableMeta } from '@stylable/core';
 import { STSymbol, CSSKeyframes } from '@stylable/core/dist/features';
 import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
 import { encode } from 'vlq';
@@ -147,16 +147,13 @@ type Position = {
 function findDefiningClassName(stateToken: ClassStateToken, entryClassName: ClassSymbol) {
     let currentClass = entryClassName;
 
-    while (currentClass[valueMapping.states]) {
-        if (
-            currentClass[valueMapping.states]?.[stripQuotes(stateToken.stateName.value)] !==
-            undefined
-        ) {
+    while (currentClass[`-st-states`]) {
+        if (currentClass[`-st-states`]?.[stripQuotes(stateToken.stateName.value)] !== undefined) {
             return currentClass.name;
         }
 
-        if (currentClass[valueMapping.extends]?._kind === 'class') {
-            currentClass = currentClass[valueMapping.extends] as ClassSymbol;
+        if (currentClass['-st-extends']?._kind === 'class') {
+            currentClass = currentClass[`-st-extends`];
         }
     }
 
@@ -180,7 +177,7 @@ function createStateLineMapping(
         const srcClassName = findDefiningClassName(stateToken, meta.getClass(entryClassName)!);
 
         meta.rawAst.walkRules(`.${srcClassName}`, (rule) => {
-            return rule.walkDecls(valueMapping.states, (decl) => {
+            return rule.walkDecls(`-st-states`, (decl) => {
                 if (decl.source && decl.source.start)
                     stateSourcePosition = {
                         line: decl.source.start.line - 1,

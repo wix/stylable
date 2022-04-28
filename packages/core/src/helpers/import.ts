@@ -3,7 +3,6 @@ import { parseImports } from '@tokey/imports-parser';
 import { Diagnostics } from '../diagnostics';
 import type { Imported } from '../features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
-import { rootValueMapping, valueMapping } from '../stylable-value-parsers';
 import { stripQuotation } from '../helpers/string';
 import { isCompRoot } from './selector';
 import type { ParsedValue } from '../types';
@@ -29,16 +28,16 @@ export const parseImportMessages = {
     },
 
     MULTIPLE_FROM_IN_IMPORT() {
-        return `cannot define multiple "${valueMapping.from}" declarations in a single import`;
+        return `cannot define multiple "-st-from" declarations in a single import`;
     },
     DEFAULT_IMPORT_IS_LOWER_CASE() {
         return 'Default import of a Stylable stylesheet must start with an upper-case letter';
     },
     ILLEGAL_PROP_IN_IMPORT(propName: string) {
-        return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`;
+        return `"${propName}" css attribute cannot be used inside :import block`;
     },
     FROM_PROP_MISSING_IN_IMPORT() {
-        return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
+        return `"-st-from" is missing in :import block`;
     },
     INVALID_NAMED_IMPORT_AS(name: string) {
         return `Invalid named import "as" with name "${name}"`;
@@ -97,7 +96,7 @@ export function createAtImportProps(
     return { name: 'st-import', params };
 }
 
-export function ensureStylableImports(
+export function ensureModuleImport(
     ast: Root,
     importPatches: Array<ImportPatch>,
     options: {
@@ -197,7 +196,7 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
     }
 }
 
-export function parseStylableImport(
+export function parseModuleImportStatement(
     node: AtRule | Rule,
     context: string,
     diagnostics: Diagnostics
@@ -271,7 +270,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
 
     rule.walkDecls((decl) => {
         switch (decl.prop) {
-            case valueMapping.from: {
+            case `-st-from`: {
                 const importPath = stripQuotation(decl.value);
                 if (!importPath.trim()) {
                     diagnostics.error(decl, parseImportMessages.EMPTY_IMPORT_FROM());
@@ -285,7 +284,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                 fromExists = true;
                 break;
             }
-            case valueMapping.default:
+            case `-st-default`:
                 importObj.defaultExport = decl.value;
                 if (!isCompRoot(importObj.defaultExport) && importObj.from.endsWith(`.css`)) {
                     diagnostics.warn(decl, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
@@ -293,7 +292,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                     });
                 }
                 break;
-            case valueMapping.named:
+            case `-st-named`:
                 {
                     const { keyframesMap, namedMap } = parsePseudoImportNamed(
                         decl.value,
