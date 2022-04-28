@@ -11,13 +11,14 @@ import type { Log } from './logger';
 import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { Diagnostic } from './report-diagnostics';
 import { errorMessages } from './messages';
+import type { IFileSystem } from '@file-services/types';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
     filePath: string;
     fullSrcDir: string;
     log: Log;
-    fs: any;
+    fs: IFileSystem;
     moduleFormats: string[];
     outputCSS?: boolean;
     outputCSSNameTemplate?: string;
@@ -68,7 +69,7 @@ export function buildSingleFile({
     diagnosticsManager = new DiagnosticsManager({ log }),
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve, isAbsolute } = fs;
-    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath)) as string;
+    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath));
     const outPath = targetFilePath + '.js';
     const fileDirectory = dirname(filePath);
     const outDirPath = dirname(outPath);
@@ -233,7 +234,7 @@ export function removeBuildProducts({
     dtsSourceMap,
 }: BuildCommonOptions) {
     const { basename, dirname, join, relative } = fs;
-    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath)) as string;
+    const targetFilePath = join(fullOutDir, relative(fullSrcDir, filePath));
     const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
         filename: basename(targetFilePath, '.st.css'),
     });
