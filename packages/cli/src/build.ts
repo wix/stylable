@@ -132,10 +132,12 @@ export async function build(
                             dtsSourceMap,
                         });
 
-                        generator.removeEntryFromIndex(
-                            outputSources ? targetFilePath : deletedFile,
-                            fullOutDir
-                        );
+                        if (indexFile) {
+                            generator.removeEntryFromIndex(
+                                outputSources ? targetFilePath : deletedFile,
+                                fullOutDir
+                            );
+                        }
                     }
                 }
             }
@@ -233,10 +235,12 @@ export async function build(
                     generated,
                 });
 
-                generator.generateFileIndexEntry(
-                    outputSources ? targetFilePath : filePath,
-                    fullOutDir
-                );
+                if (indexFile) {
+                    generator.generateFileIndexEntry(
+                        outputSources ? targetFilePath : filePath,
+                        fullOutDir
+                    );
+                }
             } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
             }
