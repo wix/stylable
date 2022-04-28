@@ -191,10 +191,10 @@ export class Stylable {
         value: string,
         options?: Partial<TransformerOptions>
     ) {
-        const decl = new postcss.Declaration({ prop, value });
+        const decl = postcss.decl({ prop, value });
         this.transformAST(
             pathOrMeta,
-            new postcss.Root({}).append(new postcss.Rule({ selector: `.root` }).append(decl)),
+            postcss.root({}).append(postcss.rule({ selector: `.x` }).append(decl)),
             options
         );
         return { prop: decl.prop, value: decl.value };

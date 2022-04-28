@@ -71,11 +71,11 @@ describe('Stylable', () => {
                 [path]: `.a { -st-states: x; }`,
             });
 
-            const resultFromPath = stylable.transformSelector(path, `.a:x {}`);
-            const resultFromMeta = stylable.transformSelector(stylable.analyze(path), `.a:x {}`);
+            const resultFromPath = stylable.transformSelector(path, `.a:x`);
+            const resultFromMeta = stylable.transformSelector(stylable.analyze(path), `.a:x`);
 
-            expect(resultFromPath.selector, `by path`).to.eql(`.entry__a.entry--x {}`);
-            expect(resultFromMeta.selector, `by meta`).to.eql(`.entry__a.entry--x {}`);
+            expect(resultFromPath.selector, `by path`).to.eql(`.entry__a.entry--x`);
+            expect(resultFromMeta.selector, `by meta`).to.eql(`.entry__a.entry--x`);
         });
         it(`should resolve selector components`, () => {
             const path = `/entry.st.css`;
@@ -84,8 +84,8 @@ describe('Stylable', () => {
             });
 
             const { meta } = sheets[path];
-            const resultFromPath = stylable.transformSelector(path, `.a {}`);
-            const resultFromMeta = stylable.transformSelector(stylable.analyze(path), `.a {}`);
+            const resultFromPath = stylable.transformSelector(path, `.a`);
+            const resultFromMeta = stylable.transformSelector(stylable.analyze(path), `.a`);
 
             const expectedResolve = [
                 [
