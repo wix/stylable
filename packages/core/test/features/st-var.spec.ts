@@ -162,6 +162,9 @@ describe(`features/st-var`, () => {
             .root {
                 /* @decl(simple) prop: green */
                 prop: value(varA);
+
+                /* @decl(concat) prop: before green-after */
+                prop: before value(varA)-after;
                 
                 /* @decl(in unknown function) prop: unknown(green) */
                 prop: unknown(value(varA))
@@ -828,18 +831,24 @@ describe(`features/st-var`, () => {
                         jsStr: '123',
                     };
                 `,
+                '/re-export.st.css': `
+                    @st-import [jsStr as mappedJsStr] from './code';
+                `,
                 '/entry.st.css': `                
                     @st-import [jsStr] from './code';
+                    @st-import [mappedJsStr as reexportJsStr] from './re-export.st.css';
 
                     :vars {
                         a: value(jsStr);
+                        b: value(reexportJsStr);
                     }
 
                     .root {
-                        /* 
-                            @decl prop: 123
-                        */
+                        /* @decl(direct) prop: 123 */
                         prop: value(jsStr);
+                        
+                        /* @decl(re-export) prop: 123 */
+                        prop: value(reexportJsStr);
                     }
                 `,
             });
@@ -850,6 +859,7 @@ describe(`features/st-var`, () => {
 
             // JS exports
             expect(exports.stVars.a, `a JS export`).to.eql(`123`);
+            expect(exports.stVars.b, `a re-exported JS export`).to.eql(`123`);
         });
         it(`should report unhandled imported non var symbols in value`, () => {
             testStylableCore({

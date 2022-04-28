@@ -1,5 +1,5 @@
 import type { StylableMeta } from '../stylable-meta';
-import type { ScopeContext, StylableExports } from '../stylable-transformer';
+import type { ScopeContext, StylableExports, StylableTransformer } from '../stylable-transformer';
 import type { StylableResolver, MetaResolvedSymbols } from '../stylable-resolver';
 import type { StylableEvaluator, EvalValueData } from '../functions';
 import type * as postcss from 'postcss';
@@ -69,7 +69,13 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         data: EvalValueData;
     }) => void;
     transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
-    transformLastPass: (options: { context: FeatureTransformContext }) => void;
+    transformLastPass: (options: {
+        context: FeatureTransformContext;
+        ast: postcss.Root;
+        transformer: StylableTransformer;
+        cssVarsMapping: Record<string, string>;
+        path: string[];
+    }) => void;
 }
 const defaultHooks: FeatureHooks<NodeTypes> = {
     metaInit() {

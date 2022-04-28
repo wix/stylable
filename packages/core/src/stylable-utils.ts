@@ -5,7 +5,6 @@ import type { Diagnostics } from './diagnostics';
 import type { Imported, ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
-import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -42,8 +41,18 @@ export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
-export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
+export const INVALID_MERGE_OF = (mergeValue: string) => {
+    return `invalid merge of: \n"${mergeValue}"`;
+};
+// ToDo: move to helpers/mixin
+export function mergeRules(
+    mixinAst: postcss.Root,
+    rule: postcss.Rule,
+    mixinDecl: postcss.Declaration,
+    report?: Diagnostics
+) {
     let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
+    const nestedInKeyframes = isChildOfAtRule(rule, `keyframes`);
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
         if (isChildOfAtRule(mixinRule, 'keyframes')) {
             return;
@@ -70,29 +79,26 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
 
     if (mixinAst.nodes) {
         let nextRule: postcss.Rule | postcss.AtRule = rule;
-        let mixinEntry: postcss.Declaration | null = null;
-
-        rule.walkDecls(mixinDeclRegExp, (decl) => {
-            mixinEntry = decl;
-        });
-        if (!mixinEntry) {
-            throw rule.error('missing mixin entry');
-        }
         // TODO: handle rules before and after decl on entry
         mixinAst.nodes.slice().forEach((node) => {
             if (node === mixinRoot) {
                 node.walkDecls((node) => {
-                    rule.insertBefore(mixinEntry!, node);
+                    rule.insertBefore(mixinDecl, node);
                 });
             } else if (node.type === 'decl') {
-                rule.insertBefore(mixinEntry!, node);
+                rule.insertBefore(mixinDecl, node);
             } else if (node.type === 'rule' || node.type === 'atrule') {
-                if (rule.parent!.last === nextRule) {
-                    rule.parent!.append(node);
+                const valid = !nestedInKeyframes;
+                if (valid) {
+                    if (rule.parent!.last === nextRule) {
+                        rule.parent!.append(node);
+                    } else {
+                        rule.parent!.insertAfter(nextRule, node);
+                    }
+                    nextRule = node;
                 } else {
-                    rule.parent!.insertAfter(nextRule, node);
+                    report?.warn(rule, INVALID_MERGE_OF(node.toString()));
                 }
-                nextRule = node;
             }
         });
     }
@@ -117,7 +123,7 @@ export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
 
 export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
     if (symbol._kind === 'class' || symbol._kind === 'element') {
-        if (!symbol[valueMapping.extends]) {
+        if (!symbol[`-st-extends`]) {
             return symbol.alias;
         }
     }

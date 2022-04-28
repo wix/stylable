@@ -4,9 +4,8 @@ import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
-import { isCSSVarProp } from '../helpers/css-custom-property';
+import { validateCustomPropertyName } from '../helpers/css-custom-property';
 import type { StylableMeta } from '../stylable-meta';
-import { rootValueMapping, valueMapping } from '../stylable-value-parsers';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
@@ -28,6 +27,13 @@ export interface Imported {
     request: string;
     context: string;
 }
+
+export const PseudoImport = `:import`;
+export const PseudoImportDecl = {
+    DEFAULT: `-st-default` as const,
+    NAMED: `-st-named` as const,
+    FROM: `-st-from` as const,
+};
 
 /**
  * ImportTypeHook is used as a way to cast imported symbols before resolving their actual type.
@@ -109,7 +115,7 @@ export const hooks = createFeature<{
         if (rule.selector !== `:import`) {
             context.diagnostics.warn(
                 rule,
-                diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.import)
+                diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(PseudoImport)
             );
             return;
         }
@@ -178,7 +184,7 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
 
 function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {
     for (const [local, imported] of Object.entries(importDef.named)) {
-        if (isCSSVarProp(imported) && !isCSSVarProp(local)) {
+        if (validateCustomPropertyName(imported) && !validateCustomPropertyName(local)) {
             context.diagnostics.warn(
                 importDef.rule,
                 diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local)
@@ -197,7 +203,7 @@ function validateImports(context: FeatureTransformContext) {
             const fromDecl =
                 importObj.rule.nodes &&
                 importObj.rule.nodes.find(
-                    (decl) => decl.type === 'decl' && decl.prop === valueMapping.from
+                    (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.FROM
                 );
 
             context.diagnostics.warn(
@@ -214,7 +220,7 @@ function validateImports(context: FeatureTransformContext) {
                     const namedDecl =
                         importObj.rule.nodes &&
                         importObj.rule.nodes.find(
-                            (decl) => decl.type === 'decl' && decl.prop === valueMapping.named
+                            (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.NAMED
                         );
 
                     context.diagnostics.warn(

@@ -1,76 +1,8 @@
-import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
+import { generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 
 describe('Stylable postcss transform (Global)', () => {
-    it('should support :global() as mixin', () => {
-        const result = generateStylableRoot({
-            entry: `/style.st.css`,
-            files: {
-                '/style.st.css': {
-                    namespace: 'style',
-                    content: `
-                        :import {
-                            -st-from: "./comp.st.css";
-                            -st-default: Comp;
-                        }
-                        .root {
-                            -st-mixin: Comp;
-                        }
-                    `,
-                },
-                '/comp.st.css': {
-                    namespace: 'comp',
-                    content: `
-                        :global(.btn) .root {}
-                    `,
-                },
-            },
-        });
-
-        expect((result.nodes[1] as postcss.Rule).selector).to.equal('.btn .style__root');
-    });
-
-    it('should support nested :global() as mixin', () => {
-        const result = generateStylableRoot({
-            entry: `/style.st.css`,
-            files: {
-                '/style.st.css': {
-                    namespace: 'style',
-                    content: `
-                        :import {
-                            -st-from: "./mixin.st.css";
-                            -st-default: Mixin;
-                        }
-                        .root {
-                            -st-mixin: Mixin;
-                        }
-                    `,
-                },
-                '/mixin.st.css': {
-                    namespace: 'mixin',
-                    content: `
-                        :import {
-                            -st-from: "./comp.st.css";
-                            -st-default: Comp;
-                        }
-                        .root {
-                            -st-mixin: Comp;
-                        }
-                    `,
-                },
-                '/comp.st.css': {
-                    namespace: 'comp',
-                    content: `
-                        :global(.btn) .root {}
-                    `,
-                },
-            },
-        });
-
-        expect((result.nodes[1] as postcss.Rule).selector).to.equal('.btn .style__root');
-    });
-
     it('should register to all global classes to "meta.globals"', () => {
         const { meta } = generateStylableResult({
             entry: `/style.st.css`,
@@ -78,26 +10,20 @@ describe('Stylable postcss transform (Global)', () => {
                 '/style.st.css': {
                     namespace: 'style',
                     content: `
-                        :import {
-                            -st-from: "./mixin.st.css";
-                            -st-named: test, mix;
-                        }
+                        @st-import [test] from './imported.st.css';
                         .root {}
                         .test {}
                         .x { -st-global: '.a .b'; }
                         :global(.c .d) {}
                         :global(.e) {}
-                        .mixIntoMe { -st-mixin: mix; }
                     `,
                 },
-                '/mixin.st.css': {
+                '/imported.st.css': {
                     namespace: 'mixin',
                     content: `
                         .test {
                             -st-global: ".global-test";
                         }
-
-                        .mix :global(.global-test2) {}
                     `,
                 },
             },
@@ -105,7 +31,6 @@ describe('Stylable postcss transform (Global)', () => {
 
         expect(meta.globals).to.eql({
             'global-test': true,
-            'global-test2': true,
             a: true,
             b: true,
             c: true,
@@ -116,9 +41,5 @@ describe('Stylable postcss transform (Global)', () => {
         expect((meta.outputAst!.nodes[2] as postcss.Rule).selector).to.equal('.a .b');
         expect((meta.outputAst!.nodes[3] as postcss.Rule).selector).to.equal('.c .d');
         expect((meta.outputAst!.nodes[4] as postcss.Rule).selector).to.equal('.e');
-        expect((meta.outputAst!.nodes[5] as postcss.Rule).selector).to.equal('.style__mixIntoMe');
-        expect((meta.outputAst!.nodes[6] as postcss.Rule).selector).to.equal(
-            '.style__mixIntoMe .global-test2'
-        );
     });
 });

@@ -43,6 +43,7 @@ export interface SRule extends Rule {
     selectorAst: SelectorAstNode;
     isSimpleSelector: boolean;
     selectorType: 'class' | 'element' | 'complex';
+    /**@deprecated*/
     mixins?: RefedMixin[];
     stScopeSelector?: string;
 }

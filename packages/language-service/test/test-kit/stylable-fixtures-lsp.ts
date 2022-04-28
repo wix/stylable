@@ -1,6 +1,7 @@
 import fs from '@file-services/node';
 import path from 'path';
-import { safeParse, Stylable } from '@stylable/core';
+import { Stylable } from '@stylable/core';
+import { safeParse } from '@stylable/core/dist/index-internal';
 import { StylableLanguageService } from '@stylable/language-service';
 
 export const CASES_PATH = path.join(

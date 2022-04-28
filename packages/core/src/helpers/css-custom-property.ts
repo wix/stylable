@@ -111,7 +111,7 @@ export function validateAtProperty(
     };
 }
 
-export function isCSSVarProp(value: string) {
+export function validateCustomPropertyName(value: string) {
     return value.startsWith('--');
 }
 

@@ -3,7 +3,6 @@ import type { Diagnostics } from '../diagnostics';
 import { parseSelectorWithCache } from './selector';
 import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver } from '../stylable-resolver';
-import { valueMapping } from '../stylable-value-parsers';
 import { validateStateArgument } from '../pseudo-states';
 import { CSSClass } from '../features';
 
@@ -21,7 +20,7 @@ export function validateRuleStateDefinition(
         if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
             const className = selectorChunk[0].value;
             const classMeta = CSSClass.get(meta, className);
-            const states = classMeta?.[valueMapping.states];
+            const states = classMeta?.[`-st-states`];
 
             if (states && classMeta._kind === 'class') {
                 for (const stateName in states) {
@@ -43,7 +42,7 @@ export function validateRuleStateDefinition(
                                 `pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`
                             );
                             rule.walkDecls((decl) => {
-                                if (decl.prop === valueMapping[`states`]) {
+                                if (decl.prop === `-st-states`) {
                                     diagnostics.warn(decl, errors.join('\n'), {
                                         word: decl.value,
                                     });

@@ -1,7 +1,8 @@
 import type { ParsedValue } from '../types';
-import type { ReportWarning } from '../stylable-value-parsers';
 import postcssValueParser from 'postcss-value-parser';
 import type { Node as ValueNode } from 'postcss-value-parser';
+
+export type ReportWarning = (message: string, options?: { word: string }) => void;
 
 export function getNamedArgs(node: ParsedValue) {
     const args: ParsedValue[][] = [];
@@ -71,7 +72,7 @@ export function getFormatterArgs(
     return argsResult;
 
     function checkEmptyArg() {
-        if (reportWarning && currentArg.trim() === '') {
+        if (reportWarning && argsResult.length && currentArg.trim() === '') {
             reportWarning(
                 `${postcssValueParser.stringify(
                     node as postcssValueParser.Node

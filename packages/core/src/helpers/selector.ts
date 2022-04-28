@@ -196,7 +196,21 @@ export function scopeNestedSelector(
                       return matchTypeAndValue(node, outputAst.nodes[i]);
                   })
                 : false;
-            if (first && !parentRef && !startWithScoping && !globalSelector) {
+            let nestedMixRoot = false;
+            walkSelector(outputAst, (node, i, nodes) => {
+                if (node.type === 'nesting') {
+                    nestedMixRoot = true;
+                    nodes.splice(i, 1, {
+                        type: `selector`,
+                        nodes: cloneDeep(scopeAst.nodes as SelectorNode[]),
+                        start: node.start,
+                        end: node.end,
+                        after: ``,
+                        before: ``,
+                    });
+                }
+            });
+            if (first && !parentRef && !startWithScoping && !globalSelector && !nestedMixRoot) {
                 outputAst.nodes.unshift(...cloneDeep(scopeAst.nodes as SelectorNode[]), {
                     type: `combinator`,
                     combinator: `space`,
@@ -208,18 +222,6 @@ export function scopeNestedSelector(
                     invalid: false,
                 });
             }
-            walkSelector(outputAst, (node, i, nodes) => {
-                if (node.type === 'nesting') {
-                    nodes.splice(i, 1, {
-                        type: `selector`,
-                        nodes: cloneDeep(scopeAst.nodes as SelectorNode[]),
-                        start: node.start,
-                        end: node.end,
-                        after: ``,
-                        before: ``,
-                    });
-                }
-            });
 
             resultSelectors.push(outputAst);
         });

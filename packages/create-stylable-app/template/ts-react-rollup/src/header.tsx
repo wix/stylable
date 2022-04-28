@@ -6,7 +6,7 @@ export interface HeaderProps {
     className?: string;
 }
 
-export const Header: React.VFC<HeaderProps> = ({ className }) => {
+export const Header: React.FC<HeaderProps> = ({ className }) => {
     return (
         <header className={st(classes.root, className)}>
             <h1 className={classes.title}>

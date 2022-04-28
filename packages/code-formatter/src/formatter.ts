@@ -1,4 +1,4 @@
-import { safeParse } from '@stylable/core';
+import { safeParse } from '@stylable/core/dist/index-internal';
 import { css, CSSBeautifyOptions } from 'js-beautify';
 import type { Root } from 'postcss';
 

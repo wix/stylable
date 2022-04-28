@@ -1,6 +1,6 @@
 import { dirname } from 'path';
 import deindent from 'deindent';
-import type { MinimalFS } from './cached-process-file';
+import type { MinimalFS } from '../cached-process-file';
 
 export interface File {
     content: string;

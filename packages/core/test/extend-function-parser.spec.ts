@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { SBTypesParsers, valueMapping } from '@stylable/core';
+import { SBTypesParsers } from '@stylable/core';
 
-const parseExtends = SBTypesParsers[valueMapping.extends];
+const parseExtends = SBTypesParsers[`-st-extends`];
 
 describe('SBTypesParsers.extends', () => {
     it('should parse type extends', () => {

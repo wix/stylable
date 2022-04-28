@@ -1,4 +1,4 @@
-import { Stylable, StylableMeta, valueMapping } from '@stylable/core';
+import type { Stylable, StylableMeta } from '@stylable/core';
 import type { Rule, ChildNode, AtRule } from 'postcss';
 import type { Metadata, ResolvedImport } from './types';
 import { hashContent } from './hash-content-util';
@@ -58,7 +58,7 @@ export function rewriteImports(
                 }
                 if (rawRule.type === 'rule') {
                     rawRule.walkDecls((decl) => {
-                        if (decl.prop === valueMapping.from) {
+                        if (decl.prop === `-st-from`) {
                             decl.value = JSON.stringify(
                                 `/${ensureHash(resolved.meta, hashes)}.st.css`
                             );

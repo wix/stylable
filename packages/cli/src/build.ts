@@ -245,7 +245,7 @@ export async function build(
             try {
                 sourceFiles.add(filePath);
                 const meta = tryRun(
-                    () => stylable.process(filePath),
+                    () => stylable.analyze(filePath),
                     errorMessages.STYLABLE_PROCESS(filePath)
                 );
                 for (const dependency of stylable.getDependencies(meta)) {

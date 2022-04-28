@@ -9,7 +9,10 @@ export type { ImportSymbol, Imported } from './st-import';
 export * as STGlobal from './st-global';
 
 export * as STVar from './st-var';
-export type { VarSymbol } from './st-var';
+export type { VarSymbol, ComputedStVar, FlatComputedStVar } from './st-var';
+
+export * as STMixin from './st-mixin';
+export type { RefedMixin, MixinValue } from './st-mixin';
 
 export * as CSSClass from './css-class';
 export type { ClassSymbol } from './css-class';
@@ -23,4 +26,4 @@ export type { CSSVarSymbol } from './css-custom-property';
 export * as CSSKeyframes from './css-keyframes';
 export type { KeyframesSymbol } from './css-keyframes';
 
-export type { RefedMixin, StylableDirectives } from './types';
+export type { StylableDirectives, MappedStates } from './types';

@@ -12,7 +12,7 @@ export interface MinimalFS {
 }
 
 export interface FileProcessor<T> {
-    process: (fullpath: string, ignoreCache?: boolean) => T;
+    process: (fullpath: string, invalidateCache?: boolean) => T;
     add: (fullpath: string, value: T) => void;
     processContent: (content: string, fullpath: string) => T;
     cache: Record<string, CacheItem<T>>;
@@ -25,11 +25,11 @@ export function cachedProcessFile<T = any>(
     postProcessors: Array<(value: T, path: string) => T> = [],
     cache: { [key: string]: CacheItem<T> } = {}
 ): FileProcessor<T> {
-    function process(fullpath: string, ignoreCache = false) {
+    function process(fullpath: string, invalidateCache = false) {
         const stat = fs.statSync(fullpath);
         const cached = cache[fullpath];
         if (
-            ignoreCache ||
+            invalidateCache ||
             !cached ||
             (cached && cached.stat.mtime.valueOf() !== stat.mtime.valueOf())
         ) {

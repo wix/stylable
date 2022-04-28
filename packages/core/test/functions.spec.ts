@@ -47,13 +47,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 -st-from: "./formatter";
                                 -st-default: formatter;
                             }
-                            :import {
-                                -st-from: "./mixin";
-                                -st-default: mixin;
-                            }
                             .container {
                                 background: formatter(1, "2px solid red" 10px);
-                                -st-mixin: mixin(1, "2");
                             }
                         `,
                     },
@@ -64,21 +59,11 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             }
                         `,
                     },
-                    '/mixin.js': {
-                        content: `
-                            module.exports = function(args) {
-                                return {
-                                    content: [...args].map((x)=>\`url(\${JSON.stringify(x)})\`).join(', ')
-                                };
-                            }
-                        `,
-                    },
                 },
             });
 
             const rule = result.nodes[0] as postcss.Rule;
             expect(rule.nodes[0].toString()).to.equal('background: 1 2px solid red 10px');
-            expect(rule.nodes[1].toString()).to.equal('content: url("1"), url("2")');
         });
 
         it('apply simple js formatter with a single argument', () => {

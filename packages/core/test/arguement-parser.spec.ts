@@ -53,6 +53,9 @@ describe('Value argument parsing (split by comma)', () => {
         test('should process a function with string argument and extra value', 'func("A" 10px)', [
             'A 10px',
         ]);
+        test('should process a function without any parameters', 'func()', [], true, [
+            /*no errors*/
+        ]);
     });
 
     describe('invalid inputs', () => {
@@ -64,7 +67,6 @@ describe('Value argument parsing (split by comma)', () => {
             'func(/*with comment*/  /*with comment*/, b, c)',
             ['', 'b', 'c']
         );
-        test('should process a function without any parameters', 'func()', []);
         test('should process a function with a empty argument', 'func(a,)', ['a']);
         test('should process a function with too many commas', 'func(a,,)', ['a']);
         test('should process a function with too many commas', 'func(a,,b)', ['a', '', 'b']);

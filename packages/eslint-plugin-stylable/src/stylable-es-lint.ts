@@ -1,12 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import {
-    Stylable,
-    createDefaultResolver,
-    StylableExports,
-    StylableMeta,
-    safeParse,
-} from '@stylable/core';
+import { Stylable, createDefaultResolver, StylableExports, StylableMeta } from '@stylable/core';
+import { safeParse } from '@stylable/core/dist/index-internal';
 import {
     ESLintUtils,
     AST_NODE_TYPES,
@@ -62,7 +57,7 @@ export default createRule({
                 const fileName = context.getFilename();
                 const dirName = path.dirname(fileName);
                 const fullPath = moduleResolver(dirName, importRequest);
-                const meta = stylable.process(fullPath);
+                const meta = stylable.analyze(fullPath);
                 const { exports } = stylable.transform(meta);
 
                 if (exposeDiagnosticsReports) {
