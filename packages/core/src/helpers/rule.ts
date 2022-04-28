@@ -215,7 +215,7 @@ export function findRule(
     });
     return found;
 }
-
+// ToDo: remove when st-scope moves to transformer
 export function getRuleScopeSelector(rule: postcss.Rule) {
     return ignoreDeprecationWarn(() => (rule as SRule).stScopeSelector);
 }

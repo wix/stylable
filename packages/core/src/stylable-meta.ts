@@ -1,5 +1,5 @@
 import type * as postcss from 'postcss';
-import type { RefedMixin, FeatureContext } from './features';
+import type { FeatureContext } from './features';
 import type { Diagnostics } from './diagnostics';
 import type { SelectorList } from '@tokey/css-selector-parser';
 import type { PlugableRecord } from './helpers/plugable-record';
@@ -41,8 +41,6 @@ export class StylableMeta {
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
     public scopes: postcss.AtRule[] = [];
-    /** @deprecated */
-    public mixins: RefedMixin[] = [];
     // Generated during transform
     public outputAst?: postcss.Root;
     public globals: Record<string, boolean> = {};

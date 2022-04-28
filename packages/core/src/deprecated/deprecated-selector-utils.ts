@@ -235,15 +235,6 @@ export const createSimpleSelectorChecker = createChecker([
     'selector',
     ['element', 'class'],
 ]);
-export function isSimpleSelector(selectorAst: SelectorAstNode) {
-    const isSimpleSelectorASTNode = createSimpleSelectorChecker();
-    const isSimple = traverseNode(
-        selectorAst,
-        (node) => isSimpleSelectorASTNode(node) !== false /*stop on complex selector */
-    );
-
-    return isSimple;
-}
 
 export function isImport(ast: SelectorAstNode): boolean {
     const selectors = ast.nodes[0];

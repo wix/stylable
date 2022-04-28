@@ -31,7 +31,6 @@ import {
     CSSKeyframes,
     CSSCustomProperty,
 } from './features';
-import type { SDecl } from './deprecated/postcss-ast-extension';
 import {
     CSSResolve,
     StylableResolverCache,
@@ -220,8 +219,6 @@ export class StylableTransformer {
         });
 
         ast.walkDecls((decl) => {
-            (decl as SDecl).stylable = { sourceValue: decl.value };
-
             if (validateCustomPropertyName(decl.prop)) {
                 CSSCustomProperty.hooks.transformDeclaration({
                     context: transformContext,

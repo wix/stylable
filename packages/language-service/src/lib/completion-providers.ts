@@ -17,7 +17,6 @@ import {
     nativePseudoClasses,
     nativePseudoElements,
     ResolvedElement,
-    SRule,
     systemValidators,
 } from '@stylable/core/dist/index-internal';
 import type { IFileSystem } from '@file-services/types';
@@ -65,7 +64,7 @@ export interface ProviderOptions {
     tsLangService: ExtendedTsLanguageService; // candidate for removal
     resolvedElements: ResolvedElement[][]; // candidate for removal
     resolvedRoot: ResolvedElement; // candidate for removal
-    parentSelector: SRule | null;
+    parentSelector: postcss.Rule | null;
     astAtCursor: postcss.AnyNode; // candidate for removal
     lineChunkAtCursor: string;
     lastSelectoid: string; // candidate for removal

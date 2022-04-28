@@ -48,6 +48,3 @@ export { expandCustomSelectors } from './stylable-utils';
 export { systemValidators } from './state-validators';
 export { processDeclarationFunctions } from './process-declaration-functions';
 export { reportDiagnostic } from './report-diagnostic';
-
-// remove
-export type { SRule } from './deprecated/postcss-ast-extension';

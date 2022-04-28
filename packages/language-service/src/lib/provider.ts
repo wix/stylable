@@ -16,7 +16,6 @@ import {
     safeParse,
     process as stylableProcess,
     expandCustomSelectors,
-    SRule,
     StateParsedValue,
 } from '@stylable/core/dist/index-internal';
 import type {
@@ -735,19 +734,19 @@ export class Provider {
         const parentAst: postcss.Node | undefined = (astAtCursor as postcss.Declaration).parent
             ? (astAtCursor as postcss.Declaration).parent
             : undefined;
-        const parentSelector: SRule | null =
+        const parentSelector: postcss.Rule | null =
             parentAst &&
             isSelector(parentAst) &&
             fakeRules.findIndex((f) => {
                 return f.selector === parentAst.selector;
             }) === -1
-                ? (parentAst as SRule)
+                ? (parentAst)
                 : astAtCursor &&
                   isSelector(astAtCursor) &&
                   fakeRules.findIndex((f) => {
                       return f.selector === astAtCursor.selector;
                   }) === -1
-                ? (astAtCursor as SRule)
+                ? (astAtCursor)
                 : null;
 
         const { lineChunkAtCursor, fixedCharIndex } = getChunkAtCursor(

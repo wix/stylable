@@ -9,7 +9,6 @@ import {
     parseStMixin,
     parseStPartialMixin,
 } from '../helpers/mixin';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { resolveArgumentsValue } from '../functions';
 import { cssObjectToAst } from '../parser';
 import * as postcss from 'postcss';
@@ -20,8 +19,6 @@ import type { StylableMeta } from '../stylable-meta';
 import type { CSSResolve } from '../stylable-resolver';
 import type { StylableTransformer } from '../stylable-transformer';
 import { dirname } from 'path';
-// ToDo: deprecate - stop usage
-import type { SRule } from '../deprecated/postcss-ast-extension';
 
 export interface MixinValue {
     type: string;
@@ -71,27 +68,6 @@ export const diagnostics = {
 // HOOKS
 
 export const hooks = createFeature({
-    analyzeDeclaration({ context, decl }) {
-        ignoreDeprecationWarn(() => {
-            const parentRule = decl.parent as SRule;
-            const prevMixins = parentRule?.mixins || [];
-            const mixins = collectDeclMixins(
-                context,
-                decl,
-                (mixinSymbolName) => {
-                    const symbol = STSymbol.get(context.meta, mixinSymbolName);
-                    return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
-                        ? 'args'
-                        : 'named';
-                },
-                false /*dont report param signature diagnostics*/,
-                prevMixins
-            );
-            if (mixins.length) {
-                parentRule.mixins = mixins;
-            }
-        });
-    },
     transformLastPass({ context, ast, transformer, cssVarsMapping, path }) {
         ast.walkRules((rule) => appendMixins(context, transformer, rule, cssVarsMapping, path));
     },
@@ -134,7 +110,6 @@ function collectRuleMixins(
                 (mixinSymbolName) => {
                     return mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named';
                 },
-                true /* report param signature diagnostics */,
                 mixins
             );
         }
@@ -146,7 +121,6 @@ function collectDeclMixins(
     context: FeatureContext,
     decl: postcss.Declaration,
     paramSignature: (mixinSymbolName: string) => 'named' | 'args',
-    emitStrategyDiagnostics: boolean,
     previousMixins?: RefedMixin[]
 ): RefedMixin[] {
     const { meta } = context;
@@ -161,35 +135,36 @@ function collectDeclMixins(
         return previousMixins || mixins;
     }
 
-    parser(decl, paramSignature, context.diagnostics, emitStrategyDiagnostics).forEach((mixin) => {
-        const mixinRefSymbol = STSymbol.get(meta, mixin.type);
-        if (
-            mixinRefSymbol &&
-            (mixinRefSymbol._kind === 'import' ||
-                mixinRefSymbol._kind === 'class' ||
-                mixinRefSymbol._kind === 'element')
-        ) {
-            if (mixin.partial && Object.keys(mixin.options).length === 0) {
-                context.diagnostics.warn(
-                    decl,
-                    diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
-                    {
-                        word: mixin.type,
-                    }
-                );
+    parser(decl, paramSignature, context.diagnostics, /*emitStrategyDiagnostics*/ true).forEach(
+        (mixin) => {
+            const mixinRefSymbol = STSymbol.get(meta, mixin.type);
+            if (
+                mixinRefSymbol &&
+                (mixinRefSymbol._kind === 'import' ||
+                    mixinRefSymbol._kind === 'class' ||
+                    mixinRefSymbol._kind === 'element')
+            ) {
+                if (mixin.partial && Object.keys(mixin.options).length === 0) {
+                    context.diagnostics.warn(
+                        decl,
+                        diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
+                        {
+                            word: mixin.type,
+                        }
+                    );
+                }
+                const refedMixin = {
+                    mixin,
+                    ref: mixinRefSymbol,
+                };
+                mixins.push(refedMixin);
+            } else {
+                context.diagnostics.warn(decl, diagnostics.UNKNOWN_MIXIN(mixin.type), {
+                    word: mixin.type,
+                });
             }
-            const refedMixin = {
-                mixin,
-                ref: mixinRefSymbol,
-            };
-            mixins.push(refedMixin);
-            ignoreDeprecationWarn(() => meta.mixins).push(refedMixin);
-        } else {
-            context.diagnostics.warn(decl, diagnostics.UNKNOWN_MIXIN(mixin.type), {
-                word: mixin.type,
-            });
         }
-    });
+    );
 
     if (previousMixins) {
         const partials = previousMixins.filter((r) => r.mixin.partial);
