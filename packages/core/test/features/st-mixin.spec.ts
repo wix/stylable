@@ -1952,4 +1952,23 @@ describe(`features/st-mixin`, () => {
             });
         });
     });
+    describe(`regressions`, () => {
+        it(`should not change meta.mixins during transform`, () => {
+            // ToDo: remove in v5 (no meta.mixins)
+            const { stylable, sheets } = testStylableCore(
+                `
+                .root { -st-mixin: mix; }
+                .mix { color: green }
+            `
+            );
+            const { meta } = sheets['/entry.st.css'];
+
+            stylable.transform(meta);
+            const mixins1 = [...meta.mixins];
+            stylable.transform(meta);
+            const mixins2 = [...meta.mixins];
+
+            expect(mixins1).to.eql(mixins2);
+        });
+    });
 });
