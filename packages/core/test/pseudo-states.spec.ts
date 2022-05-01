@@ -10,10 +10,7 @@ import {
     processSource,
     testInlineExpects,
 } from '@stylable/core-test-kit';
-import {
-    processorWarnings,
-    nativePseudoClasses,
-} from '@stylable/core/dist/index-internal';
+import { processorWarnings, nativePseudoClasses } from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
 import { stateErrors } from '@stylable/core/dist/pseudo-states';
 import { CSSType } from '@stylable/core/dist/features';
@@ -22,7 +19,6 @@ chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
 chai.use(mediaQuery);
 chai.use(flatMatch);
-
 
 // testing concerns for feature
 // - states belonging to an extended class (multi level)

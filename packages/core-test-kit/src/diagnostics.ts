@@ -1,12 +1,7 @@
 import { expect } from 'chai';
 import deindent from 'deindent';
 import type { Position } from 'postcss';
-import {
-    Diagnostics,
-    DiagnosticType,
-    StylableMeta,
-    StylableResults,
-} from '@stylable/core';
+import { Diagnostics, DiagnosticType, StylableMeta, StylableResults } from '@stylable/core';
 import { safeParse, StylableProcessor } from '@stylable/core/dist/index-internal';
 import { Config, generateStylableResult } from './generate-test-util';
 
