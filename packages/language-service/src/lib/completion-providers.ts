@@ -3,21 +3,22 @@ import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import type ts from 'typescript';
 
-import {
+import type {
     ClassSymbol,
     CSSResolve,
     CSSVarSymbol,
     ElementSymbol,
+    Stylable,
+    StylableMeta,
+    VarSymbol,
+} from '@stylable/core';
+import {
+    MappedStates,
     nativePseudoClasses,
     nativePseudoElements,
     ResolvedElement,
-    SRule,
-    Stylable,
-    StylableMeta,
     systemValidators,
-    VarSymbol,
-} from '@stylable/core';
-import type { MappedStates } from '@stylable/core/dist/index-internal';
+} from '@stylable/core/dist/index-internal';
 import type { IFileSystem } from '@file-services/types';
 import {
     classCompletion,
@@ -63,7 +64,7 @@ export interface ProviderOptions {
     tsLangService: ExtendedTsLanguageService; // candidate for removal
     resolvedElements: ResolvedElement[][]; // candidate for removal
     resolvedRoot: ResolvedElement; // candidate for removal
-    parentSelector: SRule | null;
+    parentSelector: postcss.Rule | null;
     astAtCursor: postcss.AnyNode; // candidate for removal
     lineChunkAtCursor: string;
     lastSelectoid: string; // candidate for removal

@@ -1,5 +1,5 @@
 import type * as postcss from 'postcss';
-import type { RefedMixin, FeatureContext } from './features';
+import type { FeatureContext } from './features';
 import type { Diagnostics } from './diagnostics';
 import type { SelectorList } from '@tokey/css-selector-parser';
 import type { PlugableRecord } from './helpers/plugable-record';
@@ -16,8 +16,6 @@ import {
     CSSKeyframes,
 } from './features';
 
-export const RESERVED_ROOT_NAME = 'root';
-
 const features = [
     STSymbol,
     STImport,
@@ -33,7 +31,7 @@ const features = [
 export class StylableMeta {
     public data: PlugableRecord = {};
     public rawAst: postcss.Root = this.ast.clone();
-    public root: 'root' = RESERVED_ROOT_NAME;
+    public root = 'root';
     public source: string = getSourcePath(this.ast, this.diagnostics);
     public namespace = '';
     public customSelectors: Record<string, string> = {};
@@ -41,8 +39,6 @@ export class StylableMeta {
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
     public scopes: postcss.AtRule[] = [];
-    /** @deprecated */
-    public mixins: RefedMixin[] = [];
     // Generated during transform
     public outputAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
@@ -53,7 +49,7 @@ export class StylableMeta {
             hooks.metaInit(context);
         }
         // set default root
-        const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
+        const rootSymbol = CSSClass.addClass(context, 'root');
         rootSymbol[`-st-root`] = true;
     }
     getSymbol(name: string) {

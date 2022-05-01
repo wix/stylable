@@ -8,7 +8,7 @@ import {
     processorWarnings,
     transformerWarnings,
     nativePseudoElements,
-} from '@stylable/core';
+} from '@stylable/core/dist/index-internal';
 import { CSSClass, CSSType } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
@@ -377,10 +377,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.OVERRIDE_TYPED_RULE(
-                                `-st-extends`,
-                                'root'
-                            ),
+                            message: processorWarnings.OVERRIDE_TYPED_RULE(`-st-extends`, 'root'),
                             file: 'main.css',
                         },
                     ]

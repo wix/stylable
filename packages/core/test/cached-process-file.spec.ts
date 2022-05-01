@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { cachedProcessFile, MinimalFS } from '@stylable/core';
+import type { MinimalFS } from '@stylable/core';
+import { cachedProcessFile } from '@stylable/core/dist/index-internal';
 
 describe('cachedProcessFile', () => {
     it('return process file content', () => {

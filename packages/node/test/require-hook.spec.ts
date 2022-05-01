@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { readdirSync } from 'fs';
-import { murmurhash3_32_gc } from '@stylable/core';
+import { murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 import { dirname, join } from 'path';
 import { attachHook } from '@stylable/node';
 

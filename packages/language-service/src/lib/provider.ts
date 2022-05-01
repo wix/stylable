@@ -7,15 +7,18 @@ import type { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
     CSSResolve,
-    expandCustomSelectors,
     ImportSymbol,
-    SRule,
-    StateParsedValue,
     Stylable,
     StylableMeta,
     JSResolve,
+    Diagnostics,
 } from '@stylable/core';
-import { safeParse, process as stylableProcess } from '@stylable/core/dist/index-internal';
+import {
+    safeParse,
+    StylableProcessor,
+    expandCustomSelectors,
+    StateParsedValue,
+} from '@stylable/core/dist/index-internal';
 import type {
     Location,
     ParameterInformation,
@@ -732,19 +735,19 @@ export class Provider {
         const parentAst: postcss.Node | undefined = (astAtCursor as postcss.Declaration).parent
             ? (astAtCursor as postcss.Declaration).parent
             : undefined;
-        const parentSelector: SRule | null =
+        const parentSelector: postcss.Rule | null =
             parentAst &&
             isSelector(parentAst) &&
             fakeRules.findIndex((f) => {
                 return f.selector === parentAst.selector;
             }) === -1
-                ? (parentAst as SRule)
+                ? parentAst
                 : astAtCursor &&
                   isSelector(astAtCursor) &&
                   fakeRules.findIndex((f) => {
                       return f.selector === astAtCursor.selector;
                   }) === -1
-                ? (astAtCursor as SRule)
+                ? astAtCursor
                 : null;
 
         const { lineChunkAtCursor, fixedCharIndex } = getChunkAtCursor(
@@ -1470,7 +1473,7 @@ export function createMeta(src: string, path: string) {
             fakes.push(r);
         }
 
-        meta = stylableProcess(ast);
+        meta = new StylableProcessor(new Diagnostics()).process(ast);
     } catch (error) {
         return { meta: null, fakes };
     }

@@ -1,6 +1,6 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { murmurhash3_32_gc } from '@stylable/core';
+import { murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 import { dirname } from 'path';
 
 const project = 'namespace-generation-project';

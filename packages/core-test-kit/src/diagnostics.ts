@@ -1,8 +1,13 @@
 import { expect } from 'chai';
 import deindent from 'deindent';
 import type { Position } from 'postcss';
-import { Diagnostics, DiagnosticType, StylableMeta, StylableResults } from '@stylable/core';
-import { safeParse, process } from '@stylable/core/dist/index-internal';
+import {
+    Diagnostics,
+    DiagnosticType,
+    StylableMeta,
+    StylableResults,
+} from '@stylable/core';
+import { safeParse, StylableProcessor } from '@stylable/core/dist/index-internal';
 import { Config, generateStylableResult } from './generate-test-util';
 
 export interface Diagnostic {
@@ -170,7 +175,7 @@ export function expectAnalyzeDiagnostics(
 ) {
     const source = findTestLocations(css);
     const root = safeParse(source.css);
-    const res = process(root);
+    const res = new StylableProcessor(new Diagnostics()).process(root);
 
     if (partial) {
         if (warnings.length === 0) {

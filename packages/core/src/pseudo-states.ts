@@ -2,20 +2,14 @@ import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
-import {
-    parseSelectorWithCache,
-    convertToClass,
-    stringifySelector,
-    convertToInvalid,
-} from './helpers/selector';
-import { wrapFunctionForDeprecation } from './helpers/deprecation';
+import { convertToClass, stringifySelector, convertToInvalid } from './helpers/selector';
 import { groupValues, listOptions } from './helpers/value';
 import type { PseudoClass } from '@tokey/css-selector-parser';
 import { StateResult, systemValidators } from './state-validators';
 import type { StylableMeta } from './stylable-meta';
 import type { StylableResolver } from './stylable-resolver';
 import type { ParsedValue, StateParsedValue } from './types';
-import { CSSClass, MappedStates } from './features';
+import type { MappedStates } from './features';
 import { stripQuotation } from './helpers/string';
 import { reservedFunctionalPseudoClasses } from './native-reserved-lists';
 import cssesc from 'cssesc';
@@ -180,65 +174,6 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
 }
 
 // TRANSFORM
-
-/* @deprecated */
-export const validateStateDefinition = wrapFunctionForDeprecation(
-    function (
-        decl: postcss.Declaration,
-        meta: StylableMeta,
-        resolver: StylableResolver,
-        diagnostics: Diagnostics
-    ) {
-        if (decl.parent && decl.parent.type !== 'root') {
-            const container = decl.parent;
-            if (container.type !== 'atrule') {
-                const parentRule = container as postcss.Rule;
-                const selectorAst = parseSelectorWithCache(parentRule.selector);
-                if (selectorAst.length && selectorAst.length === 1) {
-                    const singleSelectorAst = selectorAst[0];
-                    const selectorChunk = singleSelectorAst.nodes;
-
-                    if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
-                        const className = selectorChunk[0].value;
-                        const classMeta = CSSClass.get(meta, className)!;
-                        const states = classMeta[`-st-states`];
-
-                        if (classMeta && classMeta._kind === 'class' && states) {
-                            for (const stateName in states) {
-                                // TODO: Sort out types
-                                const state = states[stateName];
-                                if (state && typeof state === 'object') {
-                                    const res = validateStateArgument(
-                                        state,
-                                        meta,
-                                        state.defaultValue || '',
-                                        resolver,
-                                        diagnostics,
-                                        parentRule,
-                                        true,
-                                        !!state.defaultValue
-                                    );
-
-                                    if (res.errors) {
-                                        res.errors.unshift(
-                                            `pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`
-                                        );
-                                        diagnostics.warn(decl, res.errors.join('\n'), {
-                                            word: decl.value,
-                                        });
-                                    }
-                                }
-                            }
-                        } else {
-                            // TODO: error state on non-class
-                        }
-                    }
-                }
-            }
-        }
-    },
-    { name: `validateStateDefinition` }
-);
 
 export function validateStateArgument(
     stateAst: StateParsedValue,

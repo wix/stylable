@@ -6,8 +6,6 @@ import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
 import {
-    CSSResolve,
-    JSResolve,
     StylableResolver,
     createSymbolResolverWithCache,
     MetaResolvedSymbols,
@@ -18,9 +16,6 @@ import type { ParsedValue } from './types';
 import type { FeatureTransformContext } from './features/feature';
 import { CSSCustomProperty, STVar } from './features';
 import { unbox, CustomValueError } from './custom-values';
-
-export type ValueFormatter = (name: string) => string;
-export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
 
 export interface EvalValueData {
     value: string;

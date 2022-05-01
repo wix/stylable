@@ -1,5 +1,5 @@
 import type { LoaderDefinition } from 'webpack';
-import type { StylableExports } from '@stylable/core';
+import type { StylableExports } from '@stylable/core/dist/index-internal';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 import { addBuildInfo } from './add-build-info';
 

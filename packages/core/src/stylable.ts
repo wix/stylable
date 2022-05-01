@@ -14,7 +14,6 @@ import {
 } from './stylable-transformer';
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
-import { warnOnce } from './helpers/deprecation';
 import { STVar, CSSCustomProperty } from './features';
 import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
 import * as postcss from 'postcss';
@@ -54,7 +53,6 @@ export class Stylable {
     public projectRoot: string;
     protected fileSystem: MinimalFS;
     protected requireModule: (path: string) => any;
-    public delimiter = '__'; // ToDo: remove
     protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
     protected diagnostics = new Diagnostics();
     protected hooks: TransformHooks;
@@ -84,28 +82,8 @@ export class Stylable {
         this.resolvePath =
             config.resolveModule || createDefaultResolver(this.fileSystem, this.resolveOptions);
         this.cssParser = config.cssParser || cssParse;
-        this.resolverCache = config.resolverCache;  // ToDo: v5 default to `new Map()`
+        this.resolverCache = config.resolverCache; // ToDo: v5 default to `new Map()`
         this.fileProcessorCache = config.fileProcessorCache;
-// =======
-//     constructor(
-//         public projectRoot: string,
-//         protected fileSystem: MinimalFS,
-//         protected requireModule: (path: string) => any,
-//         public delimiter: string = '__',
-//         protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
-//         protected diagnostics = new Diagnostics(),
-//         protected hooks: TransformHooks = {},
-//         protected resolveOptions: any = {},
-//         public optimizer?: IStylableOptimizer,
-//         protected mode: 'production' | 'development' = 'production',
-//         public resolveNamespace?: typeof processNamespace,
-//         public resolvePath: ModuleResolver = createDefaultResolver(fileSystem, resolveOptions),
-//         protected cssParser: CssParser = cssParse,
-//         protected resolverCache?: StylableResolverCache, // ToDo: v5 default to `new Map()`
-//         // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
-//         protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>
-//     ) {
-// >>>>>>> d10ffe3ef8f65903f40e76954c70a56a7dd81c7c
         this.fileProcessor = createStylableFileProcessor({
             fileSystem: this.fileSystem,
             onProcess: this.onProcess,
@@ -153,13 +131,8 @@ export class Stylable {
     }: CreateProcessorOptions = {}) {
         return new StylableProcessor(new Diagnostics(), resolveNamespace);
     }
-    /**@deprecated */
-    public createTransformer(options?: Partial<TransformerOptions>) {
-        return this._createTransformer(options);
-    }
-    private _createTransformer(options: Partial<TransformerOptions> = {}) {
+    private createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
-            delimiter: this.delimiter,
             moduleResolver: this.resolvePath,
             diagnostics: new Diagnostics(),
             fileProcessor: this.fileProcessor,
@@ -184,7 +157,7 @@ export class Stylable {
                 this.cssParser(meta, { from: resourcePath })
             );
         }
-        const transformer = this._createTransformer(options);
+        const transformer = this.createTransformer(options);
         this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);
     }
@@ -194,7 +167,7 @@ export class Stylable {
         options?: Partial<TransformerOptions>
     ): { selector: string; resolved: ResolvedElement[][] } {
         const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
-        const transformer = this._createTransformer(options);
+        const transformer = this.createTransformer(options);
         const r = transformer.scopeSelector(meta, selector, undefined, undefined, true);
         return {
             selector: r.selector,
@@ -225,19 +198,9 @@ export class Stylable {
         options?: Partial<TransformerOptions>
     ): postcss.Root {
         const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
-        const transformer = this._createTransformer(options);
+        const transformer = this.createTransformer(options);
         transformer.transformAst(ast, meta);
         return ast;
-    }
-    /**@deprecated use stylable.analyze instead*/
-    public process(fullPath: string, invalidateCache = false): StylableMeta {
-        warnOnce('Stylable.process is deprecated, please use stylable.analyze instead');
-        if (typeof invalidateCache === 'string') {
-            warnOnce(
-                'Stylable.process with context as second arguments is deprecated please resolve the fullPath with Stylable.resolvePath before using'
-            );
-        }
-        return this.fileProcessor.process(fullPath, invalidateCache);
     }
     public analyze(fullPath: string, overrideSrc?: string) {
         return overrideSrc

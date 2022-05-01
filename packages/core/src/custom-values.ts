@@ -247,7 +247,7 @@ function getFlatValue<Value>(
     return parts.map((v) => getBoxValue([], v, fallbackNode, customTypes)).join(delimiter);
 }
 
-export function getBoxValue(
+function getBoxValue(
     path: string[],
     value: string | Box<string, unknown>,
     node: ParsedValue,

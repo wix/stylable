@@ -4,7 +4,7 @@ import type {
     SignatureHelp,
     SignatureInformation,
 } from 'vscode-languageserver';
-import { StateParsedValue, systemValidators } from '@stylable/core';
+import { StateParsedValue, systemValidators } from '@stylable/core/dist/index-internal';
 import type { ProviderPosition } from '../completion-providers';
 
 // Goes over an '-st-states' declaration value

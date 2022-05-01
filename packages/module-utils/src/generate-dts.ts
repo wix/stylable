@@ -1,11 +1,9 @@
-import type {
-    ClassSymbol,
+import type { ClassSymbol, StylableMeta, StylableResults, StylableSymbol } from '@stylable/core';
+import {
+    MappedStates,
     StateParsedValue,
-    StylableMeta,
-    StylableResults,
-    StylableSymbol,
-} from '@stylable/core';
-import type { MappedStates } from '@stylable/core/dist/index-internal';
+    namespace as scope,
+} from '@stylable/core/dist/index-internal';
 
 export const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
@@ -128,11 +126,6 @@ function getStateTSType(stateDef: StateParsedValue | null) {
 
 function wrapNL(code: string) {
     return code ? `\n${code}\n` : code;
-}
-
-// TODO: make available from core currently defined in transformer class
-function scope(name: string, namespace: string, delimiter = '__') {
-    return namespace ? namespace + delimiter + name : name;
 }
 
 export function generateDTSContent({ exports, meta }: StylableResults) {

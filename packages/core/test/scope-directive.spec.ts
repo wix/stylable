@@ -9,10 +9,9 @@ import {
 } from '@stylable/core-test-kit';
 import {
     processorWarnings,
-    SRule,
     transformerWarnings,
-    getRuleScopeSelector,
-} from '@stylable/core';
+} from '@stylable/core/dist/index-internal';
+import {SRule, getRuleScopeSelector} from '@stylable/core/dist/deprecated/postcss-ast-extension';
 
 use(flatMatch);
 

@@ -81,7 +81,7 @@ export type ReportError = (
     isElement: boolean
 ) => void;
 
-export function isInPath(
+function isInPath(
     extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
     { symbol: { name: name1 }, meta: { source: source1 } }: CSSResolve<ClassSymbol | ElementSymbol>
 ) {

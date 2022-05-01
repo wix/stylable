@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { createTransformer } from '@stylable/core-test-kit';
-import { expandCustomSelectors } from '@stylable/core';
+import { expandCustomSelectors } from '@stylable/core/dist/index-internal';
 
 describe('Stylable intellisense selector meta data', () => {
     it('resolve single class element', () => {

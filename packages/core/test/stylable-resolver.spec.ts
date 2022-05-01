@@ -1,27 +1,28 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { testStylableCore, generateStylableResult } from '@stylable/core-test-kit';
+import { Stylable, MinimalFS, StylableMeta } from '@stylable/core';
 import {
-    cssParse,
     StylableResolver,
-    cachedProcessFile,
-    MinimalFS,
-    StylableMeta,
     createDefaultResolver,
-} from '@stylable/core';
-import { process } from '@stylable/core/dist/index-internal';
+    cachedProcessFile,
+} from '@stylable/core/dist/index-internal';
 
 function createResolveExtendsResults(
-    fs: MinimalFS,
+    fileSystem: MinimalFS,
     fileToProcess: string,
     classNameToLookup: string,
     isElement = false
 ) {
-    const moduleResolver = createDefaultResolver(fs, {});
+    const moduleResolver = createDefaultResolver(fileSystem, {});
+    const stylable = new Stylable({
+        fileSystem,
+        projectRoot: '/',
+    });
 
     const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
-        return process(cssParse(content, { from: fullpath }));
-    }, fs);
+        return stylable.analyze(fullpath, content);
+    }, fileSystem);
 
     const resolver = new StylableResolver(
         processFile,

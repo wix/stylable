@@ -1,5 +1,6 @@
 import postcss from 'postcss';
-import { processNamespace, emitDiagnostics, DiagnosticsMode, MinimalFS } from '@stylable/core';
+import { processNamespace, MinimalFS } from '@stylable/core';
+import { emitDiagnostics, DiagnosticsMode } from '@stylable/core/dist/index-internal';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';

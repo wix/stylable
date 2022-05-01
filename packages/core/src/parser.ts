@@ -2,7 +2,8 @@ import postcss, { ProcessOptions, Root, parse as cssParse } from 'postcss';
 import postcssNested from 'postcss-nested';
 import postcssJS from 'postcss-js';
 import safeParser from 'postcss-safe-parser';
-import type { CSSObject } from './types';
+
+export type CSSObject = any & object;
 
 const processor = postcss([postcssNested()]);
 

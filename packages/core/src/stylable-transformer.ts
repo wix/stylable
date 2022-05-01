@@ -16,8 +16,7 @@ import {
     CompoundSelector,
     splitCompoundSelectors,
 } from '@tokey/css-selector-parser';
-import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
-import { namespace } from './helpers/namespace';
+import { createWarningRule, isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import { ClassSymbol, ElementSymbol, STMixin } from './features';
 import type { StylableMeta } from './stylable-meta';
@@ -31,7 +30,6 @@ import {
     CSSKeyframes,
     CSSCustomProperty,
 } from './features';
-import type { SDecl } from './deprecated/postcss-ast-extension';
 import {
     CSSResolve,
     StylableResolverCache,
@@ -41,6 +39,7 @@ import {
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
+import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -48,11 +47,6 @@ export interface ResolvedElement {
     name: string;
     type: string;
     resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
-}
-
-export interface KeyFrameWithNode {
-    value: string;
-    node: postcss.Node;
 }
 
 export type RuntimeStVar = string | { [key: string]: RuntimeStVar } | RuntimeStVar[];
@@ -93,7 +87,6 @@ export interface TransformerOptions {
     moduleResolver: ModuleResolver;
     requireModule: (modulePath: string) => any;
     diagnostics: Diagnostics;
-    delimiter?: string;
     keepValues?: boolean;
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
@@ -111,7 +104,6 @@ export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
     public diagnostics: Diagnostics;
     public resolver: StylableResolver;
-    public delimiter: string;
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
@@ -121,7 +113,6 @@ export class StylableTransformer {
 
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
-        this.delimiter = options.delimiter || '__';
         this.keepValues = options.keepValues || false;
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
@@ -220,8 +211,6 @@ export class StylableTransformer {
         });
 
         ast.walkDecls((decl) => {
-            (decl as SDecl).stylable = { sourceValue: decl.value };
-
             if (validateCustomPropertyName(decl.prop)) {
                 CSSCustomProperty.hooks.transformDeclaration({
                     context: transformContext,
@@ -291,18 +280,6 @@ export class StylableTransformer {
         // restore evaluator state
         this.evaluator.stVarOverride = prevStVarOverride;
     }
-    /** @deprecated */
-    public getScopedCSSVar(
-        decl: postcss.Declaration,
-        meta: StylableMeta,
-        cssVarsMapping: Record<string, string>
-    ) {
-        let prop = decl.prop;
-        if (CSSCustomProperty.get(meta, prop)) {
-            prop = cssVarsMapping[prop];
-        }
-        return prop;
-    }
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
@@ -314,9 +291,6 @@ export class StylableTransformer {
     ): string {
         return this.scopeSelector(meta, rule.selector, rule, topNestClassName, unwrapGlobals)
             .selector;
-    }
-    public scope(name: string, ns: string, delimiter: string = this.delimiter) {
-        return namespace(name, ns, delimiter);
     }
     public scopeSelector(
         originMeta: StylableMeta,
