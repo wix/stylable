@@ -29,18 +29,8 @@ export const hooks = createFeature<{
     SELECTOR: Type;
     IMMUTABLE_SELECTOR: ImmutableType;
 }>({
-    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes, parents] }): void {
-        /**
-         * intent to deprecate: currently `value(param)` can be used
-         * as a custom state value. Unless there is a reasonable
-         * use case, this should be removed.
-         */
-        if (
-            node.nodes &&
-            (parents.length < 2 ||
-                parents[parents.length - 2].type !== `pseudo_class` ||
-                node.value !== `value`)
-        ) {
+    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes] }): void {
+        if (node.nodes) {
             // error on functional type
             context.diagnostics.error(
                 rule,
