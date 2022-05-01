@@ -146,7 +146,7 @@ function collectDeclMixins(
     context: FeatureContext,
     decl: postcss.Declaration,
     paramSignature: (mixinSymbolName: string) => 'named' | 'args',
-    emitStrategyDiagnostics: boolean,
+    isTransformPhase: boolean,
     previousMixins?: RefedMixin[]
 ): RefedMixin[] {
     const { meta } = context;
@@ -161,7 +161,7 @@ function collectDeclMixins(
         return previousMixins || mixins;
     }
 
-    parser(decl, paramSignature, context.diagnostics, emitStrategyDiagnostics).forEach((mixin) => {
+    parser(decl, paramSignature, context.diagnostics, isTransformPhase).forEach((mixin) => {
         const mixinRefSymbol = STSymbol.get(meta, mixin.type);
         if (
             mixinRefSymbol &&
@@ -183,7 +183,9 @@ function collectDeclMixins(
                 ref: mixinRefSymbol,
             };
             mixins.push(refedMixin);
-            ignoreDeprecationWarn(() => meta.mixins).push(refedMixin);
+            if (!isTransformPhase) {
+                ignoreDeprecationWarn(() => meta.mixins).push(refedMixin);
+            }
         } else {
             context.diagnostics.warn(decl, diagnostics.UNKNOWN_MIXIN(mixin.type), {
                 word: mixin.type,
