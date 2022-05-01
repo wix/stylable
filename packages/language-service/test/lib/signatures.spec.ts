@@ -217,7 +217,7 @@ describe('Signature Help', () => {
     describe('State with parameters', () => {
         describe('definition', () => {
             describe('type hinting', () => {
-                const types = ['string', 'number', 'enum', 'tag'];
+                const types = ['string', 'number', 'enum'];
 
                 types.forEach((str) =>
                     str.split('').forEach((_c, i) => {
@@ -236,10 +236,10 @@ describe('Signature Help', () => {
                                     activeParameter: 0,
                                     signatures: [
                                         SignatureInformation.create(
-                                            'Supported state types:\n- "string | number | enum | tag"',
+                                            'Supported state types:\n- "string | number | enum"',
                                             undefined,
                                             ParameterInformation.create(
-                                                'string | number | enum | tag'
+                                                'string | number | enum'
                                             )
                                         ),
                                     ],
@@ -262,9 +262,9 @@ describe('Signature Help', () => {
                         activeParameter: 0,
                         signatures: [
                             SignatureInformation.create(
-                                'Supported state types:\n- "string | number | enum | tag"',
+                                'Supported state types:\n- "string | number | enum"',
                                 undefined,
-                                ParameterInformation.create('string | number | enum | tag')
+                                ParameterInformation.create('string | number | enum')
                             ),
                         ],
                     };
@@ -320,9 +320,9 @@ describe('Signature Help', () => {
                         activeParameter: 0,
                         signatures: [
                             SignatureInformation.create(
-                                'Supported state types:\n- "string | number | enum | tag"',
+                                'Supported state types:\n- "string | number | enum"',
                                 undefined,
-                                ParameterInformation.create('string | number | enum | tag')
+                                ParameterInformation.create('string | number | enum')
                             ),
                         ],
                     };
