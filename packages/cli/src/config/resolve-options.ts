@@ -103,7 +103,7 @@ export function getCliArguments(): Arguments<CliArguments> {
         .option('indexFile', {
             type: 'string',
             description:
-                'filename of the generated index, the exported sources will be Stylable files from the `srcDir` unless the `--stcss` option is set then it will be the generated Stylable files from the `outDir`',
+                'filename of the generated index, the index file will reference Stylable sources from the `srcDir` unless the `outputSources` option is `true` in which case it will reference the `outDir`',
             defaultDescription: String(defaults.indexFile),
         })
         .option('manifest', {
