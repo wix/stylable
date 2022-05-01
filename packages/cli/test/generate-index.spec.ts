@@ -96,6 +96,52 @@ describe('build index', () => {
             ].join('\n')
         );
     });
+
+    it('should create index file importing all matched stylesheets in srcDir when has output cjs files', async () => {
+        const fs = createMemoryFs({
+            src: {
+                '/compA.st.css': `
+                .a{}
+                `,
+                '/a/b/comp-B.st.css': `
+                .b{}
+                `,
+            },
+        });
+
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
+
+        await build(
+            {
+                outDir: '.',
+                srcDir: '.',
+                indexFile: './dist/index.st.css',
+                cjs: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        const res = fs.readFileSync('/dist/index.st.css').toString();
+
+        expect(res.trim()).to.equal(
+            [
+                ':import {-st-from: "../src/compA.st.css";-st-default:CompA;}',
+                '.root CompA{}',
+                ':import {-st-from: "../src/a/b/comp-B.st.css";-st-default:CompB;}',
+                '.root CompB{}',
+            ].join('\n')
+        );
+    });
     it('should create index file using a the default generator', async () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `

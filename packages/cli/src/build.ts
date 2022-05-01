@@ -56,7 +56,9 @@ export async function build(
     }
 
     const mode = watch ? '[Watch]' : '[Build]';
-    const generator = new IndexGenerator(stylable, log);
+    const indexFileGenerator = indexFile
+        ? new IndexGenerator({ stylable, log, indexFileTargetPath: join(fullOutDir, indexFile) })
+        : null;
     const buildGeneratedFiles = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
@@ -132,10 +134,9 @@ export async function build(
                             dtsSourceMap,
                         });
 
-                        if (indexFile) {
-                            generator.removeEntryFromIndex(
-                                outputSources ? targetFilePath : deletedFile,
-                                fullOutDir
+                        if (indexFileGenerator) {
+                            indexFileGenerator.removeEntryFromIndex(
+                                outputSources ? targetFilePath : deletedFile
                             );
                         }
                     }
@@ -235,10 +236,9 @@ export async function build(
                     generated,
                 });
 
-                if (indexFile) {
-                    generator.generateFileIndexEntry(
-                        outputSources ? targetFilePath : filePath,
-                        fullOutDir
+                if (indexFileGenerator) {
+                    indexFileGenerator.generateFileIndexEntry(
+                        outputSources ? targetFilePath : filePath
                     );
                 }
             } catch (error) {
@@ -287,12 +287,11 @@ export async function build(
     }
 
     async function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
-        if (indexFile) {
-            const indexFilePath = join(fullOutDir, indexFile);
-            generated.add(indexFilePath);
-            await generator.generateIndexFile(fs, indexFilePath);
+        if (indexFileGenerator) {
+            await indexFileGenerator.generateIndexFile(fs);
 
-            outputFiles.set(indexFilePath, affectedFiles);
+            generated.add(indexFileGenerator.indexFileTargetPath);
+            outputFiles.set(indexFileGenerator.indexFileTargetPath, affectedFiles);
         } else {
             const generatedAssets = handleAssets(assets, projectRoot, srcDir, outDir, fs);
             for (const generatedAsset of generatedAssets) {
