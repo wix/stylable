@@ -1,6 +1,6 @@
-import { Generator as Base, ReExports } from '@stylable/cli';
+import { IndexGenerator, ReExports } from '@stylable/cli';
 
-export class Generator extends Base {
+export class Generator extends IndexGenerator {
     private count = 0;
     public generateReExports(filePath: string): ReExports | undefined {
         if (filePath.includes('FILTER-ME')) {

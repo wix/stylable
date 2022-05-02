@@ -12,13 +12,14 @@ import type { Log } from './logger';
 import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { Diagnostic } from './report-diagnostics';
 import { errorMessages } from './messages';
+import type { IFileSystem } from '@file-services/types';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
     filePath: string;
     fullSrcDir: string;
     log: Log;
-    fs: any;
+    fs: IFileSystem;
     moduleFormats: string[];
     outputCSS?: boolean;
     outputCSSNameTemplate?: string;
@@ -212,6 +213,10 @@ export function buildSingleFile({
             projectAssets.add(resolve(fileDirectory, url));
         }
     }
+
+    return {
+        targetFilePath,
+    };
 }
 
 export function removeBuildProducts({
@@ -276,6 +281,10 @@ export function removeBuildProducts({
     }
 
     log(mode, `removed: [${outputLogs.join(', ')}]`);
+
+    return {
+        targetFilePath,
+    };
 }
 
 export function getAllDiagnostics(res: StylableResults): Diagnostic[] {

@@ -51,6 +51,97 @@ describe('build index', () => {
             ].join('\n')
         );
     });
+    it('should create index file importing all matched stylesheets in outDir (outputSources)', async () => {
+        const fs = createMemoryFs({
+            src: {
+                '/compA.st.css': `
+               .a{}
+            `,
+                '/a/b/comp-B.st.css': `
+               .b{}
+            `,
+            },
+        });
+
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
+
+        await build(
+            {
+                outDir: './dist',
+                srcDir: './src',
+                indexFile: 'index.st.css',
+                outputSources: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        const res = fs.readFileSync('./dist/index.st.css').toString();
+
+        expect(res.trim()).to.equal(
+            [
+                ':import {-st-from: "./compA.st.css";-st-default:CompA;}',
+                '.root CompA{}',
+                ':import {-st-from: "./a/b/comp-B.st.css";-st-default:CompB;}',
+                '.root CompB{}',
+            ].join('\n')
+        );
+    });
+
+    it('should create index file importing all matched stylesheets in srcDir when has output cjs files', async () => {
+        const fs = createMemoryFs({
+            src: {
+                '/compA.st.css': `
+                .a{}
+                `,
+                '/a/b/comp-B.st.css': `
+                .b{}
+                `,
+            },
+        });
+
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+        });
+
+        await build(
+            {
+                outDir: '.',
+                srcDir: '.',
+                indexFile: './dist/index.st.css',
+                cjs: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        const res = fs.readFileSync('/dist/index.st.css').toString();
+
+        expect(res.trim()).to.equal(
+            [
+                ':import {-st-from: "../src/compA.st.css";-st-default:CompA;}',
+                '.root CompA{}',
+                ':import {-st-from: "../src/a/b/comp-B.st.css";-st-default:CompB;}',
+                '.root CompB{}',
+            ].join('\n')
+        );
+    });
     it('should create index file using a the default generator', async () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
@@ -136,7 +227,6 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-
     it('should create index file when srcDir is parent directory of outDir', async () => {
         const fs = createMemoryFs({
             dist: {
@@ -183,7 +273,6 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-
     it('custom generator is able to filter files from the index', async () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
@@ -222,7 +311,6 @@ describe('build index', () => {
             ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}\n.root Style0{}'
         );
     });
-
     it('should create index file using a custom generator with named exports generation and @namespace', async () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
@@ -275,7 +363,6 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-
     it('should create non-existing folders in path to the generated indexFile', async () => {
         const fs = createMemoryFs({
             '/comp.st.css': `

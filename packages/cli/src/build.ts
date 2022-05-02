@@ -56,7 +56,9 @@ export async function build(
     }
 
     const mode = watch ? '[Watch]' : '[Build]';
-    const generator = new IndexGenerator(stylable, log);
+    const indexFileGenerator = indexFile
+        ? new IndexGenerator({ stylable, log, indexFileTargetPath: join(fullOutDir, indexFile) })
+        : null;
     const buildGeneratedFiles = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
@@ -117,8 +119,7 @@ export async function build(
                         }
                         diagnosticsManager.delete(identifier, deletedFile);
                         sourceFiles.delete(deletedFile);
-                        generator.removeEntryFromIndex(deletedFile, fullOutDir);
-                        removeBuildProducts({
+                        const { targetFilePath } = removeBuildProducts({
                             fullOutDir,
                             fullSrcDir,
                             filePath: deletedFile,
@@ -132,6 +133,12 @@ export async function build(
                             dts,
                             dtsSourceMap,
                         });
+
+                        if (indexFileGenerator) {
+                            indexFileGenerator.removeEntryFromIndex(
+                                outputSources ? targetFilePath : deletedFile
+                            );
+                        }
                     }
                 }
             }
@@ -149,13 +156,11 @@ export async function build(
             }
 
             for (const filePath of affectedFiles) {
-                if (!indexFile) {
-                    // map st output file path to src file path
-                    outputFiles.set(
-                        join(fullOutDir, relative(fullSrcDir, filePath)),
-                        new Set([filePath])
-                    );
-                }
+                // map st output file path to src file path
+                outputFiles.set(
+                    join(fullOutDir, relative(fullSrcDir, filePath)),
+                    new Set([filePath])
+                );
 
                 // remove assets from the affected files (handled in buildAggregatedEntities)
                 if (assets.has(filePath)) {
@@ -206,33 +211,35 @@ export async function build(
     function buildFiles(filesToBuild: Set<string>, generated: Set<string>) {
         for (const filePath of filesToBuild) {
             try {
-                if (indexFile) {
-                    generator.generateFileIndexEntry(filePath, fullOutDir);
-                } else {
-                    buildSingleFile({
-                        fullOutDir,
-                        filePath,
-                        fullSrcDir,
-                        log,
-                        fs,
-                        stylable,
-                        diagnosticsManager,
-                        diagnosticsMode,
-                        identifier,
-                        projectAssets: assets,
-                        moduleFormats,
-                        includeCSSInJS,
-                        outputCSS,
-                        outputCSSNameTemplate,
-                        outputSources,
-                        useNamespaceReference,
-                        injectCSSRequest,
-                        optimize,
-                        dts,
-                        dtsSourceMap,
-                        minify,
-                        generated,
-                    });
+                const { targetFilePath } = buildSingleFile({
+                    fullOutDir,
+                    filePath,
+                    fullSrcDir,
+                    log,
+                    fs,
+                    stylable,
+                    diagnosticsManager,
+                    diagnosticsMode,
+                    identifier,
+                    projectAssets: assets,
+                    moduleFormats,
+                    includeCSSInJS,
+                    outputCSS,
+                    outputCSSNameTemplate,
+                    outputSources,
+                    useNamespaceReference,
+                    injectCSSRequest,
+                    optimize,
+                    dts,
+                    dtsSourceMap,
+                    minify,
+                    generated,
+                });
+
+                if (indexFileGenerator) {
+                    indexFileGenerator.generateFileIndexEntry(
+                        outputSources ? targetFilePath : filePath
+                    );
                 }
             } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
@@ -280,12 +287,11 @@ export async function build(
     }
 
     async function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
-        if (indexFile) {
-            const indexFilePath = join(fullOutDir, indexFile);
-            generated.add(indexFilePath);
-            await generator.generateIndexFile(fs, indexFilePath);
+        if (indexFileGenerator) {
+            await indexFileGenerator.generateIndexFile(fs);
 
-            outputFiles.set(indexFilePath, affectedFiles);
+            generated.add(indexFileGenerator.indexFileTargetPath);
+            outputFiles.set(indexFileGenerator.indexFileTargetPath, affectedFiles);
         } else {
             const generatedAssets = handleAssets(assets, projectRoot, srcDir, outDir, fs);
             for (const generatedAsset of generatedAssets) {
