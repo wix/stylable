@@ -50,7 +50,7 @@
     "@types/yargs": "^17.0.10",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
-    "autoprefixer": "^10.4.5",
+    "autoprefixer": "^10.4.6",
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
     "create-listening-server": "^1.0.0",
