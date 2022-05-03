@@ -20,6 +20,8 @@ export interface DiagnosticOptions {
 
 export type Diagnostic = DiagnosticBase & DiagnosticContext;
 
+export type DiagnosticsBank = Record<string, (...args: any[]) => DiagnosticBase>;
+
 export class Diagnostics {
     constructor(public reports: Diagnostic[] = []) {}
     public report(diagnostic: DiagnosticBase, context: DiagnosticContext) {

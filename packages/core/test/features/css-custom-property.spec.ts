@@ -198,9 +198,9 @@ describe(`features/css-custom-property`, () => {
         testStylableCore(`
             /* 
                 @atrule(no-dashes) propY 
-                @analyze-warn(no-dashes) word(propY) ${CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE(
-                    'propY'
-                )}
+                @analyze-error(no-dashes) word(propY) ${
+                    CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE('propY').message
+                }
             */
             @property propY {
                 syntax: '<color>';
@@ -210,9 +210,9 @@ describe(`features/css-custom-property`, () => {
             
             /* 
                 @atrule(no-dashes-global) st-global(propZ)
-                @analyze-warn(no-dashes-global) word(propZ) ${CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE(
-                    'propZ'
-                )}
+                @analyze-error(no-dashes-global) word(propZ) ${
+                    CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE('propZ').message
+                }
             */
             @property st-global(propZ) {
                 syntax: '<color>';
@@ -223,7 +223,9 @@ describe(`features/css-custom-property`, () => {
             .decls {
                 /* 
                     @decl(empty var) prop: var() 
-                    @analyze-warn(empty var) ${CSSCustomProperty.diagnostics.MISSING_PROP_NAME()}
+                    @analyze-error(empty var) ${
+                        CSSCustomProperty.diagnostics.MISSING_PROP_NAME().message
+                    }
                 */
                 prop: var();
             }
@@ -231,17 +233,19 @@ describe(`features/css-custom-property`, () => {
             .root {
                 /* 
                     @decl(no-dashes) prop: var(propA) 
-                    @analyze-warn(no-dashes) word(propA) ${CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE(
-                        'propA'
-                    )}
+                    @analyze-error(no-dashes) word(propA) ${
+                        CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE('propA').message
+                    }
                 */
                 prop: var(propA);
 
                 /* 
                     @decl(space+text) prop: var(--entry-propB notAllowed, fallback) 
-                    @analyze-warn(space+text) word(--propB notAllowed, fallback) ${CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_ARGS(
-                        '--propB notAllowed, fallback'
-                    )}
+                    @analyze-error(space+text) word(--propB notAllowed, fallback) ${
+                        CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_ARGS(
+                            '--propB notAllowed, fallback'
+                        ).message
+                    }
                 */
                 prop: var(--propB notAllowed, fallback);
             }
@@ -263,23 +267,26 @@ describe(`features/css-custom-property`, () => {
     describe(`@property validation`, () => {
         it(`should report on missing syntax`, () => {
             const { sheets } = testStylableCore(`
-                /* @analyze-warn(syntax) word(--a) ${CSSCustomProperty.diagnostics.MISSING_REQUIRED_DESCRIPTOR(
-                    'syntax'
-                )} */
+                /* @analyze-error(syntax) word(--a) ${
+                    CSSCustomProperty.diagnostics.MISSING_REQUIRED_DESCRIPTOR('syntax').message
+                } */
                 @property --a {
                     inherits: true;
                     initial-value: #c0ffee;
                 }
 
-                /* @analyze-warn(inherits) word(--b) ${CSSCustomProperty.diagnostics.MISSING_REQUIRED_DESCRIPTOR(
-                    'inherits'
-                )} */
+                /* @analyze-error(inherits) word(--b) ${
+                    CSSCustomProperty.diagnostics.MISSING_REQUIRED_DESCRIPTOR('inherits').message
+                } */
                 @property --b {
                     syntax: '<color>';
                     initial-value: #c0ffee;
                 }
 
-                /* @analyze-warn(inherits) word(--c) ${CSSCustomProperty.diagnostics.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR()} */
+                /* @analyze-warn(inherits) word(--c) ${
+                    CSSCustomProperty.diagnostics.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR()
+                        .message
+                } */
                 @property --c {
                     syntax: '<color>';
                     inherits: false;
@@ -302,9 +309,9 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-warn(atrule) word(abc) ${CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_TYPE(
-                        'atrule'
-                    )} */
+                    /* @analyze-error(atrule) word(abc) ${
+                        CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_TYPE('atrule').message
+                    } */
                     @some-at-rule abc{}
                 }
 
@@ -312,9 +319,9 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-warn(rule) word(div) ${CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_TYPE(
-                        'rule'
-                    )} */
+                    /* @analyze-error(rule) word(div) ${
+                        CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_TYPE('rule').message
+                    } */
                     div {}
                 }
             `);
@@ -325,9 +332,10 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-warn word(initialValue) ${CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_NAME(
-                        'initialValue'
-                    )} */
+                    /* @analyze-error word(initialValue) ${
+                        CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_NAME('initialValue')
+                            .message
+                    } */
                     initialValue: red;
                 }
             `);
@@ -336,10 +344,14 @@ describe(`features/css-custom-property`, () => {
     describe(`@st-global-custom-property (deprecated)`, () => {
         it(`should mark properties as global`, () => {
             testStylableCore(`
-                /* @analyze-info(first) ${CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()}*/
+                /* @analyze-info(first) ${
+                    CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY().message
+                }*/
                 @st-global-custom-property --x;
                 
-                /* @analyze-info(second) ${CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()}*/
+                /* @analyze-info(second) ${
+                    CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY().message
+                }*/
                 @st-global-custom-property --a      ,--b,
                 --c  ,  --d  ;
     
@@ -395,17 +407,19 @@ describe(`features/css-custom-property`, () => {
             testStylableCore(`
                 /* 
                     @transform-remove(no-dashes)
-                    @analyze-warn(no-dashes) word(propA) ${CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(
-                        'propA'
-                    )}
+                    @analyze-error(no-dashes) word(propA) ${
+                        CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR('propA').message
+                    }
                 */
                 @st-global-custom-property propA;
                 
                 /* 
                     @transform-remove(missing comma)
-                    @analyze-warn(missing comma) word(--propB --propC) ${CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
-                        '--propB --propC'
-                    )}
+                    @analyze-error(missing comma) word(--propB --propC) ${
+                        CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
+                            '--propB --propC'
+                        ).message
+                    }
                 */
                 @st-global-custom-property --propB --propC;
             `);

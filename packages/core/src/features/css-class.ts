@@ -18,7 +18,7 @@ import type {
     ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import type { DiagnosticBase } from '../diagnostics';
+import type { DiagnosticsBank } from '../diagnostics';
 
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
@@ -27,7 +27,7 @@ export interface ClassSymbol extends StylableDirectives {
     scoped?: string; // ToDo: check if in use
 }
 
-export const diagnostics: Record<string, (...args: any[]) => DiagnosticBase> = {
+export const diagnostics: DiagnosticsBank = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
     UNSCOPED_CLASS(name: string) {
         return {
