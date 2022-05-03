@@ -40,7 +40,9 @@ describe(`features/st-global`, () => {
         testStylableCore(`
             /* 
                 @rule(multi) :global(.a, .b)
-                @analyze-error(multi) word(.a, .b) ${STGlobal.diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL()}
+                @analyze-error(multi) word(.a, .b) ${
+                    STGlobal.diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL().message
+                }
             */
             :global(.a, .b) {}
         `);
