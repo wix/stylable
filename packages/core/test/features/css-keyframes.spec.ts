@@ -113,10 +113,14 @@ describe(`features/css-keyframes`, () => {
     });
     it('should report invalid cases', () => {
         const { sheets } = testStylableCore(`
-            /* @analyze-warn(empty name) ${CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME()} */
+            /* @analyze-error(empty name) ${
+                CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME().message
+            } */
             @keyframes {}
             
-            /* @analyze-warn(empty global) ${CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL()} */
+            /* @analyze-error(empty global) ${
+                CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL().message
+            } */
             @keyframes st-global() {}
         `);
 
@@ -127,9 +131,9 @@ describe(`features/css-keyframes`, () => {
     it('should report reserved @keyframes names', () => {
         CSSKeyframes.reservedKeyFrames.map((reserved) => {
             testStylableCore(`
-                /* @analyze-error(${reserved}) word(${reserved}) ${CSSKeyframes.diagnostics.KEYFRAME_NAME_RESERVED(
-                reserved
-            )} */
+                /* @analyze-error(${reserved}) word(${reserved}) ${
+                CSSKeyframes.diagnostics.KEYFRAME_NAME_RESERVED(reserved).message
+            } */
                 @keyframes ${reserved} {}
             `);
         });
@@ -164,7 +168,7 @@ describe(`features/css-keyframes`, () => {
             }
 
             .root {
-                /* @analyze-error ${CSSKeyframes.diagnostics.ILLEGAL_KEYFRAMES_NESTING()} */
+                /* @analyze-error ${CSSKeyframes.diagnostics.ILLEGAL_KEYFRAMES_NESTING().message} */
                 @keyframes not-valid {}
             }
         `);
@@ -425,10 +429,12 @@ describe(`features/css-keyframes`, () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': ``,
                 '/entry.st.css': `
-                    /* @transform-error word(unknown) ${CSSKeyframes.diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
-                        `unknown`,
-                        `./imported.st.css`
-                    )} */
+                    /* @transform-error word(unknown) ${
+                        CSSKeyframes.diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
+                            `unknown`,
+                            `./imported.st.css`
+                        ).message
+                    } */
                     @st-import [keyframes(unknown as local)] from './imported.st.css';
                 `,
             });
