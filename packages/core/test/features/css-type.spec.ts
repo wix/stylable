@@ -52,9 +52,9 @@ describe(`features/css-type`, () => {
         anywhere in the selector: "div .local span"
         */
         const { sheets } = testStylableCore(`
-                /* @analyze-warn word(button) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
-                    `button`
-                )} */
+                /* @analyze-warn word(button) ${
+                    CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`button`).message
+                } */
                 button {}
 
                 /* NO ERROR - locally scoped */
@@ -169,9 +169,9 @@ describe(`features/css-type`, () => {
                 '/entry.st.css': `
                     @st-import [importedPart] from "./classes.st.css";
 
-                    /* @analyze-warn word(importedPart) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
-                        `importedPart`
-                    )} */
+                    /* @analyze-warn word(importedPart) ${
+                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`importedPart`).message
+                    } */
                     importedPart {}
                 `,
             });

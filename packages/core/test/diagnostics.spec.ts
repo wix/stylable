@@ -312,7 +312,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('div'),
+                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('div').message,
                             file: 'main.css',
                         },
                         { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' },
@@ -508,7 +508,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('button'),
+                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('button').message,
                             file: 'main.css',
                         },
                     ]
@@ -522,7 +522,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('button'),
+                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('button').message,
                             file: 'main.css',
                         },
                     ]

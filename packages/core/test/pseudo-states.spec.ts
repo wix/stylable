@@ -2175,7 +2175,7 @@ describe('pseudo-states', () => {
                 [
                     // skipping root scoping warning
                     {
-                        message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('MyElement'),
+                        message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('MyElement').message,
                         file: 'main.css',
                         skip: true,
                     },
