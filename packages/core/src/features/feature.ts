@@ -46,6 +46,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         walkContext: SelectorNodeContext;
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
+    prepareAST: (options: { node: postcss.ChildNode; toRemove: postcss.Node[] }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
     transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
     transformAtRuleNode: (options: {
@@ -91,6 +92,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
         /**/
     },
     analyzeDeclaration() {
+        /**/
+    },
+    prepareAST() {
         /**/
     },
     transformInit() {

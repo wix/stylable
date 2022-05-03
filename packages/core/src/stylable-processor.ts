@@ -116,6 +116,13 @@ export class StylableProcessor implements FeatureContext {
         });
 
         root.walkDecls((decl) => {
+            const parent = decl.parent as postcss.ChildNode;
+            if (parent.type === 'rule' && parent.selector === ':vars') {
+                // ToDo: remove once
+                // - custom property definition is allowed in var value
+                // - url collection is removed from st-var
+                return;
+            }
             // ToDo: refactor to be hooked by features
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
@@ -131,7 +138,24 @@ export class StylableProcessor implements FeatureContext {
 
         STSymbol.reportRedeclare(this);
 
+        this.prepareAST(this.meta, root);
+
         return this.meta;
+    }
+
+    private prepareAST(meta: StylableMeta, ast: postcss.Root) {
+        const toRemove: postcss.Node[] = [];
+        ast.walk((node) => {
+            const input = { node, toRemove };
+            if (node.type === 'atrule' && node.name === `namespace`) {
+                toRemove.push(node);
+            }
+            STImport.hooks.prepareAST(input);
+            STVar.hooks.prepareAST(input);
+        });
+        for (const node of toRemove) {
+            node.remove();
+        }
     }
 
     public insertCustomSelectorsStubs() {
@@ -171,7 +195,7 @@ export class StylableProcessor implements FeatureContext {
                         } else {
                             this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
                         }
-                        toRemove.push(atRule);
+                        // toRemove.push(atRule);
                     } else {
                         this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
                     }
