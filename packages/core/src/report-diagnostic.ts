@@ -13,21 +13,21 @@ export type DiagnosticsMode = 'auto' | 'strict' | 'loose';
 export function reportDiagnostic(
     ctx: EmitDiagnosticsContext,
     diagnosticsMode: DiagnosticsMode,
-    { message, type }: { message: string; type: DiagnosticType },
+    { message, severity }: { message: string; severity: DiagnosticType },
     from?: string
 ) {
     const error = new Error(from ? `[${from}]:\n\n${message}` : message);
 
-    if (type === 'info') {
+    if (severity === 'info') {
         ctx.emitWarning(error);
 
         return;
     }
 
     if (diagnosticsMode === 'auto') {
-        if (type === 'warning') {
+        if (severity === 'warning') {
             ctx.emitWarning(error);
-        } else if (type === 'error') {
+        } else if (severity === 'error') {
             ctx.emitError(error);
         }
     } else if (diagnosticsMode === 'strict') {

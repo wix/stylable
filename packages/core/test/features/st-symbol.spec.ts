@@ -139,9 +139,9 @@ describe(`features/st-symbol`, () => {
             STSymbol.addSymbol({ context, symbol, node: ruleB });
             STSymbol.reportRedeclare(context);
 
-            expect(context.diagnostics.reports).to.eql([
+            expect(context.diagnostics.reports).to.containSubset([
                 {
-                    type: `warning`,
+                    severity: `warning`,
                     message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleA,
                     options: {
@@ -149,7 +149,7 @@ describe(`features/st-symbol`, () => {
                     },
                 },
                 {
-                    type: `warning`,
+                    severity: `warning`,
                     message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleB,
                     options: {
@@ -184,9 +184,9 @@ describe(`features/st-symbol`, () => {
 
             STSymbol.addSymbol({ context, symbol, node: rule });
 
-            expect(context.diagnostics.reports).to.eql([
+            expect(context.diagnostics.reports).to.containSubset([
                 {
-                    type: `warning`,
+                    severity: `warning`,
                     message: STSymbol.diagnostics.REDECLARE_ROOT(),
                     node: rule,
                     options: {

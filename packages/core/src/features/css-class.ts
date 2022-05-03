@@ -18,6 +18,7 @@ import type {
     ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
+import type { DiagnosticBase } from '../diagnostics';
 
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
@@ -26,29 +27,56 @@ export interface ClassSymbol extends StylableDirectives {
     scoped?: string; // ToDo: check if in use
 }
 
-export const diagnostics = {
+export const diagnostics: Record<string, (...args: any[]) => DiagnosticBase> = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
     UNSCOPED_CLASS(name: string) {
-        return `unscoped class "${name}" will affect all elements of the same type in the document`;
+        return {
+            code: '00002',
+            message: `unscoped class "${name}" will affect all elements of the same type in the document`,
+            severity: 'warning',
+        };
     },
     EMPTY_ST_GLOBAL() {
-        return `-st-global must contain a valid selector`;
+        return {
+            code: '00003',
+            message: `-st-global must contain a valid selector`,
+            severity: 'error',
+        };
     },
     UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL() {
-        return `unsupported multi selector in -st-global`;
+        return {
+            code: '00004',
+            message: `unsupported multi selector in -st-global`,
+            severity: 'error',
+        };
     },
-    // -st-extends
     IMPORT_ISNT_EXTENDABLE() {
-        return 'import is not extendable';
+        return {
+            code: '00005',
+            message: 'import is not extendable',
+            severity: 'error',
+        };
     },
     CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string) {
-        return `cannot extend unknown symbol "${name}"`;
+        return {
+            code: '00006',
+            message: `cannot extend unknown symbol "${name}"`,
+            severity: 'error',
+        };
     },
     CANNOT_EXTEND_JS() {
-        return 'JS import is not extendable';
+        return {
+            code: '00007',
+            message: 'JS import is not extendable',
+            severity: 'error',
+        };
     },
     UNKNOWN_IMPORT_ALIAS(name: string) {
-        return `cannot use alias for unknown import "${name}"`;
+        return {
+            code: '00008',
+            message: `cannot use alias for unknown import "${name}"`,
+            severity: 'error',
+        };
     },
 };
 
@@ -62,11 +90,12 @@ export const hooks = createFeature<{
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
             // error on functional class
-            context.diagnostics.error(
-                rule,
+            context.diagnostics.report(
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `class`),
                 {
-                    word: stringifySelector(node),
+                    filePath: context.meta.source,
+                    node: rule,
+                    options: { word: stringifySelector(node) },
                 }
             );
         }
@@ -218,8 +247,9 @@ export function validateClassScoping({
         return true;
     } else if (locallyScoped === false && !inStScope) {
         if (checkForScopedNodeAfter(context, rule, nodes, index) === false) {
-            context.diagnostics.warn(rule, diagnostics.UNSCOPED_CLASS(node.value), {
-                word: node.value,
+            context.diagnostics.report(diagnostics.UNSCOPED_CLASS(node.value), {
+                node: rule,
+                options: { word: node.value },
             });
             return false;
         } else {

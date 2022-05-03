@@ -42,10 +42,12 @@ export const hooks = createFeature<{
                 node.value !== `value`)
         ) {
             // error on functional type
-            context.diagnostics.error(
-                rule,
+            context.diagnostics.report(
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
-                { word: stringifySelector(node) }
+                {
+                    node: rule,
+                    options: { word: stringifySelector(node) },
+                }
             );
         }
         addType(context, node.value, rule);

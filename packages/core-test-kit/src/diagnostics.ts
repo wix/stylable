@@ -94,7 +94,7 @@ export function matchDiagnostic(
         matchState.matches++;
         // }
         if (expected.location.word) {
-            if (report.options.word !== expected.location.word) {
+            if (report.options?.word !== expected.location.word) {
                 matchState.word = errors.wordMismatch(
                     type,
                     expected.location.word,
@@ -107,11 +107,11 @@ export function matchDiagnostic(
             matchState.matches++;
         }
         if (expected.severity) {
-            if (report.type !== expectedSeverity) {
+            if (report.severity !== expectedSeverity) {
                 matchState.location = errors.severityMismatch(
                     type,
                     expectedSeverity,
-                    report.type,
+                    report.severity,
                     expected.message,
                     expected.label
                 );
@@ -191,13 +191,13 @@ export function expectAnalyzeDiagnostics(
                 expect(report.node.source!.start, 'start').to.eql(source.start);
             }
             if (source.word !== null) {
-                expect(report.options.word).to.equal(source.word);
+                expect(report.options?.word).to.equal(source.word);
             }
 
             if (expectedWarning.severity) {
                 expect(
-                    report.type,
-                    `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.type}"`
+                    report.severity,
+                    `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.severity}"`
                 ).to.equal(expectedWarning.severity);
             }
         });
@@ -229,13 +229,13 @@ function matchPartialDiagnostics(
                     matches++;
                 }
                 if (locations[path].word !== null) {
-                    expect(report.options.word).to.eql(locations[path].word);
+                    expect(report.options?.word).to.eql(locations[path].word);
                     matches++;
                 }
                 if (expectedWarning.severity) {
                     expect(
-                        report.type,
-                        `${report.message}: severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
+                        report.severity,
+                        `${report.message}: severity mismatch, expected ${expectedWarning.severity} but received ${report.severity}`
                     ).to.equal(expectedWarning.severity);
                     matches++;
                 }
@@ -297,13 +297,13 @@ export function expectTransformDiagnostics(
             }
 
             if (locations[path].word !== null) {
-                expect(report.options.word).to.eql(locations[path].word);
+                expect(report.options?.word).to.eql(locations[path].word);
             }
 
             if (expectedWarning.severity) {
                 expect(
-                    report.type,
-                    `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
+                    report.severity,
+                    `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.severity}`
                 ).to.equal(expectedWarning.severity);
             }
         }

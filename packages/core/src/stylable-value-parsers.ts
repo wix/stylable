@@ -27,10 +27,14 @@ export const SBTypesParsers = {
             { clone: true }
         );
         if (!selector[0]) {
-            diagnostics.error(decl, CSSClass.diagnostics.EMPTY_ST_GLOBAL());
+            diagnostics.report(CSSClass.diagnostics.EMPTY_ST_GLOBAL(), {
+                node: decl,
+            });
             return;
         } else if (selector.length > 1) {
-            diagnostics.error(decl, CSSClass.diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL());
+            diagnostics.report(CSSClass.diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL(), {
+                node: decl,
+            });
         }
         return selector[0].nodes;
     },

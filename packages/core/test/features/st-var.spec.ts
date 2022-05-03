@@ -1588,7 +1588,7 @@ describe(`features/st-var`, () => {
                         reports: [
                             {
                                 message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
-                                type: 'warning',
+                                severity: 'warning',
                             },
                         ],
                     },
@@ -1623,7 +1623,7 @@ describe(`features/st-var`, () => {
                         reports: [
                             {
                                 message: STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(),
-                                type: 'warning',
+                                severity: 'warning',
                             },
                         ],
                     },

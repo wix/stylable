@@ -39,10 +39,9 @@ describe(`features/css-type`, () => {
         testStylableCore(`
             /* 
                 @rule(functional element type) div()
-                @analyze-error(functional element type) ${CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
-                    `div`,
-                    `type`
-                )}
+                @analyze-error(functional element type) ${
+                    CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`div`, `type`).message
+                }
             */
             div() {}
         `);

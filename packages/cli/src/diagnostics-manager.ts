@@ -88,7 +88,7 @@ export class DiagnosticsManager {
                 const ids = collectedDiagnostics.get(filePath)!;
 
                 for (const diagnostic of diagnostics) {
-                    const diagnosticId = `${diagnostic.type};${diagnostic.message}`;
+                    const diagnosticId = `${diagnostic.severity};${diagnostic.message}`;
                     if (!ids.has(diagnosticId)) {
                         ids.set(diagnosticId, diagnostic);
                         currentDiagnostics.push(ids.get(diagnosticId)!);

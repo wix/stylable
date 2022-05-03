@@ -3,7 +3,7 @@ import { levels, Log } from './logger';
 
 export interface Diagnostic {
     message: string;
-    type: DiagnosticType;
+    severity: DiagnosticType;
     line?: number;
     column?: number;
     offset?: number;
@@ -20,7 +20,7 @@ export function reportDiagnostics(
     for (const [filePath, diagnostics] of diagnosticsMessages.entries()) {
         message += `\n[${filePath}]\n${diagnostics
             .sort(({ offset: a = 0 }, { offset: b = 0 }) => a - b)
-            .map(({ type, message }) => `[${type}]: ${message}`)
+            .map(({ severity, message }) => `[${severity}]: ${message}`)
             .join('\n')}`;
     }
 
@@ -32,7 +32,7 @@ export function reportDiagnostics(
 function hasErrorOrWarning(diagnosticsMessages: DiagnosticMessages) {
     for (const diagnostics of diagnosticsMessages.values()) {
         const has = diagnostics.some(
-            (diagnostic) => diagnostic.type === 'error' || diagnostic.type === 'warning'
+            (diagnostic) => diagnostic.severity === 'error' || diagnostic.severity === 'warning'
         );
 
         if (has) {

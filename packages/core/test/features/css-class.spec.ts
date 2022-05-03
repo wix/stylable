@@ -2,6 +2,35 @@ import { STImport, CSSClass, STSymbol } from '@stylable/core/dist/features';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
+// type RemoveContext<T extends any[]> = T extends [...infer X, DiagnosticContext] ? X : T;
+
+// const testDiagnostics = <T extends Record<string, (...args: any[]) => Diagnostic | string>>(
+//     diagnostics: T
+// ): {
+//     [key in keyof T]: (...args: RemoveContext<Parameters<T[key]>>) => string;
+// } => {
+//     //
+//     type MappedX = {
+//         [key in keyof T]: (...args: RemoveContext<Parameters<T[key]>>) => string;
+//     };
+//     const keys = Object.keys(diagnostics) as (keyof T)[];
+//     const res = keys.reduce((acc, key) => {
+//         const func = diagnostics[key];
+//         acc[key] = (...args: any[]) => {
+//             const result = func(...args.slice(0, -1));
+//             if (typeof result === 'string') {
+//                 return result;
+//             }
+//             return result.message;
+//         };
+//         return acc;
+//     }, {} as MappedX);
+
+//     return res;
+// };
+
+// const xxx = testDiagnostics(CSSClass.diagnostics);
+
 describe(`features/css-class`, () => {
     it(`should have root class`, () => {
         const { sheets } = testStylableCore({
@@ -187,13 +216,15 @@ describe(`features/css-class`, () => {
         const { sheets } = testStylableCore(`
             /* @rule(empty) .entry__a */
             .a {
-                /* @analyze-error(empty) ${CSSClass.diagnostics.EMPTY_ST_GLOBAL()} */
+                /* @analyze-error(empty) ${CSSClass.diagnostics.EMPTY_ST_GLOBAL().message} */
                 -st-global: "";
             }
 
             /* @rule(empty) .y */
             .b {
-                /* @analyze-error(multi) ${CSSClass.diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL()} */
+                /* @analyze-error(multi) ${
+                    CSSClass.diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL().message
+                } */
                 -st-global: ".y , .z";
             }
         `);
@@ -273,10 +304,9 @@ describe(`features/css-class`, () => {
         const { sheets } = testStylableCore(`
             /* 
                 @rule(functional class) .entry__a()
-                @analyze-error(functional class) ${CSSClass.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
-                    `.a`,
-                    `class`
-                )}
+                @analyze-error(functional class) ${
+                    CSSClass.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.a`, `class`).message
+                }
             */
             .a() {}
         `);
@@ -375,9 +405,9 @@ describe(`features/css-class`, () => {
 
                     /* 
                         @rule .entry__unknown
-                        @transform-error(unresolved alias) word(unknown) ${CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(
-                            `unknown`
-                        )} 
+                        @transform-error(unresolved alias) word(unknown) ${
+                            CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(`unknown`).message
+                        } 
                     */
                     .unknown {}
                 `,
@@ -467,9 +497,9 @@ describe(`features/css-class`, () => {
                 '/entry.st.css': `
                     @st-import [importedPart] from "./classes.st.css";
 
-                    /* @analyze-warn word(importedPart) ${CSSClass.diagnostics.UNSCOPED_CLASS(
-                        `importedPart`
-                    )} */
+                    /* @analyze-warn word(importedPart) ${
+                        CSSClass.diagnostics.UNSCOPED_CLASS(`importedPart`).message
+                    } */
                     .importedPart {}
 
                     /* NO ERROR - locally scoped */
@@ -740,19 +770,23 @@ describe(`features/css-class`, () => {
                     @st-import [unknown, stColor] from './sheet.st.css';
 
                     .a {
-                        /* @transform-error(javascript) word(JS) ${CSSClass.diagnostics.CANNOT_EXTEND_JS()} */
+                        /* @transform-error(javascript) word(JS) ${
+                            CSSClass.diagnostics.CANNOT_EXTEND_JS().message
+                        } */
                         -st-extends: JS;
                     }
                     
                     .b {
-                        /* @transform-error(unresolved named) word(unknown) ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
-                            `unknown`
-                        )} */
+                        /* @transform-error(unresolved named) word(unknown) ${
+                            CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(`unknown`).message
+                        } */
                         -st-extends: unknown;
                     }
                     
                     .c {
-                        /* @transform-error(unsupported symbol) word(stColor) ${CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE()} */
+                        /* @transform-error(unsupported symbol) word(stColor) ${
+                            CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE().message
+                        } */
                         -st-extends: stColor;
                     }
                 `,

@@ -649,8 +649,8 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         );
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
-        ruleReports.forEach(({ message, type, options: { word } = {} }) => {
-            if (type === 'error') {
+        ruleReports.forEach(({ message, severity, options: { word } = {} }) => {
+            if (severity === 'error') {
                 transformer.diagnostics.error(scope, message, { word: word || scope.params });
             } else {
                 transformer.diagnostics.warn(scope, message, { word: word || scope.params });

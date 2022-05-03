@@ -276,7 +276,7 @@ export async function build(
 
     function setFileErrorDiagnostic(filePath: string, error: any) {
         const diagnostic: Diagnostic = {
-            type: 'error',
+            severity: 'error',
             message: error instanceof Error ? error.message : String(error),
         };
 

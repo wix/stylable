@@ -96,7 +96,8 @@ describe('diagnostics: warnings and errors', () => {
                 expectAnalyzeDiagnostics(`|.root $#abc()$| {}`, [
                     {
                         severity: `error`,
-                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`),
+                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`)
+                            .message,
                         file: `main.css`,
                     },
                 ]);
@@ -108,7 +109,7 @@ describe('diagnostics: warnings and errors', () => {
                         message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[attr]`,
                             `attribute`
-                        ),
+                        ).message,
                         file: `main.css`,
                     },
                 ]);
@@ -117,7 +118,8 @@ describe('diagnostics: warnings and errors', () => {
                 expectAnalyzeDiagnostics(`|.root $&()$| {}`, [
                     {
                         severity: `error`,
-                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`),
+                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`)
+                            .message,
                         file: `main.css`,
                     },
                 ]);
@@ -453,7 +455,12 @@ describe('diagnostics: warnings and errors', () => {
 
                     |.$Blah$| {}
                 `,
-                    [{ message: CSSClass.diagnostics.UNSCOPED_CLASS('Blah'), file: 'main.css' }]
+                    [
+                        {
+                            message: CSSClass.diagnostics.UNSCOPED_CLASS('Blah').message,
+                            file: 'main.css',
+                        },
+                    ]
                 );
             });
 

@@ -30,7 +30,7 @@ export function createDiagnosis(
 
     // stylable diagnostic to protocol diagnostic
     function reportToDiagnostic(report: StylableDiagnostic) {
-        const severity = report.type === 'error' ? 1 : 2;
+        const severity = report.severity === 'error' ? 1 : 2;
         const range = createRange(report);
         return Diagnostic.create(range, report.message, severity, undefined, 'stylable');
     }
@@ -40,7 +40,7 @@ export function createRange(report: StylableDiagnostic) {
     const source = report.node.source;
     const start = { line: 0, character: 0 };
     const end = { line: 0, character: 0 };
-    if (report.options.word && source) {
+    if (report.options?.word && source) {
         const lines: string[] = (source.input as any).css.split('\n');
         const searchStart = source.start!.line - 1;
         const searchEnd = source.end!.line - 1;

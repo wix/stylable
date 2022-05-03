@@ -330,34 +330,37 @@ export class StylableProcessor implements FeatureContext {
                 });
             } else if (node.type === `id`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
-                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
+                    this.diagnostics.report(
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `id`),
                         {
-                            word: stringifySelector(node),
+                            filePath: this.meta.source,
+                            node: rule,
+                            options: { word: stringifySelector(node) },
                         }
                     );
                 }
             } else if (node.type === `attribute`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
+                    this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
-                            `[${node.value}]`,
+                            `.` + node.value,
                             `attribute`
                         ),
                         {
-                            word: stringifySelector(node),
+                            filePath: this.meta.source,
+                            node: rule,
+                            options: { word: stringifySelector(node) },
                         }
                     );
                 }
             } else if (node.type === `nesting`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
-                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
+                    this.diagnostics.report(
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `nesting`),
                         {
-                            word: stringifySelector(node),
+                            filePath: this.meta.source,
+                            node: rule,
+                            options: { word: stringifySelector(node) },
                         }
                     );
                 }
