@@ -12,7 +12,7 @@ import { stripQuotation } from '../helpers/string';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
-import { Diagnostics } from '../diagnostics';
+import { Diagnostics, DiagnosticsBank } from '../diagnostics';
 import type { ParsedValue } from '../types';
 import type { Stylable } from '../stylable';
 import type { RuntimeStVar } from '../stylable-transformer';
@@ -42,28 +42,75 @@ export interface FlatComputedStVar {
     path: string[];
 }
 
-export const diagnostics = {
+export const diagnostics: DiagnosticsBank = {
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
     NO_VARS_DEF_IN_ST_SCOPE() {
-        return `cannot define ":vars" inside of "@st-scope"`;
+        return {
+            code: '07002',
+            message: `cannot define ":vars" inside of "@st-scope"`,
+            severity: 'error',
+        };
     },
     DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
-        return `"${name}" is deprecated, use "${alternativeName}"`;
+        return {
+            code: '07003',
+            message: `"${name}" is deprecated, use "${alternativeName}"`,
+            severity: 'info',
+        };
     },
-    CYCLIC_VALUE: (cyclicChain: string[]) =>
-        `Cyclic value definition detected: "${cyclicChain
-            .map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s)
-            .join('\n')}"`,
-    MISSING_VAR_IN_VALUE: () => `invalid value() with no var identifier`,
-    COULD_NOT_RESOLVE_VALUE: (args?: string) =>
-        `cannot resolve value function${args ? ` using the arguments provided: "${args}"` : ''}`,
-    MULTI_ARGS_IN_VALUE: (args: string) =>
-        `value function accepts only a single argument: "value(${args})"`,
-    CANNOT_USE_AS_VALUE: (type: string, varName: string) =>
-        `${type} "${varName}" cannot be used as a variable`,
-    CANNOT_USE_JS_AS_VALUE: (type: string, varName: string) =>
-        `JavaScript ${type} import "${varName}" cannot be used as a variable`,
-    UNKNOWN_VAR: (name: string) => `unknown var "${name}"`,
+    CYCLIC_VALUE: (cyclicChain: string[]) => {
+        return {
+            code: '07004',
+            message: `Cyclic value definition detected: "${cyclicChain
+                .map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s)
+                .join('\n')}"`,
+            severity: 'error',
+        };
+    },
+    MISSING_VAR_IN_VALUE: () => {
+        return {
+            code: '07005',
+            message: `invalid value() with no var identifier`,
+            severity: 'error',
+        };
+    },
+    COULD_NOT_RESOLVE_VALUE: (args?: string) => {
+        return {
+            code: '07006',
+            message: `cannot resolve value function${
+                args ? ` using the arguments provided: "${args}"` : ''
+            }`,
+            severity: 'error',
+        };
+    },
+    MULTI_ARGS_IN_VALUE: (args: string) => {
+        return {
+            code: '07007',
+            message: `value function accepts only a single argument: "value(${args})"`,
+            severity: 'error',
+        };
+    },
+    CANNOT_USE_AS_VALUE: (type: string, varName: string) => {
+        return {
+            code: '07008',
+            message: `${type} "${varName}" cannot be used as a variable`,
+            severity: 'error',
+        };
+    },
+    CANNOT_USE_JS_AS_VALUE: (type: string, varName: string) => {
+        return {
+            code: '07009',
+            message: `JavaScript ${type} import "${varName}" cannot be used as a variable`,
+            severity: 'error',
+        };
+    },
+    UNKNOWN_VAR: (name: string) => {
+        return {
+            code: '07010',
+            message: `unknown var "${name}"`,
+            severity: 'error',
+        };
+    },
 };
 
 // HOOKS
@@ -80,7 +127,7 @@ export const hooks = createFeature<{
         // make sure `:vars` is the only selector
         if (rule.selector === `:vars`) {
             if (isChildOfAtRule(rule, `st-scope`)) {
-                context.diagnostics.warn(rule, diagnostics.NO_VARS_DEF_IN_ST_SCOPE());
+                context.diagnostics.report(diagnostics.NO_VARS_DEF_IN_ST_SCOPE(), { node: rule });
             } else {
                 collectVarSymbols(context, rule);
             }
@@ -250,10 +297,12 @@ function warnOnDeprecatedCustomValues(context: FeatureContext, decl: postcss.Dec
         (node) => {
             if (node.type === 'nested-item' && deprecatedStFunctions[node.name]) {
                 const { alternativeName } = deprecatedStFunctions[node.name];
-                context.diagnostics.info(
-                    decl,
+                context.diagnostics.report(
                     diagnostics.DEPRECATED_ST_FUNCTION_NAME(node.name, alternativeName),
-                    { word: node.name }
+                    {
+                        node: decl,
+                        options: { word: node.name },
+                    }
                 );
             }
         },
@@ -288,8 +337,9 @@ function evaluateValueCall(
     // check var not empty
     if (!varName) {
         if (node) {
-            context.diagnostics.warn(node, diagnostics.MISSING_VAR_IN_VALUE(), {
-                word: getStringValue(parsedNode),
+            context.diagnostics.report(diagnostics.MISSING_VAR_IN_VALUE(), {
+                node,
+                options: { word: getStringValue(parsedNode) },
             });
         }
     } else if (parsedArgs.length >= 1) {
@@ -328,7 +378,9 @@ function evaluateValueCall(
             if (node) {
                 const argsAsString = parsedArgs.join(', ');
                 if (!typeError && !topLevelType && parsedArgs.length > 1) {
-                    context.diagnostics.warn(node, diagnostics.MULTI_ARGS_IN_VALUE(argsAsString));
+                    context.diagnostics.report(diagnostics.MULTI_ARGS_IN_VALUE(argsAsString), {
+                        node,
+                    });
                 }
             }
 
@@ -347,11 +399,11 @@ function evaluateValueCall(
                 } else if (node) {
                     // unsupported Javascript value
                     // ToDo: provide actual exported id (default/named as x)
-                    context.diagnostics.warn(
-                        node,
+                    context.diagnostics.report(
                         diagnostics.CANNOT_USE_JS_AS_VALUE(importedType, varName),
                         {
-                            word: varName,
+                            node,
+                            options: { word: varName },
                         }
                     );
                 }
@@ -373,13 +425,15 @@ function evaluateValueCall(
                 reportUnsupportedSymbolInValue(context, varName, finalResolve, node);
             } else if (node) {
                 // report unknown var
-                context.diagnostics.error(node, diagnostics.UNKNOWN_VAR(varName), {
-                    word: varName,
+                context.diagnostics.report(diagnostics.UNKNOWN_VAR(varName), {
+                    node,
+                    options: { word: varName },
                 });
             }
         } else if (node) {
-            context.diagnostics.warn(node, diagnostics.UNKNOWN_VAR(varName), {
-                word: varName,
+            context.diagnostics.report(diagnostics.UNKNOWN_VAR(varName), {
+                node,
+                options: { word: varName },
             });
         }
     }
@@ -394,8 +448,9 @@ function reportUnsupportedSymbolInValue(
     const symbol = resolve.symbol;
     const errorKind = symbol._kind === 'class' && symbol[`-st-root`] ? 'stylesheet' : symbol._kind;
     if (node) {
-        context.diagnostics.warn(node, diagnostics.CANNOT_USE_AS_VALUE(errorKind, name), {
-            word: name,
+        context.diagnostics.report(diagnostics.CANNOT_USE_AS_VALUE(errorKind, name), {
+            node,
+            options: { word: name },
         });
     }
 }
@@ -411,8 +466,9 @@ function handleCyclicValues(
     if (node) {
         const cyclicChain = passedThrough.map((variable) => variable || '');
         cyclicChain.push(refUniqID);
-        context.diagnostics.warn(node, diagnostics.CYCLIC_VALUE(cyclicChain), {
-            word: refUniqID, // ToDo: check word is path+var and not var name
+        context.diagnostics.report(diagnostics.CYCLIC_VALUE(cyclicChain), {
+            node,
+            options: { word: refUniqID }, // ToDo: check word is path+var and not var name
         });
     }
     return stringifyFunction(value, parsedNode);

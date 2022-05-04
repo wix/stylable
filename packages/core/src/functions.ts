@@ -257,12 +257,14 @@ export function processDeclarationValue(
                     const invalidNode = initialNode || node;
 
                     if (invalidNode) {
-                        diagnostics.warn(
-                            invalidNode,
+                        diagnostics.report(
                             STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
                                 [...(rootArgument ? [rootArgument] : []), ...args].join(', ')
                             ),
-                            { word: value }
+                            {
+                                node: invalidNode,
+                                options: { word: value },
+                            }
                         );
                     } else {
                         // TODO: catch broken variable resolutions without a node

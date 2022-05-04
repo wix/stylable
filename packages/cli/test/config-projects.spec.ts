@@ -472,13 +472,15 @@ describe('Stylable CLI config multiple projects', function () {
             const { stdout } = runCliSync(['--rootDir', tempDir.path]);
 
             const firstError = stdout.indexOf('error 1');
-            const stylableError = stdout.indexOf(STVar.diagnostics.UNKNOWN_VAR('unknown'));
+            const stylableError = stdout.indexOf(STVar.diagnostics.UNKNOWN_VAR('unknown').message);
             const secondError = stdout.indexOf('error 2');
 
             expect(firstError, 'sorted by location')
                 .to.be.lessThan(stylableError)
                 .and.lessThan(secondError);
-            expect(stdout.match(STVar.diagnostics.UNKNOWN_VAR('unknown'))?.length).to.eql(1);
+            expect(stdout.match(STVar.diagnostics.UNKNOWN_VAR('unknown').message)?.length).to.eql(
+                1
+            );
         });
 
         it('should throw when the property "projects" is invalid', () => {
