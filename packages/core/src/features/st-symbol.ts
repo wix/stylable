@@ -8,6 +8,7 @@ import type { KeyframesSymbol } from './css-keyframes';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
+import type { DiagnosticsBank } from '../diagnostics';
 
 // SYMBOLS DEFINITION
 
@@ -88,12 +89,20 @@ interface State {
 
 const dataKey = plugableRecord.key<State>('mappedSymbols');
 
-export const diagnostics = {
+export const diagnostics: DiagnosticsBank = {
     REDECLARE_SYMBOL(name: string) {
-        return `redeclare symbol "${name}"`;
+        return {
+            code: '06001',
+            message: `redeclare symbol "${name}"`,
+            severity: 'warning',
+        };
     },
     REDECLARE_ROOT() {
-        return `root is used for the stylesheet and cannot be overridden`;
+        return {
+            code: '06002',
+            message: `root is used for the stylesheet and cannot be overridden`,
+            severity: 'error',
+        };
     },
 };
 
@@ -145,7 +154,10 @@ export function addSymbol({
     const typeTable = byType[symbol._kind];
     const nsName = NAMESPACES[symbol._kind];
     if (node && name === `root` && nsName === `main` && byNSFlat[nsName][name]) {
-        context.diagnostics.warn(node, diagnostics.REDECLARE_ROOT(), { word: `root` });
+        context.diagnostics.report(diagnostics.REDECLARE_ROOT(), {
+            node,
+            options: { word: `root` },
+        });
         return;
     }
     byNS[nsName].push({ name, symbol, ast: node, safeRedeclare });
@@ -169,8 +181,9 @@ export function reportRedeclare(context: FeatureContext) {
         for (const name of collisions) {
             for (const { safeRedeclare, ast } of flat[name]) {
                 if (!safeRedeclare && ast) {
-                    context.diagnostics.warn(ast, diagnostics.REDECLARE_SYMBOL(name), {
-                        word: name,
+                    context.diagnostics.report(diagnostics.REDECLARE_SYMBOL(name), {
+                        node: ast,
+                        options: { word: name },
                     });
                 }
             }

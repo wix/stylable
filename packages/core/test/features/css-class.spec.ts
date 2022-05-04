@@ -466,7 +466,7 @@ describe(`features/css-class`, () => {
             const { sheets } = testStylableCore({
                 '/other.st.css': ``,
                 '/entry.st.css': `
-                    /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_ROOT()} */
+                    /* @analyze-error ${STSymbol.diagnostics.REDECLARE_ROOT().message} */
                     @st-import [root] from './other.st.css';
 
                     /* @rule .entry__root */

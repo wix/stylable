@@ -142,7 +142,7 @@ describe(`features/st-symbol`, () => {
             expect(context.diagnostics.reports).to.containSubset([
                 {
                     severity: `warning`,
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a').message,
                     node: ruleA,
                     options: {
                         word: `a`,
@@ -150,7 +150,7 @@ describe(`features/st-symbol`, () => {
                 },
                 {
                     severity: `warning`,
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
+                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a').message,
                     node: ruleB,
                     options: {
                         word: `a`,
@@ -186,8 +186,8 @@ describe(`features/st-symbol`, () => {
 
             expect(context.diagnostics.reports).to.containSubset([
                 {
-                    severity: `warning`,
-                    message: STSymbol.diagnostics.REDECLARE_ROOT(),
+                    severity: `error`,
+                    message: STSymbol.diagnostics.REDECLARE_ROOT().message,
                     node: rule,
                     options: {
                         word: `root`,

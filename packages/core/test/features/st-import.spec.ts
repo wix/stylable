@@ -201,10 +201,10 @@ describe(`features/st-import`, () => {
         it(`should warn on redeclare between multiple import statements`, () => {
             testStylableCore({
                 '/entry.st.css': `
-                    /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`)} */
+                    /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`).message} */
                     @st-import Name from "./file.st.css";
                     
-                    /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`)} */
+                    /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`).message} */
                     @st-import Name from "./file.st.css";
                 `,
             });
@@ -212,7 +212,7 @@ describe(`features/st-import`, () => {
         it(`should warn on redeclare within a single import symbol`, () => {
             const { sheets } = testStylableCore({
                 '/entry.st.css': `
-                    /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`)} */
+                    /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`).message} */
                     @st-import Name, [Name] from "./file.st.css"
                 `,
             });
@@ -220,7 +220,7 @@ describe(`features/st-import`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             const reports = meta.diagnostics.reports.filter(
-                ({ message }) => message === STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`)
+                ({ message }) => message === STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`).message
             );
             expect(reports.length, `for both default and name`).to.eql(2);
         });
@@ -508,13 +508,13 @@ describe(`features/st-import`, () => {
             it(`should warn on redeclare between multiple import statements`, () => {
                 testStylableCore({
                     '/entry.st.css': `
-                        /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`)} */
+                        /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`).message} */
                         :import {
                             -st-from: './file.st.css';
                             -st-default: Name;
                         }
                         
-                        /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`)} */
+                        /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`).message} */
                         :import {
                             -st-from: './file.st.css';
                             -st-default: Name;
@@ -525,7 +525,7 @@ describe(`features/st-import`, () => {
             it(`should warn on redeclare within a single import symbol`, () => {
                 const { sheets } = testStylableCore({
                     '/entry.st.css': `
-                        /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`)} */
+                        /* @analyze-warn ${STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`).message} */
                         :import {
                             -st-from: './file.st.css';    
                             -st-default: Name;
@@ -537,7 +537,8 @@ describe(`features/st-import`, () => {
                 const { meta } = sheets['/entry.st.css'];
 
                 const reports = meta.diagnostics.reports.filter(
-                    ({ message }) => message === STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`)
+                    ({ message }) =>
+                        message === STSymbol.diagnostics.REDECLARE_SYMBOL(`Name`).message
                 );
                 expect(reports.length, `for both default and name`).to.eql(2);
             });

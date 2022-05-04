@@ -125,7 +125,7 @@ describe(`features/css-custom-property`, () => {
         const symbolDiag = STSymbol.diagnostics;
         const { sheets } = testStylableCore(`
             /* @analyze-warn(@property conflicted) word(--conflicted)
-                ${symbolDiag.REDECLARE_SYMBOL(`--conflicted`)}*/
+                ${symbolDiag.REDECLARE_SYMBOL(`--conflicted`).message}*/
             @property --conflicted {
                 syntax: '<color>';
                 initial-value: green;
@@ -139,7 +139,7 @@ describe(`features/css-custom-property`, () => {
             };
 
             /* @analyze-warn(@property conflicted) word(--conflicted)
-                ${symbolDiag.REDECLARE_SYMBOL(`--conflicted`)}*/
+                ${symbolDiag.REDECLARE_SYMBOL(`--conflicted`).message}*/
             @property --conflicted {
                 syntax: '<color>';
                 initial-value: green;
@@ -368,7 +368,7 @@ describe(`features/css-custom-property`, () => {
             const symbolDiag = STSymbol.diagnostics;
             const { sheets } = testStylableCore(`
                 /* @analyze-warn(@property before) word(--before)
-                    ${symbolDiag.REDECLARE_SYMBOL(`--before`)}*/
+                    ${symbolDiag.REDECLARE_SYMBOL(`--before`).message}*/
                 @property --before {
                     syntax: '<color>';
                     initial-value: green;
@@ -376,13 +376,15 @@ describe(`features/css-custom-property`, () => {
                 };
                 
                 /*
-                @analyze-warn(before) word(--before) ${symbolDiag.REDECLARE_SYMBOL(`--before`)}
-                @analyze-warn(after) word(--after) ${symbolDiag.REDECLARE_SYMBOL(`--after`)}
+                @analyze-warn(before) word(--before) ${
+                    symbolDiag.REDECLARE_SYMBOL(`--before`).message
+                }
+                @analyze-warn(after) word(--after) ${symbolDiag.REDECLARE_SYMBOL(`--after`).message}
                 */
                 @st-global-custom-property --before, --after;
                 
                 /* @analyze-warn(@property after) word(--after) 
-                    ${symbolDiag.REDECLARE_SYMBOL(`--after`)}*/
+                    ${symbolDiag.REDECLARE_SYMBOL(`--after`).message}*/
                 @property --after{
                     syntax: '<color>';
                     initial-value: green;
@@ -520,20 +522,24 @@ describe(`features/css-custom-property`, () => {
                     }
                 `,
                 '/entry.st.css': `
-                    /* @analyze-warn(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`--before`)} */
+                    /* @analyze-warn(before) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`--before`).message
+                    } */
                     @property --before;
                     
                     /* 
-                    @analyze-warn(imported before) word(--before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                        `--before`
-                    )}
-                    @analyze-warn(imported after) word(--after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                        `--after`
-                    )}
+                    @analyze-warn(imported before) word(--before) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`--before`).message
+                    }
+                    @analyze-warn(imported after) word(--after) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`--after`).message
+                    }
                     */
                     @st-import [--before, --after] from "./props.st.css";
                     
-                    /* @analyze-warn(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`--after`)} */
+                    /* @analyze-warn(after) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`--after`).message
+                    } */
                     @property --after;
 
                     .root {

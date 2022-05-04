@@ -227,24 +227,30 @@ describe(`features/css-keyframes`, () => {
     describe(`multiple @keyframes`, () => {
         it(`should warn on redeclare keyframes in root`, () => {
             testStylableCore(`
-                /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`).message} */
                 @keyframes a {}
 
-                /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`).message} */
                 @keyframes a {}
             `);
         });
         it(`should warn on redeclare keyframes in identical @media nesting`, () => {
             testStylableCore(`
                 @media (max-width: 1px) {
-                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    /* @analyze-warn word(a) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`a`).message
+                    } */
                     @keyframes a {}
                 }
                 @media (max-width: 1px) {
-                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    /* @analyze-warn word(a) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`a`).message
+                    } */
                     @keyframes a {}
 
-                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    /* @analyze-warn word(a) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`a`).message
+                    } */
                     @keyframes a {}
                 }
             `);
@@ -370,27 +376,27 @@ describe(`features/css-keyframes`, () => {
 
                     /* 
                         @atrule entry__before
-                        @analyze-warn(local before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                            `before`
-                        )}
+                        @analyze-warn(local before) word(before) ${
+                            STSymbol.diagnostics.REDECLARE_SYMBOL(`before`).message
+                        }
                     */
                     @keyframes before {}
                     
                     /*
-                        @analyze-warn(import before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                            `before`
-                        )}
-                        @analyze-warn(import after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                            `after`
-                        )}
+                        @analyze-warn(import before) word(before) ${
+                            STSymbol.diagnostics.REDECLARE_SYMBOL(`before`).message
+                        }
+                        @analyze-warn(import after) word(after) ${
+                            STSymbol.diagnostics.REDECLARE_SYMBOL(`after`).message
+                        }
                     */
                     @st-import [keyframes(before, after)] from './import.st.css';
                     
                     /* 
                         @atrule entry__after
-                        @analyze-warn(local after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                            `after`
-                        )}
+                        @analyze-warn(local after) word(after) ${
+                            STSymbol.diagnostics.REDECLARE_SYMBOL(`after`).message
+                        }
                     */
                     @keyframes after {}
 

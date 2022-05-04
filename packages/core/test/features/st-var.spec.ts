@@ -934,9 +934,9 @@ describe(`features/st-var`, () => {
                 `,
                 '/entry.st.css': `
                     :vars {
-                        /* @analyze-warn(local before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                            `before`
-                        )} */
+                        /* @analyze-warn(local before) word(before) ${
+                            STSymbol.diagnostics.REDECLARE_SYMBOL(`before`).message
+                        } */
                         before: local-before-val;
                     }
                     .root {
@@ -945,19 +945,19 @@ describe(`features/st-var`, () => {
                     }
 
                     /*
-                    @analyze-warn(import before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                        `before`
-                    )}
-                    @analyze-warn(import after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                        `after`
-                    )}
+                    @analyze-warn(import before) word(before) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`before`).message
+                    }
+                    @analyze-warn(import after) word(after) ${
+                        STSymbol.diagnostics.REDECLARE_SYMBOL(`after`).message
+                    }
                     */
                     @st-import [before, after] from './vars.st.css';
 
                     :vars {
-                        /* @analyze-warn(local after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
-                            `after`
-                        )} */
+                        /* @analyze-warn(local after) word(after) ${
+                            STSymbol.diagnostics.REDECLARE_SYMBOL(`after`).message
+                        } */
                         after: local-after-val;
                     }
                     .root {
