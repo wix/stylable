@@ -63,6 +63,7 @@ export class StylableMeta {
     public mappedSymbols: Record<string, StylableSymbol> = {};
     /** @deprecated */
     public mappedKeyframes: Record<string, KeyframesSymbol> = {};
+    /** @deprecated */
     public customSelectors: Record<string, string> = {};
     public urls: string[] = [];
     public transformDiagnostics: Diagnostics | null = null;

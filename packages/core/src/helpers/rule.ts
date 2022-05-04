@@ -17,7 +17,7 @@ import { ignoreDeprecationWarn } from './deprecation';
 import type { SRule } from '../deprecated/postcss-ast-extension';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
-    return (
+    return !!(
         rule.parent &&
         rule.parent.type === 'atrule' &&
         (rule.parent as postcss.AtRule).name === atRuleName

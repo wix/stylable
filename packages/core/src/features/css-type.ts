@@ -110,7 +110,7 @@ export function addType(context: FeatureContext, name: string, rule?: postcss.Ru
 export function validateTypeScoping({
     context,
     locallyScoped,
-    inStScope,
+    reportUnscoped,
     node,
     nodes,
     index,
@@ -118,17 +118,19 @@ export function validateTypeScoping({
 }: {
     context: FeatureContext;
     locallyScoped: boolean;
-    inStScope: boolean;
+    reportUnscoped: boolean;
     node: ImmutableType;
     nodes: ImmutableSelectorNode[];
     index: number;
     rule: postcss.Rule;
 }): boolean {
-    if (locallyScoped === false && !inStScope) {
+    if (locallyScoped === false) {
         if (CSSClass.checkForScopedNodeAfter(context, rule, nodes, index) === false) {
-            context.diagnostics.warn(rule, diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
-                word: node.value,
-            });
+            if (reportUnscoped) {
+                context.diagnostics.warn(rule, diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+                    word: node.value,
+                });
+            }
             return false;
         } else {
             locallyScoped = true;

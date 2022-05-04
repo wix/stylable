@@ -83,7 +83,7 @@ export const processorWarnings = {
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
-
+    private customSelectorData: Record<string, { isScoped: boolean }> = {};
     constructor(
         public diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
@@ -96,12 +96,12 @@ export class StylableProcessor implements FeatureContext {
 
         this.handleAtRules(root);
 
-        const stubs = this.insertCustomSelectorsStubs();
-
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
-                this.handleCustomSelectors(rule);
-                this.handleRule(rule as SRule, isChildOfAtRule(rule, `st-scope`));
+                this.handleRule(rule as SRule, {
+                    isScoped: isChildOfAtRule(rule, `st-scope`),
+                    reportUnscoped: true,
+                });
             }
             const parent = rule.parent;
             if (parent?.type === 'rule') {
@@ -124,15 +124,13 @@ export class StylableProcessor implements FeatureContext {
                 return;
             }
             // ToDo: refactor to be hooked by features
-            if (stValuesMap[decl.prop]) {
-                this.handleDirectives(decl.parent as SRule, decl);
+            if (stValuesMap[decl.prop] && parent.type === 'rule') {
+                this.handleDirectives(parent as SRule, decl);
             }
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
 
             this.collectUrls(decl);
         });
-
-        stubs.forEach((s) => s && s.remove());
 
         this.meta.scopes.forEach((scope) => this.handleScope(scope));
 
@@ -147,30 +145,23 @@ export class StylableProcessor implements FeatureContext {
         const toRemove: postcss.Node[] = [];
         ast.walk((node) => {
             const input = { node, toRemove };
+            // namespace
             if (node.type === 'atrule' && node.name === `namespace`) {
                 toRemove.push(node);
             }
+            // custom selectors
+            if (node.type === 'rule') {
+                expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
+            } else if (node.type === 'atrule' && node.name === 'custom-selector') {
+                toRemove.push(node);
+            }
+            // extracted features
             STImport.hooks.prepareAST(input);
             STVar.hooks.prepareAST(input);
         });
         for (const node of toRemove) {
             node.remove();
         }
-    }
-
-    public insertCustomSelectorsStubs() {
-        return Object.keys(this.meta.customSelectors).map((selector) => {
-            if (this.meta.customSelectors[selector]) {
-                const rule = postcss.rule({ selector });
-                this.meta.ast.append(rule);
-                return rule;
-            }
-            return null;
-        });
-    }
-
-    public handleCustomSelectors(rule: postcss.Rule) {
-        expandCustomSelectors(rule, this.meta.customSelectors, this.meta.diagnostics);
     }
 
     protected handleAtRules(root: postcss.Root) {
@@ -211,11 +202,17 @@ export class StylableProcessor implements FeatureContext {
                 case 'custom-selector': {
                     const params = atRule.params.split(/\s/);
                     const customName = params.shift();
-                    toRemove.push(atRule);
                     if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
-                        this.meta.customSelectors[customName] = atRule.params
-                            .replace(customName, '')
-                            .trim();
+                        const selector = atRule.params.replace(customName, '').trim();
+                        const rule = postcss.rule({ selector, source: atRule.source });
+                        const isScoped = this.handleRule(rule as SRule, {
+                            isScoped: false,
+                            reportUnscoped: false,
+                        });
+                        this.meta.customSelectors[customName] = selector;
+                        this.customSelectorData[customName] = {
+                            isScoped,
+                        };
                     } else {
                         // TODO: add warn there are two types one is not valid name and the other is empty name.
                     }
@@ -272,18 +269,22 @@ export class StylableProcessor implements FeatureContext {
         );
     }
 
-    protected handleRule(rule: SRule, inStScope = false) {
+    protected handleRule(
+        rule: SRule,
+        { isScoped, reportUnscoped }: { isScoped: boolean; reportUnscoped: boolean }
+    ) {
         rule.selectorAst = deprecatedParseSelector(rule.selector);
 
         const selectorAst = parseSelectorWithCache(rule.selector);
 
-        let locallyScoped = false;
+        let locallyScoped = isScoped;
         let simpleSelector: boolean;
         walkSelector(selectorAst, (node, ...nodeContext) => {
             const [index, nodes, parents] = nodeContext;
             const type = node.type;
             if (type === 'selector' && !isInPseudoClassContext(parents)) {
-                locallyScoped = false;
+                // reset scope check between top level selectors
+                locallyScoped = isScoped;
             }
             if (type !== `selector` && type !== `class` && type !== `type`) {
                 simpleSelector = false;
@@ -311,6 +312,11 @@ export class StylableProcessor implements FeatureContext {
                         rule,
                         walkContext: nodeContext,
                     });
+                } else if (node.value.startsWith('--')) {
+                    locallyScoped =
+                        locallyScoped ||
+                        this.customSelectorData[`:${node.value}`]?.isScoped ||
+                        false;
                 } else if (!knownPseudoClassesWithNestedSelectors.includes(node.value)) {
                     return walkSelector.skipNested;
                 }
@@ -326,7 +332,7 @@ export class StylableProcessor implements FeatureContext {
                     context: this,
                     classSymbol: CSSClass.get(this.meta, node.value)!,
                     locallyScoped,
-                    inStScope,
+                    reportUnscoped,
                     node,
                     nodes,
                     index,
@@ -343,7 +349,7 @@ export class StylableProcessor implements FeatureContext {
                 locallyScoped = CSSType.validateTypeScoping({
                     context: this,
                     locallyScoped,
-                    inStScope,
+                    reportUnscoped,
                     node,
                     nodes,
                     index,
@@ -397,6 +403,7 @@ export class StylableProcessor implements FeatureContext {
         if (!isRootValid(selectorAst)) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
+        return locallyScoped;
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
@@ -491,7 +498,10 @@ export class StylableProcessor implements FeatureContext {
 
     private handleScope(atRule: postcss.AtRule) {
         const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
-        this.handleRule(scopingRule, true);
+        this.handleRule(scopingRule, {
+            isScoped: true,
+            reportUnscoped: false,
+        });
         validateScopingSelector(atRule, scopingRule, this.diagnostics);
 
         if (scopingRule.selector) {
