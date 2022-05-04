@@ -158,6 +158,7 @@ export class StylableProcessor implements FeatureContext {
             // extracted features
             STImport.hooks.prepareAST(input);
             STVar.hooks.prepareAST(input);
+            CSSCustomProperty.hooks.prepareAST(input);
         });
         for (const node of toRemove) {
             node.remove();
@@ -166,7 +167,6 @@ export class StylableProcessor implements FeatureContext {
 
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
-        const toRemove: postcss.AtRule[] = [];
 
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
@@ -174,7 +174,6 @@ export class StylableProcessor implements FeatureContext {
                     STImport.hooks.analyzeAtRule({
                         context: this,
                         atRule,
-                        toRemove,
                     });
                     break;
                 }
@@ -186,7 +185,6 @@ export class StylableProcessor implements FeatureContext {
                         } else {
                             this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
                         }
-                        // toRemove.push(atRule);
                     } else {
                         this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
                     }
@@ -196,7 +194,6 @@ export class StylableProcessor implements FeatureContext {
                     CSSKeyframes.hooks.analyzeAtRule({
                         context: this,
                         atRule,
-                        toRemove,
                     });
                     break;
                 case 'custom-selector': {
@@ -223,12 +220,11 @@ export class StylableProcessor implements FeatureContext {
                     break;
                 case 'property':
                 case 'st-global-custom-property': {
-                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule, toRemove });
+                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule });
                     break;
                 }
             }
         });
-        toRemove.forEach((node) => node.remove());
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
