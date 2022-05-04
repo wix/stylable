@@ -34,7 +34,11 @@ type SelectorWalkReturn = number | undefined | void;
 export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     metaInit: (context: FeatureContext) => void;
     analyzeInit: (context: FeatureContext) => void;
-    analyzeAtRule: (options: { context: FeatureContext; atRule: postcss.AtRule }) => void;
+    analyzeAtRule: (options: {
+        context: FeatureContext;
+        atRule: postcss.AtRule;
+        analyzeRule: (rule: postcss.Rule, options: { isScoped: boolean }) => boolean;
+    }) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
         node: T['IMMUTABLE_SELECTOR'];
@@ -42,7 +46,10 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         walkContext: SelectorNodeContext;
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
-    prepareAST: (options: { node: postcss.ChildNode; toRemove: postcss.Node[] }) => void;
+    prepareAST: (options: {
+        node: postcss.ChildNode;
+        toRemove: Array<postcss.Node | (() => void)>;
+    }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
     transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
     transformAtRuleNode: (options: {

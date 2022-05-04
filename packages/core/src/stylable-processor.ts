@@ -19,6 +19,7 @@ import {
     STSymbol,
     STImport,
     STGlobal,
+    STScope,
     CSSClass,
     CSSType,
     CSSKeyframes,
@@ -30,7 +31,6 @@ import {
     isSimpleSelector,
     isInPseudoClassContext,
     isRootValid,
-    scopeNestedSelector,
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
@@ -70,9 +70,7 @@ export const processorWarnings = {
     EMPTY_NAMESPACE_DEF() {
         return '@namespace must contain at least one character or digit';
     },
-    MISSING_SCOPING_PARAM() {
-        return '"@st-scope" missing scoping selector parameter';
-    },
+
     INVALID_NAMESPACE_REFERENCE() {
         return 'st-namespace-reference dose not have any value';
     },
@@ -132,8 +130,6 @@ export class StylableProcessor implements FeatureContext {
             this.collectUrls(decl);
         });
 
-        this.meta.scopes.forEach((scope) => this.handleScope(scope));
-
         STSymbol.reportRedeclare(this);
 
         this.prepareAST(this.meta, root);
@@ -142,7 +138,7 @@ export class StylableProcessor implements FeatureContext {
     }
 
     private prepareAST(meta: StylableMeta, ast: postcss.Root) {
-        const toRemove: postcss.Node[] = [];
+        const toRemove: Array<postcss.Node | (() => void)> = [];
         ast.walk((node) => {
             const input = { node, toRemove };
             // namespace
@@ -157,16 +153,24 @@ export class StylableProcessor implements FeatureContext {
             }
             // extracted features
             STImport.hooks.prepareAST(input);
+            STScope.hooks.prepareAST(input);
             STVar.hooks.prepareAST(input);
             CSSCustomProperty.hooks.prepareAST(input);
         });
-        for (const node of toRemove) {
-            node.remove();
+        for (const removeOfNode of toRemove) {
+            typeof removeOfNode === 'function' ? removeOfNode() : removeOfNode.remove();
         }
     }
 
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
+
+        const analyzeRule = (rule: postcss.Rule, { isScoped }: { isScoped: boolean }) => {
+            return this.handleRule(rule as SRule, {
+                isScoped,
+                reportUnscoped: false,
+            });
+        };
 
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
@@ -174,6 +178,7 @@ export class StylableProcessor implements FeatureContext {
                     STImport.hooks.analyzeAtRule({
                         context: this,
                         atRule,
+                        analyzeRule,
                     });
                     break;
                 }
@@ -194,6 +199,7 @@ export class StylableProcessor implements FeatureContext {
                     CSSKeyframes.hooks.analyzeAtRule({
                         context: this,
                         atRule,
+                        analyzeRule,
                     });
                     break;
                 case 'custom-selector': {
@@ -201,26 +207,25 @@ export class StylableProcessor implements FeatureContext {
                     const customName = params.shift();
                     if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
                         const selector = atRule.params.replace(customName, '').trim();
-                        const rule = postcss.rule({ selector, source: atRule.source });
-                        const isScoped = this.handleRule(rule as SRule, {
-                            isScoped: false,
-                            reportUnscoped: false,
-                        });
-                        this.meta.customSelectors[customName] = selector;
+                        const isScoped = analyzeRule(
+                            postcss.rule({ selector, source: atRule.source }),
+                            { isScoped: false }
+                        );
                         this.customSelectorData[customName] = {
                             isScoped,
                         };
+                        this.meta.customSelectors[customName] = selector;
                     } else {
                         // TODO: add warn there are two types one is not valid name and the other is empty name.
                     }
                     break;
                 }
                 case 'st-scope':
-                    this.meta.scopes.push(atRule);
+                    STScope.hooks.analyzeAtRule({ context: this, atRule, analyzeRule });
                     break;
                 case 'property':
                 case 'st-global-custom-property': {
-                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule });
+                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule, analyzeRule });
                     break;
                 }
             }
@@ -491,39 +496,16 @@ export class StylableProcessor implements FeatureContext {
             typedRule[key] = value;
         }
     }
-
-    private handleScope(atRule: postcss.AtRule) {
-        const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
-        this.handleRule(scopingRule, {
-            isScoped: true,
-            reportUnscoped: false,
-        });
-        validateScopingSelector(atRule, scopingRule, this.diagnostics);
-
-        if (scopingRule.selector) {
-            atRule.walkRules((rule) => {
-                const scopedRule = rule.clone({
-                    selector: scopeNestedSelector(
-                        parseSelectorWithCache(scopingRule.selector),
-                        parseSelectorWithCache(rule.selector)
-                    ).selector,
-                });
-                (scopedRule as SRule).stScopeSelector = atRule.params;
-                rule.replaceWith(scopedRule);
-            });
-        }
-
-        atRule.replaceWith(atRule.nodes || []);
-    }
 }
 
+/* @deprecated */
 export function validateScopingSelector(
     atRule: postcss.AtRule,
     { selector: scopingSelector }: SRule,
     diagnostics: Diagnostics
 ) {
     if (!scopingSelector) {
-        diagnostics.warn(atRule, processorWarnings.MISSING_SCOPING_PARAM());
+        diagnostics.warn(atRule, STScope.diagnostics.MISSING_SCOPING_PARAM());
     }
 }
 

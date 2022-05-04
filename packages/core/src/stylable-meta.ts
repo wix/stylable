@@ -68,6 +68,7 @@ export class StylableMeta {
     public urls: string[] = [];
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
+    /** @deprecated */
     public scopes: postcss.AtRule[] = [];
     /** @deprecated */
     public mixins: RefedMixin[] = [];
