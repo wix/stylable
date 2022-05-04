@@ -463,7 +463,9 @@ describe('Stylable Cli', function () {
 
             expect(status).to.equal(1);
             expect(
-                stdout.match(new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE(), 'g'))
+                stdout.match(
+                    new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE().message, 'g')
+                )
             ).to.have.length(1);
         });
 

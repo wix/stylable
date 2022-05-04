@@ -116,9 +116,9 @@ describe(`features/st-var`, () => {
                 }
             }
 
-            /* @analyze-warn(complex selector) ${STVar.diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                `:vars`
-            )} */
+            /* @analyze-error(complex selector) ${
+                STVar.diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(`:vars`).message
+            } */
             .root:vars {}
         `);
 

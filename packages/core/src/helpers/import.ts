@@ -1,6 +1,6 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
-import { Diagnostics } from '../diagnostics';
+import { Diagnostics, DiagnosticsBank } from '../diagnostics';
 import type { Imported } from '../features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { stripQuotation } from '../helpers/string';
@@ -12,38 +12,78 @@ import postcssValueParser, {
     FunctionNode,
 } from 'postcss-value-parser';
 
-export const parseImportMessages = {
+export const parseImportMessages: DiagnosticsBank = {
     ST_IMPORT_STAR() {
-        return '@st-import * is not supported';
+        return {
+            code: '05001',
+            message: '@st-import * is not supported',
+            severity: 'error',
+        };
     },
     INVALID_ST_IMPORT_FORMAT(errors: string[]) {
-        return `Invalid @st-import format:\n - ${errors.join('\n - ')}`;
+        return {
+            code: '05002',
+            message: `Invalid @st-import format:\n - ${errors.join('\n - ')}`,
+            severity: 'error',
+        };
     },
 
     ST_IMPORT_EMPTY_FROM() {
-        return '@st-import must specify a valid "from" string value';
+        return {
+            code: '05003',
+            message: '@st-import must specify a valid "from" string value',
+            severity: 'error',
+        };
     },
     EMPTY_IMPORT_FROM() {
-        return '"-st-from" cannot be empty';
+        return {
+            code: '05004',
+            message: '"-st-from" cannot be empty',
+            severity: 'error',
+        };
     },
 
     MULTIPLE_FROM_IN_IMPORT() {
-        return `cannot define multiple "-st-from" declarations in a single import`;
+        return {
+            code: '05005',
+            message: `cannot define multiple "-st-from" declarations in a single import`,
+            severity: 'warning',
+        };
     },
     DEFAULT_IMPORT_IS_LOWER_CASE() {
-        return 'Default import of a Stylable stylesheet must start with an upper-case letter';
+        return {
+            code: '05006',
+            message: 'Default import of a Stylable stylesheet must start with an upper-case letter',
+            severity: 'warning',
+        };
     },
     ILLEGAL_PROP_IN_IMPORT(propName: string) {
-        return `"${propName}" css attribute cannot be used inside :import block`;
+        return {
+            code: '05007',
+            message: `"${propName}" css attribute cannot be used inside :import block`,
+            severity: 'warning',
+        };
     },
     FROM_PROP_MISSING_IN_IMPORT() {
-        return `"-st-from" is missing in :import block`;
+        return {
+            code: '05008',
+            message: `"-st-from" is missing in :import block`,
+            severity: 'error',
+        };
     },
     INVALID_NAMED_IMPORT_AS(name: string) {
-        return `Invalid named import "as" with name "${name}"`;
+        return {
+            code: '05009',
+            message: `Invalid named import "as" with name "${name}"`,
+            severity: 'error',
+        };
     },
     INVALID_NESTED_KEYFRAMES(name: string) {
-        return `Invalid nested keyframes import "${name}"`;
+        return {
+            code: '05010',
+            message: `Invalid nested keyframes import "${name}"`,
+            severity: 'error',
+        };
     },
 };
 
@@ -221,7 +261,7 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
     const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
 
     if (imports && imports.star) {
-        diagnostics.error(atRule, parseImportMessages.ST_IMPORT_STAR());
+        diagnostics.report(parseImportMessages.ST_IMPORT_STAR(), { node: atRule });
     } else {
         setImportObjectFrom(imports.from || '', context, importObj);
 
@@ -231,8 +271,9 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
             !isCompRoot(importObj.defaultExport) &&
             importObj.from.endsWith(`.css`)
         ) {
-            diagnostics.warn(atRule, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
-                word: importObj.defaultExport,
+            diagnostics.report(parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                node: atRule,
+                options: { word: importObj.defaultExport },
             });
         }
         if (imports.tagged?.keyframes) {
@@ -247,9 +288,11 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
             }
         }
         if (imports.errors.length) {
-            diagnostics.error(atRule, parseImportMessages.INVALID_ST_IMPORT_FORMAT(imports.errors));
+            diagnostics.report(parseImportMessages.INVALID_ST_IMPORT_FORMAT(imports.errors), {
+                node: atRule,
+            });
         } else if (!imports.from?.trim()) {
-            diagnostics.error(atRule, parseImportMessages.ST_IMPORT_EMPTY_FROM());
+            diagnostics.report(parseImportMessages.ST_IMPORT_EMPTY_FROM(), { node: atRule });
         }
     }
 
@@ -273,11 +316,13 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
             case `-st-from`: {
                 const importPath = stripQuotation(decl.value);
                 if (!importPath.trim()) {
-                    diagnostics.error(decl, parseImportMessages.EMPTY_IMPORT_FROM());
+                    diagnostics.report(parseImportMessages.EMPTY_IMPORT_FROM(), { node: decl });
                 }
 
                 if (fromExists) {
-                    diagnostics.warn(rule, parseImportMessages.MULTIPLE_FROM_IN_IMPORT());
+                    diagnostics.report(parseImportMessages.MULTIPLE_FROM_IN_IMPORT(), {
+                        node: rule,
+                    });
                 }
 
                 setImportObjectFrom(importPath, context, importObj);
@@ -287,8 +332,9 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
             case `-st-default`:
                 importObj.defaultExport = decl.value;
                 if (!isCompRoot(importObj.defaultExport) && importObj.from.endsWith(`.css`)) {
-                    diagnostics.warn(decl, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
-                        word: importObj.defaultExport,
+                    diagnostics.report(parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                        node: decl,
+                        options: { word: importObj.defaultExport },
                     });
                 }
                 break;
@@ -304,15 +350,18 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                 }
                 break;
             default:
-                diagnostics.warn(decl, parseImportMessages.ILLEGAL_PROP_IN_IMPORT(decl.prop), {
-                    word: decl.prop,
+                diagnostics.report(parseImportMessages.ILLEGAL_PROP_IN_IMPORT(decl.prop), {
+                    node: decl,
+                    options: { word: decl.prop },
                 });
                 break;
         }
     });
 
     if (!importObj.from) {
-        diagnostics.error(rule, parseImportMessages.FROM_PROP_MISSING_IN_IMPORT());
+        diagnostics.report(parseImportMessages.FROM_PROP_MISSING_IN_IMPORT(), {
+            node: rule,
+        });
     }
     return importObj;
 }
@@ -507,10 +556,9 @@ function handleNamedTokens(
                     i += 4; //ignore next 4 tokens
                 } else {
                     i += !asName ? 3 : 2;
-                    diagnostics.warn(
+                    diagnostics.report(parseImportMessages.INVALID_NAMED_IMPORT_AS(token.value), {
                         node,
-                        parseImportMessages.INVALID_NAMED_IMPORT_AS(token.value)
-                    );
+                    });
                     continue;
                 }
             } else {
@@ -518,11 +566,11 @@ function handleNamedTokens(
             }
         } else if (token.type === 'function' && token.value === 'keyframes') {
             if (key === 'keyframesMap') {
-                diagnostics.warn(
-                    node,
+                diagnostics.report(
                     parseImportMessages.INVALID_NESTED_KEYFRAMES(
                         postcssValueParser.stringify(token)
-                    )
+                    ),
+                    { node }
                 );
             }
             handleNamedTokens(token, buckets, 'keyframesMap', node, diagnostics);

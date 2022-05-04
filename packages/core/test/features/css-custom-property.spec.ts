@@ -633,10 +633,10 @@ describe(`features/css-custom-property`, () => {
             const { sheets } = testStylableCore({
                 '/props.st.css': ``,
                 '/entry.st.css': `
-                    /* @transform-warn word(--unknown) ${STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                        '--unknown',
-                        './props.st.css'
-                    )} */
+                    /* @transform-error word(--unknown) ${
+                        STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL('--unknown', './props.st.css')
+                            .message
+                    } */
                     @st-import [--unknown] from './props.st.css';
 
                     .root {

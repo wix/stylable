@@ -96,7 +96,7 @@ describe(`features/st-import`, () => {
             .x {
                 /* 
                     @transform-remove
-                    @analyze-warn ${STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE()}
+                    @analyze-error ${STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE().message}
                 */
                 @st-import D, [n] from "./some/external/path";
             }
@@ -123,7 +123,9 @@ describe(`features/st-import`, () => {
     });
     it(`should warn on lowercase default import from css file`, () => {
         const { sheets } = testStylableCore(`
-            /* @analyze-warn word(sheetError) ${STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
+            /* @analyze-warn word(sheetError) ${
+                STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE().message
+            } */
             @st-import sheetError from "./a.st.css";
 
             @st-import SheetStartWithCapital from "./b.st.css";
@@ -134,43 +136,46 @@ describe(`features/st-import`, () => {
     });
     it(`should handle invalid cases`, () => {
         testStylableCore(`
-            /* @analyze-error(empty from) ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
+            /* @analyze-error(empty from) ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM().message} */
             @st-import A from "";
 
-            /* @analyze-error(spaces only from) ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
+            /* @analyze-error(spaces only from) ${
+                STImport.diagnostics.ST_IMPORT_EMPTY_FROM().message
+            } */
             @st-import A from " ";
 
-            /* @analyze-error(* import) ${STImport.diagnostics.ST_IMPORT_STAR()} */
+            /* @analyze-error(* import) ${STImport.diagnostics.ST_IMPORT_STAR().message} */
             @st-import * as X from "./some/path";
             
-            /* @analyze-error(* import) ${STImport.diagnostics.INVALID_ST_IMPORT_FORMAT([
-                `invalid missing source`,
-            ])} */
+            /* @analyze-error(* import) ${
+                STImport.diagnostics.INVALID_ST_IMPORT_FORMAT([`invalid missing source`]).message
+            } */
             @st-import %# from ("");
             
-            /* @analyze-error(missing from) ${STImport.diagnostics.INVALID_ST_IMPORT_FORMAT([
-                `invalid missing from`,
-                `invalid missing source`,
-            ])} */
+            /* @analyze-error(missing from) ${
+                STImport.diagnostics.INVALID_ST_IMPORT_FORMAT([
+                    `invalid missing from`,
+                    `invalid missing source`,
+                ]).message
+            } */
             @st-import f rom "x";
             
-            /* @analyze-warn(invalid mapped custom prop) ${STImport.diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(
-                `--x`,
-                `z`
-            )} */
+            /* @analyze-error(invalid mapped custom prop) ${
+                STImport.diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(`--x`, `z`).message
+            } */
             @st-import [--x as z] from "./a.st.css"
         `);
     });
     it(`should error on unresolved file`, () => {
         testStylableCore(`
-            /* @transform-warn(relative) word(./missing.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
-                `./missing.st.css`
-            )} */
+            /* @transform-error(relative) word(./missing.st.css) ${
+                STImport.diagnostics.UNKNOWN_IMPORTED_FILE(`./missing.st.css`).message
+            } */
             @st-import "./missing.st.css";
 
-            /* @transform-warn(3rd party) word(missing-package/index.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
-                `missing-package/index.st.css`
-            )} */
+            /* @transform-error(3rd party) word(missing-package/index.st.css) ${
+                STImport.diagnostics.UNKNOWN_IMPORTED_FILE(`missing-package/index.st.css`).message
+            } */
             @st-import "missing-package/index.st.css";
         `);
     });
@@ -178,16 +183,16 @@ describe(`features/st-import`, () => {
         testStylableCore({
             '/empty.st.css': ``,
             '/entry.st.css': `
-                /* @transform-warn(named) word(unknown) ${STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                    `unknown`,
-                    `./empty.st.css`
-                )} */
+                /* @transform-error(named) word(unknown) ${
+                    STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(`unknown`, `./empty.st.css`)
+                        .message
+                } */
                 @st-import [unknown] "./empty.st.css";
                 
-                /* @transform-warn(mapped) word(unknown) ${STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                    `unknown`,
-                    `./empty.st.css`
-                )} */
+                /* @transform-error(mapped) word(unknown) ${
+                    STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(`unknown`, `./empty.st.css`)
+                        .message
+                } */
                 @st-import [unknown as local] "./empty.st.css";
             `,
         });
@@ -330,7 +335,9 @@ describe(`features/st-import`, () => {
                 .x {
                     /* 
                         @transform-remove
-                        @analyze-warn ${STImport.diagnostics.NO_PSEUDO_IMPORT_IN_NESTED_SCOPE()}
+                        @analyze-error ${
+                            STImport.diagnostics.NO_PSEUDO_IMPORT_IN_NESTED_SCOPE().message
+                        }
                     */
                     :import {
                         -st-from: "./some/external/path.st.css";
@@ -366,7 +373,9 @@ describe(`features/st-import`, () => {
             const { sheets } = testStylableCore(`
                 :import{
                     -st-from:"./a.st.css";
-                    /* @analyze-warn word(sheetError) ${STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
+                    /* @analyze-warn word(sheetError) ${
+                        STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE().message
+                    } */
                     -st-default: sheetError;
                 }
     
@@ -387,32 +396,39 @@ describe(`features/st-import`, () => {
             // ToDo: add diagnostic for multiple -st-named
             testStylableCore(`
                 :import{
-                    /* @analyze-error(empty from) ${STImport.diagnostics.EMPTY_IMPORT_FROM()} */
+                    /* @analyze-error(empty from) ${
+                        STImport.diagnostics.EMPTY_IMPORT_FROM().message
+                    } */
                     -st-from: "";
                     -st-default: Comp;
                 }
     
                 :import{
-                    /* @analyze-error(spaces only from) ${STImport.diagnostics.EMPTY_IMPORT_FROM()} */
+                    /* @analyze-error(spaces only from) ${
+                        STImport.diagnostics.EMPTY_IMPORT_FROM().message
+                    } */
                     -st-from: " ";
                     -st-default: Comp;
                 }
                 
-                /* @analyze-warn(invalid mapped custom prop) ${STImport.diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(
-                    `--x`,
-                    `z`
-                )} */
+                /* @analyze-error(invalid mapped custom prop) ${
+                    STImport.diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(`--x`, `z`).message
+                } */
                 :import {
                     -st-from: "./a.st.css";
                     -st-named: --x as z;
                 }
 
-                /* @analyze-error(missing from) ${STImport.diagnostics.FROM_PROP_MISSING_IN_IMPORT()} */
+                /* @analyze-error(missing from) ${
+                    STImport.diagnostics.FROM_PROP_MISSING_IN_IMPORT().message
+                } */
                 :import{
                     -st-default: Comp;
                 }
 
-                /* @analyze-warn(multiple from) ${STImport.diagnostics.MULTIPLE_FROM_IN_IMPORT()} */
+                /* @analyze-warn(multiple from) ${
+                    STImport.diagnostics.MULTIPLE_FROM_IN_IMPORT().message
+                } */
                 :import{
                     -st-from: "a";
                     -st-from: "b";
@@ -422,9 +438,9 @@ describe(`features/st-import`, () => {
                 :import{
                     -st-from:"./imported.st.css";
                     -st-default:Comp;
-                    /* @analyze-warn(unknown declaration) word(color) ${STImport.diagnostics.ILLEGAL_PROP_IN_IMPORT(
-                        `color`
-                    )} */
+                    /* @analyze-warn(unknown declaration) word(color) ${
+                        STImport.diagnostics.ILLEGAL_PROP_IN_IMPORT(`color`).message
+                    } */
                     color:red;
                 }
             `);
@@ -432,16 +448,17 @@ describe(`features/st-import`, () => {
         it(`should error on unresolved file`, () => {
             testStylableCore(`
                 :import{
-                    /* @transform-warn(relative) word(./missing.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
-                        `./missing.st.css`
-                    )} */
+                    /* @transform-error(relative) word(./missing.st.css) ${
+                        STImport.diagnostics.UNKNOWN_IMPORTED_FILE(`./missing.st.css`).message
+                    } */
                     -st-from: "./missing.st.css";
                 }
     
                 :import{
-                    /* @transform-warn(3rd party) word(missing-package/index.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
-                        `missing-package/index.st.css`
-                    )} */
+                    /* @transform-error(3rd party) word(missing-package/index.st.css) ${
+                        STImport.diagnostics.UNKNOWN_IMPORTED_FILE(`missing-package/index.st.css`)
+                            .message
+                    } */
                     -st-from: "missing-package/index.st.css";
                 }
             `);
@@ -452,19 +469,23 @@ describe(`features/st-import`, () => {
                 '/entry.st.css': `
                     :import{
                         -st-from: "./empty.st.css";
-                        /* @transform-warn(named) word(unknown) ${STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                            `unknown`,
-                            `./empty.st.css`
-                        )} */
+                        /* @transform-error(named) word(unknown) ${
+                            STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                                `unknown`,
+                                `./empty.st.css`
+                            ).message
+                        } */
                         -st-named: unknown;
                     }
                     
                     :import{
                         -st-from: "./empty.st.css";
-                        /* @transform-warn(mapped) word(unknown) ${STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
-                            `unknown`,
-                            `./empty.st.css`
-                        )} */
+                        /* @transform-error(mapped) word(unknown) ${
+                            STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                                `unknown`,
+                                `./empty.st.css`
+                            ).message
+                        } */
                         -st-named: unknown as local;
                     }
                 `,
@@ -473,9 +494,9 @@ describe(`features/st-import`, () => {
         it(`should not allow in complex selector`, () => {
             testStylableCore({
                 '/entry.st.css': `
-                    /* @analyze-warn ${STImport.diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                        `:import`
-                    )} */
+                    /* @analyze-error ${
+                        STImport.diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(`:import`).message
+                    } */
                     .gaga:import {
                         -st-from: "./file.st.css";
                         -st-default: Comp;

@@ -303,7 +303,8 @@ describe('Stylable Cli Watch - Single project', function () {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -335,7 +336,8 @@ describe('Stylable Cli Watch - Single project', function () {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -352,7 +354,8 @@ describe('Stylable Cli Watch - Single project', function () {
                     },
                 },
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
             ],
         });

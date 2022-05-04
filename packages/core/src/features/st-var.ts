@@ -88,7 +88,9 @@ export const hooks = createFeature<{
             // stop further walk into `:vars {}`
             return walkSelector.stopAll;
         } else {
-            context.diagnostics.warn(rule, diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(`:vars`));
+            context.diagnostics.report(diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(`:vars`), {
+                node: rule,
+            });
         }
         return;
     },

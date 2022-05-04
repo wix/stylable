@@ -354,7 +354,8 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message:
-                                generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'),
+                                generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends')
+                                    .message,
                             file: 'main.css',
                         },
                     ]
