@@ -37,7 +37,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     analyzeAtRule: (options: {
         context: FeatureContext;
         atRule: postcss.AtRule;
-        toRemove: postcss.AtRule[]; // ToDo: remove once rawAst is immutable in processor
+        analyzeRule: (rule: postcss.Rule, options: { isScoped: boolean }) => boolean;
     }) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
@@ -46,6 +46,10 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         walkContext: SelectorNodeContext;
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
+    prepareAST: (options: {
+        node: postcss.ChildNode;
+        toRemove: Array<postcss.Node | (() => void)>;
+    }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
     transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
     transformAtRuleNode: (options: {
@@ -91,6 +95,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
         /**/
     },
     analyzeDeclaration() {
+        /**/
+    },
+    prepareAST() {
         /**/
     },
     transformInit() {

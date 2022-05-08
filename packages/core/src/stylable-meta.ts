@@ -34,10 +34,12 @@ export class StylableMeta {
     public root = 'root';
     public source: string = getSourcePath(this.ast, this.diagnostics);
     public namespace = '';
+    /** @deprecated */
     public customSelectors: Record<string, string> = {};
     public urls: string[] = [];
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
+    /** @deprecated */
     public scopes: postcss.AtRule[] = [];
     // Generated during transform
     public outputAst?: postcss.Root;

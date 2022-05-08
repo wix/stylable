@@ -84,13 +84,17 @@ export const hooks = createFeature<{
             } else {
                 collectVarSymbols(context, rule);
             }
-            rule.remove();
             // stop further walk into `:vars {}`
             return walkSelector.stopAll;
         } else {
             context.diagnostics.warn(rule, diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(`:vars`));
         }
         return;
+    },
+    prepareAST({ node, toRemove }) {
+        if (node.type === 'rule' && node.selector === ':vars') {
+            toRemove.push(node);
+        }
     },
     transformResolve({ context }) {
         // Resolve local vars
