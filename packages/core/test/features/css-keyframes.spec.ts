@@ -605,11 +605,13 @@ describe(`features/css-keyframes`, () => {
                 
                 @keyframes move {
                     /* 
-                        @transform-warn ${STMixin.diagnostics.INVALID_MERGE_OF(
-                            `0%:hover {
+                        @transform-error ${
+                            STMixin.diagnostics.INVALID_MERGE_OF(
+                                `0%:hover {
                     color: red;
                 }`
-                        )}
+                            ).message
+                        }
                         @rule[0] 0% { color: green } 
                         @rule[1] 100% { } 
                     */

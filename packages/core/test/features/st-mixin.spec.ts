@@ -132,10 +132,10 @@ describe(`features/st-mixin`, () => {
     it(`should handle circular mixins`, () => {
         testStylableCore(`
             /* 
-            @transform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
-                `b from /entry.st.css`,
-                `a from /entry.st.css`,
-            ])} 
+            @transform-error(a) ${
+                STMixin.diagnostics.CIRCULAR_MIXIN([`b from /entry.st.css`, `a from /entry.st.css`])
+                    .message
+            } 
             @rule .entry__a {
                 prop: green;
                 prop: green;
@@ -147,10 +147,10 @@ describe(`features/st-mixin`, () => {
             }
 
             /* 
-            @transform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
-                `a from /entry.st.css`,
-                `b from /entry.st.css`,
-            ])} 
+            @transform-error(a) ${
+                STMixin.diagnostics.CIRCULAR_MIXIN([`a from /entry.st.css`, `b from /entry.st.css`])
+                    .message
+            } 
             @rule .entry__b {
                 prop: green;
             } 
@@ -222,14 +222,14 @@ describe(`features/st-mixin`, () => {
 
             /* @rule .entry__root { -st-mixin: "mixA" } */
             .root {
-                /* @transform-error ${STMixin.diagnostics.VALUE_CANNOT_BE_STRING()} */
+                /* @transform-error ${STMixin.diagnostics.VALUE_CANNOT_BE_STRING().message} */
                 -st-mixin: "mixA";
             }
 
             /* @rule .entry__root { color: green } */
             .root {
                 -st-mixin: mixA;
-                /* @transform-warn ${STMixin.diagnostics.OVERRIDE_MIXIN(`-st-mixin`)} */
+                /* @transform-warn ${STMixin.diagnostics.OVERRIDE_MIXIN(`-st-mixin`).message} */
                 -st-mixin: mixB;
             }
         `);
@@ -428,14 +428,16 @@ describe(`features/st-mixin`, () => {
                     @st-import [unresolved] from './mixin.st.css';
 
                     .a {
-                        /* @transform-warn ${STMixin.diagnostics.UNKNOWN_MIXIN(`unknown`)} */
+                        /* @transform-error ${
+                            STMixin.diagnostics.UNKNOWN_MIXIN(`unknown`).message
+                        } */
                         -st-mixin: unknown;
                     }
 
                     .a {
-                        /* @transform-error ${STMixin.diagnostics.UNKNOWN_MIXIN_SYMBOL(
-                            `unresolved`
-                        )} */
+                        /* @transform-error ${
+                            STMixin.diagnostics.UNKNOWN_MIXIN_SYMBOL(`unresolved`).message
+                        } */
                         -st-mixin: unresolved;
                     }
                 `,
@@ -472,7 +474,9 @@ describe(`features/st-mixin`, () => {
         it(`should report on circular mixin when mixed on local class`, () => {
             testStylableCore(`
                 /* 
-                @transform-warn ${STMixin.diagnostics.CIRCULAR_MIXIN([`root from /entry.st.css`])}
+                @transform-error ${
+                    STMixin.diagnostics.CIRCULAR_MIXIN([`root from /entry.st.css`]).message
+                }
                 @rule(self)[0] .entry__a {} 
                 @rule(self appended)[1] .entry__a .entry__a {}
                 @rule(other appended)[2] .entry__a .entry__b {}
@@ -725,9 +729,9 @@ describe(`features/st-mixin`, () => {
 
                 /*  @rule(v1) .entry__a { } */
                 .a {
-                    /* @transform-warn word(mix-color) ${STMixin.diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(
-                        `mix-color`
-                    )} */
+                    /* @transform-error word(mix-color) ${
+                        STMixin.diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(`mix-color`).message
+                    } */
                     -st-partial-mixin: mix-color();
                 }
             `);
@@ -1130,14 +1134,16 @@ describe(`features/st-mixin`, () => {
                 '/entry.st.css': `
                     @st-import [notAFunction, throw] from './mixins.js';
 
-                    /* @transform-error(not a function) word(notAFunction) ${STMixin.diagnostics.JS_MIXIN_NOT_A_FUNC()} */
+                    /* @transform-error(not a function) word(notAFunction) ${
+                        STMixin.diagnostics.JS_MIXIN_NOT_A_FUNC().message
+                    } */
                     .a {
                         -st-mixin: notAFunction;
                     }
 
-                    /* @transform-error(mix throw) word(throw) ${STMixin.diagnostics.FAILED_TO_APPLY_MIXIN(
-                        `bug in js mix`
-                    )} */
+                    /* @transform-error(mix throw) word(throw) ${
+                        STMixin.diagnostics.FAILED_TO_APPLY_MIXIN(`bug in js mix`).message
+                    } */
                     .a {
                         -st-mixin: throw;
                     }
@@ -1339,7 +1345,7 @@ describe(`features/st-mixin`, () => {
 
                 /* @rule .entry__root {val: local} */
                 .root {
-                    /* @transform-warn ${STMixin.diagnostics.INVALID_NAMED_PARAMS()} */
+                    /* @transform-error ${STMixin.diagnostics.INVALID_NAMED_PARAMS().message} */
                     -st-mixin: mix(varNameWithNoValue);
                 }
             `);

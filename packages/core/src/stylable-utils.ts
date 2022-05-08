@@ -1,7 +1,7 @@
 import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
-import type { Diagnostics } from './diagnostics';
+import type { Diagnostics, DiagnosticsBank } from './diagnostics';
 import type { ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
@@ -41,9 +41,16 @@ function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
-export const INVALID_MERGE_OF = (mergeValue: string) => {
-    return `invalid merge of: \n"${mergeValue}"`;
+export const utilDiagnostics: DiagnosticsBank = {
+    INVALID_MERGE_OF(mergeValue: string) {
+        return {
+            code: '15001',
+            message: `invalid merge of: \n"${mergeValue}"`,
+            severity: 'error',
+        };
+    },
 };
+
 // ToDo: move to helpers/mixin
 export function mergeRules(
     mixinAst: postcss.Root,
@@ -97,7 +104,9 @@ export function mergeRules(
                     }
                     nextRule = node;
                 } else {
-                    report?.warn(rule, INVALID_MERGE_OF(node.toString()));
+                    report?.report(utilDiagnostics.INVALID_MERGE_OF(node.toString()), {
+                        node: rule,
+                    });
                 }
             }
         });
