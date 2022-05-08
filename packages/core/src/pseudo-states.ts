@@ -79,6 +79,16 @@ export const stateErrors: DiagnosticsBank = {
             severity: 'warning',
         };
     },
+    FAILED_STATE_VALIDATION: (name: string, actualParam: string, errors: string[]) => {
+        return {
+            code: '08009',
+            message: [
+                `pseudo-state "${name}" with parameter "${actualParam}" failed validation:`,
+                ...errors,
+            ].join('\n'),
+            severity: 'error',
+        };
+    },
 };
 
 // PROCESS
@@ -312,7 +322,7 @@ function resolveStateValue(
 
     const validator = systemValidators[stateDef.type];
 
-    let stateParamOutput;
+    let stateParamOutput: StateResult | undefined;
     try {
         stateParamOutput = validator.validate(
             actualParam,
@@ -331,11 +341,13 @@ function resolveStateValue(
         }
 
         if (rule && stateParamOutput.errors) {
-            stateParamOutput.errors.unshift(
-                `pseudo-state "${name}" with parameter "${actualParam}" failed validation:`
+            diagnostics.report(
+                stateErrors.STATE_FAILED_VALIDATION(name, actualParam, stateParamOutput.errors),
+                {
+                    node: rule,
+                    options: { word: actualParam },
+                }
             );
-
-            diagnostics.warn(rule, stateParamOutput.errors.join('\n'), { word: actualParam });
         }
     }
 
