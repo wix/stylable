@@ -656,35 +656,6 @@ describe('pseudo-states', () => {
         });
 
         describe('advanced type / validation', () => {
-            xit('should default to a boolean state when state is a function but receives no type', () => {
-                // TODO: Make this pass?
-
-                const res = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                            .my-class| {
-                                -st-states: |state1|();
-                            }
-                            .my-class:state1 {}
-                            `,
-                        },
-                    },
-                });
-
-                // const res = expectTransformDiagnostics(config, [{
-                //     message: [
-                //         'pseudo-state "state1" expected a definition of a single type, but received none'
-                //     ].join('\n'),
-                //     file: '/entry.st.css'
-                // }]);
-                expect(res).to.have.styleRules({
-                    1: '.entry__my-class[data-entry-state1] {}',
-                });
-            });
-
             it('should strip quotation marks when transform any state parameter', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,
