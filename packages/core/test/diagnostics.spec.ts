@@ -5,7 +5,7 @@ import {
     findTestLocations,
 } from '@stylable/core-test-kit';
 import {
-    processorWarnings,
+    processorDiagnostics,
     transformerWarnings,
     nativePseudoElements,
 } from '@stylable/core/dist/index-internal';
@@ -292,7 +292,12 @@ describe('diagnostics: warnings and errors', () => {
                     `
                     |.gaga .root|{}
                 `,
-                    [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]
+                    [
+                        {
+                            message: processorDiagnostics.ROOT_AFTER_SPACING().message,
+                            file: 'main.css',
+                        },
+                    ]
                 );
             });
 
@@ -301,7 +306,12 @@ describe('diagnostics: warnings and errors', () => {
                     `
                     |:global(*) .x .root|{}
                 `,
-                    [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]
+                    [
+                        {
+                            message: processorDiagnostics.ROOT_AFTER_SPACING().message,
+                            file: 'main.css',
+                        },
+                    ]
                 );
             });
 
@@ -315,7 +325,10 @@ describe('diagnostics: warnings and errors', () => {
                             message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('div').message,
                             file: 'main.css',
                         },
-                        { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' },
+                        {
+                            message: processorDiagnostics.ROOT_AFTER_SPACING().message,
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -380,7 +393,8 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.OVERRIDE_TYPED_RULE(`-st-extends`, 'root'),
+                            message: processorDiagnostics.OVERRIDE_TYPED_RULE(`-st-extends`, 'root')
+                                .message,
                             file: 'main.css',
                         },
                     ]

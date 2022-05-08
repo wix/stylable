@@ -7,11 +7,8 @@ import {
     processSource,
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
-import {
-    processorWarnings,
-    transformerWarnings,
-} from '@stylable/core/dist/index-internal';
-import {SRule, getRuleScopeSelector} from '@stylable/core/dist/deprecated/postcss-ast-extension';
+import { processorDiagnostics, transformerWarnings } from '@stylable/core/dist/index-internal';
+import { SRule, getRuleScopeSelector } from '@stylable/core/dist/deprecated/postcss-ast-extension';
 
 use(flatMatch);
 
@@ -568,7 +565,7 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: processorWarnings.MISSING_SCOPING_PARAM(),
+                    message: processorDiagnostics.MISSING_SCOPING_PARAM().message,
                     file: '/entry.st.css',
                     severity: 'warning',
                 },

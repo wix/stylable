@@ -4,7 +4,7 @@ import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { processNamespace } from '@stylable/core';
 import {
     knownPseudoClassesWithNestedSelectors,
-    processorWarnings,
+    processorDiagnostics,
 } from '@stylable/core/dist/index-internal';
 
 chai.use(flatMatch);
@@ -24,7 +24,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: processorWarnings.INVALID_NAMESPACE_DEF(),
+            message: processorDiagnostics.INVALID_NAMESPACE_DEF(),
         });
     });
 
@@ -33,7 +33,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: processorWarnings.EMPTY_NAMESPACE_DEF(),
+            message: processorDiagnostics.EMPTY_NAMESPACE_DEF(),
         });
     });
 
@@ -50,7 +50,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: processorWarnings.INVALID_NESTING('.y', '.x'),
+            message: processorDiagnostics.INVALID_NESTING('.y', '.x'),
         });
     });
 

@@ -4,7 +4,7 @@ import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
 import { STImport, STVar } from '@stylable/core/dist/features';
-import { processorWarnings, murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
+import { processorDiagnostics, murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 
 const log = () => {
     /**/
@@ -191,7 +191,7 @@ describe('build stand alone', () => {
         const messages = diagnosticsManager.get(identifier, '/comp.st.css')!.diagnostics;
 
         expect(messages[0].message).to.contain(
-            processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp')
+            processorDiagnostics.CANNOT_RESOLVE_EXTEND('MissingComp')
         );
         expect(messages[1].message).to.contain(
             STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')

@@ -1,5 +1,5 @@
 export { safeParse } from './parser';
-export { processorWarnings, StylableProcessor } from './stylable-processor';
+export { processorDiagnostics, StylableProcessor } from './stylable-processor';
 export {
     StylableTransformer,
     postProcessor,

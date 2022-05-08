@@ -10,7 +10,7 @@ import {
     processSource,
     testInlineExpects,
 } from '@stylable/core-test-kit';
-import { processorWarnings, nativePseudoClasses } from '@stylable/core/dist/index-internal';
+import { processorDiagnostics, nativePseudoClasses } from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
 import { stateErrors } from '@stylable/core/dist/pseudo-states';
 import { CSSType } from '@stylable/core/dist/features';
@@ -2154,7 +2154,7 @@ describe('pseudo-states', () => {
                         skip: true,
                     },
                     {
-                        message: processorWarnings.STATE_DEFINITION_IN_ELEMENT(),
+                        message: processorDiagnostics.STATE_DEFINITION_IN_ELEMENT().message,
                         file: 'main.css',
                     },
                 ]
