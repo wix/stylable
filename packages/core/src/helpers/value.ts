@@ -8,14 +8,14 @@ export type ReportWarning = (diagnostic: DiagnosticBase, options?: { word: strin
 export const valueDiagnostics: DiagnosticsBank = {
     INVALID_NAMED_PARAMS: () => {
         return {
-            code: '14001',
+            code: '13001',
             message: `invalid named parameters (e.g. "func(name value, [name value, ...])")`,
             severity: 'error',
         };
     },
     MISSING_REQUIRED_FORMATTER_ARG: (node: ParsedValue, argIndex: string) => {
         return {
-            code: '14002',
+            code: '13002',
             message: `${postcssValueParser.stringify(
                 node as postcssValueParser.Node
             )}: argument at index ${argIndex} is empty`,

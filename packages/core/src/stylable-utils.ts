@@ -44,7 +44,7 @@ function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
 export const utilDiagnostics: DiagnosticsBank = {
     INVALID_MERGE_OF(mergeValue: string) {
         return {
-            code: '15001',
+            code: '14001',
             message: `invalid merge of: \n"${mergeValue}"`,
             severity: 'error',
         };

@@ -8,7 +8,7 @@ export const mixinHelperDiagnostics: DiagnosticsBank = {
     INVALID_NAMED_PARAMS: valueDiagnostics.INVALID_NAMED_PARAMS,
     VALUE_CANNOT_BE_STRING() {
         return {
-            code: '13001',
+            code: '10008',
             message: 'value can not be a string (remove quotes?)',
             severity: 'error',
         };
