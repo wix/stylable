@@ -507,7 +507,7 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
@@ -533,12 +533,12 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
                     file: '/entry.st.css',
                     severity: 'warning',
                     skipLocationCheck: true,

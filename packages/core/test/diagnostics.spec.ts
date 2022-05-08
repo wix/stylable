@@ -232,7 +232,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectTransformDiagnostics(config, [
                         {
-                            message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn'),
+                            message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn').message,
                             file: '/main.css',
                         },
                     ]);

@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
-import type { Diagnostics } from './diagnostics';
+import type { Diagnostics, DiagnosticsBank } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
 import { setStateToNode, stateErrors } from './pseudo-states';
@@ -94,9 +94,13 @@ export interface TransformerOptions {
     resolverCache?: StylableResolverCache;
 }
 
-export const transformerWarnings = {
+export const transformerWarnings: DiagnosticsBank = {
     UNKNOWN_PSEUDO_ELEMENT(name: string) {
-        return `unknown pseudo element "${name}"`;
+        return {
+            code: '12001',
+            message: `unknown pseudo element "${name}"`,
+            severity: 'error',
+        };
     },
 };
 
@@ -458,11 +462,13 @@ export class StylableTransformer {
                     !isVendorPrefixed(node.value) &&
                     !this.isDuplicateStScopeDiagnostic(context)
                 ) {
-                    this.diagnostics.warn(
-                        context.rule,
+                    this.diagnostics.report(
                         transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(node.value),
                         {
-                            word: node.value,
+                            node: context.rule,
+                            options: {
+                                word: node.value,
+                            },
                         }
                     );
                 }
