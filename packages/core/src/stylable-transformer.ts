@@ -520,8 +520,9 @@ export class StylableTransformer {
                 !isVendorPrefixed(node.value) &&
                 !this.isDuplicateStScopeDiagnostic(context)
             ) {
-                this.diagnostics.warn(context.rule, stateErrors.UNKNOWN_STATE_USAGE(node.value), {
-                    word: node.value,
+                this.diagnostics.report(stateErrors.UNKNOWN_STATE_USAGE(node.value), {
+                    node: context.rule,
+                    options: { word: node.value },
                 });
             }
         } else if (node.type === `nesting`) {
