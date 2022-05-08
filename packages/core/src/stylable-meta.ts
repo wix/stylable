@@ -63,10 +63,12 @@ export class StylableMeta {
     public mappedSymbols: Record<string, StylableSymbol> = {};
     /** @deprecated */
     public mappedKeyframes: Record<string, KeyframesSymbol> = {};
+    /** @deprecated */
     public customSelectors: Record<string, string> = {};
     public urls: string[] = [];
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
+    /** @deprecated */
     public scopes: postcss.AtRule[] = [];
     /** @deprecated */
     public mixins: RefedMixin[] = [];

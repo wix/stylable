@@ -204,7 +204,7 @@ export function validateClassScoping({
     context,
     classSymbol,
     locallyScoped,
-    inStScope,
+    reportUnscoped,
     node,
     nodes,
     index,
@@ -213,7 +213,7 @@ export function validateClassScoping({
     context: FeatureContext;
     classSymbol: ClassSymbol;
     locallyScoped: boolean;
-    inStScope: boolean;
+    reportUnscoped: boolean;
     node: ImmutableClass;
     nodes: ImmutableSelectorNode[];
     index: number;
@@ -221,11 +221,13 @@ export function validateClassScoping({
 }): boolean {
     if (!classSymbol.alias) {
         return true;
-    } else if (locallyScoped === false && !inStScope) {
+    } else if (locallyScoped === false) {
         if (checkForScopedNodeAfter(context, rule, nodes, index) === false) {
-            context.diagnostics.warn(rule, diagnostics.UNSCOPED_CLASS(node.value), {
-                word: node.value,
-            });
+            if (reportUnscoped) {
+                context.diagnostics.warn(rule, diagnostics.UNSCOPED_CLASS(node.value), {
+                    word: node.value,
+                });
+            }
             return false;
         } else {
             return true;

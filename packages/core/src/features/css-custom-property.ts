@@ -81,7 +81,7 @@ export const hooks = createFeature<{
             }
         }
     },
-    analyzeAtRule({ context, atRule, toRemove }) {
+    analyzeAtRule({ context, atRule }) {
         if (atRule.name === `property`) {
             let name = atRule.params;
             let global = false;
@@ -105,7 +105,6 @@ export const hooks = createFeature<{
             validateAtProperty(atRule, context.diagnostics);
         } else if (atRule.name === `st-global-custom-property`) {
             analyzeDeprecatedStGlobalCustomProperty(context, atRule);
-            toRemove.push(atRule); // ToDo: move to transform
         }
     },
     analyzeDeclaration({ context, decl }) {
@@ -122,6 +121,11 @@ export const hooks = createFeature<{
         // register value
         if (decl.value.includes('var(')) {
             analyzeDeclValueVarCalls(context, decl);
+        }
+    },
+    prepareAST({ node, toRemove }) {
+        if (node.type === `atrule` && node.name === 'st-global-custom-property') {
+            toRemove.push(node);
         }
     },
     transformResolve({ context: { meta, getResolvedSymbols } }) {
