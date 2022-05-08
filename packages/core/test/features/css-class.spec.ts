@@ -761,7 +761,78 @@ describe(`features/css-class`, () => {
     });
     describe(`css-pseudo-class`, () => {
         // ToDo: move to css-pseudo-class spec once feature is created
+        describe(`st-var`, () => {
+            it('should unsupported value() within var definition / call', () => {
+                const { sheets } = testStylableCore(`
+                    :vars {
+                        optionA: a;
+                        optionB: b;
+                        optionC: c;
+                    }
+
+                    .root {
+                        -st-states: 
+                            option(enum(
+                                value(optionA),
+                                value(optionB)
+                            )) value(optionB);
+                    }
+
+                    /* @rule(default) .entry__root.entry---option-1-b */
+                    .root:option {}
+
+                    /* @rule(target value) .entry__root.entry---option-1-a */
+                    .root:option(value(optionA)) {}
+                    
+                    /* 
+                        @x-transform-error(target invalid) invalid optionC
+                        @rule(target invalid) .entry__root.entry---option-1-c 
+                    */
+                    .root:option(value(optionC)) {}
+                `);
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta); // ToDo: `target invalid` should report
+            });
+        });
         describe(`st-mixin`, () => {
+            it.skip('should override value() within var definition / call', () => {
+                // mixins could be able to gain more power by overriding st-var in state definitions and selectors
+                const { sheets } = testStylableCore(`
+                    :vars {
+                        optionA: a;
+                        optionB: b;
+                        optionC: c;
+                        optionD: c;
+                    }
+    
+                    .mix {
+                        -st-states: 
+                            option(enum(
+                                value(optionA),
+                                value(optionB)
+                            )) value(optionB);
+                    }
+                    .mix:option {}
+                    .mix:option(value(optionA)) {}
+
+                    /* 
+                        @rule[1](default) .entry__into.entry---option-1-d 
+                        @rule[2](target value) .entry__into.entry---option-1-c 
+                    */
+                    .into {
+                        -st-mixin: mix(
+                            optionA value(optionC),
+                            optionB value(optionD)
+                        );
+                    }
+                `);
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
             it(`should mix custom state`, () => {
                 const { sheets } = testStylableCore({
                     '/base.st.css': `
