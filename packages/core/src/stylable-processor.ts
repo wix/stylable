@@ -132,34 +132,9 @@ export class StylableProcessor implements FeatureContext {
 
         STSymbol.reportRedeclare(this);
 
-        this.prepareAST(this.meta, root);
+        prepareAST(this.meta, root);
 
         return this.meta;
-    }
-
-    private prepareAST(meta: StylableMeta, ast: postcss.Root) {
-        const toRemove: Array<postcss.Node | (() => void)> = [];
-        ast.walk((node) => {
-            const input = { node, toRemove };
-            // namespace
-            if (node.type === 'atrule' && node.name === `namespace`) {
-                toRemove.push(node);
-            }
-            // custom selectors
-            if (node.type === 'rule') {
-                expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
-            } else if (node.type === 'atrule' && node.name === 'custom-selector') {
-                toRemove.push(node);
-            }
-            // extracted features
-            STImport.hooks.prepareAST(input);
-            STScope.hooks.prepareAST(input);
-            STVar.hooks.prepareAST(input);
-            CSSCustomProperty.hooks.prepareAST(input);
-        });
-        for (const removeOfNode of toRemove) {
-            typeof removeOfNode === 'function' ? removeOfNode() : removeOfNode.remove();
-        }
     }
 
     protected handleAtRules(root: postcss.Root) {
@@ -526,4 +501,29 @@ export function process(
     resolveNamespace?: typeof processNamespace
 ) {
     return new StylableProcessor(diagnostics, resolveNamespace).process(root);
+}
+
+export function prepareAST(meta: StylableMeta, ast: postcss.Root) {
+    const toRemove: Array<postcss.Node | (() => void)> = [];
+    ast.walk((node) => {
+        const input = { node, toRemove };
+        // namespace
+        if (node.type === 'atrule' && node.name === `namespace`) {
+            toRemove.push(node);
+        }
+        // custom selectors
+        if (node.type === 'rule') {
+            expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
+        } else if (node.type === 'atrule' && node.name === 'custom-selector') {
+            toRemove.push(node);
+        }
+        // extracted features
+        STImport.hooks.prepareAST(input);
+        STScope.hooks.prepareAST(input);
+        STVar.hooks.prepareAST(input);
+        CSSCustomProperty.hooks.prepareAST(input);
+    });
+    for (const removeOrNode of toRemove) {
+        typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
+    }
 }
