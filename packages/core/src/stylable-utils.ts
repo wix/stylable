@@ -12,6 +12,16 @@ export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
 }
 
+export const customSelectorDiagnostics: DiagnosticsBank = {
+    UNDEFINED_SELECTOR(selector: string) {
+        return {
+            code: '18001',
+            message: `The selector '${selector}' is undefined`,
+            severity: 'error',
+        };
+    },
+};
+
 export function expandCustomSelectors(
     rule: postcss.Rule,
     customSelectors: Record<string, string>,
@@ -22,9 +32,13 @@ export function expandCustomSelectors(
             CUSTOM_SELECTOR_RE,
             (extensionName, _matches, selector) => {
                 if (!customSelectors[extensionName] && diagnostics) {
-                    diagnostics.warn(rule, `The selector '${rule.selector}' is undefined`, {
-                        word: rule.selector,
-                    });
+                    diagnostics.report(
+                        customSelectorDiagnostics.UNDEFINED_SELECTOR(rule.selector),
+                        {
+                            node: rule,
+                            options: { word: rule.selector },
+                        }
+                    );
                     return selector;
                 }
                 // TODO: support nested CustomSelectors
@@ -115,10 +129,22 @@ export function mergeRules(
     return rule;
 }
 
+export const sourcePathDiagnostics: DiagnosticsBank = {
+    MISSING_SOURCE_FILENAME() {
+        return {
+            code: '17001',
+            message: 'missing source filename',
+            severity: 'error',
+        };
+    },
+};
+
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
     const source = (root.source && root.source.input.file) || '';
     if (!source) {
-        diagnostics.error(root, 'missing source filename');
+        diagnostics.report(sourcePathDiagnostics.MISSING_SOURCE_FILENAME(), {
+            node: root,
+        });
     } else if (!isAbsolute(source)) {
         throw new Error('source filename is not absolute path: "' + source + '"');
     }
