@@ -24,9 +24,11 @@ describe(`(${project})`, () => {
     it('emit stylable errors/warnings as webpack errors/warnings', () => {
         const errors = projectRunner.getBuildErrorMessages();
         const warnings = projectRunner.getBuildWarningMessages();
-        expect(errors, 'should only have one error').to.have.lengthOf(1);
+        expect(errors, 'should only have one error').to.have.lengthOf(2);
         expect(errors[0]).to.match(/cannot extend unknown symbol "NotFound"/);
-        expect(warnings, 'should only have two warnings').to.have.lengthOf(2);
-        expect(warnings[1]).to.match(/unknown pseudo-state "unknown-state"/);
+        expect(warnings, 'should only have two warnings').to.have.lengthOf(1);
+        expect(warnings[0]).to.match(
+            /unscoped type selector "NotFound" will affect all elements of the same type in the document/
+        );
     });
 });
