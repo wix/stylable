@@ -10,6 +10,9 @@ import {
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { STImport, STVar } from '@stylable/core/dist/features';
+import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
+
+const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
 
 describe('Stylable Cli', function () {
     this.timeout(25000);
@@ -397,7 +400,7 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(
                 new RegExp(
-                    `\\[info\\]: ${STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
+                    `\\[info\\]: ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         'stArray',
                         'st-array'
                     )}`
