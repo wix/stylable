@@ -280,7 +280,7 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
         ) {
             diagnostics.report(parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
                 node: atRule,
-                options: { word: importObj.defaultExport },
+                word: importObj.defaultExport,
             });
         }
         if (imports.tagged?.keyframes) {
@@ -341,7 +341,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                 if (!isCompRoot(importObj.defaultExport) && importObj.from.endsWith(`.css`)) {
                     diagnostics.report(parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
                         node: decl,
-                        options: { word: importObj.defaultExport },
+                        word: importObj.defaultExport,
                     });
                 }
                 break;
@@ -359,7 +359,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
             default:
                 diagnostics.report(parseImportMessages.ILLEGAL_PROP_IN_IMPORT(decl.prop), {
                     node: decl,
-                    options: { word: decl.prop },
+                    word: decl.prop,
                 });
                 break;
         }

@@ -227,7 +227,7 @@ function addCSSProperty({
     if (!validateCustomPropertyName(name)) {
         context.diagnostics.report(diagnostics.ILLEGAL_CSS_VAR_USE(name), {
             node,
-            options: { word: name },
+            word: name,
         });
         return;
     }
@@ -266,7 +266,7 @@ function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declara
                 const args = postcssValueParser.stringify(node.nodes);
                 context.diagnostics.report(diagnostics.ILLEGAL_CSS_VAR_ARGS(args), {
                     node: decl,
-                    options: { word: args },
+                    word: args,
                 });
             }
 
@@ -296,7 +296,7 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
     if (cssVarsBySpacing.length > cssVarsByComma.length) {
         context.diagnostics.report(diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params), {
             node: atRule,
-            options: { word: atRule.params },
+            word: atRule.params,
         });
         return;
     }
@@ -319,7 +319,7 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
         } else {
             context.diagnostics.report(diagnostics.ILLEGAL_GLOBAL_CSS_VAR(name), {
                 node: atRule,
-                options: { word: name },
+                word: name,
             });
         }
     }

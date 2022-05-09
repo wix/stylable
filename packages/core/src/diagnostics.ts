@@ -10,7 +10,7 @@ export interface DiagnosticBase {
 
 export interface DiagnosticContext {
     node: postcss.Node;
-    options?: DiagnosticOptions;
+    word?: string;
     filePath?: string;
 }
 
@@ -25,7 +25,6 @@ export class Diagnostics {
     public report(diagnostic: DiagnosticBase, context: DiagnosticContext) {
         const node = context.node;
         this.reports.push({
-            options: {}, // todo: do we really need this?
             filePath: node.source?.input.from,
             ...diagnostic,
             ...context,

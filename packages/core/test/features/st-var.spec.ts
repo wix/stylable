@@ -230,18 +230,14 @@ describe(`features/st-var`, () => {
             `missing var diagnostic word 1`
         ).to.deep.contain({
             message: stVarDiagnostics.MISSING_VAR_IN_VALUE(),
-            options: {
-                word: `value()`,
-            },
+            word: `value()`,
         });
         expect(
             meta.transformDiagnostics!.reports[1],
             `missing var diagnostic word 2`
         ).to.deep.contain({
             message: stVarDiagnostics.MISSING_VAR_IN_VALUE(),
-            options: {
-                word: `value(, path)`,
-            },
+            word: `value(, path)`,
         });
     });
     it(`should handle escaping`, () => {

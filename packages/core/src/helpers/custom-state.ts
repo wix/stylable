@@ -50,7 +50,7 @@ export function validateRuleStateDefinition(
                                         ),
                                         {
                                             node: decl,
-                                            options: { word: decl.value },
+                                            word: decl.value,
                                         }
                                     );
                                     return false;

@@ -174,9 +174,7 @@ function collectDeclMixins(
                         diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
                         {
                             node: decl,
-                            options: {
-                                word: mixin.type,
-                            },
+                            word: mixin.type,
                         }
                     );
                 }
@@ -188,7 +186,7 @@ function collectDeclMixins(
             } else {
                 context.diagnostics.report(diagnostics.UNKNOWN_MIXIN(mixin.type), {
                     node: decl,
-                    options: { word: mixin.type },
+                    word: mixin.type,
                 });
             }
         }
@@ -242,16 +240,14 @@ export function appendMixin(context: FeatureTransformContext, config: ApplyMixin
             } catch (e) {
                 context.diagnostics.report(diagnostics.FAILED_TO_APPLY_MIXIN(String(e)), {
                     node: config.rule,
-                    options: {
-                        word: config.mixDef.mixin.type,
-                    },
+                    word: config.mixDef.mixin.type,
                 });
                 return;
             }
         } else {
             context.diagnostics.report(diagnostics.JS_MIXIN_NOT_A_FUNC(), {
                 node: config.rule,
-                options: { word: config.mixDef.mixin.type },
+                word: config.mixDef.mixin.type,
             });
         }
         return;
@@ -261,7 +257,7 @@ export function appendMixin(context: FeatureTransformContext, config: ApplyMixin
     const mixinDecl = config.mixDef.mixin.originDecl;
     context.diagnostics.report(diagnostics.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
         node: mixinDecl,
-        options: { word: mixinDecl.value },
+        word: mixinDecl.value,
     });
 }
 
@@ -280,7 +276,7 @@ function checkRecursive(
         // Todo: add test verifying word
         report.report(diagnostics.CIRCULAR_MIXIN(path), {
             node: rule,
-            options: { word: symbolName },
+            word: symbolName,
         });
         return true;
     }

@@ -95,7 +95,7 @@ export const hooks = createFeature<{
                 {
                     filePath: context.meta.source,
                     node: rule,
-                    options: { word: stringifySelector(node) },
+                    word: stringifySelector(node),
                 }
             );
         }
@@ -249,7 +249,7 @@ export function validateClassScoping({
         if (checkForScopedNodeAfter(context, rule, nodes, index) === false) {
             context.diagnostics.report(diagnostics.UNSCOPED_CLASS(node.value), {
                 node: rule,
-                options: { word: node.value },
+                word: node.value,
             });
             return false;
         } else {

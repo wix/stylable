@@ -51,7 +51,7 @@ export const hooks = createFeature<{
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
                 {
                     node: rule,
-                    options: { word: stringifySelector(node) },
+                    word: stringifySelector(node),
                 }
             );
         }
@@ -130,7 +130,7 @@ export function validateTypeScoping({
         if (CSSClass.checkForScopedNodeAfter(context, rule, nodes, index) === false) {
             context.diagnostics.report(diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
                 node: rule,
-                options: { word: node.value },
+                word: node.value,
             });
             return false;
         } else {

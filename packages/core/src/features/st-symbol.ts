@@ -156,7 +156,7 @@ export function addSymbol({
     if (node && name === `root` && nsName === `main` && byNSFlat[nsName][name]) {
         context.diagnostics.report(diagnostics.REDECLARE_ROOT(), {
             node,
-            options: { word: `root` },
+            word: `root`,
         });
         return;
     }
@@ -183,7 +183,7 @@ export function reportRedeclare(context: FeatureContext) {
                 if (!safeRedeclare && ast) {
                     context.diagnostics.report(diagnostics.REDECLARE_SYMBOL(name), {
                         node: ast,
-                        options: { word: name },
+                        word: name,
                     });
                 }
             }

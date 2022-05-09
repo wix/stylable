@@ -466,9 +466,7 @@ export class StylableTransformer {
                         transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT(node.value),
                         {
                             node: context.rule,
-                            options: {
-                                word: node.value,
-                            },
+                            word: node.value,
                         }
                     );
                 }
@@ -528,7 +526,7 @@ export class StylableTransformer {
             ) {
                 this.diagnostics.report(stateDiagnostics.UNKNOWN_STATE_USAGE(node.value), {
                     node: context.rule,
-                    options: { word: node.value },
+                    word: node.value,
                 });
             }
         } else if (node.type === `nesting`) {
@@ -657,7 +655,7 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
         for (const diag of ruleReports) {
-            diag.options = { word: diag.options?.word || scope.params };
+            diag.word = diag.word || scope.params;
             transformer.diagnostics.reports.push(diag);
         }
     }

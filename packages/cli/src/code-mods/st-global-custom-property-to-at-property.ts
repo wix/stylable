@@ -40,7 +40,7 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
             CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
             {
                 node: atRule,
-                options: { word: atRule.params },
+                word: atRule.params,
             }
         );
         return cssVars;
@@ -59,7 +59,7 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
         } else {
             diagnostics.report(CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
                 node: atRule,
-                options: { word: cssVar },
+                word: cssVar,
             });
         }
     }

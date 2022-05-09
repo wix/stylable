@@ -146,17 +146,13 @@ describe(`features/st-symbol`, () => {
                     severity: `warning`,
                     message: stSymbolDiagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleA,
-                    options: {
-                        word: `a`,
-                    },
+                    word: `a`,
                 },
                 {
                     severity: `warning`,
                     message: stSymbolDiagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleB,
-                    options: {
-                        word: `a`,
-                    },
+                    word: `a`,
                 },
             ]);
         });
@@ -191,9 +187,7 @@ describe(`features/st-symbol`, () => {
                     severity: `error`,
                     message: stSymbolDiagnostics.REDECLARE_ROOT(),
                     node: rule,
-                    options: {
-                        word: `root`,
-                    },
+                    word: `root`,
                 },
             ]);
         });

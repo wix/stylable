@@ -94,7 +94,7 @@ export function matchDiagnostic(
         matchState.matches++;
         // }
         if (expected.location.word) {
-            if (report.options?.word !== expected.location.word) {
+            if (report.word !== expected.location.word) {
                 matchState.word = errors.wordMismatch(
                     type,
                     expected.location.word,
@@ -191,7 +191,7 @@ export function expectAnalyzeDiagnostics(
                 expect(report.node.source!.start, 'start').to.eql(source.start);
             }
             if (source.word !== null) {
-                expect(report.options?.word).to.equal(source.word);
+                expect(report.word).to.equal(source.word);
             }
 
             if (expectedWarning.severity) {
@@ -229,7 +229,7 @@ function matchPartialDiagnostics(
                     matches++;
                 }
                 if (locations[path].word !== null) {
-                    expect(report.options?.word).to.eql(locations[path].word);
+                    expect(report.word).to.eql(locations[path].word);
                     matches++;
                 }
                 if (expectedWarning.severity) {
@@ -297,7 +297,7 @@ export function expectTransformDiagnostics(
             }
 
             if (locations[path].word !== null) {
-                expect(report.options?.word).to.eql(locations[path].word);
+                expect(report.word).to.eql(locations[path].word);
             }
 
             if (expectedWarning.severity) {

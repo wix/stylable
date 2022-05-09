@@ -292,8 +292,8 @@ export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
 
-    return diagnostics.map(({ message, node, options, severity }) => {
-        const err = node.error(message, options);
+    return diagnostics.map(({ message, node, word, severity }) => {
+        const err = node.error(message, { word });
         const diagnostic: Diagnostic = {
             severity,
             message: `${message}\n${err.showSourceCode(true)}`,

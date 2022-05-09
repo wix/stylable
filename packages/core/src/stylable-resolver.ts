@@ -435,17 +435,17 @@ function validateClassResolveExtends(
             if (res && res._kind === 'js') {
                 diagnostics.report(CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
                     node: decl,
-                    options: { word: decl.value },
+                    word: decl.value,
                 });
             } else if (res && !res.symbol) {
                 diagnostics.report(CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name), {
                     node: decl,
-                    options: { word: decl.value },
+                    word: decl.value,
                 });
             } else {
                 diagnostics.report(CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
                     node: decl,
-                    options: { word: decl.value },
+                    word: decl.value,
                 });
             }
         } else {
@@ -453,7 +453,7 @@ function validateClassResolveExtends(
                 meta.ast.walkRules(new RegExp('\\.' + name), (rule) => {
                     diagnostics.report(CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
                         node: rule,
-                        options: { word: name },
+                        word: name,
                     });
                     return false;
                 });

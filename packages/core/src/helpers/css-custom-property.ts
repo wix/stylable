@@ -61,7 +61,7 @@ export function validateAtProperty(
                     atPropertyValidationWarnings.INVALID_DESCRIPTOR_TYPE(node.type),
                     {
                         node,
-                        options: { word: 'params' in node ? node.params : node.selector },
+                        word: 'params' in node ? node.params : node.selector,
                     }
                 );
             }
@@ -72,7 +72,7 @@ export function validateAtProperty(
         if (!AT_PROPERTY_DISCRIPTOR_LIST.includes(node.prop)) {
             diagnostics.report(atPropertyValidationWarnings.INVALID_DESCRIPTOR_NAME(node.prop), {
                 node,
-                options: { word: node.prop },
+                word: node.prop,
             });
 
             continue;
@@ -84,7 +84,7 @@ export function validateAtProperty(
     if (!atPropertyValues.has('syntax')) {
         diagnostics.report(atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('syntax'), {
             node: atRule,
-            options: { word: name },
+            word: name,
         });
 
         return {
@@ -95,7 +95,7 @@ export function validateAtProperty(
     if (!atPropertyValues.has('inherits')) {
         diagnostics.report(atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('inherits'), {
             node: atRule,
-            options: { word: name },
+            word: name,
         });
 
         return {
@@ -111,7 +111,7 @@ export function validateAtProperty(
             atPropertyValidationWarnings.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR(),
             {
                 node: atRule,
-                options: { word: name },
+                word: name,
             }
         );
 

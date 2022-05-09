@@ -301,7 +301,7 @@ function warnOnDeprecatedCustomValues(context: FeatureContext, decl: postcss.Dec
                     diagnostics.DEPRECATED_ST_FUNCTION_NAME(node.name, alternativeName),
                     {
                         node: decl,
-                        options: { word: node.name },
+                        word: node.name,
                     }
                 );
             }
@@ -339,7 +339,7 @@ function evaluateValueCall(
         if (node) {
             context.diagnostics.report(diagnostics.MISSING_VAR_IN_VALUE(), {
                 node,
-                options: { word: getStringValue(parsedNode) },
+                word: getStringValue(parsedNode),
             });
         }
     } else if (parsedArgs.length >= 1) {
@@ -403,7 +403,7 @@ function evaluateValueCall(
                         diagnostics.CANNOT_USE_JS_AS_VALUE(importedType, varName),
                         {
                             node,
-                            options: { word: varName },
+                            word: varName,
                         }
                     );
                 }
@@ -427,13 +427,13 @@ function evaluateValueCall(
                 // report unknown var
                 context.diagnostics.report(diagnostics.UNKNOWN_VAR(varName), {
                     node,
-                    options: { word: varName },
+                    word: varName,
                 });
             }
         } else if (node) {
             context.diagnostics.report(diagnostics.UNKNOWN_VAR(varName), {
                 node,
-                options: { word: varName },
+                word: varName,
             });
         }
     }
@@ -450,7 +450,7 @@ function reportUnsupportedSymbolInValue(
     if (node) {
         context.diagnostics.report(diagnostics.CANNOT_USE_AS_VALUE(errorKind, name), {
             node,
-            options: { word: name },
+            word: name,
         });
     }
 }
@@ -468,7 +468,7 @@ function handleCyclicValues(
         cyclicChain.push(refUniqID);
         context.diagnostics.report(diagnostics.CYCLIC_VALUE(cyclicChain), {
             node,
-            options: { word: refUniqID }, // ToDo: check word is path+var and not var name
+            word: refUniqID, // ToDo: check word is path+var and not var name
         });
     }
     return stringifyFunction(value, parsedNode);

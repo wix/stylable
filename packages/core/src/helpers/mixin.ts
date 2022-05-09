@@ -48,7 +48,7 @@ export function parseStMixin(
         } else if (node.type === 'string') {
             diagnostics?.report(mixinHelperDiagnostics.VALUE_CANNOT_BE_STRING(), {
                 node: mixinNode,
-                options: { word: mixinNode.value },
+                word: mixinNode.value,
             });
         }
     });

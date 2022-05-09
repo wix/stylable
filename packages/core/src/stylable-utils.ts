@@ -36,7 +36,7 @@ export function expandCustomSelectors(
                         customSelectorDiagnostics.UNDEFINED_SELECTOR(rule.selector),
                         {
                             node: rule,
-                            options: { word: rule.selector },
+                            word: rule.selector,
                         }
                     );
                     return selector;

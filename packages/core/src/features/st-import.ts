@@ -233,7 +233,7 @@ function validateImports(context: FeatureTransformContext) {
 
             context.diagnostics.report(diagnostics.UNKNOWN_IMPORTED_FILE(importObj.request), {
                 node: fromDecl || importObj.rule,
-                options: { word: importObj.request },
+                word: importObj.request,
             });
         } else if (resolvedImport._kind === 'css') {
             // warn about unknown named imported symbols
@@ -249,7 +249,7 @@ function validateImports(context: FeatureTransformContext) {
 
                     context.diagnostics.report(
                         diagnostics.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
-                        { node: namedDecl || importObj.rule, options: { word: origName } }
+                        { node: namedDecl || importObj.rule, word: origName }
                     );
                 }
             }

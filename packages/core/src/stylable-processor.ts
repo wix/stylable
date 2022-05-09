@@ -386,7 +386,7 @@ export class StylableProcessor implements FeatureContext {
                         {
                             filePath: this.meta.source,
                             node: rule,
-                            options: { word: stringifySelector(node) },
+                            word: stringifySelector(node),
                         }
                     );
                 }
@@ -400,7 +400,7 @@ export class StylableProcessor implements FeatureContext {
                         {
                             filePath: this.meta.source,
                             node: rule,
-                            options: { word: stringifySelector(node) },
+                            word: stringifySelector(node),
                         }
                     );
                 }
@@ -411,7 +411,7 @@ export class StylableProcessor implements FeatureContext {
                         {
                             filePath: this.meta.source,
                             node: rule,
-                            options: { word: stringifySelector(node) },
+                            word: stringifySelector(node),
                         }
                     );
                 }
@@ -474,7 +474,7 @@ export class StylableProcessor implements FeatureContext {
                         processorDiagnostics.CANNOT_RESOLVE_EXTEND(decl.value),
                         {
                             node: decl,
-                            options: { word: decl.value },
+                            word: decl.value,
                         }
                     );
                 }
@@ -514,9 +514,7 @@ export class StylableProcessor implements FeatureContext {
         if (typedRule && typedRule[key]) {
             this.diagnostics.report(processorDiagnostics.OVERRIDE_TYPED_RULE(key, name), {
                 node,
-                options: {
-                    word: name,
-                },
+                word: name,
             });
         }
         if (typedRule) {

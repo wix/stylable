@@ -121,12 +121,12 @@ export function processPseudoStates(
         if (stateDefinition.value.startsWith('-')) {
             diagnostics.report(stateDiagnostics.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
                 node: decl,
-                options: { word: stateDefinition.value },
+                word: stateDefinition.value,
             });
         } else if (reservedFunctionalPseudoClasses.includes(stateDefinition.value)) {
             diagnostics.report(stateDiagnostics.RESERVED_NATIVE_STATE(stateDefinition.value), {
                 node: decl,
-                options: { word: stateDefinition.value },
+                word: stateDefinition.value,
             });
             return;
         }
@@ -155,7 +155,7 @@ function resolveStateType(
 
         diagnostics.report(stateDiagnostics.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
             node: decl,
-            options: { word: decl.value },
+            word: decl.value,
         });
 
         return;
@@ -169,7 +169,7 @@ function resolveStateType(
             ),
             {
                 node: decl,
-                options: { word: decl.value },
+                word: decl.value,
             }
         );
     }
@@ -200,7 +200,7 @@ function resolveStateType(
             stateDiagnostics.UNKNOWN_STATE_TYPE(stateDefinition.value, paramType.value),
             {
                 node: decl,
-                options: { word: paramType.value },
+                word: paramType.value,
             }
         );
     }
@@ -224,7 +224,7 @@ function resolveArguments(
                     stateDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(name, validator.value, args),
                     {
                         node: decl,
-                        options: { word: decl.value },
+                        word: decl.value,
                     }
                 );
             } else {
@@ -335,7 +335,7 @@ function resolveStateValue(
     if (rule && !inputValue && !stateDef.defaultValue) {
         diagnostics.report(stateDiagnostics.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
             node: rule,
-            options: { word: name },
+            word: name,
         });
     }
 
@@ -368,7 +368,7 @@ function resolveStateValue(
                 ),
                 {
                     node: rule,
-                    options: { word: actualParam },
+                    word: actualParam,
                 }
             );
         }

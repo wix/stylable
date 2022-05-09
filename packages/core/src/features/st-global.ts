@@ -40,7 +40,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         if (node.nodes && node.nodes?.length > 1) {
             context.diagnostics.report(diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(), {
                 node: rule,
-                options: { word: stringifySelector(node.nodes) },
+                word: stringifySelector(node.nodes),
             });
         }
         return walkSelector.skipNested;

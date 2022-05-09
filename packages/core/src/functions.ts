@@ -198,7 +198,7 @@ export function processDeclarationValue(
                             ),
                             {
                                 node,
-                                options: { word: (node as postcss.Declaration).value },
+                                word: (node as postcss.Declaration).value,
                             }
                         );
                     }
@@ -232,9 +232,7 @@ export function processDeclarationValue(
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                 diagnostics.report(functionWarnings.UNKNOWN_FORMATTER(value), {
                     node,
-                    options: {
-                        word: value,
-                    },
+                    word: value,
                 });
             }
         }
@@ -278,7 +276,7 @@ export function processDeclarationValue(
                             ),
                             {
                                 node: invalidNode,
-                                options: { word: value },
+                                word: value,
                             }
                         );
                     } else {

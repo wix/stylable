@@ -148,7 +148,7 @@ export const hooks = createFeature<{
         if (reservedKeyFrames.includes(name)) {
             context.diagnostics.report(diagnostics.KEYFRAME_NAME_RESERVED(name), {
                 node: atRule,
-                options: { word: name },
+                word: name,
             });
         }
         addKeyframes({
@@ -172,7 +172,7 @@ export const hooks = createFeature<{
                     diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(symbol.name, symbol.import.request),
                     {
                         node: symbol.import.rule,
-                        options: { word: symbol.name },
+                        word: symbol.name,
                     }
                 );
             }
