@@ -1,5 +1,5 @@
 import type * as postcss from 'postcss';
-import type { Diagnostics, DiagnosticsBank } from '../diagnostics';
+import type { DiagnosticBase, Diagnostics } from '../diagnostics';
 import { stripQuotation } from '../helpers/string';
 
 const UNIVERSAL_SYNTAX_DEFINITION = '*';
@@ -9,15 +9,15 @@ interface AtPropertyValidationResponse {
     valid: boolean;
 }
 
-export const atPropertyValidationWarnings: DiagnosticsBank = {
-    MISSING_REQUIRED_DESCRIPTOR(descriptorName: string) {
+export const atPropertyValidationWarnings = {
+    MISSING_REQUIRED_DESCRIPTOR(descriptorName: string): DiagnosticBase {
         return {
             code: '01001',
             message: `@property rules require a "${descriptorName}" descriptor`,
             severity: 'error',
         };
     },
-    MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR() {
+    MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR(): DiagnosticBase {
         return {
             code: '01002',
             message:
@@ -25,14 +25,14 @@ export const atPropertyValidationWarnings: DiagnosticsBank = {
             severity: 'warning',
         };
     },
-    INVALID_DESCRIPTOR_TYPE(descriptorType: string) {
+    INVALID_DESCRIPTOR_TYPE(descriptorType: string): DiagnosticBase {
         return {
             code: '01003',
             message: `@property does not support descriptor of type "${descriptorType}"`,
             severity: 'error',
         };
     },
-    INVALID_DESCRIPTOR_NAME(descriptorName: string) {
+    INVALID_DESCRIPTOR_NAME(descriptorName: string): DiagnosticBase {
         return {
             code: '01004',
             message: `@property does not support descriptor named "${descriptorName}"`,

@@ -19,7 +19,12 @@ export {
 } from './native-reserved-lists';
 export { isAsset, makeAbsolute } from './stylable-assets';
 export { namespace, namespaceDelimiter } from './helpers/namespace';
-export { emitDiagnostics, DiagnosticsMode, EmitDiagnosticsContext } from './report-diagnostic';
+export {
+    emitDiagnostics,
+    DiagnosticsMode,
+    EmitDiagnosticsContext,
+    reportDiagnostic,
+} from './report-diagnostic';
 export { StylableResolver, StylableResolverCache } from './stylable-resolver';
 export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
 export { createStylableFileProcessor } from './create-stylable-processor';
@@ -43,4 +48,4 @@ export { BoxedValueArray, BoxedValueMap, createCustomValue } from './custom-valu
 export { expandCustomSelectors } from './stylable-utils';
 export { systemValidators } from './state-validators';
 export { processDeclarationFunctions } from './process-declaration-functions';
-export { reportDiagnostic } from './report-diagnostic';
+export { DiagnosticBase } from './diagnostics';

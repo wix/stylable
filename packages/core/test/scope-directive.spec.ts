@@ -1,6 +1,7 @@
 import { expect, use } from 'chai';
 import type { AtRule, Declaration, Rule } from 'postcss';
 import {
+    diagnosticBankReportToStrings,
     expectTransformDiagnostics,
     flatMatch,
     generateStylableResult,
@@ -9,6 +10,9 @@ import {
 } from '@stylable/core-test-kit';
 import { processorDiagnostics, transformerDiagnostics } from '@stylable/core/dist/index-internal';
 import { SRule, getRuleScopeSelector } from '@stylable/core/dist/deprecated/postcss-ast-extension';
+
+const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
+const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 use(flatMatch);
 
@@ -507,7 +511,7 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
+                    message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
@@ -533,12 +537,12 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
+                    message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
                 {
-                    message: transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
+                    message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
                     severity: 'warning',
                     skipLocationCheck: true,
@@ -565,7 +569,7 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: processorDiagnostics.MISSING_SCOPING_PARAM().message,
+                    message: processorStringDiagnostics.MISSING_SCOPING_PARAM(),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },

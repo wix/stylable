@@ -9,7 +9,7 @@ import { isCompRoot, stringifySelector } from '../helpers/selector';
 import { getOriginDefinition } from '../helpers/resolve';
 import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import type { DiagnosticsBank } from '../diagnostics';
+import type { DiagnosticBase } from '../diagnostics';
 
 export interface ElementSymbol extends StylableDirectives {
     _kind: 'element';
@@ -17,9 +17,9 @@ export interface ElementSymbol extends StylableDirectives {
     alias?: ImportSymbol;
 }
 
-export const diagnostics: DiagnosticsBank = {
+export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
-    UNSCOPED_TYPE_SELECTOR(name: string) {
+    UNSCOPED_TYPE_SELECTOR(name: string): DiagnosticBase {
         return {
             code: `03001`,
             message: `unscoped type selector "${name}" will affect all elements of the same type in the document`,

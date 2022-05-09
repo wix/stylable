@@ -9,10 +9,12 @@ import {
     KeyframesSymbol,
 } from '@stylable/core/dist/features';
 import { Diagnostics } from '@stylable/core/dist/diagnostics';
-import { testStylableCore } from '@stylable/core-test-kit';
+import { diagnosticBankReportToStrings, testStylableCore } from '@stylable/core-test-kit';
 import * as postcss from 'postcss';
 import { expect } from 'chai';
 import { expectType, TypeEqual } from 'ts-expect';
+
+const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
 
 describe(`features/st-symbol`, () => {
     it(`should keep symbol on meta`, () => {
@@ -142,7 +144,7 @@ describe(`features/st-symbol`, () => {
             expect(context.diagnostics.reports).to.containSubset([
                 {
                     severity: `warning`,
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a').message,
+                    message: stSymbolDiagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleA,
                     options: {
                         word: `a`,
@@ -150,7 +152,7 @@ describe(`features/st-symbol`, () => {
                 },
                 {
                     severity: `warning`,
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a').message,
+                    message: stSymbolDiagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleB,
                     options: {
                         word: `a`,
@@ -187,7 +189,7 @@ describe(`features/st-symbol`, () => {
             expect(context.diagnostics.reports).to.containSubset([
                 {
                     severity: `error`,
-                    message: STSymbol.diagnostics.REDECLARE_ROOT().message,
+                    message: stSymbolDiagnostics.REDECLARE_ROOT(),
                     node: rule,
                     options: {
                         word: `root`,

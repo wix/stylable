@@ -1,35 +1,13 @@
 import { STImport, CSSClass, STSymbol } from '@stylable/core/dist/features';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
-// type RemoveContext<T extends any[]> = T extends [...infer X, DiagnosticContext] ? X : T;
-
-// const testDiagnostics = <T extends Record<string, (...args: any[]) => Diagnostic | string>>(
-//     diagnostics: T
-// ): {
-//     [key in keyof T]: (...args: RemoveContext<Parameters<T[key]>>) => string;
-// } => {
-//     //
-//     type MappedX = {
-//         [key in keyof T]: (...args: RemoveContext<Parameters<T[key]>>) => string;
-//     };
-//     const keys = Object.keys(diagnostics) as (keyof T)[];
-//     const res = keys.reduce((acc, key) => {
-//         const func = diagnostics[key];
-//         acc[key] = (...args: any[]) => {
-//             const result = func(...args.slice(0, -1));
-//             if (typeof result === 'string') {
-//                 return result;
-//             }
-//             return result.message;
-//         };
-//         return acc;
-//     }, {} as MappedX);
-
-//     return res;
-// };
-
-// const xxx = testDiagnostics(CSSClass.diagnostics);
+const classDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
+const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
 
 describe(`features/css-class`, () => {
     it(`should have root class`, () => {
@@ -216,15 +194,13 @@ describe(`features/css-class`, () => {
         const { sheets } = testStylableCore(`
             /* @rule(empty) .entry__a */
             .a {
-                /* @analyze-error(empty) ${CSSClass.diagnostics.EMPTY_ST_GLOBAL().message} */
+                /* @analyze-error(empty) ${classDiagnostics.EMPTY_ST_GLOBAL()} */
                 -st-global: "";
             }
 
             /* @rule(empty) .y */
             .b {
-                /* @analyze-error(multi) ${
-                    CSSClass.diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL().message
-                } */
+                /* @analyze-error(multi) ${classDiagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL()} */
                 -st-global: ".y , .z";
             }
         `);
@@ -304,9 +280,10 @@ describe(`features/css-class`, () => {
         const { sheets } = testStylableCore(`
             /* 
                 @rule(functional class) .entry__a()
-                @analyze-error(functional class) ${
-                    CSSClass.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.a`, `class`).message
-                }
+                @analyze-error(functional class) ${classDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
+                    `.a`,
+                    `class`
+                )}
             */
             .a() {}
         `);
@@ -405,9 +382,9 @@ describe(`features/css-class`, () => {
 
                     /* 
                         @rule .entry__unknown
-                        @transform-error(unresolved alias) word(unknown) ${
-                            CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(`unknown`).message
-                        } 
+                        @transform-error(unresolved alias) word(unknown) ${classDiagnostics.UNKNOWN_IMPORT_ALIAS(
+                            `unknown`
+                        )} 
                     */
                     .unknown {}
                 `,
@@ -466,7 +443,7 @@ describe(`features/css-class`, () => {
             const { sheets } = testStylableCore({
                 '/other.st.css': ``,
                 '/entry.st.css': `
-                    /* @analyze-error ${STSymbol.diagnostics.REDECLARE_ROOT().message} */
+                    /* @analyze-error ${stSymbolDiagnostics.REDECLARE_ROOT()} */
                     @st-import [root] from './other.st.css';
 
                     /* @rule .entry__root */
@@ -497,9 +474,9 @@ describe(`features/css-class`, () => {
                 '/entry.st.css': `
                     @st-import [importedPart] from "./classes.st.css";
 
-                    /* @analyze-warn word(importedPart) ${
-                        CSSClass.diagnostics.UNSCOPED_CLASS(`importedPart`).message
-                    } */
+                    /* @analyze-warn word(importedPart) ${classDiagnostics.UNSCOPED_CLASS(
+                        `importedPart`
+                    )} */
                     .importedPart {}
 
                     /* NO ERROR - locally scoped */
@@ -770,23 +747,19 @@ describe(`features/css-class`, () => {
                     @st-import [unknown, stColor] from './sheet.st.css';
 
                     .a {
-                        /* @transform-error(javascript) word(JS) ${
-                            CSSClass.diagnostics.CANNOT_EXTEND_JS().message
-                        } */
+                        /* @transform-error(javascript) word(JS) ${classDiagnostics.CANNOT_EXTEND_JS()} */
                         -st-extends: JS;
                     }
                     
                     .b {
-                        /* @transform-error(unresolved named) word(unknown) ${
-                            CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(`unknown`).message
-                        } */
+                        /* @transform-error(unresolved named) word(unknown) ${classDiagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
+                            `unknown`
+                        )} */
                         -st-extends: unknown;
                     }
                     
                     .c {
-                        /* @transform-error(unsupported symbol) word(stColor) ${
-                            CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE().message
-                        } */
+                        /* @transform-error(unsupported symbol) word(stColor) ${classDiagnostics.IMPORT_ISNT_EXTENDABLE()} */
                         -st-extends: stColor;
                     }
                 `,

@@ -2,9 +2,8 @@ import { expect } from 'chai';
 import deindent from 'deindent';
 import type { Position } from 'postcss';
 import { Diagnostics, DiagnosticType, StylableMeta, StylableResults } from '@stylable/core';
-import { safeParse, StylableProcessor } from '@stylable/core/dist/index-internal';
+import { DiagnosticBase, safeParse, StylableProcessor } from '@stylable/core/dist/index-internal';
 import { Config, generateStylableResult } from './generate-test-util';
-import type { DiagnosticsBank } from '@stylable/core/src/diagnostics';
 
 export interface Diagnostic {
     severity?: DiagnosticType;
@@ -338,16 +337,22 @@ export function shouldReportNoDiagnostics(meta: StylableMeta, checkTransformDiag
     }
 }
 
-type StringDiagnosticsBank = Record<string, (...args: any[]) => string>;
+export type DiagnosticsBank = Record<string, (...args: any[]) => DiagnosticBase>;
 
-export const diagnosticBankReportToStrings = (diags: DiagnosticsBank) => {
-    const cleaned: StringDiagnosticsBank = {};
+export type UnwrapDiagnosticMessage<T extends DiagnosticsBank> = {
+    [K in keyof T]: (...args: Parameters<T[K]>) => string;
+};
 
-    for (const [diagName, diagFunc] of Object.entries(diags)) {
-        cleaned[diagName] = (...args: any[]) => {
+export function diagnosticBankReportToStrings<T extends DiagnosticsBank>(
+    bank: T
+): UnwrapDiagnosticMessage<T> {
+    const cleaned = {} as UnwrapDiagnosticMessage<T>;
+
+    for (const [diagName, diagFunc] of Object.entries(bank)) {
+        cleaned[diagName as keyof T] = (...args) => {
             return diagFunc(...args).message;
         };
     }
 
     return cleaned;
-};
+}

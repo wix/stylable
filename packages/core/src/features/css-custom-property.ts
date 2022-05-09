@@ -15,7 +15,7 @@ import type { StylableResolver, CSSResolve } from '../stylable-resolver';
 import type * as postcss from 'postcss';
 // ToDo: refactor out - parse once and pass to hooks
 import postcssValueParser from 'postcss-value-parser';
-import type { DiagnosticsBank } from '../diagnostics';
+import type { DiagnosticBase } from '../diagnostics';
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
@@ -23,44 +23,44 @@ export interface CSSVarSymbol {
     alias: ImportSymbol | undefined;
 }
 
-export const diagnostics: DiagnosticsBank = {
+export const diagnostics = {
     ...atPropertyValidationWarnings,
-    ILLEGAL_CSS_VAR_USE(name: string) {
+    ILLEGAL_CSS_VAR_USE(name: string): DiagnosticBase {
         return {
             code: '01005',
             message: `a custom css property must begin with "--" (double-dash), but received "${name}"`,
             severity: 'error',
         };
     },
-    ILLEGAL_CSS_VAR_ARGS(name: string) {
+    ILLEGAL_CSS_VAR_ARGS(name: string): DiagnosticBase {
         return {
             code: '01006',
             message: `custom property "${name}" usage (var()) must receive comma separated values`,
             severity: 'error',
         };
     },
-    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
+    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(): DiagnosticBase {
         return {
             code: '01007',
             message: `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`,
             severity: 'info',
         };
     },
-    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) {
+    GLOBAL_CSS_VAR_MISSING_COMMA(name: string): DiagnosticBase {
         return {
             code: '01008',
             message: `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`,
             severity: 'error',
         };
     },
-    ILLEGAL_GLOBAL_CSS_VAR(name: string) {
+    ILLEGAL_GLOBAL_CSS_VAR(name: string): DiagnosticBase {
         return {
             code: '01009',
             message: `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`,
             severity: 'error',
         };
     },
-    MISSING_PROP_NAME() {
+    MISSING_PROP_NAME(): DiagnosticBase {
         return {
             code: '01010',
             message: `missing custom property name for "var(--[PROP NAME])"`,

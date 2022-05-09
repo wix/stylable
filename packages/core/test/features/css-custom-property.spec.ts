@@ -1,7 +1,15 @@
 import { STImport, CSSCustomProperty, STSymbol } from '@stylable/core/dist/features';
 import { generateScopedCSSVar } from '@stylable/core/dist/helpers/css-custom-property';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
+
+const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
+const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
+const customPropertyDiagnostics = diagnosticBankReportToStrings(CSSCustomProperty.diagnostics);
 
 describe(`features/css-custom-property`, () => {
     it(`should process css declaration prop`, () => {
@@ -122,10 +130,9 @@ describe(`features/css-custom-property`, () => {
         expect(exports.vars.propB, `propB JS export`).to.eql(`--entry-propB`);
     });
     it(`should process conflicted definitions`, () => {
-        const symbolDiag = STSymbol.diagnostics;
         const { sheets } = testStylableCore(`
             /* @analyze-warn(@property conflicted) word(--conflicted)
-                ${symbolDiag.REDECLARE_SYMBOL(`--conflicted`).message}*/
+                ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--conflicted`)}*/
             @property --conflicted {
                 syntax: '<color>';
                 initial-value: green;
@@ -139,7 +146,7 @@ describe(`features/css-custom-property`, () => {
             };
 
             /* @analyze-warn(@property conflicted) word(--conflicted)
-                ${symbolDiag.REDECLARE_SYMBOL(`--conflicted`).message}*/
+                ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--conflicted`)}*/
             @property --conflicted {
                 syntax: '<color>';
                 initial-value: green;
@@ -198,9 +205,9 @@ describe(`features/css-custom-property`, () => {
         testStylableCore(`
             /* 
                 @atrule(no-dashes) propY 
-                @analyze-error(no-dashes) word(propY) ${
-                    CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE('propY').message
-                }
+                @analyze-error(no-dashes) word(propY) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
+                    'propY'
+                )}
             */
             @property propY {
                 syntax: '<color>';
@@ -210,9 +217,9 @@ describe(`features/css-custom-property`, () => {
             
             /* 
                 @atrule(no-dashes-global) st-global(propZ)
-                @analyze-error(no-dashes-global) word(propZ) ${
-                    CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE('propZ').message
-                }
+                @analyze-error(no-dashes-global) word(propZ) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
+                    'propZ'
+                )}
             */
             @property st-global(propZ) {
                 syntax: '<color>';
@@ -223,9 +230,7 @@ describe(`features/css-custom-property`, () => {
             .decls {
                 /* 
                     @decl(empty var) prop: var() 
-                    @analyze-error(empty var) ${
-                        CSSCustomProperty.diagnostics.MISSING_PROP_NAME().message
-                    }
+                    @analyze-error(empty var) ${customPropertyDiagnostics.MISSING_PROP_NAME()}
                 */
                 prop: var();
             }
@@ -233,19 +238,17 @@ describe(`features/css-custom-property`, () => {
             .root {
                 /* 
                     @decl(no-dashes) prop: var(propA) 
-                    @analyze-error(no-dashes) word(propA) ${
-                        CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE('propA').message
-                    }
+                    @analyze-error(no-dashes) word(propA) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
+                        'propA'
+                    )}
                 */
                 prop: var(propA);
 
                 /* 
                     @decl(space+text) prop: var(--entry-propB notAllowed, fallback) 
-                    @analyze-error(space+text) word(--propB notAllowed, fallback) ${
-                        CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_ARGS(
-                            '--propB notAllowed, fallback'
-                        ).message
-                    }
+                    @analyze-error(space+text) word(--propB notAllowed, fallback) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_ARGS(
+                        '--propB notAllowed, fallback'
+                    )}
                 */
                 prop: var(--propB notAllowed, fallback);
             }
@@ -267,26 +270,23 @@ describe(`features/css-custom-property`, () => {
     describe(`@property validation`, () => {
         it(`should report on missing syntax`, () => {
             const { sheets } = testStylableCore(`
-                /* @analyze-error(syntax) word(--a) ${
-                    CSSCustomProperty.diagnostics.MISSING_REQUIRED_DESCRIPTOR('syntax').message
-                } */
+                /* @analyze-error(syntax) word(--a) ${customPropertyDiagnostics.MISSING_REQUIRED_DESCRIPTOR(
+                    'syntax'
+                )} */
                 @property --a {
                     inherits: true;
                     initial-value: #c0ffee;
                 }
 
-                /* @analyze-error(inherits) word(--b) ${
-                    CSSCustomProperty.diagnostics.MISSING_REQUIRED_DESCRIPTOR('inherits').message
-                } */
+                /* @analyze-error(inherits) word(--b) ${customPropertyDiagnostics.MISSING_REQUIRED_DESCRIPTOR(
+                    'inherits'
+                )} */
                 @property --b {
                     syntax: '<color>';
                     initial-value: #c0ffee;
                 }
 
-                /* @analyze-warn(inherits) word(--c) ${
-                    CSSCustomProperty.diagnostics.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR()
-                        .message
-                } */
+                /* @analyze-warn(inherits) word(--c) ${customPropertyDiagnostics.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR()} */
                 @property --c {
                     syntax: '<color>';
                     inherits: false;
@@ -309,9 +309,9 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-error(atrule) word(abc) ${
-                        CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_TYPE('atrule').message
-                    } */
+                    /* @analyze-error(atrule) word(abc) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_TYPE(
+                        'atrule'
+                    )} */
                     @some-at-rule abc{}
                 }
 
@@ -319,9 +319,9 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-error(rule) word(div) ${
-                        CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_TYPE('rule').message
-                    } */
+                    /* @analyze-error(rule) word(div) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_TYPE(
+                        'rule'
+                    )} */
                     div {}
                 }
             `);
@@ -332,10 +332,9 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-error word(initialValue) ${
-                        CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_NAME('initialValue')
-                            .message
-                    } */
+                    /* @analyze-error word(initialValue) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_NAME(
+                        'initialValue'
+                    )} */
                     initialValue: red;
                 }
             `);
@@ -344,14 +343,10 @@ describe(`features/css-custom-property`, () => {
     describe(`@st-global-custom-property (deprecated)`, () => {
         it(`should mark properties as global`, () => {
             testStylableCore(`
-                /* @analyze-info(first) ${
-                    CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY().message
-                }*/
+                /* @analyze-info(first) ${customPropertyDiagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()}*/
                 @st-global-custom-property --x;
                 
-                /* @analyze-info(second) ${
-                    CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY().message
-                }*/
+                /* @analyze-info(second) ${customPropertyDiagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()}*/
                 @st-global-custom-property --a      ,--b,
                 --c  ,  --d  ;
     
@@ -365,10 +360,9 @@ describe(`features/css-custom-property`, () => {
             `);
         });
         it(`should conflict with @property - and override global definition`, () => {
-            const symbolDiag = STSymbol.diagnostics;
             const { sheets } = testStylableCore(`
                 /* @analyze-warn(@property before) word(--before)
-                    ${symbolDiag.REDECLARE_SYMBOL(`--before`).message}*/
+                    ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--before`)}*/
                 @property --before {
                     syntax: '<color>';
                     initial-value: green;
@@ -376,15 +370,17 @@ describe(`features/css-custom-property`, () => {
                 };
                 
                 /*
-                @analyze-warn(before) word(--before) ${
-                    symbolDiag.REDECLARE_SYMBOL(`--before`).message
-                }
-                @analyze-warn(after) word(--after) ${symbolDiag.REDECLARE_SYMBOL(`--after`).message}
+                @analyze-warn(before) word(--before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
+                    `--before`
+                )}
+                @analyze-warn(after) word(--after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
+                    `--after`
+                )}
                 */
                 @st-global-custom-property --before, --after;
                 
                 /* @analyze-warn(@property after) word(--after) 
-                    ${symbolDiag.REDECLARE_SYMBOL(`--after`).message}*/
+                    ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--after`)}*/
                 @property --after{
                     syntax: '<color>';
                     initial-value: green;
@@ -409,19 +405,17 @@ describe(`features/css-custom-property`, () => {
             testStylableCore(`
                 /* 
                     @transform-remove(no-dashes)
-                    @analyze-error(no-dashes) word(propA) ${
-                        CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR('propA').message
-                    }
+                    @analyze-error(no-dashes) word(propA) ${customPropertyDiagnostics.ILLEGAL_GLOBAL_CSS_VAR(
+                        'propA'
+                    )}
                 */
                 @st-global-custom-property propA;
                 
                 /* 
                     @transform-remove(missing comma)
-                    @analyze-error(missing comma) word(--propB --propC) ${
-                        CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
-                            '--propB --propC'
-                        ).message
-                    }
+                    @analyze-error(missing comma) word(--propB --propC) ${customPropertyDiagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
+                        '--propB --propC'
+                    )}
                 */
                 @st-global-custom-property --propB --propC;
             `);
@@ -522,24 +516,20 @@ describe(`features/css-custom-property`, () => {
                     }
                 `,
                 '/entry.st.css': `
-                    /* @analyze-warn(before) ${
-                        STSymbol.diagnostics.REDECLARE_SYMBOL(`--before`).message
-                    } */
+                    /* @analyze-warn(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--before`)} */
                     @property --before;
                     
                     /* 
-                    @analyze-warn(imported before) word(--before) ${
-                        STSymbol.diagnostics.REDECLARE_SYMBOL(`--before`).message
-                    }
-                    @analyze-warn(imported after) word(--after) ${
-                        STSymbol.diagnostics.REDECLARE_SYMBOL(`--after`).message
-                    }
+                    @analyze-warn(imported before) word(--before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
+                        `--before`
+                    )}
+                    @analyze-warn(imported after) word(--after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
+                        `--after`
+                    )}
                     */
                     @st-import [--before, --after] from "./props.st.css";
                     
-                    /* @analyze-warn(after) ${
-                        STSymbol.diagnostics.REDECLARE_SYMBOL(`--after`).message
-                    } */
+                    /* @analyze-warn(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--after`)} */
                     @property --after;
 
                     .root {
@@ -639,10 +629,10 @@ describe(`features/css-custom-property`, () => {
             const { sheets } = testStylableCore({
                 '/props.st.css': ``,
                 '/entry.st.css': `
-                    /* @transform-error word(--unknown) ${
-                        STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL('--unknown', './props.st.css')
-                            .message
-                    } */
+                    /* @transform-error word(--unknown) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                        '--unknown',
+                        './props.st.css'
+                    )} */
                     @st-import [--unknown] from './props.st.css';
 
                     .root {

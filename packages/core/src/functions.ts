@@ -1,7 +1,7 @@
 import { dirname, relative } from 'path';
 import postcssValueParser from 'postcss-value-parser';
 import type * as postcss from 'postcss';
-import { Diagnostics, DiagnosticsBank } from './diagnostics';
+import { DiagnosticBase, Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
@@ -66,15 +66,15 @@ export class StylableEvaluator {
 
 // old API
 
-export const functionWarnings: DiagnosticsBank = {
-    FAIL_TO_EXECUTE_FORMATTER: (resolvedValue: string, message: string) => {
+export const functionWarnings = {
+    FAIL_TO_EXECUTE_FORMATTER(resolvedValue: string, message: string): DiagnosticBase {
         return {
             code: '15001',
             message: `failed to execute formatter "${resolvedValue}" with error: "${message}"`,
             severity: 'error',
         };
     },
-    UNKNOWN_FORMATTER: (name: string) => {
+    UNKNOWN_FORMATTER(name: string): DiagnosticBase {
         return {
             code: '15002',
             message: `cannot find native function or custom formatter called ${name}`,

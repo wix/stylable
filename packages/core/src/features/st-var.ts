@@ -12,7 +12,7 @@ import { stripQuotation } from '../helpers/string';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
-import { Diagnostics, DiagnosticsBank } from '../diagnostics';
+import { DiagnosticBase, Diagnostics } from '../diagnostics';
 import type { ParsedValue } from '../types';
 import type { Stylable } from '../stylable';
 import type { RuntimeStVar } from '../stylable-transformer';
@@ -42,23 +42,23 @@ export interface FlatComputedStVar {
     path: string[];
 }
 
-export const diagnostics: DiagnosticsBank = {
+export const diagnostics = {
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
-    NO_VARS_DEF_IN_ST_SCOPE() {
+    NO_VARS_DEF_IN_ST_SCOPE(): DiagnosticBase {
         return {
             code: '07002',
             message: `cannot define ":vars" inside of "@st-scope"`,
             severity: 'error',
         };
     },
-    DEPRECATED_ST_FUNCTION_NAME: (name: string, alternativeName: string) => {
+    DEPRECATED_ST_FUNCTION_NAME(name: string, alternativeName: string): DiagnosticBase {
         return {
             code: '07003',
             message: `"${name}" is deprecated, use "${alternativeName}"`,
             severity: 'info',
         };
     },
-    CYCLIC_VALUE: (cyclicChain: string[]) => {
+    CYCLIC_VALUE(cyclicChain: string[]): DiagnosticBase {
         return {
             code: '07004',
             message: `Cyclic value definition detected: "${cyclicChain
@@ -67,14 +67,14 @@ export const diagnostics: DiagnosticsBank = {
             severity: 'error',
         };
     },
-    MISSING_VAR_IN_VALUE: () => {
+    MISSING_VAR_IN_VALUE(): DiagnosticBase {
         return {
             code: '07005',
             message: `invalid value() with no var identifier`,
             severity: 'error',
         };
     },
-    COULD_NOT_RESOLVE_VALUE: (args?: string) => {
+    COULD_NOT_RESOLVE_VALUE(args?: string): DiagnosticBase {
         return {
             code: '07006',
             message: `cannot resolve value function${
@@ -83,28 +83,28 @@ export const diagnostics: DiagnosticsBank = {
             severity: 'error',
         };
     },
-    MULTI_ARGS_IN_VALUE: (args: string) => {
+    MULTI_ARGS_IN_VALUE(args: string): DiagnosticBase {
         return {
             code: '07007',
             message: `value function accepts only a single argument: "value(${args})"`,
             severity: 'error',
         };
     },
-    CANNOT_USE_AS_VALUE: (type: string, varName: string) => {
+    CANNOT_USE_AS_VALUE(type: string, varName: string): DiagnosticBase {
         return {
             code: '07008',
             message: `${type} "${varName}" cannot be used as a variable`,
             severity: 'error',
         };
     },
-    CANNOT_USE_JS_AS_VALUE: (type: string, varName: string) => {
+    CANNOT_USE_JS_AS_VALUE(type: string, varName: string): DiagnosticBase {
         return {
             code: '07009',
             message: `JavaScript ${type} import "${varName}" cannot be used as a variable`,
             severity: 'error',
         };
     },
-    UNKNOWN_VAR: (name: string) => {
+    UNKNOWN_VAR(name: string): DiagnosticBase {
         return {
             code: '07010',
             message: `unknown var "${name}"`,

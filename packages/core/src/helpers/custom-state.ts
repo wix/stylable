@@ -37,13 +37,15 @@ export function validateRuleStateDefinition(
                             true,
                             !!state.defaultValue
                         );
-                        if (errors) {
+                        if (errors && state.defaultValue) {
+                            const defaultValue = state.defaultValue;
+
                             rule.walkDecls((decl) => {
                                 if (decl.prop === `-st-states`) {
                                     diagnostics.report(
                                         stateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
                                             stateName,
-                                            state.defaultValue,
+                                            defaultValue,
                                             errors
                                         ),
                                         {

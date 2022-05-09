@@ -1,7 +1,7 @@
 import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
-import type { Diagnostics, DiagnosticsBank } from './diagnostics';
+import type { DiagnosticBase, Diagnostics } from './diagnostics';
 import type { ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
@@ -12,8 +12,8 @@ export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
 }
 
-export const customSelectorDiagnostics: DiagnosticsBank = {
-    UNDEFINED_SELECTOR(selector: string) {
+export const customSelectorDiagnostics = {
+    UNDEFINED_SELECTOR(selector: string): DiagnosticBase {
         return {
             code: '18001',
             message: `The selector '${selector}' is undefined`,
@@ -55,8 +55,8 @@ function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
-export const utilDiagnostics: DiagnosticsBank = {
-    INVALID_MERGE_OF(mergeValue: string) {
+export const utilDiagnostics = {
+    INVALID_MERGE_OF(mergeValue: string): DiagnosticBase {
         return {
             code: '14001',
             message: `invalid merge of: \n"${mergeValue}"`,
@@ -129,8 +129,8 @@ export function mergeRules(
     return rule;
 }
 
-export const sourcePathDiagnostics: DiagnosticsBank = {
-    MISSING_SOURCE_FILENAME() {
+export const sourcePathDiagnostics = {
+    MISSING_SOURCE_FILENAME(): DiagnosticBase {
         return {
             code: '17001',
             message: 'missing source filename',

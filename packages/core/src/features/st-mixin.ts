@@ -15,7 +15,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { CSSResolve } from '../stylable-resolver';
 import type { StylableTransformer } from '../stylable-transformer';
 import { dirname } from 'path';
-import type { DiagnosticsBank } from '../diagnostics';
+import type { DiagnosticBase } from '../diagnostics';
 
 export interface MixinValue {
     type: string;
@@ -35,53 +35,53 @@ export const MixinType = {
     PARTIAL: `-st-partial-mixin` as const,
 };
 
-export const diagnostics: DiagnosticsBank = {
+export const diagnostics = {
     VALUE_CANNOT_BE_STRING: mixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
     INVALID_NAMED_PARAMS: mixinHelperDiagnostics.INVALID_NAMED_PARAMS,
     INVALID_MERGE_OF: utilDiagnostics.INVALID_MERGE_OF,
-    PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
+    PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string): DiagnosticBase {
         return {
             code: '10001',
             message: `"${MixinType.PARTIAL}" can only be used with override arguments provided, missing overrides on "${type}"`,
             severity: 'error',
         };
     },
-    UNKNOWN_MIXIN(name: string) {
+    UNKNOWN_MIXIN(name: string): DiagnosticBase {
         return {
             code: '10002',
             message: `unknown mixin: "${name}"`,
             severity: 'error',
         };
     },
-    OVERRIDE_MIXIN(mixinType: string) {
+    OVERRIDE_MIXIN(mixinType: string): DiagnosticBase {
         return {
             code: '10003',
             message: `override ${mixinType} on same rule`,
             severity: 'warning',
         };
     },
-    FAILED_TO_APPLY_MIXIN(error: string) {
+    FAILED_TO_APPLY_MIXIN(error: string): DiagnosticBase {
         return {
             code: '10004',
             message: `could not apply mixin: ${error}`,
             severity: 'error',
         };
     },
-    JS_MIXIN_NOT_A_FUNC() {
+    JS_MIXIN_NOT_A_FUNC(): DiagnosticBase {
         return {
             code: '10005',
             message: `js mixin must be a function`,
             severity: 'error',
         };
     },
-    CIRCULAR_MIXIN(circularPaths: string[]) {
+    CIRCULAR_MIXIN(circularPaths: string[]): DiagnosticBase {
         return {
             code: '10006',
             message: `circular mixin found: ${circularPaths.join(' --> ')}`,
             severity: 'error',
         };
     },
-    UNKNOWN_MIXIN_SYMBOL(name: string) {
+    UNKNOWN_MIXIN_SYMBOL(name: string): DiagnosticBase {
         return {
             code: '10007',
             message: `cannot mixin unknown symbol "${name}"`,

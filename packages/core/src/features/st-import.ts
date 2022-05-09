@@ -9,7 +9,7 @@ import type { StylableMeta } from '../stylable-meta';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import type { DiagnosticsBank } from '../diagnostics';
+import type { DiagnosticBase } from '../diagnostics';
 
 export interface ImportSymbol {
     _kind: 'import';
@@ -51,23 +51,23 @@ export const ImportTypeHook = new Map<
 
 const dataKey = plugableRecord.key<Imported[]>('imports');
 
-export const diagnostics: DiagnosticsBank = {
+export const diagnostics = {
     ...parseImportMessages,
-    NO_ST_IMPORT_IN_NESTED_SCOPE() {
+    NO_ST_IMPORT_IN_NESTED_SCOPE(): DiagnosticBase {
         return {
             code: '05011',
             message: `cannot use "@st-import" inside of nested scope`,
             severity: 'error',
         };
     },
-    NO_PSEUDO_IMPORT_IN_NESTED_SCOPE() {
+    NO_PSEUDO_IMPORT_IN_NESTED_SCOPE(): DiagnosticBase {
         return {
             code: '05012',
             message: `cannot use ":import" inside of nested scope`,
             severity: 'error',
         };
     },
-    INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
+    INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string): DiagnosticBase {
         return {
             code: '05013',
             message: `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`,
@@ -75,14 +75,14 @@ export const diagnostics: DiagnosticsBank = {
         };
     },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
-    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) {
+    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string): DiagnosticBase {
         return {
             code: '05015',
             message: `cannot resolve imported symbol "${name}" from stylesheet "${path}"`,
             severity: 'error',
         };
     },
-    UNKNOWN_IMPORTED_FILE(path: string) {
+    UNKNOWN_IMPORTED_FILE(path: string): DiagnosticBase {
         return {
             code: '05016',
             message: `cannot resolve imported file: "${path}"`,

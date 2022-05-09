@@ -9,7 +9,7 @@ import { namespace } from '../helpers/namespace';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import type { DiagnosticsBank } from '../diagnostics';
+import type { DiagnosticBase } from '../diagnostics';
 
 export interface KeyframesSymbol {
     _kind: 'keyframes';
@@ -55,36 +55,36 @@ export const reservedKeyFrames = [
     'paused',
 ];
 
-export const diagnostics: DiagnosticsBank = {
-    ILLEGAL_KEYFRAMES_NESTING() {
+export const diagnostics = {
+    ILLEGAL_KEYFRAMES_NESTING(): DiagnosticBase {
         return {
             code: '02001',
             message: `illegal nested "@keyframes"`,
             severity: 'error',
         };
     },
-    MISSING_KEYFRAMES_NAME() {
+    MISSING_KEYFRAMES_NAME(): DiagnosticBase {
         return {
             code: '02002',
             message: '"@keyframes" missing parameter',
             severity: 'error',
         };
     },
-    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL() {
+    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(): DiagnosticBase {
         return {
             code: '02003',
             message: `"@keyframes" missing parameter inside "${GLOBAL_FUNC}()"`,
             severity: 'error',
         };
     },
-    KEYFRAME_NAME_RESERVED(name: string) {
+    KEYFRAME_NAME_RESERVED(name: string): DiagnosticBase {
         return {
             code: '02004',
             message: `keyframes "${name}" is reserved`,
             severity: 'error',
         };
     },
-    UNKNOWN_IMPORTED_KEYFRAMES(name: string, path: string) {
+    UNKNOWN_IMPORTED_KEYFRAMES(name: string, path: string): DiagnosticBase {
         return {
             code: '02005',
             message: `cannot resolve imported keyframes "${name}" from stylesheet "${path}"`,

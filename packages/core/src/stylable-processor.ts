@@ -1,6 +1,6 @@
 import path from 'path';
 import * as postcss from 'postcss';
-import { Diagnostics, DiagnosticsBank } from './diagnostics';
+import { DiagnosticBase, Diagnostics } from './diagnostics';
 import { murmurhash3_32_gc } from './murmurhash';
 import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
@@ -54,8 +54,8 @@ const stValuesMap = {
     '-st-global': true,
 } as const;
 
-export const processorDiagnostics: DiagnosticsBank = {
-    ROOT_AFTER_SPACING() {
+export const processorDiagnostics = {
+    ROOT_AFTER_SPACING(): DiagnosticBase {
         return {
             code: '11001',
             message:
@@ -63,70 +63,70 @@ export const processorDiagnostics: DiagnosticsBank = {
             severity: 'warning',
         };
     },
-    STATE_DEFINITION_IN_ELEMENT() {
+    STATE_DEFINITION_IN_ELEMENT(): DiagnosticBase {
         return {
             code: '11002',
             message: 'cannot define pseudo states inside a type selector',
             severity: 'error',
         };
     },
-    STATE_DEFINITION_IN_COMPLEX() {
+    STATE_DEFINITION_IN_COMPLEX(): DiagnosticBase {
         return {
             code: '11003',
             message: 'cannot define pseudo states inside complex selectors',
             severity: 'error',
         };
     },
-    CANNOT_RESOLVE_EXTEND(name: string) {
+    CANNOT_RESOLVE_EXTEND(name: string): DiagnosticBase {
         return {
             code: '11004',
             message: `cannot resolve '-st-extends' type for '${name}'`,
             severity: 'error',
         };
     },
-    CANNOT_EXTEND_IN_COMPLEX() {
+    CANNOT_EXTEND_IN_COMPLEX(): DiagnosticBase {
         return {
             code: '11005',
             message: `cannot define "-st-extends" inside a complex selector`,
             severity: 'error',
         };
     },
-    OVERRIDE_TYPED_RULE(key: string, name: string) {
+    OVERRIDE_TYPED_RULE(key: string, name: string): DiagnosticBase {
         return {
             code: '11006',
             message: `override "${key}" on typed rule "${name}"`,
             severity: 'warning',
         };
     },
-    INVALID_NAMESPACE_DEF() {
+    INVALID_NAMESPACE_DEF(): DiagnosticBase {
         return {
             code: '11007',
             message: 'invalid @namespace',
             severity: 'error',
         };
     },
-    EMPTY_NAMESPACE_DEF() {
+    EMPTY_NAMESPACE_DEF(): DiagnosticBase {
         return {
             code: '11008',
             message: '@namespace must contain at least one character or digit',
             severity: 'error',
         };
     },
-    MISSING_SCOPING_PARAM() {
+    MISSING_SCOPING_PARAM(): DiagnosticBase {
         return {
             code: '11009',
             message: '"@st-scope" missing scoping selector parameter',
             severity: 'error',
         };
     },
-    INVALID_NAMESPACE_REFERENCE() {
+    INVALID_NAMESPACE_REFERENCE(): DiagnosticBase {
         return {
             code: '11010',
             message: 'st-namespace-reference dose not have any value',
             severity: 'error',
         };
     },
-    INVALID_NESTING(child: string, parent: string) {
+    INVALID_NESTING(child: string, parent: string): DiagnosticBase {
         return {
             code: '11011',
             message: `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`,

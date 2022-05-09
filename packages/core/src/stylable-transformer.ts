@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
-import type { Diagnostics, DiagnosticsBank } from './diagnostics';
+import type { DiagnosticBase, Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
 import { setStateToNode, stateDiagnostics } from './pseudo-states';
@@ -94,8 +94,8 @@ export interface TransformerOptions {
     resolverCache?: StylableResolverCache;
 }
 
-export const transformerDiagnostics: DiagnosticsBank = {
-    UNKNOWN_PSEUDO_ELEMENT(name: string) {
+export const transformerDiagnostics = {
+    UNKNOWN_PSEUDO_ELEMENT(name: string): DiagnosticBase {
         return {
             code: '12001',
             message: `unknown pseudo element "${name}"`,

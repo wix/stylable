@@ -18,7 +18,7 @@ import type {
     ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import type { DiagnosticsBank } from '../diagnostics';
+import type { DiagnosticBase } from '../diagnostics';
 
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
@@ -27,51 +27,51 @@ export interface ClassSymbol extends StylableDirectives {
     scoped?: string; // ToDo: check if in use
 }
 
-export const diagnostics: DiagnosticsBank = {
+export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
-    UNSCOPED_CLASS(name: string) {
+    UNSCOPED_CLASS(name: string): DiagnosticBase {
         return {
             code: '00002',
             message: `unscoped class "${name}" will affect all elements of the same type in the document`,
             severity: 'warning',
         };
     },
-    EMPTY_ST_GLOBAL() {
+    EMPTY_ST_GLOBAL(): DiagnosticBase {
         return {
             code: '00003',
             message: `-st-global must contain a valid selector`,
             severity: 'error',
         };
     },
-    UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL() {
+    UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL(): DiagnosticBase {
         return {
             code: '00004',
             message: `unsupported multi selector in -st-global`,
             severity: 'error',
         };
     },
-    IMPORT_ISNT_EXTENDABLE() {
+    IMPORT_ISNT_EXTENDABLE(): DiagnosticBase {
         return {
             code: '00005',
             message: 'import is not extendable',
             severity: 'error',
         };
     },
-    CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string) {
+    CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string): DiagnosticBase {
         return {
             code: '00006',
             message: `cannot extend unknown symbol "${name}"`,
             severity: 'error',
         };
     },
-    CANNOT_EXTEND_JS() {
+    CANNOT_EXTEND_JS(): DiagnosticBase {
         return {
             code: '00007',
             message: 'JS import is not extendable',
             severity: 'error',
         };
     },
-    UNKNOWN_IMPORT_ALIAS(name: string) {
+    UNKNOWN_IMPORT_ALIAS(name: string): DiagnosticBase {
         return {
             code: '00008',
             message: `cannot use alias for unknown import "${name}"`,

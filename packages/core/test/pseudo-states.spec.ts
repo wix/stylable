@@ -9,6 +9,7 @@ import {
     generateStylableResult,
     processSource,
     testInlineExpects,
+    diagnosticBankReportToStrings,
 } from '@stylable/core-test-kit';
 import { processorDiagnostics, nativePseudoClasses } from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
@@ -23,6 +24,10 @@ chai.use(flatMatch);
 // testing concerns for feature
 // - states belonging to an extended class (multi level)
 // - lookup order
+
+const stateStringDiagnostics = diagnosticBankReportToStrings(stateDiagnostics);
+const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
+const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
 
 describe('pseudo-states', () => {
     describe('process', () => {
@@ -51,7 +56,7 @@ describe('pseudo-states', () => {
                         }`,
                         [
                             {
-                                message: stateDiagnostics.RESERVED_NATIVE_STATE(name).message,
+                                message: stateStringDiagnostics.RESERVED_NATIVE_STATE(name),
                                 file: 'main.css',
                             },
                         ]
@@ -113,10 +118,10 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateDiagnostics.TOO_MANY_STATE_TYPES('state1', [
+                            message: stateStringDiagnostics.TOO_MANY_STATE_TYPES('state1', [
                                 'string',
                                 'number(x)',
-                            ]).message,
+                            ]),
                             file: 'main.css',
                         },
                     ]
@@ -132,7 +137,7 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateDiagnostics.NO_STATE_TYPE_GIVEN('state1').message,
+                            message: stateStringDiagnostics.NO_STATE_TYPE_GIVEN('state1'),
                             file: 'main.css',
                         },
                     ]
@@ -148,11 +153,11 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(
+                            message: stateStringDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(
                                 'state1',
                                 'contains',
                                 ['one', 'two']
-                            ).message,
+                            ),
                             file: 'main.css',
                         },
                     ]
@@ -168,8 +173,7 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateDiagnostics.UNKNOWN_STATE_TYPE('state1', 'unknown')
-                                .message,
+                            message: stateStringDiagnostics.UNKNOWN_STATE_TYPE('state1', 'unknown'),
                             file: 'main.css',
                         },
                     ]
@@ -2064,7 +2068,7 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string').message,
+                    message: stateStringDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
@@ -2093,7 +2097,7 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string').message,
+                    message: stateStringDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
@@ -2117,7 +2121,7 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateDiagnostics.UNKNOWN_STATE_USAGE('unknownState').message,
+                    message: stateStringDiagnostics.UNKNOWN_STATE_USAGE('unknownState'),
                     file: '/entry.st.css',
                 },
             ]);
@@ -2151,12 +2155,12 @@ describe('pseudo-states', () => {
                 [
                     // skipping root scoping warning
                     {
-                        message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('MyElement').message,
+                        message: cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR('MyElement'),
                         file: 'main.css',
                         skip: true,
                     },
                     {
-                        message: processorDiagnostics.STATE_DEFINITION_IN_ELEMENT().message,
+                        message: processorStringDiagnostics.STATE_DEFINITION_IN_ELEMENT(),
                         file: 'main.css',
                     },
                 ]
@@ -2173,7 +2177,15 @@ describe('pseudo-states', () => {
                     |-st-states: mystate2;|
                 }
             `,
-                [{ message: 'override "-st-states" on typed rule "root"', file: 'main.css' }]
+                [
+                    {
+                        message: processorStringDiagnostics.OVERRIDE_TYPED_RULE(
+                            '-st-states',
+                            'root'
+                        ),
+                        file: 'main.css',
+                    },
+                ]
             );
         });
 
@@ -2186,7 +2198,7 @@ describe('pseudo-states', () => {
             `,
                 [
                     {
-                        message: stateDiagnostics.STATE_STARTS_WITH_HYPHEN('-someState').message,
+                        message: stateStringDiagnostics.STATE_STARTS_WITH_HYPHEN('-someState'),
                         file: 'main.css',
                         severity: 'error',
                     },
