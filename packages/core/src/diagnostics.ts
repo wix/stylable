@@ -33,30 +33,4 @@ export class Diagnostics {
             ...context,
         });
     }
-
-    private add2(
-        severity: DiagnosticType,
-        node: postcss.Node,
-        message: string,
-        options: DiagnosticOptions = {}
-    ) {
-        this.reports.push({
-            code: 'x',
-            filePath: '',
-            message,
-            node,
-            severity,
-            options,
-        });
-    }
-
-    public error(node: postcss.Node, message: string, options?: DiagnosticOptions) {
-        this.add2('error', node, message, options);
-    }
-    public warn(node: postcss.Node, message: string, options?: DiagnosticOptions) {
-        this.add2('warning', node, message, options);
-    }
-    public info(node: postcss.Node, message: string, options?: DiagnosticOptions) {
-        this.add2('info', node, message, options);
-    }
 }
