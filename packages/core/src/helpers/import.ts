@@ -87,16 +87,24 @@ export const parseImportMessages: DiagnosticsBank = {
     },
 };
 
-export const ensureImportsMessages = {
+export const ensureImportsMessages: DiagnosticsBank = {
     ATTEMPT_OVERRIDE_SYMBOL(
         kind: 'default' | 'named' | 'keyframes',
         origin: string,
         override: string
     ) {
-        return `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`;
+        return {
+            code: '16001',
+            message: `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`,
+            severity: 'error',
+        };
     },
     PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE() {
-        return `Attempt to insert new a import in newImport "none" mode`;
+        return {
+            code: '16002',
+            message: `Attempt to insert new a import in newImport "none" mode`,
+            severity: 'error',
+        };
     },
 };
 
@@ -184,9 +192,9 @@ function createImportPatches(
     }
     if (newImport === 'none') {
         if (handled.size !== importPatches.length) {
-            diagnostics.error(
-                ast,
-                ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
+            diagnostics.report(
+                ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE(),
+                { node: ast }
             );
         }
         return patches;
@@ -500,15 +508,17 @@ function processImports(
                     if (currentSymbol === symbol) {
                         continue;
                     } else if (currentSymbol) {
-                        diagnostics.error(
-                            imported.rule,
+                        diagnostics.report(
                             ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
                                 op,
                                 currentSymbol === asName
                                     ? currentSymbol
                                     : `${currentSymbol} as ${asName}`,
                                 symbol === asName ? symbol : `${symbol} as ${asName}`
-                            )
+                            ),
+                            {
+                                node: imported.rule,
+                            }
                         );
                     } else {
                         imported[op][asName] = symbol;
@@ -520,13 +530,15 @@ function processImports(
                 if (!imported.defaultExport) {
                     imported.defaultExport = patch.defaultExport;
                 } else if (imported.defaultExport !== patch.defaultExport) {
-                    diagnostics.error(
-                        imported.rule,
+                    diagnostics.report(
                         ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
                             'default',
                             imported.defaultExport,
                             patch.defaultExport
-                        )
+                        ),
+                        {
+                            node: imported.rule,
+                        }
                     );
                 }
             }

@@ -40,6 +40,7 @@ describe(`helpers/import`, () => {
                 expect(diag.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diag.reports[0].message).to.equal(
                     ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
+                        .message
                 );
                 expect(root.nodes, 'no imports added').to.have.lengthOf(0);
             });
@@ -465,7 +466,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import Test from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y')
+                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y').message
                 );
             });
             it('should report collision diagnostics for named and not patch', () => {
@@ -481,7 +482,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y')
+                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y').message
                 );
             });
             it('should report collision diagnostics for named "as" with "as" (no patch)', () => {
@@ -498,6 +499,7 @@ describe(`helpers/import`, () => {
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
                     ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'X as Y')
+                        .message
                 );
             });
             it('should report collision diagnostics for named "as" (no patch)', () => {
@@ -513,7 +515,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y')
+                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y').message
                 );
             });
         });
