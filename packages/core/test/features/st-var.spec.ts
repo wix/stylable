@@ -1593,8 +1593,8 @@ describe(`features/st-var`, () => {
                     diagnostics: {
                         reports: [
                             {
-                                message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
-                                severity: 'warning',
+                                message: functionWarnings.UNKNOWN_FORMATTER('invalid-func').message,
+                                severity: 'error',
                             },
                         ],
                     },
