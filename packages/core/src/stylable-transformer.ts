@@ -24,6 +24,7 @@ import {
     STSymbol,
     STImport,
     STGlobal,
+    STScope,
     STVar,
     CSSClass,
     CSSType,
@@ -40,6 +41,7 @@ import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
+import { expandCustomSelectors } from './stylable-utils';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -160,6 +162,7 @@ export class StylableTransformer {
         mixinTransform = false,
         topNestClassName = ``
     ) {
+        prepareAST(meta, ast);
         const prevStVarOverride = this.evaluator.stVarOverride;
         this.evaluator.stVarOverride = stVarOverride;
         const transformContext = {
@@ -788,5 +791,35 @@ export class ScopeContext {
         ctx.additionalSelectors = [];
 
         return ctx;
+    }
+}
+
+/**
+ * in the process of moving transformations that shouldn't be in the analyzer.
+ * all changes were moved here to be called at the beginning of the transformer,
+ * and should be inlined in the process in the future.
+ */
+function prepareAST(meta: StylableMeta, ast: postcss.Root) {
+    const toRemove: Array<postcss.Node | (() => void)> = [];
+    ast.walk((node) => {
+        const input = { node, toRemove };
+        // namespace
+        if (node.type === 'atrule' && node.name === `namespace`) {
+            toRemove.push(node);
+        }
+        // custom selectors
+        if (node.type === 'rule') {
+            expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
+        } else if (node.type === 'atrule' && node.name === 'custom-selector') {
+            toRemove.push(node);
+        }
+        // extracted features
+        STImport.hooks.prepareAST(input);
+        STScope.hooks.prepareAST(input);
+        STVar.hooks.prepareAST(input);
+        CSSCustomProperty.hooks.prepareAST(input);
+    });
+    for (const removeOrNode of toRemove) {
+        typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
     }
 }

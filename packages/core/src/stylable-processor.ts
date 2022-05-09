@@ -22,7 +22,7 @@ import {
     CSSType,
     CSSKeyframes,
 } from './features';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
     walkSelector,
@@ -138,8 +138,6 @@ export class StylableProcessor implements FeatureContext {
         });
 
         STSymbol.reportRedeclare(this);
-
-        prepareAST(this.meta, root);
 
         return this.meta;
     }
@@ -468,29 +466,4 @@ export class StylableProcessor implements FeatureContext {
 
 export function processNamespace(namespace: string, source: string) {
     return namespace + murmurhash3_32_gc(source); // .toString(36);
-}
-
-export function prepareAST(meta: StylableMeta, ast: postcss.Root) {
-    const toRemove: Array<postcss.Node | (() => void)> = [];
-    ast.walk((node) => {
-        const input = { node, toRemove };
-        // namespace
-        if (node.type === 'atrule' && node.name === `namespace`) {
-            toRemove.push(node);
-        }
-        // custom selectors
-        if (node.type === 'rule') {
-            expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
-        } else if (node.type === 'atrule' && node.name === 'custom-selector') {
-            toRemove.push(node);
-        }
-        // extracted features
-        STImport.hooks.prepareAST(input);
-        STScope.hooks.prepareAST(input);
-        STVar.hooks.prepareAST(input);
-        CSSCustomProperty.hooks.prepareAST(input);
-    });
-    for (const removeOrNode of toRemove) {
-        typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
-    }
 }

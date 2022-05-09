@@ -329,7 +329,8 @@ function createMixinRootFromCSSResolve(
         resolvedClass.meta.ast,
         (resolvedClass.symbol._kind === 'class' ? '.' : '') + resolvedClass.symbol.name,
         undefined,
-        isRootMixin
+        isRootMixin,
+        meta.customSelectors
     );
 
     const namedArgs = mixDef.mixin.options as Record<string, string>;

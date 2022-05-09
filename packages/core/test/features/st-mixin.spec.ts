@@ -1482,6 +1482,65 @@ describe(`features/st-mixin`, () => {
             shouldReportNoDiagnostics(meta);
         });
     });
+    describe(`st-custom-selector`, () => {
+        it(`should mix class through a custom selector`, () => {
+            const { sheets } = testStylableCore(`
+                @custom-selector :--x .x, .not-x;
+
+                :--x {
+                    color: green;
+                }
+
+                /* @rule(inline) .entry__a { color: green } */
+                .a {
+                    -st-mixin: x;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it(`should mix class through a custom selector`, () => {
+            // ToDo: fix wrongly reported diagnostic: unknown pseudo-state "--a"
+            testStylableCore(`
+                @custom-selector :--a .a;
+                @custom-selector :--b .b:--a;
+
+                .mix:--b {
+                    color: green;
+                }
+
+                /* @rule(deep)[1] .entry__c.entry__b.entry__a { color: green } */
+                .c {
+                    -st-mixin: mix;
+                }
+            `);
+
+            // const { meta } = sheets['/entry.st.css'];
+
+            // shouldReportNoDiagnostics(meta);
+        });
+        it.skip(`should attempt to correct compound order`, () => {
+            // ToDo: fix compound selector ordering
+            const { sheets } = testStylableCore(`
+                @custom-selector :--div div;
+
+                .mix:--div {
+                    color: green;
+                }
+
+                /* @rule(fix composed)[1] div.entry__a { color: green } */
+                .a {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
     describe(`higher-level feature integrations`, () => {
         // ToDo: move to their higher level feature spec when created
         describe(`css-asset`, () => {
