@@ -4,6 +4,7 @@ import type { Position } from 'postcss';
 import { Diagnostics, DiagnosticType, StylableMeta, StylableResults } from '@stylable/core';
 import { safeParse, StylableProcessor } from '@stylable/core/dist/index-internal';
 import { Config, generateStylableResult } from './generate-test-util';
+import type { DiagnosticsBank } from '@stylable/core/src/diagnostics';
 
 export interface Diagnostic {
     severity?: DiagnosticType;
@@ -336,3 +337,17 @@ export function shouldReportNoDiagnostics(meta: StylableMeta, checkTransformDiag
         ).to.equal(0);
     }
 }
+
+type StringDiagnosticsBank = Record<string, (...args: any[]) => string>;
+
+export const diagnosticBankReportToStrings = (diags: DiagnosticsBank) => {
+    const cleaned: StringDiagnosticsBank = {};
+
+    for (const [diagName, diagFunc] of Object.entries(diags)) {
+        cleaned[diagName] = (...args: any[]) => {
+            return diagFunc(...args).message;
+        };
+    }
+
+    return cleaned;
+};
