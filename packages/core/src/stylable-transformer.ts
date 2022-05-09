@@ -654,9 +654,19 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         );
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
-        for (const diag of ruleReports) {
-            diag.word = diag.word || scope.params;
-            transformer.diagnostics.reports.push(diag);
+        for (const { code, message, severity, filePath, word } of ruleReports) {
+            transformer.diagnostics.report(
+                {
+                    code,
+                    message,
+                    severity,
+                },
+                {
+                    node: scope,
+                    word: word || scope.params,
+                    filePath,
+                }
+            );
         }
     }
 

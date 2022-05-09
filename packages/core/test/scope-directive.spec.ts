@@ -513,7 +513,7 @@ describe('@st-scope', () => {
                 {
                     message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal(
@@ -539,12 +539,12 @@ describe('@st-scope', () => {
                 {
                     message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
                 {
                     message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                     skipLocationCheck: true,
                 },
             ]);
@@ -571,7 +571,7 @@ describe('@st-scope', () => {
                 {
                     message: processorStringDiagnostics.MISSING_SCOPING_PARAM(),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');

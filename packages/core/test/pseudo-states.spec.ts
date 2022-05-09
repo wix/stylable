@@ -2070,7 +2070,7 @@ describe('pseudo-states', () => {
                 {
                     message: stateStringDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
 
@@ -2099,7 +2099,7 @@ describe('pseudo-states', () => {
                 {
                     message: stateStringDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
 

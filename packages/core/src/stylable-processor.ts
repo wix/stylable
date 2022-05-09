@@ -382,7 +382,7 @@ export class StylableProcessor implements FeatureContext {
             } else if (node.type === `id`) {
                 if (node.nodes) {
                     this.diagnostics.report(
-                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `id`),
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
                         {
                             filePath: this.meta.source,
                             node: rule,
@@ -394,7 +394,7 @@ export class StylableProcessor implements FeatureContext {
                 if (node.nodes) {
                     this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
-                            `.` + node.value,
+                            `[${node.value}]`,
                             `attribute`
                         ),
                         {
@@ -407,7 +407,7 @@ export class StylableProcessor implements FeatureContext {
             } else if (node.type === `nesting`) {
                 if (node.nodes) {
                     this.diagnostics.report(
-                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `nesting`),
+                        generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
                         {
                             filePath: this.meta.source,
                             node: rule,

@@ -11,8 +11,11 @@ import {
 import { Diagnostics } from '@stylable/core/dist/diagnostics';
 import { diagnosticBankReportToStrings, testStylableCore } from '@stylable/core-test-kit';
 import * as postcss from 'postcss';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiSubset from 'chai-subset';
 import { expectType, TypeEqual } from 'ts-expect';
+
+chai.use(chaiSubset);
 
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
 
