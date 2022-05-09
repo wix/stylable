@@ -3,7 +3,7 @@ import type { Diagnostics } from '../diagnostics';
 import { parseSelectorWithCache } from './selector';
 import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver } from '../stylable-resolver';
-import { validateStateArgument } from '../pseudo-states';
+import { validateStateArgument, stateDiagnostics } from '../pseudo-states';
 import { CSSClass } from '../features';
 
 export function validateRuleStateDefinition(
@@ -38,14 +38,19 @@ export function validateRuleStateDefinition(
                             !!state.defaultValue
                         );
                         if (errors) {
-                            errors.unshift(
-                                `pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`
-                            );
                             rule.walkDecls((decl) => {
                                 if (decl.prop === `-st-states`) {
-                                    diagnostics.warn(decl, errors.join('\n'), {
-                                        word: decl.value,
-                                    });
+                                    diagnostics.report(
+                                        stateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
+                                            stateName,
+                                            state.defaultValue,
+                                            errors
+                                        ),
+                                        {
+                                            node: decl,
+                                            options: { word: decl.value },
+                                        }
+                                    );
                                     return false;
                                 }
                                 return;

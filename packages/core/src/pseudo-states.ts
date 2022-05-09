@@ -18,7 +18,7 @@ export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
 export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
-export const stateErrors: DiagnosticsBank = {
+export const stateDiagnostics: DiagnosticsBank = {
     UNKNOWN_STATE_USAGE: (name: string) => {
         return {
             code: '08001',
@@ -89,6 +89,15 @@ export const stateErrors: DiagnosticsBank = {
             severity: 'error',
         };
     },
+    DEFAULT_PARAM_FAILS_VALIDATION(stateName: string, defaultValue: string, errors: string[]) {
+        return {
+            code: '08010',
+            message: `pseudo-state "${stateName}" default value "${defaultValue}" failed validation:\n${errors.join(
+                '\n'
+            )}`,
+            severity: 'error',
+        };
+    },
 };
 
 // PROCESS
@@ -106,12 +115,12 @@ export function processPseudoStates(
         const [stateDefinition, ...stateDefault] = workingState;
 
         if (stateDefinition.value.startsWith('-')) {
-            diagnostics.report(stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
+            diagnostics.report(stateDiagnostics.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
                 node: decl,
                 options: { word: stateDefinition.value },
             });
         } else if (reservedFunctionalPseudoClasses.includes(stateDefinition.value)) {
-            diagnostics.report(stateErrors.RESERVED_NATIVE_STATE(stateDefinition.value), {
+            diagnostics.report(stateDiagnostics.RESERVED_NATIVE_STATE(stateDefinition.value), {
                 node: decl,
                 options: { word: stateDefinition.value },
             });
@@ -140,7 +149,7 @@ function resolveStateType(
     if (stateDefinition.type === 'function' && stateDefinition.nodes.length === 0) {
         resolveBooleanState(mappedStates, stateDefinition);
 
-        diagnostics.report(stateErrors.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
+        diagnostics.report(stateDiagnostics.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
             node: decl,
             options: { word: decl.value },
         });
@@ -150,7 +159,10 @@ function resolveStateType(
 
     if (stateDefinition.nodes.length > 1) {
         diagnostics.report(
-            stateErrors.TOO_MANY_STATE_TYPES(stateDefinition.value, listOptions(stateDefinition)),
+            stateDiagnostics.TOO_MANY_STATE_TYPES(
+                stateDefinition.value,
+                listOptions(stateDefinition)
+            ),
             {
                 node: decl,
                 options: { word: decl.value },
@@ -180,10 +192,13 @@ function resolveStateType(
     } else if (stateType.type in systemValidators) {
         mappedStates[stateDefinition.value] = stateType;
     } else {
-        diagnostics.report(stateErrors.UNKNOWN_STATE_TYPE(stateDefinition.value, paramType.value), {
-            node: decl,
-            options: { word: paramType.value },
-        });
+        diagnostics.report(
+            stateDiagnostics.UNKNOWN_STATE_TYPE(stateDefinition.value, paramType.value),
+            {
+                node: decl,
+                options: { word: paramType.value },
+            }
+        );
     }
 }
 
@@ -202,7 +217,7 @@ function resolveArguments(
             const args = listOptions(validator);
             if (args.length > 1) {
                 diagnostics.report(
-                    stateErrors.TOO_MANY_ARGS_IN_VALIDATOR(name, validator.value, args),
+                    stateDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(name, validator.value, args),
                     {
                         node: decl,
                         options: { word: decl.value },
@@ -314,7 +329,7 @@ function resolveStateValue(
     );
 
     if (rule && !inputValue && !stateDef.defaultValue) {
-        diagnostics.report(stateErrors.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
+        diagnostics.report(stateDiagnostics.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
             node: rule,
             options: { word: name },
         });
@@ -342,7 +357,11 @@ function resolveStateValue(
 
         if (rule && stateParamOutput.errors) {
             diagnostics.report(
-                stateErrors.STATE_FAILED_VALIDATION(name, actualParam, stateParamOutput.errors),
+                stateDiagnostics.STATE_FAILED_VALIDATION(
+                    name,
+                    actualParam,
+                    stateParamOutput.errors
+                ),
                 {
                     node: rule,
                     options: { word: actualParam },

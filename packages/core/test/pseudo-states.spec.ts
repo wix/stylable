@@ -12,7 +12,7 @@ import {
 } from '@stylable/core-test-kit';
 import { processorDiagnostics, nativePseudoClasses } from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
-import { stateErrors } from '@stylable/core/dist/pseudo-states';
+import { stateDiagnostics } from '@stylable/core/dist/pseudo-states';
 import { CSSType } from '@stylable/core/dist/features';
 
 chai.use(chaiSubset); // move all of these to a central place
@@ -51,7 +51,7 @@ describe('pseudo-states', () => {
                         }`,
                         [
                             {
-                                message: stateErrors.RESERVED_NATIVE_STATE(name).message,
+                                message: stateDiagnostics.RESERVED_NATIVE_STATE(name).message,
                                 file: 'main.css',
                             },
                         ]
@@ -113,7 +113,7 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateErrors.TOO_MANY_STATE_TYPES('state1', [
+                            message: stateDiagnostics.TOO_MANY_STATE_TYPES('state1', [
                                 'string',
                                 'number(x)',
                             ]).message,
@@ -132,7 +132,7 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateErrors.NO_STATE_TYPE_GIVEN('state1').message,
+                            message: stateDiagnostics.NO_STATE_TYPE_GIVEN('state1').message,
                             file: 'main.css',
                         },
                     ]
@@ -148,10 +148,11 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateErrors.TOO_MANY_ARGS_IN_VALIDATOR('state1', 'contains', [
-                                'one',
-                                'two',
-                            ]).message,
+                            message: stateDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(
+                                'state1',
+                                'contains',
+                                ['one', 'two']
+                            ).message,
                             file: 'main.css',
                         },
                     ]
@@ -167,7 +168,8 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateErrors.UNKNOWN_STATE_TYPE('state1', 'unknown').message,
+                            message: stateDiagnostics.UNKNOWN_STATE_TYPE('state1', 'unknown')
+                                .message,
                             file: 'main.css',
                         },
                     ]
@@ -2062,7 +2064,7 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string').message,
+                    message: stateDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string').message,
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
@@ -2091,7 +2093,7 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string').message,
+                    message: stateDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string').message,
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
@@ -2115,7 +2117,7 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateErrors.UNKNOWN_STATE_USAGE('unknownState').message,
+                    message: stateDiagnostics.UNKNOWN_STATE_USAGE('unknownState').message,
                     file: '/entry.st.css',
                 },
             ]);
@@ -2184,7 +2186,7 @@ describe('pseudo-states', () => {
             `,
                 [
                     {
-                        message: stateErrors.STATE_STARTS_WITH_HYPHEN('-someState').message,
+                        message: stateDiagnostics.STATE_STARTS_WITH_HYPHEN('-someState').message,
                         file: 'main.css',
                         severity: 'error',
                     },

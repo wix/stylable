@@ -6,7 +6,7 @@ import type { FileProcessor } from './cached-process-file';
 import type { Diagnostics, DiagnosticsBank } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
-import { setStateToNode, stateErrors } from './pseudo-states';
+import { setStateToNode, stateDiagnostics } from './pseudo-states';
 import { parseSelectorWithCache, stringifySelector } from './helpers/selector';
 import {
     SelectorNode,
@@ -526,7 +526,7 @@ export class StylableTransformer {
                 !isVendorPrefixed(node.value) &&
                 !this.isDuplicateStScopeDiagnostic(context)
             ) {
-                this.diagnostics.report(stateErrors.UNKNOWN_STATE_USAGE(node.value), {
+                this.diagnostics.report(stateDiagnostics.UNKNOWN_STATE_USAGE(node.value), {
                     node: context.rule,
                     options: { word: node.value },
                 });
@@ -656,14 +656,12 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         );
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
-        ruleReports.forEach(({ message, severity, options: { word } = {} }) => {
-            if (severity === 'error') {
-                transformer.diagnostics.error(scope, message, { word: word || scope.params });
-            } else {
-                transformer.diagnostics.warn(scope, message, { word: word || scope.params });
-            }
-        });
+        for (const diag of ruleReports) {
+            diag.options = { word: diag.options?.word || scope.params };
+            transformer.diagnostics.reports.push(diag);
+        }
     }
+
     return transformedScopes;
 }
 
