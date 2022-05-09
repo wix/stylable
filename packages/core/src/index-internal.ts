@@ -5,7 +5,7 @@ export {
     postProcessor,
     replaceValueHook,
     StylableExports,
-    transformerWarnings,
+    transformerDiagnostics,
     ResolvedElement,
 } from './stylable-transformer';
 export type { MappedStates } from './features';

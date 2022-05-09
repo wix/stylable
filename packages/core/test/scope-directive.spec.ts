@@ -7,7 +7,7 @@ import {
     processSource,
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
-import { processorDiagnostics, transformerWarnings } from '@stylable/core/dist/index-internal';
+import { processorDiagnostics, transformerDiagnostics } from '@stylable/core/dist/index-internal';
 import { SRule, getRuleScopeSelector } from '@stylable/core/dist/deprecated/postcss-ast-extension';
 
 use(flatMatch);
@@ -507,7 +507,7 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
+                    message: transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
@@ -533,12 +533,12 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
+                    message: transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
+                    message: transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart').message,
                     file: '/entry.st.css',
                     severity: 'warning',
                     skipLocationCheck: true,

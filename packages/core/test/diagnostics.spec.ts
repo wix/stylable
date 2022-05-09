@@ -6,7 +6,7 @@ import {
 } from '@stylable/core-test-kit';
 import {
     processorDiagnostics,
-    transformerWarnings,
+    transformerDiagnostics,
     nativePseudoElements,
 } from '@stylable/core/dist/index-internal';
 import { CSSClass, CSSType } from '@stylable/core/dist/features';
@@ -232,7 +232,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectTransformDiagnostics(config, [
                         {
-                            message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn').message,
+                            message: transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT('myBtn').message,
                             file: '/main.css',
                         },
                     ]);

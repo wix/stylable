@@ -94,7 +94,7 @@ export interface TransformerOptions {
     resolverCache?: StylableResolverCache;
 }
 
-export const transformerWarnings: DiagnosticsBank = {
+export const transformerDiagnostics: DiagnosticsBank = {
     UNKNOWN_PSEUDO_ELEMENT(name: string) {
         return {
             code: '12001',
@@ -463,7 +463,7 @@ export class StylableTransformer {
                     !this.isDuplicateStScopeDiagnostic(context)
                 ) {
                     this.diagnostics.report(
-                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(node.value),
+                        transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT(node.value),
                         {
                             node: context.rule,
                             options: {
