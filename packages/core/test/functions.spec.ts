@@ -523,7 +523,10 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
 
                 expectTransformDiagnostics(config, [
-                    { message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' },
+                    {
+                        message: functionWarnings.UNKNOWN_FORMATTER(key).message,
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -560,7 +563,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         message: functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
                             'fail(a, red, c)',
                             'FAIL FAIL FAIL'
-                        ),
+                        ).message,
                         file: '/main.st.css',
                     },
                 ]);
