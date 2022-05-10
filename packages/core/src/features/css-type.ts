@@ -33,18 +33,8 @@ export const hooks = createFeature<{
     SELECTOR: Type;
     IMMUTABLE_SELECTOR: ImmutableType;
 }>({
-    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes, parents] }): void {
-        /**
-         * intent to deprecate: currently `value(param)` can be used
-         * as a custom state value. Unless there is a reasonable
-         * use case, this should be removed.
-         */
-        if (
-            node.nodes &&
-            (parents.length < 2 ||
-                parents[parents.length - 2].type !== `pseudo_class` ||
-                node.value !== `value`)
-        ) {
+    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes] }): void {
+        if (node.nodes) {
             // error on functional type
             context.diagnostics.report(
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
@@ -111,7 +101,7 @@ export function addType(context: FeatureContext, name: string, rule?: postcss.Ru
 export function validateTypeScoping({
     context,
     locallyScoped,
-    inStScope,
+    reportUnscoped,
     node,
     nodes,
     index,
@@ -119,18 +109,20 @@ export function validateTypeScoping({
 }: {
     context: FeatureContext;
     locallyScoped: boolean;
-    inStScope: boolean;
+    reportUnscoped: boolean;
     node: ImmutableType;
     nodes: ImmutableSelectorNode[];
     index: number;
     rule: postcss.Rule;
 }): boolean {
-    if (locallyScoped === false && !inStScope) {
+    if (locallyScoped === false) {
         if (CSSClass.checkForScopedNodeAfter(context, rule, nodes, index) === false) {
-            context.diagnostics.report(diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
-                node: rule,
-                word: node.value,
-            });
+            if (reportUnscoped) {
+                context.diagnostics.report(diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+                    node: rule,
+                    word: node.value,
+                });
+            }
             return false;
         } else {
             locallyScoped = true;

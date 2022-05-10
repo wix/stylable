@@ -710,6 +710,23 @@ describe(`features/css-custom-property`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it(`should NOT define property as var value (change in v5)`, () => {
+            // ToDo: in the future property should be able to be defined in var value
+            const { sheets } = testStylableCore(`
+                :vars {
+                    myVar: var(--color);
+                }
+
+                .root {
+                    /* @decl prop: var(--color) */
+                    prop: value(myVar);
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
     });
     describe(`st-formatter`, () => {
         it(`should resolve a value to be set`, () => {

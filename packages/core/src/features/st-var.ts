@@ -115,7 +115,6 @@ export const hooks = createFeature<{
             } else {
                 collectVarSymbols(context, rule);
             }
-            rule.remove();
             // stop further walk into `:vars {}`
             return walkSelector.stopAll;
         } else {
@@ -124,6 +123,11 @@ export const hooks = createFeature<{
             });
         }
         return;
+    },
+    prepareAST({ node, toRemove }) {
+        if (node.type === 'rule' && node.selector === ':vars') {
+            toRemove.push(node);
+        }
     },
     transformResolve({ context }) {
         // Resolve local vars

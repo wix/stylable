@@ -8,6 +8,8 @@ export type { ImportSymbol, Imported } from './st-import';
 
 export * as STGlobal from './st-global';
 
+export * as STScope from './st-scope';
+
 export * as STVar from './st-var';
 export type { VarSymbol, ComputedStVar, FlatComputedStVar } from './st-var';
 

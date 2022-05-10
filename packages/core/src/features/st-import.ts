@@ -97,10 +97,7 @@ export const hooks = createFeature<{
         const dirContext = path.dirname(context.meta.source);
         // collect shallow imports
         for (const node of context.meta.ast.nodes) {
-            const isImportDef =
-                (node.type === `atrule` && node.name === `st-import`) ||
-                (node.type === `rule` && node.selector === `:import`);
-            if (!isImportDef) {
+            if (!isImportStatement(node)) {
                 continue;
             }
             const parsedImport =
@@ -120,8 +117,6 @@ export const hooks = createFeature<{
                 node: atRule,
             });
         }
-        // remove `@st-import` at rules - ToDo: move to transformer
-        atRule.remove();
     },
     analyzeSelectorNode({ context, rule, node }) {
         if (node.value !== `import`) {
@@ -139,8 +134,11 @@ export const hooks = createFeature<{
                 node: rule,
             });
         }
-        // remove rules with `:import` selector - ToDo: move to transformer
-        rule.remove();
+    },
+    prepareAST({ node, toRemove }) {
+        if (isImportStatement(node)) {
+            toRemove.push(node);
+        }
     },
     transformInit({ context }) {
         validateImports(context);
@@ -148,6 +146,13 @@ export const hooks = createFeature<{
 });
 
 // API
+
+function isImportStatement(node: postcss.ChildNode): node is postcss.Rule | postcss.AtRule {
+    return (
+        (node.type === `atrule` && node.name === `st-import`) ||
+        (node.type === `rule` && node.selector === `:import`)
+    );
+}
 
 export function getImportStatements({ data }: StylableMeta): ReadonlyArray<Imported> {
     const state = plugableRecord.getUnsafe(data, dataKey);
