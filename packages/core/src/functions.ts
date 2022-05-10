@@ -66,7 +66,7 @@ export class StylableEvaluator {
 
 // old API
 
-export const functionWarnings = {
+export const functionDiagnostics = {
     FAIL_TO_EXECUTE_FORMATTER(resolvedValue: string, message: string): DiagnosticBase {
         return {
             code: '15001',
@@ -192,7 +192,7 @@ export function processDeclarationValue(
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                     if (diagnostics && node) {
                         diagnostics.report(
-                            functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
+                            functionDiagnostics.FAIL_TO_EXECUTE_FORMATTER(
                                 parsedNode.resolvedValue,
                                 (error as Error)?.message
                             ),
@@ -230,7 +230,7 @@ export function processDeclarationValue(
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
             } else if (node) {
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                diagnostics.report(functionWarnings.UNKNOWN_FORMATTER(value), {
+                diagnostics.report(functionDiagnostics.UNKNOWN_FORMATTER(value), {
                     node,
                     word: value,
                 });

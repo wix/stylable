@@ -1,6 +1,6 @@
 import chaiSubset from 'chai-subset';
 import { STSymbol, STVar } from '@stylable/core/dist/features';
-import { functionWarnings } from '@stylable/core/dist/functions';
+import { functionDiagnostics } from '@stylable/core/dist/functions';
 import { stTypes, box } from '@stylable/core/dist/custom-values';
 import {
     testStylableCore,
@@ -14,7 +14,7 @@ chai.use(chaiSubset);
 
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
 const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
-const functionsDiagnostics = diagnosticBankReportToStrings(functionWarnings);
+const functionStringDiagnostics = diagnosticBankReportToStrings(functionDiagnostics);
 
 describe(`features/st-var`, () => {
     const stBorderDefinitionMock = `
@@ -1591,7 +1591,7 @@ describe(`features/st-var`, () => {
                     diagnostics: {
                         reports: [
                             {
-                                message: functionsDiagnostics.UNKNOWN_FORMATTER('invalid-func'),
+                                message: functionStringDiagnostics.UNKNOWN_FORMATTER('invalid-func'),
                                 severity: 'error',
                             },
                         ],
