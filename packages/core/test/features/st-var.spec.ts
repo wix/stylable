@@ -1591,7 +1591,8 @@ describe(`features/st-var`, () => {
                     diagnostics: {
                         reports: [
                             {
-                                message: functionStringDiagnostics.UNKNOWN_FORMATTER('invalid-func'),
+                                message:
+                                    functionStringDiagnostics.UNKNOWN_FORMATTER('invalid-func'),
                                 severity: 'error',
                             },
                         ],
