@@ -9,7 +9,7 @@ import { namespace } from '../helpers/namespace';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import type { DiagnosticBase } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface KeyframesSymbol {
     _kind: 'keyframes';
@@ -56,41 +56,32 @@ export const reservedKeyFrames = [
 ];
 
 export const diagnostics = {
-    ILLEGAL_KEYFRAMES_NESTING(): DiagnosticBase {
-        return {
-            code: '02001',
-            message: `illegal nested "@keyframes"`,
-            severity: 'error',
-        };
-    },
-    MISSING_KEYFRAMES_NAME(): DiagnosticBase {
-        return {
-            code: '02002',
-            message: '"@keyframes" missing parameter',
-            severity: 'error',
-        };
-    },
-    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(): DiagnosticBase {
-        return {
-            code: '02003',
-            message: `"@keyframes" missing parameter inside "${GLOBAL_FUNC}()"`,
-            severity: 'error',
-        };
-    },
-    KEYFRAME_NAME_RESERVED(name: string): DiagnosticBase {
-        return {
-            code: '02004',
-            message: `keyframes "${name}" is reserved`,
-            severity: 'error',
-        };
-    },
-    UNKNOWN_IMPORTED_KEYFRAMES(name: string, path: string): DiagnosticBase {
-        return {
-            code: '02005',
-            message: `cannot resolve imported keyframes "${name}" from stylesheet "${path}"`,
-            severity: 'error',
-        };
-    },
+    ILLEGAL_KEYFRAMES_NESTING: createDiagnosticReporter(
+        '02001',
+        'error',
+        () => `illegal nested "@keyframes"`
+    ),
+    MISSING_KEYFRAMES_NAME: createDiagnosticReporter(
+        '02002',
+        'error',
+        () => '"@keyframes" missing parameter'
+    ),
+    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL: createDiagnosticReporter(
+        '02003',
+        'error',
+        () => `"@keyframes" missing parameter inside "${GLOBAL_FUNC}()"`
+    ),
+    KEYFRAME_NAME_RESERVED: createDiagnosticReporter(
+        '02004',
+        'error',
+        (name: string) => `keyframes "${name}" is reserved`
+    ),
+    UNKNOWN_IMPORTED_KEYFRAMES: createDiagnosticReporter(
+        '02005',
+        'error',
+        (name: string, path: string) =>
+            `cannot resolve imported keyframes "${name}" from stylesheet "${path}"`
+    ),
 };
 
 const dataKey = plugableRecord.key<{

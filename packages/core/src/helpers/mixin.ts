@@ -1,4 +1,4 @@
-import type { DiagnosticBase, Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, DiagnosticBase, Diagnostics } from '../diagnostics';
 import { strategies, valueDiagnostics } from './value';
 import type { MixinValue } from '../features';
 import type * as postcss from 'postcss';
@@ -6,13 +6,11 @@ import postcssValueParser from 'postcss-value-parser';
 
 export const mixinHelperDiagnostics = {
     INVALID_NAMED_PARAMS: valueDiagnostics.INVALID_NAMED_PARAMS,
-    VALUE_CANNOT_BE_STRING(): DiagnosticBase {
-        return {
-            code: '10008',
-            message: 'value can not be a string (remove quotes?)',
-            severity: 'error',
-        };
-    },
+    VALUE_CANNOT_BE_STRING: createDiagnosticReporter(
+        '10008',
+        'error',
+        () => 'value can not be a string (remove quotes?)'
+    ),
 };
 
 export function parseStMixin(

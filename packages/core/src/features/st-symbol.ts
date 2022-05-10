@@ -8,7 +8,7 @@ import type { KeyframesSymbol } from './css-keyframes';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
-import type { DiagnosticBase } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics';
 
 // SYMBOLS DEFINITION
 
@@ -90,20 +90,16 @@ interface State {
 const dataKey = plugableRecord.key<State>('mappedSymbols');
 
 export const diagnostics = {
-    REDECLARE_SYMBOL(name: string): DiagnosticBase {
-        return {
-            code: '06001',
-            message: `redeclare symbol "${name}"`,
-            severity: 'warning',
-        };
-    },
-    REDECLARE_ROOT(): DiagnosticBase {
-        return {
-            code: '06002',
-            message: `root is used for the stylesheet and cannot be overridden`,
-            severity: 'error',
-        };
-    },
+    REDECLARE_SYMBOL: createDiagnosticReporter(
+        '06001',
+        'warning',
+        (name: string) => `redeclare symbol "${name}"`
+    ),
+    REDECLARE_ROOT: createDiagnosticReporter(
+        '06002',
+        'error',
+        () => `root is used for the stylesheet and cannot be overridden`
+    ),
 };
 
 // HOOKS

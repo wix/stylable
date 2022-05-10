@@ -1,6 +1,6 @@
 import path from 'path';
 import * as postcss from 'postcss';
-import { DiagnosticBase, Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { murmurhash3_32_gc } from './murmurhash';
 import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
@@ -55,84 +55,59 @@ const stValuesMap = {
 } as const;
 
 export const processorDiagnostics = {
-    ROOT_AFTER_SPACING(): DiagnosticBase {
-        return {
-            code: '11001',
-            message:
-                '".root" class cannot be used after native elements or selectors external to the stylesheet',
-            severity: 'warning',
-        };
-    },
-    STATE_DEFINITION_IN_ELEMENT(): DiagnosticBase {
-        return {
-            code: '11002',
-            message: 'cannot define pseudo states inside a type selector',
-            severity: 'error',
-        };
-    },
-    STATE_DEFINITION_IN_COMPLEX(): DiagnosticBase {
-        return {
-            code: '11003',
-            message: 'cannot define pseudo states inside complex selectors',
-            severity: 'error',
-        };
-    },
-    CANNOT_RESOLVE_EXTEND(name: string): DiagnosticBase {
-        return {
-            code: '11004',
-            message: `cannot resolve '-st-extends' type for '${name}'`,
-            severity: 'error',
-        };
-    },
-    CANNOT_EXTEND_IN_COMPLEX(): DiagnosticBase {
-        return {
-            code: '11005',
-            message: `cannot define "-st-extends" inside a complex selector`,
-            severity: 'error',
-        };
-    },
-    OVERRIDE_TYPED_RULE(key: string, name: string): DiagnosticBase {
-        return {
-            code: '11006',
-            message: `override "${key}" on typed rule "${name}"`,
-            severity: 'warning',
-        };
-    },
-    INVALID_NAMESPACE_DEF(): DiagnosticBase {
-        return {
-            code: '11007',
-            message: 'invalid @namespace',
-            severity: 'error',
-        };
-    },
-    EMPTY_NAMESPACE_DEF(): DiagnosticBase {
-        return {
-            code: '11008',
-            message: '@namespace must contain at least one character or digit',
-            severity: 'error',
-        };
-    },
-    MISSING_SCOPING_PARAM(): DiagnosticBase {
-        return {
-            code: '11009',
-            message: '"@st-scope" missing scoping selector parameter',
-            severity: 'error',
-        };
-    },
-    INVALID_NAMESPACE_REFERENCE(): DiagnosticBase {
-        return {
-            code: '11010',
-            message: 'st-namespace-reference dose not have any value',
-            severity: 'error',
-        };
-    },
-    INVALID_NESTING(child: string, parent: string): DiagnosticBase {
-        return {
-            code: '11011',
-            message: `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`,
-            severity: 'error',
-        };
-    },
+    ROOT_AFTER_SPACING: createDiagnosticReporter(
+        '11001',
+        'warning',
+        () =>
+            '".root" class cannot be used after native elements or selectors external to the stylesheet'
+    ),
+    STATE_DEFINITION_IN_ELEMENT: createDiagnosticReporter(
+        '11002',
+        'error',
+        () => 'cannot define pseudo states inside a type selector'
+    ),
+    STATE_DEFINITION_IN_COMPLEX: createDiagnosticReporter(
+        '11003',
+        'error',
+        () => 'cannot define pseudo states inside complex selectors'
+    ),
+    CANNOT_RESOLVE_EXTEND: createDiagnosticReporter(
+        '11004',
+        'error',
+        (name: string) => `cannot resolve '-st-extends' type for '${name}'`
+    ),
+    CANNOT_EXTEND_IN_COMPLEX: createDiagnosticReporter(
+        '11005',
+        'error',
+        () => `cannot define "-st-extends" inside a complex selector`
+    ),
+    OVERRIDE_TYPED_RULE: createDiagnosticReporter(
+        '11006',
+        'warning',
+        (key: string, name: string) => `override "${key}" on typed rule "${name}"`
+    ),
+    INVALID_NAMESPACE_DEF: createDiagnosticReporter('11007', 'error', () => 'invalid @namespace'),
+    EMPTY_NAMESPACE_DEF: createDiagnosticReporter(
+        '11008',
+        'error',
+        () => '@namespace must contain at least one character or digit'
+    ),
+    MISSING_SCOPING_PARAM: createDiagnosticReporter(
+        '11009',
+        'error',
+        () => '"@st-scope" missing scoping selector parameter'
+    ),
+    INVALID_NAMESPACE_REFERENCE: createDiagnosticReporter(
+        '11010',
+        'error',
+        () => 'st-namespace-reference dose not have any value'
+    ),
+    INVALID_NESTING: createDiagnosticReporter(
+        '11011',
+        'error',
+        (child: string, parent: string) =>
+            `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`
+    ),
 };
 
 export class StylableProcessor implements FeatureContext {

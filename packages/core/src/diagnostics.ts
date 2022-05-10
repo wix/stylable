@@ -31,3 +31,18 @@ export class Diagnostics {
         });
     }
 }
+
+export function createDiagnosticReporter<T extends any[]>(
+    code: string,
+    severity: DiagnosticType,
+    message: (...args: T) => string
+) {
+    const func = (...args: T): DiagnosticBase => {
+        return { code, severity, message: message(...args) };
+    };
+
+    func.code = code;
+    func.severity = severity;
+
+    return func;
+}

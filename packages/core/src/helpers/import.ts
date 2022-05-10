@@ -1,6 +1,6 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
-import { DiagnosticBase, Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, DiagnosticBase, Diagnostics } from '../diagnostics';
 import type { Imported } from '../features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { stripQuotation } from '../helpers/string';
@@ -13,98 +13,71 @@ import postcssValueParser, {
 } from 'postcss-value-parser';
 
 export const parseImportMessages = {
-    ST_IMPORT_STAR(): DiagnosticBase {
-        return {
-            code: '05001',
-            message: '@st-import * is not supported',
-            severity: 'error',
-        };
-    },
-    INVALID_ST_IMPORT_FORMAT(errors: string[]): DiagnosticBase {
-        return {
-            code: '05002',
-            message: `Invalid @st-import format:\n - ${errors.join('\n - ')}`,
-            severity: 'error',
-        };
-    },
+    ST_IMPORT_STAR: createDiagnosticReporter(
+        '05001',
+        'error',
+        () => '@st-import * is not supported'
+    ),
+    INVALID_ST_IMPORT_FORMAT: createDiagnosticReporter(
+        '05002',
+        'error',
+        (errors: string[]) => `Invalid @st-import format:\n - ${errors.join('\n - ')}`
+    ),
 
-    ST_IMPORT_EMPTY_FROM(): DiagnosticBase {
-        return {
-            code: '05003',
-            message: '@st-import must specify a valid "from" string value',
-            severity: 'error',
-        };
-    },
-    EMPTY_IMPORT_FROM(): DiagnosticBase {
-        return {
-            code: '05004',
-            message: '"-st-from" cannot be empty',
-            severity: 'error',
-        };
-    },
-    MULTIPLE_FROM_IN_IMPORT(): DiagnosticBase {
-        return {
-            code: '05005',
-            message: `cannot define multiple "-st-from" declarations in a single import`,
-            severity: 'warning',
-        };
-    },
-    DEFAULT_IMPORT_IS_LOWER_CASE(): DiagnosticBase {
-        return {
-            code: '05006',
-            message: 'Default import of a Stylable stylesheet must start with an upper-case letter',
-            severity: 'warning',
-        };
-    },
-    ILLEGAL_PROP_IN_IMPORT(propName: string): DiagnosticBase {
-        return {
-            code: '05007',
-            message: `"${propName}" css attribute cannot be used inside :import block`,
-            severity: 'warning',
-        };
-    },
-    FROM_PROP_MISSING_IN_IMPORT(): DiagnosticBase {
-        return {
-            code: '05008',
-            message: `"-st-from" is missing in :import block`,
-            severity: 'error',
-        };
-    },
-    INVALID_NAMED_IMPORT_AS(name: string): DiagnosticBase {
-        return {
-            code: '05009',
-            message: `Invalid named import "as" with name "${name}"`,
-            severity: 'error',
-        };
-    },
-    INVALID_NESTED_KEYFRAMES(name: string): DiagnosticBase {
-        return {
-            code: '05010',
-            message: `Invalid nested keyframes import "${name}"`,
-            severity: 'error',
-        };
-    },
+    ST_IMPORT_EMPTY_FROM: createDiagnosticReporter(
+        '05003',
+        'error',
+        () => '@st-import must specify a valid "from" string value'
+    ),
+    EMPTY_IMPORT_FROM: createDiagnosticReporter(
+        '05004',
+        'error',
+        () => '"-st-from" cannot be empty'
+    ),
+    MULTIPLE_FROM_IN_IMPORT: createDiagnosticReporter(
+        '05005',
+        'warning',
+        () => `cannot define multiple "-st-from" declarations in a single import`
+    ),
+    DEFAULT_IMPORT_IS_LOWER_CASE: createDiagnosticReporter(
+        '05006',
+        'warning',
+        () => 'Default import of a Stylable stylesheet must start with an upper-case letter'
+    ),
+    ILLEGAL_PROP_IN_IMPORT: createDiagnosticReporter(
+        '05007',
+        'warning',
+        (propName: string) => `"${propName}" css attribute cannot be used inside :import block`
+    ),
+    FROM_PROP_MISSING_IN_IMPORT: createDiagnosticReporter(
+        '05008',
+        'error',
+        () => `"-st-from" is missing in :import block`
+    ),
+    INVALID_NAMED_IMPORT_AS: createDiagnosticReporter(
+        '05009',
+        'error',
+        (name: string) => `Invalid named import "as" with name "${name}"`
+    ),
+    INVALID_NESTED_KEYFRAMES: createDiagnosticReporter(
+        '05010',
+        'error',
+        (name: string) => `Invalid nested keyframes import "${name}"`
+    ),
 };
 
 export const ensureImportsMessages = {
-    ATTEMPT_OVERRIDE_SYMBOL(
-        kind: 'default' | 'named' | 'keyframes',
-        origin: string,
-        override: string
-    ): DiagnosticBase {
-        return {
-            code: '16001',
-            message: `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`,
-            severity: 'error',
-        };
-    },
-    PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE(): DiagnosticBase {
-        return {
-            code: '16002',
-            message: `Attempt to insert new a import in newImport "none" mode`,
-            severity: 'error',
-        };
-    },
+    ATTEMPT_OVERRIDE_SYMBOL: createDiagnosticReporter(
+        '16001',
+        'error',
+        (kind: 'default' | 'named' | 'keyframes', origin: string, override: string) =>
+            `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`
+    ),
+    PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE: createDiagnosticReporter(
+        '16002',
+        'error',
+        () => `Attempt to insert new a import in newImport "none" mode`
+    ),
 };
 
 export function createAtImportProps(

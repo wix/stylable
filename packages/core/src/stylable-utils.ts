@@ -1,7 +1,7 @@
 import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
-import type { DiagnosticBase, Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import type { ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
@@ -13,13 +13,11 @@ export function isValidDeclaration(decl: postcss.Declaration) {
 }
 
 export const customSelectorDiagnostics = {
-    UNDEFINED_SELECTOR(selector: string): DiagnosticBase {
-        return {
-            code: '18001',
-            message: `The selector '${selector}' is undefined`,
-            severity: 'error',
-        };
-    },
+    UNDEFINED_SELECTOR: createDiagnosticReporter(
+        '18001',
+        'error',
+        (selector: string) => `The selector '${selector}' is undefined`
+    ),
 };
 
 export function expandCustomSelectors(
@@ -56,13 +54,11 @@ function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
 }
 
 export const utilDiagnostics = {
-    INVALID_MERGE_OF(mergeValue: string): DiagnosticBase {
-        return {
-            code: '14001',
-            message: `invalid merge of: \n"${mergeValue}"`,
-            severity: 'error',
-        };
-    },
+    INVALID_MERGE_OF: createDiagnosticReporter(
+        '14001',
+        'error',
+        (mergeValue: string) => `invalid merge of: \n"${mergeValue}"`
+    ),
 };
 
 // ToDo: move to helpers/mixin
@@ -130,13 +126,11 @@ export function mergeRules(
 }
 
 export const sourcePathDiagnostics = {
-    MISSING_SOURCE_FILENAME(): DiagnosticBase {
-        return {
-            code: '17001',
-            message: 'missing source filename',
-            severity: 'error',
-        };
-    },
+    MISSING_SOURCE_FILENAME: createDiagnosticReporter(
+        '17001',
+        'error',
+        () => 'missing source filename'
+    ),
 };
 
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {

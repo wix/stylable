@@ -18,7 +18,7 @@ import type {
     ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import type { DiagnosticBase } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
@@ -29,55 +29,42 @@ export interface ClassSymbol extends StylableDirectives {
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
-    UNSCOPED_CLASS(name: string): DiagnosticBase {
-        return {
-            code: '00002',
-            message: `unscoped class "${name}" will affect all elements of the same type in the document`,
-            severity: 'warning',
-        };
-    },
-    EMPTY_ST_GLOBAL(): DiagnosticBase {
-        return {
-            code: '00003',
-            message: `-st-global must contain a valid selector`,
-            severity: 'error',
-        };
-    },
-    UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL(): DiagnosticBase {
-        return {
-            code: '00004',
-            message: `unsupported multi selector in -st-global`,
-            severity: 'error',
-        };
-    },
-    IMPORT_ISNT_EXTENDABLE(): DiagnosticBase {
-        return {
-            code: '00005',
-            message: 'import is not extendable',
-            severity: 'error',
-        };
-    },
-    CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string): DiagnosticBase {
-        return {
-            code: '00006',
-            message: `cannot extend unknown symbol "${name}"`,
-            severity: 'error',
-        };
-    },
-    CANNOT_EXTEND_JS(): DiagnosticBase {
-        return {
-            code: '00007',
-            message: 'JS import is not extendable',
-            severity: 'error',
-        };
-    },
-    UNKNOWN_IMPORT_ALIAS(name: string): DiagnosticBase {
-        return {
-            code: '00008',
-            message: `cannot use alias for unknown import "${name}"`,
-            severity: 'error',
-        };
-    },
+    UNSCOPED_CLASS: createDiagnosticReporter(
+        '00002',
+        'warning',
+        (name: string) =>
+            `unscoped class "${name}" will affect all elements of the same type in the document`
+    ),
+    EMPTY_ST_GLOBAL: createDiagnosticReporter(
+        '00003',
+        'error',
+        () => `-st-global must contain a valid selector`
+    ),
+    UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL: createDiagnosticReporter(
+        '00004',
+        'error',
+        () => `unsupported multi selector in -st-global`
+    ),
+    IMPORT_ISNT_EXTENDABLE: createDiagnosticReporter(
+        '00005',
+        'error',
+        () => 'import is not extendable'
+    ),
+    CANNOT_EXTEND_UNKNOWN_SYMBOL: createDiagnosticReporter(
+        '00006',
+        'error',
+        (name: string) => `cannot extend unknown symbol "${name}"`
+    ),
+    CANNOT_EXTEND_JS: createDiagnosticReporter(
+        '00007',
+        'error',
+        () => 'JS import is not extendable'
+    ),
+    UNKNOWN_IMPORT_ALIAS: createDiagnosticReporter(
+        '00008',
+        'error',
+        (name: string) => `cannot use alias for unknown import "${name}"`
+    ),
 };
 
 // HOOKS

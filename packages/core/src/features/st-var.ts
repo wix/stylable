@@ -12,7 +12,7 @@ import { stripQuotation } from '../helpers/string';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
-import { DiagnosticBase, Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import type { ParsedValue } from '../types';
 import type { Stylable } from '../stylable';
 import type { RuntimeStVar } from '../stylable-transformer';
@@ -44,73 +44,57 @@ export interface FlatComputedStVar {
 
 export const diagnostics = {
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
-    NO_VARS_DEF_IN_ST_SCOPE(): DiagnosticBase {
-        return {
-            code: '07002',
-            message: `cannot define ":vars" inside of "@st-scope"`,
-            severity: 'error',
-        };
-    },
-    DEPRECATED_ST_FUNCTION_NAME(name: string, alternativeName: string): DiagnosticBase {
-        return {
-            code: '07003',
-            message: `"${name}" is deprecated, use "${alternativeName}"`,
-            severity: 'info',
-        };
-    },
-    CYCLIC_VALUE(cyclicChain: string[]): DiagnosticBase {
-        return {
-            code: '07004',
-            message: `Cyclic value definition detected: "${cyclicChain
+    NO_VARS_DEF_IN_ST_SCOPE: createDiagnosticReporter(
+        '07002',
+        'error',
+        () => `cannot define ":vars" inside of "@st-scope"`
+    ),
+    DEPRECATED_ST_FUNCTION_NAME: createDiagnosticReporter(
+        '07003',
+        'info',
+        (name: string, alternativeName: string) =>
+            `"${name}" is deprecated, use "${alternativeName}"`
+    ),
+    CYCLIC_VALUE: createDiagnosticReporter(
+        '07004',
+        'error',
+        (cyclicChain: string[]) =>
+            `Cyclic value definition detected: "${cyclicChain
                 .map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s)
-                .join('\n')}"`,
-            severity: 'error',
-        };
-    },
-    MISSING_VAR_IN_VALUE(): DiagnosticBase {
-        return {
-            code: '07005',
-            message: `invalid value() with no var identifier`,
-            severity: 'error',
-        };
-    },
-    COULD_NOT_RESOLVE_VALUE(args?: string): DiagnosticBase {
-        return {
-            code: '07006',
-            message: `cannot resolve value function${
-                args ? ` using the arguments provided: "${args}"` : ''
-            }`,
-            severity: 'error',
-        };
-    },
-    MULTI_ARGS_IN_VALUE(args: string): DiagnosticBase {
-        return {
-            code: '07007',
-            message: `value function accepts only a single argument: "value(${args})"`,
-            severity: 'error',
-        };
-    },
-    CANNOT_USE_AS_VALUE(type: string, varName: string): DiagnosticBase {
-        return {
-            code: '07008',
-            message: `${type} "${varName}" cannot be used as a variable`,
-            severity: 'error',
-        };
-    },
-    CANNOT_USE_JS_AS_VALUE(type: string, varName: string): DiagnosticBase {
-        return {
-            code: '07009',
-            message: `JavaScript ${type} import "${varName}" cannot be used as a variable`,
-            severity: 'error',
-        };
-    },
-    UNKNOWN_VAR(name: string): DiagnosticBase {
-        return {
-            code: '07010',
-            message: `unknown var "${name}"`,
-            severity: 'error',
-        };
-    },
+                .join('\n')}"`
+    ),
+    MISSING_VAR_IN_VALUE: createDiagnosticReporter(
+        '07005',
+        'error',
+        () => `invalid value() with no var identifier`
+    ),
+    COULD_NOT_RESOLVE_VALUE: createDiagnosticReporter(
+        '07006',
+        'error',
+        (args?: string) =>
+            `cannot resolve value function${args ? ` using the arguments provided: "${args}"` : ''}`
+    ),
+    MULTI_ARGS_IN_VALUE: createDiagnosticReporter(
+        '07007',
+        'error',
+        (args: string) => `value function accepts only a single argument: "value(${args})"`
+    ),
+    CANNOT_USE_AS_VALUE: createDiagnosticReporter(
+        '07008',
+        'error',
+        (type: string, varName: string) => `${type} "${varName}" cannot be used as a variable`
+    ),
+    CANNOT_USE_JS_AS_VALUE: createDiagnosticReporter(
+        '07009',
+        'error',
+        (type: string, varName: string) =>
+            `JavaScript ${type} import "${varName}" cannot be used as a variable`
+    ),
+    UNKNOWN_VAR: createDiagnosticReporter(
+        '07010',
+        'error',
+        (name: string) => `unknown var "${name}"`
+    ),
 };
 
 // HOOKS

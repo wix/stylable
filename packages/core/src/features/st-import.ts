@@ -9,7 +9,7 @@ import type { StylableMeta } from '../stylable-meta';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import type { DiagnosticBase } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface ImportSymbol {
     _kind: 'import';
@@ -53,42 +53,34 @@ const dataKey = plugableRecord.key<Imported[]>('imports');
 
 export const diagnostics = {
     ...parseImportMessages,
-    NO_ST_IMPORT_IN_NESTED_SCOPE(): DiagnosticBase {
-        return {
-            code: '05011',
-            message: `cannot use "@st-import" inside of nested scope`,
-            severity: 'error',
-        };
-    },
-    NO_PSEUDO_IMPORT_IN_NESTED_SCOPE(): DiagnosticBase {
-        return {
-            code: '05012',
-            message: `cannot use ":import" inside of nested scope`,
-            severity: 'error',
-        };
-    },
-    INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string): DiagnosticBase {
-        return {
-            code: '05013',
-            message: `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`,
-            severity: 'error',
-        };
-    },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
-    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string): DiagnosticBase {
-        return {
-            code: '05015',
-            message: `cannot resolve imported symbol "${name}" from stylesheet "${path}"`,
-            severity: 'error',
-        };
-    },
-    UNKNOWN_IMPORTED_FILE(path: string): DiagnosticBase {
-        return {
-            code: '05016',
-            message: `cannot resolve imported file: "${path}"`,
-            severity: 'error',
-        };
-    },
+    NO_ST_IMPORT_IN_NESTED_SCOPE: createDiagnosticReporter(
+        '05011',
+        'error',
+        () => `cannot use "@st-import" inside of nested scope`
+    ),
+    NO_PSEUDO_IMPORT_IN_NESTED_SCOPE: createDiagnosticReporter(
+        '05012',
+        'error',
+        () => `cannot use ":import" inside of nested scope`
+    ),
+    INVALID_CUSTOM_PROPERTY_AS_VALUE: createDiagnosticReporter(
+        '05013',
+        'error',
+        (name: string, as: string) =>
+            `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`
+    ),
+    UNKNOWN_IMPORTED_SYMBOL: createDiagnosticReporter(
+        '05015',
+        'error',
+        (name: string, path: string) =>
+            `cannot resolve imported symbol "${name}" from stylesheet "${path}"`
+    ),
+    UNKNOWN_IMPORTED_FILE: createDiagnosticReporter(
+        '05016',
+        'error',
+        (path: string) => `cannot resolve imported file: "${path}"`
+    ),
 };
 
 // HOOKS

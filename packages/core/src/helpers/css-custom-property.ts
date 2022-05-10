@@ -1,5 +1,5 @@
 import type * as postcss from 'postcss';
-import type { DiagnosticBase, Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import { stripQuotation } from '../helpers/string';
 
 const UNIVERSAL_SYNTAX_DEFINITION = '*';
@@ -10,35 +10,29 @@ interface AtPropertyValidationResponse {
 }
 
 export const atPropertyValidationWarnings = {
-    MISSING_REQUIRED_DESCRIPTOR(descriptorName: string): DiagnosticBase {
-        return {
-            code: '01001',
-            message: `@property rules require a "${descriptorName}" descriptor`,
-            severity: 'error',
-        };
-    },
-    MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR(): DiagnosticBase {
-        return {
-            code: '01002',
-            message:
-                '@property "initial-value" descriptor is optional only if the "syntax" is the universal syntax definition, otherwise the descriptor is required',
-            severity: 'warning',
-        };
-    },
-    INVALID_DESCRIPTOR_TYPE(descriptorType: string): DiagnosticBase {
-        return {
-            code: '01003',
-            message: `@property does not support descriptor of type "${descriptorType}"`,
-            severity: 'error',
-        };
-    },
-    INVALID_DESCRIPTOR_NAME(descriptorName: string): DiagnosticBase {
-        return {
-            code: '01004',
-            message: `@property does not support descriptor named "${descriptorName}"`,
-            severity: 'error',
-        };
-    },
+    MISSING_REQUIRED_DESCRIPTOR: createDiagnosticReporter(
+        '01001',
+        'error',
+        (descriptorName: string) => `@property rules require a "${descriptorName}" descriptor`
+    ),
+    MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR: createDiagnosticReporter(
+        '01002',
+        'warning',
+        () =>
+            '@property "initial-value" descriptor is optional only if the "syntax" is the universal syntax definition, otherwise the descriptor is required'
+    ),
+    INVALID_DESCRIPTOR_TYPE: createDiagnosticReporter(
+        '01003',
+        'error',
+        (descriptorType: string) =>
+            `@property does not support descriptor of type "${descriptorType}"`
+    ),
+    INVALID_DESCRIPTOR_NAME: createDiagnosticReporter(
+        '01004',
+        'error',
+        (descriptorName: string) =>
+            `@property does not support descriptor named "${descriptorName}"`
+    ),
 };
 
 export function validateAtProperty(

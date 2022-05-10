@@ -13,18 +13,16 @@ import type {
     SelectorList,
     PseudoClass,
 } from '@tokey/css-selector-parser';
-import type { DiagnosticBase } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics';
 
 const dataKey = plugableRecord.key<Record<string, true>>('globals');
 
 export const diagnostics = {
-    UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(): DiagnosticBase {
-        return {
-            code: '04001',
-            message: `unsupported multi selector in :global()`,
-            severity: 'error',
-        };
-    },
+    UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL: createDiagnosticReporter(
+        '04001',
+        'error',
+        () => `unsupported multi selector in :global()`
+    ),
 };
 
 // HOOKS

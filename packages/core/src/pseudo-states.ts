@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import type { DiagnosticBase, Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, DiagnosticBase, Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { convertToClass, stringifySelector, convertToInvalid } from './helpers/selector';
 import { groupValues, listOptions } from './helpers/value';
@@ -19,89 +19,71 @@ export const booleanStateDelimiter = '--';
 export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
 export const stateDiagnostics = {
-    UNKNOWN_STATE_USAGE(name: string): DiagnosticBase {
-        return {
-            code: '08001',
-            message: `unknown pseudo-state "${name}"`,
-            severity: 'error',
-        };
-    },
-    UNKNOWN_STATE_TYPE(name: string, type: string): DiagnosticBase {
-        return {
-            code: '08002',
-            message: `pseudo-state "${name}" defined with unknown type: "${type}"`,
-            severity: 'error',
-        };
-    },
-    TOO_MANY_STATE_TYPES(name: string, types: string[]): DiagnosticBase {
-        return {
-            code: '08003',
-            message: `pseudo-state "${name}(${types.join(
+    UNKNOWN_STATE_USAGE: createDiagnosticReporter(
+        '08001',
+        'error',
+        (name: string) => `unknown pseudo-state "${name}"`
+    ),
+    UNKNOWN_STATE_TYPE: createDiagnosticReporter(
+        '08002',
+        'error',
+        (name: string, type: string) =>
+            `pseudo-state "${name}" defined with unknown type: "${type}"`
+    ),
+    TOO_MANY_STATE_TYPES: createDiagnosticReporter(
+        '08003',
+        'error',
+        (name: string, types: string[]) =>
+            `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`
+    ),
+    NO_STATE_ARGUMENT_GIVEN: createDiagnosticReporter(
+        '08004',
+        'error',
+        (name: string, type: string) =>
+            `pseudo-state "${name}" expected argument of type "${type}" but got none`
+    ),
+    NO_STATE_TYPE_GIVEN: createDiagnosticReporter(
+        '08005',
+        'warning',
+        (name: string) =>
+            `pseudo-state "${name}" expected a definition of a single type, but received none`
+    ),
+    TOO_MANY_ARGS_IN_VALIDATOR: createDiagnosticReporter(
+        '08006',
+        'error',
+        (name: string, validator: string, args: string[]) =>
+            `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(
                 ', '
-            )})" definition must be of a single type`,
-            severity: 'error',
-        };
-    },
-    NO_STATE_ARGUMENT_GIVEN(name: string, type: string): DiagnosticBase {
-        return {
-            code: '08004',
-            message: `pseudo-state "${name}" expected argument of type "${type}" but got none`,
-            severity: 'error',
-        };
-    },
-    NO_STATE_TYPE_GIVEN(name: string): DiagnosticBase {
-        return {
-            code: '08005',
-            message: `pseudo-state "${name}" expected a definition of a single type, but received none`,
-            severity: 'warning',
-        };
-    },
-    TOO_MANY_ARGS_IN_VALIDATOR(name: string, validator: string, args: string[]): DiagnosticBase {
-        return {
-            code: '08006',
-            message: `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(
-                ', '
-            )}"`,
-            severity: 'error',
-        };
-    },
-    STATE_STARTS_WITH_HYPHEN(name: string): DiagnosticBase {
-        return {
-            code: '08007',
-            message: `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`,
-            severity: 'error',
-        };
-    },
-    RESERVED_NATIVE_STATE(name: string): DiagnosticBase {
-        return {
-            code: '08008',
-            message: `state "${name}" is reserved for native pseudo-class`,
-            severity: 'warning',
-        };
-    },
-    FAILED_STATE_VALIDATION(name: string, actualParam: string, errors: string[]): DiagnosticBase {
-        return {
-            code: '08009',
-            message: [
+            )}"`
+    ),
+    STATE_STARTS_WITH_HYPHEN: createDiagnosticReporter(
+        '08007',
+        'error',
+        (name: string) =>
+            `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`
+    ),
+    RESERVED_NATIVE_STATE: createDiagnosticReporter(
+        '08008',
+        'warning',
+        (name: string) => `state "${name}" is reserved for native pseudo-class`
+    ),
+    FAILED_STATE_VALIDATION: createDiagnosticReporter(
+        '08009',
+        'error',
+        (name: string, actualParam: string, errors: string[]) =>
+            [
                 `pseudo-state "${name}" with parameter "${actualParam}" failed validation:`,
                 ...errors,
-            ].join('\n'),
-            severity: 'error',
-        };
-    },
-    DEFAULT_PARAM_FAILS_VALIDATION(
-        stateName: string,
-        defaultValue: string,
-        errors: string[]
-    ): DiagnosticBase {
-        return {
-            code: '08010',
-            message: `pseudo-state "${stateName}" default value "${defaultValue}" failed validation:\n${errors.join(
+            ].join('\n')
+    ),
+    DEFAULT_PARAM_FAILS_VALIDATION: createDiagnosticReporter(
+        '08010',
+        'error',
+        (stateName: string, defaultValue: string, errors: string[]) =>
+            `pseudo-state "${stateName}" default value "${defaultValue}" failed validation:\n${errors.join(
                 '\n'
-            )}`,
-            severity: 'error',
-        };
-    },
+            )}`
+    ),
 };
 
 // PROCESS

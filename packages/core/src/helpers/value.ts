@@ -1,27 +1,24 @@
 import type { ParsedValue } from '../types';
 import postcssValueParser from 'postcss-value-parser';
 import type { Node as ValueNode } from 'postcss-value-parser';
-import type { DiagnosticBase } from '../diagnostics';
+import { createDiagnosticReporter, DiagnosticBase } from '../diagnostics';
 
 export type ReportWarning = (diagnostic: DiagnosticBase, options?: { word: string }) => void;
 
 export const valueDiagnostics = {
-    INVALID_NAMED_PARAMS(): DiagnosticBase {
-        return {
-            code: '13001',
-            message: `invalid named parameters (e.g. "func(name value, [name value, ...])")`,
-            severity: 'error',
-        };
-    },
-    MISSING_REQUIRED_FORMATTER_ARG(node: ParsedValue, argIndex: number): DiagnosticBase {
-        return {
-            code: '13002',
-            message: `${postcssValueParser.stringify(
+    INVALID_NAMED_PARAMS: createDiagnosticReporter(
+        '13001',
+        'error',
+        () => `invalid named parameters (e.g. "func(name value, [name value, ...])")`
+    ),
+    MISSING_REQUIRED_FORMATTER_ARG: createDiagnosticReporter(
+        '13002',
+        'error',
+        (node: ParsedValue, argIndex: number) =>
+            `${postcssValueParser.stringify(
                 node as postcssValueParser.Node
-            )}: argument at index ${argIndex} is empty`,
-            severity: 'error',
-        };
-    },
+            )}: argument at index ${argIndex} is empty`
+    ),
 };
 
 export function getNamedArgs(node: ParsedValue) {

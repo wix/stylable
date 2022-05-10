@@ -10,12 +10,12 @@ import {
 import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import { plugableRecord } from '../helpers/plugable-record';
+import { createDiagnosticReporter } from '../diagnostics';
 import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver, CSSResolve } from '../stylable-resolver';
 import type * as postcss from 'postcss';
 // ToDo: refactor out - parse once and pass to hooks
 import postcssValueParser from 'postcss-value-parser';
-import type { DiagnosticBase } from '../diagnostics';
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
@@ -25,48 +25,41 @@ export interface CSSVarSymbol {
 
 export const diagnostics = {
     ...atPropertyValidationWarnings,
-    ILLEGAL_CSS_VAR_USE(name: string): DiagnosticBase {
-        return {
-            code: '01005',
-            message: `a custom css property must begin with "--" (double-dash), but received "${name}"`,
-            severity: 'error',
-        };
-    },
-    ILLEGAL_CSS_VAR_ARGS(name: string): DiagnosticBase {
-        return {
-            code: '01006',
-            message: `custom property "${name}" usage (var()) must receive comma separated values`,
-            severity: 'error',
-        };
-    },
-    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(): DiagnosticBase {
-        return {
-            code: '01007',
-            message: `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`,
-            severity: 'info',
-        };
-    },
-    GLOBAL_CSS_VAR_MISSING_COMMA(name: string): DiagnosticBase {
-        return {
-            code: '01008',
-            message: `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`,
-            severity: 'error',
-        };
-    },
-    ILLEGAL_GLOBAL_CSS_VAR(name: string): DiagnosticBase {
-        return {
-            code: '01009',
-            message: `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`,
-            severity: 'error',
-        };
-    },
-    MISSING_PROP_NAME(): DiagnosticBase {
-        return {
-            code: '01010',
-            message: `missing custom property name for "var(--[PROP NAME])"`,
-            severity: 'error',
-        };
-    },
+    ILLEGAL_CSS_VAR_USE: createDiagnosticReporter(
+        '01005',
+        'error',
+        (name: string) =>
+            `a custom css property must begin with "--" (double-dash), but received "${name}"`
+    ),
+    ILLEGAL_CSS_VAR_ARGS: createDiagnosticReporter(
+        '01006',
+        'error',
+        (name: string) =>
+            `custom property "${name}" usage (var()) must receive comma separated values`
+    ),
+    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY: createDiagnosticReporter(
+        '01007',
+        'info',
+        () =>
+            `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`
+    ),
+    GLOBAL_CSS_VAR_MISSING_COMMA: createDiagnosticReporter(
+        '01008',
+        'error',
+        (name: string) =>
+            `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`
+    ),
+    ILLEGAL_GLOBAL_CSS_VAR: createDiagnosticReporter(
+        '01009',
+        'error',
+        (name: string) =>
+            `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`
+    ),
+    MISSING_PROP_NAME: createDiagnosticReporter(
+        '01010',
+        'error',
+        () => `missing custom property name for "var(--[PROP NAME])"`
+    ),
 };
 
 const dataKey = plugableRecord.key<{
