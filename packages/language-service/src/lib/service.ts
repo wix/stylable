@@ -18,7 +18,7 @@ import {
     SignatureHelp,
     TextEdit,
     WorkspaceEdit,
-} from 'vscode-languageserver-types';
+} from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
 
 import { ProviderPosition, ProviderRange } from './completion-providers';

@@ -1,5 +1,5 @@
 import type { Diagnostic as StylableDiagnostic, Stylable } from '@stylable/core';
-import { Diagnostic, Range } from 'vscode-languageserver-types';
+import { Diagnostic, Range } from 'vscode-languageserver';
 import type { CssService } from './css-service';
 
 export function createDiagnosis(
