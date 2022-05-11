@@ -1,6 +1,6 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
-import { createDiagnosticReporter, DiagnosticBase, Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import type { Imported } from '../features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { stripQuotation } from '../helpers/string';

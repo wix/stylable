@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import { createDiagnosticReporter, DiagnosticBase, Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { convertToClass, stringifySelector, convertToInvalid } from './helpers/selector';
 import { groupValues, listOptions } from './helpers/value';

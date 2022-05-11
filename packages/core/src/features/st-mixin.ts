@@ -15,7 +15,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { CSSResolve } from '../stylable-resolver';
 import type { StylableTransformer } from '../stylable-transformer';
 import { dirname } from 'path';
-import { createDiagnosticReporter, DiagnosticBase } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface MixinValue {
     type: string;
