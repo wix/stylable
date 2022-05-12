@@ -1,9 +1,9 @@
-import type { DiagnosticType } from '@stylable/core';
+import type { DiagnosticSeverity } from '@stylable/core';
 import { levels, Log } from './logger';
 
 export interface Diagnostic {
     message: string;
-    severity: DiagnosticType;
+    severity: DiagnosticSeverity;
     line?: number;
     column?: number;
     offset?: number;

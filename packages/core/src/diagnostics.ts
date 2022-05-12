@@ -1,9 +1,9 @@
 import type * as postcss from 'postcss';
 
-export type DiagnosticType = 'error' | 'warning' | 'info';
+export type DiagnosticSeverity = 'error' | 'warning' | 'info';
 
 export interface DiagnosticBase {
-    severity: DiagnosticType;
+    severity: DiagnosticSeverity;
     message: string;
     code: string;
 }
@@ -34,7 +34,7 @@ export class Diagnostics {
 
 export function createDiagnosticReporter<T extends any[]>(
     code: string,
-    severity: DiagnosticType,
+    severity: DiagnosticSeverity,
     message: (...args: T) => string
 ) {
     const func = (...args: T): DiagnosticBase => {
