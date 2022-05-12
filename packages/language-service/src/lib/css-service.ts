@@ -13,7 +13,7 @@ import {
     Location,
     Position,
     Range,
-} from 'vscode-languageserver-types';
+} from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
 import { createMeta } from './provider';
 

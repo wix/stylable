@@ -11,7 +11,7 @@ import {
     SignatureHelp,
 } from 'vscode-languageserver';
 import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument';
-import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
+import { Range, TextDocumentIdentifier } from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
 import { format, lspFormattingOptionsToJsBeautifyOptions } from '@stylable/language-service';
 import { ProviderPosition } from '@stylable/language-service/dist/lib/completion-providers';
