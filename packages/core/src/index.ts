@@ -14,7 +14,7 @@ export type {
     ComputedStVar,
     FlatComputedStVar,
 } from './features';
-export type { StylableMeta } from './stylable-meta';
+export { StylableMeta } from './stylable-meta';
 export type { CSSResolve, JSResolve } from './stylable-resolver';
 export type { StylableResults, RuntimeStVar } from './stylable-transformer';
 
