@@ -412,7 +412,7 @@ export class StylableTransformer {
                     context.selectorAst[context.selectorIndex].nodes[0] === node;
                 const customSelector = STCustomSelector.transformCustomSelectorByName(
                     meta,
-                    `:--${node.value}`
+                    node.value
                 );
                 if (customSelector) {
                     this.handleCustomSelector(

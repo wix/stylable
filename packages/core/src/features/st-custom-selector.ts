@@ -33,15 +33,16 @@ export const hooks = createFeature({
     },
     analyzeAtRule({ context, atRule, analyzeRule }) {
         const params = atRule.params.split(/\s/);
-        const customName = params.shift();
-        if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
-            const selector = atRule.params.replace(customName, '').trim();
+        const customSelector = params.shift();
+        if (customSelector && customSelector.match(CUSTOM_SELECTOR_RE)) {
+            const selector = atRule.params.replace(customSelector, '').trim();
             const ast = parseSelectorWithCache(selector, { clone: true });
             const isScoped = analyzeRule(postcss.rule({ selector, source: atRule.source }), {
                 isScoped: false,
             });
             const analyzed = plugableRecord.getUnsafe(context.meta.data, dataKey);
-            analyzed[customName] = { selector, ast, isScoped, def: atRule };
+            const name = customSelector.slice(3);
+            analyzed[name] = { selector, ast, isScoped, def: atRule };
         } else {
             // TODO: add warn there are two types one is not valid name and the other is empty name.
         }
@@ -54,11 +55,12 @@ export const hooks = createFeature({
         }
         const inlined = transformCustomSelectorMap(customSelectors, (report) => {
             if (report.type === 'unknown' && analyzed[report.origin]) {
+                const unknownSelector = `:--${report.unknown}`;
                 context.diagnostics.error(
                     analyzed[report.origin].def,
-                    diagnostics.UNKNOWN_CUSTOM_SELECTOR(report.unknown),
+                    diagnostics.UNKNOWN_CUSTOM_SELECTOR(unknownSelector),
                     {
-                        word: report.unknown,
+                        word: unknownSelector,
                     }
                 );
             } else if (report.type === 'circular') {
@@ -105,7 +107,7 @@ export function transformCustomSelectorByName(
 
 export function getCustomSelectorNames(meta: StylableMeta): string[] {
     const analyzed = plugableRecord.getUnsafe(meta.data, dataKey);
-    return Object.keys(analyzed);
+    return Object.keys(analyzed).map((name) => `:--${name}`);
 }
 
 export function transformCustomSelectorInline(
@@ -120,11 +122,12 @@ export function transformCustomSelectorInline(
         (name) => analyzed[name]?.ast,
         (report) => {
             if (options.diagnostics && options.node) {
+                const unknownSelector = `:--${report.unknown}`;
                 options.diagnostics.error(
                     options.node,
-                    diagnostics.UNKNOWN_CUSTOM_SELECTOR(report.unknown),
+                    diagnostics.UNKNOWN_CUSTOM_SELECTOR(unknownSelector),
                     {
-                        word: report.unknown,
+                        word: unknownSelector,
                     }
                 );
             }

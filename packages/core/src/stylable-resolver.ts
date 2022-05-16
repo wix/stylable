@@ -358,7 +358,7 @@ export class StylableResolver {
 
         const customSelector = isElement
             ? null
-            : STCustomSelector.transformCustomSelectorByName(meta, `:--${name}`);
+            : STCustomSelector.transformCustomSelectorByName(meta, name);
 
         if (!symbol && !customSelector) {
             return [];

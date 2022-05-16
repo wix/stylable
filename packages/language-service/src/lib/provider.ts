@@ -294,7 +294,7 @@ export class Provider {
                     )
                 );
             }
-        } else if (STCustomSelector.getCustomSelector(meta, `:--${word}`)) {
+        } else if (STCustomSelector.getCustomSelector(meta, word)) {
             defs.push(
                 new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
             );

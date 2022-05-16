@@ -13,7 +13,7 @@ describe('@custom-selector', () => {
             { from }
         );
 
-        const iconSelector = STCustomSelector.transformCustomSelectorByName(meta, ':--icon');
+        const iconSelector = STCustomSelector.transformCustomSelectorByName(meta, 'icon');
 
         expect(iconSelector).to.equal('.root > .icon');
     });

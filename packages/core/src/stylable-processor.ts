@@ -89,7 +89,6 @@ export const processorWarnings = {
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
-    private customSelectorData: Record<string, { isScoped: boolean }> = {};
     constructor(
         public diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
@@ -284,7 +283,7 @@ export class StylableProcessor implements FeatureContext {
                     // ToDo: move to css-class feature
                     locallyScoped =
                         locallyScoped ||
-                        STCustomSelector.isScoped(this.meta, `:${node.value}`) ||
+                        STCustomSelector.isScoped(this.meta, node.value.slice(2)) ||
                         false;
                 } else if (!knownPseudoClassesWithNestedSelectors.includes(node.value)) {
                     return walkSelector.skipNested;

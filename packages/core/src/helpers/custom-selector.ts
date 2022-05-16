@@ -27,13 +27,14 @@ export function transformCustomSelectorMap(
         result[name] = transformCustomSelectors(
             ast,
             (nestedName) => {
-                if (path.includes(nestedName)) {
+                const selector = `:--${nestedName}`;
+                if (path.includes(selector)) {
                     // loop!: report & preserve source selector
                     report({ type: 'circular', path });
-                    return parseCssSelector(nestedName);
+                    return parseCssSelector(selector);
                 }
                 if (!result[nestedName]) {
-                    link(nestedName, [...path, nestedName]);
+                    link(nestedName, [...path, selector]);
                 }
                 return result[nestedName];
             },
@@ -41,7 +42,7 @@ export function transformCustomSelectorMap(
         );
     };
     for (const name of Object.keys(customSelectors)) {
-        link(name, [name]);
+        link(name, [`:--${name}`]);
     }
     return result;
 }
@@ -71,10 +72,10 @@ function transformCustomSelector(
     // get insertion points
     walk(inputSelector, (node, index, _nodes, parents) => {
         if (isCustomSelectorNode(node)) {
-            const selector = `:${node.value}`;
-            const targetSelectors = getCustomSelector(selector);
+            const name = node.value.slice(2);
+            const targetSelectors = getCustomSelector(name);
             if (!targetSelectors) {
-                report({ type: 'unknown', origin: '', unknown: selector });
+                report({ type: 'unknown', origin: '', unknown: name });
             } else if (targetSelectors.length !== 0) {
                 const parent = parents[parents.length - 1];
                 if (parent && 'nodes' in parent && parent.nodes) {
