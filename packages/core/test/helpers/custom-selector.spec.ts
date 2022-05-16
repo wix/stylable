@@ -41,7 +41,7 @@ describe('helpers/custom-selector', () => {
             );
 
             expect(stringifySelectorAst(selectors[':--x']), 'ref').to.eql(':--unknown');
-            expect(reports, 'no circularity').to.eql([
+            expect(reports, 'unknown selector').to.eql([
                 { type: 'unknown', origin: ':--x', unknown: ':--unknown' },
             ]);
         });

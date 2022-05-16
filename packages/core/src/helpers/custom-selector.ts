@@ -76,7 +76,6 @@ function transformCustomSelector(
             if (!targetSelectors) {
                 report({ type: 'unknown', origin: '', unknown: selector });
             } else if (targetSelectors.length !== 0) {
-                // ToDo: test zero selectors
                 const parent = parents[parents.length - 1];
                 if (parent && 'nodes' in parent && parent.nodes) {
                     let selectorIndex = 0;

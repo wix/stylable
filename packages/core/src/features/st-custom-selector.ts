@@ -12,7 +12,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { Diagnostics } from '../diagnostics';
 
 export const diagnostics = {
-    UNKNOWN: (selector: string) => `The selector '${selector}' is undefined`,
+    UNKNOWN_CUSTOM_SELECTOR: (selector: string) => `The selector '${selector}' is undefined`,
 };
 
 const dataKey =
@@ -56,7 +56,7 @@ export const hooks = createFeature({
             if (report.type === 'unknown' && analyzed[report.origin]) {
                 context.diagnostics.error(
                     analyzed[report.origin].def,
-                    diagnostics.UNKNOWN(report.unknown),
+                    diagnostics.UNKNOWN_CUSTOM_SELECTOR(report.unknown),
                     {
                         word: report.unknown,
                     }
@@ -95,7 +95,10 @@ export function getCustomSelector(meta: StylableMeta, name: string): SelectorLis
     return analyzed[name]?.ast;
 }
 
-export function transformCustomSelectorByName(meta: StylableMeta, name: string): string | undefined {
+export function transformCustomSelectorByName(
+    meta: StylableMeta,
+    name: string
+): string | undefined {
     const analyzed = plugableRecord.getUnsafe(meta.data, dataKey);
     return analyzed[name]?.selector;
 }
@@ -117,9 +120,13 @@ export function transformCustomSelectorInline(
         (name) => analyzed[name]?.ast,
         (report) => {
             if (options.diagnostics && options.node) {
-                options.diagnostics.error(options.node, diagnostics.UNKNOWN(report.unknown), {
-                    word: report.unknown,
-                });
+                options.diagnostics.error(
+                    options.node,
+                    diagnostics.UNKNOWN_CUSTOM_SELECTOR(report.unknown),
+                    {
+                        word: report.unknown,
+                    }
+                );
             }
         }
     );

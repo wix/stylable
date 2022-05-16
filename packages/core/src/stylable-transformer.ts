@@ -804,6 +804,7 @@ export class ScopeContext {
  * and should be inlined in the process in the future.
  */
 function prepareAST(context: FeatureTransformContext, ast: postcss.Root) {
+    // ToDo: inline transformations
     const toRemove: Array<postcss.Node | (() => void)> = [];
     ast.walk((node) => {
         const input = { context, node, toRemove };

@@ -38,13 +38,13 @@ describe('features/st-custom-selector', () => {
     });
     it('should handle unknown custom selector', () => {
         testStylableCore(`
-            /* @analyze-error(in custom) word(:--unknown) ${STCustomSelector.diagnostics.UNKNOWN(
+            /* @analyze-error(in custom) word(:--unknown) ${STCustomSelector.diagnostics.UNKNOWN_CUSTOM_SELECTOR(
                 ':--unknown'
             )} */
             @custom-selector :--x .before:--unknown.after;
 
             /* 
-                @transform-error(in selector) word(:--unknown)  ${STCustomSelector.diagnostics.UNKNOWN(
+                @transform-error(in selector) word(:--unknown)  ${STCustomSelector.diagnostics.UNKNOWN_CUSTOM_SELECTOR(
                     ':--unknown'
                 )} 
                 @rule .entry__before:--unknown.entry__after {}
