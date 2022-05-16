@@ -1,6 +1,7 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
+import * as STCustomSelector from './st-custom-selector';
 import type { ElementSymbol } from './css-type';
 import type { ClassSymbol } from './css-class';
 import { createSubsetAst } from '../helpers/rule';
@@ -330,7 +331,7 @@ function createMixinRootFromCSSResolve(
         (resolvedClass.symbol._kind === 'class' ? '.' : '') + resolvedClass.symbol.name,
         undefined,
         isRootMixin,
-        meta.customSelectors
+        (name) => STCustomSelector.getCustomSelector(meta, name)
     );
 
     const namedArgs = mixDef.mixin.options as Record<string, string>;

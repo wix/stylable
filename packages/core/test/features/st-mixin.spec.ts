@@ -1501,9 +1501,8 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        it(`should mix class through a custom selector`, () => {
-            // ToDo: fix wrongly reported diagnostic: unknown pseudo-state "--a"
-            testStylableCore(`
+        it(`should mix class through a custom selector (deep)`, () => {
+            const { sheets } = testStylableCore(`
                 @custom-selector :--a .a;
                 @custom-selector :--b .b:--a;
 
@@ -1517,9 +1516,9 @@ describe(`features/st-mixin`, () => {
                 }
             `);
 
-            // const { meta } = sheets['/entry.st.css'];
+            const { meta } = sheets['/entry.st.css'];
 
-            // shouldReportNoDiagnostics(meta);
+            shouldReportNoDiagnostics(meta);
         });
         it.skip(`should attempt to correct compound order`, () => {
             // ToDo: fix compound selector ordering

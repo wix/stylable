@@ -1,18 +1,21 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
+import { STCustomSelector } from '@stylable/core/dist/features';
 
 describe('@custom-selector', () => {
     it('collect custom-selectors', () => {
         const from = '/path/to/style.css';
-        const { customSelectors } = processSource(
+        const meta = processSource(
             `
             @custom-selector :--icon .root > .icon;
         `,
             { from }
         );
 
-        expect(customSelectors[':--icon']).to.equal('.root > .icon');
+        const iconSelector = STCustomSelector.transformCustomSelectorByName(meta, ':--icon');
+
+        expect(iconSelector).to.equal('.root > .icon');
     });
 
     it('analyze custom-selector before process (reflect on ast)', () => {

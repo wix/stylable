@@ -8,7 +8,7 @@ export {
     transformerWarnings,
     ResolvedElement,
 } from './stylable-transformer';
-export type { MappedStates } from './features';
+export { MappedStates, STCustomSelector } from './features';
 export { murmurhash3_32_gc } from './murmurhash';
 export { cssParse } from './parser';
 export type { OptimizeConfig, IStylableOptimizer, StateParsedValue } from './types';
@@ -40,7 +40,6 @@ export const pseudoStates = {
     booleanStateDelimiter,
 };
 export { BoxedValueArray, BoxedValueMap, createCustomValue } from './custom-values';
-export { expandCustomSelectors } from './stylable-utils';
 export { systemValidators } from './state-validators';
 export { processDeclarationFunctions } from './process-declaration-functions';
 export { reportDiagnostic } from './report-diagnostic';

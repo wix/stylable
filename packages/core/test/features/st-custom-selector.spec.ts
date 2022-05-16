@@ -1,5 +1,5 @@
 import chaiSubset from 'chai-subset';
-import { CSSType } from '@stylable/core/dist/features';
+import { STCustomSelector, CSSType } from '@stylable/core/dist/features';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 
@@ -35,6 +35,22 @@ describe('features/st-custom-selector', () => {
         const { meta } = sheets['/entry.st.css'];
 
         shouldReportNoDiagnostics(meta);
+    });
+    it('should handle unknown custom selector', () => {
+        testStylableCore(`
+            /* @analyze-error(in custom) word(:--unknown) ${STCustomSelector.diagnostics.UNKNOWN(
+                ':--unknown'
+            )} */
+            @custom-selector :--x .before:--unknown.after;
+
+            /* 
+                @transform-error(in selector) word(:--unknown)  ${STCustomSelector.diagnostics.UNKNOWN(
+                    ':--unknown'
+                )} 
+                @rule .entry__before:--unknown.entry__after {}
+            */
+            .before:--unknown.after {}
+        `);
     });
     it('should report selector on atrule', () => {
         testStylableCore(`

@@ -1,7 +1,6 @@
 import { expect } from 'chai';
-import * as postcss from 'postcss';
 import { createTransformer } from '@stylable/core-test-kit';
-import { expandCustomSelectors } from '@stylable/core/dist/index-internal';
+import { STCustomSelector } from '@stylable/core/dist/index-internal';
 
 describe('Stylable intellisense selector meta data', () => {
     it('resolve single class element', () => {
@@ -391,7 +390,7 @@ describe('Stylable intellisense selector meta data', () => {
         const meta = t.fileProcessor.process('/entry.st.css');
         const elements = t.resolveSelectorElements(
             meta,
-            expandCustomSelectors(postcss.rule({ selector: ':--pongo' }), meta.customSelectors)
+            STCustomSelector.transformCustomSelectorInline(meta, ':--pongo')
         );
 
         expect(elements[0]).to.eql([

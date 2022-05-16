@@ -11,9 +11,10 @@ import {
     Selector,
     ImmutableSelectorNode,
     groupCompoundSelectors,
+    SelectorList,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
-import { expandCustomSelectors } from '../stylable-utils';
+import { transformCustomSelectors } from './custom-selector';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return !!(
@@ -77,7 +78,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     selectorPrefix: string,
     mixinTarget?: T,
     isRoot = false,
-    customSelectors?: Record<string, string>,
+    getCustomSelector?: (name: string) => SelectorList | undefined,
     scopeSelector = ''
 ): T {
     // keyframes on class mixin?
@@ -98,15 +99,10 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
             let ast = isRoot
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
                 : selectorAst;
-            if (customSelectors) {
-                // ToDo: replace with AST base alternative
-                ast = parseSelectorWithCache(
-                    expandCustomSelectors(
-                        new postcss.Rule({ selector: stringifySelector(ast) }),
-                        customSelectors
-                    ),
-                    { clone: true }
-                );
+            if (getCustomSelector) {
+                ast = transformCustomSelectors(ast, getCustomSelector, () => {
+                    /*don't report*/
+                });
             }
             const matchesSelectors = isRoot ? ast : ast.filter((node) => containsPrefix(node));
 
@@ -134,7 +130,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                         name: node.name,
                     }),
                     isRoot,
-                    customSelectors,
+                    getCustomSelector,
                     scopeSelector
                 );
                 if (atRuleSubset.nodes) {

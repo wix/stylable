@@ -18,14 +18,16 @@ import {
 } from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
-import { ClassSymbol, ElementSymbol, STMixin } from './features';
+import type { ClassSymbol, ElementSymbol, FeatureTransformContext } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
     STImport,
     STGlobal,
     STScope,
+    STCustomSelector,
     STVar,
+    STMixin,
     CSSClass,
     CSSType,
     CSSKeyframes,
@@ -41,7 +43,6 @@ import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
-import { expandCustomSelectors } from './stylable-utils';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -162,7 +163,6 @@ export class StylableTransformer {
         mixinTransform = false,
         topNestClassName = ``
     ) {
-        prepareAST(meta, ast);
         const prevStVarOverride = this.evaluator.stVarOverride;
         this.evaluator.stVarOverride = stVarOverride;
         const transformContext = {
@@ -175,6 +175,7 @@ export class StylableTransformer {
         const transformResolveOptions = {
             context: transformContext,
         };
+        prepareAST(transformContext, ast);
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
         const keyframesResolve = CSSKeyframes.hooks.transformResolve(transformResolveOptions);
@@ -409,7 +410,10 @@ export class StylableTransformer {
                 }
                 const isFirstInSelector =
                     context.selectorAst[context.selectorIndex].nodes[0] === node;
-                const customSelector = meta.customSelectors[':--' + node.value];
+                const customSelector = STCustomSelector.transformCustomSelectorByName(
+                    meta,
+                    `:--${node.value}`
+                );
                 if (customSelector) {
                     this.handleCustomSelector(
                         customSelector,
@@ -799,24 +803,19 @@ export class ScopeContext {
  * all changes were moved here to be called at the beginning of the transformer,
  * and should be inlined in the process in the future.
  */
-function prepareAST(meta: StylableMeta, ast: postcss.Root) {
+function prepareAST(context: FeatureTransformContext, ast: postcss.Root) {
     const toRemove: Array<postcss.Node | (() => void)> = [];
     ast.walk((node) => {
-        const input = { node, toRemove };
+        const input = { context, node, toRemove };
         // namespace
         if (node.type === 'atrule' && node.name === `namespace`) {
-            toRemove.push(node);
-        }
-        // custom selectors
-        if (node.type === 'rule') {
-            expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
-        } else if (node.type === 'atrule' && node.name === 'custom-selector') {
             toRemove.push(node);
         }
         // extracted features
         STImport.hooks.prepareAST(input);
         STScope.hooks.prepareAST(input);
         STVar.hooks.prepareAST(input);
+        STCustomSelector.hooks.prepareAST(input);
         CSSCustomProperty.hooks.prepareAST(input);
     });
     for (const removeOrNode of toRemove) {
