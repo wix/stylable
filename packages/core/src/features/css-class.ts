@@ -80,7 +80,6 @@ export const hooks = createFeature<{
             context.diagnostics.report(
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `class`),
                 {
-                    filePath: context.meta.source,
                     node: rule,
                     word: stringifySelector(node),
                 }

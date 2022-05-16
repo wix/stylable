@@ -9,6 +9,9 @@ import {
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { STVar } from '@stylable/core/dist/features';
+import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
+
+const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
 
 describe('Stylable CLI config multiple projects', function () {
     this.timeout(25000);
@@ -472,7 +475,7 @@ describe('Stylable CLI config multiple projects', function () {
             const { stdout } = runCliSync(['--rootDir', tempDir.path]);
 
             const firstError = stdout.indexOf('error 1');
-            const stylableError = stdout.indexOf(STVar.diagnostics.UNKNOWN_VAR('unknown').message);
+            const stylableError = stdout.indexOf(stVarDiagnostics.UNKNOWN_VAR('unknown'));
             const secondError = stdout.indexOf('error 2');
 
             expect(firstError, 'sorted by location')

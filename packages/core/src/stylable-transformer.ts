@@ -652,7 +652,7 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         );
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
-        for (const { code, message, severity, filePath, word } of ruleReports) {
+        for (const { code, message, severity, word } of ruleReports) {
             transformer.diagnostics.report(
                 {
                     code,
@@ -662,7 +662,6 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
                 {
                     node: scope,
                     word: word || scope.params,
-                    filePath,
                 }
             );
         }

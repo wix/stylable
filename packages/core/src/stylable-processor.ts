@@ -361,7 +361,6 @@ export class StylableProcessor implements FeatureContext {
                     this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
                         {
-                            filePath: this.meta.source,
                             node: rule,
                             word: stringifySelector(node),
                         }
@@ -375,7 +374,6 @@ export class StylableProcessor implements FeatureContext {
                             `attribute`
                         ),
                         {
-                            filePath: this.meta.source,
                             node: rule,
                             word: stringifySelector(node),
                         }
@@ -386,7 +384,6 @@ export class StylableProcessor implements FeatureContext {
                     this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
                         {
-                            filePath: this.meta.source,
                             node: rule,
                             word: stringifySelector(node),
                         }
