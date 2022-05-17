@@ -36,10 +36,10 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
         .filter((s) => s !== ',');
 
     if (cssVarsBySpacing.length > cssVarsByComma.length) {
-        diagnostics.warn(
-            atRule,
+        diagnostics.report(
             CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
             {
+                node: atRule,
                 word: atRule.params,
             }
         );
@@ -57,7 +57,8 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
                 alias: undefined,
             });
         } else {
-            diagnostics.warn(atRule, CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
+            diagnostics.report(CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
+                node: atRule,
                 word: cssVar,
             });
         }

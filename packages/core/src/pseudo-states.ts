@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import type { Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { convertToClass, stringifySelector, convertToInvalid } from './helpers/selector';
 import { groupValues, listOptions } from './helpers/value';
@@ -18,23 +18,72 @@ export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
 export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
-export const stateErrors = {
-    UNKNOWN_STATE_USAGE: (name: string) => `unknown pseudo-state "${name}"`,
-    UNKNOWN_STATE_TYPE: (name: string, type: string) =>
-        `pseudo-state "${name}" defined with unknown type: "${type}"`,
-    TOO_MANY_STATE_TYPES: (name: string, types: string[]) =>
-        `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
-    NO_STATE_ARGUMENT_GIVEN: (name: string, type: string) =>
-        `pseudo-state "${name}" expected argument of type "${type}" but got none`,
-    NO_STATE_TYPE_GIVEN: (name: string) =>
-        `pseudo-state "${name}" expected a definition of a single type, but received none`,
-    TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) =>
-        `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(
-            ', '
-        )}"`,
-    STATE_STARTS_WITH_HYPHEN: (name: string) =>
-        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`,
-    RESERVED_NATIVE_STATE: (name: string) => `state "${name}" is reserved for native pseudo-class`,
+export const stateDiagnostics = {
+    UNKNOWN_STATE_USAGE: createDiagnosticReporter(
+        '08001',
+        'error',
+        (name: string) => `unknown pseudo-state "${name}"`
+    ),
+    UNKNOWN_STATE_TYPE: createDiagnosticReporter(
+        '08002',
+        'error',
+        (name: string, type: string) =>
+            `pseudo-state "${name}" defined with unknown type: "${type}"`
+    ),
+    TOO_MANY_STATE_TYPES: createDiagnosticReporter(
+        '08003',
+        'error',
+        (name: string, types: string[]) =>
+            `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`
+    ),
+    NO_STATE_ARGUMENT_GIVEN: createDiagnosticReporter(
+        '08004',
+        'error',
+        (name: string, type: string) =>
+            `pseudo-state "${name}" expected argument of type "${type}" but got none`
+    ),
+    NO_STATE_TYPE_GIVEN: createDiagnosticReporter(
+        '08005',
+        'warning',
+        (name: string) =>
+            `pseudo-state "${name}" expected a definition of a single type, but received none`
+    ),
+    TOO_MANY_ARGS_IN_VALIDATOR: createDiagnosticReporter(
+        '08006',
+        'error',
+        (name: string, validator: string, args: string[]) =>
+            `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(
+                ', '
+            )}"`
+    ),
+    STATE_STARTS_WITH_HYPHEN: createDiagnosticReporter(
+        '08007',
+        'error',
+        (name: string) =>
+            `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" character`
+    ),
+    RESERVED_NATIVE_STATE: createDiagnosticReporter(
+        '08008',
+        'warning',
+        (name: string) => `state "${name}" is reserved for native pseudo-class`
+    ),
+    FAILED_STATE_VALIDATION: createDiagnosticReporter(
+        '08009',
+        'error',
+        (name: string, actualParam: string, errors: string[]) =>
+            [
+                `pseudo-state "${name}" with parameter "${actualParam}" failed validation:`,
+                ...errors,
+            ].join('\n')
+    ),
+    DEFAULT_PARAM_FAILS_VALIDATION: createDiagnosticReporter(
+        '08010',
+        'error',
+        (stateName: string, defaultValue: string, errors: string[]) =>
+            `pseudo-state "${stateName}" default value "${defaultValue}" failed validation:\n${errors.join(
+                '\n'
+            )}`
+    ),
 };
 
 // PROCESS
@@ -52,11 +101,13 @@ export function processPseudoStates(
         const [stateDefinition, ...stateDefault] = workingState;
 
         if (stateDefinition.value.startsWith('-')) {
-            diagnostics.error(decl, stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
+            diagnostics.report(stateDiagnostics.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
+                node: decl,
                 word: stateDefinition.value,
             });
         } else if (reservedFunctionalPseudoClasses.includes(stateDefinition.value)) {
-            diagnostics.warn(decl, stateErrors.RESERVED_NATIVE_STATE(stateDefinition.value), {
+            diagnostics.report(stateDiagnostics.RESERVED_NATIVE_STATE(stateDefinition.value), {
+                node: decl,
                 word: stateDefinition.value,
             });
             return;
@@ -84,7 +135,8 @@ function resolveStateType(
     if (stateDefinition.type === 'function' && stateDefinition.nodes.length === 0) {
         resolveBooleanState(mappedStates, stateDefinition);
 
-        diagnostics.warn(decl, stateErrors.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
+        diagnostics.report(stateDiagnostics.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
+            node: decl,
             word: decl.value,
         });
 
@@ -92,10 +144,15 @@ function resolveStateType(
     }
 
     if (stateDefinition.nodes.length > 1) {
-        diagnostics.warn(
-            decl,
-            stateErrors.TOO_MANY_STATE_TYPES(stateDefinition.value, listOptions(stateDefinition)),
-            { word: decl.value }
+        diagnostics.report(
+            stateDiagnostics.TOO_MANY_STATE_TYPES(
+                stateDefinition.value,
+                listOptions(stateDefinition)
+            ),
+            {
+                node: decl,
+                word: decl.value,
+            }
         );
     }
 
@@ -121,10 +178,12 @@ function resolveStateType(
     } else if (stateType.type in systemValidators) {
         mappedStates[stateDefinition.value] = stateType;
     } else {
-        diagnostics.warn(
-            decl,
-            stateErrors.UNKNOWN_STATE_TYPE(stateDefinition.value, paramType.value),
-            { word: paramType.value }
+        diagnostics.report(
+            stateDiagnostics.UNKNOWN_STATE_TYPE(stateDefinition.value, paramType.value),
+            {
+                node: decl,
+                word: paramType.value,
+            }
         );
     }
 }
@@ -143,10 +202,12 @@ function resolveArguments(
         if (validator.type === 'function') {
             const args = listOptions(validator);
             if (args.length > 1) {
-                diagnostics.warn(
-                    decl,
-                    stateErrors.TOO_MANY_ARGS_IN_VALIDATOR(name, validator.value, args),
-                    { word: decl.value }
+                diagnostics.report(
+                    stateDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(name, validator.value, args),
+                    {
+                        node: decl,
+                        word: decl.value,
+                    }
                 );
             } else {
                 stateType.arguments.push({
@@ -254,14 +315,15 @@ function resolveStateValue(
     );
 
     if (rule && !inputValue && !stateDef.defaultValue) {
-        diagnostics.warn(rule, stateErrors.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
+        diagnostics.report(stateDiagnostics.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
+            node: rule,
             word: name,
         });
     }
 
     const validator = systemValidators[stateDef.type];
 
-    let stateParamOutput;
+    let stateParamOutput: StateResult | undefined;
     try {
         stateParamOutput = validator.validate(
             actualParam,
@@ -280,11 +342,17 @@ function resolveStateValue(
         }
 
         if (rule && stateParamOutput.errors) {
-            stateParamOutput.errors.unshift(
-                `pseudo-state "${name}" with parameter "${actualParam}" failed validation:`
+            diagnostics.report(
+                stateDiagnostics.FAILED_STATE_VALIDATION(
+                    name,
+                    actualParam,
+                    stateParamOutput.errors
+                ),
+                {
+                    node: rule,
+                    word: actualParam,
+                }
             );
-
-            diagnostics.warn(rule, stateParamOutput.errors.join('\n'), { word: actualParam });
         }
     }
 

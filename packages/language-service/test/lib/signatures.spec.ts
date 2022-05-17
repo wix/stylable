@@ -238,9 +238,7 @@ describe('Signature Help', () => {
                                         SignatureInformation.create(
                                             'Supported state types:\n- "string | number | enum"',
                                             undefined,
-                                            ParameterInformation.create(
-                                                'string | number | enum'
-                                            )
+                                            ParameterInformation.create('string | number | enum')
                                         ),
                                     ],
                                 };

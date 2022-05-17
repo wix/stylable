@@ -1,9 +1,15 @@
 import chaiSubset from 'chai-subset';
 import { CSSType } from '@stylable/core/dist/features';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 
 chai.use(chaiSubset);
+
+const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 
 describe('features/st-custom-selector', () => {
     // ToDo: move and add tests when extracting feature
@@ -38,7 +44,7 @@ describe('features/st-custom-selector', () => {
     });
     it('should report selector on atrule', () => {
         testStylableCore(`
-            /* @analyze-error ${CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR('div', 'type')} */
+            /* @analyze-error ${cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR('div', 'type')} */
             @custom-selector :--functional-div div();
         `);
     });
@@ -47,7 +53,7 @@ describe('features/st-custom-selector', () => {
             @custom-selector :--unscoped div;
             @custom-selector :--scoped .root div;
 
-            /* @analyze-warn ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('span')} */
+            /* @analyze-warn ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR('span')} */
             :--unscoped span {}
 
             :--scoped ul {}

@@ -12,8 +12,8 @@ function test(
     it(desc, () => {
         const actualWarnings: string[] = [];
         const [firstNode] = postcssValueParser(src).nodes;
-        const formatterArgs = getFormatterArgs(firstNode, allowComments, (msg) =>
-            actualWarnings.push(msg)
+        const formatterArgs = getFormatterArgs(firstNode, allowComments, (diag) =>
+            actualWarnings.push(diag.message)
         );
         expect(formatterArgs).to.eql(expected);
         if (expectedWarnings) {

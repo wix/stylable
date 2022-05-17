@@ -433,24 +433,26 @@ function validateClassResolveExtends(
         if (decl) {
             // ToDo: move to STExtends
             if (res && res._kind === 'js') {
-                diagnostics.error(decl, CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
+                diagnostics.report(CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
+                    node: decl,
                     word: decl.value,
                 });
             } else if (res && !res.symbol) {
-                diagnostics.error(
-                    decl,
-                    CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name),
-                    { word: decl.value }
-                );
+                diagnostics.report(CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name), {
+                    node: decl,
+                    word: decl.value,
+                });
             } else {
-                diagnostics.error(decl, CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
+                diagnostics.report(CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
+                    node: decl,
                     word: decl.value,
                 });
             }
         } else {
             if (deepResolved?.symbol.alias) {
                 meta.ast.walkRules(new RegExp('\\.' + name), (rule) => {
-                    diagnostics.error(rule, CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
+                    diagnostics.report(CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
+                        node: rule,
                         word: name,
                     });
                     return false;

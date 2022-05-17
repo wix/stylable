@@ -1,8 +1,16 @@
 import { STSymbol, CSSKeyframes, STMixin } from '@stylable/core/dist/features';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
 chai.use(chaiSubset);
+
+const mixinDiagnostics = diagnosticBankReportToStrings(STMixin.diagnostics);
+const keyframesDiagnostics = diagnosticBankReportToStrings(CSSKeyframes.diagnostics);
+const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
 
 describe(`features/css-keyframes`, () => {
     it(`should process @keyframes`, () => {
@@ -113,10 +121,10 @@ describe(`features/css-keyframes`, () => {
     });
     it('should report invalid cases', () => {
         const { sheets } = testStylableCore(`
-            /* @analyze-warn(empty name) ${CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME()} */
+            /* @analyze-error(empty name) ${keyframesDiagnostics.MISSING_KEYFRAMES_NAME()} */
             @keyframes {}
             
-            /* @analyze-warn(empty global) ${CSSKeyframes.diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL()} */
+            /* @analyze-error(empty global) ${keyframesDiagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL()} */
             @keyframes st-global() {}
         `);
 
@@ -127,7 +135,7 @@ describe(`features/css-keyframes`, () => {
     it('should report reserved @keyframes names', () => {
         CSSKeyframes.reservedKeyFrames.map((reserved) => {
             testStylableCore(`
-                /* @analyze-error(${reserved}) word(${reserved}) ${CSSKeyframes.diagnostics.KEYFRAME_NAME_RESERVED(
+                /* @analyze-error(${reserved}) word(${reserved}) ${keyframesDiagnostics.KEYFRAME_NAME_RESERVED(
                 reserved
             )} */
                 @keyframes ${reserved} {}
@@ -164,7 +172,7 @@ describe(`features/css-keyframes`, () => {
             }
 
             .root {
-                /* @analyze-error ${CSSKeyframes.diagnostics.ILLEGAL_KEYFRAMES_NESTING()} */
+                /* @analyze-error ${keyframesDiagnostics.ILLEGAL_KEYFRAMES_NESTING()} */
                 @keyframes not-valid {}
             }
         `);
@@ -223,24 +231,24 @@ describe(`features/css-keyframes`, () => {
     describe(`multiple @keyframes`, () => {
         it(`should warn on redeclare keyframes in root`, () => {
             testStylableCore(`
-                /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                /* @analyze-warn word(a) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`a`)} */
                 @keyframes a {}
 
-                /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                /* @analyze-warn word(a) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`a`)} */
                 @keyframes a {}
             `);
         });
         it(`should warn on redeclare keyframes in identical @media nesting`, () => {
             testStylableCore(`
                 @media (max-width: 1px) {
-                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    /* @analyze-warn word(a) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`a`)} */
                     @keyframes a {}
                 }
                 @media (max-width: 1px) {
-                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    /* @analyze-warn word(a) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`a`)} */
                     @keyframes a {}
 
-                    /* @analyze-warn word(a) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`a`)} */
+                    /* @analyze-warn word(a) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`a`)} */
                     @keyframes a {}
                 }
             `);
@@ -366,17 +374,17 @@ describe(`features/css-keyframes`, () => {
 
                     /* 
                         @atrule entry__before
-                        @analyze-warn(local before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                        @analyze-warn(local before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                             `before`
                         )}
                     */
                     @keyframes before {}
                     
                     /*
-                        @analyze-warn(import before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                        @analyze-warn(import before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                             `before`
                         )}
-                        @analyze-warn(import after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                        @analyze-warn(import after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                             `after`
                         )}
                     */
@@ -384,7 +392,7 @@ describe(`features/css-keyframes`, () => {
                     
                     /* 
                         @atrule entry__after
-                        @analyze-warn(local after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                        @analyze-warn(local after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                             `after`
                         )}
                     */
@@ -425,7 +433,7 @@ describe(`features/css-keyframes`, () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': ``,
                 '/entry.st.css': `
-                    /* @transform-error word(unknown) ${CSSKeyframes.diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
+                    /* @transform-error word(unknown) ${keyframesDiagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
                         `unknown`,
                         `./imported.st.css`
                     )} */
@@ -593,7 +601,7 @@ describe(`features/css-keyframes`, () => {
                 
                 @keyframes move {
                     /* 
-                        @transform-warn ${STMixin.diagnostics.INVALID_MERGE_OF(
+                        @transform-error ${mixinDiagnostics.INVALID_MERGE_OF(
                             `0%:hover {
                     color: red;
                 }`

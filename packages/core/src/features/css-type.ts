@@ -9,6 +9,7 @@ import { isCompRoot, stringifySelector } from '../helpers/selector';
 import { getOriginDefinition } from '../helpers/resolve';
 import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface ElementSymbol extends StylableDirectives {
     _kind: 'element';
@@ -18,9 +19,12 @@ export interface ElementSymbol extends StylableDirectives {
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
-    UNSCOPED_TYPE_SELECTOR(name: string) {
-        return `unscoped type selector "${name}" will affect all elements of the same type in the document`;
-    },
+    UNSCOPED_TYPE_SELECTOR: createDiagnosticReporter(
+        `03001`,
+        'warning',
+        (name: string) =>
+            `unscoped type selector "${name}" will affect all elements of the same type in the document`
+    ),
 };
 
 // HOOKS
@@ -32,10 +36,12 @@ export const hooks = createFeature<{
     analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes] }): void {
         if (node.nodes) {
             // error on functional type
-            context.diagnostics.error(
-                rule,
+            context.diagnostics.report(
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
-                { word: stringifySelector(node) }
+                {
+                    node: rule,
+                    word: stringifySelector(node),
+                }
             );
         }
         addType(context, node.value, rule);
@@ -112,7 +118,8 @@ export function validateTypeScoping({
     if (locallyScoped === false) {
         if (CSSClass.checkForScopedNodeAfter(context, rule, nodes, index) === false) {
             if (reportUnscoped) {
-                context.diagnostics.warn(rule, diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+                context.diagnostics.report(diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+                    node: rule,
                     word: node.value,
                 });
             }

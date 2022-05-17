@@ -1,6 +1,6 @@
 import path from 'path';
 import * as postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { murmurhash3_32_gc } from './murmurhash';
 import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
@@ -52,38 +52,55 @@ const stValuesMap = {
     '-st-global': true,
 } as const;
 
-export const processorWarnings = {
-    ROOT_AFTER_SPACING() {
-        return '".root" class cannot be used after native elements or selectors external to the stylesheet';
-    },
-    STATE_DEFINITION_IN_ELEMENT() {
-        return 'cannot define pseudo states inside a type selector';
-    },
-    STATE_DEFINITION_IN_COMPLEX() {
-        return 'cannot define pseudo states inside complex selectors';
-    },
-    CANNOT_RESOLVE_EXTEND(name: string) {
-        return `cannot resolve '-st-extends' type for '${name}'`;
-    },
-    CANNOT_EXTEND_IN_COMPLEX() {
-        return `cannot define "-st-extends" inside a complex selector`;
-    },
-    OVERRIDE_TYPED_RULE(key: string, name: string) {
-        return `override "${key}" on typed rule "${name}"`;
-    },
-    INVALID_NAMESPACE_DEF() {
-        return 'invalid @namespace';
-    },
-    EMPTY_NAMESPACE_DEF() {
-        return '@namespace must contain at least one character or digit';
-    },
-
-    INVALID_NAMESPACE_REFERENCE() {
-        return 'st-namespace-reference dose not have any value';
-    },
-    INVALID_NESTING(child: string, parent: string) {
-        return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
-    },
+export const processorDiagnostics = {
+    ROOT_AFTER_SPACING: createDiagnosticReporter(
+        '11001',
+        'warning',
+        () =>
+            '".root" class cannot be used after native elements or selectors external to the stylesheet'
+    ),
+    STATE_DEFINITION_IN_ELEMENT: createDiagnosticReporter(
+        '11002',
+        'error',
+        () => 'cannot define pseudo states inside a type selector'
+    ),
+    STATE_DEFINITION_IN_COMPLEX: createDiagnosticReporter(
+        '11003',
+        'error',
+        () => 'cannot define pseudo states inside complex selectors'
+    ),
+    CANNOT_RESOLVE_EXTEND: createDiagnosticReporter(
+        '11004',
+        'error',
+        (name: string) => `cannot resolve '-st-extends' type for '${name}'`
+    ),
+    CANNOT_EXTEND_IN_COMPLEX: createDiagnosticReporter(
+        '11005',
+        'error',
+        () => `cannot define "-st-extends" inside a complex selector`
+    ),
+    OVERRIDE_TYPED_RULE: createDiagnosticReporter(
+        '11006',
+        'warning',
+        (key: string, name: string) => `override "${key}" on typed rule "${name}"`
+    ),
+    INVALID_NAMESPACE_DEF: createDiagnosticReporter('11007', 'error', () => 'invalid @namespace'),
+    EMPTY_NAMESPACE_DEF: createDiagnosticReporter(
+        '11008',
+        'error',
+        () => '@namespace must contain at least one character or digit'
+    ),
+    INVALID_NAMESPACE_REFERENCE: createDiagnosticReporter(
+        '11010',
+        'error',
+        () => 'st-namespace-reference dose not have any value'
+    ),
+    INVALID_NESTING: createDiagnosticReporter(
+        '11011',
+        'error',
+        (child: string, parent: string) =>
+            `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`
+    ),
 };
 
 export class StylableProcessor implements FeatureContext {
@@ -110,12 +127,12 @@ export class StylableProcessor implements FeatureContext {
             }
             const parent = rule.parent;
             if (parent?.type === 'rule') {
-                this.diagnostics.error(
-                    rule,
-                    processorWarnings.INVALID_NESTING(
+                this.diagnostics.report(
+                    processorDiagnostics.INVALID_NESTING(
                         rule.selector,
                         (parent as postcss.Rule).selector
-                    )
+                    ),
+                    { node: rule }
                 );
             }
         });
@@ -170,10 +187,14 @@ export class StylableProcessor implements FeatureContext {
                         if (match[1].trim()) {
                             namespace = match[1];
                         } else {
-                            this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
+                            this.diagnostics.report(processorDiagnostics.EMPTY_NAMESPACE_DEF(), {
+                                node: atRule,
+                            });
                         }
                     } else {
-                        this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
+                        this.diagnostics.report(processorDiagnostics.INVALID_NAMESPACE_DEF(), {
+                            node: atRule,
+                        });
                     }
                     break;
                 }
@@ -236,7 +257,9 @@ export class StylableProcessor implements FeatureContext {
             if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
                 const i = node.text.indexOf('=');
                 if (i === -1) {
-                    this.diagnostics.error(node, processorWarnings.INVALID_NAMESPACE_REFERENCE());
+                    this.diagnostics.report(processorDiagnostics.INVALID_NAMESPACE_REFERENCE(), {
+                        node,
+                    });
                 } else {
                     pathToSource = stripQuotation(node.text.slice(i + 1));
                 }
@@ -335,33 +358,33 @@ export class StylableProcessor implements FeatureContext {
                 });
             } else if (node.type === `id`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
+                    this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
                         {
+                            node: rule,
                             word: stringifySelector(node),
                         }
                     );
                 }
             } else if (node.type === `attribute`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
+                    this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[${node.value}]`,
                             `attribute`
                         ),
                         {
+                            node: rule,
                             word: stringifySelector(node),
                         }
                     );
                 }
             } else if (node.type === `nesting`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
+                    this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
                         {
+                            node: rule,
                             word: stringifySelector(node),
                         }
                     );
@@ -372,7 +395,7 @@ export class StylableProcessor implements FeatureContext {
 
         // ToDo: check cases of root in nested selectors?
         if (!isRootValid(selectorAst)) {
-            this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
+            this.diagnostics.report(processorDiagnostics.ROOT_AFTER_SPACING(), { node: rule });
         }
         return locallyScoped;
     }
@@ -393,9 +416,13 @@ export class StylableProcessor implements FeatureContext {
                 );
             } else {
                 if (type === 'type') {
-                    this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_ELEMENT());
+                    this.diagnostics.report(processorDiagnostics.STATE_DEFINITION_IN_ELEMENT(), {
+                        node: decl,
+                    });
                 } else {
-                    this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_COMPLEX());
+                    this.diagnostics.report(processorDiagnostics.STATE_DEFINITION_IN_COMPLEX(), {
+                        node: decl,
+                    });
                 }
             }
         } else if (decl.prop === `-st-extends`) {
@@ -418,14 +445,18 @@ export class StylableProcessor implements FeatureContext {
                         getAlias(extendsRefSymbol) || extendsRefSymbol
                     );
                 } else {
-                    this.diagnostics.warn(
-                        decl,
-                        processorWarnings.CANNOT_RESOLVE_EXTEND(decl.value),
-                        { word: decl.value }
+                    this.diagnostics.report(
+                        processorDiagnostics.CANNOT_RESOLVE_EXTEND(decl.value),
+                        {
+                            node: decl,
+                            word: decl.value,
+                        }
                     );
                 }
             } else {
-                this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
+                this.diagnostics.report(processorDiagnostics.CANNOT_EXTEND_IN_COMPLEX(), {
+                    node: decl,
+                });
             }
         } else if (decl.prop === `-st-global`) {
             if (isSimple && type !== 'type') {
@@ -456,7 +487,8 @@ export class StylableProcessor implements FeatureContext {
         const name = selector.replace('.', '');
         const typedRule = STSymbol.get(this.meta, name) as ClassSymbol | ElementSymbol;
         if (typedRule && typedRule[key]) {
-            this.diagnostics.warn(node, processorWarnings.OVERRIDE_TYPED_RULE(key, name), {
+            this.diagnostics.report(processorDiagnostics.OVERRIDE_TYPED_RULE(key, name), {
+                node,
                 word: name,
             });
         }

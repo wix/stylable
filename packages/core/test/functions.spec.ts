@@ -1,8 +1,14 @@
-import { functionWarnings } from '@stylable/core/dist/functions';
+import { functionDiagnostics } from '@stylable/core/dist/functions';
 import { nativeFunctionsDic } from '@stylable/core/dist/native-reserved-lists';
-import { expectTransformDiagnostics, generateStylableRoot } from '@stylable/core-test-kit';
+import {
+    diagnosticBankReportToStrings,
+    expectTransformDiagnostics,
+    generateStylableRoot,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
+
+const functionStringDiagnostics = diagnosticBankReportToStrings(functionDiagnostics);
 
 // var receives special handling and standalone testing
 const testedNativeFunctions = Object.keys(nativeFunctionsDic).filter((func) => func !== 'var');
@@ -523,7 +529,10 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
 
                 expectTransformDiagnostics(config, [
-                    { message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' },
+                    {
+                        message: functionStringDiagnostics.UNKNOWN_FORMATTER(key),
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -557,7 +566,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
                 expectTransformDiagnostics(config, [
                     {
-                        message: functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
+                        message: functionStringDiagnostics.FAIL_TO_EXECUTE_FORMATTER(
                             'fail(a, red, c)',
                             'FAIL FAIL FAIL'
                         ),

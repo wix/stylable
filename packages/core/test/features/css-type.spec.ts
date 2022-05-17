@@ -1,6 +1,12 @@
 import { STImport, CSSType, STSymbol } from '@stylable/core/dist/features';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
+
+const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 
 describe(`features/css-type`, () => {
     it(`should process element types`, () => {
@@ -39,7 +45,7 @@ describe(`features/css-type`, () => {
         testStylableCore(`
             /* 
                 @rule(functional element type) div()
-                @analyze-error(functional element type) ${CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
+                @analyze-error(functional element type) ${cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                     `div`,
                     `type`
                 )}
@@ -53,7 +59,7 @@ describe(`features/css-type`, () => {
         anywhere in the selector: "div .local span"
         */
         const { sheets } = testStylableCore(`
-                /* @analyze-warn word(button) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                /* @analyze-warn word(button) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                     `button`
                 )} */
                 button {}
@@ -170,7 +176,7 @@ describe(`features/css-type`, () => {
                 '/entry.st.css': `
                     @st-import [importedPart] from "./classes.st.css";
 
-                    /* @analyze-warn word(importedPart) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                    /* @analyze-warn word(importedPart) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                         `importedPart`
                     )} */
                     importedPart {}

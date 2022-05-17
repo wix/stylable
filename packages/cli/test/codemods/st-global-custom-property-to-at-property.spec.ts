@@ -7,6 +7,9 @@ import {
     createTempDirectory,
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
+import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
+
+const cssCustomPropertyDiagnostics = diagnosticBankReportToStrings(CSSCustomProperty.diagnostics);
 
 describe('CLI Codemods st-global-custom-property-to-at-property', () => {
     let tempDir: ITempDirectory;
@@ -73,7 +76,7 @@ describe('CLI Codemods st-global-custom-property-to-at-property', () => {
 
         expect(stdout).to.match(
             new RegExp(
-                `style.st.css: ${CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
+                `style.st.css: ${cssCustomPropertyDiagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
                     '--myVar --mySecondVar'
                 )}`
             )

@@ -1,7 +1,7 @@
 import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { replaceRuleSelector } from './replace-rule-selector';
-import type { Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import type { ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
@@ -11,6 +11,14 @@ export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
 }
+
+export const customSelectorDiagnostics = {
+    UNDEFINED_SELECTOR: createDiagnosticReporter(
+        '18001',
+        'error',
+        (selector: string) => `The selector '${selector}' is undefined`
+    ),
+};
 
 export function expandCustomSelectors(
     rule: postcss.Rule,
@@ -22,9 +30,13 @@ export function expandCustomSelectors(
             CUSTOM_SELECTOR_RE,
             (extensionName, _matches, selector) => {
                 if (!customSelectors[extensionName] && diagnostics) {
-                    diagnostics.warn(rule, `The selector '${rule.selector}' is undefined`, {
-                        word: rule.selector,
-                    });
+                    diagnostics.report(
+                        customSelectorDiagnostics.UNDEFINED_SELECTOR(rule.selector),
+                        {
+                            node: rule,
+                            word: rule.selector,
+                        }
+                    );
                     return selector;
                 }
                 // TODO: support nested CustomSelectors
@@ -41,9 +53,14 @@ function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
-export const INVALID_MERGE_OF = (mergeValue: string) => {
-    return `invalid merge of: \n"${mergeValue}"`;
+export const utilDiagnostics = {
+    INVALID_MERGE_OF: createDiagnosticReporter(
+        '14001',
+        'error',
+        (mergeValue: string) => `invalid merge of: \n"${mergeValue}"`
+    ),
 };
+
 // ToDo: move to helpers/mixin
 export function mergeRules(
     mixinAst: postcss.Root,
@@ -97,7 +114,9 @@ export function mergeRules(
                     }
                     nextRule = node;
                 } else {
-                    report?.warn(rule, INVALID_MERGE_OF(node.toString()));
+                    report?.report(utilDiagnostics.INVALID_MERGE_OF(node.toString()), {
+                        node: rule,
+                    });
                 }
             }
         });
@@ -106,10 +125,20 @@ export function mergeRules(
     return rule;
 }
 
+export const sourcePathDiagnostics = {
+    MISSING_SOURCE_FILENAME: createDiagnosticReporter(
+        '17001',
+        'error',
+        () => 'missing source filename'
+    ),
+};
+
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
     const source = (root.source && root.source.input.file) || '';
     if (!source) {
-        diagnostics.error(root, 'missing source filename');
+        diagnostics.report(sourcePathDiagnostics.MISSING_SOURCE_FILENAME(), {
+            node: root,
+        });
     } else if (!isAbsolute(source)) {
         throw new Error('source filename is not absolute path: "' + source + '"');
     }

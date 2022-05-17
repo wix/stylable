@@ -5,6 +5,7 @@
     "types": ["node", "externals", "mocha"]
   },
   "references": [
+    { "path": "../../core-test-kit/src" },
     { "path": "../../e2e-test-kit/src" },
     { "path": "../../core/src" },
     { "path": "../src" }

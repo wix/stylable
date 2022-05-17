@@ -1,4 +1,4 @@
-import type { Diagnostic, DiagnosticType } from './diagnostics';
+import type { Diagnostic } from './diagnostics';
 import type { StylableMeta } from './stylable-meta';
 
 export interface EmitDiagnosticsContext {
@@ -13,21 +13,22 @@ export type DiagnosticsMode = 'auto' | 'strict' | 'loose';
 export function reportDiagnostic(
     ctx: EmitDiagnosticsContext,
     diagnosticsMode: DiagnosticsMode,
-    { message, type }: { message: string; type: DiagnosticType },
+    { code, message, severity }: Diagnostic,
     from?: string
 ) {
-    const error = new Error(from ? `[${from}]:\n\n${message}` : message);
+    const messageToPrint = `[${severity}: ${code}]: ${message}`;
+    const error = new Error(from ? `[${from}]:\n\n${messageToPrint}` : messageToPrint);
 
-    if (type === 'info') {
+    if (severity === 'info') {
         ctx.emitWarning(error);
 
         return;
     }
 
     if (diagnosticsMode === 'auto') {
-        if (type === 'warning') {
+        if (severity === 'warning') {
             ctx.emitWarning(error);
-        } else if (type === 'error') {
+        } else if (severity === 'error') {
             ctx.emitError(error);
         }
     } else if (diagnosticsMode === 'strict') {

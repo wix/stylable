@@ -9,6 +9,7 @@ import { namespace } from '../helpers/namespace';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface KeyframesSymbol {
     _kind: 'keyframes';
@@ -55,21 +56,32 @@ export const reservedKeyFrames = [
 ];
 
 export const diagnostics = {
-    ILLEGAL_KEYFRAMES_NESTING() {
-        return `illegal nested "@keyframes"`;
-    },
-    MISSING_KEYFRAMES_NAME() {
-        return '"@keyframes" missing parameter';
-    },
-    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL() {
-        return `"@keyframes" missing parameter inside "${GLOBAL_FUNC}()"`;
-    },
-    KEYFRAME_NAME_RESERVED(name: string) {
-        return `keyframes "${name}" is reserved`;
-    },
-    UNKNOWN_IMPORTED_KEYFRAMES(name: string, path: string) {
-        return `cannot resolve imported keyframes "${name}" from stylesheet "${path}"`;
-    },
+    ILLEGAL_KEYFRAMES_NESTING: createDiagnosticReporter(
+        '02001',
+        'error',
+        () => `illegal nested "@keyframes"`
+    ),
+    MISSING_KEYFRAMES_NAME: createDiagnosticReporter(
+        '02002',
+        'error',
+        () => '"@keyframes" missing parameter'
+    ),
+    MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL: createDiagnosticReporter(
+        '02003',
+        'error',
+        () => `"@keyframes" missing parameter inside "${GLOBAL_FUNC}()"`
+    ),
+    KEYFRAME_NAME_RESERVED: createDiagnosticReporter(
+        '02004',
+        'error',
+        (name: string) => `keyframes "${name}" is reserved`
+    ),
+    UNKNOWN_IMPORTED_KEYFRAMES: createDiagnosticReporter(
+        '02005',
+        'error',
+        (name: string, path: string) =>
+            `cannot resolve imported keyframes "${name}" from stylesheet "${path}"`
+    ),
 };
 
 const dataKey = plugableRecord.key<{
@@ -100,7 +112,7 @@ export const hooks = createFeature<{
         let { params: name } = atRule;
         // check nesting validity
         if (!isInConditionalGroup(atRule, true)) {
-            context.diagnostics.error(atRule, diagnostics.ILLEGAL_KEYFRAMES_NESTING());
+            context.diagnostics.report(diagnostics.ILLEGAL_KEYFRAMES_NESTING(), { node: atRule });
             return;
         }
         // save keyframes declarations
@@ -108,7 +120,7 @@ export const hooks = createFeature<{
         keyframesAsts.push(atRule);
         // validate name
         if (!name) {
-            context.diagnostics.warn(atRule, diagnostics.MISSING_KEYFRAMES_NAME());
+            context.diagnostics.report(diagnostics.MISSING_KEYFRAMES_NAME(), { node: atRule });
             return;
         }
         //
@@ -119,11 +131,14 @@ export const hooks = createFeature<{
             global = true;
         }
         if (name === '') {
-            context.diagnostics.warn(atRule, diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL());
+            context.diagnostics.report(diagnostics.MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL(), {
+                node: atRule,
+            });
             return;
         }
         if (reservedKeyFrames.includes(name)) {
-            context.diagnostics.error(atRule, diagnostics.KEYFRAME_NAME_RESERVED(name), {
+            context.diagnostics.report(diagnostics.KEYFRAME_NAME_RESERVED(name), {
+                node: atRule,
                 word: name,
             });
         }
@@ -144,10 +159,10 @@ export const hooks = createFeature<{
             if (res) {
                 resolved[name] = res;
             } else if (symbol.import) {
-                context.diagnostics.error(
-                    symbol.import.rule,
+                context.diagnostics.report(
                     diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(symbol.name, symbol.import.request),
                     {
+                        node: symbol.import.rule,
                         word: symbol.name,
                     }
                 );

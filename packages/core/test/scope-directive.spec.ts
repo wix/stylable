@@ -1,15 +1,19 @@
 import { expect, use } from 'chai';
 import type { AtRule, Declaration, Rule } from 'postcss';
 import {
+    diagnosticBankReportToStrings,
     expectTransformDiagnostics,
     flatMatch,
     generateStylableResult,
     processSource,
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
-import { transformerWarnings } from '@stylable/core/dist/index-internal';
+import { transformerDiagnostics } from '@stylable/core/dist/index-internal';
 import { SRule, getRuleScopeSelector } from '@stylable/core/dist/deprecated/postcss-ast-extension';
 import { STScope } from '@stylable/core/dist/features';
+
+const stScopeDiagnostics = diagnosticBankReportToStrings(STScope.diagnostics);
+const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 use(flatMatch);
 
@@ -509,9 +513,9 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal(
@@ -535,14 +539,14 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
                 {
-                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                     skipLocationCheck: true,
                 },
             ]);
@@ -567,9 +571,9 @@ describe('@st-scope', () => {
 
             const { meta } = expectTransformDiagnostics(config, [
                 {
-                    message: STScope.diagnostics.MISSING_SCOPING_PARAM(),
+                    message: stScopeDiagnostics.MISSING_SCOPING_PARAM(),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');
