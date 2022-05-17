@@ -10,7 +10,8 @@ export function packageNamespaceFactory(
     }: { dirname(path: string): string; relative(from: string, to: string): string },
     hashSalt = '',
     prefix = '',
-    normalizeVersion = (semver: string) => semver
+    normalizeVersion = (semver: string, _packageName: string) => semver,
+    buildNamespace = defaultBuildNamespace
 ): typeof processNamespace {
     return (namespace: string, stylesheetPath: string) => {
         const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
@@ -18,15 +19,32 @@ export function packageNamespaceFactory(
             throw new Error(`Could not find package.json for ${stylesheetPath}`);
         }
         const config = loadConfig(configPath) as { name: string; version: string };
-        const fromRoot = relative(dirname(configPath), stylesheetPath).replace(/\\/g, '/');
-        return (
-            prefix +
-            namespace +
-            murmurhash3_32_gc(
-                hashSalt + config.name + '@' + normalizeVersion(config.version) + '/' + fromRoot
-            )
+        return buildNamespace(
+            hashSalt,
+            prefix,
+            namespace,
+            config.name,
+            normalizeVersion(config.version, config.name),
+            relative(dirname(configPath), stylesheetPath).replace(/\\/g, '/')
         );
     };
+}
+
+export function defaultBuildNamespace(
+    hashSalt: string,
+    prefix: string,
+    namespace: string,
+    packageName: string,
+    packageVersion: string,
+    relativeFilePathFromPackageRoot: string
+) {
+    return (
+        prefix +
+        namespace +
+        murmurhash3_32_gc(
+            hashSalt + packageName + '@' + packageVersion + '/' + relativeFilePathFromPackageRoot
+        )
+    );
 }
 
 export function noCollisionNamespace({

@@ -159,7 +159,11 @@ export {
     nativePseudoClasses,
     nativePseudoElements,
 } from './native-reserved-lists';
-export { noCollisionNamespace, packageNamespaceFactory } from './resolve-namespace-factories';
+export {
+    noCollisionNamespace,
+    packageNamespaceFactory,
+    defaultBuildNamespace,
+} from './resolve-namespace-factories';
 export { DiagnosticsMode, EmitDiagnosticsContext, emitDiagnostics } from './report-diagnostic';
 import { visitMetaCSSDependenciesBFS as deprecatedVisitMetaCSSDependenciesBFS } from './visit-meta-css-dependencies';
 /**@deprecated use Stylable.getDependencies in v5*/
