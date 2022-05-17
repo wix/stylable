@@ -25,10 +25,10 @@ describe(`(${project})`, () => {
         const errors = projectRunner.getBuildErrorMessages();
         const warnings = projectRunner.getBuildWarningMessages();
         expect(errors, 'should only have two error').to.have.lengthOf(2);
-        expect(errors[0]).to.match(/cannot extend unknown symbol "NotFound"/);
+        expect(errors[0]).to.match(/\[error: \d+\]: cannot extend unknown symbol "NotFound"/);
         expect(warnings, 'should only have one warnings').to.have.lengthOf(1);
         expect(warnings[0]).to.match(
-            /unscoped type selector "NotFound" will affect all elements of the same type in the document/
+            /\[warning: \d+\]: unscoped type selector "NotFound" will affect all elements of the same type in the document/
         );
     });
 });

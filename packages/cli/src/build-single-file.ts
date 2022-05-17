@@ -10,7 +10,7 @@ import { ensureDirectory, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
 import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
-import type { Diagnostic } from './report-diagnostics';
+import type { CLIDiagnostic } from './report-diagnostics';
 import { errorMessages } from './messages';
 import type { IFileSystem } from '@file-services/types';
 
@@ -287,15 +287,17 @@ export function removeBuildProducts({
     };
 }
 
-export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
+export function getAllDiagnostics(res: StylableResults): CLIDiagnostic[] {
     const diagnostics = res.meta.transformDiagnostics
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
 
-    return diagnostics.map(({ message, node, word, severity }) => {
+    return diagnostics.map(({ message, node, word, severity, code }) => {
         const err = node.error(message, { word });
-        const diagnostic: Diagnostic = {
+        const diagnostic: CLIDiagnostic = {
             severity,
+            node,
+            code,
             message: `${message}\n${err.showSourceCode(true)}`,
             ...(node.source?.start && {}),
         };

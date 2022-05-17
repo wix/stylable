@@ -400,7 +400,7 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(
                 new RegExp(
-                    `\\[info\\]: ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
+                    `\\[info\\: \\d+]: ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         'stArray',
                         'st-array'
                     )}`

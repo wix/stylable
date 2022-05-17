@@ -1,15 +1,13 @@
-import type { DiagnosticSeverity } from '@stylable/core';
+import type { Diagnostic } from '@stylable/core';
 import { levels, Log } from './logger';
 
-export interface Diagnostic {
-    message: string;
-    severity: DiagnosticSeverity;
+export interface CLIDiagnostic extends Diagnostic {
     line?: number;
     column?: number;
     offset?: number;
 }
 
-export type DiagnosticMessages = Map<string, Diagnostic[]>;
+export type DiagnosticMessages = Map<string, CLIDiagnostic[]>;
 
 export function reportDiagnostics(
     log: Log,
@@ -20,7 +18,7 @@ export function reportDiagnostics(
     for (const [filePath, diagnostics] of diagnosticsMessages.entries()) {
         message += `\n[${filePath}]\n${diagnostics
             .sort(({ offset: a = 0 }, { offset: b = 0 }) => a - b)
-            .map(({ severity, message }) => `[${severity}]: ${message}`)
+            .map(({ code, severity, message }) => `[${severity}: ${code}]: ${message}`)
             .join('\n')}`;
     }
 

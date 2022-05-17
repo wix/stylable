@@ -5,9 +5,10 @@ import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { DiagnosticsManager } from './diagnostics-manager';
-import type { Diagnostic } from './report-diagnostics';
+import type { CLIDiagnostic } from './report-diagnostics';
 import { tryRun } from './build-tools';
 import { errorMessages, buildMessages } from './messages';
+import postcss from 'postcss';
 
 export async function build(
     {
@@ -275,9 +276,12 @@ export async function build(
     }
 
     function setFileErrorDiagnostic(filePath: string, error: any) {
-        const diagnostic: Diagnostic = {
+        const diagnostic: CLIDiagnostic = {
             severity: 'error',
             message: error instanceof Error ? error.message : String(error),
+            code: '00000',
+            node: postcss.root(),
+            filePath,
         };
 
         diagnosticsManager.set(identifier, filePath, {

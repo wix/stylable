@@ -390,7 +390,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     ),
                 },
                 {
-                    msg: '[error]: nesting of rules within rules is not supported',
+                    msg: '[error: 11011]: nesting of rules within rules is not supported',
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
