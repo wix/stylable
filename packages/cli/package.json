@@ -17,6 +17,7 @@
     "@stylable/build-tools": "^4.13.2",
     "@stylable/code-formatter": "^4.13.2",
     "@stylable/core": "^4.13.2",
+    "@stylable/module-utils": "^4.13.2",
     "@stylable/node": "^4.13.2",
     "@stylable/optimizer": "^4.13.2",
     "@wixc3/resolve-directory-context": "^2.0.0",
