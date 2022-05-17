@@ -76,4 +76,17 @@ describe('features/st-custom-selector', () => {
             'only a single unscoped diagnostic for span'
         ).to.eql(1);
     });
+    describe('css-pseudo-element', () => {
+        //
+        it.skip('should handle circular reference', () => {
+            // ToDo: refactor handleCustomSelector transformer flow to handle circularity
+            testStylableCore(`
+                @custom-selector :--x ::y;
+                @custom-selector :--y ::x;
+    
+                /* @rule :--y */
+                :--y {}
+            `);
+        });
+    });
 });
