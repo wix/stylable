@@ -1,9 +1,16 @@
 import chaiSubset from 'chai-subset';
 import { STCustomSelector, CSSType } from '@stylable/core/dist/features';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 
 chai.use(chaiSubset);
+
+const customSelectorDiagnostics = diagnosticBankReportToStrings(STCustomSelector.diagnostics);
+const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 
 describe('features/st-custom-selector', () => {
     // ToDo: move and add tests when extracting feature
@@ -38,13 +45,13 @@ describe('features/st-custom-selector', () => {
     });
     it('should handle unknown custom selector', () => {
         testStylableCore(`
-            /* @analyze-error(in custom) word(:--unknown) ${STCustomSelector.diagnostics.UNKNOWN_CUSTOM_SELECTOR(
+            /* @analyze-error(in custom) word(:--unknown) ${customSelectorDiagnostics.UNKNOWN_CUSTOM_SELECTOR(
                 ':--unknown'
             )} */
             @custom-selector :--x .before:--unknown.after;
 
             /* 
-                @transform-error(in selector) word(:--unknown)  ${STCustomSelector.diagnostics.UNKNOWN_CUSTOM_SELECTOR(
+                @transform-error(in selector) word(:--unknown)  ${customSelectorDiagnostics.UNKNOWN_CUSTOM_SELECTOR(
                     ':--unknown'
                 )} 
                 @rule .entry__before:--unknown.entry__after {}
@@ -54,7 +61,7 @@ describe('features/st-custom-selector', () => {
     });
     it('should report selector on atrule', () => {
         testStylableCore(`
-            /* @analyze-error ${CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR('div', 'type')} */
+            /* @analyze-error ${cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR('div', 'type')} */
             @custom-selector :--functional-div div();
         `);
     });
@@ -63,7 +70,7 @@ describe('features/st-custom-selector', () => {
             @custom-selector :--unscoped div;
             @custom-selector :--scoped .root div;
 
-            /* @analyze-warn ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('span')} */
+            /* @analyze-warn ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR('span')} */
             :--unscoped span {}
 
             :--scoped ul {}

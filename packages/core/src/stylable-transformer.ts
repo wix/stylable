@@ -3,10 +3,10 @@ import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
-import type { Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
-import { setStateToNode, stateErrors } from './pseudo-states';
+import { setStateToNode, stateDiagnostics } from './pseudo-states';
 import { parseSelectorWithCache, stringifySelector } from './helpers/selector';
 import {
     SelectorNode,
@@ -97,10 +97,12 @@ export interface TransformerOptions {
     resolverCache?: StylableResolverCache;
 }
 
-export const transformerWarnings = {
-    UNKNOWN_PSEUDO_ELEMENT(name: string) {
-        return `unknown pseudo element "${name}"`;
-    },
+export const transformerDiagnostics = {
+    UNKNOWN_PSEUDO_ELEMENT: createDiagnosticReporter(
+        '12001',
+        'error',
+        (name: string) => `unknown pseudo element "${name}"`
+    ),
 };
 
 export class StylableTransformer {
@@ -465,10 +467,10 @@ export class StylableTransformer {
                     !isVendorPrefixed(node.value) &&
                     !this.isDuplicateStScopeDiagnostic(context)
                 ) {
-                    this.diagnostics.warn(
-                        context.rule,
-                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(node.value),
+                    this.diagnostics.report(
+                        transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT(node.value),
                         {
+                            node: context.rule,
                             word: node.value,
                         }
                     );
@@ -527,7 +529,8 @@ export class StylableTransformer {
                 !isVendorPrefixed(node.value) &&
                 !this.isDuplicateStScopeDiagnostic(context)
             ) {
-                this.diagnostics.warn(context.rule, stateErrors.UNKNOWN_STATE_USAGE(node.value), {
+                this.diagnostics.report(stateDiagnostics.UNKNOWN_STATE_USAGE(node.value), {
+                    node: context.rule,
                     word: node.value,
                 });
             }
@@ -656,14 +659,21 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         );
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
-        ruleReports.forEach(({ message, type, options: { word } = {} }) => {
-            if (type === 'error') {
-                transformer.diagnostics.error(scope, message, { word: word || scope.params });
-            } else {
-                transformer.diagnostics.warn(scope, message, { word: word || scope.params });
-            }
-        });
+        for (const { code, message, severity, word } of ruleReports) {
+            transformer.diagnostics.report(
+                {
+                    code,
+                    message,
+                    severity,
+                },
+                {
+                    node: scope,
+                    word: word || scope.params,
+                }
+            );
+        }
     }
+
     return transformedScopes;
 }
 

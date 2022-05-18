@@ -1,6 +1,6 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
-import { Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import type { Imported } from '../features';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { stripQuotation } from '../helpers/string';
@@ -13,51 +13,71 @@ import postcssValueParser, {
 } from 'postcss-value-parser';
 
 export const parseImportMessages = {
-    ST_IMPORT_STAR() {
-        return '@st-import * is not supported';
-    },
-    INVALID_ST_IMPORT_FORMAT(errors: string[]) {
-        return `Invalid @st-import format:\n - ${errors.join('\n - ')}`;
-    },
+    ST_IMPORT_STAR: createDiagnosticReporter(
+        '05001',
+        'error',
+        () => '@st-import * is not supported'
+    ),
+    INVALID_ST_IMPORT_FORMAT: createDiagnosticReporter(
+        '05002',
+        'error',
+        (errors: string[]) => `Invalid @st-import format:\n - ${errors.join('\n - ')}`
+    ),
 
-    ST_IMPORT_EMPTY_FROM() {
-        return '@st-import must specify a valid "from" string value';
-    },
-    EMPTY_IMPORT_FROM() {
-        return '"-st-from" cannot be empty';
-    },
-
-    MULTIPLE_FROM_IN_IMPORT() {
-        return `cannot define multiple "-st-from" declarations in a single import`;
-    },
-    DEFAULT_IMPORT_IS_LOWER_CASE() {
-        return 'Default import of a Stylable stylesheet must start with an upper-case letter';
-    },
-    ILLEGAL_PROP_IN_IMPORT(propName: string) {
-        return `"${propName}" css attribute cannot be used inside :import block`;
-    },
-    FROM_PROP_MISSING_IN_IMPORT() {
-        return `"-st-from" is missing in :import block`;
-    },
-    INVALID_NAMED_IMPORT_AS(name: string) {
-        return `Invalid named import "as" with name "${name}"`;
-    },
-    INVALID_NESTED_KEYFRAMES(name: string) {
-        return `Invalid nested keyframes import "${name}"`;
-    },
+    ST_IMPORT_EMPTY_FROM: createDiagnosticReporter(
+        '05003',
+        'error',
+        () => '@st-import must specify a valid "from" string value'
+    ),
+    EMPTY_IMPORT_FROM: createDiagnosticReporter(
+        '05004',
+        'error',
+        () => '"-st-from" cannot be empty'
+    ),
+    MULTIPLE_FROM_IN_IMPORT: createDiagnosticReporter(
+        '05005',
+        'warning',
+        () => `cannot define multiple "-st-from" declarations in a single import`
+    ),
+    DEFAULT_IMPORT_IS_LOWER_CASE: createDiagnosticReporter(
+        '05006',
+        'warning',
+        () => 'Default import of a Stylable stylesheet must start with an upper-case letter'
+    ),
+    ILLEGAL_PROP_IN_IMPORT: createDiagnosticReporter(
+        '05007',
+        'warning',
+        (propName: string) => `"${propName}" css attribute cannot be used inside :import block`
+    ),
+    FROM_PROP_MISSING_IN_IMPORT: createDiagnosticReporter(
+        '05008',
+        'error',
+        () => `"-st-from" is missing in :import block`
+    ),
+    INVALID_NAMED_IMPORT_AS: createDiagnosticReporter(
+        '05009',
+        'error',
+        (name: string) => `Invalid named import "as" with name "${name}"`
+    ),
+    INVALID_NESTED_KEYFRAMES: createDiagnosticReporter(
+        '05010',
+        'error',
+        (name: string) => `Invalid nested keyframes import "${name}"`
+    ),
 };
 
 export const ensureImportsMessages = {
-    ATTEMPT_OVERRIDE_SYMBOL(
-        kind: 'default' | 'named' | 'keyframes',
-        origin: string,
-        override: string
-    ) {
-        return `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`;
-    },
-    PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE() {
-        return `Attempt to insert new a import in newImport "none" mode`;
-    },
+    ATTEMPT_OVERRIDE_SYMBOL: createDiagnosticReporter(
+        '16001',
+        'error',
+        (kind: 'default' | 'named' | 'keyframes', origin: string, override: string) =>
+            `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`
+    ),
+    PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE: createDiagnosticReporter(
+        '16002',
+        'error',
+        () => `Attempt to insert new a import in newImport "none" mode`
+    ),
 };
 
 export function createAtImportProps(
@@ -144,9 +164,9 @@ function createImportPatches(
     }
     if (newImport === 'none') {
         if (handled.size !== importPatches.length) {
-            diagnostics.error(
-                ast,
-                ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
+            diagnostics.report(
+                ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE(),
+                { node: ast }
             );
         }
         return patches;
@@ -221,7 +241,7 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
     const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
 
     if (imports && imports.star) {
-        diagnostics.error(atRule, parseImportMessages.ST_IMPORT_STAR());
+        diagnostics.report(parseImportMessages.ST_IMPORT_STAR(), { node: atRule });
     } else {
         setImportObjectFrom(imports.from || '', context, importObj);
 
@@ -231,7 +251,8 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
             !isCompRoot(importObj.defaultExport) &&
             importObj.from.endsWith(`.css`)
         ) {
-            diagnostics.warn(atRule, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+            diagnostics.report(parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                node: atRule,
                 word: importObj.defaultExport,
             });
         }
@@ -247,9 +268,11 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
             }
         }
         if (imports.errors.length) {
-            diagnostics.error(atRule, parseImportMessages.INVALID_ST_IMPORT_FORMAT(imports.errors));
+            diagnostics.report(parseImportMessages.INVALID_ST_IMPORT_FORMAT(imports.errors), {
+                node: atRule,
+            });
         } else if (!imports.from?.trim()) {
-            diagnostics.error(atRule, parseImportMessages.ST_IMPORT_EMPTY_FROM());
+            diagnostics.report(parseImportMessages.ST_IMPORT_EMPTY_FROM(), { node: atRule });
         }
     }
 
@@ -273,11 +296,13 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
             case `-st-from`: {
                 const importPath = stripQuotation(decl.value);
                 if (!importPath.trim()) {
-                    diagnostics.error(decl, parseImportMessages.EMPTY_IMPORT_FROM());
+                    diagnostics.report(parseImportMessages.EMPTY_IMPORT_FROM(), { node: decl });
                 }
 
                 if (fromExists) {
-                    diagnostics.warn(rule, parseImportMessages.MULTIPLE_FROM_IN_IMPORT());
+                    diagnostics.report(parseImportMessages.MULTIPLE_FROM_IN_IMPORT(), {
+                        node: rule,
+                    });
                 }
 
                 setImportObjectFrom(importPath, context, importObj);
@@ -287,7 +312,8 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
             case `-st-default`:
                 importObj.defaultExport = decl.value;
                 if (!isCompRoot(importObj.defaultExport) && importObj.from.endsWith(`.css`)) {
-                    diagnostics.warn(decl, parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                    diagnostics.report(parseImportMessages.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                        node: decl,
                         word: importObj.defaultExport,
                     });
                 }
@@ -304,7 +330,8 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                 }
                 break;
             default:
-                diagnostics.warn(decl, parseImportMessages.ILLEGAL_PROP_IN_IMPORT(decl.prop), {
+                diagnostics.report(parseImportMessages.ILLEGAL_PROP_IN_IMPORT(decl.prop), {
+                    node: decl,
                     word: decl.prop,
                 });
                 break;
@@ -312,7 +339,9 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
     });
 
     if (!importObj.from) {
-        diagnostics.error(rule, parseImportMessages.FROM_PROP_MISSING_IN_IMPORT());
+        diagnostics.report(parseImportMessages.FROM_PROP_MISSING_IN_IMPORT(), {
+            node: rule,
+        });
     }
     return importObj;
 }
@@ -451,15 +480,17 @@ function processImports(
                     if (currentSymbol === symbol) {
                         continue;
                     } else if (currentSymbol) {
-                        diagnostics.error(
-                            imported.rule,
+                        diagnostics.report(
                             ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
                                 op,
                                 currentSymbol === asName
                                     ? currentSymbol
                                     : `${currentSymbol} as ${asName}`,
                                 symbol === asName ? symbol : `${symbol} as ${asName}`
-                            )
+                            ),
+                            {
+                                node: imported.rule,
+                            }
                         );
                     } else {
                         imported[op][asName] = symbol;
@@ -471,13 +502,15 @@ function processImports(
                 if (!imported.defaultExport) {
                     imported.defaultExport = patch.defaultExport;
                 } else if (imported.defaultExport !== patch.defaultExport) {
-                    diagnostics.error(
-                        imported.rule,
+                    diagnostics.report(
                         ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
                             'default',
                             imported.defaultExport,
                             patch.defaultExport
-                        )
+                        ),
+                        {
+                            node: imported.rule,
+                        }
                     );
                 }
             }
@@ -507,10 +540,9 @@ function handleNamedTokens(
                     i += 4; //ignore next 4 tokens
                 } else {
                     i += !asName ? 3 : 2;
-                    diagnostics.warn(
+                    diagnostics.report(parseImportMessages.INVALID_NAMED_IMPORT_AS(token.value), {
                         node,
-                        parseImportMessages.INVALID_NAMED_IMPORT_AS(token.value)
-                    );
+                    });
                     continue;
                 }
             } else {
@@ -518,11 +550,11 @@ function handleNamedTokens(
             }
         } else if (token.type === 'function' && token.value === 'keyframes') {
             if (key === 'keyframesMap') {
-                diagnostics.warn(
-                    node,
+                diagnostics.report(
                     parseImportMessages.INVALID_NESTED_KEYFRAMES(
                         postcssValueParser.stringify(token)
-                    )
+                    ),
+                    { node }
                 );
             }
             handleNamedTokens(token, buckets, 'keyframesMap', node, diagnostics);

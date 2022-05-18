@@ -390,7 +390,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     ),
                 },
                 {
-                    msg: '[error]: nesting of rules within rules is not supported',
+                    msg: '[error: 11011]: nesting of rules within rules is not supported',
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
@@ -472,7 +472,8 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     ),
                 },
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
             ],
         });
@@ -525,7 +526,8 @@ describe('Stylable Cli Watch - Multiple projects', function () {
             args: ['-w'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -534,7 +536,9 @@ describe('Stylable Cli Watch - Multiple projects', function () {
         });
 
         expect(
-            output().match(STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'))
+            output().match(
+                STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css').message
+            )
         ).to.lengthOf(1);
     });
 });

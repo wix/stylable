@@ -1,8 +1,25 @@
 import type { ParsedValue } from '../types';
 import postcssValueParser from 'postcss-value-parser';
 import type { Node as ValueNode } from 'postcss-value-parser';
+import { createDiagnosticReporter, DiagnosticBase } from '../diagnostics';
 
-export type ReportWarning = (message: string, options?: { word: string }) => void;
+export type ReportWarning = (diagnostic: DiagnosticBase, options?: { word: string }) => void;
+
+export const valueDiagnostics = {
+    INVALID_NAMED_PARAMS: createDiagnosticReporter(
+        '13001',
+        'error',
+        () => `invalid named parameters (e.g. "func(name value, [name value, ...])")`
+    ),
+    MISSING_REQUIRED_FORMATTER_ARG: createDiagnosticReporter(
+        '13002',
+        'error',
+        (node: ParsedValue, argIndex: number) =>
+            `${postcssValueParser.stringify(
+                node as postcssValueParser.Node
+            )}: argument at index ${argIndex} is empty`
+    ),
+};
 
 export function getNamedArgs(node: ParsedValue) {
     const args: ParsedValue[][] = [];
@@ -73,11 +90,7 @@ export function getFormatterArgs(
 
     function checkEmptyArg() {
         if (reportWarning && argsResult.length && currentArg.trim() === '') {
-            reportWarning(
-                `${postcssValueParser.stringify(
-                    node as postcssValueParser.Node
-                )}: argument at index ${argIndex} is empty`
-            );
+            reportWarning(valueDiagnostics.MISSING_REQUIRED_FORMATTER_ARG(node, argIndex));
         }
     }
 }
@@ -148,11 +161,6 @@ export function validateAllowedNodesUntil(
 
     return true;
 }
-
-export const valueDiagnostics = {
-    INVALID_NAMED_PARAMS: () =>
-        `invalid named parameters (e.g. "func(name value, [name value, ...])")`,
-};
 
 export const strategies = {
     named: (node: any, reportWarning?: ReportWarning) => {

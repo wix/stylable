@@ -9,10 +9,14 @@ import { parseSelectorWithCache } from '../helpers/selector';
 import * as postcss from 'postcss';
 import { SelectorList, stringifySelectorAst } from '@tokey/css-selector-parser';
 import type { StylableMeta } from '../stylable-meta';
-import type { Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 
 export const diagnostics = {
-    UNKNOWN_CUSTOM_SELECTOR: (selector: string) => `The selector '${selector}' is undefined`,
+    UNKNOWN_CUSTOM_SELECTOR: createDiagnosticReporter(
+        '18001',
+        'error',
+        (selector: string) => `The selector '${selector}' is undefined`
+    ),
 };
 
 const dataKey =
@@ -56,13 +60,10 @@ export const hooks = createFeature({
         const inlined = transformCustomSelectorMap(customSelectors, (report) => {
             if (report.type === 'unknown' && analyzed[report.origin]) {
                 const unknownSelector = `:--${report.unknown}`;
-                context.diagnostics.error(
-                    analyzed[report.origin].def,
-                    diagnostics.UNKNOWN_CUSTOM_SELECTOR(unknownSelector),
-                    {
-                        word: unknownSelector,
-                    }
-                );
+                context.diagnostics.report(diagnostics.UNKNOWN_CUSTOM_SELECTOR(unknownSelector), {
+                    node: analyzed[report.origin].def,
+                    word: unknownSelector,
+                });
             } else if (report.type === 'circular') {
                 // ToDo: report error
             }
@@ -123,13 +124,10 @@ export function transformCustomSelectorInline(
         (report) => {
             if (options.diagnostics && options.node) {
                 const unknownSelector = `:--${report.unknown}`;
-                options.diagnostics.error(
-                    options.node,
-                    diagnostics.UNKNOWN_CUSTOM_SELECTOR(unknownSelector),
-                    {
-                        word: unknownSelector,
-                    }
-                );
+                options.diagnostics.report(diagnostics.UNKNOWN_CUSTOM_SELECTOR(unknownSelector), {
+                    node: options.node,
+                    word: unknownSelector,
+                });
             }
         }
     );

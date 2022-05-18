@@ -1,4 +1,4 @@
-import type { Location } from 'vscode-languageserver-types';
+import type { Location } from 'vscode-languageserver';
 
 export function dedupeRefs(refs: Location[]): Location[] {
     const res: Location[] = [];

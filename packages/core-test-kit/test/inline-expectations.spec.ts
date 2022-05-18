@@ -1,12 +1,18 @@
 import {
+    diagnosticBankReportToStrings,
     generateStylableResult,
     generateStylableRoot,
     testInlineExpects,
     testInlineExpectsErrors,
 } from '@stylable/core-test-kit';
-import { transformerWarnings } from '@stylable/core/dist/stylable-transformer';
+import { transformerDiagnostics } from '@stylable/core/dist/stylable-transformer';
 import { STImport, CSSType, CSSClass } from '@stylable/core/dist/features';
 import { expect } from 'chai';
+
+const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
+const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
+const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
+const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 describe('inline-expectations', () => {
     it('should throw when expected amount is not found (manual)', () => {
@@ -673,13 +679,13 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @analyze-warn(1 line) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                            /* @analyze-warn(1 line) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                                 `div`
                             )} */
                             div {}
 
                             /* @analyze-warn(multi line) word(span) 
-                                ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`span`)}
+                                ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`span`)}
                             */
                             span {}
                         `,
@@ -725,8 +731,8 @@ describe('inline-expectations', () => {
                         namespace: 'entry',
                         content: `
                             /* 
-                                @analyze-warn ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)}
-                                @analyze-warn(label) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                                @analyze-warn ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)}
+                                @analyze-warn(label) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                                     `div`
                                 )}
                             */
@@ -742,11 +748,11 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `analyze`,
-                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
                     ),
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `analyze`,
-                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
                         `(label): `
                     ),
                 ])
@@ -759,12 +765,12 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                        /* @analyze-warn word(single) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                        /* @analyze-warn word(single) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                             `div`
                         )} */
                         div {}
                         
-                        /* @analyze-warn(many words) word(one two) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                        /* @analyze-warn(many words) word(one two) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                             `div`
                         )} */
                         div {}
@@ -778,12 +784,12 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `analyze`,
                         `single`,
-                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
                     ),
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `analyze`,
                         `one two`,
-                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
                         `(many words): `
                     ),
                 ])
@@ -796,10 +802,10 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                        /* @analyze-error ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)} */
+                        /* @analyze-error ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)} */
                         div {}
 
-                        /* @analyze-error(label) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                        /* @analyze-error(label) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                             `div`
                         )} */
                         div {}
@@ -814,13 +820,13 @@ describe('inline-expectations', () => {
                         `analyze`,
                         `error`,
                         `warning`,
-                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
                     ),
                     testInlineExpectsErrors.diagnosticsSeverityMismatch(
                         `analyze`,
                         `error`,
                         `warning`,
-                        CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
                         `(label): `
                     ),
                 ])
@@ -864,10 +870,10 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @analyze-warn word(comp) ${STImport.diagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
+                            /* @analyze-warn word(comp) ${stImportDiagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
                             @st-import comp from "./x.st.css";
                             
-                            /* @analyze-warn ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
+                            /* @analyze-warn ${stImportDiagnostics.ST_IMPORT_EMPTY_FROM()} */
                             @st-import comp from "./x.st.css";
                         `,
                     },
@@ -877,7 +883,7 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.diagnosticExpectedNotFound(
                     `analyze`,
-                    STImport.diagnostics.ST_IMPORT_EMPTY_FROM()
+                    stImportDiagnostics.ST_IMPORT_EMPTY_FROM()
                 )
             );
         });
@@ -964,7 +970,7 @@ describe('inline-expectations', () => {
                         @st-import [unknown] from './other.st.css';
 
                         .root {
-                            /* @transform-error(1 line) ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
+                            /* @transform-error(1 line) ${cssClassDiagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
                                 `unknown`
                             )}*/
                             -st-extends: unknown;
@@ -972,7 +978,7 @@ describe('inline-expectations', () => {
 
                         .part {
                             /* @transform-error(multi line) 
-                                ${CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(`unknown`)}*/
+                                ${cssClassDiagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(`unknown`)}*/
                             -st-extends: unknown;
                         }
                         `,
@@ -1024,10 +1030,10 @@ describe('inline-expectations', () => {
                             @st-import [unknown] from './unknown.st.css';
 
                             /* 
-                                @transform-warn ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
+                                @transform-warn ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                                     `./unknown.st.css`
                                 )}
-                                @transform-warn(label) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
+                                @transform-warn(label) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                                     `./unknown.st.css`
                                 )}
                             */
@@ -1041,11 +1047,11 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `transform`,
-                        STImport.diagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`)
+                        stImportDiagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`)
                     ),
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `transform`,
-                        STImport.diagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`),
+                        stImportDiagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`),
                         `(label): `
                     ),
                 ])
@@ -1058,12 +1064,12 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                        /* @transform-warn word(something-else) ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                        /* @transform-warn word(something-else) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
                             `not-a-real-thing`
                         )} */
                         .root::not-a-real-thing {}
                         
-                        /* @transform-warn(many) word(a b c) ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                        /* @transform-warn(many) word(a b c) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
                             `not-a-real-thing`
                         )} */
                         .root::not-a-real-thing {}
@@ -1077,12 +1083,12 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `transform`,
                         `something-else`,
-                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`)
+                        transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`)
                     ),
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `transform`,
                         `a b c`,
-                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
+                        transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
                         `(many): `
                     ),
                 ])
@@ -1095,12 +1101,12 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                        /* @transform-info ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                        /* @transform-info ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
                             `not-a-real-thing`
                         )} */
                         .root::not-a-real-thing {}
                         
-                        /* @transform-error(label) ${transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(
+                        /* @transform-warning(label) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
                             `not-a-real-thing`
                         )} */
                         .root::not-a-real-thing {}
@@ -1114,14 +1120,14 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsSeverityMismatch(
                         `transform`,
                         `info`,
-                        `warning`,
-                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`)
+                        `error`,
+                        transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`)
                     ),
                     testInlineExpectsErrors.diagnosticsSeverityMismatch(
                         `transform`,
-                        `error`,
                         `warning`,
-                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
+                        `error`,
+                        transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
                         `(label): `
                     ),
                 ])
@@ -1165,12 +1171,12 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @transform-warn(should match) word(./x.st.css) ${STImport.diagnostics.UNKNOWN_IMPORTED_FILE(
+                            /* @transform-error(should match) word(./x.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                                 `./x.st.css`
                             )} */
                             @st-import A from "./x.st.css";
 
-                            /* @transform-warn(should fail) ${STImport.diagnostics.ST_IMPORT_EMPTY_FROM()} */
+                            /* @transform-error(should fail) ${stImportDiagnostics.ST_IMPORT_EMPTY_FROM()} */
                             @st-import B from "./x.st.css";
                         `,
                     },
@@ -1181,7 +1187,7 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.diagnosticExpectedNotFound(
                     `transform`,
-                    STImport.diagnostics.ST_IMPORT_EMPTY_FROM()
+                    stImportDiagnostics.ST_IMPORT_EMPTY_FROM()
                 )
             );
         });

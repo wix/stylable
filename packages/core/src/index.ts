@@ -1,5 +1,5 @@
 export { Stylable, StylableConfig } from './stylable';
-export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
+export { Diagnostics, Diagnostic, DiagnosticSeverity } from './diagnostics';
 export type {
     StylableSymbol,
     ClassSymbol,
@@ -14,7 +14,7 @@ export type {
     ComputedStVar,
     FlatComputedStVar,
 } from './features';
-export type { StylableMeta } from './stylable-meta';
+export { StylableMeta } from './stylable-meta';
 export type { CSSResolve, JSResolve } from './stylable-resolver';
 export type { CSSDependency, JSDependency, Dependency } from './visit-meta-css-dependencies';
 export type { StylableResults, RuntimeStVar } from './stylable-transformer';

@@ -1,7 +1,7 @@
 import { dirname, relative } from 'path';
 import postcssValueParser from 'postcss-value-parser';
 import type * as postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
@@ -66,11 +66,18 @@ export class StylableEvaluator {
 
 // old API
 
-export const functionWarnings = {
-    FAIL_TO_EXECUTE_FORMATTER: (resolvedValue: string, message: string) =>
-        `failed to execute formatter "${resolvedValue}" with error: "${message}"`,
-    UNKNOWN_FORMATTER: (name: string) =>
-        `cannot find native function or custom formatter called ${name}`,
+export const functionDiagnostics = {
+    FAIL_TO_EXECUTE_FORMATTER: createDiagnosticReporter(
+        '15001',
+        'error',
+        (resolvedValue: string, message: string) =>
+            `failed to execute formatter "${resolvedValue}" with error: "${message}"`
+    ),
+    UNKNOWN_FORMATTER: createDiagnosticReporter(
+        '15002',
+        'error',
+        (name: string) => `cannot find native function or custom formatter called ${name}`
+    ),
 };
 
 export function resolveArgumentsValue(
@@ -181,13 +188,15 @@ export function processDeclarationValue(
                 } catch (error) {
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                     if (diagnostics && node) {
-                        diagnostics.warn(
-                            node,
-                            functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
+                        diagnostics.report(
+                            functionDiagnostics.FAIL_TO_EXECUTE_FORMATTER(
                                 parsedNode.resolvedValue,
                                 (error as Error)?.message
                             ),
-                            { word: (node as postcss.Declaration).value }
+                            {
+                                node,
+                                word: (node as postcss.Declaration).value,
+                            }
                         );
                     }
                 }
@@ -218,7 +227,8 @@ export function processDeclarationValue(
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
             } else if (node) {
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
+                diagnostics.report(functionDiagnostics.UNKNOWN_FORMATTER(value), {
+                    node,
                     word: value,
                 });
             }
@@ -257,12 +267,14 @@ export function processDeclarationValue(
                     const invalidNode = initialNode || node;
 
                     if (invalidNode) {
-                        diagnostics.warn(
-                            invalidNode,
+                        diagnostics.report(
                             STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
                                 [...(rootArgument ? [rootArgument] : []), ...args].join(', ')
                             ),
-                            { word: value }
+                            {
+                                node: invalidNode,
+                                word: value,
+                            }
                         );
                     } else {
                         // TODO: catch broken variable resolutions without a node

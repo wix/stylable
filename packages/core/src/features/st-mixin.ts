@@ -5,21 +5,18 @@ import * as STCustomSelector from './st-custom-selector';
 import type { ElementSymbol } from './css-type';
 import type { ClassSymbol } from './css-class';
 import { createSubsetAst } from '../helpers/rule';
-import {
-    diagnostics as MixinHelperDiagnostics,
-    parseStMixin,
-    parseStPartialMixin,
-} from '../helpers/mixin';
+import { mixinHelperDiagnostics, parseStMixin, parseStPartialMixin } from '../helpers/mixin';
 import { resolveArgumentsValue } from '../functions';
 import { cssObjectToAst } from '../parser';
 import * as postcss from 'postcss';
 import type { FunctionNode, WordNode } from 'postcss-value-parser';
 import { fixRelativeUrls } from '../stylable-assets';
-import { isValidDeclaration, mergeRules, INVALID_MERGE_OF } from '../stylable-utils';
+import { isValidDeclaration, mergeRules, utilDiagnostics } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
 import type { CSSResolve } from '../stylable-resolver';
 import type { StylableTransformer } from '../stylable-transformer';
 import { dirname } from 'path';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface MixinValue {
     type: string;
@@ -40,30 +37,45 @@ export const MixinType = {
 };
 
 export const diagnostics = {
-    VALUE_CANNOT_BE_STRING: MixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
-    INVALID_NAMED_PARAMS: MixinHelperDiagnostics.INVALID_NAMED_PARAMS,
-    INVALID_MERGE_OF: INVALID_MERGE_OF,
-    PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
-        return `"${MixinType.PARTIAL}" can only be used with override arguments provided, missing overrides on "${type}"`;
-    },
-    UNKNOWN_MIXIN(name: string) {
-        return `unknown mixin: "${name}"`;
-    },
-    OVERRIDE_MIXIN(mixinType: string) {
-        return `override ${mixinType} on same rule`;
-    },
-    FAILED_TO_APPLY_MIXIN(error: string) {
-        return `could not apply mixin: ${error}`;
-    },
-    JS_MIXIN_NOT_A_FUNC() {
-        return `js mixin must be a function`;
-    },
-    CIRCULAR_MIXIN(circularPaths: string[]) {
-        return `circular mixin found: ${circularPaths.join(' --> ')}`;
-    },
-    UNKNOWN_MIXIN_SYMBOL(name: string) {
-        return `cannot mixin unknown symbol "${name}"`;
-    },
+    VALUE_CANNOT_BE_STRING: mixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
+    INVALID_NAMED_PARAMS: mixinHelperDiagnostics.INVALID_NAMED_PARAMS,
+    INVALID_MERGE_OF: utilDiagnostics.INVALID_MERGE_OF,
+    PARTIAL_MIXIN_MISSING_ARGUMENTS: createDiagnosticReporter(
+        '10001',
+        'error',
+        (type: string) =>
+            `"${MixinType.PARTIAL}" can only be used with override arguments provided, missing overrides on "${type}"`
+    ),
+    UNKNOWN_MIXIN: createDiagnosticReporter(
+        '10002',
+        'error',
+        (name: string) => `unknown mixin: "${name}"`
+    ),
+    OVERRIDE_MIXIN: createDiagnosticReporter(
+        '10003',
+        'warning',
+        (mixinType: string) => `override ${mixinType} on same rule`
+    ),
+    FAILED_TO_APPLY_MIXIN: createDiagnosticReporter(
+        '10004',
+        'error',
+        (error: string) => `could not apply mixin: ${error}`
+    ),
+    JS_MIXIN_NOT_A_FUNC: createDiagnosticReporter(
+        '10005',
+        'error',
+        () => `js mixin must be a function`
+    ),
+    UNKNOWN_MIXIN_SYMBOL: createDiagnosticReporter(
+        '10007',
+        'error',
+        (name: string) => `cannot mixin unknown symbol "${name}"`
+    ),
+    CIRCULAR_MIXIN: createDiagnosticReporter(
+        '10006',
+        'error',
+        (circularPaths: string[]) => `circular mixin found: ${circularPaths.join(' --> ')}`
+    ),
 };
 
 // HOOKS
@@ -146,10 +158,10 @@ function collectDeclMixins(
                     mixinRefSymbol._kind === 'element')
             ) {
                 if (mixin.partial && Object.keys(mixin.options).length === 0) {
-                    context.diagnostics.warn(
-                        decl,
+                    context.diagnostics.report(
                         diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
                         {
+                            node: decl,
                             word: mixin.type,
                         }
                     );
@@ -160,7 +172,8 @@ function collectDeclMixins(
                 };
                 mixins.push(refedMixin);
             } else {
-                context.diagnostics.warn(decl, diagnostics.UNKNOWN_MIXIN(mixin.type), {
+                context.diagnostics.report(diagnostics.UNKNOWN_MIXIN(mixin.type), {
+                    node: decl,
                     word: mixin.type,
                 });
             }
@@ -175,7 +188,7 @@ function collectDeclMixins(
             (partials.length && decl.prop === MixinType.PARTIAL) ||
             (nonPartials.length && decl.prop === MixinType.ALL)
         ) {
-            context.diagnostics.warn(decl, diagnostics.OVERRIDE_MIXIN(decl.prop));
+            context.diagnostics.report(diagnostics.OVERRIDE_MIXIN(decl.prop), { node: decl });
         }
         if (partials.length && nonPartials.length) {
             mixins = isInPartial ? nonPartials.concat(mixins) : partials.concat(mixins);
@@ -213,17 +226,15 @@ export function appendMixin(context: FeatureTransformContext, config: ApplyMixin
             try {
                 handleJSMixin(context, config, resolvedMixin.symbol);
             } catch (e) {
-                context.diagnostics.error(
-                    config.rule,
-                    diagnostics.FAILED_TO_APPLY_MIXIN(String(e)),
-                    {
-                        word: config.mixDef.mixin.type,
-                    }
-                );
+                context.diagnostics.report(diagnostics.FAILED_TO_APPLY_MIXIN(String(e)), {
+                    node: config.rule,
+                    word: config.mixDef.mixin.type,
+                });
                 return;
             }
         } else {
-            context.diagnostics.error(config.rule, diagnostics.JS_MIXIN_NOT_A_FUNC(), {
+            context.diagnostics.report(diagnostics.JS_MIXIN_NOT_A_FUNC(), {
+                node: config.rule,
                 word: config.mixDef.mixin.type,
             });
         }
@@ -232,7 +243,8 @@ export function appendMixin(context: FeatureTransformContext, config: ApplyMixin
 
     // ToDo: report on unsupported mixed in symbol type
     const mixinDecl = config.mixDef.mixin.originDecl;
-    context.diagnostics.error(mixinDecl, diagnostics.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
+    context.diagnostics.report(diagnostics.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
+        node: mixinDecl,
         word: mixinDecl.value,
     });
 }
@@ -250,7 +262,8 @@ function checkRecursive(
     const isRecursive = path.includes(symbolName + ' from ' + meta.source);
     if (isRecursive) {
         // Todo: add test verifying word
-        report.warn(rule, diagnostics.CIRCULAR_MIXIN(path), {
+        report.report(diagnostics.CIRCULAR_MIXIN(path), {
+            node: rule,
             word: symbolName,
         });
         return true;

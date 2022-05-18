@@ -3,11 +3,14 @@ import { parseSelectorWithCache, scopeNestedSelector } from '../helpers/selector
 import type { ImmutablePseudoClass } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
 import type { SRule } from '../deprecated/postcss-ast-extension';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export const diagnostics = {
-    MISSING_SCOPING_PARAM() {
-        return '"@st-scope" missing scoping selector parameter';
-    },
+    MISSING_SCOPING_PARAM: createDiagnosticReporter(
+        '11009',
+        'error',
+        () => '"@st-scope" missing scoping selector parameter'
+    ),
 };
 
 // HOOKS
@@ -18,7 +21,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
             return;
         }
         if (!atRule.params) {
-            context.diagnostics.warn(atRule, diagnostics.MISSING_SCOPING_PARAM());
+            context.diagnostics.report(diagnostics.MISSING_SCOPING_PARAM(), { node: atRule });
         }
         analyzeRule(
             postcss.rule({

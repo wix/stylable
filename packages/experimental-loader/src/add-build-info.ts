@@ -6,7 +6,9 @@ export function addBuildInfo(ctx: LoaderContext<any>, namespace: string) {
     } catch (error) {
         ctx.emitWarning(
             new Error(
-                `Failed to add stylableNamespace buildInfo for: ${ctx.resourcePath} because ${(error as Error).message}`
+                `Failed to add stylableNamespace buildInfo for: ${ctx.resourcePath} because ${
+                    (error as Error).message
+                }`
             )
         );
     }

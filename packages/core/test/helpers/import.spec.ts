@@ -1,8 +1,16 @@
 import { expect } from 'chai';
 import { parse } from 'postcss';
 import { Diagnostics, ensureModuleImport } from '@stylable/core';
-import { ensureImportsMessages, parsePseudoImportNamed } from '@stylable/core/dist/helpers/import';
+import {
+    ensureImportsMessages,
+    parseImportMessages,
+    parsePseudoImportNamed,
+} from '@stylable/core/dist/helpers/import';
 import * as postcss from 'postcss';
+import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
+
+const parseImportsDiagnostics = diagnosticBankReportToStrings(parseImportMessages);
+const ensureImportsDiagnostics = diagnosticBankReportToStrings(ensureImportsMessages);
 
 describe(`helpers/import`, () => {
     describe('ensureModuleImport', () => {
@@ -39,7 +47,7 @@ describe(`helpers/import`, () => {
 
                 expect(diag.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diag.reports[0].message).to.equal(
-                    ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
+                    ensureImportsDiagnostics.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
                 );
                 expect(root.nodes, 'no imports added').to.have.lengthOf(0);
             });
@@ -465,7 +473,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import Test from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y')
                 );
             });
             it('should report collision diagnostics for named and not patch', () => {
@@ -481,7 +489,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y')
                 );
             });
             it('should report collision diagnostics for named "as" with "as" (no patch)', () => {
@@ -497,7 +505,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'X as Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'X as Y')
                 );
             });
             it('should report collision diagnostics for named "as" (no patch)', () => {
@@ -513,7 +521,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y')
                 );
             });
         });
@@ -615,7 +623,7 @@ describe(`helpers/import`, () => {
                     );
                     expect(diagnostics.reports).to.be.lengthOf(1);
                     expect(diagnostics.reports[0].message).to.equal(
-                        'Invalid named import "as" with name "x"'
+                        parseImportsDiagnostics.INVALID_NAMED_IMPORT_AS('x')
                     );
                 });
                 it('invalid nested keyframes', () => {
@@ -628,7 +636,7 @@ describe(`helpers/import`, () => {
                     );
                     expect(diagnostics.reports).to.be.lengthOf(1);
                     expect(diagnostics.reports[0].message).to.equal(
-                        'Invalid nested keyframes import "keyframes(b)"'
+                        parseImportsDiagnostics.INVALID_NESTED_KEYFRAMES('keyframes(b)')
                     );
                 });
             });

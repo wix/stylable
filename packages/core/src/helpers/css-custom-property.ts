@@ -1,5 +1,5 @@
 import type * as postcss from 'postcss';
-import type { Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import { stripQuotation } from '../helpers/string';
 
 const UNIVERSAL_SYNTAX_DEFINITION = '*';
@@ -10,18 +10,29 @@ interface AtPropertyValidationResponse {
 }
 
 export const atPropertyValidationWarnings = {
-    MISSING_REQUIRED_DESCRIPTOR(descriptorName: string) {
-        return `@property rules require a "${descriptorName}" descriptor`;
-    },
-    MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR() {
-        return '@property "initial-value" descriptor is optional only if the "syntax" is the universal syntax definition, otherwise the descriptor is required';
-    },
-    INVALID_DESCRIPTOR_TYPE(descriptorType: string) {
-        return `@property does not support descriptor of type "${descriptorType}"`;
-    },
-    INVALID_DESCRIPTOR_NAME(descriptorName: string) {
-        return `@property does not support descriptor named "${descriptorName}"`;
-    },
+    MISSING_REQUIRED_DESCRIPTOR: createDiagnosticReporter(
+        '01001',
+        'error',
+        (descriptorName: string) => `@property rules require a "${descriptorName}" descriptor`
+    ),
+    MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR: createDiagnosticReporter(
+        '01002',
+        'warning',
+        () =>
+            '@property "initial-value" descriptor is optional only if the "syntax" is the universal syntax definition, otherwise the descriptor is required'
+    ),
+    INVALID_DESCRIPTOR_TYPE: createDiagnosticReporter(
+        '01003',
+        'error',
+        (descriptorType: string) =>
+            `@property does not support descriptor of type "${descriptorType}"`
+    ),
+    INVALID_DESCRIPTOR_NAME: createDiagnosticReporter(
+        '01004',
+        'error',
+        (descriptorName: string) =>
+            `@property does not support descriptor named "${descriptorName}"`
+    ),
 };
 
 export function validateAtProperty(
@@ -40,10 +51,10 @@ export function validateAtProperty(
     for (const node of atRule.nodes) {
         if (node.type !== 'decl') {
             if (node.type === 'atrule' || node.type === 'rule') {
-                diagnostics.warn(
-                    node,
+                diagnostics.report(
                     atPropertyValidationWarnings.INVALID_DESCRIPTOR_TYPE(node.type),
                     {
+                        node,
                         word: 'params' in node ? node.params : node.selector,
                     }
                 );
@@ -53,13 +64,10 @@ export function validateAtProperty(
         }
 
         if (!AT_PROPERTY_DISCRIPTOR_LIST.includes(node.prop)) {
-            diagnostics.warn(
+            diagnostics.report(atPropertyValidationWarnings.INVALID_DESCRIPTOR_NAME(node.prop), {
                 node,
-                atPropertyValidationWarnings.INVALID_DESCRIPTOR_NAME(node.prop),
-                {
-                    word: node.prop,
-                }
-            );
+                word: node.prop,
+            });
 
             continue;
         }
@@ -68,11 +76,10 @@ export function validateAtProperty(
     }
 
     if (!atPropertyValues.has('syntax')) {
-        diagnostics.warn(
-            atRule,
-            atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('syntax'),
-            { word: name }
-        );
+        diagnostics.report(atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('syntax'), {
+            node: atRule,
+            word: name,
+        });
 
         return {
             valid: false,
@@ -80,11 +87,10 @@ export function validateAtProperty(
     }
 
     if (!atPropertyValues.has('inherits')) {
-        diagnostics.warn(
-            atRule,
-            atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('inherits'),
-            { word: name }
-        );
+        diagnostics.report(atPropertyValidationWarnings.MISSING_REQUIRED_DESCRIPTOR('inherits'), {
+            node: atRule,
+            word: name,
+        });
 
         return {
             valid: false,
@@ -95,10 +101,12 @@ export function validateAtProperty(
         !atPropertyValues.has('initial-value') &&
         atPropertyValues.get('syntax') !== UNIVERSAL_SYNTAX_DEFINITION
     ) {
-        diagnostics.warn(
-            atRule,
+        diagnostics.report(
             atPropertyValidationWarnings.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR(),
-            { word: name }
+            {
+                node: atRule,
+                word: name,
+            }
         );
 
         return {

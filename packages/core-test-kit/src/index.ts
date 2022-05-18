@@ -4,6 +4,7 @@ export {
     expectTransformDiagnostics,
     findTestLocations,
     shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
 } from './diagnostics';
 export {
     Config,
