@@ -9,6 +9,7 @@ import {
     StylableSymbol,
     CSSClass,
     STSymbol,
+    STCustomSelector,
     VarSymbol,
     CSSVarSymbol,
     KeyframesSymbol,
@@ -355,7 +356,9 @@ export class StylableResolver {
                     : meta.getClass(nameOrSymbol)
                 : nameOrSymbol;
 
-        const customSelector = isElement ? null : meta.customSelectors[':--' + name];
+        const customSelector = isElement
+            ? null
+            : STCustomSelector.getCustomSelectorExpended(meta, name);
 
         if (!symbol && !customSelector) {
             return [];

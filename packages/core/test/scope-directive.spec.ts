@@ -9,7 +9,6 @@ import {
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
 import { transformerDiagnostics } from '@stylable/core/dist/index-internal';
-import { SRule, getRuleScopeSelector } from '@stylable/core/dist/deprecated/postcss-ast-extension';
 import { STScope } from '@stylable/core/dist/features';
 
 const stScopeDiagnostics = diagnosticBankReportToStrings(STScope.diagnostics);
@@ -39,23 +38,6 @@ describe('@st-scope', () => {
                 },
             ]);
         });
-        it('should annotate rules under "@st-scope"', () => {
-            const meta = processSource(
-                `
-                @st-scope .root{
-                    .part {}
-                }
-            `,
-                { from: 'path/to/style.css' }
-            );
-
-            shouldReportNoDiagnostics(meta);
-            const rule = meta.ast.nodes[0] as SRule;
-            expect(getRuleScopeSelector(rule)).to.equal('.root');
-            expect(getRuleScopeSelector(rule.clone()), 'clone rules preserve stScope').to.equal(
-                '.root'
-            );
-        });
 
         it('should parse "@st-scope" directives with a new class', () => {
             const meta = processSource(
@@ -75,26 +57,6 @@ describe('@st-scope', () => {
                     params: '.newClass',
                 },
             ]);
-        });
-
-        it('should mark scope ref name on impacted rules', () => {
-            const meta = processSource(
-                `
-                @st-scope .root {
-                    .part {}
-                    .otherPart {}
-                }
-            `,
-                { from: 'path/to/style.css' }
-            );
-
-            const rules = meta.ast.nodes;
-
-            shouldReportNoDiagnostics(meta);
-
-            expect((rules[0] as Rule).selector).to.equal('.root .part');
-            expect((rules[1] as Rule).selector).to.equal('.root .otherPart');
-            expect(rules[2]).to.eql(undefined);
         });
     });
 

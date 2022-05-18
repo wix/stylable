@@ -1,5 +1,5 @@
 import path from 'path';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { murmurhash3_32_gc } from './murmurhash';
 import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
@@ -10,6 +10,7 @@ import {
     ElementSymbol,
     StylableDirectives,
     STVar,
+    STCustomSelector,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
 import {
@@ -22,7 +23,7 @@ import {
     CSSType,
     CSSKeyframes,
 } from './features';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
+import { getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
     walkSelector,
@@ -105,7 +106,6 @@ export const processorDiagnostics = {
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
-    private customSelectorData: Record<string, { isScoped: boolean }> = {};
     constructor(
         public diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
@@ -153,10 +153,9 @@ export class StylableProcessor implements FeatureContext {
 
             this.collectUrls(decl);
         });
+        STCustomSelector.hooks.analyzeDone(this);
 
         STSymbol.reportRedeclare(this);
-
-        prepareAST(this.meta, root);
 
         return this.meta;
     }
@@ -206,21 +205,11 @@ export class StylableProcessor implements FeatureContext {
                     });
                     break;
                 case 'custom-selector': {
-                    const params = atRule.params.split(/\s/);
-                    const customName = params.shift();
-                    if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
-                        const selector = atRule.params.replace(customName, '').trim();
-                        const isScoped = analyzeRule(
-                            postcss.rule({ selector, source: atRule.source }),
-                            { isScoped: false }
-                        );
-                        this.customSelectorData[customName] = {
-                            isScoped,
-                        };
-                        this.meta.customSelectors[customName] = selector;
-                    } else {
-                        // TODO: add warn there are two types one is not valid name and the other is empty name.
-                    }
+                    STCustomSelector.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
                     break;
                 }
                 case 'st-scope':
@@ -314,9 +303,10 @@ export class StylableProcessor implements FeatureContext {
                         walkContext: nodeContext,
                     });
                 } else if (node.value.startsWith('--')) {
+                    // ToDo: move to css-class feature
                     locallyScoped =
                         locallyScoped ||
-                        this.customSelectorData[`:${node.value}`]?.isScoped ||
+                        STCustomSelector.isScoped(this.meta, node.value.slice(2)) ||
                         false;
                 } else if (!knownPseudoClassesWithNestedSelectors.includes(node.value)) {
                     return walkSelector.skipNested;
@@ -500,29 +490,4 @@ export class StylableProcessor implements FeatureContext {
 
 export function processNamespace(namespace: string, source: string) {
     return namespace + murmurhash3_32_gc(source); // .toString(36);
-}
-
-export function prepareAST(meta: StylableMeta, ast: postcss.Root) {
-    const toRemove: Array<postcss.Node | (() => void)> = [];
-    ast.walk((node) => {
-        const input = { node, toRemove };
-        // namespace
-        if (node.type === 'atrule' && node.name === `namespace`) {
-            toRemove.push(node);
-        }
-        // custom selectors
-        if (node.type === 'rule') {
-            expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
-        } else if (node.type === 'atrule' && node.name === 'custom-selector') {
-            toRemove.push(node);
-        }
-        // extracted features
-        STImport.hooks.prepareAST(input);
-        STScope.hooks.prepareAST(input);
-        STVar.hooks.prepareAST(input);
-        CSSCustomProperty.hooks.prepareAST(input);
-    });
-    for (const removeOrNode of toRemove) {
-        typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
-    }
 }

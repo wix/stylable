@@ -1,56 +1,12 @@
 import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
-import { replaceRuleSelector } from './replace-rule-selector';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import type { ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
 
-export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
-
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
-}
-
-export const customSelectorDiagnostics = {
-    UNDEFINED_SELECTOR: createDiagnosticReporter(
-        '18001',
-        'error',
-        (selector: string) => `The selector '${selector}' is undefined`
-    ),
-};
-
-export function expandCustomSelectors(
-    rule: postcss.Rule,
-    customSelectors: Record<string, string>,
-    diagnostics?: Diagnostics
-): string {
-    if (rule.selector.includes(':--')) {
-        rule.selector = rule.selector.replace(
-            CUSTOM_SELECTOR_RE,
-            (extensionName, _matches, selector) => {
-                if (!customSelectors[extensionName] && diagnostics) {
-                    diagnostics.report(
-                        customSelectorDiagnostics.UNDEFINED_SELECTOR(rule.selector),
-                        {
-                            node: rule,
-                            word: rule.selector,
-                        }
-                    );
-                    return selector;
-                }
-                // TODO: support nested CustomSelectors
-                return ':matches(' + customSelectors[extensionName] + ')';
-            }
-        );
-
-        return (rule.selector = transformMatchesOnRule(rule, false));
-    }
-    return rule.selector;
-}
-
-function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
-    return replaceRuleSelector(rule, { lineBreak });
 }
 
 export const utilDiagnostics = {

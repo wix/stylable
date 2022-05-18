@@ -16,7 +16,7 @@ import {
 import {
     safeParse,
     StylableProcessor,
-    expandCustomSelectors,
+    STCustomSelector,
     StateParsedValue,
 } from '@stylable/core/dist/index-internal';
 import type {
@@ -294,7 +294,7 @@ export class Provider {
                     )
                 );
             }
-        } else if (Object.keys(meta.customSelectors).find((sym) => sym === ':--' + word)) {
+        } else if (STCustomSelector.getCustomSelector(meta, word)) {
             defs.push(
                 new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
             );
@@ -762,9 +762,9 @@ export class Provider {
             (ps.selector[0] as SelectorChunk).classes[0] ||
             (ps.selector[0] as SelectorChunk).customSelectors[0] ||
             chunkStrings[0];
-        const expandedLine: string = expandCustomSelectors(
-            postcss.rule({ selector: lineChunkAtCursor }),
-            meta.customSelectors
+        const expandedLine: string = STCustomSelector.transformCustomSelectorInline(
+            meta,
+            lineChunkAtCursor
         )
             .split(' ')
             .pop()!; // TODO: replace with selector parser
@@ -1822,9 +1822,9 @@ export function getDefSymbol(
         }
     }
 
-    const expandedLine: string = expandCustomSelectors(
-        postcss.rule({ selector: lineChunkAtCursor }),
-        meta.customSelectors
+    const expandedLine: string = STCustomSelector.transformCustomSelectorInline(
+        meta,
+        lineChunkAtCursor
     )
         .split(' ')
         .pop()!; // TODO: replace with selector parser

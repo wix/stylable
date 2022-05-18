@@ -18,13 +18,16 @@ import {
 } from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
-import { ClassSymbol, ElementSymbol, STMixin } from './features';
+import type { ClassSymbol, ElementSymbol, FeatureTransformContext } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
     STImport,
     STGlobal,
+    STScope,
+    STCustomSelector,
     STVar,
+    STMixin,
     CSSClass,
     CSSType,
     CSSKeyframes,
@@ -174,6 +177,7 @@ export class StylableTransformer {
         const transformResolveOptions = {
             context: transformContext,
         };
+        prepareAST(transformContext, ast);
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
         const keyframesResolve = CSSKeyframes.hooks.transformResolve(transformResolveOptions);
@@ -408,7 +412,7 @@ export class StylableTransformer {
                 }
                 const isFirstInSelector =
                     context.selectorAst[context.selectorIndex].nodes[0] === node;
-                const customSelector = meta.customSelectors[':--' + node.value];
+                const customSelector = STCustomSelector.getCustomSelectorExpended(meta, node.value);
                 if (customSelector) {
                     this.handleCustomSelector(
                         customSelector,
@@ -798,5 +802,31 @@ export class ScopeContext {
         ctx.additionalSelectors = [];
 
         return ctx;
+    }
+}
+
+/**
+ * in the process of moving transformations that shouldn't be in the analyzer.
+ * all changes were moved here to be called at the beginning of the transformer,
+ * and should be inlined in the process in the future.
+ */
+function prepareAST(context: FeatureTransformContext, ast: postcss.Root) {
+    // ToDo: inline transformations
+    const toRemove: Array<postcss.Node | (() => void)> = [];
+    ast.walk((node) => {
+        const input = { context, node, toRemove };
+        // namespace
+        if (node.type === 'atrule' && node.name === `namespace`) {
+            toRemove.push(node);
+        }
+        // extracted features
+        STImport.hooks.prepareAST(input);
+        STScope.hooks.prepareAST(input);
+        STVar.hooks.prepareAST(input);
+        STCustomSelector.hooks.prepareAST(input);
+        CSSCustomProperty.hooks.prepareAST(input);
+    });
+    for (const removeOrNode of toRemove) {
+        typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
     }
 }

@@ -9,6 +9,7 @@ import {
     STMixin,
     STSymbol,
     STVar,
+    STCustomSelector,
 } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 import { atPropertyValidationWarnings } from '@stylable/core/dist/helpers/css-custom-property';
@@ -19,11 +20,7 @@ import { functionDiagnostics } from '@stylable/core/dist/functions';
 import { stateDiagnostics } from '@stylable/core/dist/pseudo-states';
 import { processorDiagnostics } from '@stylable/core/dist/stylable-processor';
 import { transformerDiagnostics } from '@stylable/core/dist/stylable-transformer';
-import {
-    utilDiagnostics,
-    sourcePathDiagnostics,
-    customSelectorDiagnostics,
-} from '@stylable/core/dist/stylable-utils';
+import { utilDiagnostics, sourcePathDiagnostics } from '@stylable/core/dist/stylable-utils';
 
 describe('diagnostics error codes', () => {
     it('should assure all error codes are unique', () => {
@@ -40,6 +37,7 @@ describe('diagnostics error codes', () => {
             ...STMixin.diagnostics,
             ...STSymbol.diagnostics,
             ...STVar.diagnostics,
+            ...STCustomSelector.diagnostics,
             ...atPropertyValidationWarnings,
             ...parseImportMessages,
             ...ensureImportsMessages,
@@ -51,7 +49,6 @@ describe('diagnostics error codes', () => {
             ...transformerDiagnostics,
             ...utilDiagnostics,
             ...sourcePathDiagnostics,
-            ...customSelectorDiagnostics,
         };
 
         let failingCode = '';

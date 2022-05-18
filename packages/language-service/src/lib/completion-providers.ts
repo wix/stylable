@@ -17,6 +17,7 @@ import {
     nativePseudoClasses,
     nativePseudoElements,
     ResolvedElement,
+    STCustomSelector,
     systemValidators,
 } from '@stylable/core/dist/index-internal';
 import type { IFileSystem } from '@file-services/types';
@@ -473,7 +474,7 @@ export const SelectorCompletionProvider: CompletionProvider = {
                     )
             );
             comps.push(
-                ...Object.keys(meta.customSelectors).map((c) =>
+                ...STCustomSelector.getCustomSelectorNames(meta).map((c) =>
                     classCompletion(
                         c,
                         createDirectiveRange(position, fullLineText, lineChunkAtCursor),
@@ -1019,7 +1020,9 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                 comps = comps.concat(
                     Object.keys(res.meta.getAllClasses())
                         .concat(
-                            Object.keys(res.meta.customSelectors).map((s) => s.slice(':--'.length))
+                            STCustomSelector.getCustomSelectorNames(res.meta).map((s) =>
+                                s.slice(':--'.length)
+                            )
                         )
                         .filter((e) => e.startsWith(filter) && e !== 'root')
                         .map((c) => {
@@ -1062,7 +1065,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                     comps = comps.concat(
                         Object.keys(res.meta.getAllClasses())
                             .concat(
-                                Object.keys(res.meta.customSelectors).map((s) =>
+                                STCustomSelector.getCustomSelectorNames(res.meta).map((s) =>
                                     s.slice(':--'.length)
                                 )
                             )
