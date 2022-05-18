@@ -98,7 +98,7 @@ export function getCustomSelector(meta: StylableMeta, name: string): SelectorLis
     return analyzed[name]?.ast;
 }
 
-export function transformCustomSelectorByName(
+export function getCustomSelectorExpended(
     meta: StylableMeta,
     name: string
 ): string | undefined {

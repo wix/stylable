@@ -412,10 +412,7 @@ export class StylableTransformer {
                 }
                 const isFirstInSelector =
                     context.selectorAst[context.selectorIndex].nodes[0] === node;
-                const customSelector = STCustomSelector.transformCustomSelectorByName(
-                    meta,
-                    node.value
-                );
+                const customSelector = STCustomSelector.getCustomSelectorExpended(meta, node.value);
                 if (customSelector) {
                     this.handleCustomSelector(
                         customSelector,
