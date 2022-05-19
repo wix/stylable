@@ -43,7 +43,7 @@ describe(`testStylableCore()`, () => {
         const newMeta = stylable.analyze(`/new.st.css`);
         stylable.transform(newMeta);
 
-        expect(newMeta.outputAst?.toString().trim()).to.equal(`.entry__part {}`);
+        expect(newMeta.targetAst?.toString().trim()).to.equal(`.entry__part {}`);
     });
     describe(`multiple files`, () => {
         it(`should accept a multiple files (transform all by default)`, () => {

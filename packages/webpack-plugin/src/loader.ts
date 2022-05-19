@@ -21,7 +21,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
     const varType = this.target === 'oldie' ? 'var' : 'const';
 
     this.flagStylableModule({
-        css: meta.outputAst!.toString(),
+        css: meta.targetAst!.toString(),
         globals: meta.globals,
         exports,
         namespace: meta.namespace,

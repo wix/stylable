@@ -20,7 +20,7 @@ module.exports = {
                                 message: 'test info diagnostic!',
                                 severity: 'info',
                             },
-                            { node: result.meta.ast.root() }
+                            { node: result.meta.sourceAst.root() }
                         );
                         return result;
                     },

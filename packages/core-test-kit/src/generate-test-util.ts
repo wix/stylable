@@ -131,7 +131,7 @@ export function generateStylableResult(
 }
 
 export function generateStylableRoot(config: Config) {
-    return generateStylableResult(config).meta.outputAst!;
+    return generateStylableResult(config).meta.targetAst!;
 }
 
 export function generateStylableExports(config: Config) {

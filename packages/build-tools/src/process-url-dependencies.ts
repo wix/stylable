@@ -29,7 +29,7 @@ export function processUrlDependencies(
         }
     };
 
-    meta.outputAst!.walkDecls((node) => {
+    meta.targetAst!.walkDecls((node) => {
         processDeclarationFunctions(
             node,
             (functionNode) => {

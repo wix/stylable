@@ -139,7 +139,7 @@ export class StylableTransformer {
             keyframes: {},
         };
         meta.transformedScopes = null;
-        meta.outputAst = meta.ast.clone();
+        meta.targetAst = meta.sourceAst.clone();
         const context = {
             meta,
             diagnostics: this.diagnostics,
@@ -150,7 +150,7 @@ export class StylableTransformer {
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
-        this.transformAst(meta.outputAst, meta, metaExports);
+        this.transformAst(meta.targetAst, meta, metaExports);
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -248,7 +248,7 @@ export class StylableTransformer {
             }
         });
 
-        if (!mixinTransform && meta.outputAst && this.mode === 'development') {
+        if (!mixinTransform && meta.targetAst && this.mode === 'development') {
             this.addDevRules(meta);
         }
 
@@ -365,12 +365,12 @@ export class StylableTransformer {
         if (selectorList.length === 0) {
             context.elements.push([]);
         }
-        const outputAst = splitCompoundSelectors(selectorList);
-        context.additionalSelectors.forEach((addSelector) => outputAst.push(addSelector()));
-        for (let i = 0; i < outputAst.length; i++) {
-            selectorAst[i] = outputAst[i];
+        const targetAst = splitCompoundSelectors(selectorList);
+        context.additionalSelectors.forEach((addSelector) => targetAst.push(addSelector()));
+        for (let i = 0; i < targetAst.length; i++) {
+            selectorAst[i] = targetAst[i];
         }
-        return outputAst;
+        return targetAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
         const { currentAnchor, node, originMeta, topNestClassName } = context;
@@ -616,7 +616,7 @@ export class StylableTransformer {
         const resolvedSymbols = this.getResolvedSymbols(meta);
         for (const [className, resolved] of Object.entries(resolvedSymbols.class)) {
             if (resolved.length > 1) {
-                meta.outputAst!.walkRules(
+                meta.targetAst!.walkRules(
                     '.' + namespaceEscape(className, meta.namespace),
                     (rule) => {
                         const a = resolved[0];

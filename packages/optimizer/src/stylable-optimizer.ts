@@ -29,12 +29,11 @@ export class StylableOptimizer implements IStylableOptimizer {
         usageMapping: Record<string, boolean>
     ) {
         const {
-            meta: { globals, outputAst: _outputAst },
+            meta: { globals, targetAst },
             exports: jsExports,
         } = stylableResults;
-        const outputAst = _outputAst!;
 
-        this.optimizeAst(config, outputAst, usageMapping, jsExports, globals);
+        this.optimizeAst(config, targetAst as Root, usageMapping, jsExports, globals);
     }
 
     public getNamespace(namespace: string) {
@@ -47,25 +46,25 @@ export class StylableOptimizer implements IStylableOptimizer {
 
     public optimizeAst(
         config: OptimizeConfig,
-        outputAst: Root,
+        targetAst: Root,
         usageMapping: Record<string, boolean>,
         jsExports: StylableExports,
         globals: Record<string, boolean>
     ) {
         if (config.removeComments) {
-            this.removeComments(outputAst);
+            this.removeComments(targetAst);
         }
         if (config.removeStylableDirectives) {
-            this.removeStylableDirectives(outputAst);
+            this.removeStylableDirectives(targetAst);
         }
         if (config.removeUnusedComponents && usageMapping) {
-            this.removeUnusedComponents(outputAst, usageMapping);
+            this.removeUnusedComponents(targetAst, usageMapping);
         }
         if (config.removeEmptyNodes) {
-            this.removeEmptyNodes(outputAst);
+            this.removeEmptyNodes(targetAst);
         }
         this.optimizeAstAndExports(
-            outputAst,
+            targetAst,
             jsExports.classes,
             undefined,
             usageMapping,
@@ -202,12 +201,12 @@ export class StylableOptimizer implements IStylableOptimizer {
     }
 
     private removeUnusedComponents(
-        outputAst: Root,
+        targetAst: Root,
         usageMapping: Record<string, boolean>,
         shouldComment = false
     ) {
         const matchNamespace = new RegExp(`(.+)${delimiter}(.+)`);
-        outputAst.walkRules((rule) => {
+        targetAst.walkRules((rule) => {
             const outputSelectors = rule.selectors.filter((selector) => {
                 const selectorAst = parseCssSelector(selector);
                 return !this.isContainsUnusedParts(selectorAst[0], usageMapping, matchNamespace);

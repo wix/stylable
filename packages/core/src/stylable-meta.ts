@@ -34,9 +34,8 @@ const features = [
 
 export class StylableMeta {
     public data: PlugableRecord = {};
-    public rawAst: postcss.Root = this.ast.clone();
     public root = 'root';
-    public source: string = getSourcePath(this.ast, this.diagnostics);
+    public source: string = getSourcePath(this.sourceAst, this.diagnostics);
     public namespace = '';
     public urls: string[] = [];
     public transformDiagnostics: Diagnostics | null = null;
@@ -44,9 +43,9 @@ export class StylableMeta {
     /** @deprecated */
     public scopes: postcss.AtRule[] = [];
     // Generated during transform
-    public outputAst?: postcss.Root;
+    public targetAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
-    constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
+    constructor(public sourceAst: postcss.Root, public diagnostics: Diagnostics) {
         // initiate features
         const context: FeatureContext = { meta: this, diagnostics };
         for (const { hooks } of features) {

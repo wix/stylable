@@ -59,7 +59,7 @@ export function testStylableCore(
     // inline test - build all and test
     for (const path of allSheets) {
         const meta = stylable.analyze(path);
-        if (!meta.outputAst) {
+        if (!meta.targetAst) {
             // ToDo: test
             stylable.transform(meta);
         }

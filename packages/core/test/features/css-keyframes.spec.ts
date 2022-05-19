@@ -60,7 +60,7 @@ describe(`features/css-keyframes`, () => {
         expect(
             CSSKeyframes.getKeyframesStatements(meta),
             `CSSKeyframes.getKeyframesStatements(meta)`
-        ).to.containSubset([meta.ast.nodes[1], meta.ast.nodes[3]]);
+        ).to.containSubset([meta.sourceAst.nodes[1], meta.sourceAst.nodes[3]]);
     });
     it(`should namespace "animation" and "animation-name" declarations`, () => {
         const { sheets } = testStylableCore(`
@@ -130,7 +130,7 @@ describe(`features/css-keyframes`, () => {
 
         const { meta } = sheets['/entry.st.css'];
 
-        expect(meta.outputAst?.nodes[1]?.toString()).to.eql(`@keyframes {}`);
+        expect(meta.targetAst?.nodes[1]?.toString()).to.eql(`@keyframes {}`);
     });
     it('should report reserved @keyframes names', () => {
         CSSKeyframes.reservedKeyFrames.map((reserved) => {
@@ -494,7 +494,7 @@ describe(`features/css-keyframes`, () => {
             `);
 
             expect(
-                sheets[`/entry.st.css`].meta.outputAst?.toString().match(/@keyframes/g)!.length,
+                sheets[`/entry.st.css`].meta.targetAst?.toString().match(/@keyframes/g)!.length,
                 `only original @keyframes`
             ).to.eql(1);
         });
@@ -519,7 +519,7 @@ describe(`features/css-keyframes`, () => {
             });
 
             expect(
-                sheets[`/entry.st.css`].meta.outputAst?.toString(),
+                sheets[`/entry.st.css`].meta.targetAst?.toString(),
                 `@keyframes referenced & not copied`
             ).to.not.include(`@keyframes`);
         });

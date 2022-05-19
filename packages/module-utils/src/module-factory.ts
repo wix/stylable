@@ -32,7 +32,7 @@ export function stylableModuleFactory(
             `runtime.$`,
             `runtime.create`,
             `runtime.createRenderable`,
-            injectCSS ? JSON.stringify(res.meta.outputAst!.toString()) : '""',
+            injectCSS ? JSON.stringify(res.meta.targetAst!.toString()) : '""',
             '-1', // ToDo: calc depth for node as well
             'module.exports',
             '' /* afterModule */,

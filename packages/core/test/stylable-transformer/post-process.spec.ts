@@ -7,7 +7,7 @@ describe('post-process', () => {
             stylableConfig: {
                 hooks: {
                     postProcessor(res) {
-                        res.meta.outputAst!.walkRules((rule) => {
+                        res.meta.targetAst!.walkRules((rule) => {
                             rule.selector = rule.selector.replace(`.entry__part`, `.custom-part`);
                         });
                         res.exports.classes.part = `custom-part`;
@@ -18,7 +18,7 @@ describe('post-process', () => {
         });
 
         const { meta, exports } = sheets[`/entry.st.css`];
-        expect(meta.outputAst?.toString(), `change meta`).to.eql(`.custom-part {}`);
+        expect(meta.targetAst?.toString(), `change meta`).to.eql(`.custom-part {}`);
         expect(exports.classes.part, `JS exports`).to.eql(`custom-part`);
     });
 });

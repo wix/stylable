@@ -96,7 +96,7 @@ export const hooks = createFeature<{
         const imports = plugableRecord.getUnsafe(context.meta.data, dataKey);
         const dirContext = path.dirname(context.meta.source);
         // collect shallow imports
-        for (const node of context.meta.ast.nodes) {
+        for (const node of context.meta.sourceAst.nodes) {
             if (!isImportStatement(node)) {
                 continue;
             }

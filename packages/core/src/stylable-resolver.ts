@@ -432,7 +432,7 @@ function validateClassResolveExtends(
     deepResolved: CSSResolve<StylableSymbol> | JSResolve | null
 ): ReportError | undefined {
     return (res, extend) => {
-        const decl = findRule(meta.ast, '.' + name);
+        const decl = findRule(meta.sourceAst, '.' + name);
         if (decl) {
             // ToDo: move to STExtends
             if (res && res._kind === 'js') {
@@ -453,7 +453,7 @@ function validateClassResolveExtends(
             }
         } else {
             if (deepResolved?.symbol.alias) {
-                meta.ast.walkRules(new RegExp('\\.' + name), (rule) => {
+                meta.sourceAst.walkRules(new RegExp('\\.' + name), (rule) => {
                     diagnostics.report(CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
                         node: rule,
                         word: name,
