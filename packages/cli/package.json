@@ -17,13 +17,14 @@
     "@stylable/build-tools": "^4.13.2",
     "@stylable/code-formatter": "^4.13.2",
     "@stylable/core": "^4.13.2",
+    "@stylable/module-utils": "^4.13.2",
     "@stylable/node": "^4.13.2",
     "@stylable/optimizer": "^4.13.2",
     "@wixc3/resolve-directory-context": "^2.0.0",
     "decache": "^4.6.1",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
-    "yargs": "^17.4.1"
+    "yargs": "^17.5.1"
   },
   "files": [
     "bin",
