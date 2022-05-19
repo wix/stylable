@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 import {
-    type NamespaceBuilderOptions,
+    type NamespaceBuilderParams,
     createNamespaceStrategy,
     defaultNamespaceBuilder,
+    defaultNoMatchHandler,
 } from '@stylable/core/dist/helpers/namespace';
 
 describe('createNamespaceStrategy', () => {
@@ -43,7 +44,7 @@ describe('createNamespaceStrategy', () => {
         expect(usedInput).to.equal('__SALT__package@0.0.0//x.st.css');
     });
     it('should call buildNamespace hook', () => {
-        let usedOptions: NamespaceBuilderOptions | undefined;
+        let usedOptions: NamespaceBuilderParams | undefined;
         const resolveNamespace = createNamespaceStrategy({
             hashFn: () => '1',
             getPackageInfo: () => ({ name: 'package', version: '0.0.0', dirPath: '/package' }),
@@ -83,6 +84,15 @@ describe('createNamespaceStrategy', () => {
         expect(resolveNamespace('x', '/package/x2.st.css')).to.equal('x-2'); // hash 2
     });
     it('should throw when no unique namespace can be generated and hash slice size is larger then hash length', () => {
+        function getErrorMessage() {
+            try {
+                defaultNoMatchHandler(false, 'x-1', '/package/x2.st.css', '/package/x1.st.css');
+            } catch (e) {
+                return (e as Error).message;
+            }
+            return '';
+        }
+
         const resolveNamespace = createNamespaceStrategy({
             hashFn: () => '1',
             getPackageInfo: () => ({ name: 'package', version: '0.0.0', dirPath: '/package' }),
@@ -92,7 +102,28 @@ describe('createNamespaceStrategy', () => {
         expect(resolveNamespace('x', '/package/x1.st.css')).to.equal('x-1');
         expect(() => {
             resolveNamespace('x', '/package/x2.st.css');
-        }).to.throw('Could not create namespace for /package/x2.st.css');
+        }).to.throw(getErrorMessage());
+    });
+    it('should throw when no unique namespace can be generated in strict mode', () => {
+        function getErrorMessage() {
+            try {
+                defaultNoMatchHandler(true, 'x', '/package/x1.st.css', '/package/x.st.css');
+            } catch (e) {
+                return (e as Error).message;
+            }
+            return '';
+        }
+
+        const resolveNamespace = createNamespaceStrategy({
+            hashFn: () => '1',
+            getPackageInfo: () => ({ name: 'package', version: '0.0.0', dirPath: '/package' }),
+            normalizePath: (dirPath, filePath) => filePath.replace(dirPath, ''),
+            strict: true,
+        });
+        expect(resolveNamespace('x', '/package/x.st.css')).to.equal('x');
+        expect(() => {
+            resolveNamespace('x', '/package/x1.st.css');
+        }).to.throw(getErrorMessage());
     });
     it('should use minimum hash slice size', () => {
         const resolveNamespace = createNamespaceStrategy({

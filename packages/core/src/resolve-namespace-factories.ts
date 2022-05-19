@@ -12,13 +12,17 @@ export function packageNamespaceFactory(
     prefix = '',
     normalizeVersion = (semver: string) => semver
 ): typeof processNamespace {
-    return (namespace: string, stylesheetPath: string) => {
+    return (
+        namespace: string,
+        originStylesheetPath: string,
+        stylesheetPath: string = originStylesheetPath
+    ) => {
         const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
         if (!configPath) {
-            throw new Error(`Could not find package.json for ${stylesheetPath}`);
+            throw new Error(`Could not find package.json for ${originStylesheetPath}`);
         }
         const config = loadConfig(configPath) as { name: string; version: string };
-        const fromRoot = relative(dirname(configPath), stylesheetPath).replace(/\\/g, '/');
+        const fromRoot = relative(dirname(configPath), originStylesheetPath).replace(/\\/g, '/');
         return (
             prefix +
             namespace +

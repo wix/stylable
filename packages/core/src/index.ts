@@ -27,5 +27,8 @@ export { processNamespace } from './stylable-processor';
 export { parseModuleImportStatement, ensureModuleImport } from './helpers/import';
 export { validateCustomPropertyName } from './helpers/css-custom-property';
 
+// namespace helpers
+export * from './helpers/namespace';
+
 // deprecations
 export * from './index-deprecated';

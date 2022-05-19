@@ -8,7 +8,7 @@ export interface PackageInfo {
     dirPath: string;
 }
 
-export interface NamespaceBuilderOptions {
+export interface NamespaceBuilderParams {
     hashSalt: string;
     prefix: string;
     namespace: string;
@@ -20,7 +20,7 @@ export interface NamespaceBuilderOptions {
 }
 
 export interface NamespaceBuilder {
-    (options: NamespaceBuilderOptions): {
+    (options: NamespaceBuilderParams): {
         namespace: string;
         hashPart: string;
     };
@@ -32,6 +32,14 @@ export interface CreateNamespaceOptions {
     hashFragment?: 'full' | 'minimal' | number;
     buildNamespace?: NamespaceBuilder;
     getPackageInfo?: (filePath: string) => PackageInfo;
+    handleNoMatch?: (
+        strict: boolean,
+        namespace: string,
+        filePath: string,
+        usedBy?: string
+    ) => string;
+    hashSeparator?: string;
+    strict?: boolean;
     normalizePath: (dirPath: string, filePath: string) => string;
     hashFn: (i: string) => string | number;
 }
@@ -50,21 +58,27 @@ export function defaultNamespaceBuilder({
     hashSalt,
     paths,
     packageInfo,
-}: NamespaceBuilderOptions) {
+}: NamespaceBuilderParams) {
     return {
         namespace: prefix + namespace,
         hashPart: hashSalt + packageInfo.name + '@' + packageInfo.version + '/' + paths.origin,
     };
 }
 
-// function defaultHash(input: string) {
-//     //Node12 compatibility - we might want to use base64Url instead
-//     return createHash('sha256').update(input).digest('hex');
-// }
-
-// function normPath(packageRoot: string, stylesheetPath: string) {
-//     return relative(packageRoot, stylesheetPath).replace(/\\/g, '/');
-// }
+export function defaultNoMatchHandler(
+    strict: boolean,
+    ns: string,
+    stylesheetPath: string,
+    usedBy?: string
+): string {
+    throw new Error(
+        `Could not create namespace for:\n${stylesheetPath}\nthe last valid namespace tried was ${JSON.stringify(
+            ns
+        )}${usedBy ? ` that was used by:\n${usedBy}\n` : strict ? ' ' : ''}${
+            strict ? 'running on strict mode' : ''
+        }`
+    );
+}
 
 export function createNamespaceStrategy(options: CreateNamespaceOptions) {
     const {
@@ -73,6 +87,9 @@ export function createNamespaceStrategy(options: CreateNamespaceOptions) {
         hashFragment = 'minimal',
         buildNamespace = defaultNamespaceBuilder,
         getPackageInfo = defaultGetPackageInfo,
+        handleNoMatch = defaultNoMatchHandler,
+        hashSeparator = '-',
+        strict = false,
         hashFn,
         normalizePath,
     } = options;
@@ -81,12 +98,11 @@ export function createNamespaceStrategy(options: CreateNamespaceOptions) {
 
     return (
         namespace: string,
-        stylesheetPath: string,
-        stylesheetOriginPath: string = stylesheetPath
+        stylesheetOriginPath: string,
+        stylesheetPath: string = stylesheetOriginPath
     ) => {
         const packageInfo = getPackageInfo(stylesheetPath);
-
-        const results = buildNamespace({
+        const buildNamespaceParams = {
             prefix,
             hashSalt,
             namespace,
@@ -99,11 +115,11 @@ export function createNamespaceStrategy(options: CreateNamespaceOptions) {
                     : stylesheetOriginPath,
             },
             packageInfo,
-        });
-
-        const { namespace: resultNs, hashPart } = results;
+        };
+        const { namespace: resultNs, hashPart } = buildNamespace(buildNamespaceParams);
 
         const hashStr = hashFn(hashPart).toString();
+
         let i =
             typeof hashFragment === 'number'
                 ? hashFragment
@@ -111,19 +127,28 @@ export function createNamespaceStrategy(options: CreateNamespaceOptions) {
                 ? hashStr.length
                 : 0;
 
+        let finalNamespace = '';
         while (i <= hashStr.length) {
             const hashSlice = hashStr.slice(0, i);
-            const ns = resultNs + (hashSlice ? '-' + hashSlice : '');
-            const used = usedNamespaces.get(ns);
-            if (!used) {
-                usedNamespaces.set(ns, stylesheetPath);
-                return ns;
+            finalNamespace = resultNs + (hashSlice ? hashSeparator + hashSlice : '');
+            const usedBy = usedNamespaces.get(finalNamespace);
+            if (!usedBy) {
+                usedNamespaces.set(finalNamespace, stylesheetPath);
+                return finalNamespace;
             }
-            if (used === stylesheetPath) {
-                return ns;
+            if (usedBy === stylesheetPath) {
+                return finalNamespace;
+            } else if (strict) {
+                return handleNoMatch(strict, finalNamespace, stylesheetPath, usedBy);
             }
             i++;
         }
-        throw new Error('Could not create namespace for ' + stylesheetPath);
+
+        return handleNoMatch(
+            strict,
+            finalNamespace,
+            stylesheetPath,
+            usedNamespaces.get(finalNamespace)
+        );
     };
 }
