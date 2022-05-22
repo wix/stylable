@@ -28,7 +28,15 @@ export { parseModuleImportStatement, ensureModuleImport } from './helpers/import
 export { validateCustomPropertyName } from './helpers/css-custom-property';
 
 // namespace helpers
-export * from './helpers/namespace';
+export {
+    createNamespaceStrategy,
+    defaultNoMatchHandler,
+    defaultNamespaceBuilder,
+    CreateNamespaceOptions,
+    NamespaceBuilder,
+    NamespaceBuilderParams,
+    PackageInfo,
+} from './helpers/namespace';
 
 // deprecations
 export * from './index-deprecated';

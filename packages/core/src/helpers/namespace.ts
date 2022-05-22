@@ -1,3 +1,5 @@
+import { murmurhash3_32_gc } from '../murmurhash';
+
 export function namespace(name: string, namespace: string, delimiter = '__') {
     return namespace ? namespace + delimiter + name : name;
 }
@@ -20,10 +22,13 @@ export interface NamespaceBuilderParams {
 }
 
 export interface NamespaceBuilder {
-    (options: NamespaceBuilderParams): {
-        namespace: string;
-        hashPart: string;
-    };
+    (options: NamespaceBuilderParams):
+        | {
+              namespace: string;
+              hashPart: string;
+          }
+        | undefined
+        | null;
 }
 
 export interface CreateNamespaceOptions {
@@ -40,8 +45,8 @@ export interface CreateNamespaceOptions {
     ) => string;
     hashSeparator?: string;
     strict?: boolean;
+    hashFn?: (i: string) => string | number;
     normalizePath: (dirPath: string, filePath: string) => string;
-    hashFn: (i: string) => string | number;
 }
 
 function defaultGetPackageInfo() {
@@ -90,7 +95,7 @@ export function createNamespaceStrategy(options: CreateNamespaceOptions) {
         handleNoMatch = defaultNoMatchHandler,
         hashSeparator = '-',
         strict = false,
-        hashFn,
+        hashFn = murmurhash3_32_gc,
         normalizePath,
     } = options;
 
@@ -116,7 +121,8 @@ export function createNamespaceStrategy(options: CreateNamespaceOptions) {
             },
             packageInfo,
         };
-        const { namespace: resultNs, hashPart } = buildNamespace(buildNamespaceParams);
+        const { namespace: resultNs, hashPart } =
+            buildNamespace(buildNamespaceParams) ?? defaultNamespaceBuilder(buildNamespaceParams);
 
         const hashStr = hashFn(hashPart).toString();
 

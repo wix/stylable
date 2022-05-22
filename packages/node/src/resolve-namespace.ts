@@ -1,5 +1,4 @@
 import {
-    murmurhash3_32_gc,
     packageNamespaceFactory,
     createNamespaceStrategy,
     CreateNamespaceOptions,
@@ -17,7 +16,6 @@ export function resolveNamespaceFactory(
 
 export function createNamespaceStrategyNode(options: Partial<CreateNamespaceOptions> = {}) {
     return createNamespaceStrategy({
-        hashFn: murmurhash3_32_gc,
         normalizePath(packageRoot: string, stylesheetPath: string) {
             return relative(packageRoot, stylesheetPath).replace(/\\/g, '/');
         },

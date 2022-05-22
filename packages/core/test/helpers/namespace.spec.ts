@@ -43,7 +43,7 @@ describe('createNamespaceStrategy', () => {
         expect(resolveNamespace('x', '/package/x.st.css')).to.equal('x');
         expect(usedInput).to.equal('__SALT__package@0.0.0//x.st.css');
     });
-    it('should call buildNamespace hook', () => {
+    it('should provide custom control over namespace', () => {
         let usedOptions: NamespaceBuilderParams | undefined;
         const resolveNamespace = createNamespaceStrategy({
             hashFn: () => '1',
@@ -71,6 +71,19 @@ describe('createNamespaceStrategy', () => {
             },
         });
     });
+    it('should fallback to default namespace when custom buildNamespace returns undefined', () => {
+        const resolveNamespace = createNamespaceStrategy({
+            hashFn: () => '1',
+            hashFragment: 'full',
+            getPackageInfo: () => ({ name: 'package', version: '0.0.0', dirPath: '/package' }),
+            normalizePath: (dirPath, filePath) => filePath.replace(dirPath, ''),
+            buildNamespace() {
+                return undefined;
+            },
+        });
+
+        expect(resolveNamespace('x', '/package/x.st.css')).to.equal('x-1');
+    });
     it('should add a small part of the hash for same namespace from different file', () => {
         let nextHash = 0;
         const resolveNamespace = createNamespaceStrategy({
@@ -82,6 +95,26 @@ describe('createNamespaceStrategy', () => {
         expect(resolveNamespace('x', '/package/x.st.css')).to.equal('x'); // hash 0
         expect(resolveNamespace('x', '/package/x1.st.css')).to.equal('x-1'); // hash 1
         expect(resolveNamespace('x', '/package/x2.st.css')).to.equal('x-2'); // hash 2
+    });
+    it('should add a small part of the hash for same namespace from different file (with colliding starts)', () => {
+        const hashes = {
+            'package@0.0.0//x.st.css': '1',
+            'package@0.0.0//x1.st.css': '12',
+            'package@0.0.0//x2.st.css': '123',
+            'package@0.0.0//x3.st.css': '1234',
+        };
+        const resolveNamespace = createNamespaceStrategy({
+            hashFn: (input) => {
+                return hashes[input as keyof typeof hashes];
+            },
+            getPackageInfo: () => ({ name: 'package', version: '0.0.0', dirPath: '/package' }),
+            normalizePath: (dirPath, filePath) => filePath.replace(dirPath, ''),
+        });
+
+        expect(resolveNamespace('x', '/package/x.st.css')).to.equal('x');
+        expect(resolveNamespace('x', '/package/x1.st.css')).to.equal('x-1');
+        expect(resolveNamespace('x', '/package/x2.st.css')).to.equal('x-12');
+        expect(resolveNamespace('x', '/package/x3.st.css')).to.equal('x-123');
     });
     it('should throw when no unique namespace can be generated and hash slice size is larger then hash length', () => {
         function getErrorMessage() {
@@ -139,7 +172,7 @@ describe('createNamespaceStrategy', () => {
 
     it('should use full hash', () => {
         const resolveNamespace = createNamespaceStrategy({
-            hashFragment: 'full', // min size hash slice
+            hashFragment: 'full', // take the entire hash
             hashFn: () => '12345',
             getPackageInfo: () => ({ name: 'package', version: '0.0.0', dirPath: '/package' }),
             normalizePath: (dirPath, filePath) => filePath.replace(dirPath, ''),
