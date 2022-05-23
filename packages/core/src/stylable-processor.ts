@@ -239,10 +239,10 @@ export class StylableProcessor implements FeatureContext {
 
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
-        let length = this.meta.ast.nodes.length;
+        let length = this.meta.sourceAst.nodes.length;
 
         while (length--) {
-            const node = this.meta.ast.nodes[length];
+            const node = this.meta.sourceAst.nodes[length];
             if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
                 const i = node.text.indexOf('=');
                 if (i === -1) {

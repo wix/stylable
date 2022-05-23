@@ -71,7 +71,7 @@ describe('StylableOptimizer', () => {
 
         new StylableOptimizer().optimize({ removeUnusedComponents: true }, result, usageMapping);
 
-        expect(result.meta.outputAst!.toString().trim()).to.equal('');
+        expect(result.meta.targetAst!.toString().trim()).to.equal('');
     });
 
     it('minifyCSS', () => {
@@ -88,7 +88,7 @@ describe('StylableOptimizer', () => {
             },
         };
         const { meta } = generateStylableResult({ entry: index, files });
-        const output = new StylableOptimizer().minifyCSS(meta.outputAst!.toString());
+        const output = new StylableOptimizer().minifyCSS(meta.targetAst!.toString());
         expect(output).to.equal(`.${meta.namespace}__x{color:red}`);
     }).timeout(25000);
 });

@@ -78,7 +78,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal(
+            expect((meta.targetAst!.nodes[0] as Rule).selector).to.equal(
                 '.entry__root .entry__part'
             );
         });
@@ -100,7 +100,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal(
+            expect((meta.targetAst!.nodes[0] as Rule).selector).to.equal(
                 '.entry__scope1 .entry__part1, .entry__scope2 .entry__part1, .entry__scope1 .entry__part2, .entry__scope2 .entry__part2'
             );
         });
@@ -122,7 +122,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal('* .entry__part');
+            expect((meta.targetAst!.nodes[0] as Rule).selector).to.equal('* .entry__part');
         });
 
         it('should support :global() selector', () => {
@@ -142,7 +142,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal('.my-class .entry__part');
+            expect((meta.targetAst!.nodes[0] as Rule).selector).to.equal('.my-class .entry__part');
         });
 
         it('should selectors with internal parts', () => {
@@ -172,7 +172,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes[1] as Rule).selector).to.equal(
+            expect((meta.targetAst!.nodes[1] as Rule).selector).to.equal(
                 '.entry__root .imported__part .entry__part1, .entry__root .imported__part .entry__part2'
             );
         });
@@ -204,7 +204,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.first as Rule).selector).to.equal(
+            expect((meta.targetAst!.first as Rule).selector).to.equal(
                 '.imported__importedPart .entry__part'
             );
         });
@@ -229,7 +229,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes[2] as Rule).selector).to.equal(
+            expect((meta.targetAst!.nodes[2] as Rule).selector).to.equal(
                 '.entry__root .entry__part .entry__scopedPart'
             );
 
@@ -259,7 +259,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal(
+            expect((meta.targetAst!.nodes[0] as Rule).selector).to.equal(
                 '.entry__root .entry__part, .entry__root .entry__otherPart, .entry__root .entry__oneMorePart'
             );
         });
@@ -289,7 +289,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect(meta.outputAst!.first).to.flatMatch({
+            expect(meta.targetAst!.first).to.flatMatch({
                 selector: '.imported__root .entry__part',
             });
         });
@@ -319,7 +319,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect(meta.outputAst!.first).to.flatMatch({
+            expect(meta.targetAst!.first).to.flatMatch({
                 selector: '.entry__root .imported__root',
             });
         });
@@ -354,7 +354,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            const rule: Rule = meta.outputAst!.first as Rule;
+            const rule: Rule = meta.targetAst!.first as Rule;
             const decl: Declaration = rule.first as Declaration;
             expect(decl).to.equal(undefined);
         });
@@ -390,7 +390,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            const rule: Rule = meta.outputAst!.nodes[1] as Rule;
+            const rule: Rule = meta.targetAst!.nodes[1] as Rule;
             const decl: Declaration = rule.first as Declaration;
             expect(decl.value).to.equal('red');
         });
@@ -428,7 +428,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            const rule = meta.outputAst!.nodes[1] as Rule;
+            const rule = meta.targetAst!.nodes[1] as Rule;
             expect(rule.selector).to.equal('.entry__root.imported--myState');
         });
 
@@ -451,7 +451,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            const atRule = meta.outputAst!.nodes[0] as AtRule;
+            const atRule = meta.targetAst!.nodes[0] as AtRule;
             const rule = atRule.nodes[0] as Rule;
             expect(rule.selector).to.equal('.entry__root .entry__part');
         });
@@ -480,7 +480,7 @@ describe('@st-scope', () => {
                     severity: 'error',
                 },
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal(
+            expect((meta.targetAst!.first as Rule).selector).to.equal(
                 '.entry__root::unknownPart .entry__part'
             );
         });
@@ -512,7 +512,7 @@ describe('@st-scope', () => {
                     skipLocationCheck: true,
                 },
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal(
+            expect((meta.targetAst!.first as Rule).selector).to.equal(
                 '.entry__root::unknownPart .entry__part::unknownPart'
             );
         });
@@ -538,7 +538,7 @@ describe('@st-scope', () => {
                     severity: 'error',
                 },
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');
+            expect((meta.targetAst!.first as Rule).selector).to.equal('.entry__part');
         });
     });
 });

@@ -340,7 +340,7 @@ function createMixinRootFromCSSResolve(
     const mixDef = config.mixDef;
     const isRootMixin = resolvedClass.symbol.name === resolvedClass.meta.root;
     const mixinRoot = createSubsetAst<postcss.Root>(
-        resolvedClass.meta.ast,
+        resolvedClass.meta.sourceAst,
         (resolvedClass.symbol._kind === 'class' ? '.' : '') + resolvedClass.symbol.name,
         undefined,
         isRootMixin,

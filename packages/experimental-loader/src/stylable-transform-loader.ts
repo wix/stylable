@@ -122,11 +122,11 @@ const stylableLoader: LoaderDefinition = function (content) {
     ];
 
     if (mode !== 'development') {
-        optimizer.removeStylableDirectives(meta.outputAst!);
+        optimizer.removeStylableDirectives(meta.targetAst!);
     }
 
     postcss(plugins)
-        .process(meta.outputAst!, {
+        .process(meta.targetAst!, {
             from: this.resourcePath,
             to: this.resourcePath,
             map: false,

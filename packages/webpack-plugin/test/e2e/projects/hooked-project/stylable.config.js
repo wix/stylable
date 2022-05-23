@@ -8,7 +8,7 @@ module.exports.webpackPlugin = function (options) {
                 hooks: {
                     postProcessor(result) {
                         const actions = [];
-                        result.meta.outputAst.walkDecls((decl) => {
+                        result.meta.targetAst.walkDecls((decl) => {
                             actions.push(() =>
                                 decl.after(
                                     decl.clone({

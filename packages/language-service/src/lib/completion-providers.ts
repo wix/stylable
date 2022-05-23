@@ -314,8 +314,9 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
                 return topLevelDeclarations
                     .filter(
                         (d) =>
-                            !meta.ast.source!.input.css.includes(topLevelDirectives.namespace) ||
-                            d !== 'namespace'
+                            !meta.sourceAst.source!.input.css.includes(
+                                topLevelDirectives.namespace
+                            ) || d !== 'namespace'
                     )
                     .filter((d) => topLevelDirectives[d].startsWith(fullLineText.trim()))
                     .map((d) =>

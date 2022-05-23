@@ -45,7 +45,10 @@ export function getPath(fileName: string): postcss.Node[] {
     const pos = getCaretPosition(src);
     src = src.replace('|', '');
     const proc = createMeta(src, fullPath);
-    return pathFromPosition(proc.meta!.rawAst, new ProviderPosition(pos.line + 1, pos.character));
+    return pathFromPosition(
+        proc.meta!.sourceAst,
+        new ProviderPosition(pos.line + 1, pos.character)
+    );
 }
 
 export function getDefinition(fileName: string): ProviderLocation[] {

@@ -43,7 +43,7 @@ export interface IStylableOptimizer {
     getClassName(className: string): string;
     optimizeAst(
         config: OptimizeConfig,
-        outputAst: postcss.Root,
+        targetAst: postcss.Root,
         usageMapping: Record<string, boolean>,
         jsExports: StylableExports,
         globals: Record<string, boolean>
