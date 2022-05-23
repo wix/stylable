@@ -1,6 +1,7 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { dirname } from 'path';
+import { waitFor } from 'promise-assist';
 
 const project = 'simplest-project-target-node';
 const projectDir = dirname(
@@ -12,7 +13,7 @@ describe(`(${project})`, () => {
         {
             projectDir,
             launchOptions: {
-                // headless: false,
+                headless: false,
             },
         },
         before,
@@ -28,6 +29,11 @@ describe(`(${project})`, () => {
             { id: './node_modules/comp-lib/index.es.st.css', depth: '1' },
             { id: './src/index.st.css', depth: '2' },
         ]);
+
+        await waitFor(async () => {
+            const kind = await page.evaluate(() => document.querySelector('#kind')?.textContent);
+            expect(kind).to.equal('esm');
+        });
     });
 
     it('css is working', async () => {
