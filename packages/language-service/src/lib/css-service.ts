@@ -1,5 +1,4 @@
 import type { IFileSystem } from '@file-services/types';
-import path from 'path';
 import type * as postcss from 'postcss';
 import { getCSSLanguageService, HoverSettings, Stylesheet } from 'vscode-css-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -15,7 +14,9 @@ import {
     Range,
 } from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
-import { createMeta } from './provider';
+import { getAstNodeAt } from '@stylable/core/dist/index-internal';
+import type { StylableMeta } from '@stylable/core';
+import { getOffsetFromPosition } from './utils/postcss-ast-utils';
 
 function readDocRange(doc: TextDocument, rng: Range): string {
     const lines = doc.getText().split('\n');
@@ -119,7 +120,7 @@ export class CssService {
         return ast;
     }
 
-    public getDiagnostics(document: TextDocument): Diagnostic[] {
+    public getDiagnostics(document: TextDocument, meta: StylableMeta): Diagnostic[] {
         if (!document.uri.endsWith('.css')) {
             return [];
         }
@@ -128,11 +129,13 @@ export class CssService {
         return this.inner
             .doValidation(document, stylesheet)
             .filter((diag) => {
+                const atRuleName = readDocRange(document, diag.range);
+                const diagStart = diag.range.start;
+                const diagEnd = diag.range.end;
+
                 if (diag.code === 'emptyRules') {
                     return false;
-                }
-                const atRuleName = readDocRange(document, diag.range);
-                if (
+                } else if (
                     diag.code === 'unknownAtRules' &&
                     (atRuleName === '@custom-selector' ||
                         atRuleName === '@st-scope' ||
@@ -140,46 +143,70 @@ export class CssService {
                         atRuleName === '@st-global-custom-property')
                 ) {
                     return false;
-                }
-                if (
+                } else if (
                     diag.code === 'css-lcurlyexpected' &&
                     readDocRange(
                         document,
-                        Range.create(Position.create(diag.range.start.line, 0), diag.range.end)
+                        Range.create(Position.create(diagStart.line, 0), diagEnd)
                     ).startsWith('@custom-selector')
                 ) {
                     return false;
-                }
-                if (diag.code === 'css-rparentexpected' || diag.code === 'css-identifierexpected') {
+                } else if (
+                    diag.code === 'css-rparentexpected' ||
+                    diag.code === 'css-identifierexpected'
+                ) {
                     const line = readDocRange(
                         document,
-                        Range.create(Position.create(diag.range.start.line, 0), diag.range.end)
+                        Range.create(Position.create(diagStart.line, 0), diagEnd)
                     );
-                    const stateStart = findPseudoStateStart(line, diag.range.start.character);
+                    const stateStart = findPseudoStateStart(line, diagStart.character);
 
                     if (stateStart.index !== -1 && stateStart.openParens > 0) {
                         return false;
                     }
-                }
-                if (diag.code === 'unknownProperties') {
+                } else if (diag.code === 'unknownProperties') {
                     const prop = diag.message.match(/'(.*)'/)![1];
 
-                    const uri = URI.parse(document.uri);
-                    // on windows, uri.fsPath replaces separators with '\'
-                    // this breaks posix paths in-memory when running on windows
-                    // take raw posix path instead
-                    const filePath =
-                        uri.scheme === 'file' &&
-                        !uri.authority && // not UNC
-                        uri.path.charCodeAt(2) !== 58 && // the colon in "c:"
-                        path.isAbsolute(uri.path)
-                            ? uri.path
-                            : uri.fsPath;
-
-                    const src = this.fs.readFileSync(filePath, 'utf8');
-                    const meta = createMeta(src, filePath).meta;
-                    if (meta && Object.keys(meta.getAllSymbols()).some((ms) => ms === prop)) {
+                    if (meta.getStVar(prop)) {
                         return false;
+                    }
+                } else if (
+                    diag.code === 'css-mediaqueryexpected' ||
+                    diag.code === 'css-ruleorselectorexpected'
+                ) {
+                    // caused by @st-scope with special characters (e.g. @st-scope [div=rtl])
+                    const offset = getOffsetFromPosition(meta.rawAst.toString(), diag.range.start);
+                    const [astNode, _astNodeOffset] = getAstNodeAt(meta.rawAst, offset + 1);
+                    const stScopeSanitized = 'media   ';
+                    const astNodeStart = astNode.source?.start;
+                    const astNodeEnd = astNode.source?.end;
+
+                    if (
+                        astNode.type === 'atrule' &&
+                        astNode.name === stScopeSanitized &&
+                        astNodeEnd
+                    ) {
+                        // ruleorselectorexpected - shows on the last character of the @st-scope
+                        if (
+                            diagStart.line === astNodeEnd.line - 1 &&
+                            diagEnd.character === astNodeEnd.column
+                        ) {
+                            return false;
+                        }
+
+                        // mediaqueryexpected - shows on the special character in the @st-scope param
+                        if (
+                            astNodeStart &&
+                            diagStart.line >= astNodeStart.line - 1 &&
+                            diagStart.character >
+                                astNodeStart.column - 1 + stScopeSanitized.length &&
+                            diagStart.character <=
+                                astNodeStart.column +
+                                    stScopeSanitized.length +
+                                    astNode.params.length
+                        ) {
+                            return false;
+                        }
                     }
                 }
                 return true;

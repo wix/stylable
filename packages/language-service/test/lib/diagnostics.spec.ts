@@ -3,6 +3,7 @@ import { Stylable } from '@stylable/core';
 import { safeParse } from '@stylable/core/dist/index-internal';
 import { StylableLanguageService } from '@stylable/language-service';
 import { expect } from 'chai';
+import deindent from 'deindent';
 import { createDiagnostics } from '../test-kit/diagnostics-setup';
 
 describe('diagnostics', () => {
@@ -161,6 +162,40 @@ describe('diagnostics', () => {
                     
                     @media value(size) {
                         .part{}
+                    }
+                    `,
+                },
+                filePath
+            );
+
+            expect(diagnostics).to.eql([]);
+        });
+
+        it('should ignore errors for attribute selectors inside @st-scope', () => {
+            const filePath = '/style.st.css';
+
+            const diagnostics = createDiagnostics(
+                {
+                    [filePath]: deindent`
+                    @st-scope [div=rtl] {
+                         .root {}
+                    }
+                    `,
+                },
+                filePath
+            );
+
+            expect(diagnostics).to.eql([]);
+        });
+
+        it('should ignore errors for "*" selectors inside @st-scope', () => {
+            const filePath = '/style.st.css';
+
+            const diagnostics = createDiagnostics(
+                {
+                    [filePath]: deindent`
+                    @st-scope * {
+                         .root {}
                     }
                     `,
                 },
