@@ -458,7 +458,7 @@ function getCSSMixinRoots(
     for (const resolved of resolveChain) {
         const isRootMixin = resolved.symbol.name === resolved.meta.root;
         const mixinRoot = createSubsetAst<postcss.Root>(
-            resolved.meta.ast,
+            resolved.meta.sourceAst,
             (resolved.symbol._kind === 'class' ? '.' : '') + resolved.symbol.name,
             undefined,
             isRootMixin,

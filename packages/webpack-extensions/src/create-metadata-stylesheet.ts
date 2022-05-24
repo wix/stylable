@@ -44,7 +44,7 @@ export function rewriteImports(
     const sourcesByHash: Record<string, string> = {};
     for (const [meta, resolvedImports] of usedMeta.entries()) {
         const hash = ensureHash(meta, hashes);
-        const rawAst = meta.rawAst.clone();
+        const rawAst = meta.sourceAst.clone();
         for (const { resolved, stImport } of resolvedImports) {
             if (resolved && resolved._kind === 'css') {
                 const rawRule = rawAst.nodes?.find(ruleByLocation(stImport.rule));
@@ -103,7 +103,7 @@ export function ensureHash(meta: StylableMeta, hashes: Map<StylableMeta, string>
 export function createContentHashPerMeta(usedMeta: Iterable<StylableMeta>) {
     const hashes = new Map<StylableMeta, string>();
     for (const meta of usedMeta) {
-        hashes.set(meta, hashContent(meta.rawAst.toString()));
+        hashes.set(meta, hashContent(meta.sourceAst.toString()));
     }
     return hashes;
 }

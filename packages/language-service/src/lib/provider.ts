@@ -240,7 +240,7 @@ export class Provider {
                             position.line + 1,
                             position.character
                         );
-                        const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+                        const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
                         const selec = (pfp[pfp.length - 1] as postcss.Rule).selector;
 
                         // If called from -st-state, i.e. inside node, pos is not in selector.
@@ -358,7 +358,7 @@ export class Provider {
         const line = split[pos.line];
         let value = '';
 
-        const stPath = pathFromPosition(meta.rawAst, {
+        const stPath = pathFromPosition(meta.sourceAst, {
             line: pos.line + 1,
             character: pos.character + 1,
         });
@@ -727,7 +727,7 @@ export class Provider {
         cursorPosInLine: number,
         fs: IFileSystem
     ): ProviderOptions {
-        const path = pathFromPosition(meta.rawAst, {
+        const path = pathFromPosition(meta.sourceAst, {
             line: position.line + 1,
             character: position.character,
         });
@@ -834,7 +834,7 @@ function findRefs(
     const refs: Location[] = [];
 
     if (word.startsWith(':global(')) {
-        scannedMeta.rawAst.walkRules((rule) => {
+        scannedMeta.sourceAst.walkRules((rule) => {
             if (rule.selector.includes(word) && rule.source && rule.source.start) {
                 refs.push({
                     uri: URI.file(scannedMeta.source).toString(),
@@ -854,7 +854,7 @@ function findRefs(
         return refs;
     }
     const valueRegex = new RegExp('(\\.?' + word + ')(\\s|$|\\:|;|\\)|,)', 'g');
-    scannedMeta.rawAst.walkRules((rule) => {
+    scannedMeta.sourceAst.walkRules((rule) => {
         // Usage in selector
         const filterRegex = new RegExp('(\\.?' + word + ')(\\s|$|\\:|;|\\))', 'g');
         if (filterRegex.test(rule.selector) && !!rule.source && !!rule.source.start) {
@@ -890,7 +890,7 @@ function findRefs(
                 !!pos &&
                 resScanned[0].some((rs) => {
                     const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
-                    const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+                    const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
                     let lastStPath = pfp[pfp.length - 1];
                     if (lastStPath.type === 'decl') {
                         lastStPath = pfp[pfp.length - 2] as postcss.Rule;
@@ -954,7 +954,7 @@ function findRefs(
             }
         }
     });
-    scannedMeta.rawAst.walkDecls((decl) => {
+    scannedMeta.sourceAst.walkDecls((decl) => {
         if (!decl.source || !decl.source.start) {
             return;
         }
@@ -991,13 +991,13 @@ function findRefs(
             }
         }
     });
-    scannedMeta.rawAst.walkDecls((decl) => {
+    scannedMeta.sourceAst.walkDecls((decl) => {
         if (!decl.source || !decl.source.start || !pos) {
             return;
         }
         const directiveRegex = new RegExp(`-st-states`);
         const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
-        const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+        const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
         const char = isInNode(postcsspos, pfp[pfp.length - 1]) ? 1 : pos.character;
         const callPs = parseSelector((pfp[pfp.length - 1] as postcss.Rule).selector, char);
         const callingElement = findLast(
@@ -1054,7 +1054,7 @@ function findRefs(
             }
         }
     });
-    scannedMeta.rawAst.walkDecls(`-st-mixin`, (decl) => {
+    scannedMeta.sourceAst.walkDecls(`-st-mixin`, (decl) => {
         // usage in -st-mixin
         if (!decl.source || !decl.source.start) {
             return;
@@ -1095,7 +1095,7 @@ function findRefs(
             }
         });
     });
-    scannedMeta.rawAst.walkDecls(word, (decl) => {
+    scannedMeta.sourceAst.walkDecls(word, (decl) => {
         // Variable definition
         if (
             decl.parent &&
@@ -1119,7 +1119,7 @@ function findRefs(
             });
         }
     });
-    scannedMeta.rawAst.walkDecls((decl) => {
+    scannedMeta.sourceAst.walkDecls((decl) => {
         // Variable usage
         if (decl.value.includes('value(') && !!decl.source && !!decl.source.start) {
             const usageRegex = new RegExp('value\\(\\s*' + word + '\\s*\\)', 'g');
@@ -1170,7 +1170,7 @@ function newFindRefs(
         // Global selector strings are special
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.analyze(stylesheetPath);
-            scannedMeta.rawAst.walkRules((rule) => {
+            scannedMeta.sourceAst.walkRules((rule) => {
                 if (rule.selector.includes(word)) {
                     refs = refs.concat(findRefs(word, defMeta, scannedMeta, callingMeta, stylable));
                 }
@@ -1241,7 +1241,7 @@ function newFindRefs(
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.analyze(stylesheetPath);
             let done = false;
-            scannedMeta.rawAst.walkRules((r) => {
+            scannedMeta.sourceAst.walkRules((r) => {
                 if (valueRegex.test(r.selector) && !done) {
                     const resolved = stylable.transformSelector(scannedMeta, r.selector).resolved;
                     const resolvedInner = resolved[0].find((r) => r.name === word);
@@ -1262,7 +1262,7 @@ function newFindRefs(
                     }
                 }
             });
-            scannedMeta.rawAst.walkDecls((d) => {
+            scannedMeta.sourceAst.walkDecls((d) => {
                 if (valueRegex.test(d.value) && !done) {
                     if (
                         d.prop === `-st-named` &&
@@ -1301,7 +1301,7 @@ function newFindRefs(
                 Object.keys(symbolStates).some((k) => {
                     if (k === word && !!pos) {
                         const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
-                        const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+                        const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
                         let lastStPath = pfp[pfp.length - 1];
                         if (lastStPath.type === 'decl') {
                             lastStPath = pfp[pfp.length - 2] as postcss.Rule;
@@ -1356,7 +1356,7 @@ function newFindRefs(
             if (!pos) {
                 return;
             }
-            scannedMeta.rawAst.walkRules((r) => {
+            scannedMeta.sourceAst.walkRules((r) => {
                 if (r.selector.includes(':' + word) && !done) {
                     // Won't work if word appears elsewhere in string
                     const parsed = parseSelector(r.selector, r.selector.indexOf(word));

@@ -156,7 +156,7 @@ export function buildSingleFile({
     });
     // .css
     if (outputCSS) {
-        let cssCode = res.meta.outputAst!.toString();
+        let cssCode = res.meta.targetAst!.toString();
         if (minify) {
             cssCode = optimizer.minifyCSS(cssCode);
         }

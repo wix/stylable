@@ -8,6 +8,7 @@ import {
 import { transformerDiagnostics } from '@stylable/core/dist/stylable-transformer';
 import { STImport, CSSType, CSSClass } from '@stylable/core/dist/features';
 import { expect } from 'chai';
+import type { Rule } from 'postcss';
 
 const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
@@ -377,7 +378,7 @@ describe('inline-expectations', () => {
                 },
             });
 
-            result.meta.outputAst?.nodes[1].remove();
+            result.meta.targetAst?.nodes[1].remove();
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.removedNode(`rule`, `(label): `)
@@ -471,7 +472,7 @@ describe('inline-expectations', () => {
                 },
             });
 
-            result.meta.outputAst?.nodes[1].remove();
+            result.meta.targetAst?.nodes[1].remove();
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.removedNode(`atrule`, `(label): `)
@@ -614,7 +615,7 @@ describe('inline-expectations', () => {
                 },
             });
 
-            (result.meta.outputAst?.nodes[0] as any).nodes[1].remove();
+            (result.meta.targetAst!.nodes[0] as Rule).nodes[1].remove();
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.removedNode(`decl`, `(label): `)

@@ -30,12 +30,12 @@ describe('Stylable', () => {
             const overrideMeta = stylable.analyze(path, overrideContent);
             const fsMetaAfter = stylable.analyze(path);
 
-            expect(overrideMeta.ast.toString(), `override src ast`).to.eql(`.override {}`);
+            expect(overrideMeta.sourceAst.toString(), `override src ast`).to.eql(`.override {}`);
             expect(overrideMeta, `override meta`).to.contain({
                 source: path,
                 namespace: `entry`,
             });
-            expect(fsMetaBefore.ast.toString(), `fs before src ast`).to.eql(`.fs {}`);
+            expect(fsMetaBefore.sourceAst.toString(), `fs before src ast`).to.eql(`.fs {}`);
             expect(fsMetaBefore, `fs meta`).to.contain({
                 source: path,
                 namespace: `entry`,
@@ -51,7 +51,7 @@ describe('Stylable', () => {
 
             const { meta, exports } = stylable.transform(src, path);
 
-            expect(meta.outputAst?.toString(), `output CSS`).to.eql(`.entry__a {}`);
+            expect(meta.targetAst?.toString(), `output CSS`).to.eql(`.entry__a {}`);
             expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
         });
         it(`should transform a stylesheet from meta`, () => {
@@ -62,7 +62,7 @@ describe('Stylable', () => {
 
             const { meta, exports } = stylable.transform(stylable.analyze(path));
 
-            expect(meta.outputAst?.toString(), `output CSS`).to.eql(`.entry__a {}`);
+            expect(meta.targetAst?.toString(), `output CSS`).to.eql(`.entry__a {}`);
             expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
         });
         it(`should transform selector`, () => {

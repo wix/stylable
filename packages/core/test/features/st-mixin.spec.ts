@@ -259,7 +259,7 @@ describe(`features/st-mixin`, () => {
                 stylableConfig: {
                     onProcess(meta) {
                         // remove -st-mixin origin before apply mixin.
-                        const mixToClass = meta.ast.nodes[2] as postcss.Rule;
+                        const mixToClass = meta.sourceAst.nodes[2] as postcss.Rule;
                         const stMixinDecl = mixToClass.nodes[1];
                         stMixinDecl.remove();
                         return meta;
@@ -1688,7 +1688,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[2] as postcss.Container,
+                    meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
                     'id: nested'
@@ -1723,7 +1723,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[2] as postcss.Container,
+                    meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
                     'id: nested'
@@ -1757,7 +1757,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[3] as postcss.Container,
+                    meta.targetAst!.nodes[3] as postcss.Container,
                     0,
                     '.entry__a .mixin__mix',
                     'id: nested'
@@ -1793,7 +1793,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[2] as postcss.Container,
+                    meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
                     'id: nested'
@@ -1828,7 +1828,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[2] as postcss.Container,
+                    meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
                     'id: nested'
@@ -1862,7 +1862,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[3] as postcss.Container,
+                    meta.targetAst!.nodes[3] as postcss.Container,
                     0,
                     '.entry__a .mixin__mix',
                     'id: nested'

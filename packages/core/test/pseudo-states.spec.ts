@@ -1321,7 +1321,7 @@ describe('pseudo-states', () => {
                         },
                     });
 
-                    testInlineExpects(res.meta.outputAst!);
+                    testInlineExpects(res.meta.targetAst!);
                     expect(
                         res.meta.diagnostics.reports,
                         'no diagnostics reported for native states'
@@ -2020,7 +2020,6 @@ describe('pseudo-states', () => {
                     },
                 });
 
-                // result.meta.outputAst.toString();
                 expect(
                     result.meta.diagnostics.reports,
                     'no diagnostics reported for imported states'

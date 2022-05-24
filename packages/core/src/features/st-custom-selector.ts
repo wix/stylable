@@ -98,10 +98,7 @@ export function getCustomSelector(meta: StylableMeta, name: string): SelectorLis
     return analyzed[name]?.ast;
 }
 
-export function getCustomSelectorExpended(
-    meta: StylableMeta,
-    name: string
-): string | undefined {
+export function getCustomSelectorExpended(meta: StylableMeta, name: string): string | undefined {
     const analyzed = plugableRecord.getUnsafe(meta.data, dataKey);
     return analyzed[name]?.selector;
 }
