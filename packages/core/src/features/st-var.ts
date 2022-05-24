@@ -16,6 +16,7 @@ import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import type { ParsedValue } from '../types';
 import type { Stylable } from '../stylable';
 import type { RuntimeStVar } from '../stylable-transformer';
+import postcssValueParser from 'postcss-value-parser';
 
 export interface VarSymbol {
     _kind: 'var';
@@ -246,6 +247,26 @@ export class StylablePublicApi {
 
         return currentVars;
     }
+}
+
+export function parseVarsFromExpr(expr: string) {
+    const nameSet = new Set<string>();
+    postcssValueParser(expr).walk((node) => {
+        if (node.type === 'function' && node.value === 'value') {
+            for (const argNode of node.nodes) {
+                switch (argNode.type) {
+                    case 'word':
+                        nameSet.add(argNode.value);
+                        return;
+                    case 'div':
+                        if (argNode.value === ',') {
+                            return;
+                        }
+                }
+            }
+        }
+    });
+    return [...nameSet];
 }
 
 function collectVarSymbols(context: FeatureContext, rule: postcss.Rule) {

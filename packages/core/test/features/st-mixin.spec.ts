@@ -1,4 +1,5 @@
 import chaiSubset from 'chai-subset';
+import { Diagnostics } from '@stylable/core';
 import { STMixin } from '@stylable/core/dist/features';
 import {
     testStylableCore,
@@ -1867,6 +1868,88 @@ describe(`features/st-mixin`, () => {
                     'id: nested'
                 );
             });
+        });
+    });
+    describe('stylable API', () => {
+        it('should resolve mixin expression', () => {
+            const { stylable, sheets } = testStylableCore({
+                '/sheet.st.css': `
+                    .mix-base-type {
+                        prop: value(not-part-of-mixin);
+                    }
+                    .css-mix {
+                        -st-extends: mix-base-type;
+                        prop: value(bg-color);
+                    }
+                `,
+                'code.js': `
+                    module.exports = {
+                        'code-mix': () => ({}),
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [css-mix as importedClassMix] from './sheet.st.css';
+                    @st-import [code-mix as importedFuncMix] from './code.js';
+                    .local-mix {
+                        background: value(bg-size) value(bg-color);
+                    }
+                    .local-mix:hover {
+                        background-color: value(bg-hover-color);
+                    }
+                    ElementMix {
+                        color: value(colorList, value(color-index));
+                    }
+                    :vars {
+                        st-var-name: "cannot be used as mixin";
+                    }
+                `,
+            });
+            const inputExpr = `
+                local-mix(a 1, b value(x)), 
+                importedClassMix(c 2),
+                unknownBetweenMix(e 3),
+                st-var-name(e 4),
+                ElementMix(f 5, g 6),
+                importedFuncMix(argA, argB),
+            `;
+
+            const diagnostics = new Diagnostics();
+            const resolvedMixins = stylable.stMixin.resolveExpr(
+                sheets['/entry.st.css'].meta,
+                inputExpr,
+                {
+                    diagnostics,
+                    resolveOptionalArgs: true,
+                }
+            );
+
+            expect(resolvedMixins, 'resolvedMixins').to.eql([
+                {
+                    name: 'local-mix',
+                    kind: 'css-fragment',
+                    args: [{ a: '1' }, { b: 'value(x)' }],
+                    optionalArgNames: ['bg-size', 'bg-color', 'bg-hover-color'],
+                },
+                {
+                    name: 'importedClassMix',
+                    kind: 'css-fragment',
+                    args: [{ c: '2' }],
+                    optionalArgNames: ['bg-color'],
+                },
+                { name: 'unknownBetweenMix', kind: 'invalid', args: [] },
+                { name: 'st-var-name', kind: 'invalid', args: [] },
+                {
+                    name: 'ElementMix',
+                    kind: 'css-fragment',
+                    args: [{ f: '5' }, { g: '6' }],
+                    optionalArgNames: ['colorList', 'color-index'],
+                },
+                { name: 'importedFuncMix', kind: 'js-func', args: ['argA', 'argB'] },
+            ]);
+            expect(diagnostics.reports, 'diagnostics').to.containSubset([
+                STMixin.diagnostics.UNKNOWN_MIXIN('unknownBetweenMix'),
+                STMixin.diagnostics.UNKNOWN_MIXIN('st-var-name'),
+            ]);
         });
     });
 });

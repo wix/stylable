@@ -14,7 +14,7 @@ import {
 } from './stylable-transformer';
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
-import { STVar, CSSCustomProperty } from './features';
+import { STVar, STMixin, CSSCustomProperty } from './features';
 import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
 import * as postcss from 'postcss';
 
@@ -49,6 +49,7 @@ export class Stylable {
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
     public stVar = new STVar.StylablePublicApi(this);
+    public stMixin = new STMixin.StylablePublicApi(this);
     //
     public projectRoot: string;
     protected fileSystem: MinimalFS;
