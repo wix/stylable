@@ -1,6 +1,7 @@
 import { murmurhash3_32_gc } from './murmurhash';
 import type { processNamespace } from './stylable-processor';
 
+/** @deprecated use createNamespaceStrategy */
 export function packageNamespaceFactory(
     findConfig: (fileName: string, options: { cwd: string }) => string | null,
     loadConfig: (filePath: string) => object,
@@ -33,6 +34,7 @@ export function packageNamespaceFactory(
     };
 }
 
+/** @deprecated use createNamespaceStrategy */
 export function noCollisionNamespace({
     prefix = '',
     used: usedNamespaces = new Map<
