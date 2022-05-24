@@ -1885,11 +1885,12 @@ describe(`features/st-mixin`, () => {
                 'code.js': `
                     module.exports = {
                         'code-mix': () => ({}),
+                        'code-str': "not valid mixin",
                     }
                 `,
                 '/entry.st.css': `
                     @st-import [css-mix as importedClassMix] from './sheet.st.css';
-                    @st-import [code-mix as importedFuncMix] from './code.js';
+                    @st-import [code-mix as importedFuncMix, code-str] from './code.js';
                     .local-mix {
                         background: value(bg-size) value(bg-color);
                     }
@@ -1910,6 +1911,7 @@ describe(`features/st-mixin`, () => {
                 unknownBetweenMix(e 3),
                 st-var-name(e 4),
                 ElementMix(f 5, g 6),
+                code-str(argX),
                 importedFuncMix(argA, argB),
             `;
 
@@ -1944,6 +1946,7 @@ describe(`features/st-mixin`, () => {
                     args: [{ f: '5' }, { g: '6' }],
                     optionalArgNames: ['colorList', 'color-index'],
                 },
+                { name: 'code-str', kind: 'invalid', args: [] },
                 { name: 'importedFuncMix', kind: 'js-func', args: ['argA', 'argB'] },
             ]);
             expect(diagnostics.reports, 'diagnostics').to.containSubset([
