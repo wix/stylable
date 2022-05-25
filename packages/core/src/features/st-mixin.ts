@@ -28,12 +28,19 @@ export interface MixinValue {
     originDecl: postcss.Declaration;
 }
 
-export interface AnalyzedMixin<VALID extends 'valid' | 'invalid'> {
-    data: MixinValue;
-    symbol: VALID extends 'valid'
-        ? ImportSymbol | ClassSymbol | ElementSymbol
-        : STSymbol.StylableSymbol | undefined;
-}
+export type ValidMixinSymbols = ImportSymbol | ClassSymbol | ElementSymbol;
+
+export type AnalyzedMixin =
+    | {
+          valid: true;
+          data: MixinValue;
+          symbol: ValidMixinSymbols;
+      }
+    | {
+          valid: false;
+          data: MixinValue;
+          symbol: Exclude<STSymbol.StylableSymbol, ValidMixinSymbols> | undefined;
+      };
 
 export type MixinReflection =
     | {
@@ -173,7 +180,9 @@ function appendMixins(
         return;
     }
     for (const mixin of mixins) {
-        appendMixin(context, { transformer, mixDef: mixin, rule, path, cssPropertyMapping });
+        if (mixin.valid) {
+            appendMixin(context, { transformer, mixDef: mixin, rule, path, cssPropertyMapping });
+        }
     }
     for (const mixinDecl of decls) {
         mixinDecl.remove();
@@ -183,8 +192,8 @@ function appendMixins(
 function collectRuleMixins(
     context: FeatureTransformContext,
     rule: postcss.Rule
-): [decls: postcss.Declaration[], mixins: AnalyzedMixin<'valid'>[]] {
-    let mixins: AnalyzedMixin<'invalid'>[] = [];
+): [decls: postcss.Declaration[], mixins: AnalyzedMixin[]] {
+    let mixins: AnalyzedMixin[] = [];
     const { mainNamespace } = context.getResolvedSymbols(context.meta);
     const decls: postcss.Declaration[] = [];
     rule.walkDecls((decl) => {
@@ -200,31 +209,17 @@ function collectRuleMixins(
             );
         }
     });
-    return [
-        decls,
-        mixins
-            .map((mixin) => {
-                switch (mixin.symbol?._kind) {
-                    case 'class':
-                    case 'element':
-                    case 'import':
-                        return mixin;
-                    default:
-                        return;
-                }
-            })
-            .filter((mixin) => mixin !== undefined) as any as AnalyzedMixin<'valid'>[],
-    ];
+    return [decls, mixins];
 }
 
 function collectDeclMixins(
     context: Pick<FeatureContext, 'meta' | 'diagnostics'>,
     decl: postcss.Declaration,
     paramSignature: (mixinSymbolName: string) => 'named' | 'args',
-    previousMixins?: AnalyzedMixin<'invalid'>[]
-): AnalyzedMixin<'invalid'>[] {
+    previousMixins?: AnalyzedMixin[]
+): AnalyzedMixin[] {
     const { meta } = context;
-    let mixins: AnalyzedMixin<'invalid'>[] = [];
+    let mixins: AnalyzedMixin[] = [];
     const parser =
         decl.prop === MixinType.ALL
             ? parseStMixin
@@ -238,16 +233,17 @@ function collectDeclMixins(
     parser(decl, paramSignature, context.diagnostics, /*emitStrategyDiagnostics*/ true).forEach(
         (mixin) => {
             const mixinRefSymbol = STSymbol.get(meta, mixin.type);
-            mixins.push({
-                data: mixin,
-                symbol: mixinRefSymbol,
-            });
             if (
                 mixinRefSymbol &&
                 (mixinRefSymbol._kind === 'import' ||
                     mixinRefSymbol._kind === 'class' ||
                     mixinRefSymbol._kind === 'element')
             ) {
+                mixins.push({
+                    valid: true,
+                    data: mixin,
+                    symbol: mixinRefSymbol,
+                });
                 if (mixin.partial && Object.keys(mixin.options).length === 0) {
                     context.diagnostics.report(
                         diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
@@ -258,6 +254,11 @@ function collectDeclMixins(
                     );
                 }
             } else {
+                mixins.push({
+                    valid: false,
+                    data: mixin,
+                    symbol: mixinRefSymbol,
+                });
                 context.diagnostics.report(diagnostics.UNKNOWN_MIXIN(mixin.type), {
                     node: decl,
                     word: mixin.type,
@@ -289,7 +290,7 @@ function collectDeclMixins(
 
 interface ApplyMixinContext {
     transformer: StylableTransformer;
-    mixDef: AnalyzedMixin<'valid'>;
+    mixDef: AnalyzedMixin & { valid: true };
     rule: postcss.Rule;
     path: string[];
     cssPropertyMapping: Record<string, string>;
