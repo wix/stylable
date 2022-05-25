@@ -1930,7 +1930,7 @@ describe(`features/st-mixin`, () => {
                     name: 'local-mix',
                     kind: 'css-fragment',
                     args: [{ a: '1' }, { b: 'value(x)' }],
-                    optionalArgNames: new Map([
+                    optionalArgs: new Map([
                         ['bg-size', { name: 'bg-size' }],
                         ['bg-color', { name: 'bg-color' }],
                         ['bg-hover-color', { name: 'bg-hover-color' }],
@@ -1940,7 +1940,7 @@ describe(`features/st-mixin`, () => {
                     name: 'importedClassMix',
                     kind: 'css-fragment',
                     args: [{ c: '2' }],
-                    optionalArgNames: new Map([['bg-color', { name: 'bg-color' }]]),
+                    optionalArgs: new Map([['bg-color', { name: 'bg-color' }]]),
                 },
                 { name: 'unknownBetweenMix', kind: 'invalid', args: [] },
                 { name: 'st-var-name', kind: 'invalid', args: [] },
@@ -1948,7 +1948,7 @@ describe(`features/st-mixin`, () => {
                     name: 'ElementMix',
                     kind: 'css-fragment',
                     args: [{ f: '5' }, { g: '6' }],
-                    optionalArgNames: new Map([
+                    optionalArgs: new Map([
                         ['colorList', { name: 'colorList' }],
                         ['color-index', { name: 'color-index' }],
                     ]),
