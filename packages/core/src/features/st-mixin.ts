@@ -148,7 +148,6 @@ export class StylablePublicApi {
                 symbolKind === 'js' &&
                 typeof resolvedSymbols.js[name].symbol === 'function'
             ) {
-                resolvedSymbols.js[name].symbol;
                 const mixRef: MixinReflection = { name, kind: 'js-func', args: [] };
                 for (const arg of Object.values(data.options)) {
                     mixRef.args.push(arg.value);
