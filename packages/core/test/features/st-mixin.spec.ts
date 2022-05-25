@@ -1942,8 +1942,8 @@ describe(`features/st-mixin`, () => {
                     args: [{ c: '2' }],
                     optionalArgs: new Map([['bg-color', { name: 'bg-color' }]]),
                 },
-                { name: 'unknownBetweenMix', kind: 'invalid', args: [] },
-                { name: 'st-var-name', kind: 'invalid', args: [] },
+                { name: 'unknownBetweenMix', kind: 'invalid', args: 'e 3' },
+                { name: 'st-var-name', kind: 'invalid', args: 'e 4' },
                 {
                     name: 'ElementMix',
                     kind: 'css-fragment',
@@ -1953,7 +1953,7 @@ describe(`features/st-mixin`, () => {
                         ['color-index', { name: 'color-index' }],
                     ]),
                 },
-                { name: 'code-str', kind: 'invalid', args: [] },
+                { name: 'code-str', kind: 'invalid', args: 'argX' },
                 { name: 'importedFuncMix', kind: 'js-func', args: ['argA', 'argB'] },
             ]);
             expect(diagnostics.reports, 'diagnostics').to.containSubset([

@@ -10,7 +10,7 @@ import { mixinHelperDiagnostics, parseStMixin, parseStPartialMixin } from '../he
 import { resolveArgumentsValue } from '../functions';
 import { cssObjectToAst } from '../parser';
 import * as postcss from 'postcss';
-import type { FunctionNode, WordNode } from 'postcss-value-parser';
+import { FunctionNode, WordNode, stringify } from 'postcss-value-parser';
 import { fixRelativeUrls } from '../stylable-assets';
 import { isValidDeclaration, mergeRules, utilDiagnostics } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
@@ -50,7 +50,7 @@ export type MixinReflection =
           optionalArgs: Map<string, { name: string }>;
       }
     | { name: string; kind: 'js-func'; args: string[] }
-    | { name: string; kind: 'invalid'; args: never[] };
+    | { name: string; kind: 'invalid'; args: string };
 
 export const MixinType = {
     ALL: `-st-mixin` as const,
@@ -161,7 +161,12 @@ export class StylablePublicApi {
                 }
                 result.push(mixRef);
             } else {
-                result.push({ name, kind: 'invalid', args: [] });
+                result.push({
+                    name,
+                    kind: 'invalid',
+                    args:
+                        data.valueNode?.type === 'function' ? stringify(data.valueNode.nodes) : '',
+                });
             }
         }
         return result;
