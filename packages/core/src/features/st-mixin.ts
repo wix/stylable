@@ -40,7 +40,7 @@ export type MixinReflection =
           name: string;
           kind: 'css-fragment';
           args: Record<string, string>[];
-          optionalArgNames: string[];
+          optionalArgs: Map<string, { name: string }>;
       }
     | { name: string; kind: 'js-func'; args: string[] }
     | { name: string; kind: 'invalid'; args: never[] };
@@ -127,21 +127,21 @@ export class StylablePublicApi {
                     name,
                     kind: 'css-fragment',
                     args: [],
-                    optionalArgNames: [],
+                    optionalArgs: new Map(),
                 };
                 for (const [argName, argValue] of Object.entries(data.options)) {
                     mixRef.args.push({ [argName]: argValue });
                 }
                 if (resolveOptionalArgs) {
-                    const nameSet = new Set<string>();
+                    const varMap = new Map<string, { name: string }>();
                     const resolveChain = resolvedSymbols[symbolKind][name];
                     getCSSMixinRoots(meta, resolveChain, ({ mixinRoot }) => {
                         mixinRoot.walkDecls((decl) => {
                             const varNames = STVar.parseVarsFromExpr(decl.value);
-                            varNames.forEach((name) => nameSet.add(name));
+                            varNames.forEach((name) => varMap.set(name, { name }));
                         });
                     });
-                    mixRef.optionalArgNames.push(...nameSet);
+                    mixRef.optionalArgs = varMap;
                 }
                 result.push(mixRef);
             } else if (
