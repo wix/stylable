@@ -171,7 +171,7 @@ describe('diagnostics', () => {
             expect(diagnostics).to.eql([]);
         });
 
-        it('should ignore errors for attribute selectors inside @st-scope', () => {
+        it('should ignore native css lsp diagnostics for selectors with special characters inside @st-scope params', () => {
             const filePath = '/style.st.css';
 
             const diagnostics = createDiagnostics(
@@ -180,22 +180,9 @@ describe('diagnostics', () => {
                     @st-scope [div=rtl] {
                          .root {}
                     }
-                    `,
-                },
-                filePath
-            );
 
-            expect(diagnostics).to.eql([]);
-        });
-
-        it('should ignore errors for "*" selectors inside @st-scope', () => {
-            const filePath = '/style.st.css';
-
-            const diagnostics = createDiagnostics(
-                {
-                    [filePath]: deindent`
                     @st-scope * {
-                         .root {}
+                        .root {}
                     }
                     `,
                 },

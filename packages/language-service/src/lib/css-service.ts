@@ -14,9 +14,7 @@ import {
     Range,
 } from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
-import { getAstNodeAt } from '@stylable/core/dist/index-internal';
 import type { StylableMeta } from '@stylable/core';
-import { getOffsetFromPosition } from './utils/postcss-ast-utils';
 
 function readDocRange(doc: TextDocument, rng: Range): string {
     const lines = doc.getText().split('\n');
@@ -110,11 +108,10 @@ export class CssService {
         const mq = 'media';
 
         ast.walkAtRules(stScope, (atRule) => {
-            atRule.name = mq + ' '.repeat(stScope.length - mq.length);
+            atRule.name = mq;
 
-            if (atRule.params.includes('.')) {
-                atRule.params = atRule.params.replace('.', ' ');
-            }
+            const replacementDiff = `${stScope} ${atRule.params}`.length - `${mq} all`.length;
+            atRule.params = 'all' + ' '.repeat(replacementDiff);
         });
 
         return ast;
@@ -169,44 +166,6 @@ export class CssService {
 
                     if (meta.getStVar(prop)) {
                         return false;
-                    }
-                } else if (
-                    diag.code === 'css-mediaqueryexpected' ||
-                    diag.code === 'css-ruleorselectorexpected'
-                ) {
-                    // caused by @st-scope with special characters (e.g. @st-scope [div=rtl])
-                    const offset = getOffsetFromPosition(meta.rawAst.toString(), diag.range.start);
-                    const [astNode, _astNodeOffset] = getAstNodeAt(meta.rawAst, offset + 1);
-                    const stScopeSanitized = 'media   ';
-                    const astNodeStart = astNode.source?.start;
-                    const astNodeEnd = astNode.source?.end;
-
-                    if (
-                        astNode.type === 'atrule' &&
-                        astNode.name === stScopeSanitized &&
-                        astNodeEnd
-                    ) {
-                        // ruleorselectorexpected - shows on the last character of the @st-scope
-                        if (
-                            diagStart.line === astNodeEnd.line - 1 &&
-                            diagEnd.character === astNodeEnd.column
-                        ) {
-                            return false;
-                        }
-
-                        // mediaqueryexpected - shows on the special character in the @st-scope param
-                        if (
-                            astNodeStart &&
-                            diagStart.line >= astNodeStart.line - 1 &&
-                            diagStart.character >
-                                astNodeStart.column - 1 + stScopeSanitized.length &&
-                            diagStart.character <=
-                                astNodeStart.column +
-                                    stScopeSanitized.length +
-                                    astNode.params.length
-                        ) {
-                            return false;
-                        }
                     }
                 }
                 return true;
