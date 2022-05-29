@@ -179,6 +179,36 @@ describe('Stylable Cli', function () {
         ).to.equal(true);
     });
 
+    it('build only .st.css.d.ts and .st.css.d.ts.map files ', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': srcContent,
+        });
+
+        const { stdout, status } = runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            'dist',
+            '--dts',
+        ]);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const dtsContent = dirContent['dist/style.st.css.d.ts'];
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
+            true
+        );
+        expect(
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+        ).to.equal(true);
+
+        expect(status).to.equal(0);
+        expect(stdout, 'stdout').to.not.match(new RegExp(`No target output declared for "(.*?)"`));
+    });
+
     it('build .st.css.d.ts source-map and target the source file path relatively', () => {
         const srcContent = '.root{color:red}';
         populateDirectorySync(tempDir.path, {
