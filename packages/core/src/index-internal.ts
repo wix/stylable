@@ -48,3 +48,4 @@ export { BoxedValueArray, BoxedValueMap, createCustomValue } from './custom-valu
 export { systemValidators } from './state-validators';
 export { processDeclarationFunctions } from './process-declaration-functions';
 export { DiagnosticBase } from './diagnostics';
+export { getAstNodeAt } from './helpers/ast';
