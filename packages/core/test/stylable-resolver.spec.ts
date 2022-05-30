@@ -19,9 +19,12 @@ function createResolveExtendsResults(
 ) {
     const moduleResolver = createDefaultResolver(fs, {});
 
-    const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
-        return process(cssParse(content, { from: fullpath }));
-    }, fs);
+    const processFile = cachedProcessFile<StylableMeta>(
+        (fullpath, content) => {
+            return process(cssParse(content, { from: fullpath }));
+        },
+        (filePath: string) => fs.readFileSync(filePath, 'utf8')
+    );
 
     const resolver = new StylableResolver(
         processFile,
