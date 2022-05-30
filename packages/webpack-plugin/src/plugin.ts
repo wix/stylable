@@ -1,18 +1,15 @@
 import {
     Stylable,
     StylableConfig,
-    packageNamespaceFactory,
     OptimizeConfig,
     DiagnosticsMode,
     IStylableOptimizer,
 } from '@stylable/core';
+import { createNamespaceStrategyNode } from '@stylable/node';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
-import { dirname, relative } from 'path';
 import type { Compilation, Compiler, NormalModule, WebpackError } from 'webpack';
-
-import findConfig from 'find-config';
 
 import {
     getStaticPublicPath,
@@ -359,13 +356,9 @@ export class StylableWebpackPlugin {
                         ...resolverOptions,
                         extensions: [], // use Stylable's default extensions
                     },
-                    resolveNamespace: packageNamespaceFactory(
-                        findConfig,
-                        require,
-                        { dirname, relative },
-                        compiler.options.output.hashSalt || '',
-                        ''
-                    ),
+                    resolveNamespace: createNamespaceStrategyNode({
+                        hashSalt: compiler.options.output.hashSalt || '',
+                    }),
                     requireModule: createDecacheRequire(compiler),
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
