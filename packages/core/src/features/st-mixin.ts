@@ -97,6 +97,11 @@ export const diagnostics = {
         'error',
         (circularPaths: string[]) => `circular mixin found: ${circularPaths.join(' --> ')}`
     ),
+    UNKNOWN_ARG: createDiagnosticReporter(
+        '10008',
+        'warning',
+        (argName) => `unknown mixin argument "${argName}"`
+    ),
 };
 
 // HOOKS
@@ -143,10 +148,11 @@ export class StylablePublicApi {
                     const varMap = new Map<string, { name: string }>();
                     const resolveChain = resolvedSymbols[symbolKind][name];
                     getCSSMixinRoots(meta, resolveChain, ({ mixinRoot }) => {
-                        mixinRoot.walkDecls((decl) => {
-                            const varNames = STVar.parseVarsFromExpr(decl.value);
-                            varNames.forEach((name) => varMap.set(name, { name }));
-                        });
+                        const names = collectOptionalArgs(
+                            { meta, resolver: this.stylable.resolver },
+                            mixinRoot
+                        );
+                        names.forEach((name) => varMap.set(name, { name }));
                     });
                     mixRef.optionalArgs = varMap;
                 }
@@ -410,6 +416,7 @@ function handleCSSMixin(
         return;
     }
 
+    const optionalArgs = new Set<string>();
     const roots = getCSSMixinRoots(
         context.meta,
         resolveChain,
@@ -422,6 +429,7 @@ function handleCSSMixin(
                 filterPartialMixinDecl(context.meta, mixinRoot, Object.keys(namedArgs));
             }
 
+            // resolve override args
             const resolvedArgs = resolveArgumentsValue(
                 namedArgs,
                 config.transformer,
@@ -432,11 +440,15 @@ function handleCSSMixin(
                 config.path,
                 config.cssPropertyMapping
             );
-
+            collectOptionalArgs(
+                { meta: resolvedClass.meta, resolver: context.resolver },
+                mixinRoot,
+                optionalArgs
+            );
+            // transform mixin
             const mixinMeta: StylableMeta = resolvedClass.meta;
             const symbolName =
                 isRootMixin && resolvedClass.meta !== context.meta ? 'default' : mixDef.data.type;
-
             config.transformer.transformAst(
                 mixinRoot,
                 mixinMeta,
@@ -450,6 +462,15 @@ function handleCSSMixin(
         }
     );
 
+    for (const overrideArg of overrideKeys) {
+        if (!optionalArgs.has(overrideArg)) {
+            context.diagnostics.report(diagnostics.UNKNOWN_ARG(overrideArg), {
+                node: mixDef.data.originDecl,
+                word: overrideArg,
+            });
+        }
+    }
+
     if (roots.length === 1) {
         mergeRules(roots[0], config.rule, mixDef.data.originDecl, config.transformer.diagnostics);
     } else if (roots.length > 1) {
@@ -457,6 +478,22 @@ function handleCSSMixin(
         roots.forEach((root) => mixinRoot.prepend(...root.nodes));
         mergeRules(mixinRoot, config.rule, mixDef.data.originDecl, config.transformer.diagnostics);
     }
+}
+
+function collectOptionalArgs(
+    context: Pick<FeatureTransformContext, 'meta' | 'resolver'>,
+    mixinRoot: postcss.Root,
+    optionalArgs: Set<string> = new Set()
+) {
+    mixinRoot.walkDecls((decl) => {
+        const varNames = STVar.parseVarsFromExpr(decl.value);
+        for (const name of varNames) {
+            for (const refName of STVar.resolveReferencedVarNames(context, name)) {
+                optionalArgs.add(refName);
+            }
+        }
+    });
+    return optionalArgs;
 }
 
 function getCSSMixinRoots(

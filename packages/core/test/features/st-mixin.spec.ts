@@ -215,6 +215,26 @@ describe(`features/st-mixin`, () => {
 
         shouldReportNoDiagnostics(meta);
     });
+    it(`should report unknown args`, () => {
+        testStylableCore(`
+            :vars {
+                a: red;
+                point_to_a: value(a);
+            }
+            .mix {
+                color: value(point_to_a);
+            }
+
+            /* @rule .entry__root { color: green } */
+            .root {
+                /* @transform-warn word(unknown) ${mixinDiagnostics.UNKNOWN_ARG('unknown')} */
+                -st-mixin: mix(
+                    a green, 
+                    unknown red
+                );
+            }
+        `);
+    });
     it(`should handle invalid cases`, () => {
         testStylableCore(`
             .mixA {
@@ -387,6 +407,37 @@ describe(`features/st-mixin`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        it(`should report unknown args (from another sheet)`, () => {
+            const { sheets } = testStylableCore({
+                '/vars.st.css': `
+                    :vars {
+                        a: red;
+                        point_to_a: value(a);
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [point_to_a] from './vars.st.css';
+                    .mix {
+                        color: value(point_to_a);
+                    }
+    
+                    /* @rule .entry__root { color: green } */
+                    .root {
+                        /* @transform-warn word(unknown) ${mixinDiagnostics.UNKNOWN_ARG(
+                            'unknown'
+                        )} */
+                        -st-mixin: mix(
+                            a green, 
+                            unknown red
+                        );
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(meta.transformDiagnostics?.reports.length).to.eql(1);
         });
         it(`should handle circular mixins from multiple stylesheets`, () => {
             // ToDo: check why circular_mixin is not reported
@@ -646,11 +697,10 @@ describe(`features/st-mixin`, () => {
                 .mix-deep {
                     propA: value(v1);
                     propB: value(v2);
-                    propC: value(v3);
                 }
                 .mix {
                     -st-partial-mixin: mix-deep(v2 value(v1));
-                    propX: value(v3);
+                    propX: value(v2);
                 }
 
                 /* 
@@ -663,20 +713,11 @@ describe(`features/st-mixin`, () => {
                 .SEP {}
 
                 /* 
-                    @rule(v2) .entry__a { }
+                    @rule(v2) .entry__a { propX: white }
                     @rule(v2-end)[1] .entry__SEP
                 */
                 .a {
                     -st-partial-mixin: mix(v2 white);
-                }
-                .SEP {}
-
-                /* 
-                    @rule(v3) .entry__a { propX: white }
-                    @rule(v3-end)[1] .entry__SEP
-                */
-                .a {
-                    -st-partial-mixin: mix(v3 white);
                 }
                 .SEP {}
             `);

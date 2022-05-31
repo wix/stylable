@@ -448,6 +448,44 @@ function evaluateValueCall(
     }
 }
 
+export function resolveReferencedVarNames(
+    context: Pick<FeatureTransformContext, 'meta' | 'resolver'>,
+    initialName: string
+) {
+    const refNames = new Set<string>();
+    const varsToCheck: { meta: StylableMeta; name: string }[] = [
+        { meta: context.meta, name: initialName },
+    ];
+    const checked = new Set<string>();
+    while (varsToCheck.length) {
+        const { meta, name } = varsToCheck.shift()!;
+        const contextualId = meta.source + '/' + name;
+        if (!checked.has(contextualId)) {
+            checked.add(contextualId);
+            refNames.add(name);
+            const symbol = STSymbol.get(meta, name);
+            switch (symbol?._kind) {
+                case 'var':
+                    varsToCheck.push(
+                        ...parseVarsFromExpr(symbol.text).map((refName) => ({
+                            meta,
+                            name: refName,
+                        }))
+                    );
+                    break;
+                case 'import': {
+                    const resolved = context.resolver.deepResolve(symbol);
+                    if (resolved?._kind === 'css' && resolved.symbol._kind === 'var') {
+                        varsToCheck.push({ meta: resolved.meta, name: resolved.symbol.name });
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    return refNames;
+}
+
 function reportUnsupportedSymbolInValue(
     context: FeatureTransformContext,
     name: string,
