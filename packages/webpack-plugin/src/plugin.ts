@@ -1,17 +1,14 @@
 import { Stylable, StylableConfig } from '@stylable/core';
-import {
-    packageNamespaceFactory,
+import type {
     OptimizeConfig,
     DiagnosticsMode,
     IStylableOptimizer,
 } from '@stylable/core/dist/index-internal';
+import { createNamespaceStrategyNode } from '@stylable/node';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
-import { dirname, relative } from 'path';
 import type { Compilation, Compiler, NormalModule, WebpackError } from 'webpack';
-
-import findConfig from 'find-config';
 
 import {
     getStaticPublicPath,
@@ -358,13 +355,9 @@ export class StylableWebpackPlugin {
                         ...resolverOptions,
                         extensions: [], // use Stylable's default extensions
                     },
-                    resolveNamespace: packageNamespaceFactory(
-                        findConfig,
-                        require,
-                        { dirname, relative },
-                        compiler.options.output.hashSalt || '',
-                        ''
-                    ),
+                    resolveNamespace: createNamespaceStrategyNode({
+                        hashSalt: compiler.options.output.hashSalt || '',
+                    }),
                     requireModule: createDecacheRequire(compiler),
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
@@ -434,7 +427,10 @@ export class StylableWebpackPlugin {
                          * If STC Builder is running in background we need to add the relevant files to webpack file dependencies watcher,
                          * and emit diagnostics from the sources and not from the output.
                          */
-                        const sources = this.stcBuilder?.getSourcesFiles(module.resource);
+                        if (!this.stcBuilder) {
+                            return;
+                        }
+                        const sources = this.stcBuilder.getSourcesFiles(module.resource);
 
                         if (sources) {
                             /**
@@ -451,7 +447,7 @@ export class StylableWebpackPlugin {
                                 /**
                                  * Add source file diagnostics to the output file module (more accurate diagnostic)
                                  */
-                                this.stcBuilder!.reportDiagnostic(
+                                this.stcBuilder.reportDiagnostic(
                                     sourceFilePath,
                                     loaderContext,
                                     this.options.diagnosticsMode,

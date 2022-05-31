@@ -1,30 +1,19 @@
 import { expect } from 'chai';
-import type { MinimalFS } from '@stylable/core';
 import { cachedProcessFile } from '@stylable/core/dist/index-internal';
 
 describe('cachedProcessFile', () => {
     it('return process file content', () => {
         const file = 'C:/file.txt';
-        const fs: MinimalFS = {
-            readFileSync(fullpath: string) {
-                if (fullpath === file) {
-                    return 'content';
-                }
-                return '';
-            },
-            statSync() {
-                return {
-                    mtime: new Date(0),
-                } as any;
-            },
-            readlinkSync() {
-                throw new Error(`not implemented`);
-            },
-        };
+        function readFileSync(fullpath: string) {
+            if (fullpath === file) {
+                return 'content';
+            }
+            return '';
+        }
 
         const p = cachedProcessFile((_fullpath, content) => {
             return content + '!';
-        }, fs);
+        }, readFileSync);
 
         expect(p.process(file)).to.equal('content!');
     });
@@ -32,77 +21,28 @@ describe('cachedProcessFile', () => {
     it('not process file if not changed', () => {
         const file = 'C:/file.txt';
         let res: {};
-        const fs: MinimalFS = {
-            readFileSync(fullpath: string) {
-                if (fullpath === file) {
-                    return 'content';
-                }
-                return '';
-            },
-            statSync() {
-                return {
-                    mtime: new Date(0),
-                };
-            },
-            readlinkSync() {
-                throw new Error(`not implemented`);
-            },
-        };
+        function readFileSync(fullpath: string) {
+            if (fullpath === file) {
+                return 'content';
+            }
+            return '';
+        }
 
         const p = cachedProcessFile((fullpath, content) => {
             const processed = { content, fullpath };
             res = res ? res : processed;
             return processed;
-        }, fs);
+        }, readFileSync);
 
         expect(p.process(file)).to.equal(p.process(file));
     });
 
-    it('not read file if not changed', () => {
-        const file = 'C:/file.txt';
-
-        let count = 0;
-
-        const fs: MinimalFS = {
-            readFileSync(fullpath: string) {
-                count++;
-                return fullpath;
-            },
-            statSync() {
-                return {
-                    mtime: new Date(0),
-                };
-            },
-            readlinkSync() {
-                throw new Error(`not implemented`);
-            },
-        };
-
-        const p = cachedProcessFile(() => null, fs);
-        p.process(file);
-        p.process(file);
-        p.process(file);
-        expect(count).to.equal(1);
-    });
-
     it('should accept post processors used in process and processContent', () => {
         const file = 'C:/file.txt';
-
-        const fs: MinimalFS = {
-            readFileSync(fullpath: string) {
-                return fullpath;
-            },
-            statSync() {
-                return {
-                    mtime: new Date(0),
-                };
-            },
-            readlinkSync() {
-                throw new Error(`not implemented`);
-            },
-        };
-
-        const p = cachedProcessFile(() => 'Hello', fs, [
+        function readFileSync(fullpath: string) {
+            return fullpath;
+        }
+        const p = cachedProcessFile(() => 'Hello', readFileSync, [
             (content) => {
                 return content + '!post-processor';
             },
@@ -115,25 +55,14 @@ describe('cachedProcessFile', () => {
 
     it('should accept cache', () => {
         const file = 'C:/file.txt';
-        const mtime = new Date(0);
-        const fs: MinimalFS = {
-            readFileSync(fullpath: string) {
-                return fullpath;
-            },
-            statSync() {
-                return {
-                    mtime,
-                };
-            },
-            readlinkSync() {
-                throw new Error(`not implemented`);
-            },
-        };
+        function readFileSync(fullpath: string) {
+            return fullpath;
+        }
 
-        const p = cachedProcessFile(() => 'Hello', fs, [], {
+        const p = cachedProcessFile(() => 'Hello', readFileSync, [], {
             [file]: {
                 value: 'FROM CACHE',
-                stat: { mtime },
+                content: file,
             },
         });
 
@@ -149,26 +78,12 @@ describe('cachedProcessFile', () => {
 
         let readCount = 0;
         let processCount = 0;
-
-        const fs: MinimalFS = {
-            readFileSync() {
-                readCount++;
-                return '';
-            },
-            statSync() {
-                return {
-                    mtime: readCount === 0 ? new Date(0) : new Date(1),
-                };
-            },
-            readlinkSync() {
-                throw new Error(`not implemented`);
-            },
-        };
-
+        function readFileSync() {
+            return String(readCount++);
+        }
         const p = cachedProcessFile(() => {
-            processCount++;
-            return null;
-        }, fs);
+            return String(processCount++);
+        }, readFileSync);
 
         p.process(file);
         p.process(file);
@@ -183,25 +98,14 @@ describe('cachedProcessFile', () => {
         let readCount = 0;
         let processCount = 0;
 
-        const fs: MinimalFS = {
-            readFileSync() {
-                readCount++;
-                return '';
-            },
-            statSync() {
-                return {
-                    mtime: readCount === 0 ? new Date(0) : new Date(1),
-                };
-            },
-            readlinkSync() {
-                throw new Error(`not implemented`);
-            },
-        };
+        function readFileSync() {
+            return String(readCount++);
+        }
 
         const p = cachedProcessFile(() => {
             processCount++;
             return null;
-        }, fs);
+        }, readFileSync);
 
         p.process(file);
         p.process(file);

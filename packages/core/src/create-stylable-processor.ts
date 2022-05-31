@@ -25,22 +25,8 @@ export function createStylableFileProcessor({
                 cssParser(content, { from })
             );
         },
-        {
-            readFileSync(resolvedPath: string) {
-                return fileSystem.readFileSync(resolvedPath, 'utf8');
-            },
-            statSync(resolvedPath: string) {
-                const stat = fileSystem.statSync(resolvedPath);
-                if (!stat.mtime) {
-                    return {
-                        mtime: new Date(0),
-                    };
-                }
-                return stat;
-            },
-            readlinkSync() {
-                throw new Error(`not implemented`);
-            },
+        (resolvedPath: string) => {
+            return fileSystem.readFileSync(resolvedPath, 'utf8');
         },
         onProcess && [onProcess],
         cache

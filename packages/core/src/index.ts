@@ -22,6 +22,15 @@ export type { StylableResults, RuntimeStVar } from './stylable-transformer';
 // utils
 export type { MinimalFS } from './cached-process-file';
 export { noCollisionNamespace } from './resolve-namespace-factories';
+export {
+    createNamespaceStrategy,
+    defaultNoMatchHandler,
+    defaultNamespaceBuilder,
+    CreateNamespaceOptions,
+    NamespaceBuilder,
+    NamespaceBuilderParams,
+    PackageInfo,
+} from './helpers/namespace';
 export { processNamespace } from './stylable-processor';
 export { CustomValueStrategy, createCustomValue } from './custom-values';
 

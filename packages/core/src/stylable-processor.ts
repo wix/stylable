@@ -260,7 +260,8 @@ export class StylableProcessor implements FeatureContext {
             namespace,
             pathToSource
                 ? path.resolve(path.dirname(this.meta.source), pathToSource)
-                : this.meta.source
+                : this.meta.source,
+            this.meta.source
         );
     }
 
@@ -488,6 +489,6 @@ export class StylableProcessor implements FeatureContext {
     }
 }
 
-export function processNamespace(namespace: string, source: string) {
-    return namespace + murmurhash3_32_gc(source); // .toString(36);
+export function processNamespace(namespace: string, origin: string, _source?: string) {
+    return namespace + murmurhash3_32_gc(origin); // .toString(36);
 }

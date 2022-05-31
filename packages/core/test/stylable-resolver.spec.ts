@@ -20,9 +20,12 @@ function createResolveExtendsResults(
         projectRoot: '/',
     });
 
-    const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
-        return stylable.analyze(fullpath, content);
-    }, fileSystem);
+    const processFile = cachedProcessFile<StylableMeta>(
+        (fullPath, content) => {
+            return stylable.analyze(fullPath, content);
+        },
+        (filePath: string) => fileSystem.readFileSync(filePath, 'utf8')
+    );
 
     const resolver = new StylableResolver(
         processFile,

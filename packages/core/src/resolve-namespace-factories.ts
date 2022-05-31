@@ -1,6 +1,7 @@
 import { murmurhash3_32_gc } from './murmurhash';
 import type { processNamespace } from './stylable-processor';
 
+/** @deprecated use createNamespaceStrategy */
 export function packageNamespaceFactory(
     findConfig: (fileName: string, options: { cwd: string }) => string | null,
     loadConfig: (filePath: string) => object,
@@ -12,13 +13,17 @@ export function packageNamespaceFactory(
     prefix = '',
     normalizeVersion = (semver: string) => semver
 ): typeof processNamespace {
-    return (namespace: string, stylesheetPath: string) => {
+    return (
+        namespace: string,
+        originStylesheetPath: string,
+        stylesheetPath: string = originStylesheetPath
+    ) => {
         const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
         if (!configPath) {
-            throw new Error(`Could not find package.json for ${stylesheetPath}`);
+            throw new Error(`Could not find package.json for ${originStylesheetPath}`);
         }
         const config = loadConfig(configPath) as { name: string; version: string };
-        const fromRoot = relative(dirname(configPath), stylesheetPath).replace(/\\/g, '/');
+        const fromRoot = relative(dirname(configPath), originStylesheetPath).replace(/\\/g, '/');
         return (
             prefix +
             namespace +
@@ -29,6 +34,7 @@ export function packageNamespaceFactory(
     };
 }
 
+/** @deprecated use createNamespaceStrategy */
 export function noCollisionNamespace({
     prefix = '',
     used: usedNamespaces = new Map<

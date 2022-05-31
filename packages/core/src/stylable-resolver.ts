@@ -108,11 +108,25 @@ export class StylableResolver {
         }
 
         let entity: CachedModuleEntity;
+        let resolvedPath: string;
 
-        if (request.endsWith('.css')) {
+        try {
+            resolvedPath = this.resolvePath(context, request);
+        } catch (error) {
+            entity = {
+                kind: request.endsWith('css') ? 'css' : 'js',
+                value: null,
+                error,
+                request,
+                context,
+            };
+            this.cache?.set(key, entity);
+            return entity;
+        }
+
+        if (resolvedPath.endsWith('.css')) {
             const kind = 'css';
             try {
-                const resolvedPath = this.resolvePath(context, request);
                 entity = { kind, value: this.fileProcessor.process(resolvedPath), resolvedPath };
             } catch (error) {
                 entity = { kind, value: null, error, request, context };
@@ -120,7 +134,6 @@ export class StylableResolver {
         } else {
             const kind = 'js';
             try {
-                const resolvedPath = this.resolvePath(context, request);
                 entity = { kind, value: this.requireModule(resolvedPath), resolvedPath };
             } catch (error) {
                 entity = { kind, value: null, error, request, context };
