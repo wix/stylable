@@ -266,7 +266,7 @@ export function parseVarsFromExpr(expr: string) {
             }
         }
     });
-    return [...nameSet];
+    return nameSet;
 }
 
 function collectVarSymbols(context: FeatureContext, rule: postcss.Rule) {
@@ -466,11 +466,11 @@ export function resolveReferencedVarNames(
             const symbol = STSymbol.get(meta, name);
             switch (symbol?._kind) {
                 case 'var':
-                    varsToCheck.push(
-                        ...parseVarsFromExpr(symbol.text).map((refName) => ({
+                    parseVarsFromExpr(symbol.text).forEach((refName) =>
+                        varsToCheck.push({
                             meta,
                             name: refName,
-                        }))
+                        })
                     );
                     break;
                 case 'import': {
