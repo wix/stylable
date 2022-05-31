@@ -1906,7 +1906,7 @@ describe(`features/st-mixin`, () => {
                 `,
             });
             const inputExpr = `
-                local-mix(a 1, b value(x)), 
+                local-mix(a 1, b value(x), c ' " , quotation and comma'), 
                 importedClassMix(c 2),
                 unknownBetweenMix(e 3),
                 st-var-name(e 4),
@@ -1929,7 +1929,7 @@ describe(`features/st-mixin`, () => {
                 {
                     name: 'local-mix',
                     kind: 'css-fragment',
-                    args: [{ a: '1' }, { b: 'value(x)' }],
+                    args: [{ a: '1' }, { b: 'value(x)' }, { c: ` " , quotation and comma` }],
                     optionalArgs: new Map([
                         ['bg-size', { name: 'bg-size' }],
                         ['bg-color', { name: 'bg-color' }],
