@@ -48,7 +48,7 @@
     "@types/rimraf": "^3.0.2",
     "@types/validate-npm-package-name": "^3.0.3",
     "@types/yargs": "^17.0.10",
-    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.26.0",
     "autoprefixer": "^10.4.7",
     "chai": "^4.3.6",
