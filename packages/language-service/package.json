@@ -1,6 +1,6 @@
 {
   "name": "@stylable/language-service",
-  "version": "4.13.2",
+  "version": "5.0.0-rc.0",
   "description": "Stylable Language Services - syntax highlighting, completions, hinting and more for the Stylable CSS preprocessor.",
   "main": "dist/index.js",
   "scripts": {

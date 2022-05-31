@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-extensions",
-  "version": "4.13.2",
+  "version": "5.0.0-rc.0",
   "description": "Experimental Stylable webpack plugins",
   "main": "dist/index.js",
   "scripts": {

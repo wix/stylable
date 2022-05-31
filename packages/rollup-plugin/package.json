@@ -1,13 +1,13 @@
 {
   "name": "@stylable/rollup-plugin",
-  "version": "4.13.2",
+  "version": "5.0.0-rc.0",
   "description": "Stylable plugin for Rollup",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"dist/test/**/*.spec.js\""
   },
   "peerDependencies": {
-    "@stylable/core": "^4.13.2",
+    "@stylable/core": "5.0.0-rc.0",
     "rollup": "^2.70.0"
   },
   "dependencies": {

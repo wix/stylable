@@ -1,6 +1,6 @@
 {
   "name": "@stylable/build-tools",
-  "version": "4.13.2",
+  "version": "5.0.0-rc.0",
   "description": "Collection of helper functions for Stylable based tooling.",
   "main": "dist/index.js",
   "scripts": {

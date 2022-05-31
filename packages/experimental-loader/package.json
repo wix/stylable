@@ -1,6 +1,6 @@
 {
   "name": "@stylable/experimental-loader",
-  "version": "4.13.2",
+  "version": "5.0.0-rc.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"

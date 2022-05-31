@@ -1,6 +1,6 @@
 {
   "name": "@stylable/optimizer",
-  "version": "4.13.2",
+  "version": "5.0.0-rc.0",
   "description": "Stylable core optimizer",
   "main": "dist/index.js",
   "scripts": {
