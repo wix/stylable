@@ -1,4 +1,4 @@
-name: npm
+name: release3
 on:
   push:
     branches: ['3.x']
