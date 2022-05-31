@@ -1,4 +1,4 @@
-import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
+import { createFeature, FeatureTransformContext } from './feature';
 import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import * as STCustomSelector from './st-custom-selector';
@@ -14,7 +14,7 @@ import { FunctionNode, WordNode, stringify } from 'postcss-value-parser';
 import { fixRelativeUrls } from '../stylable-assets';
 import { isValidDeclaration, mergeRules, utilDiagnostics } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
-import type { CSSResolve } from '../stylable-resolver';
+import type { CSSResolve, MetaResolvedSymbols } from '../stylable-resolver';
 import type { StylableTransformer } from '../stylable-transformer';
 import { dirname } from 'path';
 import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
@@ -87,10 +87,10 @@ export const diagnostics = {
         'error',
         () => `js mixin must be a function`
     ),
-    UNKNOWN_MIXIN_SYMBOL: createDiagnosticReporter(
+    UNSUPPORTED_MIXIN_SYMBOL: createDiagnosticReporter(
         '10007',
         'error',
-        (name: string) => `cannot mixin unknown symbol "${name}"`
+        (name: string) => `cannot mixin unsupported symbol "${name}"`
     ),
     CIRCULAR_MIXIN: createDiagnosticReporter(
         '10006',
@@ -127,6 +127,7 @@ export class StylablePublicApi {
         const { mainNamespace } = resolvedSymbols;
         const analyzedMixins = collectDeclMixins(
             { meta, diagnostics },
+            resolvedSymbols,
             postcss.decl({ prop: '-st-mixin', value: expr }),
             (mixinSymbolName) => (mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named')
         );
@@ -212,13 +213,15 @@ function collectRuleMixins(
     rule: postcss.Rule
 ): [decls: postcss.Declaration[], mixins: AnalyzedMixin[]] {
     let mixins: AnalyzedMixin[] = [];
-    const { mainNamespace } = context.getResolvedSymbols(context.meta);
+    const resolvedSymbols = context.getResolvedSymbols(context.meta);
+    const { mainNamespace } = resolvedSymbols;
     const decls: postcss.Declaration[] = [];
     rule.walkDecls((decl) => {
         if (decl.prop === `-st-mixin` || decl.prop === `-st-partial-mixin`) {
             decls.push(decl);
             mixins = collectDeclMixins(
                 context,
+                resolvedSymbols,
                 decl,
                 (mixinSymbolName) => {
                     return mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named';
@@ -231,7 +234,8 @@ function collectRuleMixins(
 }
 
 function collectDeclMixins(
-    context: Pick<FeatureContext, 'meta' | 'diagnostics'>,
+    context: Pick<FeatureTransformContext, 'meta' | 'diagnostics'>,
+    resolvedSymbols: MetaResolvedSymbols,
     decl: postcss.Declaration,
     paramSignature: (mixinSymbolName: string) => 'named' | 'args',
     previousMixins?: AnalyzedMixin[]
@@ -251,16 +255,20 @@ function collectDeclMixins(
     parser(decl, paramSignature, context.diagnostics, /*emitStrategyDiagnostics*/ true).forEach(
         (mixin) => {
             const mixinRefSymbol = STSymbol.get(meta, mixin.type);
+            resolvedSymbols;
+            const symbolName = mixin.type;
+            const resolvedType = resolvedSymbols.mainNamespace[symbolName];
             if (
-                mixinRefSymbol &&
-                (mixinRefSymbol._kind === 'import' ||
-                    mixinRefSymbol._kind === 'class' ||
-                    mixinRefSymbol._kind === 'element')
+                resolvedType &&
+                ((resolvedType === 'js' &&
+                    typeof resolvedSymbols.js[symbolName].symbol === 'function') ||
+                    resolvedType === 'class' ||
+                    resolvedType === 'element')
             ) {
                 mixins.push({
                     valid: true,
                     data: mixin,
-                    symbol: mixinRefSymbol,
+                    symbol: mixinRefSymbol as ValidMixinSymbols,
                 });
                 if (mixin.partial && Object.keys(mixin.options).length === 0) {
                     context.diagnostics.report(
@@ -275,12 +283,26 @@ function collectDeclMixins(
                 mixins.push({
                     valid: false,
                     data: mixin,
-                    symbol: mixinRefSymbol,
+                    symbol: mixinRefSymbol as
+                        | Exclude<STSymbol.StylableSymbol, ValidMixinSymbols>
+                        | undefined,
                 });
-                context.diagnostics.report(diagnostics.UNKNOWN_MIXIN(mixin.type), {
-                    node: decl,
-                    word: mixin.type,
-                });
+                if (mixinRefSymbol && resolvedType === 'js') {
+                    context.diagnostics.report(diagnostics.JS_MIXIN_NOT_A_FUNC(), {
+                        node: decl,
+                        word: mixin.type,
+                    });
+                } else if (mixinRefSymbol) {
+                    context.diagnostics.report(diagnostics.UNSUPPORTED_MIXIN_SYMBOL(mixin.type), {
+                        node: decl,
+                        word: mixin.type,
+                    });
+                } else {
+                    context.diagnostics.report(diagnostics.UNKNOWN_MIXIN(mixin.type), {
+                        node: decl,
+                        word: mixin.type,
+                    });
+                }
             }
         }
     );
@@ -337,21 +359,9 @@ function appendMixin(context: FeatureTransformContext, config: ApplyMixinContext
                 });
                 return;
             }
-        } else {
-            context.diagnostics.report(diagnostics.JS_MIXIN_NOT_A_FUNC(), {
-                node: config.rule,
-                word: config.mixDef.data.type,
-            });
         }
         return;
     }
-
-    // ToDo: report on unsupported mixed in symbol type
-    const mixinDecl = config.mixDef.data.originDecl;
-    context.diagnostics.report(diagnostics.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value), {
-        node: mixinDecl,
-        word: mixinDecl.value,
-    });
 }
 
 function checkRecursive(

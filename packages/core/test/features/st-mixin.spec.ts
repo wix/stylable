@@ -488,7 +488,7 @@ describe(`features/st-mixin`, () => {
                     }
 
                     .a {
-                        /* @transform-error ${mixinDiagnostics.UNKNOWN_MIXIN_SYMBOL(
+                        /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(
                             `unresolved`
                         )} */
                         -st-mixin: unresolved;
@@ -1175,8 +1175,8 @@ describe(`features/st-mixin`, () => {
                 '/entry.st.css': `
                     @st-import [notAFunction, throw] from './mixins.js';
 
-                    /* @transform-error(not a function) word(notAFunction) ${mixinDiagnostics.JS_MIXIN_NOT_A_FUNC()} */
                     .a {
+                        /* @transform-error(not a function) word(notAFunction) ${mixinDiagnostics.JS_MIXIN_NOT_A_FUNC()} */
                         -st-mixin: notAFunction;
                     }
 
@@ -2020,7 +2020,7 @@ describe(`features/st-mixin`, () => {
             ).to.eql({ color: 'green!' });
             expect(diagnostics.reports, 'diagnostics').to.containSubset([
                 STMixin.diagnostics.UNKNOWN_MIXIN('unknownBetweenMix'),
-                STMixin.diagnostics.UNKNOWN_MIXIN('st-var-name'),
+                STMixin.diagnostics.UNSUPPORTED_MIXIN_SYMBOL('st-var-name'),
             ]);
         });
     });
