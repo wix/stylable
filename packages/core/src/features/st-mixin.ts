@@ -98,7 +98,7 @@ export const diagnostics = {
         (circularPaths: string[]) => `circular mixin found: ${circularPaths.join(' --> ')}`
     ),
     UNKNOWN_ARG: createDiagnosticReporter(
-        '10008',
+        '10009',
         'warning',
         (argName) => `unknown mixin argument "${argName}"`
     ),
