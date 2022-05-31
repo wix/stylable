@@ -256,6 +256,25 @@ describe(`features/st-mixin`, () => {
                 /* @transform-warn ${mixinDiagnostics.OVERRIDE_MIXIN(`-st-mixin`)} */
                 -st-mixin: mixB;
             }
+
+            :vars {
+                colorX: red;
+            }
+            /* @rule .entry__root { } */
+            .root {
+                /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(`colorX`, 'var')} */
+                -st-mixin: colorX;
+            }
+            
+            @property --customPropX;
+            /* @rule .entry__root { } */
+            .root {
+                /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(
+                    `--customPropX`,
+                    'cssVar'
+                )} */
+                -st-mixin: --customPropX;
+            }
         `);
     });
     it(`should not mix mixin that is removed before transform`, () => {
@@ -488,9 +507,7 @@ describe(`features/st-mixin`, () => {
                     }
 
                     .a {
-                        /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(
-                            `unresolved`
-                        )} */
+                        /* @transform-error ${mixinDiagnostics.UNKNOWN_MIXIN(`unresolved`)} */
                         -st-mixin: unresolved;
                     }
                 `,
@@ -2020,7 +2037,8 @@ describe(`features/st-mixin`, () => {
             ).to.eql({ color: 'green!' });
             expect(diagnostics.reports, 'diagnostics').to.containSubset([
                 STMixin.diagnostics.UNKNOWN_MIXIN('unknownBetweenMix'),
-                STMixin.diagnostics.UNSUPPORTED_MIXIN_SYMBOL('st-var-name'),
+                STMixin.diagnostics.UNSUPPORTED_MIXIN_SYMBOL('st-var-name', 'var'),
+                STMixin.diagnostics.JS_MIXIN_NOT_A_FUNC(),
             ]);
         });
     });

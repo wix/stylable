@@ -29,6 +29,14 @@ const NAMESPACES = {
     keyframes: `keyframes`,
     var: `main`,
 } as const;
+export const readableTypeMap: Record<StylableSymbol['_kind'], string> = {
+    class: 'css class',
+    element: 'css element type',
+    cssVar: 'css custom property',
+    import: 'stylable imported symbol',
+    keyframes: 'css keyframes',
+    var: 'stylable var',
+};
 // state structure
 function createState(clone?: State): State {
     return {

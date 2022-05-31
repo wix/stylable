@@ -90,7 +90,8 @@ export const diagnostics = {
     UNSUPPORTED_MIXIN_SYMBOL: createDiagnosticReporter(
         '10007',
         'error',
-        (name: string) => `cannot mixin unsupported symbol "${name}"`
+        (name: string, symbolType: STSymbol.StylableSymbol['_kind']) =>
+            `cannot mix unsupported symbol "${name}" of type "${STSymbol.readableTypeMap[symbolType]}"`
     ),
     CIRCULAR_MIXIN: createDiagnosticReporter(
         '10006',
@@ -255,7 +256,6 @@ function collectDeclMixins(
     parser(decl, paramSignature, context.diagnostics, /*emitStrategyDiagnostics*/ true).forEach(
         (mixin) => {
             const mixinRefSymbol = STSymbol.get(meta, mixin.type);
-            resolvedSymbols;
             const symbolName = mixin.type;
             const resolvedType = resolvedSymbols.mainNamespace[symbolName];
             if (
@@ -287,16 +287,19 @@ function collectDeclMixins(
                         | Exclude<STSymbol.StylableSymbol, ValidMixinSymbols>
                         | undefined,
                 });
-                if (mixinRefSymbol && resolvedType === 'js') {
+                if (resolvedType === 'js') {
                     context.diagnostics.report(diagnostics.JS_MIXIN_NOT_A_FUNC(), {
                         node: decl,
                         word: mixin.type,
                     });
-                } else if (mixinRefSymbol) {
-                    context.diagnostics.report(diagnostics.UNSUPPORTED_MIXIN_SYMBOL(mixin.type), {
-                        node: decl,
-                        word: mixin.type,
-                    });
+                } else if (resolvedType) {
+                    context.diagnostics.report(
+                        diagnostics.UNSUPPORTED_MIXIN_SYMBOL(mixin.type, resolvedType),
+                        {
+                            node: decl,
+                            word: mixin.type,
+                        }
+                    );
                 } else {
                     context.diagnostics.report(diagnostics.UNKNOWN_MIXIN(mixin.type), {
                         node: decl,
