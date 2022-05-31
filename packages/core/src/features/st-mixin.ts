@@ -49,7 +49,7 @@ export type MixinReflection =
           args: Record<string, string>[];
           optionalArgs: Map<string, { name: string }>;
       }
-    | { name: string; kind: 'js-func'; args: string[] }
+    | { name: string; kind: 'js-func'; args: string[]; func: (...args: any[]) => any }
     | { name: string; kind: 'invalid'; args: string };
 
 export const MixinType = {
@@ -155,7 +155,12 @@ export class StylablePublicApi {
                 symbolKind === 'js' &&
                 typeof resolvedSymbols.js[name].symbol === 'function'
             ) {
-                const mixRef: MixinReflection = { name, kind: 'js-func', args: [] };
+                const mixRef: MixinReflection = {
+                    name,
+                    kind: 'js-func',
+                    args: [],
+                    func: resolvedSymbols.js[name].symbol,
+                };
                 for (const arg of Object.values(data.options)) {
                     mixRef.args.push(arg.value);
                 }

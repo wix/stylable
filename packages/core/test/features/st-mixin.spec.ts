@@ -1884,7 +1884,9 @@ describe(`features/st-mixin`, () => {
                 `,
                 'code.js': `
                     module.exports = {
-                        'code-mix': () => ({}),
+                        'code-mix': ([arg1, arg2]) => {
+                            return { [arg1]: arg2 + '!' }
+                        },
                         'code-str': "not valid mixin",
                     }
                 `,
@@ -1925,37 +1927,56 @@ describe(`features/st-mixin`, () => {
                 }
             );
 
-            expect(resolvedMixins, 'resolvedMixins').to.eql([
-                {
-                    name: 'local-mix',
-                    kind: 'css-fragment',
-                    args: [{ a: '1' }, { b: 'value(x)' }, { c: ` " , quotation and comma` }],
-                    optionalArgs: new Map([
-                        ['bg-size', { name: 'bg-size' }],
-                        ['bg-color', { name: 'bg-color' }],
-                        ['bg-hover-color', { name: 'bg-hover-color' }],
-                    ]),
-                },
-                {
-                    name: 'importedClassMix',
-                    kind: 'css-fragment',
-                    args: [{ c: '2' }],
-                    optionalArgs: new Map([['bg-color', { name: 'bg-color' }]]),
-                },
-                { name: 'unknownBetweenMix', kind: 'invalid', args: 'e 3' },
-                { name: 'st-var-name', kind: 'invalid', args: 'e 4' },
-                {
-                    name: 'ElementMix',
-                    kind: 'css-fragment',
-                    args: [{ f: '5' }, { g: '6' }],
-                    optionalArgs: new Map([
-                        ['colorList', { name: 'colorList' }],
-                        ['color-index', { name: 'color-index' }],
-                    ]),
-                },
-                { name: 'code-str', kind: 'invalid', args: 'argX' },
-                { name: 'importedFuncMix', kind: 'js-func', args: ['argA', 'argB'] },
-            ]);
+            expect(resolvedMixins[0], 'local-mix').to.eql({
+                name: 'local-mix',
+                kind: 'css-fragment',
+                args: [{ a: '1' }, { b: 'value(x)' }, { c: ` " , quotation and comma` }],
+                optionalArgs: new Map([
+                    ['bg-size', { name: 'bg-size' }],
+                    ['bg-color', { name: 'bg-color' }],
+                    ['bg-hover-color', { name: 'bg-hover-color' }],
+                ]),
+            });
+            expect(resolvedMixins[1], 'importedClassMix').to.eql({
+                name: 'importedClassMix',
+                kind: 'css-fragment',
+                args: [{ c: '2' }],
+                optionalArgs: new Map([['bg-color', { name: 'bg-color' }]]),
+            });
+            expect(resolvedMixins[2], 'unknownBetweenMix').to.eql({
+                name: 'unknownBetweenMix',
+                kind: 'invalid',
+                args: 'e 3',
+            });
+            expect(resolvedMixins[3], 'st-var-name').to.eql({
+                name: 'st-var-name',
+                kind: 'invalid',
+                args: 'e 4',
+            });
+            expect(resolvedMixins[4], 'ElementMix').to.eql({
+                name: 'ElementMix',
+                kind: 'css-fragment',
+                args: [{ f: '5' }, { g: '6' }],
+                optionalArgs: new Map([
+                    ['colorList', { name: 'colorList' }],
+                    ['color-index', { name: 'color-index' }],
+                ]),
+            });
+            expect(resolvedMixins[5], 'code-str').to.eql({
+                name: 'code-str',
+                kind: 'invalid',
+                args: 'argX',
+            });
+            const jsMix = resolvedMixins[6];
+            expect(jsMix, 'importedFuncMix').to.deep.include({
+                name: 'importedFuncMix',
+                kind: 'js-func',
+                args: ['argA', 'argB'],
+            });
+            expect(
+                jsMix.kind === 'js-func' && jsMix.func(['color', 'green']),
+                'importedFuncMix func ref'
+            ).to.eql({ color: 'green!' });
             expect(diagnostics.reports, 'diagnostics').to.containSubset([
                 STMixin.diagnostics.UNKNOWN_MIXIN('unknownBetweenMix'),
                 STMixin.diagnostics.UNKNOWN_MIXIN('st-var-name'),
