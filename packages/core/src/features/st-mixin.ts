@@ -148,9 +148,11 @@ export class StylablePublicApi {
                     const varMap = new Map<string, { name: string }>();
                     const resolveChain = resolvedSymbols[symbolKind][name];
                     getCSSMixinRoots(meta, resolveChain, ({ mixinRoot }) => {
-                        const names = collectOptionalArgs(
+                        const names = new Set<string>();
+                        collectOptionalArgs(
                             { meta, resolver: this.stylable.resolver },
-                            mixinRoot
+                            mixinRoot,
+                            names
                         );
                         names.forEach((name) => varMap.set(name, { name }));
                     });
@@ -493,7 +495,6 @@ function collectOptionalArgs(
             }
         }
     });
-    return optionalArgs;
 }
 
 function getCSSMixinRoots(
