@@ -11,11 +11,11 @@
     "rollup": "^2.70.0"
   },
   "dependencies": {
-    "@stylable/build-tools": "^4.13.2",
-    "@stylable/cli": "^4.13.2",
-    "@stylable/node": "^4.13.2",
-    "@stylable/optimizer": "^4.13.2",
-    "@stylable/runtime": "^4.13.2",
+    "@stylable/build-tools": "^v5.0.0-rc.0",
+    "@stylable/cli": "^v5.0.0-rc.0",
+    "@stylable/node": "^v5.0.0-rc.0",
+    "@stylable/optimizer": "^v5.0.0-rc.0",
+    "@stylable/runtime": "^v5.0.0-rc.0",
     "decache": "^4.6.1",
     "mime": "^3.0.0"
   },

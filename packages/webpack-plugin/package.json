@@ -11,12 +11,12 @@
     "webpack": "^5.30.0"
   },
   "dependencies": {
-    "@stylable/build-tools": "^4.13.2",
-    "@stylable/cli": "^4.13.2",
-    "@stylable/module-utils": "^4.13.2",
-    "@stylable/node": "^4.13.2",
-    "@stylable/optimizer": "^4.13.2",
-    "@stylable/runtime": "^4.13.2",
+    "@stylable/build-tools": "^v5.0.0-rc.0",
+    "@stylable/cli": "^v5.0.0-rc.0",
+    "@stylable/module-utils": "^v5.0.0-rc.0",
+    "@stylable/node": "^v5.0.0-rc.0",
+    "@stylable/optimizer": "^v5.0.0-rc.0",
+    "@stylable/runtime": "^v5.0.0-rc.0",
     "decache": "^4.6.1",
     "find-config": "^1.0.0",
     "lodash.clonedeep": "^4.5.0",

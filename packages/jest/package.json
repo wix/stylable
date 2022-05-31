@@ -7,10 +7,10 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "^4.13.2",
-    "@stylable/module-utils": "^4.13.2",
-    "@stylable/node": "^4.13.2",
-    "@stylable/runtime": "^4.13.2"
+    "@stylable/core": "^v5.0.0-rc.0",
+    "@stylable/module-utils": "^v5.0.0-rc.0",
+    "@stylable/node": "^v5.0.0-rc.0",
+    "@stylable/runtime": "^v5.0.0-rc.0"
   },
   "files": [
     "dist",
