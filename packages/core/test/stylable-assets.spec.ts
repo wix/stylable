@@ -1,6 +1,7 @@
 import { normalize } from 'path';
 import { expect } from 'chai';
-import { cssParse, processDeclarationFunctions } from '@stylable/core/dist/index-internal';
+import { cssParse } from '@stylable/core/dist/index-internal';
+import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
 import { fixRelativeUrls, isAsset, makeAbsolute } from '@stylable/core/dist/stylable-assets';
 import type * as postcss from 'postcss';
 
