@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@stylable/core": "^4.13.2",
-    "@typescript-eslint/experimental-utils": "^5.26.0"
+    "@typescript-eslint/experimental-utils": "^5.27.0"
   },
   "keywords": [
     "eslint",
