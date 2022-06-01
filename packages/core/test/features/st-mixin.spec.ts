@@ -1,4 +1,5 @@
 import chaiSubset from 'chai-subset';
+import { Diagnostics } from '@stylable/core';
 import { STMixin } from '@stylable/core/dist/features';
 import {
     testStylableCore,
@@ -214,6 +215,26 @@ describe(`features/st-mixin`, () => {
 
         shouldReportNoDiagnostics(meta);
     });
+    it(`should report unknown args`, () => {
+        testStylableCore(`
+            :vars {
+                a: red;
+                point_to_a: value(a);
+            }
+            .mix {
+                color: value(point_to_a);
+            }
+
+            /* @rule .entry__root { color: green } */
+            .root {
+                /* @transform-warn word(unknown) ${mixinDiagnostics.UNKNOWN_ARG('unknown')} */
+                -st-mixin: mix(
+                    a green, 
+                    unknown red
+                );
+            }
+        `);
+    });
     it(`should handle invalid cases`, () => {
         testStylableCore(`
             .mixA {
@@ -234,6 +255,25 @@ describe(`features/st-mixin`, () => {
                 -st-mixin: mixA;
                 /* @transform-warn ${mixinDiagnostics.OVERRIDE_MIXIN(`-st-mixin`)} */
                 -st-mixin: mixB;
+            }
+
+            :vars {
+                colorX: red;
+            }
+            /* @rule .entry__root { } */
+            .root {
+                /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(`colorX`, 'var')} */
+                -st-mixin: colorX;
+            }
+            
+            @property --customPropX;
+            /* @rule .entry__root { } */
+            .root {
+                /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(
+                    `--customPropX`,
+                    'cssVar'
+                )} */
+                -st-mixin: --customPropX;
             }
         `);
     });
@@ -387,6 +427,37 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it(`should report unknown args (from another sheet)`, () => {
+            const { sheets } = testStylableCore({
+                '/vars.st.css': `
+                    :vars {
+                        a: red;
+                        point_to_a: value(a);
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [point_to_a] from './vars.st.css';
+                    .mix {
+                        color: value(point_to_a);
+                    }
+    
+                    /* @rule .entry__root { color: green } */
+                    .root {
+                        /* @transform-warn word(unknown) ${mixinDiagnostics.UNKNOWN_ARG(
+                            'unknown'
+                        )} */
+                        -st-mixin: mix(
+                            a green, 
+                            unknown red
+                        );
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(meta.transformDiagnostics?.reports.length).to.eql(1);
+        });
         it(`should handle circular mixins from multiple stylesheets`, () => {
             // ToDo: check why circular_mixin is not reported
             testStylableCore({
@@ -436,9 +507,7 @@ describe(`features/st-mixin`, () => {
                     }
 
                     .a {
-                        /* @transform-error ${mixinDiagnostics.UNKNOWN_MIXIN_SYMBOL(
-                            `unresolved`
-                        )} */
+                        /* @transform-error ${mixinDiagnostics.UNKNOWN_MIXIN(`unresolved`)} */
                         -st-mixin: unresolved;
                     }
                 `,
@@ -645,11 +714,10 @@ describe(`features/st-mixin`, () => {
                 .mix-deep {
                     propA: value(v1);
                     propB: value(v2);
-                    propC: value(v3);
                 }
                 .mix {
                     -st-partial-mixin: mix-deep(v2 value(v1));
-                    propX: value(v3);
+                    propX: value(v2);
                 }
 
                 /* 
@@ -662,20 +730,11 @@ describe(`features/st-mixin`, () => {
                 .SEP {}
 
                 /* 
-                    @rule(v2) .entry__a { }
+                    @rule(v2) .entry__a { propX: white }
                     @rule(v2-end)[1] .entry__SEP
                 */
                 .a {
                     -st-partial-mixin: mix(v2 white);
-                }
-                .SEP {}
-
-                /* 
-                    @rule(v3) .entry__a { propX: white }
-                    @rule(v3-end)[1] .entry__SEP
-                */
-                .a {
-                    -st-partial-mixin: mix(v3 white);
                 }
                 .SEP {}
             `);
@@ -1133,8 +1192,8 @@ describe(`features/st-mixin`, () => {
                 '/entry.st.css': `
                     @st-import [notAFunction, throw] from './mixins.js';
 
-                    /* @transform-error(not a function) word(notAFunction) ${mixinDiagnostics.JS_MIXIN_NOT_A_FUNC()} */
                     .a {
+                        /* @transform-error(not a function) word(notAFunction) ${mixinDiagnostics.JS_MIXIN_NOT_A_FUNC()} */
                         -st-mixin: notAFunction;
                     }
 
@@ -1867,6 +1926,120 @@ describe(`features/st-mixin`, () => {
                     'id: nested'
                 );
             });
+        });
+    });
+    describe('stylable API', () => {
+        it('should resolve mixin expression', () => {
+            const { stylable, sheets } = testStylableCore({
+                '/sheet.st.css': `
+                    .mix-base-type {
+                        prop: value(not-part-of-mixin);
+                    }
+                    .css-mix {
+                        -st-extends: mix-base-type;
+                        prop: value(bg-color);
+                    }
+                `,
+                'code.js': `
+                    module.exports = {
+                        'code-mix': ([arg1, arg2]) => {
+                            return { [arg1]: arg2 + '!' }
+                        },
+                        'code-str': "not valid mixin",
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [css-mix as importedClassMix] from './sheet.st.css';
+                    @st-import [code-mix as importedFuncMix, code-str] from './code.js';
+                    .local-mix {
+                        background: value(bg-size) value(bg-color);
+                    }
+                    .local-mix:hover {
+                        background-color: value(bg-hover-color);
+                    }
+                    ElementMix {
+                        color: value(colorList, value(color-index));
+                    }
+                    :vars {
+                        st-var-name: "cannot be used as mixin";
+                    }
+                `,
+            });
+            const inputExpr = `
+                local-mix(a 1, b value(x), c ' " , quotation and comma'), 
+                importedClassMix(c 2),
+                unknownBetweenMix(e 3),
+                st-var-name(e 4),
+                ElementMix(f 5, g 6),
+                code-str(argX),
+                importedFuncMix(argA, argB),
+            `;
+
+            const diagnostics = new Diagnostics();
+            const resolvedMixins = stylable.stMixin.resolveExpr(
+                sheets['/entry.st.css'].meta,
+                inputExpr,
+                {
+                    diagnostics,
+                    resolveOptionalArgs: true,
+                }
+            );
+
+            expect(resolvedMixins[0], 'local-mix').to.eql({
+                name: 'local-mix',
+                kind: 'css-fragment',
+                args: [{ a: '1' }, { b: 'value(x)' }, { c: ` " , quotation and comma` }],
+                optionalArgs: new Map([
+                    ['bg-size', { name: 'bg-size' }],
+                    ['bg-color', { name: 'bg-color' }],
+                    ['bg-hover-color', { name: 'bg-hover-color' }],
+                ]),
+            });
+            expect(resolvedMixins[1], 'importedClassMix').to.eql({
+                name: 'importedClassMix',
+                kind: 'css-fragment',
+                args: [{ c: '2' }],
+                optionalArgs: new Map([['bg-color', { name: 'bg-color' }]]),
+            });
+            expect(resolvedMixins[2], 'unknownBetweenMix').to.eql({
+                name: 'unknownBetweenMix',
+                kind: 'invalid',
+                args: 'e 3',
+            });
+            expect(resolvedMixins[3], 'st-var-name').to.eql({
+                name: 'st-var-name',
+                kind: 'invalid',
+                args: 'e 4',
+            });
+            expect(resolvedMixins[4], 'ElementMix').to.eql({
+                name: 'ElementMix',
+                kind: 'css-fragment',
+                args: [{ f: '5' }, { g: '6' }],
+                optionalArgs: new Map([
+                    ['colorList', { name: 'colorList' }],
+                    ['color-index', { name: 'color-index' }],
+                ]),
+            });
+            expect(resolvedMixins[5], 'code-str').to.eql({
+                name: 'code-str',
+                kind: 'invalid',
+                args: 'argX',
+            });
+            const jsMix = resolvedMixins[6];
+            expect(jsMix, 'importedFuncMix').to.deep.include({
+                name: 'importedFuncMix',
+                kind: 'js-func',
+                args: ['argA', 'argB'],
+            });
+            expect(
+                jsMix.kind === 'js-func' && jsMix.func(['color', 'green']),
+                'importedFuncMix func ref'
+            ).to.eql({ color: 'green!' });
+            expect(diagnostics.reports, 'diagnostics').to.containSubset([
+                STMixin.diagnostics.UNKNOWN_MIXIN('unknownBetweenMix'),
+                STMixin.diagnostics.UNSUPPORTED_MIXIN_SYMBOL('st-var-name', 'var'),
+                STMixin.diagnostics.JS_MIXIN_NOT_A_FUNC(),
+            ]);
         });
     });
 });
