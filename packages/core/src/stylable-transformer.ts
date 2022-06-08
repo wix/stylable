@@ -95,6 +95,7 @@ export interface TransformerOptions {
     postProcessor?: postProcessor;
     mode?: EnvMode;
     resolverCache?: StylableResolverCache;
+    stVarOverride?: Record<string, string>;
 }
 
 export const transformerDiagnostics = {
@@ -113,6 +114,7 @@ export class StylableTransformer {
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
+    private defaultStVarOverride: Record<string, string>;
     private evaluator: StylableEvaluator = new StylableEvaluator();
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
 
@@ -129,6 +131,7 @@ export class StylableTransformer {
             options.resolverCache || new Map()
         );
         this.mode = options.mode || 'production';
+        this.defaultStVarOverride = options.stVarOverride || {};
         this.getResolvedSymbols = createSymbolResolverWithCache(this.resolver, this.diagnostics);
     }
     public transform(meta: StylableMeta): StylableResults {
@@ -160,7 +163,7 @@ export class StylableTransformer {
         ast: postcss.Root,
         meta: StylableMeta,
         metaExports?: StylableExports,
-        stVarOverride?: Record<string, string>,
+        stVarOverride: Record<string, string> = this.defaultStVarOverride,
         path: string[] = [],
         mixinTransform = false,
         topNestClassName = ``

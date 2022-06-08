@@ -132,6 +132,34 @@ describe('Stylable', () => {
                 value: `var(--entry-x) jump`,
             });
         });
+        it(`should transform declaration prop/value with override st-vars`, () => {
+            const path = `/entry.st.css`;
+            const { stylable } = testStylableCore({
+                [path]: `
+                    :vars {
+                        x: red;
+                        a: value(x);
+                        b: blue;
+                    }
+                `,
+            });
+
+            const declAnimation = stylable.transformDecl(
+                path,
+                `prop`,
+                `value(a) value(b) value(x)`,
+                {
+                    stVarOverride: {
+                        x: 'green',
+                    },
+                }
+            );
+
+            expect(declAnimation, `animation context`).to.eql({
+                prop: `prop`,
+                value: `green blue green`,
+            });
+        });
         it(`should transform custom property`, () => {
             const path = `/entry.st.css`;
             const { stylable } = testStylableCore({
