@@ -529,4 +529,79 @@ describe(`features/st-import`, () => {
             });
         });
     });
+    describe('stylable API', () => {
+        it('should analyze imports', () => {
+            const { stylable, sheets } = testStylableCore({
+                '/dir/entry.st.css': `
+                    @st-import "./no/import";
+                    
+                    @st-import "../parent-dir";
+
+                    @st-import "/absolute/path";
+
+                    @st-import a from "./default/import";
+
+                    @st-import [b, c as x] from "./named/import";
+
+                    @st-import d, [e] from "./default&named/import";
+                    
+                    @st-import [f, keyframes(key1, key2 as localKey)] from "./keyframes";
+                `,
+            });
+
+            const { meta } = sheets['/dir/entry.st.css'];
+
+            const analyzedImports = stylable.stModule.analyze(meta);
+
+            expect(analyzedImports).to.eql([
+                {
+                    default: '',
+                    named: {},
+                    from: './no/import',
+                    typed: { keyframes: {} },
+                },
+                {
+                    default: '',
+                    named: {},
+                    from: '../parent-dir',
+                    typed: { keyframes: {} },
+                },
+                {
+                    default: '',
+                    named: {},
+                    from: '/absolute/path',
+                    typed: { keyframes: {} },
+                },
+                {
+                    default: 'a',
+                    named: {},
+                    from: './default/import',
+                    typed: { keyframes: {} },
+                },
+                {
+                    default: '',
+                    named: { b: 'b', x: 'c' },
+                    from: './named/import',
+                    typed: { keyframes: {} },
+                },
+                {
+                    default: 'd',
+                    named: { e: 'e' },
+                    from: './default&named/import',
+                    typed: { keyframes: {} },
+                },
+                {
+                    default: '',
+                    named: { f: 'f' },
+                    from: './keyframes',
+                    typed: {
+                        keyframes: {
+                            key1: 'key1',
+                            localKey: 'key2',
+                        },
+                    },
+                },
+            ]);
+        });
+    });
 });
