@@ -1,5 +1,6 @@
 import { testStylableCore, generateStylableEnvironment } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import deindent from 'deindent';
 
 describe('Stylable', () => {
     describe(`analyze (generate meta) `, () => {
@@ -55,15 +56,51 @@ describe('Stylable', () => {
             expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
         });
         it(`should transform a stylesheet from meta`, () => {
-            const src = `.a {}`;
+            const src = `
+                :vars {
+                    varA: red;
+                }
+                .a {
+                    prop: value(varA);
+                }
+            `;
             const path = `/entry.st.css`;
             const { stylable, fs } = testStylableCore({});
             fs.writeFileSync(path, src);
+            const meta = stylable.analyze(path);
 
-            const { meta, exports } = stylable.transform(stylable.analyze(path));
+            const defaultTransform = stylable.transform(meta);
 
-            expect(meta.targetAst?.toString(), `output CSS`).to.eql(`.entry__a {}`);
-            expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
+            expect(
+                deindent(defaultTransform.meta.targetAst!.toString()),
+                `default output CSS`
+            ).to.eql(
+                deindent(`
+                    .entry__a {
+                        prop: red;
+                    }
+                `)
+            );
+            expect(defaultTransform.exports.classes.a, `JS export`).to.eql(`entry__a`);
+            expect(defaultTransform.exports.stVars.varA, `default var JS export`).to.eql(`red`);
+            // ToDo: run test once stylable.transform is fixed
+            // const varOverrideTransform = stylable.transform(meta, '', {
+            //     stVarOverride: { varA: 'green' },
+            // });
+
+            // expect(
+            //     deindent(varOverrideTransform.meta.targetAst!.toString()),
+            //     `override vars output CSS`
+            // ).to.eql(
+            //     deindent(`
+            //         .entry__a {
+            //             prop: green;
+            //         }
+            //     `)
+            // );
+            // expect(varOverrideTransform.exports.stVars.varA, `override var JS export`).to.eql(
+            //     `green`
+            // );
         });
         it(`should transform selector`, () => {
             const path = `/entry.st.css`;
@@ -144,18 +181,13 @@ describe('Stylable', () => {
                 `,
             });
 
-            const declAnimation = stylable.transformDecl(
-                path,
-                `prop`,
-                `value(a) value(b) value(x)`,
-                {
-                    stVarOverride: {
-                        x: 'green',
-                    },
-                }
-            );
+            const decl = stylable.transformDecl(path, `prop`, `value(a) value(b) value(x)`, {
+                stVarOverride: {
+                    x: 'green',
+                },
+            });
 
-            expect(declAnimation, `animation context`).to.eql({
+            expect(decl, `value override`).to.eql({
                 prop: `prop`,
                 value: `green blue green`,
             });

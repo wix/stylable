@@ -142,6 +142,7 @@ export const hooks = createFeature<{
         for (const name of Object.keys(symbols)) {
             const symbol = symbols[name];
             const evaluated = context.evaluator.evaluateValue(noDaigContext, {
+                // ToDo: change to `value(${name})` in order to fix overrides in exports
                 value: stripQuotation(symbol.text),
                 meta: context.meta,
                 node: symbol.node,
