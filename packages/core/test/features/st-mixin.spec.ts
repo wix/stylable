@@ -1572,7 +1572,7 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        it(`should override vars with comma values`, () => {
+        it(`should un-escape override arguments`, () => {
             const { sheets } = testStylableCore(`
                 :vars {
                     color: red;
