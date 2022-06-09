@@ -533,7 +533,7 @@ describe(`features/st-import`, () => {
         it('should analyze imports', () => {
             const { stylable, sheets } = testStylableCore({
                 '/dir/entry.st.css': `
-                    @st-import "./no/import";
+                    @st-import "./no/imported/symbols";
                     
                     @st-import "../parent-dir";
 
@@ -557,7 +557,7 @@ describe(`features/st-import`, () => {
                 {
                     default: '',
                     named: {},
-                    from: './no/import',
+                    from: './no/imported/symbols',
                     typed: { keyframes: {} },
                 },
                 {
