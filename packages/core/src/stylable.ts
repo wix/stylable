@@ -145,19 +145,21 @@ export class Stylable {
             ...options,
         });
     }
+    // ToDo: unify signature - accept only meta + optional transformer options
     public transform(meta: StylableMeta): StylableResults;
     public transform(source: string, resourcePath: string): StylableResults;
     public transform(
-        meta: string | StylableMeta,
+        metaOrSource: string | StylableMeta,
         resourcePath?: string,
         options: Partial<TransformerOptions> = {},
         processorOptions: CreateProcessorOptions = {}
     ): StylableResults {
-        if (typeof meta === 'string') {
-            meta = this.createProcessor(processorOptions).process(
-                this.cssParser(meta, { from: resourcePath })
-            );
-        }
+        const meta =
+            typeof metaOrSource === 'string'
+                ? this.createProcessor(processorOptions).process(
+                      this.cssParser(metaOrSource, { from: resourcePath })
+                  )
+                : metaOrSource;
         const transformer = this.createTransformer(options);
         this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);
