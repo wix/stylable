@@ -7,6 +7,7 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
     "plugin:stylable/recommended",
     "prettier"
   ],
@@ -21,8 +22,7 @@
     "no-console": "warn",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "error",
-    "react/prop-types": "off",
-    "react/react-in-jsx-scope": "off"
+    "react/prop-types": "off"
   },
   "overrides": [
     {
