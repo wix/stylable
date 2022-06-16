@@ -217,6 +217,9 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
         rule: atRule,
         context,
         keyframes: {},
+        typed: {
+            keyframes: {},
+        },
     };
     const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
 
@@ -235,10 +238,13 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
                 word: importObj.defaultExport,
             });
         }
-        if (imports.tagged?.keyframes) {
-            // importObj.keyframes = imports.tagged?.keyframes;
-            for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
-                importObj.keyframes[impAsName] = impName;
+        if (imports.tagged) {
+            for (const [kind, namedTyped] of Object.entries(imports.tagged)) {
+                if (kind in importObj.typed) {
+                    for (const [impName, impAsName] of Object.entries(namedTyped)) {
+                        importObj.typed[kind as keyof Imported['typed']][impAsName] = impName;
+                    }
+                }
             }
         }
         if (imports.named) {
@@ -258,12 +264,16 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
 
 export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diagnostics) {
     let fromExists = false;
+    const keyframes = {};
     const importObj: Imported = {
         defaultExport: '',
         from: '',
         request: '',
         named: {},
-        keyframes: {},
+        keyframes,
+        typed: {
+            keyframes,
+        },
         rule,
         context,
     };
@@ -301,6 +311,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                     );
                     importObj.named = namedMap;
                     importObj.keyframes = keyframesMap;
+                    importObj.typed.keyframes = keyframesMap;
                 }
                 break;
             default:

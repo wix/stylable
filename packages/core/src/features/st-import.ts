@@ -23,7 +23,9 @@ export interface Imported {
     from: string;
     defaultExport: string;
     named: Record<string, string>;
+    /**@deprecated use imported.typed.keyframes */
     keyframes: Record<string, string>;
+    typed: Record<'keyframes', Record<string, string>>;
     rule: postcss.Rule | postcss.AtRule;
     request: string;
     context: string;
@@ -45,7 +47,7 @@ export const PseudoImportDecl = {
  * have to move into the `metaInit` hook.
  */
 export const ImportTypeHook = new Map<
-    StylableSymbol['_kind'] & keyof Imported,
+    StylableSymbol['_kind'] & keyof Imported['typed'],
     (context: FeatureContext, localName: string, importName: string, importDef: Imported) => void
 >();
 
@@ -183,8 +185,8 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
     });
     // import as typed symbol
     for (const [type, handler] of ImportTypeHook.entries()) {
-        if (type in importDef) {
-            for (const [localName, importName] of Object.entries(importDef[type])) {
+        if (type in importDef.typed) {
+            for (const [localName, importName] of Object.entries(importDef.typed[type])) {
                 handler(context, localName, importName, importDef);
             }
         }

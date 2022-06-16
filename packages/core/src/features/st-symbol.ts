@@ -66,7 +66,13 @@ type FilterByNamespace<NS extends Namespaces, T extends SymbolTypes = SymbolType
 type NamespaceToSymbolType = {
     [NS in SymbolTypeToNamespace[SymbolTypes]]: FilterByNamespace<NS>;
 };
-type Namespaces = keyof NamespaceToSymbolType;
+export type Namespaces = keyof NamespaceToSymbolType;
+export type SymbolByNamespace<NS extends Namespaces> = Extract<
+    StylableSymbol,
+    {
+        _kind: NamespaceToSymbolType[NS];
+    }
+>;
 interface SymbolDeclaration<NS = Namespaces> {
     name: string;
     symbol: filterSymbols<

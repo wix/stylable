@@ -147,7 +147,7 @@ export class StylableResolver {
     public resolveImported(
         imported: Imported,
         name: string,
-        subtype: 'mappedSymbols' | 'mappedKeyframes' = 'mappedSymbols'
+        subtype: 'mappedSymbols' | 'mappedKeyframes' | STSymbol.Namespaces = 'mappedSymbols'
     ): CSSResolve | JSResolve | null {
         const res = this.getModule(imported);
         if (res.value === null) {
@@ -156,7 +156,12 @@ export class StylableResolver {
 
         if (res.kind === 'css') {
             const { value: meta } = res;
-            const namespace = subtype === `mappedSymbols` ? `main` : `keyframes`;
+            const namespace =
+                subtype === `mappedSymbols`
+                    ? `main`
+                    : subtype === 'mappedKeyframes'
+                    ? `keyframes`
+                    : subtype;
             name = !name && namespace === `main` ? `root` : name;
             const symbol = STSymbol.getAll(meta, namespace)[name];
             return {
@@ -340,9 +345,10 @@ export class StylableResolver {
             }
             resolvedSymbols.mainNamespace[name] = deepResolved.symbol._kind;
         }
+        // ToDo: unify resolve types
         // resolve keyframes
         for (const [name, symbol] of Object.entries(CSSKeyframes.getAll(meta))) {
-            const result = resolveKeyframes(meta, symbol, this);
+            const result = resolveByNamespace(meta, symbol, this, 'keyframes');
             if (result) {
                 resolvedSymbols.keyframes[name] = {
                     _kind: `css`,
@@ -488,22 +494,23 @@ export function createSymbolResolverWithCache(
     };
 }
 
-function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {
+function resolveByNamespace<NS extends STSymbol.Namespaces>(
+    meta: StylableMeta,
+    symbol: StylableSymbol,
+    resolver: StylableResolver,
+    type: NS
+): CSSResolve<STSymbol.SymbolByNamespace<NS>> | undefined {
     const current = { meta, symbol };
-    while (current.symbol?.import) {
-        const res = resolver.resolveImported(
-            current.symbol.import,
-            current.symbol.name,
-            'mappedKeyframes' // ToDo: refactor out of resolver
-        );
-        if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
+    while ('import' in current.symbol && current.symbol.import) {
+        const res = resolver.resolveImported(current.symbol.import, current.symbol.name, type);
+        if (res?._kind === 'css' && res.symbol?._kind === type) {
             ({ meta: current.meta, symbol: current.symbol } = res);
         } else {
             return undefined;
         }
     }
-    if (current.symbol) {
-        return current;
+    if (current.symbol?._kind === type) {
+        return current as CSSResolve<STSymbol.SymbolByNamespace<typeof type>>;
     }
     return undefined;
 }
