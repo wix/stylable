@@ -12,7 +12,9 @@ import {
     VarSymbol,
     CSSVarSymbol,
     KeyframesSymbol,
+    LayerSymbol,
     CSSKeyframes,
+    CSSLayer,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { findRule } from './helpers/rule';
@@ -69,6 +71,7 @@ export interface MetaResolvedSymbols {
     customValues: Record<string, CustomValueExtension<any>>;
     cssVar: Record<string, CSSResolve<CSSVarSymbol>>;
     keyframes: Record<string, CSSResolve<KeyframesSymbol>>;
+    layer: Record<string, CSSResolve<LayerSymbol>>;
     import: Record<string, CSSResolve<ImportSymbol>>;
 }
 
@@ -188,7 +191,8 @@ export class StylableResolver {
                 maybeImport &&
                 maybeImport._kind !== 'var' &&
                 maybeImport._kind !== 'cssVar' &&
-                maybeImport._kind !== 'keyframes'
+                maybeImport._kind !== 'keyframes' &&
+                maybeImport._kind !== 'layer'
             ) {
                 if (maybeImport.alias && !maybeImport[`-st-extends`]) {
                     maybeImport = maybeImport.alias;
@@ -282,6 +286,7 @@ export class StylableResolver {
             js: {},
             customValues: { ...stTypes },
             keyframes: {},
+            layer: {},
             cssVar: {},
             import: {},
         };
@@ -351,6 +356,17 @@ export class StylableResolver {
             const result = resolveByNamespace(meta, symbol, this, 'keyframes');
             if (result) {
                 resolvedSymbols.keyframes[name] = {
+                    _kind: `css`,
+                    meta: result.meta,
+                    symbol: result.symbol,
+                };
+            }
+        }
+        // resolve layers
+        for (const [name, symbol] of Object.entries(CSSLayer.getAll(meta))) {
+            const result = resolveByNamespace(meta, symbol, this, 'layer');
+            if (result) {
+                resolvedSymbols.layer[name] = {
                     _kind: `css`,
                     meta: result.meta,
                     symbol: result.symbol,

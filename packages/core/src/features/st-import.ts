@@ -25,7 +25,7 @@ export interface Imported {
     named: Record<string, string>;
     /**@deprecated use imported.typed.keyframes */
     keyframes: Record<string, string>;
-    typed: Record<'keyframes', Record<string, string>>;
+    typed: Record<'keyframes' | 'layer', Record<string, string>>;
     rule: postcss.Rule | postcss.AtRule;
     request: string;
     context: string;

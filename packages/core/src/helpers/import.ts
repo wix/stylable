@@ -219,6 +219,7 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
         keyframes: {},
         typed: {
             keyframes: {},
+            layer: {},
         },
     };
     const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
@@ -273,6 +274,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
         keyframes,
         typed: {
             keyframes,
+            layer: {},
         },
         rule,
         context,
