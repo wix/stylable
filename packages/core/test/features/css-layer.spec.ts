@@ -1,5 +1,6 @@
 import { CSSLayer } from '@stylable/core/dist/features';
 import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import deindent from 'deindent';
 import { expect } from 'chai';
 
 describe('features/css-layer', () => {
@@ -315,6 +316,42 @@ describe('features/css-layer', () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+    });
+    describe('st-mixin', () => {
+        it('should mix @layer for nested mixin', () => {
+            const { sheets } = testStylableCore(
+                deindent(`
+                @layer x {
+                    .before { id: before-in-layer; }
+                    .mix { id: mix-in-layer; }
+                    .after { id: after-in-layer; }
+                }
+
+                .into {
+                    -st-mixin: mix;
+                }
+            `)
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(meta.outputAst?.toString()).to.eql(
+                deindent(`
+                @layer entry__x {
+                    .entry__before { id: before-in-layer; }
+                    .entry__mix { id: mix-in-layer; }
+                    .entry__after { id: after-in-layer; }
+                }
+                 .entry__into {
+                }
+                 @layer entry__x {
+                    .entry__into { id: mix-in-layer; }
+                }
+            `)
+            );
         });
     });
     describe('css-import', () => {
