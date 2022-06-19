@@ -2,6 +2,7 @@ import type { RuntimeStylesheet } from './dist';
 
 export const classes: RuntimeStylesheet['classes'];
 export const keyframes: RuntimeStylesheet['keyframes'];
+export const layers: RuntimeStylesheet['layers'];
 export const vars: RuntimeStylesheet['vars'];
 export const stVars: RuntimeStylesheet['stVars'];
 export const namespace: RuntimeStylesheet['namespace'];
