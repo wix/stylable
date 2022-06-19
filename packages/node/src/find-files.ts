@@ -17,16 +17,15 @@ export function findFiles(
     while (folders.length) {
         const current = folders.pop()!;
         try {
-            fs.readdirSync(current).forEach((item: string) => {
-                if (blacklist.has(item)) {
+            fs.readdirSync(current, { withFileTypes: true }).forEach((item) => {
+                if (blacklist.has(item.name)) {
                     return;
                 }
-                const itemFullPath = join(current, item);
+                const itemFullPath = join(current, item.name);
                 try {
-                    const status = fs.statSync(itemFullPath);
-                    if (status.isDirectory()) {
+                    if (item.isDirectory()) {
                         folders.push(itemFullPath);
-                    } else if (status.isFile() && itemFullPath.endsWith(ext)) {
+                    } else if (item.isFile() && itemFullPath.endsWith(ext)) {
                         result.add(
                             useRelative ? relative(rootDirectory, itemFullPath) : itemFullPath
                         );
