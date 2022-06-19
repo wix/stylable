@@ -129,7 +129,7 @@ export const hooks = createFeature<{
     },
     transformJSExports({ exports, resolved }) {
         for (const [name, resolve] of Object.entries(resolved)) {
-            exports.layer[name] = getTransformedName(resolve);
+            exports.layers[name] = getTransformedName(resolve);
         }
     },
 });

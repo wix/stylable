@@ -63,7 +63,7 @@ export interface StylableExports {
     vars: Record<string, string>;
     stVars: Record<string, RuntimeStVar>;
     keyframes: Record<string, string>;
-    layer: Record<string, string>;
+    layers: Record<string, string>;
 }
 
 export interface StylableResults {
@@ -143,7 +143,7 @@ export class StylableTransformer {
             vars: {},
             stVars: {},
             keyframes: {},
-            layer: {},
+            layers: {},
         };
         meta.transformedScopes = null;
         meta.outputAst = meta.ast.clone();

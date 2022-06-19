@@ -70,7 +70,7 @@ describe('features/css-layer', () => {
         });
 
         // JS exports
-        expect(exports.layer).to.eql({
+        expect(exports.layers).to.eql({
             single: 'entry__single',
             one: 'entry__one',
             two: 'entry__two',
@@ -129,7 +129,7 @@ describe('features/css-layer', () => {
         });
 
         // JS exports
-        expect(exports.layer.name, `JS export`).to.eql(`name`);
+        expect(exports.layers.name, `JS export`).to.eql(`name`);
     });
     it('should transform nested layers', () => {
         const { sheets } = testStylableCore(`           
@@ -224,7 +224,7 @@ describe('features/css-layer', () => {
             });
 
             // JS exports
-            expect(exports.layer, `JS exports`).to.eql({
+            expect(exports.layers, `JS exports`).to.eql({
                 layer1: `imported__layer1`,
                 'local-layer': `imported__layer2`,
             });
@@ -267,7 +267,7 @@ describe('features/css-layer', () => {
             });
 
             // JS exports
-            expect(exports.layer, `JS exports`).to.eql({
+            expect(exports.layers, `JS exports`).to.eql({
                 layer1: `layer1`,
                 'local-layer': `layer2`,
             });
@@ -296,7 +296,7 @@ describe('features/css-layer', () => {
             });
 
             // JS exports
-            expect(exports.layer, `JS exports`).to.eql({});
+            expect(exports.layers, `JS exports`).to.eql({});
         });
         it('should transform nested layers', () => {
             const { sheets } = testStylableCore({
