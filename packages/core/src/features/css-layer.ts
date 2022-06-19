@@ -48,6 +48,7 @@ const dataKey = plugableRecord.key<{
             transformNames: (mappedNames: Record<string, string>) => string;
         }
     >;
+    layerDefs: Record<string, postcss.AtRule | postcss.Rule>;
 }>('layer');
 
 // HOOKS
@@ -67,7 +68,7 @@ export const hooks = createFeature<{
     RESOLVED: Record<string, ResolvedLayer>;
 }>({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, { analyzedParams: {} });
+        plugableRecord.set(meta.data, dataKey, { analyzedParams: {}, layerDefs: {} });
     },
     analyzeAtRule({ context, atRule }) {
         if (atRule.name !== 'layer' || !atRule.params) {
@@ -141,6 +142,13 @@ export function get(meta: StylableMeta, name: string): LayerSymbol | undefined {
 }
 export function getAll(meta: StylableMeta): Record<string, LayerSymbol> {
     return STSymbol.getAllByType(meta, `layer`);
+}
+export function getDefinition(
+    meta: StylableMeta,
+    name: string
+): postcss.AtRule | postcss.Rule | undefined {
+    const analyzeMetaData = plugableRecord.getUnsafe(meta.data, dataKey);
+    return analyzeMetaData.layerDefs[name];
 }
 
 function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.AtRule) {
@@ -234,6 +242,8 @@ function addLayer({
             global = true;
             context.diagnostics.error(ast, diagnostics.RESERVED_KEYWORD(name), { word: name });
         }
+        const analyzeMetaData = plugableRecord.getUnsafe(context.meta.data, dataKey);
+        analyzeMetaData.layerDefs[name] = ast;
         STSymbol.addSymbol({
             context,
             node: ast,
