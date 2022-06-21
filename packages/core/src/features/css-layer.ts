@@ -35,6 +35,9 @@ export const diagnostics = {
     NOT_IDENT(name: string) {
         return `"@layer" expected ident, but got "${name}"`;
     },
+    RECONFIGURE_IMPORTED(name: string) {
+        return `cannot reconfigure imported layer "${name}"`;
+    },
     UNKNOWN_IMPORTED_LAYER(name: string, path: string) {
         return `cannot resolve imported layer "${name}" from stylesheet "${path}"`;
     },
@@ -257,5 +260,7 @@ function addLayer({
             },
             safeRedeclare: false,
         });
+    } else if (definedSymbol.import && global) {
+        context.diagnostics.error(ast, diagnostics.RECONFIGURE_IMPORTED(name), { word: name });
     }
 }

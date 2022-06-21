@@ -317,6 +317,38 @@ describe('features/css-layer', () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it('should report imported @layer override attempt', () => {
+            const { sheets } = testStylableCore({
+                '/imported.st.css': `
+                    @layer L1 {}
+                `,
+                '/entry.st.css': `
+                    @st-import [layer(L1)] from './imported.st.css';
+
+                    /* 
+                        @analyze-error word(L1) ${CSSLayer.diagnostics.RECONFIGURE_IMPORTED('L1')} 
+                        @atrule imported__L1
+                    */
+                    @layer st-global(L1) {}
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            // symbols
+            expect(CSSLayer.get(meta, `L1`), `symbol`).to.include({
+                _kind: 'layer',
+                name: 'L1',
+                alias: 'L1',
+                global: false,
+                import: meta.getImportStatements()[0],
+            });
+
+            // JS exports
+            expect(exports.layers, `JS exports`).to.eql({
+                L1: `imported__L1`,
+            });
+        });
     });
     describe('st-mixin', () => {
         it('should mix @layer for nested mixin', () => {
