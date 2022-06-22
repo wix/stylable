@@ -4,7 +4,9 @@ export function loadStylableConfig<T>(
     context: string,
     extract: (config: any) => T
 ): { path: string; config: T } | undefined {
-    const path = findConfig('stylable.config.js', { cwd: context });
+    const path =
+        findConfig('stylable.config.js', { cwd: context }) ??
+        findConfig('stylable.config.cjs', { cwd: context });
     let config;
     if (path) {
         try {
