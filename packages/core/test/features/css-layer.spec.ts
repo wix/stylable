@@ -387,37 +387,68 @@ describe('features/css-layer', () => {
         });
     });
     describe('css-import', () => {
-        it.skip('transform native @import', () => {
+        it('transform native @import', () => {
             const { sheets } = testStylableCore(`
-                /* atrule(named) url("button.css") layer(entry__base) */
-                @import url("button.css") layer(base);
+                /* @atrule(named) url("a.css") layer(entry__base) */
+                @import url("a.css") layer(base);
+
+                /* @atrule(nested) url("b.css") layer(entry__L1.entry__L2) */
+                @import url("b.css") layer(L1.L2);
+
+                @layer st-global(global-layer);
+                /* @atrule(named) url("c.css") layer(global-layer) */
+                @import url("c.css") layer(global-layer);
                 
-                /* atrule(unnamed) url("other.css") layer() */
+                /* @atrule(unnamed) url("other.css") layer() */
                 @import url("other.css") layer();
             `);
 
-            const { meta } = sheets['/entry.st.css'];
+            const { meta, exports } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
 
             // symbols
-            expect(CSSLayer.get(meta, 'base'), 'symbol').to.eql({
+            expect(CSSLayer.get(meta, 'base'), 'single symbol').to.eql({
                 _kind: 'layer',
                 name: 'base',
                 alias: 'base',
                 global: false,
                 import: undefined,
             });
+            expect(CSSLayer.get(meta, 'L1'), 'nested symbol 1').to.eql({
+                _kind: 'layer',
+                name: 'L1',
+                alias: 'L1',
+                global: false,
+                import: undefined,
+            });
+            expect(CSSLayer.get(meta, 'L2'), 'nested symbol 2').to.eql({
+                _kind: 'layer',
+                name: 'L2',
+                alias: 'L2',
+                global: false,
+                import: undefined,
+            });
+            expect(CSSLayer.get(meta, 'global-layer'), 'global symbol').to.eql({
+                _kind: 'layer',
+                name: 'global-layer',
+                alias: 'global-layer',
+                global: true,
+                import: undefined,
+            });
 
             // JS exports
-            expect(exports.layer).to.eql({
+            expect(exports.layers).to.eql({
                 base: 'entry__base',
+                L1: 'entry__L1',
+                L2: 'entry__L2',
+                'global-layer': 'global-layer',
             });
         });
         it.skip('should not allow between @import rules', () => {
             testStylableCore(`
                 @import url(before.css) layer(before);
-                /* analyze-error not allowed between @import statements */
+                /* @analyze-error not allowed between @import statements */
                 @layer between;
                 @import url(after.css) layer(after);
             `);

@@ -226,6 +226,12 @@ export class StylableTransformer {
                     atRule,
                     resolved: layerResolve,
                 });
+            } else if (name === 'import') {
+                CSSLayer.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: layerResolve,
+                });
             }
         });
 

@@ -185,6 +185,13 @@ export class StylableProcessor implements FeatureContext {
                         analyzeRule,
                     });
                     break;
+                case 'import':
+                    CSSLayer.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
                 case 'custom-selector': {
                     const params = atRule.params.split(/\s/);
                     const customName = params.shift();

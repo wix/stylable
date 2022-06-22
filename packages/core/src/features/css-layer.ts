@@ -74,7 +74,11 @@ export const hooks = createFeature<{
         plugableRecord.set(meta.data, dataKey, { analyzedParams: {}, layerDefs: {} });
     },
     analyzeAtRule({ context, atRule }) {
-        if (atRule.name !== 'layer' || !atRule.params) {
+        if ((atRule.name !== 'layer' && atRule.name !== 'import') || !atRule.params) {
+            return;
+        }
+        if (atRule.name === 'import') {
+            analyzeCSSImportLayer(context, atRule);
             return;
         }
         const analyzeMetaData = plugableRecord.getUnsafe(context.meta.data, dataKey);
@@ -116,7 +120,11 @@ export const hooks = createFeature<{
         return resolved;
     },
     transformAtRuleNode({ context, atRule, resolved }) {
-        if (atRule.name !== 'layer' || !atRule.params) {
+        if ((atRule.name !== 'layer' && atRule.name !== 'import') || !atRule.params) {
+            return;
+        }
+        if (atRule.name === 'import') {
+            transformCSSImportLayer(context, atRule, resolved);
             return;
         }
         const { analyzedParams } = plugableRecord.getUnsafe(context.meta.data, dataKey);
@@ -217,6 +225,55 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
             return valueParser.stringify(ast);
         },
     };
+}
+
+function analyzeCSSImportLayer(context: FeatureContext, importAtRule: postcss.AtRule) {
+    const ast = valueParser(importAtRule.params).nodes;
+    for (let i = 0; i < ast.length; ++i) {
+        const node = ast[i];
+        const { type, value } = node;
+        if (type === 'function' && value === 'layer' && node.nodes.length) {
+            for (const nestedNode of node.nodes) {
+                if (nestedNode.type === 'word') {
+                    for (const name of nestedNode.value.split('.')) {
+                        addLayer({
+                            context,
+                            name,
+                            importName: name,
+                            ast: importAtRule,
+                            global: false,
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
+function transformCSSImportLayer(
+    _context: FeatureContext,
+    importAtRule: postcss.AtRule,
+    resolved: Record<string, ResolvedLayer>
+) {
+    const ast = valueParser(importAtRule.params).nodes;
+    for (let i = 0; i < ast.length; ++i) {
+        const node = ast[i];
+        const { type, value } = node;
+        if (type === 'function' && value === 'layer' && node.nodes.length) {
+            for (const nestedNode of node.nodes) {
+                const { type, value } = nestedNode;
+                if (type === 'word') {
+                    nestedNode.value = value
+                        .split('.')
+                        .map((name) => {
+                            const resolve = resolved[name];
+                            return resolve ? getTransformedName(resolved[name]) : name;
+                        })
+                        .join('.');
+                }
+            }
+        }
+    }
+    importAtRule.params = valueParser.stringify(ast);
 }
 
 function getTransformedName({ symbol, meta }: ResolvedLayer) {
