@@ -440,7 +440,10 @@ export function createOptimizationMapping(
     return sortedModules.reduce<OptimizationMapping>(
         (acc, module) => {
             const { namespace, isUsed } = getStylableBuildMeta(module);
-            acc.usageMapping[namespace] = isUsed ?? true;
+
+            if (!acc.usageMapping[namespace]) {
+                acc.usageMapping[namespace] = isUsed ?? true;
+            }
             acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
             if (acc.namespaceToFileMapping.has(namespace)) {
                 acc.namespaceToFileMapping.get(namespace)!.add(module);

@@ -12,6 +12,7 @@ import {
 } from './stylable-resolver';
 import type { replaceValueHook, RuntimeStVar, StylableTransformer } from './stylable-transformer';
 import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
+import { unescapeCSS } from './helpers/escape';
 import type { ParsedValue } from './types';
 import type { FeatureTransformContext } from './features/feature';
 import { CSSCustomProperty, STVar } from './features';
@@ -94,7 +95,7 @@ export function resolveArgumentsValue(
     for (const k in options) {
         resolvedArgs[k] = evalDeclarationValue(
             transformer.resolver,
-            options[k],
+            unescapeCSS(options[k]),
             meta,
             node,
             variableOverride,

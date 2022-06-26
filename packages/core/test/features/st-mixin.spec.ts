@@ -1490,6 +1490,33 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it(`should un-escape override arguments`, () => {
+            const { sheets } = testStylableCore(`
+                :vars {
+                    color: red;
+                    font: Arial;
+                }
+                .mix {
+                    color: value(color);
+                    font-family: value(font);
+                }
+                
+                /* @rule .entry__groot {
+                    color: blue;
+                    font-family: "Avenir Next", Arial;
+                } */
+                .groot {
+                    -st-mixin: mix(
+                        font "\\"Avenir Next\\", Arial",
+                        color blue
+                    );
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
         it(`should override vars that are used as override `, () => {
             const { sheets } = testStylableCore({
                 '/mix.st.css': `
