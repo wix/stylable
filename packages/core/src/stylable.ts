@@ -14,7 +14,7 @@ import {
 } from './stylable-transformer';
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
-import { STVar, CSSCustomProperty } from './features';
+import { STImport, STVar, STMixin, CSSCustomProperty } from './features';
 import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
 import * as postcss from 'postcss';
 
@@ -48,7 +48,9 @@ export type CreateProcessorOptions = Pick<StylableConfig, 'resolveNamespace'>;
 export class Stylable {
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
+    public stModule = new STImport.StylablePublicApi(this);
     public stVar = new STVar.StylablePublicApi(this);
+    public stMixin = new STMixin.StylablePublicApi(this);
     //
     public projectRoot: string;
     protected fileSystem: MinimalFS;
@@ -144,19 +146,21 @@ export class Stylable {
             ...options,
         });
     }
+    // ToDo: unify signature - accept only meta + optional transformer options
     public transform(meta: StylableMeta): StylableResults;
     public transform(source: string, resourcePath: string): StylableResults;
     public transform(
-        meta: string | StylableMeta,
+        metaOrSource: string | StylableMeta,
         resourcePath?: string,
         options: Partial<TransformerOptions> = {},
         processorOptions: CreateProcessorOptions = {}
     ): StylableResults {
-        if (typeof meta === 'string') {
-            meta = this.createProcessor(processorOptions).process(
-                this.cssParser(meta, { from: resourcePath })
-            );
-        }
+        const meta =
+            typeof metaOrSource === 'string'
+                ? this.createProcessor(processorOptions).process(
+                      this.cssParser(metaOrSource, { from: resourcePath })
+                  )
+                : metaOrSource;
         const transformer = this.createTransformer(options);
         this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);

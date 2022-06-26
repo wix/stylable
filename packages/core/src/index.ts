@@ -9,8 +9,7 @@ export type {
     VarSymbol,
     Imported,
     KeyframesSymbol,
-    RefedMixin,
-    MixinValue,
+    MixinReflection,
     ComputedStVar,
     FlatComputedStVar,
 } from './features';

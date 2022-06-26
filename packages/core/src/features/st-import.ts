@@ -10,6 +10,7 @@ import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { createDiagnosticReporter } from '../diagnostics';
+import type { Stylable } from '../stylable';
 
 export interface ImportSymbol {
     _kind: 'import';
@@ -17,6 +18,15 @@ export interface ImportSymbol {
     name: string;
     import: Imported;
     context: string;
+}
+
+export interface AnalyzedImport {
+    from: string;
+    default: string;
+    named: Record<string, string>;
+    typed: {
+        keyframes: Record<string, string>;
+    };
 }
 
 export interface Imported {
@@ -146,6 +156,20 @@ export const hooks = createFeature<{
 });
 
 // API
+
+export class StylablePublicApi {
+    constructor(private stylable: Stylable) {}
+    public analyze(meta: StylableMeta): AnalyzedImport[] {
+        return getImportStatements(meta).map(({ request, defaultExport, named, keyframes }) => ({
+            from: request,
+            default: defaultExport,
+            named,
+            typed: {
+                keyframes,
+            },
+        }));
+    }
+}
 
 function isImportStatement(node: postcss.ChildNode): node is postcss.Rule | postcss.AtRule {
     return (
