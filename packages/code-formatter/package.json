@@ -7,7 +7,7 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "v5.0.0-rc.3",
+    "@stylable/core": "5.0.0-rc.3",
     "js-beautify": "^1.14.4"
   },
   "files": [

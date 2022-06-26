@@ -6,9 +6,9 @@
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "dependencies": {
-    "@stylable/core": "v5.0.0-rc.3",
-    "@stylable/optimizer": "v5.0.0-rc.3",
-    "@stylable/runtime": "v5.0.0-rc.3",
+    "@stylable/core": "5.0.0-rc.3",
+    "@stylable/optimizer": "5.0.0-rc.3",
+    "@stylable/runtime": "5.0.0-rc.3",
     "css-loader": "^6.7.1",
     "decache": "^4.6.1",
     "loader-utils": "^3.2.0"

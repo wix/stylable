@@ -7,16 +7,16 @@
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "peerDependencies": {
-    "@stylable/core": "v5.0.0-rc.3",
+    "@stylable/core": "5.0.0-rc.3",
     "webpack": "^5.30.0"
   },
   "dependencies": {
-    "@stylable/build-tools": "v5.0.0-rc.3",
-    "@stylable/cli": "v5.0.0-rc.3",
-    "@stylable/module-utils": "v5.0.0-rc.3",
-    "@stylable/node": "v5.0.0-rc.3",
-    "@stylable/optimizer": "v5.0.0-rc.3",
-    "@stylable/runtime": "v5.0.0-rc.3",
+    "@stylable/build-tools": "5.0.0-rc.3",
+    "@stylable/cli": "5.0.0-rc.3",
+    "@stylable/module-utils": "5.0.0-rc.3",
+    "@stylable/node": "5.0.0-rc.3",
+    "@stylable/optimizer": "5.0.0-rc.3",
+    "@stylable/runtime": "5.0.0-rc.3",
     "decache": "^4.6.1",
     "find-config": "^1.0.0",
     "lodash.clonedeep": "^4.5.0",

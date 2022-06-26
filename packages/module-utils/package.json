@@ -7,7 +7,7 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "v5.0.0-rc.3",
+    "@stylable/core": "5.0.0-rc.3",
     "@tokey/core": "^1.3.0",
     "vlq": "^2.0.4"
   },

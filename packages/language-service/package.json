@@ -13,8 +13,8 @@
   "dependencies": {
     "@file-services/types": "^6.0.0",
     "@file-services/typescript": "^6.0.0",
-    "@stylable/code-formatter": "v5.0.0-rc.3",
-    "@stylable/core": "v5.0.0-rc.3",
+    "@stylable/code-formatter": "5.0.0-rc.3",
+    "@stylable/core": "5.0.0-rc.3",
     "css-selector-tokenizer": "^0.8.0",
     "postcss": "^8.4.14",
     "postcss-value-parser": "^4.2.0",

@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@file-services/memory": "^6.0.0",
-    "@stylable/core": "v5.0.0-rc.3",
+    "@stylable/core": "5.0.0-rc.3",
     "chai": "^4.3.6",
     "flat": "^5.0.2",
     "postcss": "^8.4.14"
