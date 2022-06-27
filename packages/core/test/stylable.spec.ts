@@ -73,21 +73,23 @@ describe('Stylable', () => {
             );
             expect(defaultTransform.exports.classes.a, `JS export`).to.eql(`entry__a`);
             expect(defaultTransform.exports.stVars.varA, `default var JS export`).to.eql(`red`);
-            // ToDo: run test once stylable.transform is fixed
-            // const varOverrideTransform = stylable.transform(meta, {
-            //     stVarOverride: { varA: 'green' },
-            // });
 
-            // expect(
-            //     deindent(varOverrideTransform.meta.targetAst!.toString()),
-            //     `override vars output CSS`
-            // ).to.eql(
-            //     deindent(`
-            //         .entry__a {
-            //             prop: green;
-            //         }
-            //     `)
-            // );
+            // test with override
+            const varOverrideTransform = stylable.transform(meta, {
+                stVarOverride: { varA: 'green' },
+            });
+
+            expect(
+                deindent(varOverrideTransform.meta.targetAst!.toString()),
+                `override vars output CSS`
+            ).to.eql(
+                deindent(`
+                    .entry__a {
+                        prop: green;
+                    }
+                `)
+            );
+            // ToDo: fix JS export for programmatic override
             // expect(varOverrideTransform.exports.stVars.varA, `override var JS export`).to.eql(
             //     `green`
             // );
