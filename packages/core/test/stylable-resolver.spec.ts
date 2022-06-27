@@ -1,12 +1,8 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { testStylableCore, generateStylableResult } from '@stylable/core-test-kit';
-import { Stylable, MinimalFS, StylableMeta } from '@stylable/core';
-import {
-    StylableResolver,
-    createDefaultResolver,
-    cachedProcessFile,
-} from '@stylable/core/dist/index-internal';
+import { Stylable, MinimalFS, StylableMeta, createDefaultResolver } from '@stylable/core';
+import { StylableResolver, cachedProcessFile } from '@stylable/core/dist/index-internal';
 
 function createResolveExtendsResults(
     fileSystem: MinimalFS,
