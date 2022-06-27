@@ -60,7 +60,8 @@ export class StylableEvaluator {
             data.cssVarsMapping,
             data.args,
             data.rootArgument,
-            data.initialNode
+            data.initialNode,
+            context.topTransform
         );
     }
 }
@@ -122,7 +123,8 @@ export function processDeclarationValue(
     cssVarsMapping: Record<string, string> = {},
     args: string[] = [],
     rootArgument?: string,
-    initialNode?: postcss.Node
+    initialNode?: postcss.Node,
+    topTransform?: FeatureTransformContext['topTransform']
 ): EvalValueResult {
     const evaluator = new StylableEvaluator({ stVarOverride: variableOverride });
     const resolvedSymbols = getResolvedSymbols(meta);
@@ -138,6 +140,7 @@ export function processDeclarationValue(
                         resolver,
                         evaluator,
                         getResolvedSymbols,
+                        topTransform,
                     },
                     data: {
                         value,
@@ -209,6 +212,7 @@ export function processDeclarationValue(
                         resolver,
                         evaluator,
                         getResolvedSymbols,
+                        topTransform,
                     },
                     data: {
                         value,

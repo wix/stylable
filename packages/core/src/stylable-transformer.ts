@@ -117,7 +117,7 @@ export class StylableTransformer {
     private defaultStVarOverride: Record<string, string>;
     private evaluator: StylableEvaluator = new StylableEvaluator();
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
-
+    private topTransform: FeatureTransformContext['topTransform'];
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;
@@ -149,6 +149,7 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            topTransform: this.getTopTransform(meta),
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
@@ -176,6 +177,7 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            topTransform: this.getTopTransform(meta),
         };
         const transformResolveOptions = {
             context: transformContext,
@@ -308,6 +310,7 @@ export class StylableTransformer {
         topNestClassName?: string,
         unwrapGlobals = false
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
+        this.getTopTransform(originMeta);
         const context = new ScopeContext(
             originMeta,
             this.resolver,
@@ -375,6 +378,9 @@ export class StylableTransformer {
         }
         return targetAst;
     }
+    private getTopTransform(meta: StylableMeta) {
+        return (this.topTransform ??= { meta });
+    }
     private handleCompoundNode(context: Required<ScopeContext>) {
         const { currentAnchor, node, originMeta, topNestClassName } = context;
         const resolvedSymbols = this.getResolvedSymbols(originMeta);
@@ -384,6 +390,7 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            topTransform: this.getTopTransform(originMeta),
         };
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({

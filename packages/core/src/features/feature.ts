@@ -21,6 +21,10 @@ export interface FeatureTransformContext extends FeatureContext {
     resolver: StylableResolver;
     evaluator: StylableEvaluator;
     getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols;
+    // ToDo: always pass after v5 is out and merged to the main branch
+    topTransform?: {
+        meta: StylableMeta;
+    };
 }
 
 export interface NodeTypes {

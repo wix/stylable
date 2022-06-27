@@ -458,6 +458,39 @@ describe(`features/st-mixin`, () => {
 
             expect(meta.transformDiagnostics?.reports.length).to.eql(1);
         });
+        it(`should report unknown args only for the stylesheet that contains the mixin`, () => {
+            const { sheets } = testStylableCore({
+                '/mixins.st.css': `
+                    :vars {
+                        a: yellow;
+                    }
+                    .mix {
+                        color: value(a);
+                    }
+    
+                    .top-mix {
+                        /* @transform-warn word(unknown) ${mixinDiagnostics.UNKNOWN_ARG(
+                            'unknown'
+                        )} */
+                        -st-mixin: mix(
+                            a green, 
+                            unknown red
+                        );
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [top-mix] from "./mixins.st.css";
+    
+                    .root {
+                        -st-mixin: top-mix;
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
         it(`should handle circular mixins from multiple stylesheets`, () => {
             // ToDo: check why circular_mixin is not reported
             testStylableCore({

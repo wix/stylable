@@ -477,12 +477,15 @@ function handleCSSMixin(
         }
     );
 
-    for (const overrideArg of overrideKeys) {
-        if (!optionalArgs.has(overrideArg)) {
-            context.diagnostics.report(diagnostics.UNKNOWN_ARG(overrideArg), {
-                node: mixDef.data.originDecl,
-                word: overrideArg,
-            });
+    // report only for the top level mixin
+    if (context.topTransform?.meta === context.meta) {
+        for (const overrideArg of overrideKeys) {
+            if (!optionalArgs.has(overrideArg)) {
+                context.diagnostics.report(diagnostics.UNKNOWN_ARG(overrideArg), {
+                    node: mixDef.data.originDecl,
+                    word: overrideArg,
+                });
+            }
         }
     }
 
