@@ -8,7 +8,6 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
-    "plugin:stylable/recommended",
     "prettier"
   ],
   "plugins": ["react-hooks"],
