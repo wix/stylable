@@ -87,7 +87,7 @@ export function buildSingleFile({
         `Read File Error: ${filePath}`
     );
     const res = tryRun(
-        () => stylable.transform(stylable.analyze(filePath, content)),
+        () => stylable.transform(stylable.analyze(filePath)),
         errorMessages.STYLABLE_PROCESS(filePath)
     );
     const optimizer = new StylableOptimizer();

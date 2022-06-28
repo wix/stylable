@@ -152,7 +152,6 @@ export class Stylable {
     ): StylableResults {
         const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
         const transformer = this.createTransformer(options);
-        this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);
     }
     public transformSelector(
