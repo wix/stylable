@@ -1115,14 +1115,14 @@ describe(`features/css-class`, () => {
 
             // ToDo: fix :global(.class) not registering as symbol?
 
-            expect(api.transformToSelector(meta, 'a'), 'local class').to.eql('.entry__a');
-            // expect(api.transformToSelector(meta, 'b'), 'local global class').to.eql('.b');
-            expect(api.transformToSelector(meta, 'c'), 'local mapped class').to.eql('[attr=c]');
-            expect(api.transformToSelector(meta, 'unknown'), 'unknown class').to.eql(undefined);
-            expect(api.transformToSelector(meta, 'not-a-class'), 'not class').to.eql(undefined);
-            expect(api.transformToSelector(meta, 'ext-x'), 'imported class').to.eql('.other__x');
-            // expect(api.transformToSelector(meta, 'ext-y'), 'imported global class').to.eql('.y');
-            expect(api.transformToSelector(meta, 'ext-z'), 'imported mapped class').to.eql(
+            expect(api.transformIntoSelector(meta, 'a'), 'local class').to.eql('.entry__a');
+            // expect(api.transformIntoSelector(meta, 'b'), 'local global class').to.eql('.b');
+            expect(api.transformIntoSelector(meta, 'c'), 'local mapped class').to.eql('[attr=c]');
+            expect(api.transformIntoSelector(meta, 'unknown'), 'unknown class').to.eql(undefined);
+            expect(api.transformIntoSelector(meta, 'not-a-class'), 'not class').to.eql(undefined);
+            expect(api.transformIntoSelector(meta, 'ext-x'), 'imported class').to.eql('.other__x');
+            // expect(api.transformIntoSelector(meta, 'ext-y'), 'imported global class').to.eql('.y');
+            expect(api.transformIntoSelector(meta, 'ext-z'), 'imported mapped class').to.eql(
                 '[attr=z]'
             );
         });

@@ -167,7 +167,7 @@ export const hooks = createFeature<{
 
 export class StylablePublicApi {
     constructor(private stylable: Stylable) {}
-    public transformToSelector(meta: StylableMeta, name: string): string | undefined {
+    public transformIntoSelector(meta: StylableMeta, name: string): string | undefined {
         const localSymbol = STSymbol.get(meta, name);
         const resolved =
             localSymbol?._kind === 'import'
