@@ -30,7 +30,7 @@ describe(`features/st-scope`, () => {
     // ToDo: move relevant tests here
 
     describe('stylable API', () => {
-        it.only(`should get @st-scope for rule`, () => {
+        it(`should get @st-scope for rule`, () => {
             const { stylable, sheets } = testStylableCore(`
                 @st-scope a {
                     .direct {}
