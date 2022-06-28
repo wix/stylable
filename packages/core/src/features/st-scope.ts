@@ -1,5 +1,6 @@
 import { createFeature } from './feature';
 import { parseSelectorWithCache, scopeNestedSelector } from '../helpers/selector';
+import type { Stylable } from '../stylable';
 import type { ImmutablePseudoClass } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
 import type { SRule } from '../deprecated/postcss-ast-extension';
@@ -44,7 +45,14 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
 
 // API
 
-function isStScopeStatement(node: postcss.ChildNode): node is postcss.AtRule {
+export class StylablePublicApi {
+    constructor(private stylable: Stylable) {}
+    public getStScope(rule: postcss.Rule) {
+        return getStScope(rule);
+    }
+}
+
+function isStScopeStatement(node: any): node is postcss.AtRule {
     return node.type === 'atrule' && node.name === 'st-scope';
 }
 
@@ -59,4 +67,15 @@ function flattenScope(atRule: postcss.AtRule) {
             (rule as SRule).stScopeSelector = atRule.params;
         });
     }
+}
+
+export function getStScope(rule: postcss.Rule): postcss.AtRule | undefined {
+    let current: postcss.Container | postcss.Document = rule;
+    while (current?.parent) {
+        current = current.parent;
+        if (isStScopeStatement(current) && current.parent?.type === 'root') {
+            return current;
+        }
+    }
+    return;
 }

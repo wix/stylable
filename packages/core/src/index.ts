@@ -37,3 +37,4 @@ export { createDefaultResolver } from './module-resolver';
 // low-level api
 export { parseModuleImportStatement, ensureModuleImport } from './helpers/import';
 export { validateCustomPropertyName } from './helpers/css-custom-property';
+export { getStScope } from './features/st-scope';
