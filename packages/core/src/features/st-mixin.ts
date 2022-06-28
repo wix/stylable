@@ -6,6 +6,7 @@ import * as STVar from './st-var';
 import type { ElementSymbol } from './css-type';
 import type { ClassSymbol } from './css-class';
 import { createSubsetAst } from '../helpers/rule';
+import { scopeNestedSelector } from '../helpers/selector';
 import { mixinHelperDiagnostics, parseStMixin, parseStPartialMixin } from '../helpers/mixin';
 import { resolveArgumentsValue } from '../functions';
 import { cssObjectToAst } from '../parser';
@@ -19,6 +20,7 @@ import type { StylableTransformer } from '../stylable-transformer';
 import { dirname } from 'path';
 import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import type { Stylable } from '../stylable';
+import { parseCssSelector } from '@tokey/css-selector-parser';
 
 export interface MixinValue {
     type: string;
@@ -185,6 +187,10 @@ export class StylablePublicApi {
             }
         }
         return result;
+    }
+    public scopeNestedSelector(scopeSelector: string, nestSelector: string): string {
+        return scopeNestedSelector(parseCssSelector(scopeSelector), parseCssSelector(nestSelector))
+            .selector;
     }
 }
 
