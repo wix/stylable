@@ -69,7 +69,7 @@ function flattenScope(atRule: postcss.AtRule) {
     }
 }
 
-export function getStScope(rule: postcss.Rule): postcss.AtRule | undefined {
+function getStScope(rule: postcss.Rule): postcss.AtRule | undefined {
     let current: postcss.Container | postcss.Document = rule;
     while (current?.parent) {
         current = current.parent;
