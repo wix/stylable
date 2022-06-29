@@ -21,7 +21,8 @@ export function stylableModuleFactory(
 ) {
     const stylable = new Stylable(stylableOptions);
     return function stylableToModule(source: string, path: string) {
-        const res = stylable.transform(source, path);
+        const meta = stylable.analyze(path, source);
+        const res = stylable.transform(meta);
         return generateModuleSource(
             res,
             runtimeStylesheetId === 'module' ? 'module.id' : res.meta.namespace,

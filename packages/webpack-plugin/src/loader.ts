@@ -3,7 +3,9 @@ import type { StylableLoaderContext } from './types';
 import { emitDiagnostics } from '@stylable/core/dist/index-internal';
 
 export default function StylableWebpackLoader(this: StylableLoaderContext, source: string) {
-    const { meta, exports } = this.stylable.transform(source, this.resourcePath);
+    const { meta, exports } = this.stylable.transform(
+        this.stylable.analyze(this.resourcePath, source)
+    );
 
     const { urls, imports, buildDependencies, unusedImports } = getImports(
         this.stylable,

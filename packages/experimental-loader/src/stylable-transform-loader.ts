@@ -71,7 +71,7 @@ const stylableLoader: LoaderDefinition = function (content) {
         resolveNamespace,
     });
 
-    const { meta, exports } = stylable.transform(content, this.resourcePath);
+    const { meta, exports } = stylable.transform(stylable.analyze(this.resourcePath, content));
 
     emitDiagnostics(this, meta, diagnosticsMode);
 

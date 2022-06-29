@@ -14,7 +14,7 @@ import {
 } from './stylable-transformer';
 import type { IStylableOptimizer, ModuleResolver } from './types';
 import { createDefaultResolver } from './module-resolver';
-import { STImport, STVar, STMixin, CSSClass, CSSCustomProperty } from './features';
+import { STImport, STScope, STVar, STMixin, CSSClass, CSSCustomProperty } from './features';
 import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
 import * as postcss from 'postcss';
 
@@ -49,6 +49,7 @@ export class Stylable {
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
     public stModule = new STImport.StylablePublicApi(this);
+    public stScope = new STScope.StylablePublicApi(this);
     public stVar = new STVar.StylablePublicApi(this);
     public stMixin = new STMixin.StylablePublicApi(this);
     public cssClass = new CSSClass.StylablePublicApi(this);
@@ -147,23 +148,12 @@ export class Stylable {
             ...options,
         });
     }
-    // ToDo: unify signature - accept only meta + optional transformer options
-    public transform(meta: StylableMeta): StylableResults;
-    public transform(source: string, resourcePath: string): StylableResults;
     public transform(
-        metaOrSource: string | StylableMeta,
-        resourcePath?: string,
-        options: Partial<TransformerOptions> = {},
-        processorOptions: CreateProcessorOptions = {}
+        pathOrMeta: string | StylableMeta,
+        options: Partial<TransformerOptions> = {}
     ): StylableResults {
-        const meta =
-            typeof metaOrSource === 'string'
-                ? this.createProcessor(processorOptions).process(
-                      this.cssParser(metaOrSource, { from: resourcePath })
-                  )
-                : metaOrSource;
+        const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
         const transformer = this.createTransformer(options);
-        this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);
     }
     public transformSelector(
