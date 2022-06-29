@@ -154,7 +154,7 @@ export function stylableRollupPlugin({
             if (!id.endsWith(ST_CSS)) {
                 return null;
             }
-            const { meta, exports } = stylable.transform(source, id);
+            const { meta, exports } = stylable.transform(stylable.analyze(id, source));
             const assetsIds = emitAssets(this, stylable, meta, emittedAssets, inlineAssets);
             const css = generateCssString(meta, minify, stylable, assetsIds);
             const moduleImports = [];

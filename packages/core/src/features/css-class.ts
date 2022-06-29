@@ -11,11 +11,13 @@ import { namespaceEscape, unescapeCSS } from '../helpers/escape';
 import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
 import { validateRuleStateDefinition } from '../helpers/custom-state';
-import type {
+import type { Stylable } from '../stylable';
+import {
     ImmutableClass,
     Class,
     SelectorNode,
     ImmutableSelectorNode,
+    stringifySelectorAst,
 } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { createDiagnosticReporter } from '../diagnostics';
@@ -162,6 +164,31 @@ export const hooks = createFeature<{
 });
 
 // API
+
+export class StylablePublicApi {
+    constructor(private stylable: Stylable) {}
+    public transformIntoSelector(meta: StylableMeta, name: string): string | undefined {
+        const localSymbol = STSymbol.get(meta, name);
+        const resolved =
+            localSymbol?._kind === 'import'
+                ? this.stylable.resolver.deepResolve(localSymbol)
+                : { _kind: 'css', meta, symbol: localSymbol };
+
+        if (resolved?._kind !== 'css' || resolved.symbol?._kind !== 'class') {
+            return undefined;
+        }
+
+        const node: Class = {
+            type: 'class',
+            value: '',
+            start: 0,
+            end: 0,
+            dotComments: [],
+        };
+        namespaceClass(resolved.meta, resolved.symbol, node, meta);
+        return stringifySelectorAst(node);
+    }
+}
 
 export function get(meta: StylableMeta, name: string): ClassSymbol | undefined {
     return STSymbol.get(meta, name, `class`);

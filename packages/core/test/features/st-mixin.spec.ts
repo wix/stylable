@@ -2068,5 +2068,15 @@ describe(`features/st-mixin`, () => {
                 STMixin.diagnostics.JS_MIXIN_NOT_A_FUNC(),
             ]);
         });
+        it('should combine two selectors', () => {
+            const { stylable } = testStylableCore(``);
+            const api = stylable.stMixin;
+
+            expect(api.scopeNestedSelector('.a', '.b'), 'descendant').to.eql('.a .b');
+            expect(api.scopeNestedSelector('.a', '&'), 'replacement').to.eql('.a');
+            expect(api.scopeNestedSelector('.a', '&.b'), 'compound').to.eql('.a.b');
+            expect(api.scopeNestedSelector('.a', ':not(&)'), 'nested').to.eql(':not(.a)');
+            expect(api.scopeNestedSelector('.a', '.b&'), 'after').to.eql('.b.a');
+        });
     });
 });

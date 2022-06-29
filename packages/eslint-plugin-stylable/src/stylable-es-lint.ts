@@ -1,11 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Stylable, StylableMeta } from '@stylable/core';
-import {
-    safeParse,
-    createDefaultResolver,
-    StylableExports,
-} from '@stylable/core/dist/index-internal';
+import { Stylable, StylableMeta, createDefaultResolver } from '@stylable/core';
+import { safeParse, StylableExports } from '@stylable/core/dist/index-internal';
 import {
     ESLintUtils,
     AST_NODE_TYPES,

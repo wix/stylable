@@ -28,7 +28,6 @@ export {
 export { StylableResolver, StylableResolverCache } from './stylable-resolver';
 export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
 export { createStylableFileProcessor } from './create-stylable-processor';
-export { createDefaultResolver } from './module-resolver';
 export { packageNamespaceFactory } from './resolve-namespace-factories';
 import {
     createBooleanStateClassName,

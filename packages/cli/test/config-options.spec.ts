@@ -78,6 +78,35 @@ describe('Stylable CLI config file options', function () {
         ]);
     });
 
+    it('picks up stylable.config.cjs', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`,
+            'stylable.config.cjs': `
+                  exports.stcConfig = { 
+                      options: { 
+                            outDir: './dist',
+                            cjs: false,
+                            esm: true,
+                        } 
+                    }
+                `,
+        });
+
+        const { stdout, stderr } = runCliSync(['--rootDir', tempDir.path]);
+        const dirContent = loadDirSync(tempDir.path);
+
+        expect(stderr, 'has cli error').not.to.match(/error/i);
+        expect(stdout, 'has diagnostic error').not.to.match(/error/i);
+
+        expect(Object.keys(dirContent)).to.eql([
+            'dist/style.st.css.mjs',
+            'package.json',
+            'stylable.config.cjs',
+            'style.st.css',
+        ]);
+    });
+
     it('should override config file from cli arguments', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
