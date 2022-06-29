@@ -1088,6 +1088,44 @@ describe(`features/css-class`, () => {
         });
     });
     describe(`stylable (public API)`, () => {
+        it(`should transform class name`, () => {
+            const { stylable, sheets } = testStylableCore({
+                'other.st.css': `
+                    .x {}
+                    :global(.y) {}
+                    .z {
+                        -st-global: "[attr=z]";
+                    }
+                `,
+                'entry.st.css': `
+                    @st-import [x as ext-x, y as ext-y, z as ext-z] from './other.st.css';
+                    .a {}
+                    :global(.b) {}
+                    .c {
+                        -st-global: "[attr=c]";
+                    }
+                    :vars {
+                        not-a-class: red;
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+            const api = stylable.cssClass;
+
+            // ToDo: fix :global(.class) not registering as symbol?
+
+            expect(api.transformIntoSelector(meta, 'a'), 'local class').to.eql('.entry__a');
+            // expect(api.transformIntoSelector(meta, 'b'), 'local global class').to.eql('.b');
+            expect(api.transformIntoSelector(meta, 'c'), 'local mapped class').to.eql('[attr=c]');
+            expect(api.transformIntoSelector(meta, 'unknown'), 'unknown class').to.eql(undefined);
+            expect(api.transformIntoSelector(meta, 'not-a-class'), 'not class').to.eql(undefined);
+            expect(api.transformIntoSelector(meta, 'ext-x'), 'imported class').to.eql('.other__x');
+            // expect(api.transformIntoSelector(meta, 'ext-y'), 'imported global class').to.eql('.y');
+            expect(api.transformIntoSelector(meta, 'ext-z'), 'imported mapped class').to.eql(
+                '[attr=z]'
+            );
+        });
         it(`should not modify globals when transforming external selector`, () => {
             const { stylable, sheets } = testStylableCore(`
                 .a :global(.a) {}
