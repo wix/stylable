@@ -1,16 +1,16 @@
 {
   "name": "@stylable/jest",
-  "version": "5.0.0-rc.3",
+  "version": "5.0.0-rc.4",
   "description": "Test your Stylable React components using Jest",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "5.0.0-rc.3",
-    "@stylable/module-utils": "5.0.0-rc.3",
-    "@stylable/node": "5.0.0-rc.3",
-    "@stylable/runtime": "5.0.0-rc.3"
+    "@stylable/core": "5.0.0-rc.4",
+    "@stylable/module-utils": "5.0.0-rc.4",
+    "@stylable/node": "5.0.0-rc.4",
+    "@stylable/runtime": "5.0.0-rc.4"
   },
   "files": [
     "dist",
