@@ -1,5 +1,3 @@
 export default {
-    pinnedPackages: [
-        // { name: 'name', reason: 'reason' },
-    ],
+  pinnedPackages: [{ name: 'jsdom', reason: 'definitely typed package has not been updated yet' }],
 };
