@@ -315,6 +315,8 @@ function addLayer({
             },
             safeRedeclare: false,
         });
+    } else if (!definedSymbol.import && global) {
+        definedSymbol.global = true;
     } else if (definedSymbol.import && global) {
         context.diagnostics.error(ast, diagnostics.RECONFIGURE_IMPORTED(name), { word: name });
     }

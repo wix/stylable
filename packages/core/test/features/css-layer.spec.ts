@@ -85,6 +85,13 @@ describe('features/css-layer', () => {
 
             /* @atrule(multi) entry__ns1, g1, entry__ns2, g2 */
             @layer ns1, st-global(g1), ns2, st-global(g2);
+
+            /* @atrule(global def before) g3 */
+            @layer g3;
+            /* @atrule(global def) g3 */
+            @layer st-global(g3);
+            /* @atrule(global def after) g3 */
+            @layer g3;
         `);
 
         const { meta, exports } = sheets['/entry.st.css'];
@@ -127,9 +134,23 @@ describe('features/css-layer', () => {
             global: true,
             import: undefined,
         });
+        expect(CSSLayer.get(meta, `g3`), `symbol`).to.eql({
+            _kind: 'layer',
+            alias: 'g3',
+            name: 'g3',
+            global: true,
+            import: undefined,
+        });
 
         // JS exports
-        expect(exports.layers.name, `JS export`).to.eql(`name`);
+        expect(exports.layers, `JS export`).to.eql({
+            name: 'name',
+            ns1: 'entry__ns1',
+            ns2: 'entry__ns2',
+            g1: 'g1',
+            g2: 'g2',
+            g3: 'g3',
+        });
     });
     it('should transform nested layers', () => {
         const { sheets } = testStylableCore(`           
