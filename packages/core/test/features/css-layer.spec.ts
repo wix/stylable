@@ -161,6 +161,7 @@ describe('features/css-layer', () => {
             /* @atrule entry__L1.entry__L2 */
             @layer L1.L2 {}
         `);
+        // ToDo: support escaping "L1/.L2"
 
         const { meta } = sheets['/entry.st.css'];
 
