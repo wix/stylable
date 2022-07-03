@@ -23,7 +23,7 @@ export interface Imported {
     from: string;
     defaultExport: string;
     named: Record<string, string>;
-    /**@deprecated use imported.typed.keyframes */
+    /**@deprecated use imported.typed.keyframes (remove in stylable 5) */
     keyframes: Record<string, string>;
     typed: Record<'keyframes' | 'layer', Record<string, string>>;
     rule: postcss.Rule | postcss.AtRule;

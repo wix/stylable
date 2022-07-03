@@ -11,7 +11,6 @@ describe('StylableRollupPlugin - js exports', function () {
         projectPath: getProjectPath(project),
         entry: './src/index.js',
         pluginOptions: {
-            stcConfig: './project/stylable.config.js',
             // keep namespace with no hash for test expectations
             resolveNamespace: (namespace) => namespace,
         },

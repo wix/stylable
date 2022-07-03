@@ -146,9 +146,14 @@ describe('features/css-layer', () => {
         shouldReportNoDiagnostics(meta);
     });
     it.skip('should combine global within nested layers', () => {
+        /*
+            Nested global definition is not supported at the moment.
+            Workaround by changing the definition of L2 in 
+            a separate @layer definition.
+        */
         const { sheets } = testStylableCore(`           
             /* @atrule entry__L1.L2.entry__L3 */
-            @layer L1.st-global(L2).L2 {}
+            @layer L1.st-global(L2).L3 {}
         `);
 
         const { meta } = sheets['/entry.st.css'];
@@ -298,7 +303,7 @@ describe('features/css-layer', () => {
             // JS exports
             expect(exports.layers, `JS exports`).to.eql({});
         });
-        it('should transform nested layers', () => {
+        it('should transform nested layers (local and imported)', () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': `
                     @layer L1 {}
@@ -388,20 +393,29 @@ describe('features/css-layer', () => {
     });
     describe('css-import', () => {
         it('transform native @import', () => {
-            const { sheets } = testStylableCore(`
-                /* @atrule(named) url("a.css") layer(entry__base) */
-                @import url("a.css") layer(base);
+            const { sheets } = testStylableCore({
+                'other.st.css': `
+                    @layer imported;
+                `,
+                'entry.st.css': `
+                    /* @atrule(named) url("a.css") layer(entry__base) */
+                    @import url("a.css") layer(base);
 
-                /* @atrule(nested) url("b.css") layer(entry__L1.entry__L2) */
-                @import url("b.css") layer(L1.L2);
+                    /* @atrule(nested) url("b.css") layer(entry__L1.entry__L2) */
+                    @import url("b.css") layer(L1.L2);
 
-                @layer st-global(global-layer);
-                /* @atrule(named) url("c.css") layer(global-layer) */
-                @import url("c.css") layer(global-layer);
-                
-                /* @atrule(unnamed) url("other.css") layer() */
-                @import url("other.css") layer();
-            `);
+                    @layer st-global(global-layer);
+                    /* @atrule(named) url("c.css") layer(global-layer) */
+                    @import url("c.css") layer(global-layer);
+                    
+                    /* @atrule(unnamed) url("other.css") layer() */
+                    @import url("other.css") layer();
+
+                    @st-import [layer(imported)] from './other.st.css';
+                    /* @atrule(imported) url("a.css") layer(other__imported) */
+                    @import url("a.css") layer(imported);
+                `,
+            });
 
             const { meta, exports } = sheets['/entry.st.css'];
 
@@ -436,6 +450,13 @@ describe('features/css-layer', () => {
                 global: true,
                 import: undefined,
             });
+            expect(CSSLayer.get(meta, 'imported'), 'imported symbol').to.eql({
+                _kind: 'layer',
+                name: 'imported',
+                alias: 'imported',
+                global: false,
+                import: meta.getImportStatements()[0],
+            });
 
             // JS exports
             expect(exports.layers).to.eql({
@@ -443,6 +464,7 @@ describe('features/css-layer', () => {
                 L1: 'entry__L1',
                 L2: 'entry__L2',
                 'global-layer': 'global-layer',
+                imported: 'other__imported',
             });
         });
         it.skip('should not allow between @import rules', () => {

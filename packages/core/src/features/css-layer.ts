@@ -74,29 +74,28 @@ export const hooks = createFeature<{
         plugableRecord.set(meta.data, dataKey, { analyzedParams: {}, layerDefs: {} });
     },
     analyzeAtRule({ context, atRule }) {
-        if ((atRule.name !== 'layer' && atRule.name !== 'import') || !atRule.params) {
-            return;
-        }
         if (atRule.name === 'import') {
+            // native css import
             analyzeCSSImportLayer(context, atRule);
-            return;
-        }
-        const analyzeMetaData = plugableRecord.getUnsafe(context.meta.data, dataKey);
-        const analyzedParams = parseLayerParams(atRule.params, context.diagnostics, atRule);
-        if (analyzedParams.multiple && atRule.nodes) {
-            context.diagnostics.error(atRule, diagnostics.LAYER_SORT_STATEMENT_WITH_STYLE());
-        }
-        // cache params
-        analyzeMetaData.analyzedParams[atRule.params] = analyzedParams;
-        // cache symbols
-        for (const name of analyzedParams.names) {
-            addLayer({
-                context,
-                name,
-                importName: name,
-                global: !!analyzedParams.globals[name],
-                ast: atRule,
-            });
+        } else if (atRule.name === 'layer' && atRule.params) {
+            // layer atrule
+            const analyzeMetaData = plugableRecord.getUnsafe(context.meta.data, dataKey);
+            const analyzedParams = parseLayerParams(atRule.params, context.diagnostics, atRule);
+            if (analyzedParams.multiple && atRule.nodes) {
+                context.diagnostics.error(atRule, diagnostics.LAYER_SORT_STATEMENT_WITH_STYLE());
+            }
+            // cache params
+            analyzeMetaData.analyzedParams[atRule.params] = analyzedParams;
+            // cache symbols
+            for (const name of analyzedParams.names) {
+                addLayer({
+                    context,
+                    name,
+                    importName: name,
+                    global: !!analyzedParams.globals[name],
+                    ast: atRule,
+                });
+            }
         }
     },
     transformResolve({ context }) {
@@ -120,23 +119,22 @@ export const hooks = createFeature<{
         return resolved;
     },
     transformAtRuleNode({ context, atRule, resolved }) {
-        if ((atRule.name !== 'layer' && atRule.name !== 'import') || !atRule.params) {
-            return;
-        }
         if (atRule.name === 'import') {
+            // native css import
             transformCSSImportLayer(context, atRule, resolved);
-            return;
-        }
-        const { analyzedParams } = plugableRecord.getUnsafe(context.meta.data, dataKey);
-        const analyzed = analyzedParams[atRule.params];
-        if (analyzed) {
-            atRule.params = analyzed.transformNames(
-                analyzed.names.reduce((mapped, name) => {
-                    const resolve = resolved[name];
-                    mapped[name] = resolve ? getTransformedName(resolved[name]) : name;
-                    return mapped;
-                }, {} as Record<string, string>)
-            );
+        } else if (atRule.name === 'layer' && atRule.params) {
+            // layer atrule
+            const { analyzedParams } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+            const analyzed = analyzedParams[atRule.params];
+            if (analyzed) {
+                atRule.params = analyzed.transformNames(
+                    analyzed.names.reduce((mapped, name) => {
+                        const resolve = resolved[name];
+                        mapped[name] = resolve ? getTransformedName(resolved[name]) : name;
+                        return mapped;
+                    }, {} as Record<string, string>)
+                );
+            }
         }
     },
     transformJSExports({ exports, resolved }) {
