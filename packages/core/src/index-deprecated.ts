@@ -276,7 +276,6 @@ import {
     matchAtKeyframes as deprecatedMatchAtKeyframes,
     isImport as deprecatedIsImport,
     isSimpleSelector as deprecatedIsSimpleSelector,
-    isRootValid as deprecatedIsRootValid,
     isGlobal as deprecatedIsGlobal,
     createChecker as deprecatedCreateChecker,
     isNested as deprecatedIsNested,
@@ -325,7 +324,7 @@ export const isSimpleSelector = wrapFunctionForDeprecation(deprecatedIsSimpleSel
     name: `isSimpleSelector`,
 });
 /**@deprecated*/
-export const isRootValid = wrapFunctionForDeprecation(deprecatedIsRootValid, {
+export const isRootValid = wrapFunctionForDeprecation(() => true, {
     name: `isRootValid`,
 });
 /**@deprecated*/

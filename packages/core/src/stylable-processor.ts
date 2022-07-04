@@ -30,7 +30,6 @@ import {
     walkSelector,
     isSimpleSelector,
     isInPseudoClassContext,
-    isRootValid,
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
@@ -46,9 +45,6 @@ const parseGlobal = SBTypesParsers[`-st-global`];
 const parseExtends = SBTypesParsers[`-st-extends`];
 
 export const processorWarnings = {
-    ROOT_AFTER_SPACING() {
-        return '".root" class cannot be used after native elements or selectors external to the stylesheet';
-    },
     STATE_DEFINITION_IN_ELEMENT() {
         return 'cannot define pseudo states inside a type selector';
     },
@@ -376,10 +372,6 @@ export class StylableProcessor implements FeatureContext {
             rule.selectorType = 'complex';
         }
 
-        // ToDo: check cases of root in nested selectors?
-        if (!isRootValid(selectorAst)) {
-            this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
-        }
         return locallyScoped;
     }
 

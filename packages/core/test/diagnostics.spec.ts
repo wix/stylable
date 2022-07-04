@@ -4,11 +4,7 @@ import {
     expectTransformDiagnostics,
     findTestLocations,
 } from '@stylable/core-test-kit';
-import {
-    processorWarnings,
-    transformerWarnings,
-    nativePseudoElements,
-} from '@stylable/core';
+import { processorWarnings, transformerWarnings, nativePseudoElements } from '@stylable/core';
 import { CSSClass, CSSType } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
@@ -284,59 +280,6 @@ describe('diagnostics: warnings and errors', () => {
     });
 
     describe('structure', () => {
-        describe('root', () => {
-            it('should return warning for ".root" after a selector', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |.gaga .root|{}
-                `,
-                    [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]
-                );
-            });
-
-            it('should return warning for ".root" after global and local classes', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |:global(*) .x .root|{}
-                `,
-                    [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]
-                );
-            });
-
-            it('should return warning for ".root" after a global and element', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    |:global(*) div .root|{}
-                `,
-                    [
-                        {
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('div'),
-                            file: 'main.css',
-                        },
-                        { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' },
-                    ]
-                );
-            });
-
-            it('should not return warning for ".root" after a global selector', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    :global(*) .root{}
-                `,
-                    []
-                );
-            });
-
-            it('should not return warning for ".root" after a complex global selector', () => {
-                expectAnalyzeDiagnostics(
-                    `
-                    :global(body[dir="rtl"] > header) .root {}
-                `,
-                    []
-                );
-            });
-        });
-
         describe('-st-extends', () => {
             it('should return warning when defined under complex selector', () => {
                 expectAnalyzeDiagnostics(
@@ -377,10 +320,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.OVERRIDE_TYPED_RULE(
-                                `-st-extends`,
-                                'root'
-                            ),
+                            message: processorWarnings.OVERRIDE_TYPED_RULE(`-st-extends`, 'root'),
                             file: 'main.css',
                         },
                     ]

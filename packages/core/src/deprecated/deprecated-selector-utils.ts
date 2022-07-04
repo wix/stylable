@@ -182,32 +182,6 @@ export function traverseNode(
     }
 }
 
-export function isRootValid(ast: SelectorAstNode, rootName: string) {
-    let isValid = true;
-
-    traverseNode(ast, (node, index, nodes) => {
-        if (node.type === 'nested-pseudo-class') {
-            return true;
-        }
-        if (node.type === 'class' && node.name === rootName) {
-            let isLastScopeGlobal = false;
-            for (let i = 0; i < index; i++) {
-                const part = nodes[i];
-                if (isGlobal(part)) {
-                    isLastScopeGlobal = true;
-                }
-                if (part.type === 'spacing' && !isLastScopeGlobal) {
-                    isValid = false;
-                }
-                if (part.type === 'element' || (part.type === 'class' && part.value !== 'root')) {
-                    isLastScopeGlobal = false;
-                }
-            }
-        }
-        return undefined;
-    });
-    return isValid;
-}
 export function isGlobal(node: SelectorAstNode) {
     return node.type === 'nested-pseudo-class' && node.name === 'global';
 }
