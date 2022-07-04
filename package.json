@@ -54,7 +54,7 @@
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
     "create-listening-server": "^1.0.0",
-    "eslint": "^8.18.0",
+    "eslint": "^8.19.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^4.6.0",
