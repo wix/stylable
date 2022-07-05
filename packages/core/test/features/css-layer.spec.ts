@@ -160,6 +160,8 @@ describe('features/css-layer', () => {
             /* @atrule(connected) entry__L3\\.L4 */
             @layer L3\\.L4 {}
 
+            /* @atrule(repetition) entry__L1.entry__L2, entry__L1.entry__L3 */
+            @layer L1.L2, L1.L3;
         `);
 
         const { meta, exports } = sheets['/entry.st.css'];
@@ -170,6 +172,7 @@ describe('features/css-layer', () => {
         expect(exports.layers).to.eql({
             L1: 'entry__L1',
             L2: 'entry__L2',
+            L3: 'entry__L3',
             'L3\\.L4': 'entry__L3\\.L4',
         });
     });

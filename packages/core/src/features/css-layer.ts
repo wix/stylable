@@ -172,7 +172,7 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
     let readyForName = true;
     let multiple = false;
     const ast = valueParser(params).nodes;
-    const namedNodeRefs: Record<string, valueParser.Node> = {};
+    const namedNodeRefs: Record<string, valueParser.Node[]> = {};
     for (let i = 0; i < ast.length; ++i) {
         const node = ast[i];
         const { type, value } = node;
@@ -186,7 +186,8 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
                         layers.push({ ...node, value: '.' });
                     }
                     layers.push(splittedLayer);
-                    namedNodeRefs[name] = splittedLayer;
+                    namedNodeRefs[name] ??= [];
+                    namedNodeRefs[name].push(splittedLayer);
                     names.push(name);
                 }
                 readyForName = false;
@@ -195,7 +196,8 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
         } else if (type === 'function' && value === GLOBAL_FUNC && readyForName) {
             const globalName = globalValueFromFunctionNode(node);
             if (globalName) {
-                namedNodeRefs[globalName] = node;
+                namedNodeRefs[globalName] ??= [];
+                namedNodeRefs[globalName].push(node);
                 names.push(globalName);
                 globals[globalName] = true;
             } else if (globalName === '') {
@@ -219,12 +221,13 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
         multiple,
         transformNames(mappedNames: Record<string, string>) {
             for (const [srcName, targetName] of Object.entries(mappedNames)) {
-                const modifiedNode = namedNodeRefs[srcName];
-                if (modifiedNode.type === 'function') {
-                    // mutate to word - this is safe since this node is not exposed
-                    (modifiedNode as any).type = 'word';
+                for (const modifiedNode of namedNodeRefs[srcName]) {
+                    if (modifiedNode.type === 'function') {
+                        // mutate to word - this is safe since this node is not exposed
+                        (modifiedNode as any).type = 'word';
+                    }
+                    modifiedNode.value = targetName;
                 }
-                modifiedNode.value = targetName;
             }
             return valueParser.stringify(ast);
         },
