@@ -432,6 +432,9 @@ describe('features/css-layer', () => {
                     /* @atrule(nested) url("b.css") layer(entry__L1.entry__L2) */
                     @import url("b.css") layer(L1.L2);
 
+                    /* @atrule(escaped) url("b.css") layer(entry__L3\\.X) */
+                    @import url("b.css") layer(L3\\.X);
+
                     @layer st-global(global-layer);
                     /* @atrule(named) url("c.css") layer(global-layer) */
                     @import url("c.css") layer(global-layer);
@@ -471,6 +474,13 @@ describe('features/css-layer', () => {
                 global: false,
                 import: undefined,
             });
+            expect(CSSLayer.get(meta, 'L3\\.X'), 'escaped symbol').to.eql({
+                _kind: 'layer',
+                name: 'L3\\.X',
+                alias: 'L3\\.X',
+                global: false,
+                import: undefined,
+            });
             expect(CSSLayer.get(meta, 'global-layer'), 'global symbol').to.eql({
                 _kind: 'layer',
                 name: 'global-layer',
@@ -491,6 +501,7 @@ describe('features/css-layer', () => {
                 base: 'entry__base',
                 L1: 'entry__L1',
                 L2: 'entry__L2',
+                'L3\\.X': 'entry__L3\\.X',
                 'global-layer': 'global-layer',
                 imported: 'other__imported',
             });

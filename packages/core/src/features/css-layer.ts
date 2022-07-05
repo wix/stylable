@@ -274,7 +274,7 @@ function analyzeCSSImportLayer(context: FeatureContext, importAtRule: postcss.At
         if (type === 'function' && value === 'layer' && node.nodes.length) {
             for (const nestedNode of node.nodes) {
                 if (nestedNode.type === 'word') {
-                    for (const name of nestedNode.value.split('.')) {
+                    for (const name of getDotSeparatedNames(nestedNode.value)) {
                         addLayer({
                             context,
                             name,
@@ -301,8 +301,7 @@ function transformCSSImportLayer(
             for (const nestedNode of node.nodes) {
                 const { type, value } = nestedNode;
                 if (type === 'word') {
-                    nestedNode.value = value
-                        .split('.')
+                    nestedNode.value = getDotSeparatedNames(value)
                         .map((name) => {
                             const resolve = resolved[name];
                             return resolve ? getTransformedName(resolved[name]) : name;
