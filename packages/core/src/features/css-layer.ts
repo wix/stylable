@@ -74,10 +74,13 @@ export const hooks = createFeature<{
         plugableRecord.set(meta.data, dataKey, { analyzedParams: {}, layerDefs: {} });
     },
     analyzeAtRule({ context, atRule }) {
+        if (!atRule.params) {
+            return;
+        }
         if (atRule.name === 'import') {
             // native css import
             analyzeCSSImportLayer(context, atRule);
-        } else if (atRule.name === 'layer' && atRule.params) {
+        } else if (atRule.name === 'layer') {
             // layer atrule
             const analyzeMetaData = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const analyzedParams = parseLayerParams(atRule.params, context.diagnostics, atRule);
@@ -119,10 +122,13 @@ export const hooks = createFeature<{
         return resolved;
     },
     transformAtRuleNode({ context, atRule, resolved }) {
+        if (!atRule.params) {
+            return;
+        }
         if (atRule.name === 'import') {
             // native css import
             transformCSSImportLayer(context, atRule, resolved);
-        } else if (atRule.name === 'layer' && atRule.params) {
+        } else if (atRule.name === 'layer') {
             // layer atrule
             const { analyzedParams } = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const analyzed = analyzedParams[atRule.params];
