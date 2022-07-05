@@ -48,7 +48,7 @@ const dataKey = plugableRecord.key<{
         string,
         {
             names: string[];
-            transformNames: (mappedNames: Record<string, string>) => string;
+            transformNames: (getTransformedName: (name: string) => string) => string;
         }
     >;
     layerDefs: Record<string, postcss.AtRule | postcss.Rule>;
@@ -133,13 +133,10 @@ export const hooks = createFeature<{
             const { analyzedParams } = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const analyzed = analyzedParams[atRule.params];
             if (analyzed) {
-                atRule.params = analyzed.transformNames(
-                    analyzed.names.reduce((mapped, name) => {
-                        const resolve = resolved[name];
-                        mapped[name] = resolve ? getTransformedName(resolved[name]) : name;
-                        return mapped;
-                    }, {} as Record<string, string>)
-                );
+                atRule.params = analyzed.transformNames((name) => {
+                    const resolve = resolved[name];
+                    return resolve ? getTransformedName(resolved[name]) : name;
+                });
             }
         }
     },
@@ -219,14 +216,15 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
         names,
         globals,
         multiple,
-        transformNames(mappedNames: Record<string, string>) {
-            for (const [srcName, targetName] of Object.entries(mappedNames)) {
-                for (const modifiedNode of namedNodeRefs[srcName]) {
+        transformNames(getTransformedName: (name: string) => string) {
+            for (const [name, nodes] of Object.entries(namedNodeRefs)) {
+                const transformedName = getTransformedName(name);
+                for (const modifiedNode of nodes) {
                     if (modifiedNode.type === 'function') {
                         // mutate to word - this is safe since this node is not exposed
                         (modifiedNode as any).type = 'word';
                     }
-                    modifiedNode.value = targetName;
+                    modifiedNode.value = transformedName;
                 }
             }
             return valueParser.stringify(ast);
