@@ -1,5 +1,9 @@
-import { Stylable, StylableMeta, visitMetaCSSDependenciesBFS } from '@stylable/core';
-import { processUrlDependencies, hasImportedSideEffects } from '@stylable/build-tools';
+import type { Stylable, StylableMeta } from '@stylable/core';
+import {
+    processUrlDependencies,
+    hasImportedSideEffects,
+    tryCollectImportsDeep,
+} from '@stylable/build-tools';
 
 export function getReplacementToken(token: string) {
     return `/* INJECT */ {__${token}__:true}`;
@@ -28,16 +32,10 @@ export function getImports(
             }
         }
     }
-    const buildDependencies: string[] = [];
     /**
      * Collect all deep dependencies since they can affect the output
      */
-    visitMetaCSSDependenciesBFS(
-        meta,
-        ({ source }) => buildDependencies.push(source),
-        stylable.resolver,
-        (resolvedPath) => buildDependencies.push(resolvedPath)
-    );
+    const buildDependencies: string[] = Array.from(tryCollectImportsDeep(stylable, meta));
 
     /**
      * @remove

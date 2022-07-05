@@ -1,17 +1,13 @@
 import type { Plugin } from 'rollup';
 import fs from 'fs';
 import { join, parse } from 'path';
-import {
-    Stylable,
-    visitMetaCSSDependenciesBFS,
-    emitDiagnostics,
-    DiagnosticsMode,
-} from '@stylable/core';
+import { Stylable, emitDiagnostics, DiagnosticsMode } from '@stylable/core';
 import {
     sortModulesByDepth,
     calcDepth,
     CalcDepthContext,
     hasImportedSideEffects,
+    tryCollectImportsDeep,
 } from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -169,12 +165,9 @@ export function stylableRollupPlugin({
             }
             extracted.set(id, { css });
 
-            visitMetaCSSDependenciesBFS(
-                meta,
-                (dep) => this.addWatchFile(dep.source),
-                stylable.createResolver(),
-                (resolvedPath) => this.addWatchFile(resolvedPath)
-            );
+            for (const filePath of tryCollectImportsDeep(stylable, meta)) {
+                this.addWatchFile(filePath);
+            }
 
             /**
              * In case this Stylable module has sources the diagnostics will be emitted in `watchChange` hook.

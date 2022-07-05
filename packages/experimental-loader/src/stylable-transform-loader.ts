@@ -1,12 +1,7 @@
 import postcss from 'postcss';
-import {
-    processNamespace,
-    emitDiagnostics,
-    visitMetaCSSDependenciesBFS,
-    DiagnosticsMode,
-    MinimalFS,
-} from '@stylable/core';
+import { processNamespace, emitDiagnostics, DiagnosticsMode, MinimalFS } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
+import { tryCollectImportsDeep } from '@stylable/build-tools';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
@@ -79,13 +74,9 @@ const stylableLoader: LoaderDefinition = function (content) {
     const { meta, exports } = stylable.transform(content, this.resourcePath);
 
     emitDiagnostics(this, meta, diagnosticsMode);
-
-    visitMetaCSSDependenciesBFS(
-        meta,
-        ({ source }) => this.addDependency(source),
-        stylable.resolver,
-        (resolvedPath) => this.addDependency(resolvedPath)
-    );
+    for (const filePath of tryCollectImportsDeep(stylable, meta)) {
+        this.addDependency(filePath);
+    }
 
     addBuildInfo(this, meta.namespace);
 
