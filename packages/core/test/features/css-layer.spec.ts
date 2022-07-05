@@ -154,18 +154,24 @@ describe('features/css-layer', () => {
     });
     it('should transform nested layers', () => {
         const { sheets } = testStylableCore(`           
-            @layer L1 {
-                @layer L2 {}
-            }
-
-            /* @atrule entry__L1.entry__L2 */
+            /* @atrule(separated) entry__L1.entry__L2 */
             @layer L1.L2 {}
-        `);
-        // ToDo: support escaping "L1/.L2"
 
-        const { meta } = sheets['/entry.st.css'];
+            /* @atrule(connected) entry__L3\\.L4 */
+            @layer L3\\.L4 {}
+
+        `);
+
+        const { meta, exports } = sheets['/entry.st.css'];
 
         shouldReportNoDiagnostics(meta);
+
+        // JS exports
+        expect(exports.layers).to.eql({
+            L1: 'entry__L1',
+            L2: 'entry__L2',
+            'L3\\.L4': 'entry__L3\\.L4',
+        });
     });
     it.skip('should combine global within nested layers', () => {
         /*

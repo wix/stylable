@@ -173,7 +173,7 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
         if (type === 'word') {
             if (readyForName) {
                 const layers: valueParser.WordNode[] = [];
-                for (const name of value.split('.')) {
+                for (const name of getDotSeparatedNames(value)) {
                     // ToDo: handle name duplications
                     const splittedLayer = { ...node, value: name };
                     if (layers.length) {
@@ -182,8 +182,8 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
                     layers.push(splittedLayer);
                     namedNodeRefs[name] = splittedLayer;
                     names.push(name);
-                    readyForName = false;
                 }
+                readyForName = false;
                 ast.splice(i, 1, ...layers);
             }
         } else if (type === 'function' && value === GLOBAL_FUNC && readyForName) {
@@ -223,6 +223,41 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
             return valueParser.stringify(ast);
         },
     };
+}
+
+function getDotSeparatedNames(value: string) {
+    if (!value.includes('.')) {
+        return [value];
+    }
+    const names = [];
+    let lastIndex = 0;
+    let escaped = false;
+    for (let index = 0; index < value.length; ++index) {
+        const char = value[index];
+        switch (char) {
+            case '\\': {
+                if (!escaped) {
+                    escaped = true;
+                }
+                break;
+            }
+            case '.': {
+                if (!escaped) {
+                    names.push(value.substring(lastIndex, index));
+                    lastIndex = index + 1;
+                }
+                escaped = false;
+                break;
+            }
+            default: {
+                escaped = false;
+            }
+        }
+    }
+    if (lastIndex < value.length - 1) {
+        names.push(value.substring(lastIndex, value.length));
+    }
+    return names;
 }
 
 function analyzeCSSImportLayer(context: FeatureContext, importAtRule: postcss.AtRule) {
