@@ -29,7 +29,6 @@ import {
     walkSelector,
     isSimpleSelector,
     isInPseudoClassContext,
-    isRootValid,
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
@@ -54,12 +53,6 @@ const stValuesMap = {
 } as const;
 
 export const processorDiagnostics = {
-    ROOT_AFTER_SPACING: createDiagnosticReporter(
-        '11001',
-        'warning',
-        () =>
-            '".root" class cannot be used after native elements or selectors external to the stylesheet'
-    ),
     STATE_DEFINITION_IN_ELEMENT: createDiagnosticReporter(
         '11002',
         'error',
@@ -384,10 +377,6 @@ export class StylableProcessor implements FeatureContext {
             return;
         });
 
-        // ToDo: check cases of root in nested selectors?
-        if (!isRootValid(selectorAst)) {
-            this.diagnostics.report(processorDiagnostics.ROOT_AFTER_SPACING(), { node: rule });
-        }
         return locallyScoped;
     }
 

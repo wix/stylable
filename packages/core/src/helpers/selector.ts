@@ -127,37 +127,6 @@ export function matchTypeAndValue(
     return a.type === b.type && (a as any).value === (b as any).value;
 }
 
-export function isRootValid(ast: ImmutableSelectorList) {
-    let isValid = true;
-    walk(ast, (node, index, nodes) => {
-        if (node.type === 'pseudo_class') {
-            return walk.skipNested;
-        }
-        if (node.type === 'class' && node.value === `root`) {
-            let isLastScopeGlobal = false;
-            for (let i = 0; i < index; i++) {
-                const part = nodes[i];
-                if (isGlobal(part)) {
-                    isLastScopeGlobal = true;
-                }
-                if (part.type === 'combinator' && !isLastScopeGlobal) {
-                    isValid = false;
-                    return walk.skipCurrentSelector;
-                }
-                if (part.type === 'type' || (part.type === 'class' && part.value !== 'root')) {
-                    isLastScopeGlobal = false;
-                }
-            }
-        }
-        return undefined;
-    });
-    return isValid;
-}
-
-function isGlobal(node: ImmutableSelectorNode) {
-    return node.type === 'pseudo_class' && node.value === 'global';
-}
-
 export function isCompRoot(name: string) {
     return name.charAt(0).match(/[A-Z]/);
 }
