@@ -23,7 +23,6 @@ export const parseImportMessages = {
         'error',
         (errors: string[]) => `Invalid @st-import format:\n - ${errors.join('\n - ')}`
     ),
-
     ST_IMPORT_EMPTY_FROM: createDiagnosticReporter(
         '05003',
         'error',
@@ -63,6 +62,11 @@ export const parseImportMessages = {
         '05010',
         'error',
         (name: string) => `Invalid nested keyframes import "${name}"`
+    ),
+    INVALID_NESTED_TYPED_IMPORT: createDiagnosticReporter(
+        '05019',
+        'warning',
+        (type: string, name: string) => `Invalid nested ${type} import "${name}"`
     ),
 };
 
@@ -229,6 +233,7 @@ export function parseModuleImportStatement(
 }
 
 export function parseStImport(atRule: AtRule, context: string, diagnostics: Diagnostics) {
+    const keyframes = {};
     const importObj: Imported = {
         defaultExport: '',
         from: '',
@@ -236,7 +241,10 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
         named: {},
         rule: atRule,
         context,
-        keyframes: {},
+        keyframes,
+        typed: {
+            keyframes,
+        },
     };
     const imports = parseImports(`import ${atRule.params}`, '[', ']', true)[0];
 
@@ -256,10 +264,12 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
                 word: importObj.defaultExport,
             });
         }
-        if (imports.tagged?.keyframes) {
-            // importObj.keyframes = imports.tagged?.keyframes;
-            for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
-                importObj.keyframes[impAsName] = impName;
+        if (imports.tagged) {
+            for (const [kind, namedTyped] of Object.entries(imports.tagged)) {
+                for (const [impName, impAsName] of Object.entries(namedTyped)) {
+                    importObj.typed[kind] ??= {};
+                    importObj.typed[kind][impAsName] = impName;
+                }
             }
         }
         if (imports.named) {
@@ -281,12 +291,16 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
 
 export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diagnostics) {
     let fromExists = false;
+    const keyframes = {};
     const importObj: Imported = {
         defaultExport: '',
         from: '',
         request: '',
         named: {},
-        keyframes: {},
+        keyframes,
+        typed: {
+            keyframes,
+        },
         rule,
         context,
     };
@@ -320,13 +334,14 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                 break;
             case `-st-named`:
                 {
-                    const { keyframesMap, namedMap } = parsePseudoImportNamed(
+                    const { typedMap, namedMap } = parsePseudoImportNamed(
                         decl.value,
                         decl,
                         diagnostics
                     );
                     importObj.named = namedMap;
-                    importObj.keyframes = keyframesMap;
+                    importObj.keyframes = typedMap.keyframes || {};
+                    importObj.typed = typedMap;
                 }
                 break;
             default:
@@ -352,17 +367,11 @@ export function parsePseudoImportNamed(
     diagnostics: Diagnostics
 ) {
     const namedMap: Record<string, string> = {};
-    const keyframesMap: Record<string, string> = {};
+    const typedMap: Record<string, Record<string, string>> = {};
     if (value) {
-        handleNamedTokens(
-            postcssValueParser(value),
-            { namedMap, keyframesMap },
-            'namedMap',
-            node,
-            diagnostics
-        );
+        handleNamedTokens(postcssValueParser(value), namedMap, typedMap, node, diagnostics);
     }
-    return { namedMap, keyframesMap };
+    return { namedMap, typedMap };
 }
 
 function createPseudoImportProps(
@@ -521,8 +530,8 @@ function processImports(
 
 function handleNamedTokens(
     tokens: PostCSSParsedValue | FunctionNode,
-    buckets: { namedMap: Record<string, string>; keyframesMap: Record<string, string> },
-    key: keyof typeof buckets = 'namedMap',
+    mainBucket: Record<string, string>,
+    typedBuckets: Record<string, Record<string, string>> | null,
     node: postcss.Declaration | postcss.AtRule,
     diagnostics: Diagnostics
 ) {
@@ -536,7 +545,7 @@ function handleNamedTokens(
             const asName = nodes[i + 4];
             if (isImportAs(space, as)) {
                 if (spaceAfter?.type === 'space' && asName?.type === 'word') {
-                    buckets[key][asName.value] = token.value;
+                    mainBucket[asName.value] = token.value;
                     i += 4; //ignore next 4 tokens
                 } else {
                     i += !asName ? 3 : 2;
@@ -546,18 +555,21 @@ function handleNamedTokens(
                     continue;
                 }
             } else {
-                buckets[key][token.value] = token.value;
+                mainBucket[token.value] = token.value;
             }
-        } else if (token.type === 'function' && token.value === 'keyframes') {
-            if (key === 'keyframesMap') {
+        } else if (token.type === 'function') {
+            if (!typedBuckets) {
                 diagnostics.report(
-                    parseImportMessages.INVALID_NESTED_KEYFRAMES(
+                    parseImportMessages.INVALID_NESTED_TYPED_IMPORT(
+                        token.value,
                         postcssValueParser.stringify(token)
                     ),
                     { node }
                 );
+            } else {
+                typedBuckets[token.value] ??= {};
+                handleNamedTokens(token, typedBuckets[token.value], null, node, diagnostics);
             }
-            handleNamedTokens(token, buckets, 'keyframesMap', node, diagnostics);
         }
     }
 }

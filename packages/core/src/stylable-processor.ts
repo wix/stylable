@@ -22,6 +22,7 @@ import {
     CSSClass,
     CSSType,
     CSSKeyframes,
+    CSSLayer,
 } from './features';
 import { getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
@@ -192,6 +193,20 @@ export class StylableProcessor implements FeatureContext {
                 }
                 case 'keyframes':
                     CSSKeyframes.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                case 'layer':
+                    CSSLayer.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                case 'import':
+                    CSSLayer.hooks.analyzeAtRule({
                         context: this,
                         atRule,
                         analyzeRule,

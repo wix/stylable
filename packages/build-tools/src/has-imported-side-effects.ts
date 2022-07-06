@@ -1,8 +1,12 @@
 import type { Imported, Stylable, StylableMeta } from '@stylable/core';
 
 export function hasImportedSideEffects(stylable: Stylable, meta: StylableMeta, imported: Imported) {
-    //keyframes
-    if (Object.keys(imported.keyframes).length) {
+    // direct import usage
+    const { keyframes, layer } = imported.typed;
+    if (keyframes && Object.keys(keyframes).length) {
+        return true;
+    }
+    if (layer && Object.keys(layer).length) {
         return true;
     }
 

@@ -5,6 +5,7 @@ import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import type { CSSVarSymbol } from './css-custom-property';
 import type { KeyframesSymbol } from './css-keyframes';
+import type { LayerSymbol } from './css-layer';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
@@ -19,7 +20,8 @@ export type StylableSymbol =
     | ClassSymbol
     | ElementSymbol
     | CSSVarSymbol
-    | KeyframesSymbol;
+    | KeyframesSymbol
+    | LayerSymbol;
 // the namespace that each symbol exists on
 const NAMESPACES = {
     import: `main`,
@@ -27,6 +29,7 @@ const NAMESPACES = {
     cssVar: `main`,
     element: `main`,
     keyframes: `keyframes`,
+    layer: `layer`,
     var: `main`,
 } as const;
 export const readableTypeMap: Record<StylableSymbol['_kind'], string> = {
@@ -35,6 +38,7 @@ export const readableTypeMap: Record<StylableSymbol['_kind'], string> = {
     cssVar: 'css custom property',
     import: 'stylable imported symbol',
     keyframes: 'css keyframes',
+    layer: 'css layer',
     var: 'stylable var',
 };
 // state structure
@@ -43,10 +47,12 @@ function createState(clone?: State): State {
         byNS: {
             main: clone ? [...clone.byNS.main] : [],
             keyframes: clone ? [...clone.byNS.keyframes] : [],
+            layer: clone ? [...clone.byNS.layer] : [],
         },
         byNSFlat: {
             main: clone ? { ...clone.byNSFlat.main } : {},
             keyframes: clone ? { ...clone.byNSFlat.keyframes } : {},
+            layer: clone ? { ...clone.byNSFlat.layer } : {},
         },
         byType: {
             import: clone ? { ...clone.byType.import } : {},
@@ -54,6 +60,7 @@ function createState(clone?: State): State {
             cssVar: clone ? { ...clone.byType.cssVar } : {},
             element: clone ? { ...clone.byType.element } : {},
             keyframes: clone ? { ...clone.byType.keyframes } : {},
+            layer: clone ? { ...clone.byType.layer } : {},
             var: clone ? { ...clone.byType.var } : {},
         },
     };
@@ -74,7 +81,13 @@ type FilterByNamespace<NS extends Namespaces, T extends SymbolTypes = SymbolType
 type NamespaceToSymbolType = {
     [NS in SymbolTypeToNamespace[SymbolTypes]]: FilterByNamespace<NS>;
 };
-type Namespaces = keyof NamespaceToSymbolType;
+export type Namespaces = keyof NamespaceToSymbolType;
+export type SymbolByNamespace<NS extends Namespaces> = Extract<
+    StylableSymbol,
+    {
+        _kind: NamespaceToSymbolType[NS];
+    }
+>;
 interface SymbolDeclaration<NS = Namespaces> {
     name: string;
     symbol: filterSymbols<
