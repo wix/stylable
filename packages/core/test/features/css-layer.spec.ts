@@ -216,6 +216,7 @@ describe('features/css-layer', () => {
             */
             @layer func() {}
         `);
+        // ToDo: check invalid ident "@layer 123 {}" / "@layer a.123.b;"
 
         const { meta } = sheets['/entry.st.css'];
 

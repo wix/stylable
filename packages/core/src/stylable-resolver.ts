@@ -350,7 +350,6 @@ export class StylableResolver {
             }
             resolvedSymbols.mainNamespace[name] = deepResolved.symbol._kind;
         }
-        // ToDo: unify resolve types
         // resolve keyframes
         for (const [name, symbol] of Object.entries(CSSKeyframes.getAll(meta))) {
             const result = resolveByNamespace(meta, symbol, this, 'keyframes');
