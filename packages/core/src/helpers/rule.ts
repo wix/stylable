@@ -12,13 +12,12 @@ import {
     ImmutableSelectorNode,
     groupCompoundSelectors,
 } from '@tokey/css-selector-parser';
-import { valueMapping } from '../stylable-value-parsers';
 import * as postcss from 'postcss';
 import { ignoreDeprecationWarn } from './deprecation';
 import type { SRule } from '../deprecated/postcss-ast-extension';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
-    return (
+    return !!(
         rule.parent &&
         rule.parent.type === 'atrule' &&
         (rule.parent as postcss.AtRule).name === atRuleName
@@ -178,14 +177,14 @@ function containsMatchInFirstChunk(
         if (node.type === `combinator`) {
             return walkSelector.stopAll;
         } else if (node.type === 'pseudo_class') {
-            // TODO: support nested match :is(.mixin)
-            // if (node.nodes) {
-            //     for (const innerSelectorNode of node.nodes) {
-            //         if (containsMatchInFirstChunk(prefixType, innerSelectorNode)) {
-            //             isMatch = true;
-            //         }
-            //     }
-            // }
+            // handle nested match :is(.mix)
+            if (node.nodes) {
+                for (const innerSelectorNode of node.nodes) {
+                    if (containsMatchInFirstChunk(prefixType, innerSelectorNode)) {
+                        isMatch = true;
+                    }
+                }
+            }
             return walkSelector.skipNested;
         } else if (matchTypeAndValue(node, prefixType)) {
             isMatch = true;
@@ -200,7 +199,7 @@ function containsMatchInFirstChunk(
 export function findRule(
     root: postcss.Root,
     selector: string,
-    test: any = (statement: any) => statement.prop === valueMapping.extends
+    test: any = (statement: any) => statement.prop === `-st-extends`
 ): null | postcss.Declaration {
     let found: any = null;
     root.walkRules(selector, (rule) => {

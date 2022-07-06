@@ -2,42 +2,39 @@ export type processFn<T> = (fullpath: string, content: string) => T;
 
 export interface CacheItem<T> {
     value: T;
-    stat: { mtime: Date };
+    content: string;
 }
 
 export interface MinimalFS {
-    statSync: (fullpath: string) => { mtime: Date };
-    readFileSync: (fullpath: string, encoding: 'utf8') => string;
-    readlinkSync: (fullpath: string) => string;
+    statSync: (filePath: string) => { mtime: Date };
+    readFileSync: (filePath: string, encoding: 'utf8') => string;
+    readlinkSync: (filePath: string) => string;
 }
 
 export interface FileProcessor<T> {
-    process: (fullpath: string, ignoreCache?: boolean) => T;
-    add: (fullpath: string, value: T) => void;
-    processContent: (content: string, fullpath: string) => T;
+    process: (filePath: string, invalidateCache?: boolean) => T;
+    add: (filePath: string, value: T) => void;
+    processContent: (content: string, filePath: string) => T;
     cache: Record<string, CacheItem<T>>;
     postProcessors: Array<(value: T, path: string) => T>;
 }
 
 export function cachedProcessFile<T = any>(
     processor: processFn<T>,
-    fs: MinimalFS,
+    readFileSync: MinimalFS['readFileSync'],
     postProcessors: Array<(value: T, path: string) => T> = [],
     cache: { [key: string]: CacheItem<T> } = {}
 ): FileProcessor<T> {
-    function process(fullpath: string, ignoreCache = false) {
-        const stat = fs.statSync(fullpath);
-        const cached = cache[fullpath];
-        if (
-            ignoreCache ||
-            !cached ||
-            (cached && cached.stat.mtime.valueOf() !== stat.mtime.valueOf())
-        ) {
-            const content = fs.readFileSync(fullpath, 'utf8');
-            const value = processContent(content, fullpath);
-            cache[fullpath] = { value, stat: { mtime: stat.mtime } };
+    function process(filePath: string, invalidateCache = false) {
+        const content = readFileSync(filePath, 'utf8');
+        const cached = cache[filePath];
+        if (invalidateCache || !cached || (cached && cached.content !== content)) {
+            cache[filePath] = {
+                value: processContent(content, filePath),
+                content,
+            };
         }
-        return cache[fullpath].value;
+        return cache[filePath].value;
     }
 
     function processContent(content: string, filePath: string): T {
@@ -47,18 +44,16 @@ export function cachedProcessFile<T = any>(
         );
     }
 
-    function add(fullpath: string, value: T) {
-        let mtime;
+    function add(filePath: string, value: T) {
+        let content;
         try {
-            mtime = fs.statSync(fullpath).mtime;
+            content = readFileSync(filePath, 'utf8');
         } catch (e) {
-            mtime = new Date();
+            content = '';
         }
-        cache[fullpath] = {
+        cache[filePath] = {
             value,
-            stat: {
-                mtime,
-            },
+            content,
         };
     }
 

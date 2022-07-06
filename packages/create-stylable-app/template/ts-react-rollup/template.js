@@ -1,3 +1,4 @@
+//@ts-check
 /** @type {import('create-stylable-app').TemplateDefinition} */
 module.exports = {
     dependencies: ['react', 'react-dom'],
@@ -9,6 +10,7 @@ module.exports = {
         '@rollup/plugin-replace',
         '@rollup/plugin-typescript',
         '@stylable/core',
+        '@stylable/cli',
         '@stylable/rollup-plugin',
         '@stylable/runtime',
         '@types/react',
@@ -19,7 +21,6 @@ module.exports = {
         'eslint-config-prettier',
         'eslint-plugin-react',
         'eslint-plugin-react-hooks',
-        'eslint-plugin-stylable',
         'rimraf',
         'rollup',
         'rollup-plugin-copy',
@@ -42,4 +43,5 @@ module.exports = {
             test: 'npm run typecheck && npm run lint',
         },
     },
+    postinstall: [['npm', 'run', 'build']],
 };

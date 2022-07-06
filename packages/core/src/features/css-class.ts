@@ -10,7 +10,6 @@ import { namespace } from '../helpers/namespace';
 import { namespaceEscape, unescapeCSS } from '../helpers/escape';
 import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
-import { valueMapping } from '../stylable-value-parsers';
 import { validateRuleStateDefinition } from '../helpers/custom-state';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type {
@@ -82,7 +81,7 @@ export const hooks = createFeature<{
             let first = true;
             // collect list of css classes for exports
             for (const { meta, symbol } of resolved) {
-                if (!first && symbol[valueMapping.root]) {
+                if (!first && symbol[`-st-root`]) {
                     // extended stylesheet root: stop collection as root is expected to
                     // be placed by inner component, for example in <Button class={classes.primaryBtn} />
                     // `primaryBtn` shouldn't contain `button__root` as it is placed by the Button component
@@ -109,7 +108,7 @@ export const hooks = createFeature<{
                     }
                     continue;
                 }
-                if (symbol.alias && !symbol[valueMapping.extends]) {
+                if (symbol.alias && !symbol[`-st-extends`]) {
                     continue;
                 }
                 exportedClasses.push(namespace(symbol.name, meta.namespace));
@@ -132,7 +131,7 @@ export const hooks = createFeature<{
         ];
         selectorContext.setCurrentAnchor({ name: node.value, type: 'class', resolved });
         const { symbol, meta } = getOriginDefinition(resolved);
-        if (selectorContext.originMeta === meta && symbol[valueMapping.states]) {
+        if (selectorContext.originMeta === meta && symbol[`-st-states`]) {
             // ToDo: refactor out to transformer validation phase
             validateRuleStateDefinition(
                 selectorContext.rule,
@@ -188,10 +187,10 @@ export function namespaceClass(
     node: SelectorNode, // ToDo: check this is the correct type, should this be inline selector?
     originMeta: StylableMeta
 ) {
-    if (valueMapping.global in symbol && symbol[valueMapping.global]) {
+    if (`-st-global` in symbol && symbol[`-st-global`]) {
         // change node to `-st-global` value
         const flatNode = convertToSelector(node);
-        const globalMappedNodes = symbol[valueMapping.global]!;
+        const globalMappedNodes = symbol[`-st-global`]!;
         flatNode.nodes = globalMappedNodes;
         // ToDo: check if this is causes an issue with globals from an imported alias
         STGlobal.addGlobals(originMeta, globalMappedNodes);
@@ -205,7 +204,7 @@ export function validateClassScoping({
     context,
     classSymbol,
     locallyScoped,
-    inStScope,
+    reportUnscoped,
     node,
     nodes,
     index,
@@ -214,7 +213,7 @@ export function validateClassScoping({
     context: FeatureContext;
     classSymbol: ClassSymbol;
     locallyScoped: boolean;
-    inStScope: boolean;
+    reportUnscoped: boolean;
     node: ImmutableClass;
     nodes: ImmutableSelectorNode[];
     index: number;
@@ -222,11 +221,13 @@ export function validateClassScoping({
 }): boolean {
     if (!classSymbol.alias) {
         return true;
-    } else if (locallyScoped === false && !inStScope) {
+    } else if (locallyScoped === false) {
         if (checkForScopedNodeAfter(context, rule, nodes, index) === false) {
-            context.diagnostics.warn(rule, diagnostics.UNSCOPED_CLASS(node.value), {
-                word: node.value,
-            });
+            if (reportUnscoped) {
+                context.diagnostics.warn(rule, diagnostics.UNSCOPED_CLASS(node.value), {
+                    word: node.value,
+                });
+            }
             return false;
         } else {
             return true;

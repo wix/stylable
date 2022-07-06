@@ -1,5 +1,6 @@
 import type { IFileSystem, IFileSystemStats } from '@file-services/types';
-import { Stylable, safeParse } from '@stylable/core';
+import type { Stylable } from '@stylable/core';
+import { safeParse } from '@stylable/core/dist/index-internal';
 import type { HoverSettings } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { Range, TextDocument } from 'vscode-languageserver-textdocument';
@@ -17,7 +18,7 @@ import {
     SignatureHelp,
     TextEdit,
     WorkspaceEdit,
-} from 'vscode-languageserver-types';
+} from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
 
 import { ProviderPosition, ProviderRange } from './completion-providers';

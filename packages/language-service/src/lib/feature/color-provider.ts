@@ -1,5 +1,5 @@
 import type { IFileSystem } from '@file-services/types';
-import { evalDeclarationValue, Stylable, valueMapping } from '@stylable/core';
+import type { Stylable } from '@stylable/core';
 import { dirname } from 'path';
 import type { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
@@ -42,7 +42,7 @@ export function resolveDocumentColors(
                         'css',
                         0,
                         '.gaga {border: ' +
-                            evalDeclarationValue(stylable.resolver, sym.text, meta, sym.node) +
+                            stylable.transformDecl(meta, `unknown-prop`, sym.text).value +
                             '}'
                     );
                     color = cssService.findColor(doc);
@@ -57,12 +57,11 @@ export function resolveDocumentColors(
                             'css',
                             0,
                             '.gaga {border: ' +
-                                evalDeclarationValue(
-                                    stylable.resolver,
-                                    'value(' + sym.name + ')',
+                                stylable.transformDecl(
                                     impMeta,
-                                    relevantVar.node
-                                ) +
+                                    `unknown-prop`,
+                                    `value(${sym.name})`
+                                ).value +
                                 '}'
                         );
                         color = cssService.findColor(doc);
@@ -117,7 +116,7 @@ export function getColorPresentation(
         params.range.start.character + 1
     );
     let noPicker = false;
-    meta?.rawAst.walkDecls(valueMapping.named, (node) => {
+    meta?.rawAst.walkDecls(`-st-named`, (node) => {
         if (
             node &&
             ((wordStart.line === node.source!.start!.line &&

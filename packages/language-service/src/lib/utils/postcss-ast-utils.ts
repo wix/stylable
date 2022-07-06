@@ -147,7 +147,8 @@ export function getAtRuleByPosition(
     return res;
 }
 
-export function getPositionInSrc(src: string, position: ProviderPosition) {
+// todo rename this function
+export function getOffsetFromPosition(src: string, position: ProviderPosition) {
     const lines = src.split('\n');
     return (
         lines.slice(0, position.line).reduce((total: number, line) => line.length + total + 1, -1) +

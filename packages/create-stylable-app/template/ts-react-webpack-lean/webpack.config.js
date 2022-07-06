@@ -23,6 +23,9 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json'],
     },
-    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin({ title: 'Stylable App' })],
+    plugins: [
+        new StylableWebpackPlugin({ stcConfig: true }),
+        new HtmlWebpackPlugin({ title: 'Stylable App' }),
+    ],
     cache: { type: 'filesystem' },
 };

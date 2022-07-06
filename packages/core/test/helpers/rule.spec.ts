@@ -38,12 +38,17 @@ describe(`helpers/rule`, () => {
 
                 .i.i{}
 
+                /*nested selectors*/
+                :not(.i) .i{}
+                :nth-child(5n - 1 of .i) {}
+                :nth-child(5n - 2 of .i, .i) {}
+                :nth-child(5n - 3 of .i, .x, .i) {}
+
                 /*extracted as decl on root*/
                 .i{color: red}
 
                 /*not extracted*/
                 .x .i{}
-                :not(.i) .i{}
             `),
                 '.i'
             );
@@ -64,6 +69,10 @@ describe(`helpers/rule`, () => {
                 { selector: '& &.x:hover' },
                 { selector: '&.y.x' },
                 { selector: '&&' }, // TODO: check if possible
+                { selector: ':not(&) &' },
+                { selector: ':nth-child(5n - 1 of &)' },
+                { selector: ':nth-child(5n - 2 of &, &)' },
+                { selector: ':nth-child(5n - 3 of &, .x, &)' }, // ToDo: check if to remove unrelated nested selectors
                 { selector: '&' },
             ];
 

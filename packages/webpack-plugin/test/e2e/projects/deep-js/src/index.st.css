@@ -1,0 +1,5 @@
+@st-import Mixin from './mixin';
+
+.root {
+    -st-mixin: Mixin;
+}

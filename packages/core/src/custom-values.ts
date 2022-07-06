@@ -3,25 +3,49 @@ import postcssValueParser from 'postcss-value-parser';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
 import type { ParsedValue } from './types';
 
+export class CustomValueError extends Error {
+    constructor(message: string, public fallbackValue: string) {
+        super(message);
+    }
+}
+
 export interface Box<Type extends string, Value> {
     type: Type;
     value: Value;
+    flatValue: string | undefined;
 }
 
-export function box<Type extends string, Value>(type: Type, value: Value): Box<Type, Value> {
+export function box<Type extends string, Value>(
+    type: Type,
+    value: Value,
+    flatValue?: string
+): Box<Type, Value> {
     return {
         type,
         value,
+        flatValue,
     };
 }
 
-const { hasOwnProperty } = Object.prototype;
+export function boxString(value: string) {
+    return box('st-string', value, value);
+}
 
-export function unbox<B extends Box<string, unknown>>(boxed: B | string): any {
+export function unbox<B extends Box<string, unknown>>(
+    boxed: B | string,
+    unboxPrimitives = true,
+    customValues?: CustomTypes,
+    node?: ParsedValue
+): any {
     if (typeof boxed === 'string') {
-        return boxed;
-    } else if (typeof boxed === 'object' && boxed.type && hasOwnProperty.call(boxed, 'value')) {
-        return cloneDeepWith(boxed.value, unbox);
+        return unboxPrimitives ? boxed : boxString(boxed);
+    } else if (typeof boxed === 'object' && boxed) {
+        const customValue = customValues?.[boxed.type];
+        let value = boxed.value;
+        if (customValue?.flattenValue && node) {
+            value = customValue.getValue([], boxed, node, customValues!);
+        }
+        return cloneDeepWith(value, (v) => unbox(v, unboxPrimitives, customValues, node));
     }
 }
 
@@ -39,7 +63,8 @@ export interface CustomValueExtension<T> {
         valueAst: ParsedValue,
         customTypes: {
             [typeID: string]: CustomValueExtension<unknown>;
-        }
+        },
+        boxPrimitive?: boolean
     ): Box<string, T>;
     getValue(
         path: string[],
@@ -51,8 +76,8 @@ export interface CustomValueExtension<T> {
 
 function createStArrayCustomFunction() {
     return createCustomValue<BoxedValueArray, BoxedValueArray>({
-        processArgs: (node, customTypes) => {
-            return CustomValueStrategy.args(node, customTypes);
+        processArgs: (node, customTypes, boxPrimitive) => {
+            return CustomValueStrategy.args(node, customTypes, boxPrimitive);
         },
         createValue: (args) => {
             return args;
@@ -63,8 +88,8 @@ function createStArrayCustomFunction() {
 
 function createStMapCustomFunction() {
     return createCustomValue<BoxedValueMap, BoxedValueMap>({
-        processArgs: (node, customTypes) => {
-            return CustomValueStrategy.named(node, customTypes);
+        processArgs: (node, customTypes, boxPrimitive) => {
+            return CustomValueStrategy.named(node, customTypes, boxPrimitive);
         },
         createValue: (args) => {
             return args;
@@ -80,6 +105,7 @@ export const stTypes: CustomTypes = {
     stMap: createStMapCustomFunction().register('stMap'),
     'st-array': createStArrayCustomFunction().register('st-array'),
     'st-map': createStMapCustomFunction().register('st-map'),
+    'st-string': createStMapCustomFunction().register('st-string'),
 } as const;
 
 export const deprecatedStFunctions: Record<string, { alternativeName: string }> = {
@@ -92,7 +118,7 @@ export const deprecatedStFunctions: Record<string, { alternativeName: string }> 
 };
 
 export const CustomValueStrategy = {
-    args: (fnNode: ParsedValue, customTypes: CustomTypes) => {
+    args: (fnNode: ParsedValue, customTypes: CustomTypes, boxPrimitive?: boolean) => {
         const pathArgs = getFormatterArgs(fnNode);
         const outputArray = [];
         for (const arg of pathArgs) {
@@ -100,13 +126,13 @@ export const CustomValueStrategy = {
             const ct = parsedArg.type === 'function' && parsedArg.value;
             const resolvedValue =
                 typeof ct === 'string' && customTypes[ct]
-                    ? customTypes[ct].evalVarAst(parsedArg, customTypes)
-                    : arg;
+                    ? customTypes[ct].evalVarAst(parsedArg, customTypes, boxPrimitive)
+                    : unbox(arg, !boxPrimitive);
             outputArray.push(resolvedValue);
         }
         return outputArray;
     },
-    named: (fnNode: ParsedValue, customTypes: CustomTypes) => {
+    named: (fnNode: ParsedValue, customTypes: CustomTypes, boxPrimitive?: boolean) => {
         const outputMap: BoxedValueMap = {};
         const s = getNamedArgs(fnNode);
         for (const [prop, space, ...valueNodes] of s) {
@@ -124,13 +150,13 @@ export const CustomValueStrategy = {
                 if (!resolvedValue) {
                     const ct = customTypes[valueNode.value];
                     if (valueNode.type === 'function' && ct) {
-                        resolvedValue = ct.evalVarAst(valueNode, customTypes);
+                        resolvedValue = ct.evalVarAst(valueNode, customTypes, boxPrimitive);
                     } else {
-                        resolvedValue = getStringValue(valueNode);
+                        resolvedValue = unbox(getStringValue(valueNode), !boxPrimitive);
                     }
                 }
             } else {
-                resolvedValue = getStringValue(valueNodes);
+                resolvedValue = unbox(getStringValue(valueNodes), !boxPrimitive);
             }
 
             if (resolvedValue) {
@@ -152,7 +178,7 @@ type FlattenValue<Value> = (v: Box<string, Value>) => {
 };
 
 interface ExtensionApi<Value, Args> {
-    processArgs: (fnNode: ParsedValue, customTypes: CustomTypes) => Args;
+    processArgs: (fnNode: ParsedValue, customTypes: CustomTypes, boxPrimitive?: boolean) => Args;
     createValue: (args: Args) => Value;
     getValue: (v: Value, key: string) => string | Box<string, unknown>;
     flattenValue?: FlattenValue<Value>;
@@ -169,9 +195,21 @@ export function createCustomValue<Value, Args>({
         register(localTypeSymbol: string) {
             return {
                 flattenValue,
-                evalVarAst(fnNode: ParsedValue, customTypes: CustomTypes) {
-                    const args = processArgs(fnNode, customTypes);
-                    return box(localTypeSymbol, createValue(args));
+                evalVarAst(fnNode: ParsedValue, customTypes: CustomTypes, boxPrimitive?: boolean) {
+                    const args = processArgs(fnNode, customTypes, boxPrimitive);
+                    const value = createValue(args);
+                    let flatValue: string | undefined;
+
+                    if (flattenValue) {
+                        flatValue = getFlatValue(
+                            flattenValue,
+                            box(localTypeSymbol, value),
+                            fnNode,
+                            customTypes
+                        );
+                    }
+
+                    return box(localTypeSymbol, value, flatValue);
                 },
                 getValue(
                     path: string[],
@@ -181,13 +219,14 @@ export function createCustomValue<Value, Args>({
                 ): string {
                     if (path.length === 0) {
                         if (flattenValue) {
-                            const { delimiter, parts } = flattenValue(obj);
-                            return parts
-                                .map((v) => getBoxValue([], v, fallbackNode, customTypes))
-                                .join(delimiter);
+                            return getFlatValue(flattenValue, obj, fallbackNode, customTypes);
                         } else {
-                            // TODO: add diagnostics
-                            return getStringValue([fallbackNode]);
+                            const stringifiedValue = getStringValue([fallbackNode]);
+
+                            throw new CustomValueError(
+                                `/* Error trying to flat -> */${stringifiedValue}`,
+                                stringifiedValue
+                            );
                         }
                     }
                     const value = getValue(obj.value, path[0]);
@@ -198,14 +237,24 @@ export function createCustomValue<Value, Args>({
     };
 }
 
+function getFlatValue<Value>(
+    flattenValue: FlattenValue<Value>,
+    obj: Box<string, Value>,
+    fallbackNode: ParsedValue,
+    customTypes: CustomTypes
+) {
+    const { delimiter, parts } = flattenValue(obj);
+    return parts.map((v) => getBoxValue([], v, fallbackNode, customTypes)).join(delimiter);
+}
+
 export function getBoxValue(
     path: string[],
     value: string | Box<string, unknown>,
     node: ParsedValue,
     customTypes: CustomTypes
 ): string {
-    if (typeof value === 'string') {
-        return value;
+    if (typeof value === 'string' || value.type === 'st-string') {
+        return unbox(value, true, customTypes);
     } else if (value && customTypes[value.type]) {
         return customTypes[value.type].getValue(path, value, node, customTypes);
     } else {

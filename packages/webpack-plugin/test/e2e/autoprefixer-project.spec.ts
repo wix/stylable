@@ -30,7 +30,7 @@ describe(`(${project})`, () => {
             {
                 id: './src/index.st.css',
                 depth: '1',
-                css: '::-moz-placeholder {\n  color: gray;\n}\n:-ms-input-placeholder {\n  color: gray;\n}\n::placeholder {\n  color: gray;\n}',
+                css: '::-moz-placeholder {\n  color: gray;\n}\n::placeholder {\n  color: gray;\n}',
             },
         ]);
     });

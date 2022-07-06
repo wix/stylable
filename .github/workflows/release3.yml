@@ -1,4 +1,4 @@
-name: npm
+name: release3
 on:
   push:
     branches: ['3.x']
@@ -6,7 +6,7 @@ jobs:
   npm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js 14
         uses: actions/setup-node@v3
         with:
@@ -17,6 +17,6 @@ jobs:
       - run: yarn config set network-timeout 300000
       - run: yarn --frozen-lockfile
       - run: yarn build
-      - run: npx pleb@4 publish --tag release-3.x
+      - run: npx pleb@5 publish --tag release-3.x
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

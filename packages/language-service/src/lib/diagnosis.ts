@@ -1,5 +1,5 @@
 import type { Diagnostic as StylableDiagnostic, Stylable } from '@stylable/core';
-import { Diagnostic, Range } from 'vscode-languageserver-types';
+import { Diagnostic, Range } from 'vscode-languageserver';
 import type { CssService } from './css-service';
 
 export function createDiagnosis(
@@ -26,12 +26,14 @@ export function createDiagnosis(
     return meta.diagnostics.reports
         .concat(meta.transformDiagnostics ? meta.transformDiagnostics.reports : [])
         .map(reportToDiagnostic)
-        .concat(cssService.getDiagnostics(cleanDoc));
+        .concat(cssService.getDiagnostics(cleanDoc, meta));
 
     // stylable diagnostic to protocol diagnostic
     function reportToDiagnostic(report: StylableDiagnostic) {
         const severity = report.type === 'error' ? 1 : 2;
         const range = createRange(report);
+
+        // todo: incorporate diagnostics code in v5
         return Diagnostic.create(range, report.message, severity, undefined, 'stylable');
     }
 }

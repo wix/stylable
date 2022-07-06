@@ -1,9 +1,7 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { generateInfra, generateStylableResult } from '@stylable/core-test-kit';
+import { testStylableCore, generateStylableResult } from '@stylable/core-test-kit';
 import {
-    createMinimalFS,
-    process,
     cssParse,
     StylableResolver,
     cachedProcessFile,
@@ -11,6 +9,7 @@ import {
     StylableMeta,
     createDefaultResolver,
 } from '@stylable/core';
+import { process } from '@stylable/core/dist/index-internal';
 
 function createResolveExtendsResults(
     fs: MinimalFS,
@@ -20,9 +19,12 @@ function createResolveExtendsResults(
 ) {
     const moduleResolver = createDefaultResolver(fs, {});
 
-    const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
-        return process(cssParse(content, { from: fullpath }));
-    }, fs);
+    const processFile = cachedProcessFile<StylableMeta>(
+        (fullpath, content) => {
+            return process(cssParse(content, { from: fullpath }));
+        },
+        (filePath: string) => fs.readFileSync(filePath, 'utf8')
+    );
 
     const resolver = new StylableResolver(
         processFile,
@@ -39,29 +41,23 @@ function createResolveExtendsResults(
 
 describe('stylable-resolver', () => {
     it('should resolve extend classes', () => {
-        const { fs } = createMinimalFS({
-            files: {
-                '/button.st.css': {
-                    content: `
-                        @namespace:'Button';
-                        .root {
-                            color:red;
-                        }
-                    `,
-                },
-                '/extended-button.st.css': {
-                    content: `
-                        :import {
-                            -st-from: './button.st.css';
-                            -st-default: Button;
-                        }
-                        .myClass {
-                            -st-extends:Button;
-                            width: 100px;
-                        }
-                    `,
-                },
-            },
+        const { fs } = testStylableCore({
+            '/button.st.css': `
+                @namespace:'Button';
+                .root {
+                    color:red;
+                }
+            `,
+            '/extended-button.st.css': `
+                :import {
+                    -st-from: './button.st.css';
+                    -st-default: Button;
+                }
+                .myClass {
+                    -st-extends:Button;
+                    width: 100px;
+                }
+            `,
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'myClass');
@@ -71,28 +67,22 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve extend elements', () => {
-        const { fs } = createMinimalFS({
-            files: {
-                '/button.st.css': {
-                    content: `
-                        @namespace:'Button';
-                        .root {
-                            color:red;
-                        }
-                    `,
-                },
-                '/extended-button.st.css': {
-                    content: `
-                        :import {
-                            -st-from: './button.st.css';
-                            -st-default: Button;
-                        }
-                        Button {
-                            width: 100px;
-                        }
-                    `,
-                },
-            },
+        const { fs } = testStylableCore({
+            '/button.st.css': `
+                @namespace:'Button';
+                .root {
+                    color:red;
+                }
+            `,
+            '/extended-button.st.css': `
+                :import {
+                    -st-from: './button.st.css';
+                    -st-default: Button;
+                }
+                Button {
+                    width: 100px;
+                }
+            `,
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
@@ -102,35 +92,29 @@ describe('stylable-resolver', () => {
     });
 
     it('should not enter infinite loops even with broken code', () => {
-        const { fs } = createMinimalFS({
-            files: {
-                '/button.st.css': {
-                    content: `
-                        @namespace: 'Button';
-                        :import {
-                            -st-from: './extended-button.st.css';
-                            -st-default: Button;
-                        }
-                        .root {
-                            -st-extends: Button
-                        }
-                    `,
-                },
-                '/extended-button.st.css': {
-                    content: `
-                        :import {
-                            -st-from: './button.st.css';
-                            -st-default: Button;
-                        }
-                        .root {
-                            -st-extends: Button;
-                        }
-                        Button {
-                            width: 100px;
-                        }
-                    `,
-                },
-            },
+        const { fs } = testStylableCore({
+            '/button.st.css': `
+                @namespace: 'Button';
+                :import {
+                    -st-from: './extended-button.st.css';
+                    -st-default: Button;
+                }
+                .root {
+                    -st-extends: Button
+                }
+            `,
+            '/extended-button.st.css': `
+                :import {
+                    -st-from: './button.st.css';
+                    -st-default: Button;
+                }
+                .root {
+                    -st-extends: Button;
+                }
+                Button {
+                    width: 100px;
+                }
+            `,
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
@@ -140,49 +124,38 @@ describe('stylable-resolver', () => {
     });
 
     it.skip('should resolve extend classes on broken css', () => {
-        const { fs } = createMinimalFS({
-            files: {
-                '/button.st.css': {
-                    content: `
-                        .gaga
-                    `,
-                },
-            },
+        const { fs } = testStylableCore({
+            '/button.st.css': `
+                .gaga
+            `,
         });
         const results = createResolveExtendsResults(fs, '/button.st.css', 'gaga');
         expect(results).to.eql([]);
     });
 
     it('should resolve extend through exported alias', () => {
-        const { fs } = createMinimalFS({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./index.st.css";
-                            -st-named: Comp;
-                        }
-                        .root {
-                            -st-extends: Comp;
-                        }
-                    `,
-                },
-                '/index.st.css': {
-                    content: `
-                        :import{
-                            -st-from: "./button.st.css";
-                            -st-default: Comp;
-                        }
-                        Comp{}
-                    `,
-                },
-                '/button.st.css': {
-                    content: `
-                        .root{}
-                    `,
-                },
-            },
+        const { fs } = testStylableCore({
+            '/entry.st.css': `
+                :import {
+                    -st-from: "./index.st.css";
+                    -st-named: Comp;
+                }
+                .root {
+                    -st-extends: Comp;
+                }
+            `,
+            '/index.st.css': `
+                :import{
+                    -st-from: "./button.st.css";
+                    -st-default: Comp;
+                }
+                Comp{}
+            `,
+            '/button.st.css': `
+                .root{}
+            `,
         });
+
         const results = createResolveExtendsResults(fs, '/entry.st.css', 'root');
 
         expect(results[0].symbol.name).to.equal('root');
@@ -195,31 +168,25 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve class as local and not an alias when an -st-extend is present', () => {
-        const { fs } = createMinimalFS({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: 'inner.st.css';
-                            -st-named: alias;
-                        }
-                        .root {}
+        const { fs } = testStylableCore({
+            '/entry.st.css': `
+                :import {
+                    -st-from: 'inner.st.css';
+                    -st-named: alias;
+                }
+                .root {}
 
-                        .alias {
-                            -st-extends: root;
-                        }
-                        
-                        .target { 
-                            -st-extends: alias;
-                        }
-                    `,
-                },
-                '/inner.st.css': {
-                    content: `
-                        .alias {}
-                    `,
-                },
-            },
+                .alias {
+                    -st-extends: root;
+                }
+                
+                .target { 
+                    -st-extends: alias;
+                }
+            `,
+            '/inner.st.css': `
+                .alias {}
+            `,
         });
 
         const results = createResolveExtendsResults(fs, '/entry.st.css', 'target');
@@ -234,225 +201,181 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve classes', () => {
-        const { resolver, fileProcessor } = generateInfra({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./button.st.css";
-                            -st-default: Button;
-                        }
-                        .x {-st-extends: Button}
-                    `,
-                },
-                '/button.st.css': {
-                    content: `
-                        .root{}
-                    `,
-                },
-            },
+        const { stylable } = testStylableCore({
+            'entry.st.css': `
+                :import {
+                    -st-from: "./button.st.css";
+                    -st-default: Button;
+                }
+                .x {-st-extends: Button}
+            `,
+            'button.st.css': `
+                .root{}
+            `,
         });
 
-        const entryMeta = fileProcessor.process('/entry.st.css');
-        const btnMeta = fileProcessor.process('/button.st.css');
-        const res = resolver.resolve(entryMeta.getSymbol(`x`));
+        const entryMeta = stylable.fileProcessor.process('/entry.st.css');
+        const btnMeta = stylable.fileProcessor.process('/button.st.css');
+        const res = stylable.resolver.resolve(entryMeta.getSymbol(`x`));
 
         expect(res?.symbol).to.eql(btnMeta.getClass(`root`));
     });
 
     it('should resolve elements', () => {
-        const { resolver, fileProcessor } = generateInfra({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./button.st.css";
-                            -st-default: Button;
-                            -st-named: ButtonX;
-                        }
-                        Button {}
-                        ButtonX {}
-                    `,
-                },
-                '/button.st.css': {
-                    content: `
-                        .root{}
-                        .label{}
-                        ButtonX{}
-                    `,
-                },
-            },
+        const { stylable } = testStylableCore({
+            'entry.st.css': `
+                :import {
+                    -st-from: "./button.st.css";
+                    -st-default: Button;
+                    -st-named: ButtonX;
+                }
+                Button {}
+                ButtonX {}
+            `,
+            'button.st.css': `
+                .root{}
+                .label{}
+                ButtonX{}
+            `,
         });
 
-        const btnMeta = fileProcessor.process('/button.st.css');
-        const entryMeta = fileProcessor.process('/entry.st.css');
+        const btnMeta = stylable.fileProcessor.process('/button.st.css');
+        const entryMeta = stylable.fileProcessor.process('/entry.st.css');
         const btn = entryMeta.getSymbol(`Button`);
-        const res = resolver.resolve(btn);
+        const res = stylable.resolver.resolve(btn);
 
         const btn1 = entryMeta.getSymbol(`ButtonX`);
-        const res1 = resolver.resolve(btn1);
+        const res1 = stylable.resolver.resolve(btn1);
 
         expect(res?.symbol).to.eql(btnMeta.getClass(`root`));
         expect(res1?.symbol).to.eql(btnMeta.getTypeElement(`ButtonX`));
     });
 
     it('should resolve elements deep', () => {
-        const { resolver, fileProcessor } = generateInfra({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./button.st.css";
-                            -st-named: ButtonX;
-                        }
-                        ButtonX {}
-                    `,
-                },
-                '/button.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./button-x.st.css";
-                            -st-default: ButtonX;
-                        }
-                        ButtonX{}
-                    `,
-                },
-                '/button-x.st.css': {
-                    content: `
-                        .x-label{}
-                    `,
-                },
-            },
+        const { stylable } = testStylableCore({
+            'entry.st.css': `
+                :import {
+                    -st-from: "./button.st.css";
+                    -st-named: ButtonX;
+                }
+                ButtonX {}
+            `,
+            'button.st.css': `
+                :import {
+                    -st-from: "./button-x.st.css";
+                    -st-default: ButtonX;
+                }
+                ButtonX{}
+            `,
+            'button-x.st.css': `
+                .x-label{}
+            `,
         });
 
-        const entryMeta = fileProcessor.process('/entry.st.css');
-        const btnXMeta = fileProcessor.process('/button-x.st.css');
+        const entryMeta = stylable.fileProcessor.process('/entry.st.css');
+        const btnXMeta = stylable.fileProcessor.process('/button-x.st.css');
 
         const btn1 = entryMeta.getSymbol(`ButtonX`);
-        const res1 = resolver.deepResolve(btn1);
+        const res1 = stylable.resolver.deepResolve(btn1);
 
         expect(res1?.symbol).to.eql(btnXMeta.getClass(`root`));
     });
 
     it('should handle circular "re-declare" (deepResolve)', () => {
-        const { resolver, fileProcessor } = generateInfra({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./entry.st.css";
-                            -st-named: a;
-                        }
-                        .a {}
-                    `,
-                },
-            },
+        const { stylable } = testStylableCore({
+            'entry.st.css': `
+                :import {
+                    -st-from: "./entry.st.css";
+                    -st-named: a;
+                }
+                .a {}
+            `,
         });
 
-        const entryMeta = fileProcessor.process('/entry.st.css');
+        const entryMeta = stylable.fileProcessor.process('/entry.st.css');
 
         const a = entryMeta.getSymbol(`a`);
-        const res1 = resolver.deepResolve(a);
+        const res1 = stylable.resolver.deepResolve(a);
 
         expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 
     it('should handle circular "re-declare" (resolveSymbolOrigin)', () => {
-        const { resolver, fileProcessor } = generateInfra({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./entry.st.css";
-                            -st-named: a;
-                        }
-                        .a {}
-                    `,
-                },
-            },
+        const { stylable } = testStylableCore({
+            'entry.st.css': `
+                :import {
+                    -st-from: "./entry.st.css";
+                    -st-named: a;
+                }
+                .a {}
+            `,
         });
 
-        const entryMeta = fileProcessor.process('/entry.st.css');
+        const entryMeta = stylable.fileProcessor.process('/entry.st.css');
 
         const a = entryMeta.getSymbol(`a`);
-        const res1 = resolver.resolveSymbolOrigin(a, entryMeta);
+        const res1 = stylable.resolver.resolveSymbolOrigin(a, entryMeta);
 
         expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 
     it('should resolve alias origin', () => {
-        const { resolver, fileProcessor } = generateInfra({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./a.st.css";
-                            -st-named: a, b;
-                        }
-                        .a{}
-                        .b{}
-                    `,
-                },
-                '/a.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./a1.st.css";
-                            -st-named: a, b;
-                        }
-                        .a{}
-                        .b{}
-                    `,
-                },
-                '/a1.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./comp.st.css";
-                            -st-named: Comp;
-                        }
-                        .a{}
-                        .b{-st-extends: Comp}
-                    `,
-                },
-                '/comp.st.css': {
-                    content: ``,
-                },
-            },
+        const { stylable } = testStylableCore({
+            '/entry.st.css': `
+                :import {
+                    -st-from: "./a.st.css";
+                    -st-named: a, b;
+                }
+                .a{}
+                .b{}
+            `,
+            '/a.st.css': `
+                :import {
+                    -st-from: "./a1.st.css";
+                    -st-named: a, b;
+                }
+                .a{}
+                .b{}
+                `,
+            '/a1.st.css': `
+                :import {
+                    -st-from: "./comp.st.css";
+                    -st-named: Comp;
+                }
+                .a{}
+                .b{-st-extends: Comp}
+                `,
+            '/comp.st.css': ``,
         });
 
-        const entryMeta = fileProcessor.process('/entry.st.css');
-        const a1 = fileProcessor.process('/a1.st.css');
+        const entryMeta = stylable.fileProcessor.process('/entry.st.css');
+        const a1 = stylable.fileProcessor.process('/a1.st.css');
 
-        const res1 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`a`), entryMeta);
-        const res2 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`b`), entryMeta);
+        const res1 = stylable.resolver.resolveSymbolOrigin(entryMeta.getSymbol(`a`), entryMeta);
+        const res2 = stylable.resolver.resolveSymbolOrigin(entryMeta.getSymbol(`b`), entryMeta);
 
         expect(res1?.symbol).to.eql(a1.getClass(`a`));
         expect(res2?.symbol).to.eql(a1.getClass(`b`));
     });
 
     it('should not resolve extends on alias', () => {
-        const { resolver, fileProcessor } = generateInfra({
-            files: {
-                '/entry.st.css': {
-                    content: `
-                        :import {
-                            -st-from: "./a.st.css";
-                            -st-named: a;
-                        }
-                        .a {
-                           -st-extends: a;
-                        }
-                    `,
-                },
-                '/a.st.css': {
-                    content: `
-                        .a{}
-                    `,
-                },
-            },
+        const { stylable } = testStylableCore({
+            'entry.st.css': `
+                :import {
+                    -st-from: "./a.st.css";
+                    -st-named: a;
+                }
+                .a {
+                -st-extends: a;
+                }
+            `,
+            '/a.st.css': `
+                .a{}
+            `,
         });
 
-        const entryMeta = fileProcessor.process('/entry.st.css');
-        const res1 = resolver.resolveSymbolOrigin(entryMeta.getSymbol(`a`), entryMeta);
+        const entryMeta = stylable.fileProcessor.process('/entry.st.css');
+        const res1 = stylable.resolver.resolveSymbolOrigin(entryMeta.getSymbol(`a`), entryMeta);
         expect(res1?.symbol).to.eql(entryMeta.getClass(`a`));
     });
 

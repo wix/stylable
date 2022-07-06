@@ -29,7 +29,7 @@ module.exports = {
     commonjs(),
     html({}),
     rollupTypescript(),
-    stylableRollupPlugin({ optimization: { minify: isProductionMode } }),
+    stylableRollupPlugin({ stcConfig: true, optimization: { minify: isProductionMode } }),
     copy({
       targets: [{ src: 'favicon.ico', dest: 'dist' }],
     }),

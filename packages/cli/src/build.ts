@@ -202,7 +202,7 @@ export async function build(
         log(mode, buildMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined));
     }
 
-    return { service };
+    return { service, generatedFiles: buildGeneratedFiles };
 
     function buildFiles(filesToBuild: Set<string>, generated: Set<string>) {
         for (const filePath of filesToBuild) {
@@ -247,7 +247,7 @@ export async function build(
             try {
                 sourceFiles.add(filePath);
                 const meta = tryRun(
-                    () => stylable.process(filePath),
+                    () => stylable.analyze(filePath),
                     errorMessages.STYLABLE_PROCESS(filePath)
                 );
                 visitMetaCSSDependenciesBFS(
@@ -273,14 +273,14 @@ export async function build(
     }
 
     function setFileErrorDiagnostic(filePath: string, error: any) {
-        const diangostic: Diagnostic = {
+        const diagnostic: Diagnostic = {
             type: 'error',
             message: error instanceof Error ? error.message : String(error),
         };
 
         diagnosticsManager.set(identifier, filePath, {
             diagnosticsMode,
-            diagnostics: [diangostic],
+            diagnostics: [diagnostic],
         });
     }
 

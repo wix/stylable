@@ -1,0 +1,5 @@
+@st-import Unused from "./unused.st.css";
+
+.root {
+    color: green;
+}

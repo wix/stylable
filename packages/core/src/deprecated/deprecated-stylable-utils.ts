@@ -9,7 +9,6 @@ import {
 import type { SRule } from './postcss-ast-extension';
 import { STSymbol, Imported } from '../features';
 import type { StylableMeta } from '../stylable-meta';
-import { valueMapping } from '../stylable-value-parsers';
 import cloneDeep from 'lodash.clonedeep';
 import * as postcss from 'postcss';
 
@@ -189,7 +188,7 @@ export function removeUnusedRules(
                 }
                 const symbol = STSymbol.get(meta, node.name);
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
-                    let extend = symbol[valueMapping.extends] || symbol.alias;
+                    let extend = symbol[`-st-extends`] || symbol.alias;
                     extend = extend && extend._kind !== 'import' ? extend.alias || extend : extend;
 
                     if (
@@ -213,7 +212,7 @@ export function removeUnusedRules(
 export function findRule(
     root: postcss.Root,
     selector: string,
-    test: any = (statement: any) => statement.prop === valueMapping.extends
+    test: any = (statement: any) => statement.prop === `-st-extends`
 ): null | postcss.Declaration {
     let found: any = null;
     root.walkRules(selector, (rule) => {

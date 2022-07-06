@@ -15,7 +15,6 @@ import {
     CSSKeyframes,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
-import { valueMapping } from './stylable-value-parsers';
 import { findRule } from './helpers/rule';
 import type { ModuleResolver } from './types';
 import { CustomValueExtension, isCustomValue, stTypes } from './custom-values';
@@ -108,11 +107,25 @@ export class StylableResolver {
         }
 
         let entity: CachedModuleEntity;
+        let resolvedPath: string;
 
-        if (request.endsWith('.css')) {
+        try {
+            resolvedPath = this.resolvePath(context, request);
+        } catch (error) {
+            entity = {
+                kind: request.endsWith('css') ? 'css' : 'js',
+                value: null,
+                error,
+                request,
+                context,
+            };
+            this.cache?.set(key, entity);
+            return entity;
+        }
+
+        if (resolvedPath.endsWith('.css')) {
             const kind = 'css';
             try {
-                const resolvedPath = this.resolvePath(context, request);
                 entity = { kind, value: this.fileProcessor.process(resolvedPath), resolvedPath };
             } catch (error) {
                 entity = { kind, value: null, error, request, context };
@@ -120,7 +133,6 @@ export class StylableResolver {
         } else {
             const kind = 'js';
             try {
-                const resolvedPath = this.resolvePath(context, request);
                 entity = { kind, value: this.requireModule(resolvedPath), resolvedPath };
             } catch (error) {
                 entity = { kind, value: null, error, request, context };
@@ -173,10 +185,10 @@ export class StylableResolver {
                 maybeImport._kind !== 'cssVar' &&
                 maybeImport._kind !== 'keyframes'
             ) {
-                if (maybeImport.alias && !maybeImport[valueMapping.extends]) {
+                if (maybeImport.alias && !maybeImport[`-st-extends`]) {
                     maybeImport = maybeImport.alias;
-                } else if (maybeImport[valueMapping.extends]) {
-                    maybeImport = maybeImport[valueMapping.extends];
+                } else if (maybeImport[`-st-extends`]) {
+                    maybeImport = maybeImport[`-st-extends`];
                 } else {
                     return null;
                 }
@@ -212,7 +224,7 @@ export class StylableResolver {
             if (
                 ((resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') &&
                     resolved.symbol.alias &&
-                    !resolved.symbol[valueMapping.extends]) ||
+                    !resolved.symbol[`-st-extends`]) ||
                 (resolved.symbol._kind === 'cssVar' && resolved.symbol.alias)
             ) {
                 if (path.includes(resolved.symbol)) {
@@ -237,7 +249,7 @@ export class StylableResolver {
                 return { meta, symbol, _kind: 'css' };
             }
             path.push(symbol);
-            const isAliasOnly = symbol.alias && !symbol[valueMapping.extends];
+            const isAliasOnly = symbol.alias && !symbol[`-st-extends`];
             return isAliasOnly
                 ? this.resolveSymbolOrigin(symbol.alias, meta, path)
                 : { meta, symbol, _kind: 'css' };
@@ -389,7 +401,7 @@ export class StylableResolver {
 
             extendPath.push(current);
 
-            const parent = current.symbol[valueMapping.extends] || current.symbol.alias;
+            const parent = current.symbol[`-st-extends`] || current.symbol.alias;
 
             if (parent) {
                 if (parent._kind === 'import') {

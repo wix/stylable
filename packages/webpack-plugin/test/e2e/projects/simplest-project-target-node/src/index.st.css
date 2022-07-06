@@ -1,0 +1,8 @@
+@st-import [--color] from "comp-lib/index.st.css";
+@st-import [fn] from "st-utils";
+
+
+.root {
+    background: var(--color);
+    color: fn();
+}

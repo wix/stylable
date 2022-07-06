@@ -1,4 +1,3 @@
-import { valueMapping } from '@stylable/core';
 import type { ProviderRange } from './completion-providers';
 
 export class Completion {
@@ -18,16 +17,16 @@ export class Snippet {
 }
 
 export const importDirectives = {
-    from: valueMapping.from,
-    default: valueMapping.default,
-    named: valueMapping.named,
-};
+    from: `-st-from`,
+    default: `-st-default`,
+    named: `-st-named`,
+} as const;
 
 export const rulesetDirectives = {
-    extends: valueMapping.extends,
-    mixin: valueMapping.mixin,
-    states: valueMapping.states,
-};
+    extends: `-st-extends`,
+    mixin: `-st-mixin`,
+    states: `-st-states`,
+} as const;
 
 export const topLevelDirectives = {
     root: '.root' as const,
@@ -38,34 +37,34 @@ export const topLevelDirectives = {
     stScope: '@st-scope' as const,
     stImport: '@st-import' as const,
     stGlobalCustomProperty: '@st-global-custom-property' as const,
-};
+} as const;
 
 // syntactic
 
 export function importInternalDirective(type: keyof typeof importDirectives, rng: ProviderRange) {
     switch (importDirectives[type]) {
-        case valueMapping.default:
+        case `-st-default`:
             return new Completion(
-                valueMapping.default + ':',
+                `-st-default:`,
                 'Default export name',
                 'a',
-                new Snippet(valueMapping.default + ': $1;'),
+                new Snippet(`-st-default` + ': $1;'),
                 rng
             );
-        case valueMapping.from:
+        case `-st-from`:
             return new Completion(
-                valueMapping.from + ':',
+                `-st-from:`,
                 'Path to library',
                 'a',
-                new Snippet(valueMapping.from + ': "$1";'),
+                new Snippet(`-st-from` + ': "$1";'),
                 rng
             );
-        case valueMapping.named:
+        case `-st-named`:
             return new Completion(
-                valueMapping.named + ':',
+                `-st-named:`,
                 'Named export name',
                 'a',
-                new Snippet(valueMapping.named + ': $1;'),
+                new Snippet(`-st-named` + ': $1;'),
                 rng
             );
     }
@@ -73,27 +72,27 @@ export function importInternalDirective(type: keyof typeof importDirectives, rng
 
 export function rulesetInternalDirective(type: keyof typeof rulesetDirectives, rng: ProviderRange) {
     switch (rulesetDirectives[type]) {
-        case valueMapping.extends:
+        case `-st-extends`:
             return new Completion(
-                valueMapping.extends + ':',
+                `-st-extends:`,
                 'Extend an external component',
                 'a',
                 new Snippet('-st-extends: $1;'),
                 rng,
                 true
             );
-        case valueMapping.mixin:
+        case `-st-mixin`:
             return new Completion(
-                valueMapping.mixin + ':',
+                `-st-mixin:`,
                 'Apply mixins on the class',
                 'a',
                 new Snippet('-st-mixin: $1;'),
                 rng,
                 true
             );
-        case valueMapping.states:
+        case `-st-states`:
             return new Completion(
-                valueMapping.states + ':',
+                `-st-states:`,
                 'Define the CSS states available for this class',
                 'a',
                 new Snippet('-st-states: $1;'),

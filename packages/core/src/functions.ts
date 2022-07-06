@@ -12,11 +12,13 @@ import {
     createSymbolResolverWithCache,
     MetaResolvedSymbols,
 } from './stylable-resolver';
-import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
+import type { replaceValueHook, RuntimeStVar, StylableTransformer } from './stylable-transformer';
 import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
+import { unescapeCSS } from './helpers/escape';
 import type { ParsedValue } from './types';
 import type { FeatureTransformContext } from './features/feature';
 import { CSSCustomProperty, STVar } from './features';
+import { unbox, CustomValueError } from './custom-values';
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
@@ -27,21 +29,24 @@ export interface EvalValueData {
     node?: postcss.Node;
     valueHook?: replaceValueHook;
     meta: StylableMeta;
-    tsVarOverride?: Record<string, string> | null;
+    stVarOverride?: Record<string, string> | null;
     cssVarsMapping?: Record<string, string>;
     args?: string[];
+    rootArgument?: string;
+    initialNode?: postcss.Node;
 }
 
 export interface EvalValueResult {
     topLevelType: any;
+    runtimeValue: RuntimeStVar;
     outputValue: string;
     typeError?: Error;
 }
 
 export class StylableEvaluator {
-    public tsVarOverride: Record<string, string> | null | undefined;
-    constructor(options: { tsVarOverride?: Record<string, string> | null } = {}) {
-        this.tsVarOverride = options.tsVarOverride;
+    public stVarOverride: Record<string, string> | null | undefined;
+    constructor(options: { stVarOverride?: Record<string, string> | null } = {}) {
+        this.stVarOverride = options.stVarOverride;
     }
     evaluateValue(
         context: FeatureTransformContext,
@@ -53,12 +58,14 @@ export class StylableEvaluator {
             data.value,
             data.meta,
             data.node,
-            data.tsVarOverride || this.tsVarOverride,
+            data.stVarOverride || this.stVarOverride,
             data.valueHook,
             context.diagnostics,
             data.passedThrough,
             data.cssVarsMapping,
-            data.args
+            data.args,
+            data.rootArgument,
+            data.initialNode
         );
     }
 }
@@ -86,7 +93,7 @@ export function resolveArgumentsValue(
     for (const k in options) {
         resolvedArgs[k] = evalDeclarationValue(
             transformer.resolver,
-            options[k],
+            unescapeCSS(options[k]),
             meta,
             node,
             variableOverride,
@@ -111,9 +118,11 @@ export function processDeclarationValue(
     diagnostics: Diagnostics = new Diagnostics(),
     passedThrough: string[] = [],
     cssVarsMapping: Record<string, string> = {},
-    args: string[] = []
+    args: string[] = [],
+    rootArgument?: string,
+    initialNode?: postcss.Node
 ): EvalValueResult {
-    const evaluator = new StylableEvaluator({ tsVarOverride: variableOverride });
+    const evaluator = new StylableEvaluator({ stVarOverride: variableOverride });
     const resolvedSymbols = getResolvedSymbols(meta);
     const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -134,9 +143,11 @@ export function processDeclarationValue(
                         node,
                         valueHook,
                         meta,
-                        tsVarOverride: variableOverride,
+                        stVarOverride: variableOverride,
                         cssVarsMapping,
                         args,
+                        rootArgument,
+                        initialNode,
                     },
                     node: parsedNode,
                 });
@@ -201,9 +212,11 @@ export function processDeclarationValue(
                         node,
                         valueHook,
                         meta,
-                        tsVarOverride: variableOverride,
+                        stVarOverride: variableOverride,
                         cssVarsMapping,
                         args,
+                        rootArgument,
+                        initialNode,
                     },
                     node: parsedNode,
                 });
@@ -220,23 +233,46 @@ export function processDeclarationValue(
 
     let outputValue = '';
     let topLevelType = null;
+    let runtimeValue = null;
     let typeError: Error | undefined = undefined;
     for (const n of parsedValue.nodes) {
         if (n.type === 'function') {
             const matchingType = resolvedSymbols.customValues[n.value];
 
             if (matchingType) {
-                topLevelType = matchingType.evalVarAst(n, resolvedSymbols.customValues);
                 try {
-                    outputValue += matchingType.getValue(
-                        args,
-                        topLevelType,
-                        n,
-                        resolvedSymbols.customValues
-                    );
+                    topLevelType = matchingType.evalVarAst(n, resolvedSymbols.customValues, true);
+                    runtimeValue = unbox(topLevelType, true, resolvedSymbols.customValues, n);
+                    try {
+                        outputValue += matchingType.getValue(
+                            args,
+                            topLevelType,
+                            n,
+                            resolvedSymbols.customValues
+                        );
+                    } catch (error) {
+                        if (error instanceof CustomValueError) {
+                            outputValue += error.fallbackValue;
+                        } else {
+                            throw error;
+                        }
+                    }
                 } catch (e) {
                     typeError = e as Error;
-                    // catch broken variable resolutions
+
+                    const invalidNode = initialNode || node;
+
+                    if (invalidNode) {
+                        diagnostics.warn(
+                            invalidNode,
+                            STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
+                                [...(rootArgument ? [rootArgument] : []), ...args].join(', ')
+                            ),
+                            { word: value }
+                        );
+                    } else {
+                        // TODO: catch broken variable resolutions without a node
+                    }
                 }
             } else {
                 outputValue += getStringValue([n]);
@@ -245,7 +281,7 @@ export function processDeclarationValue(
             outputValue += getStringValue([n]);
         }
     }
-    return { outputValue, topLevelType, typeError };
+    return { outputValue, topLevelType, typeError, runtimeValue };
 }
 
 export function evalDeclarationValue(

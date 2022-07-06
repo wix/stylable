@@ -19,8 +19,7 @@ import {
 import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
 import { namespace } from './helpers/namespace';
 import { getOriginDefinition } from './helpers/resolve';
-import { appendMixins } from './stylable-mixins';
-import type { ClassSymbol, ElementSymbol } from './features';
+import { ClassSymbol, ElementSymbol, STMixin } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
@@ -32,15 +31,14 @@ import {
     CSSKeyframes,
     CSSCustomProperty,
 } from './features';
-import type { SRule, SDecl } from './deprecated/postcss-ast-extension';
+import type { SDecl } from './deprecated/postcss-ast-extension';
 import {
     CSSResolve,
     StylableResolverCache,
     StylableResolver,
     createSymbolResolverWithCache,
 } from './stylable-resolver';
-import { isCSSVarProp } from './helpers/css-custom-property';
-import { valueMapping } from './stylable-value-parsers';
+import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 
@@ -157,7 +155,6 @@ export class StylableTransformer {
         STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(meta.outputAst, meta, metaExports);
-        STGlobal.hooks.transformLastPass({ context });
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -167,12 +164,13 @@ export class StylableTransformer {
         ast: postcss.Root,
         meta: StylableMeta,
         metaExports?: StylableExports,
-        tsVarOverride?: Record<string, string>,
+        stVarOverride?: Record<string, string>,
         path: string[] = [],
         mixinTransform = false,
         topNestClassName = ``
     ) {
-        this.evaluator.tsVarOverride = tsVarOverride;
+        const prevStVarOverride = this.evaluator.stVarOverride;
+        this.evaluator.stVarOverride = stVarOverride;
         const transformContext = {
             meta,
             diagnostics: this.diagnostics,
@@ -204,6 +202,7 @@ export class StylableTransformer {
                     node: atRule,
                     valueHook: this.replaceValueHook,
                     passedThrough: path.slice(),
+                    initialNode: atRule,
                 }).outputValue;
             } else if (name === 'property') {
                 CSSCustomProperty.hooks.transformAtRuleNode({
@@ -223,7 +222,7 @@ export class StylableTransformer {
         ast.walkDecls((decl) => {
             (decl as SDecl).stylable = { sourceValue: decl.value };
 
-            if (isCSSVarProp(decl.prop)) {
+            if (validateCustomPropertyName(decl.prop)) {
                 CSSCustomProperty.hooks.transformDeclaration({
                     context: transformContext,
                     decl,
@@ -238,9 +237,9 @@ export class StylableTransformer {
             }
 
             switch (decl.prop) {
-                case valueMapping.partialMixin:
-                case valueMapping.mixin:
-                case valueMapping.states:
+                case `-st-partial-mixin`:
+                case `-st-mixin`:
+                case `-st-states`:
                     break;
                 default:
                     decl.value = this.evaluator.evaluateValue(transformContext, {
@@ -257,17 +256,18 @@ export class StylableTransformer {
         if (!mixinTransform && meta.outputAst && this.mode === 'development') {
             this.addDevRules(meta);
         }
-        ast.walkRules((rule) =>
-            appendMixins(
-                transformContext,
-                this,
-                rule as SRule,
-                meta,
-                tsVarOverride || {},
-                cssVarsMapping,
-                path
-            )
-        );
+
+        const lastPassParams = {
+            context: transformContext,
+            ast,
+            transformer: this,
+            cssVarsMapping,
+            path,
+        };
+        STMixin.hooks.transformLastPass(lastPassParams);
+        if (!mixinTransform) {
+            STGlobal.hooks.transformLastPass(lastPassParams);
+        }
 
         if (metaExports) {
             CSSClass.hooks.transformJSExports({
@@ -287,6 +287,9 @@ export class StylableTransformer {
                 resolved: cssVarsMapping,
             });
         }
+
+        // restore evaluator state
+        this.evaluator.stVarOverride = prevStVarOverride;
     }
     /** @deprecated */
     public getScopedCSSVar(
@@ -303,8 +306,14 @@ export class StylableTransformer {
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
-    public scopeRule(meta: StylableMeta, rule: postcss.Rule, topNestClassName?: string): string {
-        return this.scopeSelector(meta, rule.selector, rule, topNestClassName).selector;
+    public scopeRule(
+        meta: StylableMeta,
+        rule: postcss.Rule,
+        topNestClassName?: string,
+        unwrapGlobals?: boolean
+    ): string {
+        return this.scopeSelector(meta, rule.selector, rule, topNestClassName, unwrapGlobals)
+            .selector;
     }
     public scope(name: string, ns: string, delimiter: string = this.delimiter) {
         return namespace(name, ns, delimiter);
@@ -313,7 +322,8 @@ export class StylableTransformer {
         originMeta: StylableMeta,
         selector: string,
         rule?: postcss.Rule,
-        topNestClassName?: string
+        topNestClassName?: string,
+        unwrapGlobals = false
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
         const context = new ScopeContext(
             originMeta,
@@ -323,6 +333,9 @@ export class StylableTransformer {
             topNestClassName
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
+        if (unwrapGlobals) {
+            STGlobal.unwrapPseudoGlobals(targetSelectorAst);
+        }
         return {
             targetSelectorAst,
             selector: stringifySelector(targetSelectorAst),
@@ -414,7 +427,7 @@ export class StylableTransformer {
             let resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>> | undefined;
             for (let i = lookupStartingPoint; i < len; i++) {
                 const { symbol, meta } = currentAnchor.resolved[i];
-                if (!symbol[valueMapping.root]) {
+                if (!symbol[`-st-root`]) {
                     continue;
                 }
                 const isFirstInSelector =
@@ -450,7 +463,7 @@ export class StylableTransformer {
 
                 const resolvedPart = getOriginDefinition(resolved);
 
-                if (!resolvedPart.symbol[valueMapping.root] && !isFirstInSelector) {
+                if (!resolvedPart.symbol[`-st-root`] && !isFirstInSelector) {
                     // insert nested combinator before internal custom element
                     context.insertDescendantCombinatorBeforePseudoElement();
                 }
@@ -484,7 +497,7 @@ export class StylableTransformer {
             // find matching custom state
             let foundCustomState = false;
             for (const { symbol, meta } of currentAnchor.resolved) {
-                const states = symbol[valueMapping.states];
+                const states = symbol[`-st-states`];
                 if (states && hasOwnProperty.call(states, node.value)) {
                     foundCustomState = true;
                     // transform custom state
@@ -543,14 +556,13 @@ export class StylableTransformer {
              * the general `st-symbol` feature because the actual symbol can
              * be a type-element symbol that is actually an imported root in a mixin
              */
-            const origin = STSymbol.get(
-                originMeta,
-                topNestClassName || originMeta.root
-            ) as ClassSymbol;
+            const origin = STSymbol.get(originMeta, topNestClassName || originMeta.root) as
+                | ClassSymbol
+                | ElementSymbol; // ToDo: handle other cases
             context.setCurrentAnchor({
                 name: origin.name,
-                type: 'class',
-                resolved: resolvedSymbols.class[origin.name],
+                type: origin._kind,
+                resolved: resolvedSymbols[origin._kind][origin.name],
             });
         }
     }

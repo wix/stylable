@@ -203,13 +203,20 @@ export function injectLoader(compiler: Compiler) {
 export function createDecacheRequire(compiler: Compiler) {
     const cacheIds = new Set<string>();
     compiler.hooks.done.tap('decache require', () => {
+        if (!compiler.watchMode) {
+            return;
+        }
+
         for (const id of cacheIds) {
             decache(id);
         }
         cacheIds.clear();
     });
     return (id: string) => {
-        cacheIds.add(id);
+        if (compiler.watchMode) {
+            cacheIds.add(id);
+        }
+
         return require(id);
     };
 }
@@ -433,7 +440,10 @@ export function createOptimizationMapping(
     return sortedModules.reduce<OptimizationMapping>(
         (acc, module) => {
             const { namespace, isUsed } = getStylableBuildMeta(module);
-            acc.usageMapping[namespace] = isUsed ?? true;
+
+            if (!acc.usageMapping[namespace]) {
+                acc.usageMapping[namespace] = isUsed ?? true;
+            }
             acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
             if (acc.namespaceToFileMapping.has(namespace)) {
                 acc.namespaceToFileMapping.get(namespace)!.add(module);

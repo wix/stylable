@@ -2,14 +2,13 @@ import {
     ClassSymbol,
     ElementSymbol,
     ImportSymbol,
-    MappedStates,
     cssParse,
     StateParsedValue,
     StylableMeta,
     StylableProcessor,
-    valueMapping,
     VarSymbol,
 } from '@stylable/core';
+import type { MappedStates } from '@stylable/core/dist/index-internal';
 import { getCssDocsForSymbol } from './cssdocs';
 import {
     MinimalPath,
@@ -53,7 +52,7 @@ export function generateSchema(
             if (symbol._kind === 'class' || symbol._kind === 'element') {
                 schema.properties[entry] = {};
                 const schemaEntry = schema.properties[entry] as StylableSymbolSchema;
-                const { [valueMapping.states]: states, [valueMapping.extends]: extended } = symbol;
+                const { [`-st-states`]: states, [`-st-extends`]: extended } = symbol;
 
                 if (symbol.alias && symbol.alias.import) {
                     addModuleDependency(schema, filePath, symbol.alias.import.from, basePath, path);

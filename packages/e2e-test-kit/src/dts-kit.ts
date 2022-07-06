@@ -2,7 +2,7 @@ import fs, { readFileSync, symlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { Stylable } from '@stylable/core';
 import { generateDTSContent } from '@stylable/module-utils';
-import { createTempDirectorySync, ITempDirectorySync } from './cli-test-kit';
+import { createTempDirectorySync, ITempDirectorySync } from './file-system-helpers';
 import {
     createProgram,
     ModuleKind,
@@ -102,7 +102,7 @@ export class DTSKit {
 
     private genDTS(internalPath: string) {
         const results = this.stylable.transform(
-            this.stylable.process(this.sourcePath(internalPath))
+            this.stylable.analyze(this.sourcePath(internalPath))
         );
         this.write(internalPath + '.d.ts', generateDTSContent(results));
     }

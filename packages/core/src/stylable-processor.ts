@@ -9,9 +9,9 @@ import {
     ClassSymbol,
     CSSCustomProperty,
     ElementSymbol,
-    RefedMixin,
     StylableDirectives,
     STVar,
+    STMixin,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
 import {
@@ -19,6 +19,7 @@ import {
     STSymbol,
     STImport,
     STGlobal,
+    STScope,
     CSSClass,
     CSSType,
     CSSKeyframes,
@@ -30,24 +31,19 @@ import {
     isSimpleSelector,
     isInPseudoClassContext,
     isRootValid,
-    scopeNestedSelector,
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
-import {
-    rootValueMapping,
-    SBTypesParsers,
-    stValuesMap,
-    valueMapping,
-} from './stylable-value-parsers';
+import { stValuesMap } from './deprecated/value-mapping';
+import { SBTypesParsers } from './stylable-value-parsers';
 import { stripQuotation, filename2varname } from './helpers/string';
-import { ignoreDeprecationWarn, warnOnce } from './helpers/deprecation';
+import { warnOnce } from './helpers/deprecation';
 
-const parseStates = SBTypesParsers[valueMapping.states];
-const parseGlobal = SBTypesParsers[valueMapping.global];
-const parseExtends = SBTypesParsers[valueMapping.extends];
+const parseStates = SBTypesParsers[`-st-states`];
+const parseGlobal = SBTypesParsers[`-st-global`];
+const parseExtends = SBTypesParsers[`-st-extends`];
 
 export const processorWarnings = {
     ROOT_AFTER_SPACING() {
@@ -60,22 +56,13 @@ export const processorWarnings = {
         return 'cannot define pseudo states inside complex selectors';
     },
     CANNOT_RESOLVE_EXTEND(name: string) {
-        return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
+        return `cannot resolve '-st-extends' type for '${name}'`;
     },
     CANNOT_EXTEND_IN_COMPLEX() {
-        return `cannot define "${valueMapping.extends}" inside a complex selector`;
-    },
-    UNKNOWN_MIXIN(name: string) {
-        return `unknown mixin: "${name}"`;
-    },
-    OVERRIDE_MIXIN(mixinType: string) {
-        return `override ${mixinType} on same rule`;
+        return `cannot define "-st-extends" inside a complex selector`;
     },
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
-    },
-    PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
-        return `"${valueMapping.partialMixin}" can only be used with override arguments provided, missing overrides on "${type}"`;
     },
     INVALID_NAMESPACE_DEF() {
         return 'invalid @namespace';
@@ -83,9 +70,7 @@ export const processorWarnings = {
     EMPTY_NAMESPACE_DEF() {
         return '@namespace must contain at least one character or digit';
     },
-    MISSING_SCOPING_PARAM() {
-        return '"@st-scope" missing scoping selector parameter';
-    },
+
     INVALID_NAMESPACE_REFERENCE() {
         return 'st-namespace-reference dose not have any value';
     },
@@ -96,7 +81,7 @@ export const processorWarnings = {
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
-
+    private customSelectorData: Record<string, { isScoped: boolean }> = {};
     constructor(
         public diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
@@ -109,12 +94,12 @@ export class StylableProcessor implements FeatureContext {
 
         this.handleAtRules(root);
 
-        const stubs = this.insertCustomSelectorsStubs();
-
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
-                this.handleCustomSelectors(rule);
-                this.handleRule(rule as SRule, isChildOfAtRule(rule, rootValueMapping.stScope));
+                this.handleRule(rule as SRule, {
+                    isScoped: isChildOfAtRule(rule, `st-scope`),
+                    reportUnscoped: true,
+                });
             }
             const parent = rule.parent;
             if (parent?.type === 'rule') {
@@ -129,41 +114,38 @@ export class StylableProcessor implements FeatureContext {
         });
 
         root.walkDecls((decl) => {
-            if (stValuesMap[decl.prop]) {
-                this.handleDirectives(decl.parent as SRule, decl);
+            const parent = decl.parent as postcss.ChildNode;
+            if (parent.type === 'rule' && parent.selector === ':vars') {
+                // ToDo: remove once
+                // - custom property definition is allowed in var value
+                // - url collection is removed from st-var
+                return;
+            }
+            // ToDo: refactor to be hooked by features
+            if (stValuesMap[decl.prop] && parent.type === 'rule') {
+                this.handleDirectives(parent as SRule, decl);
             }
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
 
             this.collectUrls(decl);
         });
 
-        stubs.forEach((s) => s && s.remove());
-
-        this.meta.scopes.forEach((scope) => this.handleScope(scope));
-
         STSymbol.reportRedeclare(this);
+
+        prepareAST(this.meta, root);
 
         return this.meta;
     }
 
-    public insertCustomSelectorsStubs() {
-        return Object.keys(this.meta.customSelectors).map((selector) => {
-            if (this.meta.customSelectors[selector]) {
-                const rule = postcss.rule({ selector });
-                this.meta.ast.append(rule);
-                return rule;
-            }
-            return null;
-        });
-    }
-
-    public handleCustomSelectors(rule: postcss.Rule) {
-        expandCustomSelectors(rule, this.meta.customSelectors, this.meta.diagnostics);
-    }
-
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
-        const toRemove: postcss.AtRule[] = [];
+
+        const analyzeRule = (rule: postcss.Rule, { isScoped }: { isScoped: boolean }) => {
+            return this.handleRule(rule as SRule, {
+                isScoped,
+                reportUnscoped: false,
+            });
+        };
 
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
@@ -171,7 +153,7 @@ export class StylableProcessor implements FeatureContext {
                     STImport.hooks.analyzeAtRule({
                         context: this,
                         atRule,
-                        toRemove,
+                        analyzeRule,
                     });
                     break;
                 }
@@ -183,7 +165,6 @@ export class StylableProcessor implements FeatureContext {
                         } else {
                             this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
                         }
-                        toRemove.push(atRule);
                     } else {
                         this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
                     }
@@ -193,33 +174,37 @@ export class StylableProcessor implements FeatureContext {
                     CSSKeyframes.hooks.analyzeAtRule({
                         context: this,
                         atRule,
-                        toRemove,
+                        analyzeRule,
                     });
                     break;
                 case 'custom-selector': {
                     const params = atRule.params.split(/\s/);
                     const customName = params.shift();
-                    toRemove.push(atRule);
                     if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
-                        this.meta.customSelectors[customName] = atRule.params
-                            .replace(customName, '')
-                            .trim();
+                        const selector = atRule.params.replace(customName, '').trim();
+                        const isScoped = analyzeRule(
+                            postcss.rule({ selector, source: atRule.source }),
+                            { isScoped: false }
+                        );
+                        this.customSelectorData[customName] = {
+                            isScoped,
+                        };
+                        this.meta.customSelectors[customName] = selector;
                     } else {
                         // TODO: add warn there are two types one is not valid name and the other is empty name.
                     }
                     break;
                 }
                 case 'st-scope':
-                    this.meta.scopes.push(atRule);
+                    STScope.hooks.analyzeAtRule({ context: this, atRule, analyzeRule });
                     break;
                 case 'property':
                 case 'st-global-custom-property': {
-                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule, toRemove });
+                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule, analyzeRule });
                     break;
                 }
             }
         });
-        toRemove.forEach((node) => node.remove());
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
@@ -239,7 +224,7 @@ export class StylableProcessor implements FeatureContext {
         let pathToSource: string | undefined;
         let length = this.meta.ast.nodes.length;
 
-        while(length--) {
+        while (length--) {
             const node = this.meta.ast.nodes[length];
             if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
                 const i = node.text.indexOf('=');
@@ -256,22 +241,27 @@ export class StylableProcessor implements FeatureContext {
             namespace,
             pathToSource
                 ? path.resolve(path.dirname(this.meta.source), pathToSource)
-                : this.meta.source
+                : this.meta.source,
+            this.meta.source
         );
     }
 
-    protected handleRule(rule: SRule, inStScope = false) {
+    protected handleRule(
+        rule: SRule,
+        { isScoped, reportUnscoped }: { isScoped: boolean; reportUnscoped: boolean }
+    ) {
         rule.selectorAst = deprecatedParseSelector(rule.selector);
 
         const selectorAst = parseSelectorWithCache(rule.selector);
 
-        let locallyScoped = false;
+        let locallyScoped = isScoped;
         let simpleSelector: boolean;
         walkSelector(selectorAst, (node, ...nodeContext) => {
             const [index, nodes, parents] = nodeContext;
             const type = node.type;
             if (type === 'selector' && !isInPseudoClassContext(parents)) {
-                locallyScoped = false;
+                // reset scope check between top level selectors
+                locallyScoped = isScoped;
             }
             if (type !== `selector` && type !== `class` && type !== `type`) {
                 simpleSelector = false;
@@ -299,6 +289,11 @@ export class StylableProcessor implements FeatureContext {
                         rule,
                         walkContext: nodeContext,
                     });
+                } else if (node.value.startsWith('--')) {
+                    locallyScoped =
+                        locallyScoped ||
+                        this.customSelectorData[`:${node.value}`]?.isScoped ||
+                        false;
                 } else if (!knownPseudoClassesWithNestedSelectors.includes(node.value)) {
                     return walkSelector.skipNested;
                 }
@@ -314,7 +309,7 @@ export class StylableProcessor implements FeatureContext {
                     context: this,
                     classSymbol: CSSClass.get(this.meta, node.value)!,
                     locallyScoped,
-                    inStScope,
+                    reportUnscoped,
                     node,
                     nodes,
                     index,
@@ -331,7 +326,7 @@ export class StylableProcessor implements FeatureContext {
                 locallyScoped = CSSType.validateTypeScoping({
                     context: this,
                     locallyScoped,
-                    inStScope,
+                    reportUnscoped,
                     node,
                     nodes,
                     index,
@@ -385,6 +380,7 @@ export class StylableProcessor implements FeatureContext {
         if (!isRootValid(selectorAst)) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
+        return locallyScoped;
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
@@ -393,12 +389,12 @@ export class StylableProcessor implements FeatureContext {
             return !accType ? type : accType !== type ? `complex` : type;
         }, `` as typeof isSimplePerSelector[number]['type']);
         const isSimple = type !== `complex`;
-        if (decl.prop === valueMapping.states) {
+        if (decl.prop === `-st-states`) {
             if (isSimple && type !== 'type') {
                 this.extendTypedRule(
                     decl,
                     rule.selector,
-                    valueMapping.states,
+                    `-st-states`,
                     parseStates(decl.value, decl, this.diagnostics)
                 );
             } else {
@@ -408,7 +404,7 @@ export class StylableProcessor implements FeatureContext {
                     this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_COMPLEX());
                 }
             }
-        } else if (decl.prop === valueMapping.extends) {
+        } else if (decl.prop === `-st-extends`) {
             if (isSimple) {
                 const parsed = parseExtends(decl.value);
                 const symbolName = parsed.types[0] && parsed.types[0].symbolName;
@@ -424,7 +420,7 @@ export class StylableProcessor implements FeatureContext {
                     this.extendTypedRule(
                         decl,
                         rule.selector,
-                        valueMapping.extends,
+                        `-st-extends`,
                         getAlias(extendsRefSymbol) || extendsRefSymbol
                     );
                 } else {
@@ -437,74 +433,9 @@ export class StylableProcessor implements FeatureContext {
             } else {
                 this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
             }
-        } else if (decl.prop === valueMapping.mixin || decl.prop === valueMapping.partialMixin) {
-            const mixins: RefedMixin[] = [];
-            /**
-             * This functionality is broken we don't know what strategy to choose here.
-             * Should be fixed when we refactor to the new flow
-             */
-            SBTypesParsers[decl.prop](
-                decl,
-                (type) => {
-                    const symbol = STSymbol.get(this.meta, type);
-                    return symbol?._kind === 'import' && !symbol.import.from.match(/.css$/)
-                        ? 'args'
-                        : 'named';
-                },
-                this.diagnostics,
-                false
-            ).forEach((mixin) => {
-                const mixinRefSymbol = STSymbol.get(this.meta, mixin.type);
-                if (
-                    mixinRefSymbol &&
-                    (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
-                ) {
-                    if (mixin.partial && Object.keys(mixin.options).length === 0) {
-                        this.diagnostics.warn(
-                            decl,
-                            processorWarnings.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
-                            {
-                                word: mixin.type,
-                            }
-                        );
-                    }
-                    const refedMixin = {
-                        mixin,
-                        ref: mixinRefSymbol,
-                    };
-                    mixins.push(refedMixin);
-                    ignoreDeprecationWarn(() => this.meta.mixins).push(refedMixin);
-                } else {
-                    this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), {
-                        word: mixin.type,
-                    });
-                }
-            });
-
-            const previousMixins = ignoreDeprecationWarn(() => rule.mixins);
-            if (previousMixins) {
-                const partials = previousMixins.filter((r) => r.mixin.partial);
-                const nonPartials = previousMixins.filter((r) => !r.mixin.partial);
-                const isInPartial = decl.prop === valueMapping.partialMixin;
-                if (
-                    (partials.length && decl.prop === valueMapping.partialMixin) ||
-                    (nonPartials.length && decl.prop === valueMapping.mixin)
-                ) {
-                    this.diagnostics.warn(decl, processorWarnings.OVERRIDE_MIXIN(decl.prop));
-                }
-                if (partials.length && nonPartials.length) {
-                    rule.mixins = isInPartial
-                        ? nonPartials.concat(mixins)
-                        : partials.concat(mixins);
-                } else if (partials.length) {
-                    rule.mixins = isInPartial ? mixins : partials.concat(mixins);
-                } else if (nonPartials.length) {
-                    rule.mixins = isInPartial ? nonPartials.concat(mixins) : mixins;
-                }
-            } else if (mixins.length) {
-                rule.mixins = mixins;
-            }
-        } else if (decl.prop === valueMapping.global) {
+        } else if (decl.prop === STMixin.MixinType.ALL || decl.prop === STMixin.MixinType.PARTIAL) {
+            STMixin.hooks.analyzeDeclaration({ context: this, decl });
+        } else if (decl.prop === `-st-global`) {
             if (isSimple && type !== 'type') {
                 this.setClassGlobalMapping(decl, rule);
             } else {
@@ -519,7 +450,7 @@ export class StylableProcessor implements FeatureContext {
         if (classSymbol) {
             const globalSelectorAst = parseGlobal(decl, this.diagnostics);
             if (globalSelectorAst) {
-                classSymbol[valueMapping.global] = globalSelectorAst;
+                classSymbol[`-st-global`] = globalSelectorAst;
             }
         }
     }
@@ -541,36 +472,16 @@ export class StylableProcessor implements FeatureContext {
             typedRule[key] = value;
         }
     }
-
-    private handleScope(atRule: postcss.AtRule) {
-        const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
-        this.handleRule(scopingRule, true);
-        validateScopingSelector(atRule, scopingRule, this.diagnostics);
-
-        if (scopingRule.selector) {
-            atRule.walkRules((rule) => {
-                const scopedRule = rule.clone({
-                    selector: scopeNestedSelector(
-                        parseSelectorWithCache(scopingRule.selector),
-                        parseSelectorWithCache(rule.selector)
-                    ).selector,
-                });
-                (scopedRule as SRule).stScopeSelector = atRule.params;
-                rule.replaceWith(scopedRule);
-            });
-        }
-
-        atRule.replaceWith(atRule.nodes || []);
-    }
 }
 
+/* @deprecated */
 export function validateScopingSelector(
     atRule: postcss.AtRule,
     { selector: scopingSelector }: SRule,
     diagnostics: Diagnostics
 ) {
     if (!scopingSelector) {
-        diagnostics.warn(atRule, processorWarnings.MISSING_SCOPING_PARAM());
+        diagnostics.warn(atRule, STScope.diagnostics.MISSING_SCOPING_PARAM());
     }
 }
 
@@ -581,8 +492,8 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
     return new StylableMeta(root, diagnostics);
 }
 
-export function processNamespace(namespace: string, source: string) {
-    return namespace + murmurhash3_32_gc(source); // .toString(36);
+export function processNamespace(namespace: string, origin: string, _source?: string) {
+    return namespace + murmurhash3_32_gc(origin); // .toString(36);
 }
 
 export function process(
@@ -591,4 +502,29 @@ export function process(
     resolveNamespace?: typeof processNamespace
 ) {
     return new StylableProcessor(diagnostics, resolveNamespace).process(root);
+}
+
+export function prepareAST(meta: StylableMeta, ast: postcss.Root) {
+    const toRemove: Array<postcss.Node | (() => void)> = [];
+    ast.walk((node) => {
+        const input = { node, toRemove };
+        // namespace
+        if (node.type === 'atrule' && node.name === `namespace`) {
+            toRemove.push(node);
+        }
+        // custom selectors
+        if (node.type === 'rule') {
+            expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
+        } else if (node.type === 'atrule' && node.name === 'custom-selector') {
+            toRemove.push(node);
+        }
+        // extracted features
+        STImport.hooks.prepareAST(input);
+        STScope.hooks.prepareAST(input);
+        STVar.hooks.prepareAST(input);
+        CSSCustomProperty.hooks.prepareAST(input);
+    });
+    for (const removeOrNode of toRemove) {
+        typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
+    }
 }

@@ -15,12 +15,12 @@ import type { SelectorList } from '@tokey/css-selector-parser';
 import type { PlugableRecord } from './helpers/plugable-record';
 import { getSourcePath } from './stylable-utils';
 import { setFieldForDeprecation } from './helpers/deprecation';
-import { valueMapping } from './stylable-value-parsers';
 import {
     STSymbol,
     STImport,
     STGlobal,
     STVar,
+    STMixin,
     CSSClass,
     CSSType,
     CSSCustomProperty,
@@ -34,6 +34,7 @@ const features = [
     STImport,
     STGlobal,
     STVar,
+    STMixin,
     CSSClass,
     CSSType,
     CSSCustomProperty,
@@ -62,12 +63,15 @@ export class StylableMeta {
     public mappedSymbols: Record<string, StylableSymbol> = {};
     /** @deprecated */
     public mappedKeyframes: Record<string, KeyframesSymbol> = {};
+    /** @deprecated */
     public customSelectors: Record<string, string> = {};
     public urls: string[] = [];
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
+    /** @deprecated */
     public scopes: postcss.AtRule[] = [];
-    public mixins: RefedMixin[];
+    /** @deprecated */
+    public mixins: RefedMixin[] = [];
     // Generated during transform
     public outputAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
@@ -79,10 +83,7 @@ export class StylableMeta {
         }
         // set default root
         const rootSymbol = CSSClass.addClass(context, RESERVED_ROOT_NAME);
-        rootSymbol[valueMapping.root] = true;
-
-        setFieldForDeprecation(this, `mixins`, { objectType: `stylableMeta` });
-        this.mixins = [];
+        rootSymbol[`-st-root`] = true;
     }
     getSymbol(name: string) {
         return STSymbol.get(this, name);
@@ -148,4 +149,8 @@ setFieldForDeprecation(StylableMeta.prototype, `vars`, {
     objectType: `stylableMeta`,
     valueOnThis: true,
     pleaseUse: `meta.getAllStVars() or meta.getStVar(name)`,
+});
+setFieldForDeprecation(StylableMeta.prototype, `mixins`, {
+    objectType: `stylableMeta`,
+    valueOnThis: true,
 });

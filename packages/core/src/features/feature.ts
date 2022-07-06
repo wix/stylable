@@ -1,5 +1,5 @@
 import type { StylableMeta } from '../stylable-meta';
-import type { ScopeContext, StylableExports } from '../stylable-transformer';
+import type { ScopeContext, StylableExports, StylableTransformer } from '../stylable-transformer';
 import type { StylableResolver, MetaResolvedSymbols } from '../stylable-resolver';
 import type { StylableEvaluator, EvalValueData } from '../functions';
 import type * as postcss from 'postcss';
@@ -37,7 +37,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     analyzeAtRule: (options: {
         context: FeatureContext;
         atRule: postcss.AtRule;
-        toRemove: postcss.AtRule[]; // ToDo: remove once rawAst is immutable in processor
+        analyzeRule: (rule: postcss.Rule, options: { isScoped: boolean }) => boolean;
     }) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
@@ -46,6 +46,10 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         walkContext: SelectorNodeContext;
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
+    prepareAST: (options: {
+        node: postcss.ChildNode;
+        toRemove: Array<postcss.Node | (() => void)>;
+    }) => void;
     transformInit: (options: { context: FeatureTransformContext }) => void;
     transformResolve: (options: { context: FeatureTransformContext }) => T['RESOLVED'];
     transformAtRuleNode: (options: {
@@ -69,7 +73,13 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         data: EvalValueData;
     }) => void;
     transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
-    transformLastPass: (options: { context: FeatureTransformContext }) => void;
+    transformLastPass: (options: {
+        context: FeatureTransformContext;
+        ast: postcss.Root;
+        transformer: StylableTransformer;
+        cssVarsMapping: Record<string, string>;
+        path: string[];
+    }) => void;
 }
 const defaultHooks: FeatureHooks<NodeTypes> = {
     metaInit() {
@@ -85,6 +95,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
         /**/
     },
     analyzeDeclaration() {
+        /**/
+    },
+    prepareAST() {
         /**/
     },
     transformInit() {
