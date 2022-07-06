@@ -25,6 +25,7 @@ import {
     CSSType,
     CSSCustomProperty,
     CSSKeyframes,
+    CSSLayer,
 } from './features';
 
 export const RESERVED_ROOT_NAME = 'root';
@@ -39,6 +40,7 @@ const features = [
     CSSType,
     CSSCustomProperty,
     CSSKeyframes,
+    CSSLayer,
 ];
 
 export class StylableMeta {

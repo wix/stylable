@@ -108,7 +108,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 mixinRoot.append(node.clone({ selector }));
             }
         } else if (node.type === `atrule`) {
-            if (node.name === 'media' || node.name === 'supports') {
+            if (node.name === 'media' || node.name === 'supports' || node.name === 'layer') {
                 const atRuleSubset = createSubsetAst(
                     node,
                     selectorPrefix,

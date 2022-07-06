@@ -157,6 +157,35 @@ describe('Generate DTS', function () {
         expect(tk.typecheck('test.ts')).to.include(propUnknownNotOnType);
     });
 
+    it('should generate layers .d.ts', () => {
+        tk.populate({
+            'test.st.css': '@layer layerA, layerB',
+            'test.ts': `
+                import { eq } from "./test-kit";
+                import { layers } from "./test.st.css";
+                
+                eq<string>(layers.layerA);
+                eq<string>(layers.layerB);
+            `,
+        });
+
+        expect(tk.typecheck('test.ts')).to.equal('');
+    });
+
+    it('should warn about non-existing layers', () => {
+        tk.populate({
+            'test.st.css': '@layers someLayer',
+            'test.ts': `
+                import { eq } from "./test-kit";
+                import { layers } from "./test.st.css";
+                
+                eq<string>(layers.unknown);
+            `,
+        });
+
+        expect(tk.typecheck('test.ts')).to.include(propUnknownNotOnType);
+    });
+
     describe('st function', () => {
         it('should support basic usage with root class', () => {
             tk.populate({

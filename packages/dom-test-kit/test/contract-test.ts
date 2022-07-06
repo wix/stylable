@@ -14,6 +14,7 @@ export const contractTest =
             {
                 classes: { root: 'ns-root', x: 'ns__x', y: 'ns__y', z: 'ns__z ns__y' },
                 keyframes: {},
+                layers: {},
                 vars: {},
                 stVars: {},
             },
