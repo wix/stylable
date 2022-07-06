@@ -9,7 +9,7 @@ export function applyCodeMods(
 ): ApplyCodeModsResult {
     try {
         const reports = new Map<string, Diagnostic[]>();
-        const ast = parse(css);
+        const ast = parse(css, { from: filePath });
         let modifications = 0;
 
         for (const { id, apply } of mods) {

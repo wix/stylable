@@ -68,7 +68,7 @@ describe('Stylable Cli Code Mods', () => {
 
         expect(dirContent['style.st.css']).equal(`:import {-st-from: './x' -st-default: Name}`);
         expect(stdout).to.match(/failed to parse/);
-        expect(stdout).to.match(/CssSyntaxError: <css input>:1:20: Missed semicolon/);
+        expect(stdout).to.match(/CssSyntaxError: .*?style\.st\.css.*?:1:20: Missed semicolon/);
     });
 
     it('should report skipped files with no changes', () => {
