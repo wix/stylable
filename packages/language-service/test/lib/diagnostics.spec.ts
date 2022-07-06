@@ -12,18 +12,17 @@ describe('diagnostics', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: '.gaga .root{}',
+                [filePath]: '.root:unknown{}',
             },
             filePath
         );
 
         expect(diagnostics).to.deep.include({
             range: {
-                start: { line: 0, character: 0 },
+                start: { line: 0, character: 6 },
                 end: { line: 0, character: 13 },
             },
-            message:
-                '".root" class cannot be used after native elements or selectors external to the stylesheet',
+            message: 'unknown pseudo-state "unknown"',
             severity: 2,
             source: 'stylable',
         });
@@ -32,7 +31,7 @@ describe('diagnostics', () => {
     it('should not duplicate diagnostics within multiple runs on the same file', () => {
         const filePath = '/style.st.css';
         const files = {
-            [filePath]: '.gaga .root{}',
+            [filePath]: '.root:unknown{}',
         };
         const fs = createMemoryFs(files);
 
