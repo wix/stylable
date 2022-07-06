@@ -238,26 +238,15 @@ function getDotSeparatedNames(value: string) {
     }
     const names = [];
     let lastIndex = 0;
-    let escaped = false;
     for (let index = 0; index < value.length; ++index) {
         const char = value[index];
         switch (char) {
-            case '\\': {
-                if (!escaped) {
-                    escaped = true;
-                }
-                break;
-            }
             case '.': {
-                if (!escaped) {
+                if (value[index - 1] !== '\\') {
                     names.push(value.substring(lastIndex, index));
                     lastIndex = index + 1;
                 }
-                escaped = false;
                 break;
-            }
-            default: {
-                escaped = false;
             }
         }
     }
