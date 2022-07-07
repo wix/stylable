@@ -7,7 +7,7 @@ export function tryCollectImportsDeep(
 ) {
     for (const { context, request } of meta.getImportStatements()) {
         try {
-            const resolved = stylable.resolvePath(context, request);
+            const resolved = stylable.resolver.resolvePath(context, request);
             imports.add(resolved);
             tryCollectImportsDeep(stylable, stylable.analyze(resolved), imports);
         } catch (e) {

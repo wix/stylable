@@ -98,7 +98,7 @@ export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (resolvedPath: string) => any,
-        protected requestResolver: ModuleResolver,
+        protected moduleResolver: ModuleResolver,
         protected cache?: StylableResolverCache
     ) {}
     private getModule({ context, request }: Imported): CachedModuleEntity {
@@ -111,7 +111,7 @@ export class StylableResolver {
         let resolvedPath: string;
 
         try {
-            resolvedPath = this.requestResolver(context, request);
+            resolvedPath = this.moduleResolver(context, request);
         } catch (error) {
             entity = {
                 kind: request.endsWith('css') ? 'css' : 'js',
@@ -150,7 +150,7 @@ export class StylableResolver {
         if (resolvedPath) {
             return resolvedPath;
         }
-        return this.requestResolver(directoryPath, request);
+        return this.moduleResolver(directoryPath, request);
     }
     public resolveImported(
         imported: Imported,
