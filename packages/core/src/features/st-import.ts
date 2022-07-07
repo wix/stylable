@@ -1,7 +1,6 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
-import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
@@ -23,7 +22,9 @@ export interface Imported {
     from: string;
     defaultExport: string;
     named: Record<string, string>;
+    /**@deprecated use imported.typed.keyframes (remove in stylable 5) */
     keyframes: Record<string, string>;
+    typed: Record<string, Record<string, string>>;
     rule: postcss.Rule | postcss.AtRule;
     request: string;
     context: string;
@@ -45,7 +46,7 @@ export const PseudoImportDecl = {
  * have to move into the `metaInit` hook.
  */
 export const ImportTypeHook = new Map<
-    StylableSymbol['_kind'] & keyof Imported,
+    string,
     (context: FeatureContext, localName: string, importName: string, importDef: Imported) => void
 >();
 
@@ -68,6 +69,9 @@ export const diagnostics = {
     },
     UNKNOWN_IMPORTED_FILE(path: string) {
         return `cannot resolve imported file: "${path}"`;
+    },
+    UNKNOWN_TYPED_IMPORT(type: string) {
+        return `Unknown type import "${type}"`;
     },
 };
 
@@ -182,11 +186,16 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
         });
     });
     // import as typed symbol
-    for (const [type, handler] of ImportTypeHook.entries()) {
-        if (type in importDef) {
-            for (const [localName, importName] of Object.entries(importDef[type])) {
+    for (const [type, imports] of Object.entries(importDef.typed)) {
+        const handler = ImportTypeHook.get(type);
+        if (handler) {
+            for (const [localName, importName] of Object.entries(imports)) {
                 handler(context, localName, importName, importDef);
             }
+        } else {
+            context.diagnostics.error(importDef.rule, diagnostics.UNKNOWN_TYPED_IMPORT(type), {
+                word: type,
+            });
         }
     }
 }

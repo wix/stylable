@@ -150,6 +150,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
                 dependencyTemplates,
             }: DependencyTemplateContext
         ) {
+            /**
+             * NOTICE: replace assumes changes are done from bottom->top
+             * replace out of order might cause issues!
+             * the order is coupled with "loader.ts".
+             */
             const stylableBuildData = getStylableBuildData(this.stylableModules, module);
             if (!stylableBuildData.isUsed) {
                 return;
@@ -230,6 +235,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
                 source,
                 getReplacementToken('stVars'),
                 JSON.stringify(stylableBuildData.exports.stVars)
+            );
+            replacePlaceholder(
+                source,
+                getReplacementToken('layers'),
+                JSON.stringify(stylableBuildData.exports.layers)
             );
             replacePlaceholder(
                 source,
