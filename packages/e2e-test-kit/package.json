@@ -1,16 +1,16 @@
 {
   "name": "@stylable/e2e-test-kit",
-  "version": "5.0.0-rc.4",
+  "version": "5.0.0-rc.5",
   "description": "A collection of tools to help test Stylable components and applications from end-to-end",
   "main": "dist/index.js",
   "peerDependencies": {
     "webpack": "^5.30.0"
   },
   "dependencies": {
-    "@stylable/runtime": "5.0.0-rc.4",
+    "@stylable/runtime": "5.0.0-rc.5",
     "express": "^4.18.1",
     "node-eval": "^2.0.0",
-    "playwright-core": "^1.23.0",
+    "playwright-core": "^1.23.1",
     "rimraf": "^3.0.2"
   },
   "files": [

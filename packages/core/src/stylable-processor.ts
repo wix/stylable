@@ -22,6 +22,7 @@ import {
     CSSClass,
     CSSType,
     CSSKeyframes,
+    CSSLayer,
 } from './features';
 import { getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
@@ -29,7 +30,6 @@ import {
     walkSelector,
     isSimpleSelector,
     isInPseudoClassContext,
-    isRootValid,
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
@@ -54,12 +54,6 @@ const stValuesMap = {
 } as const;
 
 export const processorDiagnostics = {
-    ROOT_AFTER_SPACING: createDiagnosticReporter(
-        '11001',
-        'warning',
-        () =>
-            '".root" class cannot be used after native elements or selectors external to the stylesheet'
-    ),
     STATE_DEFINITION_IN_ELEMENT: createDiagnosticReporter(
         '11002',
         'error',
@@ -199,6 +193,20 @@ export class StylableProcessor implements FeatureContext {
                 }
                 case 'keyframes':
                     CSSKeyframes.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                case 'layer':
+                    CSSLayer.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                case 'import':
+                    CSSLayer.hooks.analyzeAtRule({
                         context: this,
                         atRule,
                         analyzeRule,
@@ -384,10 +392,6 @@ export class StylableProcessor implements FeatureContext {
             return;
         });
 
-        // ToDo: check cases of root in nested selectors?
-        if (!isRootValid(selectorAst)) {
-            this.diagnostics.report(processorDiagnostics.ROOT_AFTER_SPACING(), { node: rule });
-        }
         return locallyScoped;
     }
 

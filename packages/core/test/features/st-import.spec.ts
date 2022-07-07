@@ -128,6 +128,34 @@ describe(`features/st-import`, () => {
 
         shouldReportNoDiagnostics(sheets[`/entry.st.css`].meta);
     });
+    it(`should only allow known typed imports`, () => {
+        const { sheets: validSheets } = testStylableCore({
+            'a.st.css': `
+                @keyframes k1;
+                @keyframes k2;
+                @layer l1;
+                @layer l2;
+            `,
+            'entry.st.css': `@st-import [keyframes(k1, k2), layer(l1, l2)] from "./a.st.css";`,
+        });
+
+        shouldReportNoDiagnostics(validSheets['/entry.st.css'].meta);
+
+        testStylableCore({
+            'other.st.css': ``,
+            'entry.st.css': `
+                /* 
+                    @analyze-error word(unknown) ${stImportDiagnostics.UNKNOWN_TYPED_IMPORT(
+                        'unknown'
+                    )}
+                    @analyze-error word(classes) ${stImportDiagnostics.UNKNOWN_TYPED_IMPORT(
+                        'classes'
+                    )}
+                */
+                @st-import [unknown(u1, u2), classes(c1, c2)] "./a.st.css";
+            `,
+        });
+    });
     it(`should warn on lowercase default import from css file`, () => {
         const { sheets } = testStylableCore(`
             /* @analyze-warn word(sheetError) ${stImportDiagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
@@ -368,6 +396,42 @@ describe(`features/st-import`, () => {
             });
 
             shouldReportNoDiagnostics(sheets[`/entry.st.css`].meta);
+        });
+        it(`should only allow known typed imports (keyframes)`, () => {
+            const { sheets: validSheets } = testStylableCore({
+                'a.st.css': `
+                    @keyframes k1;
+                    @keyframes k2;
+                    @layer l1;
+                    @layer l2;
+                `,
+                'entry.st.css': `
+                    :import {
+                        -st-from: "./a.st.css";
+                        -st-named: keyframes(k1, k2), layer(l1, l2); 
+                    }
+                `,
+            });
+
+            shouldReportNoDiagnostics(validSheets['/entry.st.css'].meta);
+
+            testStylableCore({
+                'other.st.css': ``,
+                'entry.st.css': `
+                    /*
+                        @analyze-error word(unknown) ${stImportDiagnostics.UNKNOWN_TYPED_IMPORT(
+                            'unknown'
+                        )}
+                        @analyze-error word(classes) ${stImportDiagnostics.UNKNOWN_TYPED_IMPORT(
+                            'classes'
+                        )}
+                    */
+                    :import {
+                        -st-from: "./a.st.css";
+                        -st-named: unknown(u1, u2), classes(c1, c2); 
+                    }
+                `,
+            });
         });
         it(`should warn on lowercase default import from css file`, () => {
             const { sheets } = testStylableCore(`

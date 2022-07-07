@@ -531,85 +531,83 @@ describe(`helpers/import`, () => {
             const parseNamedImport = (value: string) =>
                 parsePseudoImportNamed(value, postcss.decl(), new Diagnostics());
             it('empty value', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({});
             });
             it('only named', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('a, b, c');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('a, b, c');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ a: 'a', b: 'b', c: 'c' });
             });
             it('named as', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('a as b, b as c, c as d');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('a as b, b as c, c as d');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ b: 'a', c: 'b', d: 'c' });
             });
             it('keyframes', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('keyframes(a)');
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a' });
+                const { typedMap, namedMap } = parseNamedImport('keyframes(a)');
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a' } });
                 expect(namedMap, 'named').to.eql({});
             });
             it('keyframes with as', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('keyframes(a as b)');
-                expect(keyframesMap, 'keyframes').to.eql({ b: 'a' });
+                const { typedMap, namedMap } = parseNamedImport('keyframes(a as b)');
+                expect(typedMap, 'typed').to.eql({ keyframes: { b: 'a' } });
                 expect(namedMap, 'named').to.eql({});
             });
             it('multiple keyframes', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('keyframes(a, b, c)');
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a', b: 'b', c: 'c' });
+                const { typedMap, namedMap } = parseNamedImport('keyframes(a, b, c)');
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', b: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({});
             });
             it('mix named and keyframes', () => {
-                const { keyframesMap, namedMap } = parseNamedImport(
-                    'a, b, keyframes(a, b, c), c, d'
-                );
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a', b: 'b', c: 'c' });
+                const { typedMap, namedMap } = parseNamedImport('a, b, keyframes(a, b, c), c, d');
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', b: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({ a: 'a', b: 'b', c: 'c', d: 'd' });
             });
             it('mix named and keyframes with as', () => {
-                const { keyframesMap, namedMap } = parseNamedImport(
+                const { typedMap, namedMap } = parseNamedImport(
                     'a as x, b, keyframes(a, b as z, c), c as y, d'
                 );
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a', z: 'b', c: 'c' });
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', z: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({ x: 'a', b: 'b', y: 'c', d: 'd' });
             });
 
             it('mix named and keyframes and comments', () => {
-                const { keyframesMap, namedMap } = parseNamedImport(
+                const { typedMap, namedMap } = parseNamedImport(
                     'a as x /* comment 0 */, b, /* comment 1 */keyframes(a, b as z, c), c as y, d'
                 );
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a', z: 'b', c: 'c' });
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', z: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({ x: 'a', b: 'b', y: 'c', d: 'd' });
             });
 
             it('keyframes nested', () => {
-                const { keyframesMap, namedMap } = parseNamedImport(
+                const { typedMap, namedMap } = parseNamedImport(
                     'keyframes(a as b, keyframes(d), e), f'
                 );
-                expect(keyframesMap, 'keyframes').to.eql({ b: 'a', d: 'd', e: 'e' });
+                expect(typedMap, 'keyframes').to.eql({ keyframes: { b: 'a', e: 'e' } });
                 expect(namedMap, 'named').to.eql({ f: 'f' });
             });
 
             it('"as" edge case', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('as');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('as');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ as: 'as' });
             });
 
             it('broken "as" edge case (broken at end)', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('a as');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('a as');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({});
             });
             it('broken "as" edge case (with more nodes)', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('a as, x');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('a as, x');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ x: 'x' });
             });
             it('"as" "as"', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('as as x');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('as as x');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ x: 'as' });
             });
             describe('errors', () => {

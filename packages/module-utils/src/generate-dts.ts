@@ -134,6 +134,7 @@ export function generateDTSContent({ exports, meta }: StylableResults) {
     const vars = wrapNL(stringifyStringRecord(exports.vars));
     const stVars = wrapNL(stringifyStringRecord(exports.stVars));
     const keyframes = wrapNL(stringifyStringRecord(exports.keyframes));
+    const layers = wrapNL(stringifyStringRecord(exports.layers));
     const states = wrapNL(stringifyStates(meta));
 
     return `/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */
@@ -148,6 +149,8 @@ declare const vars: {${vars}};
 declare const stVars: {${stVars}};
 
 declare const keyframes: {${keyframes}};
+
+declare const layers: {${layers}};
 
 declare function st<T extends string = keyof states>(
     ctx: T | NullableString,
@@ -167,6 +170,7 @@ export {
     vars,
     stVars,
     keyframes,
+    layers,
     namespace,
     st,
     style,

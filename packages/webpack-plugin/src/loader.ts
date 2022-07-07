@@ -30,12 +30,16 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         urls,
         unusedImports,
     });
-
+    /**
+     * NOTICE: order of replacements is coupled with "webpack-entities.ts"
+     * replacement is done from bottom->top.
+     */
     return `
 ${imports.join('\n')}
 export ${varType} namespace = ${getReplacementToken('namespace')};
 export ${varType} classes = ${getReplacementToken('classes')};
 export ${varType} keyframes = ${getReplacementToken('keyframes')}; 
+export ${varType} layers = ${getReplacementToken('layers')};
 export ${varType} stVars = ${getReplacementToken('stVars')}; 
 export ${varType} vars = ${getReplacementToken('vars')}; 
 export ${varType} cssStates = ${getReplacementToken('stc')};

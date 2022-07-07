@@ -24,7 +24,8 @@ export function generateStylableModuleCode(
         export var style = st;
         export var cssStates = stc.bind(null, namespace);
         export var classes = ${JSON.stringify(exports.classes)}; 
-        export var keyframes = ${JSON.stringify(exports.keyframes)}; 
+        export var keyframes = ${JSON.stringify(exports.keyframes)};
+        export var layers = ${JSON.stringify(exports.layers)};
         export var stVars = ${JSON.stringify(exports.stVars)}; 
         export var vars = ${JSON.stringify(exports.vars)}; 
     `;

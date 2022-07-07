@@ -1,7 +1,6 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
-import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
 import { validateCustomPropertyName } from '../helpers/css-custom-property';
@@ -33,7 +32,9 @@ export interface Imported {
     from: string;
     defaultExport: string;
     named: Record<string, string>;
+    /**@deprecated use imported.typed.keyframes (remove in stylable 5) */
     keyframes: Record<string, string>;
+    typed: Record<string, Record<string, string>>;
     rule: postcss.Rule | postcss.AtRule;
     request: string;
     context: string;
@@ -55,7 +56,7 @@ export const PseudoImportDecl = {
  * have to move into the `metaInit` hook.
  */
 export const ImportTypeHook = new Map<
-    StylableSymbol['_kind'] & keyof Imported,
+    string,
     (context: FeatureContext, localName: string, importName: string, importDef: Imported) => void
 >();
 
@@ -90,6 +91,11 @@ export const diagnostics = {
         '05016',
         'error',
         (path: string) => `cannot resolve imported file: "${path}"`
+    ),
+    UNKNOWN_TYPED_IMPORT: createDiagnosticReporter(
+        '05018',
+        'error',
+        (type: string) => `Unknown type import "${type}"`
     ),
 };
 
@@ -219,11 +225,17 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
         });
     });
     // import as typed symbol
-    for (const [type, handler] of ImportTypeHook.entries()) {
-        if (type in importDef) {
-            for (const [localName, importName] of Object.entries(importDef[type])) {
+    for (const [type, imports] of Object.entries(importDef.typed)) {
+        const handler = ImportTypeHook.get(type);
+        if (handler) {
+            for (const [localName, importName] of Object.entries(imports)) {
                 handler(context, localName, importName, importDef);
             }
+        } else {
+            context.diagnostics.report(diagnostics.UNKNOWN_TYPED_IMPORT(type), {
+                node: importDef.rule,
+                word: type,
+            });
         }
     }
 }

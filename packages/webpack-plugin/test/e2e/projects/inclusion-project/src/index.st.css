@@ -18,6 +18,11 @@
     -st-named: keyframes(x);
 }
 
+:import {
+    -st-from: "./included-via-layer.st.css";
+    -st-named: layer(L1);
+}
+
 WithGlobals {}
 
 .root {

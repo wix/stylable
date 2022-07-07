@@ -120,7 +120,12 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 mixinRoot.append(node.clone({ selector }));
             }
         } else if (node.type === `atrule`) {
-            if (node.name === 'media' || node.name === 'supports' || node.name === 'st-scope') {
+            if (
+                node.name === 'media' ||
+                node.name === 'supports' ||
+                node.name === 'st-scope' ||
+                node.name === 'layer'
+            ) {
                 const scopeSelector = node.name === 'st-scope' ? node.params : '';
                 const atRuleSubset = createSubsetAst(
                     node,

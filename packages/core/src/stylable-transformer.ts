@@ -31,6 +31,7 @@ import {
     CSSClass,
     CSSType,
     CSSKeyframes,
+    CSSLayer,
     CSSCustomProperty,
 } from './features';
 import {
@@ -59,6 +60,7 @@ export interface StylableExports {
     vars: Record<string, string>;
     stVars: Record<string, RuntimeStVar>;
     keyframes: Record<string, string>;
+    layers: Record<string, string>;
 }
 
 export interface StylableResults {
@@ -140,6 +142,7 @@ export class StylableTransformer {
             vars: {},
             stVars: {},
             keyframes: {},
+            layers: {},
         };
         meta.transformedScopes = null;
         meta.targetAst = meta.sourceAst.clone();
@@ -184,6 +187,7 @@ export class StylableTransformer {
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
         const keyframesResolve = CSSKeyframes.hooks.transformResolve(transformResolveOptions);
+        const layerResolve = CSSLayer.hooks.transformResolve(transformResolveOptions);
         const cssVarsMapping = CSSCustomProperty.hooks.transformResolve(transformResolveOptions);
 
         ast.walkRules((rule) => {
@@ -215,6 +219,18 @@ export class StylableTransformer {
                     context: transformContext,
                     atRule,
                     resolved: keyframesResolve,
+                });
+            } else if (name === 'layer') {
+                CSSLayer.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: layerResolve,
+                });
+            } else if (name === 'import') {
+                CSSLayer.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: layerResolve,
                 });
             }
         });
@@ -279,6 +295,10 @@ export class StylableTransformer {
             CSSKeyframes.hooks.transformJSExports({
                 exports: metaExports,
                 resolved: keyframesResolve,
+            });
+            CSSLayer.hooks.transformJSExports({
+                exports: metaExports,
+                resolved: layerResolve,
             });
             CSSCustomProperty.hooks.transformJSExports({
                 exports: metaExports,
