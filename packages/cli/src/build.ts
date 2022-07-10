@@ -1,3 +1,4 @@
+import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
 import type { BuildContext, BuildOptions } from './types';
 import { IndexGenerator as BaseIndexGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
@@ -256,8 +257,9 @@ export async function build(
                     () => stylable.analyze(filePath),
                     errorMessages.STYLABLE_PROCESS(filePath)
                 );
-                for (const dependency of stylable.getDependencies(meta)) {
-                    registerInvalidation(dependency.resolvedPath, filePath);
+                // todo: consider merging this API with stylable.getDependencies()
+                for (const depFilePath of tryCollectImportsDeep(stylable, meta)) {
+                    registerInvalidation(depFilePath, filePath);
                 }
             } catch (error) {
                 setFileErrorDiagnostic(filePath, error);

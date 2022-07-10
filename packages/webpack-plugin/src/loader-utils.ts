@@ -1,4 +1,5 @@
 import type { Stylable, StylableMeta } from '@stylable/core';
+import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
 import { processUrlDependencies, hasImportedSideEffects } from '@stylable/build-tools';
 
 export function getReplacementToken(token: string) {
@@ -28,13 +29,10 @@ export function getImports(
             }
         }
     }
-    const buildDependencies: string[] = [];
     /**
      * Collect all deep dependencies since they can affect the output
      */
-    for (const dependency of stylable.getDependencies(meta)) {
-        buildDependencies.push(dependency.resolvedPath);
-    }
+    const buildDependencies: string[] = Array.from(tryCollectImportsDeep(stylable, meta));
 
     /**
      * @remove

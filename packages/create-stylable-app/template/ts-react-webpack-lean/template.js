@@ -3,7 +3,6 @@
 module.exports = {
     dependencies: ['react', 'react-dom'],
     devDependencies: [
-        '@stylable/core',
         '@stylable/cli',
         '@stylable/runtime',
         '@stylable/webpack-plugin',

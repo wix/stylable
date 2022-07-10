@@ -7,12 +7,12 @@
     "test": "mocha \"dist/test/**/*.spec.js\""
   },
   "peerDependencies": {
-    "@stylable/core": "5.0.0-rc.5",
     "rollup": "^2.70.0"
   },
   "dependencies": {
     "@stylable/build-tools": "5.0.0-rc.5",
     "@stylable/cli": "5.0.0-rc.5",
+    "@stylable/core": "5.0.0-rc.5",
     "@stylable/node": "5.0.0-rc.5",
     "@stylable/optimizer": "5.0.0-rc.5",
     "@stylable/runtime": "5.0.0-rc.5",

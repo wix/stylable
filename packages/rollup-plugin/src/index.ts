@@ -2,7 +2,11 @@ import type { Plugin } from 'rollup';
 import fs from 'fs';
 import { join, parse } from 'path';
 import { Stylable } from '@stylable/core';
-import { emitDiagnostics, DiagnosticsMode } from '@stylable/core/dist/index-internal';
+import {
+    emitDiagnostics,
+    DiagnosticsMode,
+    tryCollectImportsDeep,
+} from '@stylable/core/dist/index-internal';
 import {
     sortModulesByDepth,
     calcDepth,
@@ -165,8 +169,8 @@ export function stylableRollupPlugin({
             }
             extracted.set(id, { css });
 
-            for (const dependency of stylable.getDependencies(meta)) {
-                this.addWatchFile(dependency.resolvedPath);
+            for (const filePath of tryCollectImportsDeep(stylable, meta)) {
+                this.addWatchFile(filePath);
             }
 
             /**

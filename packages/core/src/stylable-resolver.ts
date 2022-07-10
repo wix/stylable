@@ -33,6 +33,7 @@ export interface InvalidCachedModule {
     error: unknown;
     request: string;
     context: string;
+    resolvedPath: string | undefined;
 }
 
 export interface CachedStylableMeta {
@@ -101,11 +102,11 @@ export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (resolvedPath: string) => any,
-        public resolvePath: ModuleResolver,
+        protected moduleResolver: ModuleResolver,
         protected cache?: StylableResolverCache
     ) {}
     private getModule({ context, request }: Imported): CachedModuleEntity {
-        const key = `${context}${safePathDelimiter}${request}`;
+        const key = cacheKey(context, request);
         if (this.cache?.has(key)) {
             return this.cache.get(key)!;
         }
@@ -114,7 +115,7 @@ export class StylableResolver {
         let resolvedPath: string;
 
         try {
-            resolvedPath = this.resolvePath(context, request);
+            resolvedPath = this.moduleResolver(context, request);
         } catch (error) {
             entity = {
                 kind: request.endsWith('css') ? 'css' : 'js',
@@ -122,6 +123,7 @@ export class StylableResolver {
                 error,
                 request,
                 context,
+                resolvedPath: undefined,
             };
             this.cache?.set(key, entity);
             return entity;
@@ -132,14 +134,14 @@ export class StylableResolver {
             try {
                 entity = { kind, value: this.fileProcessor.process(resolvedPath), resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error, request, context };
+                entity = { kind, value: null, error, request, context, resolvedPath };
             }
         } else {
             const kind = 'js';
             try {
                 entity = { kind, value: this.requireModule(resolvedPath), resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error, request, context };
+                entity = { kind, value: null, error, request, context, resolvedPath };
             }
         }
 
@@ -147,7 +149,13 @@ export class StylableResolver {
 
         return entity;
     }
-
+    public resolvePath(directoryPath: string, request: string): string {
+        const resolvedPath = this.cache?.get(cacheKey(directoryPath, request))?.resolvedPath;
+        if (resolvedPath) {
+            return resolvedPath;
+        }
+        return this.moduleResolver(directoryPath, request);
+    }
     public resolveImported(
         imported: Imported,
         name: string,
@@ -459,6 +467,11 @@ export class StylableResolver {
         return extendPath;
     }
 }
+
+function cacheKey(context: string, request: string) {
+    return `${context}${safePathDelimiter}${request}`;
+}
+
 function validateClassResolveExtends(
     meta: StylableMeta,
     name: string,
