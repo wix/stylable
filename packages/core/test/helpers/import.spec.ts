@@ -1,8 +1,13 @@
 import { expect } from 'chai';
 import { parse } from 'postcss';
 import { Diagnostics, ensureModuleImport } from '@stylable/core';
-import { ensureImportsMessages, parsePseudoImportNamed } from '@stylable/core/dist/helpers/import';
+import {
+    ensureImportsMessages,
+    parsePseudoImportNamed,
+    tryCollectImportsDeep,
+} from '@stylable/core/dist/helpers/import';
 import * as postcss from 'postcss';
+import { testStylableCore } from '@stylable/core-test-kit';
 
 describe(`helpers/import`, () => {
     describe('ensureModuleImport', () => {
@@ -630,6 +635,62 @@ describe(`helpers/import`, () => {
                     );
                 });
             });
+        });
+    });
+    describe('tryCollectImportsDeep', () => {
+        it('should collect deep imports', () => {
+            const { stylable } = testStylableCore({
+                'deep.st.css': `
+                    .root {}
+                `,
+                'middle.st.css': `
+                    @st-import Deep from './deep.st.css';
+                `,
+                'entry.st.css': `
+                    @st-import Middle from './middle.st.css';
+                `,
+            });
+
+            const imports = tryCollectImportsDeep(stylable, stylable.analyze('/entry.st.css'));
+
+            expect(imports).to.eql(new Set(['/deep.st.css', '/middle.st.css']));
+        });
+
+        it('should collect deep imports with circularity', () => {
+            const { stylable } = testStylableCore({
+                'a.st.css': `
+                    @st-import B from './b.st.css';
+                `,
+                'b.st.css': `
+                    @st-import A from './a.st.css';
+                `,
+                'entry.st.css': `
+                    @st-import A from './a.st.css';
+                `,
+            });
+
+            const imports = tryCollectImportsDeep(stylable, stylable.analyze('/entry.st.css'));
+
+            expect(imports).to.eql(new Set(['/a.st.css', '/b.st.css']));
+        });
+
+        it.skip('should collect imports resiliently when an error occurs', () => {
+            // todo: remove skip once testStylableCore is resilient to errors
+            const { stylable } = testStylableCore({
+                'deep.st.css': `
+                    \\
+                `,
+                'middle.st.css': `
+                    @st-import Deep from './deep.st.css';
+                `,
+                'entry.st.css': `
+                    @st-import Middle from './middle.st.css';
+                `,
+            });
+
+            const imports = tryCollectImportsDeep(stylable, stylable.analyze('entry.st.css'));
+
+            expect(imports).to.eql(new Set(['/deep.st.css', '/middle.st.css']));
         });
     });
 });

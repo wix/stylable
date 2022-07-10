@@ -552,8 +552,11 @@ export function tryCollectImportsDeep(
     for (const { context, request } of meta.getImportStatements()) {
         try {
             const resolved = stylable.resolver.resolvePath(context, request);
-            imports.add(resolved);
-            tryCollectImportsDeep(stylable, stylable.analyze(resolved), imports);
+
+            if (!imports.has(resolved)) {
+                imports.add(resolved);
+                tryCollectImportsDeep(stylable, stylable.analyze(resolved), imports);
+            }
         } catch (e) {
             /** */
         }
