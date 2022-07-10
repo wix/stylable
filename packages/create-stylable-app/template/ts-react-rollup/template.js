@@ -9,7 +9,6 @@ module.exports = {
         '@rollup/plugin-node-resolve',
         '@rollup/plugin-replace',
         '@rollup/plugin-typescript',
-        '@stylable/core',
         '@stylable/cli',
         '@stylable/rollup-plugin',
         '@stylable/runtime',
