@@ -1,4 +1,4 @@
-import { pseudoStates } from '@stylable/core';
+import { pseudoStates } from '@stylable/core/dist/index-internal';
 import {
     parseCssSelector,
     walk,

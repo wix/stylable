@@ -1,6 +1,12 @@
 import { STGlobal } from '@stylable/core/dist/features';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
+
+const stGlobalDiagnostics = diagnosticBankReportToStrings(STGlobal.diagnostics);
 
 describe(`features/st-global`, () => {
     it(`should remove :global() and keep inner selector untransformed`, () => {
@@ -40,7 +46,7 @@ describe(`features/st-global`, () => {
         testStylableCore(`
             /* 
                 @rule(multi) :global(.a, .b)
-                @analyze-error(multi) word(.a, .b) ${STGlobal.diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL()}
+                @analyze-error(multi) word(.a, .b) ${stGlobalDiagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL()}
             */
             :global(.a, .b) {}
         `);

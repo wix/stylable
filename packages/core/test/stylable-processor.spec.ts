@@ -1,17 +1,22 @@
 import { resolve } from 'path';
 import chai, { expect } from 'chai';
-import { flatMatch, processSource } from '@stylable/core-test-kit';
-import { processNamespace, processorWarnings } from '@stylable/core';
-import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
+import { flatMatch, processSource, diagnosticBankReportToStrings } from '@stylable/core-test-kit';
+import { processNamespace } from '@stylable/core';
+import {
+    knownPseudoClassesWithNestedSelectors,
+    processorDiagnostics,
+} from '@stylable/core/dist/index-internal';
 
 chai.use(flatMatch);
+
+const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
 
 describe('Stylable postcss process', () => {
     it('report if missing filename', () => {
         const { diagnostics, namespace } = processSource(``);
         expect(namespace).to.equal('s0');
         expect(diagnostics.reports[0]).to.include({
-            type: 'error',
+            severity: 'error',
             message: 'missing source filename',
         });
     });
@@ -20,8 +25,8 @@ describe('Stylable postcss process', () => {
         const { diagnostics } = processSource(`@namespace App;`, { from: '/path/to/source' });
 
         expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.INVALID_NAMESPACE_DEF(),
+            severity: 'error',
+            message: processorStringDiagnostics.INVALID_NAMESPACE_DEF(),
         });
     });
 
@@ -29,8 +34,8 @@ describe('Stylable postcss process', () => {
         const { diagnostics } = processSource(`@namespace '   ';`, { from: '/path/to/source' });
 
         expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.EMPTY_NAMESPACE_DEF(),
+            severity: 'error',
+            message: processorStringDiagnostics.EMPTY_NAMESPACE_DEF(),
         });
     });
 
@@ -46,8 +51,8 @@ describe('Stylable postcss process', () => {
         );
 
         expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.INVALID_NESTING('.y', '.x'),
+            severity: 'error',
+            message: processorStringDiagnostics.INVALID_NESTING('.y', '.x'),
         });
     });
 

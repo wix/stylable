@@ -21,7 +21,7 @@ export function createDiagnosis(
         /*TODO: report this failure to transform */
     }
 
-    const cleanDoc = cssService.createSanitizedDocument(meta.rawAst, filePath, version);
+    const cleanDoc = cssService.createSanitizedDocument(meta.sourceAst, filePath, version);
 
     return meta.diagnostics.reports
         .concat(meta.transformDiagnostics ? meta.transformDiagnostics.reports : [])
@@ -30,7 +30,7 @@ export function createDiagnosis(
 
     // stylable diagnostic to protocol diagnostic
     function reportToDiagnostic(report: StylableDiagnostic) {
-        const severity = report.type === 'error' ? 1 : 2;
+        const severity = report.severity === 'error' ? 1 : 2;
         const range = createRange(report);
 
         // todo: incorporate diagnostics code in v5
@@ -42,17 +42,17 @@ export function createRange(report: StylableDiagnostic) {
     const source = report.node.source;
     const start = { line: 0, character: 0 };
     const end = { line: 0, character: 0 };
-    if (report.options.word && source) {
+    if (report.word && source) {
         const lines: string[] = (source.input as any).css.split('\n');
         const searchStart = source.start!.line - 1;
         const searchEnd = source.end!.line - 1;
         for (let i = searchStart; i <= searchEnd; ++i) {
-            const wordIndex = lines[i].indexOf(report.options.word);
+            const wordIndex = lines[i].indexOf(report.word);
             if (~wordIndex) {
                 start.line = i;
                 start.character = wordIndex;
                 end.line = i;
-                end.character = wordIndex + report.options.word.length;
+                end.character = wordIndex + report.word.length;
                 break;
             }
         }

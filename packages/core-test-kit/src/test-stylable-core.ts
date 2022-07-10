@@ -33,7 +33,7 @@ export function testStylableCore(
     const fs =
         options.stylableConfig?.filesystem ||
         createMemoryFs(typeof input === `string` ? { '/entry.st.css': input } : input);
-    const stylable = Stylable.create({
+    const stylable = new Stylable({
         fileSystem: fs,
         projectRoot: '/',
         resolveNamespace: (ns) => ns,
@@ -59,7 +59,7 @@ export function testStylableCore(
     // inline test - build all and test
     for (const path of allSheets) {
         const meta = stylable.analyze(path);
-        if (!meta.outputAst) {
+        if (!meta.targetAst) {
             // ToDo: test
             stylable.transform(meta);
         }

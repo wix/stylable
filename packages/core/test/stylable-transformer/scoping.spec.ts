@@ -72,7 +72,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 .root:not(::nestedPart) {}
 
                 /* @rule(custom-selector syntax) 
-                        .entry__root:not(.entry__partA), .entry__root:not(.entry__partB)
+                        .entry__root:not(.entry__partA),.entry__root:not(.entry__partB)
                 */
                 .root:not(:--part) {}
             `);

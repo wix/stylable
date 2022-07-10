@@ -1,5 +1,6 @@
 import { testStylableCore, generateStylableEnvironment } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import deindent from 'deindent';
 
 describe('Stylable', () => {
     describe(`analyze (generate meta) `, () => {
@@ -30,12 +31,12 @@ describe('Stylable', () => {
             const overrideMeta = stylable.analyze(path, overrideContent);
             const fsMetaAfter = stylable.analyze(path);
 
-            expect(overrideMeta.ast.toString(), `override src ast`).to.eql(`.override {}`);
+            expect(overrideMeta.sourceAst.toString(), `override src ast`).to.eql(`.override {}`);
             expect(overrideMeta, `override meta`).to.contain({
                 source: path,
                 namespace: `entry`,
             });
-            expect(fsMetaBefore.ast.toString(), `fs before src ast`).to.eql(`.fs {}`);
+            expect(fsMetaBefore.sourceAst.toString(), `fs before src ast`).to.eql(`.fs {}`);
             expect(fsMetaBefore, `fs meta`).to.contain({
                 source: path,
                 namespace: `entry`,
@@ -44,26 +45,54 @@ describe('Stylable', () => {
         });
     });
     describe(`transformation`, () => {
-        it(`should transform a stylesheet by content & path`, () => {
-            const src = `.a {}`;
-            const path = `/entry.st.css`;
-            const { stylable } = testStylableCore({});
-
-            const { meta, exports } = stylable.transform(src, path);
-
-            expect(meta.outputAst?.toString(), `output CSS`).to.eql(`.entry__a {}`);
-            expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
-        });
         it(`should transform a stylesheet from meta`, () => {
-            const src = `.a {}`;
+            const src = `
+                :vars {
+                    varA: red;
+                }
+                .a {
+                    prop: value(varA);
+                }
+            `;
             const path = `/entry.st.css`;
             const { stylable, fs } = testStylableCore({});
             fs.writeFileSync(path, src);
+            const meta = stylable.analyze(path);
 
-            const { meta, exports } = stylable.transform(stylable.analyze(path));
+            const defaultTransform = stylable.transform(meta);
 
-            expect(meta.outputAst?.toString(), `output CSS`).to.eql(`.entry__a {}`);
-            expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
+            expect(
+                deindent(defaultTransform.meta.targetAst!.toString()),
+                `default output CSS`
+            ).to.eql(
+                deindent(`
+                    .entry__a {
+                        prop: red;
+                    }
+                `)
+            );
+            expect(defaultTransform.exports.classes.a, `JS export`).to.eql(`entry__a`);
+            expect(defaultTransform.exports.stVars.varA, `default var JS export`).to.eql(`red`);
+
+            // test with override
+            const varOverrideTransform = stylable.transform(meta, {
+                stVarOverride: { varA: 'green' },
+            });
+
+            expect(
+                deindent(varOverrideTransform.meta.targetAst!.toString()),
+                `override vars output CSS`
+            ).to.eql(
+                deindent(`
+                    .entry__a {
+                        prop: green;
+                    }
+                `)
+            );
+            // ToDo: fix JS export for programmatic override
+            // expect(varOverrideTransform.exports.stVars.varA, `override var JS export`).to.eql(
+            //     `green`
+            // );
         });
         it(`should transform selector`, () => {
             const path = `/entry.st.css`;
@@ -130,6 +159,29 @@ describe('Stylable', () => {
             expect(declFromMeta, `by path`).to.eql({
                 prop: `--entry-x`,
                 value: `var(--entry-x) jump`,
+            });
+        });
+        it(`should transform declaration prop/value with override st-vars`, () => {
+            const path = `/entry.st.css`;
+            const { stylable } = testStylableCore({
+                [path]: `
+                    :vars {
+                        x: red;
+                        a: value(x);
+                        b: blue;
+                    }
+                `,
+            });
+
+            const decl = stylable.transformDecl(path, `prop`, `value(a) value(b) value(x)`, {
+                stVarOverride: {
+                    x: 'green',
+                },
+            });
+
+            expect(decl, `value override`).to.eql({
+                prop: `prop`,
+                value: `green blue green`,
             });
         });
         it(`should transform custom property`, () => {

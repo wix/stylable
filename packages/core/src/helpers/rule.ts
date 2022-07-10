@@ -11,10 +11,10 @@ import {
     Selector,
     ImmutableSelectorNode,
     groupCompoundSelectors,
+    SelectorList,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
-import { ignoreDeprecationWarn } from './deprecation';
-import type { SRule } from '../deprecated/postcss-ast-extension';
+import { transformCustomSelectors } from './custom-selector';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return !!(
@@ -77,21 +77,33 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     root: postcss.Root | postcss.AtRule,
     selectorPrefix: string,
     mixinTarget?: T,
-    isRoot = false
+    isRoot = false,
+    getCustomSelector?: (name: string) => SelectorList | undefined,
+    scopeSelector = ''
 ): T {
     // keyframes on class mixin?
     const prefixSelectorList = parseSelectorWithCache(selectorPrefix);
     const prefixType = prefixSelectorList[0].nodes[0];
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
-
+    const scopeSelectorAST = parseSelectorWithCache(scopeSelector);
     root.nodes.forEach((node) => {
-        if (node.type === `rule`) {
-            const selectorAst = parseSelectorWithCache(node.selector, { clone: true });
-            const ast = isRoot
+        if (node.type === `rule` && (node.selector === ':vars' || node.selector === ':import')) {
+            // nodes that don't mix
+            return;
+        } else if (node.type === `rule`) {
+            let selectorAst = parseSelectorWithCache(node.selector, { clone: true });
+            if (scopeSelector) {
+                selectorAst = scopeNestedSelector(scopeSelectorAST, selectorAst, isRoot).ast;
+            }
+            let ast = isRoot
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
                 : selectorAst;
-
+            if (getCustomSelector) {
+                ast = transformCustomSelectors(ast, getCustomSelector, () => {
+                    /*don't report*/
+                });
+            }
             const matchesSelectors = isRoot ? ast : ast.filter((node) => containsPrefix(node));
 
             if (matchesSelectors.length) {
@@ -108,7 +120,13 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 mixinRoot.append(node.clone({ selector }));
             }
         } else if (node.type === `atrule`) {
-            if (node.name === 'media' || node.name === 'supports' || node.name === 'layer') {
+            if (
+                node.name === 'media' ||
+                node.name === 'supports' ||
+                node.name === 'st-scope' ||
+                node.name === 'layer'
+            ) {
+                const scopeSelector = node.name === 'st-scope' ? node.params : '';
                 const atRuleSubset = createSubsetAst(
                     node,
                     selectorPrefix,
@@ -116,7 +134,9 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                         params: node.params,
                         name: node.name,
                     }),
-                    isRoot
+                    isRoot,
+                    getCustomSelector,
+                    scopeSelector
                 );
                 if (atRuleSubset.nodes) {
                     mixinRoot.append(atRuleSubset);
@@ -214,8 +234,4 @@ export function findRule(
         }
     });
     return found;
-}
-
-export function getRuleScopeSelector(rule: postcss.Rule) {
-    return ignoreDeprecationWarn(() => (rule as SRule).stScopeSelector);
 }

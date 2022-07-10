@@ -1,7 +1,13 @@
 import { CSSLayer } from '@stylable/core/dist/features';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import deindent from 'deindent';
 import { expect } from 'chai';
+
+const cssLayerDiagnostics = diagnosticBankReportToStrings(CSSLayer.diagnostics);
 
 describe('features/css-layer', () => {
     it('should analyze @layer', () => {
@@ -209,33 +215,34 @@ describe('features/css-layer', () => {
     it('should report invalid cases', () => {
         const { sheets } = testStylableCore(`           
             /* 
-                @analyze-warn(empty global) ${CSSLayer.diagnostics.MISSING_LAYER_NAME_INSIDE_GLOBAL()} 
+                @analyze-warn(empty global) ${cssLayerDiagnostics.MISSING_LAYER_NAME_INSIDE_GLOBAL()} 
                 @atrule st-global()
             */
             @layer st-global() {}
-            
-            /* @analyze-error(multi block) ${CSSLayer.diagnostics.LAYER_SORT_STATEMENT_WITH_STYLE()} */
+
+            /* @analyze-error(multi block) ${cssLayerDiagnostics.LAYER_SORT_STATEMENT_WITH_STYLE()} */
             @layer one, two {}
-            
-            /* 
-                @analyze-error(reserved wide keywords) word(initial) ${CSSLayer.diagnostics.RESERVED_KEYWORD(
+
+            /*
+                @analyze-error(reserved wide keywords) word(initial) ${cssLayerDiagnostics.RESERVED_KEYWORD(
                     'initial'
                 )}
                 @atrule(reserved wide keywords) initial
             */
             @layer initial {}
-                
-            /* 
-                @analyze-error(not ident) ${CSSLayer.diagnostics.NOT_IDENT('func()')}
+
+            /*
+                @analyze-error(not ident) ${cssLayerDiagnostics.NOT_IDENT('func()')}
                 @atrule(not ident) func()
             */
             @layer func() {}
+           
         `);
         // ToDo: check invalid ident "@layer 123 {}" / "@layer a.123.b;"
 
         const { meta } = sheets['/entry.st.css'];
 
-        expect(meta.outputAst?.nodes[1]?.toString()).to.eql(`@layer st-global() {}`);
+        expect(meta.targetAst?.nodes[1]?.toString()).to.eql(`@layer st-global() {}`);
     });
     describe('st-import', () => {
         it('should resolve imported @layer', () => {
@@ -328,7 +335,7 @@ describe('features/css-layer', () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': ``,
                 '/entry.st.css': `
-                    /* @transform-error word(unknown) ${CSSLayer.diagnostics.UNKNOWN_IMPORTED_LAYER(
+                    /* @transform-error word(unknown) ${cssLayerDiagnostics.UNKNOWN_IMPORTED_LAYER(
                         `unknown`,
                         `./imported.st.css`
                     )} */
@@ -378,7 +385,7 @@ describe('features/css-layer', () => {
                     @st-import [layer(L1)] from './imported.st.css';
 
                     /* 
-                        @analyze-error word(L1) ${CSSLayer.diagnostics.RECONFIGURE_IMPORTED('L1')} 
+                        @analyze-error word(L1) ${cssLayerDiagnostics.RECONFIGURE_IMPORTED('L1')} 
                         @atrule imported__L1
                     */
                     @layer st-global(L1) {}
@@ -422,7 +429,7 @@ describe('features/css-layer', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect(meta.outputAst?.toString()).to.eql(
+            expect(meta.targetAst?.toString()).to.eql(
                 deindent(`
                 @layer entry__x {
                     .entry__before { id: before-in-layer; }

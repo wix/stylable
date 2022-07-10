@@ -7,10 +7,10 @@ import {
     generateScopedCSSVar,
     atPropertyValidationWarnings,
 } from '../helpers/css-custom-property';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import { plugableRecord } from '../helpers/plugable-record';
+import { createDiagnosticReporter } from '../diagnostics';
 import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver, CSSResolve } from '../stylable-resolver';
 import type * as postcss from 'postcss';
@@ -25,24 +25,41 @@ export interface CSSVarSymbol {
 
 export const diagnostics = {
     ...atPropertyValidationWarnings,
-    ILLEGAL_CSS_VAR_USE(name: string) {
-        return `a custom css property must begin with "--" (double-dash), but received "${name}"`;
-    },
-    ILLEGAL_CSS_VAR_ARGS(name: string) {
-        return `custom property "${name}" usage (var()) must receive comma separated values`;
-    },
-    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY() {
-        return `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`;
-    },
-    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) {
-        return `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`;
-    },
-    ILLEGAL_GLOBAL_CSS_VAR(name: string) {
-        return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
-    },
-    MISSING_PROP_NAME() {
-        return `missing custom property name for "var(--[PROP NAME])"`;
-    },
+    ILLEGAL_CSS_VAR_USE: createDiagnosticReporter(
+        '01005',
+        'error',
+        (name: string) =>
+            `a custom css property must begin with "--" (double-dash), but received "${name}"`
+    ),
+    ILLEGAL_CSS_VAR_ARGS: createDiagnosticReporter(
+        '01006',
+        'error',
+        (name: string) =>
+            `custom property "${name}" usage (var()) must receive comma separated values`
+    ),
+    DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY: createDiagnosticReporter(
+        '01007',
+        'info',
+        () =>
+            `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`
+    ),
+    GLOBAL_CSS_VAR_MISSING_COMMA: createDiagnosticReporter(
+        '01008',
+        'error',
+        (name: string) =>
+            `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`
+    ),
+    ILLEGAL_GLOBAL_CSS_VAR: createDiagnosticReporter(
+        '01009',
+        'error',
+        (name: string) =>
+            `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`
+    ),
+    MISSING_PROP_NAME: createDiagnosticReporter(
+        '01010',
+        'error',
+        () => `missing custom property name for "var(--[PROP NAME])"`
+    ),
 };
 
 const dataKey = plugableRecord.key<{
@@ -205,7 +222,8 @@ function addCSSProperty({
 }) {
     // validate indent
     if (!validateCustomPropertyName(name)) {
-        context.diagnostics.warn(node, diagnostics.ILLEGAL_CSS_VAR_USE(name), {
+        context.diagnostics.report(diagnostics.ILLEGAL_CSS_VAR_USE(name), {
+            node,
             word: name,
         });
         return;
@@ -227,10 +245,6 @@ function addCSSProperty({
         safeRedeclare: !final || !!alias,
         node,
     });
-    // deprecated
-    ignoreDeprecationWarn(
-        () => (context.meta.cssVars[name] = STSymbol.get(context.meta, name, `cssVar`)!)
-    );
 }
 
 function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declaration) {
@@ -239,13 +253,16 @@ function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declara
         if (node.type === 'function' && node.value === 'var' && node.nodes) {
             const varName = node.nodes[0];
             if (!varName) {
-                context.diagnostics.warn(decl, diagnostics.MISSING_PROP_NAME());
+                context.diagnostics.report(diagnostics.MISSING_PROP_NAME(), {
+                    node: decl,
+                });
                 return;
             }
 
             if (!validateAllowedNodesUntil(node, 1)) {
                 const args = postcssValueParser.stringify(node.nodes);
-                context.diagnostics.warn(decl, diagnostics.ILLEGAL_CSS_VAR_ARGS(args), {
+                context.diagnostics.report(diagnostics.ILLEGAL_CSS_VAR_ARGS(args), {
+                    node: decl,
                     word: args,
                 });
             }
@@ -263,7 +280,9 @@ function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declara
 
 function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule: postcss.AtRule) {
     // report deprecation
-    context.diagnostics.info(atRule, diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY());
+    context.diagnostics.report(diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY(), {
+        node: atRule,
+    });
     //
     const cssVarsByComma = atRule.params.split(',');
     const cssVarsBySpacing = atRule.params
@@ -272,7 +291,8 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
         .filter((s) => s !== ',');
 
     if (cssVarsBySpacing.length > cssVarsByComma.length) {
-        context.diagnostics.warn(atRule, diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params), {
+        context.diagnostics.report(diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params), {
+            node: atRule,
             word: atRule.params,
         });
         return;
@@ -294,7 +314,8 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
             const { stCustomGlobalProperty } = plugableRecord.getUnsafe(context.meta.data, dataKey);
             stCustomGlobalProperty[name] = STSymbol.get(context.meta, name, `cssVar`)!;
         } else {
-            context.diagnostics.warn(atRule, diagnostics.ILLEGAL_GLOBAL_CSS_VAR(name), {
+            context.diagnostics.report(diagnostics.ILLEGAL_GLOBAL_CSS_VAR(name), {
+                node: atRule,
                 word: name,
             });
         }

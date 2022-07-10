@@ -148,7 +148,6 @@ describe('States', () => {
                 exp.push(createCompletion('string', rng));
                 exp.push(createCompletion('number', rng));
                 exp.push(createCompletion('enum', rng));
-                exp.push(createCompletion('tag', rng));
                 asserter.suggested(exp);
             });
 
@@ -166,7 +165,6 @@ describe('States', () => {
                     exp.push(createCompletion('string', rng));
                     unExp.push(createCompletion('number', rng));
                     unExp.push(createCompletion('enum', rng));
-                    unExp.push(createCompletion('tag', rng));
                     asserter.suggested(exp);
                     asserter.notSuggested(unExp);
                 });
@@ -297,7 +295,6 @@ describe('States', () => {
                     exp.push(createCompletion('number', rng));
                     unExp.push(createCompletion('string', rng));
                     unExp.push(createCompletion('enum', rng));
-                    unExp.push(createCompletion('tag', rng));
                     asserter.suggested(exp);
                     asserter.notSuggested(unExp);
                 });
@@ -424,27 +421,6 @@ describe('States', () => {
                     const unExp: Array<Partial<Completion>> = [];
                     exp.push(createCompletion('enum', rng));
                     unExp.push(createCompletion('number', rng));
-                    unExp.push(createCompletion('tag', rng));
-                    unExp.push(createCompletion('string', rng));
-                    asserter.suggested(exp);
-                    asserter.notSuggested(unExp);
-                });
-            });
-
-            describe('Tag', () => {
-                it('should complete available state with the start of a "tag" pre-written', () => {
-                    const rng = createRange(1, 22, 1, 23);
-                    const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
-                        asserters.stateTypeDefinitionCompletion(str, rng, path);
-
-                    const asserter = asserters.getCompletions(
-                        'states/with-param/tag/state-def-with-param-tag-start.st.css'
-                    );
-                    const exp: Array<Partial<Completion>> = [];
-                    const unExp: Array<Partial<Completion>> = [];
-                    exp.push(createCompletion('tag', rng));
-                    unExp.push(createCompletion('number', rng));
-                    unExp.push(createCompletion('enum', rng));
                     unExp.push(createCompletion('string', rng));
                     asserter.suggested(exp);
                     asserter.notSuggested(unExp);

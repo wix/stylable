@@ -19,9 +19,10 @@ export function stylableModuleFactory(
         staticImports = [],
     }: Partial<Options> = {}
 ) {
-    const stylable = Stylable.create(stylableOptions);
+    const stylable = new Stylable(stylableOptions);
     return function stylableToModule(source: string, path: string) {
-        const res = stylable.transform(source, path);
+        const meta = stylable.analyze(path, source);
+        const res = stylable.transform(meta);
         return generateModuleSource(
             res,
             runtimeStylesheetId === 'module' ? 'module.id' : res.meta.namespace,
@@ -32,7 +33,7 @@ export function stylableModuleFactory(
             `runtime.$`,
             `runtime.create`,
             `runtime.createRenderable`,
-            injectCSS ? JSON.stringify(res.meta.outputAst!.toString()) : '""',
+            injectCSS ? JSON.stringify(res.meta.targetAst!.toString()) : '""',
             '-1', // ToDo: calc depth for node as well
             'module.exports',
             '' /* afterModule */,

@@ -3,10 +3,10 @@ import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
-import type { Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
-import { setStateToNode, stateErrors } from './pseudo-states';
+import { setStateToNode, stateDiagnostics } from './pseudo-states';
 import { parseSelectorWithCache, stringifySelector } from './helpers/selector';
 import {
     SelectorNode,
@@ -16,23 +16,24 @@ import {
     CompoundSelector,
     splitCompoundSelectors,
 } from '@tokey/css-selector-parser';
-import { createWarningRule, isChildOfAtRule, getRuleScopeSelector } from './helpers/rule';
-import { namespace } from './helpers/namespace';
+import { createWarningRule, isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
-import { ClassSymbol, ElementSymbol, STMixin } from './features';
+import type { ClassSymbol, ElementSymbol, FeatureTransformContext } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
     STImport,
     STGlobal,
+    STScope,
+    STCustomSelector,
     STVar,
+    STMixin,
     CSSClass,
     CSSType,
     CSSKeyframes,
     CSSLayer,
     CSSCustomProperty,
 } from './features';
-import type { SDecl } from './deprecated/postcss-ast-extension';
 import {
     CSSResolve,
     StylableResolverCache,
@@ -42,6 +43,7 @@ import {
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
+import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -49,11 +51,6 @@ export interface ResolvedElement {
     name: string;
     type: string;
     resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
-}
-
-export interface KeyFrameWithNode {
-    value: string;
-    node: postcss.Node;
 }
 
 export type RuntimeStVar = string | { [key: string]: RuntimeStVar } | RuntimeStVar[];
@@ -95,35 +92,36 @@ export interface TransformerOptions {
     moduleResolver: ModuleResolver;
     requireModule: (modulePath: string) => any;
     diagnostics: Diagnostics;
-    delimiter?: string;
     keepValues?: boolean;
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
     mode?: EnvMode;
     resolverCache?: StylableResolverCache;
+    stVarOverride?: Record<string, string>;
 }
 
-export const transformerWarnings = {
-    UNKNOWN_PSEUDO_ELEMENT(name: string) {
-        return `unknown pseudo element "${name}"`;
-    },
+export const transformerDiagnostics = {
+    UNKNOWN_PSEUDO_ELEMENT: createDiagnosticReporter(
+        '12001',
+        'error',
+        (name: string) => `unknown pseudo element "${name}"`
+    ),
 };
 
 export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
     public diagnostics: Diagnostics;
     public resolver: StylableResolver;
-    public delimiter: string;
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
+    private defaultStVarOverride: Record<string, string>;
     private evaluator: StylableEvaluator = new StylableEvaluator();
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
 
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
-        this.delimiter = options.delimiter || '__';
         this.keepValues = options.keepValues || false;
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
@@ -135,6 +133,7 @@ export class StylableTransformer {
             options.resolverCache || new Map()
         );
         this.mode = options.mode || 'production';
+        this.defaultStVarOverride = options.stVarOverride || {};
         this.getResolvedSymbols = createSymbolResolverWithCache(this.resolver, this.diagnostics);
     }
     public transform(meta: StylableMeta): StylableResults {
@@ -146,7 +145,7 @@ export class StylableTransformer {
             layers: {},
         };
         meta.transformedScopes = null;
-        meta.outputAst = meta.ast.clone();
+        meta.targetAst = meta.sourceAst.clone();
         const context = {
             meta,
             diagnostics: this.diagnostics,
@@ -157,7 +156,7 @@ export class StylableTransformer {
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
-        this.transformAst(meta.outputAst, meta, metaExports);
+        this.transformAst(meta.targetAst, meta, metaExports);
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -167,7 +166,7 @@ export class StylableTransformer {
         ast: postcss.Root,
         meta: StylableMeta,
         metaExports?: StylableExports,
-        stVarOverride?: Record<string, string>,
+        stVarOverride: Record<string, string> = this.defaultStVarOverride,
         path: string[] = [],
         mixinTransform = false,
         topNestClassName = ``
@@ -184,6 +183,7 @@ export class StylableTransformer {
         const transformResolveOptions = {
             context: transformContext,
         };
+        prepareAST(transformContext, ast);
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
         const keyframesResolve = CSSKeyframes.hooks.transformResolve(transformResolveOptions);
@@ -236,8 +236,6 @@ export class StylableTransformer {
         });
 
         ast.walkDecls((decl) => {
-            (decl as SDecl).stylable = { sourceValue: decl.value };
-
             if (validateCustomPropertyName(decl.prop)) {
                 CSSCustomProperty.hooks.transformDeclaration({
                     context: transformContext,
@@ -269,7 +267,7 @@ export class StylableTransformer {
             }
         });
 
-        if (!mixinTransform && meta.outputAst && this.mode === 'development') {
+        if (!mixinTransform && meta.targetAst && this.mode === 'development') {
             this.addDevRules(meta);
         }
 
@@ -311,18 +309,6 @@ export class StylableTransformer {
         // restore evaluator state
         this.evaluator.stVarOverride = prevStVarOverride;
     }
-    /** @deprecated */
-    public getScopedCSSVar(
-        decl: postcss.Declaration,
-        meta: StylableMeta,
-        cssVarsMapping: Record<string, string>
-    ) {
-        let prop = decl.prop;
-        if (CSSCustomProperty.get(meta, prop)) {
-            prop = cssVarsMapping[prop];
-        }
-        return prop;
-    }
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
@@ -334,9 +320,6 @@ export class StylableTransformer {
     ): string {
         return this.scopeSelector(meta, rule.selector, rule, topNestClassName, unwrapGlobals)
             .selector;
-    }
-    public scope(name: string, ns: string, delimiter: string = this.delimiter) {
-        return namespace(name, ns, delimiter);
     }
     public scopeSelector(
         originMeta: StylableMeta,
@@ -405,12 +388,12 @@ export class StylableTransformer {
         if (selectorList.length === 0) {
             context.elements.push([]);
         }
-        const outputAst = splitCompoundSelectors(selectorList);
-        context.additionalSelectors.forEach((addSelector) => outputAst.push(addSelector()));
-        for (let i = 0; i < outputAst.length; i++) {
-            selectorAst[i] = outputAst[i];
+        const targetAst = splitCompoundSelectors(selectorList);
+        context.additionalSelectors.forEach((addSelector) => targetAst.push(addSelector()));
+        for (let i = 0; i < targetAst.length; i++) {
+            selectorAst[i] = targetAst[i];
         }
-        return outputAst;
+        return targetAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
         const { currentAnchor, node, originMeta, topNestClassName } = context;
@@ -452,7 +435,7 @@ export class StylableTransformer {
                 }
                 const isFirstInSelector =
                     context.selectorAst[context.selectorIndex].nodes[0] === node;
-                const customSelector = meta.customSelectors[':--' + node.value];
+                const customSelector = STCustomSelector.getCustomSelectorExpended(meta, node.value);
                 if (customSelector) {
                     this.handleCustomSelector(
                         customSelector,
@@ -504,10 +487,10 @@ export class StylableTransformer {
                     !isVendorPrefixed(node.value) &&
                     !this.isDuplicateStScopeDiagnostic(context)
                 ) {
-                    this.diagnostics.warn(
-                        context.rule,
-                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(node.value),
+                    this.diagnostics.report(
+                        transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT(node.value),
                         {
+                            node: context.rule,
                             word: node.value,
                         }
                     );
@@ -566,7 +549,8 @@ export class StylableTransformer {
                 !isVendorPrefixed(node.value) &&
                 !this.isDuplicateStScopeDiagnostic(context)
             ) {
-                this.diagnostics.warn(context.rule, stateErrors.UNKNOWN_STATE_USAGE(node.value), {
+                this.diagnostics.report(stateDiagnostics.UNKNOWN_STATE_USAGE(node.value), {
+                    node: context.rule,
                     word: node.value,
                 });
             }
@@ -655,7 +639,7 @@ export class StylableTransformer {
         const resolvedSymbols = this.getResolvedSymbols(meta);
         for (const [className, resolved] of Object.entries(resolvedSymbols.class)) {
             if (resolved.length > 1) {
-                meta.outputAst!.walkRules(
+                meta.targetAst!.walkRules(
                     '.' + namespaceEscape(className, meta.namespace),
                     (rule) => {
                         const a = resolved[0];
@@ -695,14 +679,21 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         );
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
-        ruleReports.forEach(({ message, type, options: { word } = {} }) => {
-            if (type === 'error') {
-                transformer.diagnostics.error(scope, message, { word: word || scope.params });
-            } else {
-                transformer.diagnostics.warn(scope, message, { word: word || scope.params });
-            }
-        });
+        for (const { code, message, severity, word } of ruleReports) {
+            transformer.diagnostics.report(
+                {
+                    code,
+                    message,
+                    severity,
+                },
+                {
+                    node: scope,
+                    word: word || scope.params,
+                }
+            );
+        }
     }
+
     return transformedScopes;
 }
 
@@ -834,5 +825,31 @@ export class ScopeContext {
         ctx.additionalSelectors = [];
 
         return ctx;
+    }
+}
+
+/**
+ * in the process of moving transformations that shouldn't be in the analyzer.
+ * all changes were moved here to be called at the beginning of the transformer,
+ * and should be inlined in the process in the future.
+ */
+function prepareAST(context: FeatureTransformContext, ast: postcss.Root) {
+    // ToDo: inline transformations
+    const toRemove: Array<postcss.Node | (() => void)> = [];
+    ast.walk((node) => {
+        const input = { context, node, toRemove };
+        // namespace
+        if (node.type === 'atrule' && node.name === `namespace`) {
+            toRemove.push(node);
+        }
+        // extracted features
+        STImport.hooks.prepareAST(input);
+        STScope.hooks.prepareAST(input);
+        STVar.hooks.prepareAST(input);
+        STCustomSelector.hooks.prepareAST(input);
+        CSSCustomProperty.hooks.prepareAST(input);
+    });
+    for (const removeOrNode of toRemove) {
+        typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
     }
 }

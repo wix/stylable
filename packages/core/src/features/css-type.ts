@@ -7,9 +7,9 @@ import * as CSSClass from './css-class';
 import type { StylableMeta } from '../stylable-meta';
 import { isCompRoot, stringifySelector } from '../helpers/selector';
 import { getOriginDefinition } from '../helpers/resolve';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface ElementSymbol extends StylableDirectives {
     _kind: 'element';
@@ -19,9 +19,12 @@ export interface ElementSymbol extends StylableDirectives {
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
-    UNSCOPED_TYPE_SELECTOR(name: string) {
-        return `unscoped type selector "${name}" will affect all elements of the same type in the document`;
-    },
+    UNSCOPED_TYPE_SELECTOR: createDiagnosticReporter(
+        `03001`,
+        'warning',
+        (name: string) =>
+            `unscoped type selector "${name}" will affect all elements of the same type in the document`
+    ),
 };
 
 // HOOKS
@@ -30,23 +33,15 @@ export const hooks = createFeature<{
     SELECTOR: Type;
     IMMUTABLE_SELECTOR: ImmutableType;
 }>({
-    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes, parents] }): void {
-        /**
-         * intent to deprecate: currently `value(param)` can be used
-         * as a custom state value. Unless there is a reasonable
-         * use case, this should be removed.
-         */
-        if (
-            node.nodes &&
-            (parents.length < 2 ||
-                parents[parents.length - 2].type !== `pseudo_class` ||
-                node.value !== `value`)
-        ) {
+    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes] }): void {
+        if (node.nodes) {
             // error on functional type
-            context.diagnostics.error(
-                rule,
+            context.diagnostics.report(
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
-                { word: stringifySelector(node) }
+                {
+                    node: rule,
+                    word: stringifySelector(node),
+                }
             );
         }
         addType(context, node.value, rule);
@@ -99,10 +94,6 @@ export function addType(context: FeatureContext, name: string, rule?: postcss.Ru
             node: rule,
             safeRedeclare: !!alias,
         });
-        // deprecated
-        ignoreDeprecationWarn(() => {
-            context.meta.elements[name] = STSymbol.get(context.meta, name, `element`)!;
-        });
     }
     return STSymbol.get(context.meta, name, `element`)!;
 }
@@ -127,7 +118,8 @@ export function validateTypeScoping({
     if (locallyScoped === false) {
         if (CSSClass.checkForScopedNodeAfter(context, rule, nodes, index) === false) {
             if (reportUnscoped) {
-                context.diagnostics.warn(rule, diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+                context.diagnostics.report(diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+                    node: rule,
                     word: node.value,
                 });
             }

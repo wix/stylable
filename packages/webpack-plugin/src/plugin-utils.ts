@@ -18,7 +18,7 @@ import type {
     WebpackCreateHash,
     WebpackOutputOptions,
 } from './types';
-import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core';
+import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core/dist/index-internal';
 import decache from 'decache';
 import { CalcDepthContext, getCSSViewModule } from '@stylable/build-tools';
 import { join, parse } from 'path';

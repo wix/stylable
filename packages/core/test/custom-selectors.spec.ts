@@ -1,21 +1,24 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
+import { STCustomSelector } from '@stylable/core/dist/features';
 
 describe('@custom-selector', () => {
     it('collect custom-selectors', () => {
         const from = '/path/to/style.css';
-        const { customSelectors } = processSource(
+        const meta = processSource(
             `
             @custom-selector :--icon .root > .icon;
         `,
             { from }
         );
 
-        expect(customSelectors[':--icon']).to.equal('.root > .icon');
+        const iconSelector = STCustomSelector.getCustomSelectorExpended(meta, 'icon');
+
+        expect(iconSelector).to.equal('.root > .icon');
     });
 
-    it('expand custom-selector before process (reflect on ast)', () => {
+    it('analyze custom-selector before process (reflect on ast)', () => {
         const from = '/path/to/style.css';
         const meta = processSource(
             `
@@ -23,20 +26,6 @@ describe('@custom-selector', () => {
             :--icon, .class {
                 color: red;
             }
-        `,
-            { from }
-        );
-
-        const [rule] = meta.ast.nodes as [postcss.Rule];
-        expect(rule.selector).to.equal('.root > .icon, .class');
-        expect(meta.getClass(`icon`)).to.contain({ _kind: 'class', name: 'icon' });
-    });
-
-    it('expand custom-selector before process (reflect on ast when not written)', () => {
-        const from = '/path/to/style.css';
-        const meta = processSource(
-            `
-            @custom-selector :--icon .root > .icon;
         `,
             { from }
         );

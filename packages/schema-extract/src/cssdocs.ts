@@ -21,7 +21,7 @@ export function getCssDocsForSymbol(meta: StylableMeta, symbol: StylableSymbol):
 
 function extractCSSDocsToSymbolMap(meta: StylableMeta) {
     const docs = new Map<StylableSymbol, CssDoc>();
-    meta.rawAst.walkComments((comment) => {
+    meta.sourceAst.walkComments((comment) => {
         const node = comment.next();
         if (node?.type === 'rule') {
             const symbol = meta.getSymbol(

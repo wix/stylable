@@ -7,8 +7,11 @@ import type { IFileSystem } from '@file-services/types';
 import type { DiagnosticMessages } from './report-diagnostics';
 import type { STCProjects } from './types';
 import type { WatchHandler } from './watch-handler';
-import type { DiagnosticsMode, EmitDiagnosticsContext } from '@stylable/core';
-import { reportDiagnostic } from '@stylable/core/dist/report-diagnostic';
+import {
+    DiagnosticsMode,
+    EmitDiagnosticsContext,
+    reportDiagnostic,
+} from '@stylable/core/dist/index-internal';
 
 export type STCBuilderFileSystem = Pick<IFileSystem, 'existsSync' | 'realpathSync' | 'join'>;
 

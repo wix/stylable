@@ -1,29 +1,26 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { testStylableCore, generateStylableResult } from '@stylable/core-test-kit';
-import {
-    cssParse,
-    StylableResolver,
-    cachedProcessFile,
-    MinimalFS,
-    StylableMeta,
-    createDefaultResolver,
-} from '@stylable/core';
-import { process } from '@stylable/core/dist/index-internal';
+import { Stylable, MinimalFS, StylableMeta, createDefaultResolver } from '@stylable/core';
+import { StylableResolver, cachedProcessFile } from '@stylable/core/dist/index-internal';
 
 function createResolveExtendsResults(
-    fs: MinimalFS,
+    fileSystem: MinimalFS,
     fileToProcess: string,
     classNameToLookup: string,
     isElement = false
 ) {
-    const moduleResolver = createDefaultResolver(fs, {});
+    const moduleResolver = createDefaultResolver(fileSystem, {});
+    const stylable = new Stylable({
+        fileSystem,
+        projectRoot: '/',
+    });
 
     const processFile = cachedProcessFile<StylableMeta>(
-        (fullpath, content) => {
-            return process(cssParse(content, { from: fullpath }));
+        (fullPath, content) => {
+            return stylable.analyze(fullPath, content);
         },
-        (filePath: string) => fs.readFileSync(filePath, 'utf8')
+        (filePath: string) => fileSystem.readFileSync(filePath, 'utf8')
     );
 
     const resolver = new StylableResolver(
@@ -402,7 +399,7 @@ describe('stylable-resolver', () => {
             },
         });
 
-        const rule = meta.outputAst!.nodes[0] as postcss.Rule;
+        const rule = meta.targetAst!.nodes[0] as postcss.Rule;
         expect(rule.selector).to.equal('.A__root');
         expect(meta.diagnostics.reports).to.eql([]);
         expect(meta.transformDiagnostics!.reports).to.eql([]);

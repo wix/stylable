@@ -46,7 +46,9 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         walkContext: SelectorNodeContext;
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
+    analyzeDone: (context: FeatureContext) => void;
     prepareAST: (options: {
+        context: FeatureTransformContext;
         node: postcss.ChildNode;
         toRemove: Array<postcss.Node | (() => void)>;
     }) => void;
@@ -95,6 +97,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
         /**/
     },
     analyzeDeclaration() {
+        /**/
+    },
+    analyzeDone() {
         /**/
     },
     prepareAST() {

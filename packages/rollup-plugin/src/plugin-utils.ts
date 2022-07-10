@@ -1,4 +1,5 @@
-import type { Stylable, StylableExports, StylableMeta } from '@stylable/core';
+import type { Stylable, StylableMeta } from '@stylable/core';
+import type { StylableExports } from '@stylable/core/dist/index-internal';
 import type { PluginContext } from 'rollup';
 import type { StylableRollupPluginOptions } from './index';
 import { processUrlDependencies } from '@stylable/build-tools';
@@ -37,7 +38,7 @@ export function generateCssString(
     assetsIds: string[]
 ) {
     const css = meta
-        .outputAst!.toString()
+        .targetAst!.toString()
         .replace(/__stylable_url_asset_(.*?)__/g, (_$0, $1) => assetsIds[Number($1)]);
 
     if (minify && stylable.optimizer) {

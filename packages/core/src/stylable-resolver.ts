@@ -9,6 +9,7 @@ import {
     StylableSymbol,
     CSSClass,
     STSymbol,
+    STCustomSelector,
     VarSymbol,
     CSSVarSymbol,
     KeyframesSymbol,
@@ -85,7 +86,7 @@ export type ReportError = (
     isElement: boolean
 ) => void;
 
-export function isInPath(
+function isInPath(
     extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
     { symbol: { name: name1 }, meta: { source: source1 } }: CSSResolve<ClassSymbol | ElementSymbol>
 ) {
@@ -397,7 +398,9 @@ export class StylableResolver {
                     : meta.getClass(nameOrSymbol)
                 : nameOrSymbol;
 
-        const customSelector = isElement ? null : meta.customSelectors[':--' + name];
+        const customSelector = isElement
+            ? null
+            : STCustomSelector.getCustomSelectorExpended(meta, name);
 
         if (!symbol && !customSelector) {
             return [];
@@ -476,28 +479,30 @@ function validateClassResolveExtends(
     deepResolved: CSSResolve<StylableSymbol> | JSResolve | null
 ): ReportError | undefined {
     return (res, extend) => {
-        const decl = findRule(meta.ast, '.' + name);
+        const decl = findRule(meta.sourceAst, '.' + name);
         if (decl) {
             // ToDo: move to STExtends
             if (res && res._kind === 'js') {
-                diagnostics.error(decl, CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
+                diagnostics.report(CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
+                    node: decl,
                     word: decl.value,
                 });
             } else if (res && !res.symbol) {
-                diagnostics.error(
-                    decl,
-                    CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name),
-                    { word: decl.value }
-                );
+                diagnostics.report(CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name), {
+                    node: decl,
+                    word: decl.value,
+                });
             } else {
-                diagnostics.error(decl, CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
+                diagnostics.report(CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
+                    node: decl,
                     word: decl.value,
                 });
             }
         } else {
             if (deepResolved?.symbol.alias) {
-                meta.ast.walkRules(new RegExp('\\.' + name), (rule) => {
-                    diagnostics.error(rule, CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
+                meta.sourceAst.walkRules(new RegExp('\\.' + name), (rule) => {
+                    diagnostics.report(CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
+                        node: rule,
                         word: name,
                     });
                     return false;

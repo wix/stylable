@@ -1,13 +1,20 @@
 import chaiSubset from 'chai-subset';
 import { STSymbol, STVar } from '@stylable/core/dist/features';
-import { functionWarnings } from '@stylable/core/dist/functions';
+import { functionDiagnostics } from '@stylable/core/dist/functions';
 import { stTypes, box } from '@stylable/core/dist/custom-values';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import postcssValueParser from 'postcss-value-parser';
 
 chai.use(chaiSubset);
+
+const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
+const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
+const functionStringDiagnostics = diagnosticBankReportToStrings(functionDiagnostics);
 
 describe(`features/st-var`, () => {
     const stBorderDefinitionMock = `
@@ -69,14 +76,6 @@ describe(`features/st-var`, () => {
         // JS exports
         expect(exports.stVars.varA, `varA JS export`).to.eql(`a-val`);
         expect(exports.stVars.varB, `varB JS export`).to.eql(`b-val`);
-
-        // deprecation
-        ignoreDeprecationWarn(() => {
-            expect(meta.vars, `deprecated 'meta.vars'`).to.eql([
-                STVar.get(meta, `varA`),
-                STVar.get(meta, `varB`),
-            ]);
-        });
     });
     it(`should process multiple :vars definitions`, () => {
         const { sheets } = testStylableCore(`
@@ -117,7 +116,7 @@ describe(`features/st-var`, () => {
         const { sheets } = testStylableCore(`
             @st-scope {
                 /* 
-                @analyze-warn ${STVar.diagnostics.NO_VARS_DEF_IN_ST_SCOPE()}
+                @analyze-error ${stVarDiagnostics.NO_VARS_DEF_IN_ST_SCOPE()}
                 @transform-remove
                 */
                 :vars {
@@ -125,7 +124,7 @@ describe(`features/st-var`, () => {
                 }
             }
 
-            /* @analyze-warn(complex selector) ${STVar.diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+            /* @analyze-error(complex selector) ${stVarDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
                 `:vars`
             )} */
             .root:vars {}
@@ -190,25 +189,25 @@ describe(`features/st-var`, () => {
             .root {
                 /* 
                     @decl(empty) prop: value()
-                    @transform-warn(empty) ${STVar.diagnostics.MISSING_VAR_IN_VALUE()} 
+                    @transform-error(empty) ${stVarDiagnostics.MISSING_VAR_IN_VALUE()} 
                 */
                 prop: value();
 
                 /* 
                     @decl(no first arg) prop: value(, path)
-                    @transform-warn(no first arg) ${STVar.diagnostics.MISSING_VAR_IN_VALUE()} 
+                    @transform-error(no first arg) ${stVarDiagnostics.MISSING_VAR_IN_VALUE()} 
                 */
                 prop: value(, path);
                 
                 /* 
                     @decl(unknown var) prop: value(unknown)
-                    @transform-warn(unknown var) ${STVar.diagnostics.UNKNOWN_VAR('unknown')} 
+                    @transform-error(unknown var) ${stVarDiagnostics.UNKNOWN_VAR('unknown')} 
                 */
                 prop: value(unknown);
 
                 /* 
                     @decl(non var symbol) prop: value(part)
-                    @transform-warn(non var symbol) word(part) ${STVar.diagnostics.CANNOT_USE_AS_VALUE(
+                    @transform-error(non var symbol) word(part) ${stVarDiagnostics.CANNOT_USE_AS_VALUE(
                         'class',
                         `part`
                     )} 
@@ -217,7 +216,7 @@ describe(`features/st-var`, () => {
 
                 /* 
                     @decl(unknown 2nd arg) prop: green
-                    @transform-warn(unknown 2nd arg) ${STVar.diagnostics.MULTI_ARGS_IN_VALUE(
+                    @transform-error(unknown 2nd arg) ${stVarDiagnostics.MULTI_ARGS_IN_VALUE(
                         'varA, invalidSecondArgument'
                     )} 
                 */
@@ -230,19 +229,15 @@ describe(`features/st-var`, () => {
             meta.transformDiagnostics!.reports[0],
             `missing var diagnostic word 1`
         ).to.deep.contain({
-            message: STVar.diagnostics.MISSING_VAR_IN_VALUE(),
-            options: {
-                word: `value()`,
-            },
+            message: stVarDiagnostics.MISSING_VAR_IN_VALUE(),
+            word: `value()`,
         });
         expect(
             meta.transformDiagnostics!.reports[1],
             `missing var diagnostic word 2`
         ).to.deep.contain({
-            message: STVar.diagnostics.MISSING_VAR_IN_VALUE(),
-            options: {
-                word: `value(, path)`,
-            },
+            message: stVarDiagnostics.MISSING_VAR_IN_VALUE(),
+            word: `value(, path)`,
         });
     });
     it(`should handle escaping`, () => {
@@ -330,14 +325,14 @@ describe(`features/st-var`, () => {
     it(`should resolve cyclic vars`, () => {
         const { sheets } = testStylableCore(`                
             :vars {
-                /* @transform-warn(varA) ${STVar.diagnostics.CYCLIC_VALUE([
+                /* @transform-error(varA) ${stVarDiagnostics.CYCLIC_VALUE([
                     `/entry.st.css: varB`,
                     `/entry.st.css: varA`,
                     `/entry.st.css: varB`,
                 ])} */
                 varA: a(value(varB));
                 
-                /* @transform-warn(varB) ${STVar.diagnostics.CYCLIC_VALUE([
+                /* @transform-error(varB) ${stVarDiagnostics.CYCLIC_VALUE([
                     `/entry.st.css: varA`,
                     `/entry.st.css: varB`,
                     `/entry.st.css: varA`,
@@ -610,10 +605,10 @@ describe(`features/st-var`, () => {
 
                     /* 
                     @decl(success despite internal path error) prop: deep-value
-                    @transform-warn(index un-required path) ${STVar.diagnostics.MULTI_ARGS_IN_VALUE(
+                    @transform-error(index un-required path) ${stVarDiagnostics.MULTI_ARGS_IN_VALUE(
                         'arr-key, no-path'
                     )} 
-                    @transform-warn(key un-required path) ${STVar.diagnostics.MULTI_ARGS_IN_VALUE(
+                    @transform-error(key un-required path) ${stVarDiagnostics.MULTI_ARGS_IN_VALUE(
                         'map-key, no-path'
                     )} 
                     */
@@ -632,12 +627,12 @@ describe(`features/st-var`, () => {
                     );
                 }
                 .root {
-                    /* @transform-warn(1st level) ${STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
+                    /* @transform-error(1st level) ${stVarDiagnostics.COULD_NOT_RESOLVE_VALUE(
                         `myVar, unknown`
                     )}*/
                     prop: value(myVar, unknown);
 
-                    /* @transform-warn(2nd level) ${STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
+                    /* @transform-error(2nd level) ${stVarDiagnostics.COULD_NOT_RESOLVE_VALUE(
                         `myVar, key2, unknown`
                     )}*/
                     prop: value(myVar, key2, unknown);
@@ -653,19 +648,19 @@ describe(`features/st-var`, () => {
         it(`should report deprecated forms`, () => {
             testStylableCore(`
                 :vars {
-                    /* @analyze-info(stMap) word(stMap) ${STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
+                    /* @analyze-info(stMap) word(stMap) ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         `stMap`,
                         `st-map`
                     )}*/
                     varA: stMap(a 1);
                     
-                    /* @analyze-info(stArray) word(stArray) ${STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
+                    /* @analyze-info(stArray) word(stArray) ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         `stArray`,
                         `st-array`
                     )}*/
                     varA: stArray(a, b);
                     
-                    /* @analyze-info(nested) word(stMap) ${STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
+                    /* @analyze-info(nested) word(stMap) ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         `stMap`,
                         `st-map`
                     )}*/
@@ -683,7 +678,7 @@ describe(`features/st-var`, () => {
             testStylableCore(`
                 :vars {
                     /* @transform-error ${
-                        STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
+                        stVarDiagnostics.COULD_NOT_RESOLVE_VALUE(
                             `keyWithoutValue`
                         ) /** TODO - add custom diagnostic for this case */
                     }*/
@@ -888,7 +883,7 @@ describe(`features/st-var`, () => {
                     .root {
                         /* 
                             @decl(imported sheet) prop: value(Sheet)
-                            @transform-warn(imported sheet) word(Sheet) ${STVar.diagnostics.CANNOT_USE_AS_VALUE(
+                            @transform-error(imported sheet) word(Sheet) ${stVarDiagnostics.CANNOT_USE_AS_VALUE(
                                 `stylesheet`,
                                 `Sheet`
                             )} 
@@ -897,7 +892,7 @@ describe(`features/st-var`, () => {
                         
                         /* 
                             @decl(imported-class) prop: value(imported-class)
-                            @transform-warn(imported-class) word(imported-class) ${STVar.diagnostics.CANNOT_USE_AS_VALUE(
+                            @transform-error(imported-class) word(imported-class) ${stVarDiagnostics.CANNOT_USE_AS_VALUE(
                                 `class`,
                                 `imported-class`
                             )} 
@@ -906,7 +901,7 @@ describe(`features/st-var`, () => {
 
                         /* 
                             @decl(unknown) prop: value(unknown)
-                            @transform-error(unknown) word(unknown) ${STVar.diagnostics.UNKNOWN_VAR(
+                            @transform-error(unknown) word(unknown) ${stVarDiagnostics.UNKNOWN_VAR(
                                 `unknown`
                             )} 
                         */
@@ -914,7 +909,7 @@ describe(`features/st-var`, () => {
 
                         /* 
                             @decl(JS number) prop: value(jsNum)
-                            @transform-warn(JS number) word(jsNum) ${STVar.diagnostics.CANNOT_USE_JS_AS_VALUE(
+                            @transform-error(JS number) word(jsNum) ${stVarDiagnostics.CANNOT_USE_JS_AS_VALUE(
                                 `number`,
                                 `jsNum`
                             )} 
@@ -923,7 +918,7 @@ describe(`features/st-var`, () => {
                         
                         /* 
                             @decl(JS function) prop: value(jsFunc)
-                            @transform-warn(JS function) word(jsFunc) ${STVar.diagnostics.CANNOT_USE_JS_AS_VALUE(
+                            @transform-error(JS function) word(jsFunc) ${stVarDiagnostics.CANNOT_USE_JS_AS_VALUE(
                                 `function`,
                                 `jsFunc`
                             )} 
@@ -943,7 +938,7 @@ describe(`features/st-var`, () => {
                 `,
                 '/entry.st.css': `
                     :vars {
-                        /* @analyze-warn(local before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                        /* @analyze-warn(local before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                             `before`
                         )} */
                         before: local-before-val;
@@ -954,17 +949,17 @@ describe(`features/st-var`, () => {
                     }
 
                     /*
-                    @analyze-warn(import before) word(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                    @analyze-warn(import before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                         `before`
                     )}
-                    @analyze-warn(import after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                    @analyze-warn(import after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                         `after`
                     )}
                     */
                     @st-import [before, after] from './vars.st.css';
 
                     :vars {
-                        /* @analyze-warn(local after) word(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                        /* @analyze-warn(local after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                             `after`
                         )} */
                         after: local-after-val;
@@ -1026,7 +1021,7 @@ describe(`features/st-var`, () => {
                 '/a.st.css': `
                     @st-import [varB] from './b.st.css';
                     :vars {
-                        /* @transform-warn(varA) ${STVar.diagnostics.CYCLIC_VALUE([
+                        /* @transform-error(varA) ${stVarDiagnostics.CYCLIC_VALUE([
                             `/a.st.css: varB`,
                             `/b.st.css: varA`,
                             `/a.st.css: varB`,
@@ -1044,7 +1039,7 @@ describe(`features/st-var`, () => {
                 '/b.st.css': `
                     @st-import [varA] from './a.st.css';
                     :vars {
-                        /* @transform-warn(varB) ${STVar.diagnostics.CYCLIC_VALUE([
+                        /* @transform-error(varB) ${stVarDiagnostics.CYCLIC_VALUE([
                             `/b.st.css: varA`,
                             `/a.st.css: varB`,
                             `/b.st.css: varA`,
@@ -1596,8 +1591,9 @@ describe(`features/st-var`, () => {
                     diagnostics: {
                         reports: [
                             {
-                                message: functionWarnings.UNKNOWN_FORMATTER('invalid-func'),
-                                type: 'warning',
+                                message:
+                                    functionStringDiagnostics.UNKNOWN_FORMATTER('invalid-func'),
+                                severity: 'error',
                             },
                         ],
                     },
@@ -1631,8 +1627,8 @@ describe(`features/st-var`, () => {
                     diagnostics: {
                         reports: [
                             {
-                                message: STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(),
-                                type: 'warning',
+                                message: stVarDiagnostics.COULD_NOT_RESOLVE_VALUE(),
+                                severity: 'error',
                             },
                         ],
                     },

@@ -11,14 +11,16 @@ import { namespaceEscape, unescapeCSS } from '../helpers/escape';
 import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
 import { validateRuleStateDefinition } from '../helpers/custom-state';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
-import type {
+import type { Stylable } from '../stylable';
+import {
     ImmutableClass,
     Class,
     SelectorNode,
     ImmutableSelectorNode,
+    stringifySelectorAst,
 } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
+import { createDiagnosticReporter } from '../diagnostics';
 
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
@@ -29,28 +31,42 @@ export interface ClassSymbol extends StylableDirectives {
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
-    UNSCOPED_CLASS(name: string) {
-        return `unscoped class "${name}" will affect all elements of the same type in the document`;
-    },
-    EMPTY_ST_GLOBAL() {
-        return `-st-global must contain a valid selector`;
-    },
-    UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL() {
-        return `unsupported multi selector in -st-global`;
-    },
-    // -st-extends
-    IMPORT_ISNT_EXTENDABLE() {
-        return 'import is not extendable';
-    },
-    CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string) {
-        return `cannot extend unknown symbol "${name}"`;
-    },
-    CANNOT_EXTEND_JS() {
-        return 'JS import is not extendable';
-    },
-    UNKNOWN_IMPORT_ALIAS(name: string) {
-        return `cannot use alias for unknown import "${name}"`;
-    },
+    UNSCOPED_CLASS: createDiagnosticReporter(
+        '00002',
+        'warning',
+        (name: string) =>
+            `unscoped class "${name}" will affect all elements of the same type in the document`
+    ),
+    EMPTY_ST_GLOBAL: createDiagnosticReporter(
+        '00003',
+        'error',
+        () => `-st-global must contain a valid selector`
+    ),
+    UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL: createDiagnosticReporter(
+        '00004',
+        'error',
+        () => `unsupported multi selector in -st-global`
+    ),
+    IMPORT_ISNT_EXTENDABLE: createDiagnosticReporter(
+        '00005',
+        'error',
+        () => 'import is not extendable'
+    ),
+    CANNOT_EXTEND_UNKNOWN_SYMBOL: createDiagnosticReporter(
+        '00006',
+        'error',
+        (name: string) => `cannot extend unknown symbol "${name}"`
+    ),
+    CANNOT_EXTEND_JS: createDiagnosticReporter(
+        '00007',
+        'error',
+        () => 'JS import is not extendable'
+    ),
+    UNKNOWN_IMPORT_ALIAS: createDiagnosticReporter(
+        '00008',
+        'error',
+        (name: string) => `cannot use alias for unknown import "${name}"`
+    ),
 };
 
 // HOOKS
@@ -63,10 +79,10 @@ export const hooks = createFeature<{
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
             // error on functional class
-            context.diagnostics.error(
-                rule,
+            context.diagnostics.report(
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(`.` + node.value, `class`),
                 {
+                    node: rule,
                     word: stringifySelector(node),
                 }
             );
@@ -149,6 +165,31 @@ export const hooks = createFeature<{
 
 // API
 
+export class StylablePublicApi {
+    constructor(private stylable: Stylable) {}
+    public transformIntoSelector(meta: StylableMeta, name: string): string | undefined {
+        const localSymbol = STSymbol.get(meta, name);
+        const resolved =
+            localSymbol?._kind === 'import'
+                ? this.stylable.resolver.deepResolve(localSymbol)
+                : { _kind: 'css', meta, symbol: localSymbol };
+
+        if (resolved?._kind !== 'css' || resolved.symbol?._kind !== 'class') {
+            return undefined;
+        }
+
+        const node: Class = {
+            type: 'class',
+            value: '',
+            start: 0,
+            end: 0,
+            dotComments: [],
+        };
+        namespaceClass(resolved.meta, resolved.symbol, node, meta);
+        return stringifySelectorAst(node);
+    }
+}
+
 export function get(meta: StylableMeta, name: string): ClassSymbol | undefined {
     return STSymbol.get(meta, name, `class`);
 }
@@ -172,10 +213,6 @@ export function addClass(context: FeatureContext, name: string, rule?: postcss.R
             },
             node: rule,
             safeRedeclare: !!alias,
-        });
-        // deprecated
-        ignoreDeprecationWarn(() => {
-            context.meta.classes[name] = STSymbol.get(context.meta, name, `class`)!;
         });
     }
     return STSymbol.get(context.meta, name, `class`)!;
@@ -224,7 +261,8 @@ export function validateClassScoping({
     } else if (locallyScoped === false) {
         if (checkForScopedNodeAfter(context, rule, nodes, index) === false) {
             if (reportUnscoped) {
-                context.diagnostics.warn(rule, diagnostics.UNSCOPED_CLASS(node.value), {
+                context.diagnostics.report(diagnostics.UNSCOPED_CLASS(node.value), {
+                    node: rule,
                     word: node.value,
                 });
             }

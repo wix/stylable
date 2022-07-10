@@ -1,12 +1,23 @@
 import { expect } from 'chai';
 import {
+    diagnosticBankReportToStrings,
     expectAnalyzeDiagnostics,
     expectTransformDiagnostics,
     findTestLocations,
 } from '@stylable/core-test-kit';
-import { processorWarnings, transformerWarnings, nativePseudoElements } from '@stylable/core';
+import {
+    processorDiagnostics,
+    transformerDiagnostics,
+    nativePseudoElements,
+} from '@stylable/core/dist/index-internal';
 import { CSSClass, CSSType } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
+
+const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
+const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
+const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
+const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
+const generalStringDiagnostics = diagnosticBankReportToStrings(generalDiagnostics);
 
 describe('findTestLocations', () => {
     it('find single location 1', () => {
@@ -92,7 +103,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectAnalyzeDiagnostics(`|.root $#abc()$| {}`, [
                     {
                         severity: `error`,
-                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`),
+                        message: cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`#abc`, `id`),
                         file: `main.css`,
                     },
                 ]);
@@ -101,7 +112,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectAnalyzeDiagnostics(`|.root $[attr]()$| {}`, [
                     {
                         severity: `error`,
-                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
+                        message: cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[attr]`,
                             `attribute`
                         ),
@@ -113,7 +124,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectAnalyzeDiagnostics(`|.root $&()$| {}`, [
                     {
                         severity: `error`,
-                        message: CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`),
+                        message: cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`&`, `nesting`),
                         file: `main.css`,
                     },
                 ]);
@@ -226,7 +237,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectTransformDiagnostics(config, [
                         {
-                            message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn'),
+                            message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('myBtn'),
                             file: '/main.css',
                         },
                     ]);
@@ -295,7 +306,9 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message:
-                                generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'),
+                                generalStringDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                    '-st-extends'
+                                ),
                             file: 'main.css',
                         },
                     ]
@@ -320,7 +333,10 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorWarnings.OVERRIDE_TYPED_RULE(`-st-extends`, 'root'),
+                            message: processorStringDiagnostics.OVERRIDE_TYPED_RULE(
+                                `-st-extends`,
+                                'root'
+                            ),
                             file: 'main.css',
                         },
                     ]
@@ -396,7 +412,12 @@ describe('diagnostics: warnings and errors', () => {
 
                     |.$Blah$| {}
                 `,
-                    [{ message: CSSClass.diagnostics.UNSCOPED_CLASS('Blah'), file: 'main.css' }]
+                    [
+                        {
+                            message: cssClassDiagnostics.UNSCOPED_CLASS('Blah'),
+                            file: 'main.css',
+                        },
+                    ]
                 );
             });
 
@@ -444,7 +465,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('button'),
+                            message: cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR('button'),
                             file: 'main.css',
                         },
                     ]
@@ -458,7 +479,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('button'),
+                            message: cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR('button'),
                             file: 'main.css',
                         },
                     ]

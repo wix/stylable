@@ -23,7 +23,7 @@ describe('diagnostics', () => {
                 end: { line: 0, character: 13 },
             },
             message: 'unknown pseudo-state "unknown"',
-            severity: 2,
+            severity: 1,
             source: 'stylable',
         });
     });
@@ -37,7 +37,7 @@ describe('diagnostics', () => {
 
         const stylableLSP = new StylableLanguageService({
             fs,
-            stylable: Stylable.create({
+            stylable: new Stylable({
                 fileSystem: fs,
                 requireModule: require,
                 projectRoot: '/',
@@ -77,7 +77,7 @@ describe('diagnostics', () => {
                 end: { line: 3, character: 44 },
             },
             message: `cannot resolve imported symbol "ninja" from stylesheet ".${filePathA}"`,
-            severity: 2,
+            severity: 1,
             source: 'stylable',
         });
     });

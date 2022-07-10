@@ -1,18 +1,18 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { SBTypesParsers } from '@stylable/core';
+import { parseStMixin, parseStPartialMixin } from '@stylable/core/dist/helpers/mixin';
 import postcssValueParser from 'postcss-value-parser';
 
 const createMixinDecl = (value: string) => postcss.decl({ prop: `-st-mixin`, value });
 const createPartialMixinDecl = (value: string) =>
     postcss.decl({ prop: `-st-partial-mixin`, value });
 const parseMixin = (mixinDecl: postcss.Declaration) => {
-    const mix = SBTypesParsers[`-st-mixin`](mixinDecl, () => 'named');
+    const mix = parseStMixin(mixinDecl, () => 'named');
     return mix;
 };
 
 const parsePartialMixin = (mixinDecl: postcss.Declaration) => {
-    const mix = SBTypesParsers[`-st-partial-mixin`](mixinDecl, () => 'named');
+    const mix = parseStPartialMixin(mixinDecl, () => 'named');
     return mix;
 };
 

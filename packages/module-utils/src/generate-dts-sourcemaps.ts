@@ -18,7 +18,7 @@ function getClassSrcPosition(className: string, meta: StylableMeta): Position | 
     let res;
 
     if (cls) {
-        meta.rawAst.walkRules(`.${className}`, (rule) => {
+        meta.sourceAst.walkRules(`.${className}`, (rule) => {
             if (rule.source && rule.source.start) {
                 res = { line: rule.source.start.line - 1, column: rule.source.start.column - 1 };
                 return false;
@@ -37,7 +37,7 @@ function getVarsSrcPosition(varName: string, meta: StylableMeta): Position | und
     let res;
 
     if (cssVar) {
-        meta.rawAst.walkDecls(cssVar.name, (decl) => {
+        meta.sourceAst.walkDecls(cssVar.name, (decl) => {
             if (decl.source && decl.source.start) {
                 res = { line: decl.source.start.line - 1, column: decl.source.start.column - 1 };
                 return false;
@@ -61,7 +61,7 @@ function getStVarsSrcPosition(varName: string, meta: StylableMeta): Position | u
     } else {
         // TODO: move this logic to Stylable core and enhance it. The meta should provide the API to get to the inner parts of the st-var
         let res: Position;
-        meta.rawAst.walkRules(':vars', (rule) => {
+        meta.sourceAst.walkRules(':vars', (rule) => {
             return rule.walkDecls((decl) => {
                 if (decl.source?.start) {
                     if (decl.prop === varName) {
@@ -188,7 +188,7 @@ function createStateLineMapping(
 
         const srcClassName = findDefiningClassName(stateToken, meta.getClass(entryClassName)!);
 
-        meta.rawAst.walkRules(`.${srcClassName}`, (rule) => {
+        meta.sourceAst.walkRules(`.${srcClassName}`, (rule) => {
             return rule.walkDecls(`-st-states`, (decl) => {
                 if (decl.source && decl.source.start)
                     stateSourcePosition = {

@@ -4,14 +4,14 @@ import type {
     SignatureHelp,
     SignatureInformation,
 } from 'vscode-languageserver';
-import { StateParsedValue, systemValidators } from '@stylable/core';
+import { StateParsedValue, systemValidators } from '@stylable/core/dist/index-internal';
 import type { ProviderPosition } from '../completion-providers';
 
 // Goes over an '-st-states' declaration value
 // parses the state and position to resolve if inside a state with a parameter
 // returns: `-st-states: someState([1] str[2]ing([a] re[b]gex( [args] ) [c]) [3])
 // caret positions:
-// 1, 2, 3 - requires typing information (string, number, enum, tag)
+// 1, 2, 3 - requires typing information (string, number, enum)
 // a, b, c - require validator informationbased on type defined
 // args - TODO: should return validator function information
 export function resolveStateTypeOrValidator(

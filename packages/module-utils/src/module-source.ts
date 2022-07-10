@@ -51,7 +51,7 @@ export function createModuleSource(
         throw new Error('Configuration conflict (renderableOnly && !includeCSSInJS)');
     }
     const cssString = includeCSSInJS
-        ? JSON.stringify(stylableResult.meta.outputAst!.toString())
+        ? JSON.stringify(stylableResult.meta.targetAst!.toString())
         : '""';
 
     switch (moduleFormat) {

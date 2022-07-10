@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "4.14.0",
+  "version": "5.0.0",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "dist/index.js",
   "bin": {
@@ -14,13 +14,13 @@
   "dependencies": {
     "@file-services/node": "^6.0.0",
     "@file-services/types": "^6.0.0",
-    "@stylable/build-tools": "^4.14.0",
-    "@stylable/code-formatter": "^4.14.0",
-    "@stylable/core": "^4.14.0",
-    "@stylable/module-utils": "^4.14.0",
-    "@stylable/node": "^4.14.0",
-    "@stylable/optimizer": "^4.14.0",
-    "@wixc3/resolve-directory-context": "^2.0.0",
+    "@stylable/build-tools": "^5.0.0",
+    "@stylable/code-formatter": "^5.0.0",
+    "@stylable/core": "^5.0.0",
+    "@stylable/module-utils": "^5.0.0",
+    "@stylable/node": "^5.0.0",
+    "@stylable/optimizer": "^5.0.0",
+    "@wixc3/resolve-directory-context": "^3.0.0",
     "decache": "^4.6.1",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
@@ -34,7 +34,7 @@
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=12"
+    "node": ">=14.14.0"
   },
   "publishConfig": {
     "access": "public"

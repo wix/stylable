@@ -1,9 +1,11 @@
 import { getImports, getReplacementToken } from './loader-utils';
 import type { StylableLoaderContext } from './types';
-import { emitDiagnostics } from '@stylable/core';
+import { emitDiagnostics } from '@stylable/core/dist/index-internal';
 
 export default function StylableWebpackLoader(this: StylableLoaderContext, source: string) {
-    const { meta, exports } = this.stylable.transform(source, this.resourcePath);
+    const { meta, exports } = this.stylable.transform(
+        this.stylable.analyze(this.resourcePath, source)
+    );
 
     const { urls, imports, buildDependencies, unusedImports } = getImports(
         this.stylable,
@@ -21,7 +23,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
     const varType = this.target === 'oldie' ? 'var' : 'const';
 
     this.flagStylableModule({
-        css: meta.outputAst!.toString(),
+        css: meta.targetAst!.toString(),
         globals: meta.globals,
         exports,
         namespace: meta.namespace,

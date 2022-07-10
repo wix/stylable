@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { cachedProcessFile } from '@stylable/core';
+import { cachedProcessFile } from '@stylable/core/dist/index-internal';
 
 describe('cachedProcessFile', () => {
     it('return process file content', () => {

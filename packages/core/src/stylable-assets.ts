@@ -2,40 +2,11 @@ import path from 'path';
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from './process-declaration-functions';
 
-export interface UrlNode {
-    type: 'url';
-    url: string;
-    stringType?: string;
-    name?: string;
-    before?: string;
-    after?: string;
-    innerSpacingBefore?: string;
-    innerSpacingAfter?: string;
-}
-
-export type OnUrlCallback = (node: UrlNode) => void;
-
-export function collectAssets(ast: postcss.Root) {
-    const assetDependencies: string[] = [];
-    ast.walkDecls((decl) => {
-        processDeclarationFunctions(
-            decl,
-            (node) => {
-                if (node.type === 'url') {
-                    assetDependencies.push(node.url);
-                }
-            },
-            false
-        );
-    });
-    return assetDependencies;
-}
-
-export function isExternal(url: string) {
+function isExternal(url: string) {
     return url === '' || url.startsWith('data:') || isUrl(url);
 }
 
-export function isUrl(maybeUrl: string) {
+function isUrl(maybeUrl: string) {
     maybeUrl = maybeUrl.trim();
     if (maybeUrl.includes(' ')) {
         return false;

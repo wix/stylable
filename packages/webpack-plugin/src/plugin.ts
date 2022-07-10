@@ -1,10 +1,9 @@
-import {
-    Stylable,
-    StylableConfig,
+import { Stylable, StylableConfig } from '@stylable/core';
+import type {
     OptimizeConfig,
     DiagnosticsMode,
     IStylableOptimizer,
-} from '@stylable/core';
+} from '@stylable/core/dist/index-internal';
 import { createNamespaceStrategyNode } from '@stylable/node';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -342,7 +341,7 @@ export class StylableWebpackPlugin {
                 compiler.options.resolve.aliasFields,
         };
 
-        this.stylable = Stylable.create(
+        this.stylable = new Stylable(
             this.options.stylableConfig(
                 {
                     projectRoot: compiler.context,
@@ -428,7 +427,10 @@ export class StylableWebpackPlugin {
                          * If STC Builder is running in background we need to add the relevant files to webpack file dependencies watcher,
                          * and emit diagnostics from the sources and not from the output.
                          */
-                        const sources = this.stcBuilder?.getSourcesFiles(module.resource);
+                        if (!this.stcBuilder) {
+                            return;
+                        }
+                        const sources = this.stcBuilder.getSourcesFiles(module.resource);
 
                         if (sources) {
                             /**
@@ -445,7 +447,7 @@ export class StylableWebpackPlugin {
                                 /**
                                  * Add source file diagnostics to the output file module (more accurate diagnostic)
                                  */
-                                this.stcBuilder!.reportDiagnostic(
+                                this.stcBuilder.reportDiagnostic(
                                     sourceFilePath,
                                     loaderContext,
                                     this.options.diagnosticsMode,
@@ -557,7 +559,6 @@ export class StylableWebpackPlugin {
                         optimizeOptions,
                         ast,
                         usageMapping,
-                        this.stylable.delimiter,
                         buildData.exports,
                         globals
                     );

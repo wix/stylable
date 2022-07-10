@@ -18,7 +18,6 @@ describe('StylableOptimizer className optimizations', () => {
             undefined,
             { namespace: true },
             {},
-            '__',
             false,
             true
         );
@@ -50,7 +49,6 @@ describe('StylableOptimizer className optimizations', () => {
                 otherNamespace: true,
             },
             {},
-            '__',
             false,
             true
         );
@@ -91,7 +89,6 @@ describe('StylableOptimizer shortNamespaces', () => {
             undefined,
             { namespace: true, otherNamespace: true },
             {},
-            '__',
             true,
             false
         );

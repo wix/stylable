@@ -8,7 +8,7 @@ import { globalValueFromFunctionNode, GLOBAL_FUNC } from '../helpers/global';
 import { CSSWideKeywords } from '../native-reserved-lists';
 import valueParser from 'postcss-value-parser';
 import type * as postcss from 'postcss';
-import type { Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 
 export interface LayerSymbol {
     _kind: 'layer';
@@ -23,24 +23,37 @@ export interface ResolvedLayer {
 }
 
 export const diagnostics = {
-    MISSING_LAYER_NAME_INSIDE_GLOBAL() {
-        return `"@layer" missing parameter inside "${GLOBAL_FUNC}()"`;
-    },
-    LAYER_SORT_STATEMENT_WITH_STYLE() {
-        return `"@layer" ordering statement cannot have a style block`;
-    },
-    RESERVED_KEYWORD(name: string) {
-        return `"@layer" name cannot be reserved word "${name}"`;
-    },
-    NOT_IDENT(name: string) {
-        return `"@layer" expected ident, but got "${name}"`;
-    },
-    RECONFIGURE_IMPORTED(name: string) {
-        return `cannot reconfigure imported layer "${name}"`;
-    },
-    UNKNOWN_IMPORTED_LAYER(name: string, path: string) {
-        return `cannot resolve imported layer "${name}" from stylesheet "${path}"`;
-    },
+    MISSING_LAYER_NAME_INSIDE_GLOBAL: createDiagnosticReporter(
+        '19001',
+        'warning',
+        () => `"@layer" missing parameter inside "${GLOBAL_FUNC}()"`
+    ),
+    LAYER_SORT_STATEMENT_WITH_STYLE: createDiagnosticReporter(
+        '19002',
+        'error',
+        () => `"@layer" ordering statement cannot have a style block`
+    ),
+    RESERVED_KEYWORD: createDiagnosticReporter(
+        '19003',
+        'error',
+        (name: string) => `"@layer" name cannot be reserved word "${name}"`
+    ),
+    NOT_IDENT: createDiagnosticReporter(
+        '19004',
+        'error',
+        (name: string) => `"@layer" expected ident, but got "${name}"`
+    ),
+    RECONFIGURE_IMPORTED: createDiagnosticReporter(
+        '19005',
+        'error',
+        (name: string) => `cannot reconfigure imported layer "${name}"`
+    ),
+    UNKNOWN_IMPORTED_LAYER: createDiagnosticReporter(
+        '19006',
+        'error',
+        (name: string, path: string) =>
+            `cannot resolve imported layer "${name}" from stylesheet "${path}"`
+    ),
 };
 
 const dataKey = plugableRecord.key<{
@@ -85,7 +98,9 @@ export const hooks = createFeature<{
             const analyzeMetaData = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const analyzedParams = parseLayerParams(atRule.params, context.diagnostics, atRule);
             if (analyzedParams.multiple && atRule.nodes) {
-                context.diagnostics.error(atRule, diagnostics.LAYER_SORT_STATEMENT_WITH_STYLE());
+                context.diagnostics.report(diagnostics.LAYER_SORT_STATEMENT_WITH_STYLE(), {
+                    node: atRule,
+                });
             }
             // cache params
             analyzeMetaData.analyzedParams[atRule.params] = analyzedParams;
@@ -110,10 +125,10 @@ export const hooks = createFeature<{
             if (res) {
                 resolved[name] = res;
             } else if (symbol.import) {
-                context.diagnostics.error(
-                    symbol.import.rule,
+                context.diagnostics.report(
                     diagnostics.UNKNOWN_IMPORTED_LAYER(symbol.name, symbol.import.request),
                     {
+                        node: symbol.import.rule,
                         word: symbol.name,
                     }
                 );
@@ -198,7 +213,7 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
                 names.push(globalName);
                 globals[globalName] = true;
             } else if (globalName === '') {
-                report.warn(atRule, diagnostics.MISSING_LAYER_NAME_INSIDE_GLOBAL());
+                report.report(diagnostics.MISSING_LAYER_NAME_INSIDE_GLOBAL(), { node: atRule });
             }
             readyForName = false;
         } else if (type === 'div' && value === ',') {
@@ -209,7 +224,7 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
         } else {
             readyForName = false;
             const source = valueParser.stringify(node);
-            report.error(atRule, diagnostics.NOT_IDENT(source), { word: source });
+            report.report(diagnostics.NOT_IDENT(source), { node: atRule, word: source });
         }
     }
     return {
@@ -328,7 +343,10 @@ function addLayer({
         if (CSSWideKeywords.includes(name)) {
             // keep
             global = true;
-            context.diagnostics.error(ast, diagnostics.RESERVED_KEYWORD(name), { word: name });
+            context.diagnostics.report(diagnostics.RESERVED_KEYWORD(name), {
+                node: ast,
+                word: name,
+            });
         }
         const analyzeMetaData = plugableRecord.getUnsafe(context.meta.data, dataKey);
         analyzeMetaData.layerDefs[name] = ast;
@@ -348,6 +366,9 @@ function addLayer({
     } else if (!definedSymbol.import && global) {
         definedSymbol.global = true;
     } else if (definedSymbol.import && global) {
-        context.diagnostics.error(ast, diagnostics.RECONFIGURE_IMPORTED(name), { word: name });
+        context.diagnostics.report(diagnostics.RECONFIGURE_IMPORTED(name), {
+            node: ast,
+            word: name,
+        });
     }
 }

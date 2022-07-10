@@ -10,7 +10,7 @@ import {
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { realpathSync, renameSync, rmdirSync, unlinkSync, promises } from 'fs';
+import { realpathSync, renameSync, rmSync, unlinkSync, promises } from 'fs';
 import { join, sep } from 'path';
 
 const { writeFile } = promises;
@@ -208,7 +208,7 @@ describe('Stylable Cli Watch - Single project', function () {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
+                        rmSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
@@ -237,7 +237,7 @@ describe('Stylable Cli Watch - Single project', function () {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
+                        rmSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
@@ -303,7 +303,8 @@ describe('Stylable Cli Watch - Single project', function () {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -335,7 +336,8 @@ describe('Stylable Cli Watch - Single project', function () {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -352,7 +354,8 @@ describe('Stylable Cli Watch - Single project', function () {
                     },
                 },
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
             ],
         });

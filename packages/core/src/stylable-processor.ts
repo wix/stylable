@@ -1,7 +1,6 @@
 import path from 'path';
-import * as postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
-import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
+import type * as postcss from 'postcss';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { murmurhash3_32_gc } from './murmurhash';
 import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
@@ -11,7 +10,7 @@ import {
     ElementSymbol,
     StylableDirectives,
     STVar,
-    STMixin,
+    STCustomSelector,
 } from './features';
 import { generalDiagnostics } from './features/diagnostics';
 import {
@@ -25,7 +24,7 @@ import {
     CSSKeyframes,
     CSSLayer,
 } from './features';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
+import { getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
     walkSelector,
@@ -35,50 +34,72 @@ import {
     stringifySelector,
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
-import type { SRule } from './deprecated/postcss-ast-extension';
-import { stValuesMap } from './deprecated/value-mapping';
 import { SBTypesParsers } from './stylable-value-parsers';
 import { stripQuotation, filename2varname } from './helpers/string';
-import { warnOnce } from './helpers/deprecation';
 
 const parseStates = SBTypesParsers[`-st-states`];
 const parseGlobal = SBTypesParsers[`-st-global`];
 const parseExtends = SBTypesParsers[`-st-extends`];
 
-export const processorWarnings = {
-    STATE_DEFINITION_IN_ELEMENT() {
-        return 'cannot define pseudo states inside a type selector';
-    },
-    STATE_DEFINITION_IN_COMPLEX() {
-        return 'cannot define pseudo states inside complex selectors';
-    },
-    CANNOT_RESOLVE_EXTEND(name: string) {
-        return `cannot resolve '-st-extends' type for '${name}'`;
-    },
-    CANNOT_EXTEND_IN_COMPLEX() {
-        return `cannot define "-st-extends" inside a complex selector`;
-    },
-    OVERRIDE_TYPED_RULE(key: string, name: string) {
-        return `override "${key}" on typed rule "${name}"`;
-    },
-    INVALID_NAMESPACE_DEF() {
-        return 'invalid @namespace';
-    },
-    EMPTY_NAMESPACE_DEF() {
-        return '@namespace must contain at least one character or digit';
-    },
+const stValuesMap = {
+    '-st-from': true,
+    '-st-named': true,
+    '-st-default': true,
+    '-st-root': true,
+    '-st-states': true,
+    '-st-extends': true,
+    '-st-mixin': true,
+    '-st-partial-mixin': true,
+    '-st-global': true,
+} as const;
 
-    INVALID_NAMESPACE_REFERENCE() {
-        return 'st-namespace-reference dose not have any value';
-    },
-    INVALID_NESTING(child: string, parent: string) {
-        return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
-    },
+export const processorDiagnostics = {
+    STATE_DEFINITION_IN_ELEMENT: createDiagnosticReporter(
+        '11002',
+        'error',
+        () => 'cannot define pseudo states inside a type selector'
+    ),
+    STATE_DEFINITION_IN_COMPLEX: createDiagnosticReporter(
+        '11003',
+        'error',
+        () => 'cannot define pseudo states inside complex selectors'
+    ),
+    CANNOT_RESOLVE_EXTEND: createDiagnosticReporter(
+        '11004',
+        'error',
+        (name: string) => `cannot resolve '-st-extends' type for '${name}'`
+    ),
+    CANNOT_EXTEND_IN_COMPLEX: createDiagnosticReporter(
+        '11005',
+        'error',
+        () => `cannot define "-st-extends" inside a complex selector`
+    ),
+    OVERRIDE_TYPED_RULE: createDiagnosticReporter(
+        '11006',
+        'warning',
+        (key: string, name: string) => `override "${key}" on typed rule "${name}"`
+    ),
+    INVALID_NAMESPACE_DEF: createDiagnosticReporter('11007', 'error', () => 'invalid @namespace'),
+    EMPTY_NAMESPACE_DEF: createDiagnosticReporter(
+        '11008',
+        'error',
+        () => '@namespace must contain at least one character or digit'
+    ),
+    INVALID_NAMESPACE_REFERENCE: createDiagnosticReporter(
+        '11010',
+        'error',
+        () => 'st-namespace-reference dose not have any value'
+    ),
+    INVALID_NESTING: createDiagnosticReporter(
+        '11011',
+        'error',
+        (child: string, parent: string) =>
+            `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`
+    ),
 };
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
-    private customSelectorData: Record<string, { isScoped: boolean }> = {};
     constructor(
         public diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
@@ -93,19 +114,19 @@ export class StylableProcessor implements FeatureContext {
 
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
-                this.handleRule(rule as SRule, {
+                this.handleRule(rule, {
                     isScoped: isChildOfAtRule(rule, `st-scope`),
                     reportUnscoped: true,
                 });
             }
             const parent = rule.parent;
             if (parent?.type === 'rule') {
-                this.diagnostics.error(
-                    rule,
-                    processorWarnings.INVALID_NESTING(
+                this.diagnostics.report(
+                    processorDiagnostics.INVALID_NESTING(
                         rule.selector,
                         (parent as postcss.Rule).selector
-                    )
+                    ),
+                    { node: rule }
                 );
             }
         });
@@ -119,17 +140,16 @@ export class StylableProcessor implements FeatureContext {
                 return;
             }
             // ToDo: refactor to be hooked by features
-            if (stValuesMap[decl.prop] && parent.type === 'rule') {
-                this.handleDirectives(parent as SRule, decl);
+            if (decl.prop in stValuesMap && parent.type === 'rule') {
+                this.handleDirectives(parent, decl);
             }
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
 
             this.collectUrls(decl);
         });
+        STCustomSelector.hooks.analyzeDone(this);
 
         STSymbol.reportRedeclare(this);
-
-        prepareAST(this.meta, root);
 
         return this.meta;
     }
@@ -138,7 +158,7 @@ export class StylableProcessor implements FeatureContext {
         let namespace = '';
 
         const analyzeRule = (rule: postcss.Rule, { isScoped }: { isScoped: boolean }) => {
-            return this.handleRule(rule as SRule, {
+            return this.handleRule(rule, {
                 isScoped,
                 reportUnscoped: false,
             });
@@ -160,10 +180,14 @@ export class StylableProcessor implements FeatureContext {
                         if (match[1].trim()) {
                             namespace = match[1];
                         } else {
-                            this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
+                            this.diagnostics.report(processorDiagnostics.EMPTY_NAMESPACE_DEF(), {
+                                node: atRule,
+                            });
                         }
                     } else {
-                        this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
+                        this.diagnostics.report(processorDiagnostics.INVALID_NAMESPACE_DEF(), {
+                            node: atRule,
+                        });
                     }
                     break;
                 }
@@ -189,21 +213,11 @@ export class StylableProcessor implements FeatureContext {
                     });
                     break;
                 case 'custom-selector': {
-                    const params = atRule.params.split(/\s/);
-                    const customName = params.shift();
-                    if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
-                        const selector = atRule.params.replace(customName, '').trim();
-                        const isScoped = analyzeRule(
-                            postcss.rule({ selector, source: atRule.source }),
-                            { isScoped: false }
-                        );
-                        this.customSelectorData[customName] = {
-                            isScoped,
-                        };
-                        this.meta.customSelectors[customName] = selector;
-                    } else {
-                        // TODO: add warn there are two types one is not valid name and the other is empty name.
-                    }
+                    STCustomSelector.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
                     break;
                 }
                 case 'st-scope':
@@ -233,14 +247,16 @@ export class StylableProcessor implements FeatureContext {
 
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
-        let length = this.meta.ast.nodes.length;
+        let length = this.meta.sourceAst.nodes.length;
 
         while (length--) {
-            const node = this.meta.ast.nodes[length];
+            const node = this.meta.sourceAst.nodes[length];
             if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
                 const i = node.text.indexOf('=');
                 if (i === -1) {
-                    this.diagnostics.error(node, processorWarnings.INVALID_NAMESPACE_REFERENCE());
+                    this.diagnostics.report(processorDiagnostics.INVALID_NAMESPACE_REFERENCE(), {
+                        node,
+                    });
                 } else {
                     pathToSource = stripQuotation(node.text.slice(i + 1));
                 }
@@ -258,24 +274,19 @@ export class StylableProcessor implements FeatureContext {
     }
 
     protected handleRule(
-        rule: SRule,
+        rule: postcss.Rule,
         { isScoped, reportUnscoped }: { isScoped: boolean; reportUnscoped: boolean }
     ) {
-        rule.selectorAst = deprecatedParseSelector(rule.selector);
-
         const selectorAst = parseSelectorWithCache(rule.selector);
 
         let locallyScoped = isScoped;
-        let simpleSelector: boolean;
+
         walkSelector(selectorAst, (node, ...nodeContext) => {
             const [index, nodes, parents] = nodeContext;
             const type = node.type;
             if (type === 'selector' && !isInPseudoClassContext(parents)) {
                 // reset scope check between top level selectors
                 locallyScoped = isScoped;
-            }
-            if (type !== `selector` && type !== `class` && type !== `type`) {
-                simpleSelector = false;
             }
 
             if (node.type === 'pseudo_class') {
@@ -301,9 +312,10 @@ export class StylableProcessor implements FeatureContext {
                         walkContext: nodeContext,
                     });
                 } else if (node.value.startsWith('--')) {
+                    // ToDo: move to css-class feature
                     locallyScoped =
                         locallyScoped ||
-                        this.customSelectorData[`:${node.value}`]?.isScoped ||
+                        STCustomSelector.isScoped(this.meta, node.value.slice(2)) ||
                         false;
                 } else if (!knownPseudoClassesWithNestedSelectors.includes(node.value)) {
                     return walkSelector.skipNested;
@@ -345,33 +357,33 @@ export class StylableProcessor implements FeatureContext {
                 });
             } else if (node.type === `id`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
+                    this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(`#` + node.value, `id`),
                         {
+                            node: rule,
                             word: stringifySelector(node),
                         }
                     );
                 }
             } else if (node.type === `attribute`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
+                    this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[${node.value}]`,
                             `attribute`
                         ),
                         {
+                            node: rule,
                             word: stringifySelector(node),
                         }
                     );
                 }
             } else if (node.type === `nesting`) {
                 if (node.nodes) {
-                    this.diagnostics.error(
-                        rule,
+                    this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `nesting`),
                         {
+                            node: rule,
                             word: stringifySelector(node),
                         }
                     );
@@ -380,17 +392,10 @@ export class StylableProcessor implements FeatureContext {
             return;
         });
 
-        if (simpleSelector! !== false) {
-            rule.isSimpleSelector = true;
-            rule.selectorType = rule.selector.match(/^\./) ? 'class' : 'element';
-        } else {
-            rule.selectorType = 'complex';
-        }
-
         return locallyScoped;
     }
 
-    protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
+    protected handleDirectives(rule: postcss.Rule, decl: postcss.Declaration) {
         const isSimplePerSelector = isSimpleSelector(rule.selector);
         const type = isSimplePerSelector.reduce((accType, { type }) => {
             return !accType ? type : accType !== type ? `complex` : type;
@@ -406,9 +411,13 @@ export class StylableProcessor implements FeatureContext {
                 );
             } else {
                 if (type === 'type') {
-                    this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_ELEMENT());
+                    this.diagnostics.report(processorDiagnostics.STATE_DEFINITION_IN_ELEMENT(), {
+                        node: decl,
+                    });
                 } else {
-                    this.diagnostics.warn(decl, processorWarnings.STATE_DEFINITION_IN_COMPLEX());
+                    this.diagnostics.report(processorDiagnostics.STATE_DEFINITION_IN_COMPLEX(), {
+                        node: decl,
+                    });
                 }
             }
         } else if (decl.prop === `-st-extends`) {
@@ -431,17 +440,19 @@ export class StylableProcessor implements FeatureContext {
                         getAlias(extendsRefSymbol) || extendsRefSymbol
                     );
                 } else {
-                    this.diagnostics.warn(
-                        decl,
-                        processorWarnings.CANNOT_RESOLVE_EXTEND(decl.value),
-                        { word: decl.value }
+                    this.diagnostics.report(
+                        processorDiagnostics.CANNOT_RESOLVE_EXTEND(decl.value),
+                        {
+                            node: decl,
+                            word: decl.value,
+                        }
                     );
                 }
             } else {
-                this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
+                this.diagnostics.report(processorDiagnostics.CANNOT_EXTEND_IN_COMPLEX(), {
+                    node: decl,
+                });
             }
-        } else if (decl.prop === STMixin.MixinType.ALL || decl.prop === STMixin.MixinType.PARTIAL) {
-            STMixin.hooks.analyzeDeclaration({ context: this, decl });
         } else if (decl.prop === `-st-global`) {
             if (isSimple && type !== 'type') {
                 this.setClassGlobalMapping(decl, rule);
@@ -471,7 +482,8 @@ export class StylableProcessor implements FeatureContext {
         const name = selector.replace('.', '');
         const typedRule = STSymbol.get(this.meta, name) as ClassSymbol | ElementSymbol;
         if (typedRule && typedRule[key]) {
-            this.diagnostics.warn(node, processorWarnings.OVERRIDE_TYPED_RULE(key, name), {
+            this.diagnostics.report(processorDiagnostics.OVERRIDE_TYPED_RULE(key, name), {
+                node,
                 word: name,
             });
         }
@@ -481,57 +493,6 @@ export class StylableProcessor implements FeatureContext {
     }
 }
 
-/* @deprecated */
-export function validateScopingSelector(
-    atRule: postcss.AtRule,
-    { selector: scopingSelector }: SRule,
-    diagnostics: Diagnostics
-) {
-    if (!scopingSelector) {
-        diagnostics.warn(atRule, STScope.diagnostics.MISSING_SCOPING_PARAM());
-    }
-}
-
-export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
-    warnOnce(
-        'createEmptyMeta is deprecated and will be removed in the next version. Use "new StylableMeta()"'
-    );
-    return new StylableMeta(root, diagnostics);
-}
-
 export function processNamespace(namespace: string, origin: string, _source?: string) {
     return namespace + murmurhash3_32_gc(origin); // .toString(36);
-}
-
-export function process(
-    root: postcss.Root,
-    diagnostics = new Diagnostics(),
-    resolveNamespace?: typeof processNamespace
-) {
-    return new StylableProcessor(diagnostics, resolveNamespace).process(root);
-}
-
-export function prepareAST(meta: StylableMeta, ast: postcss.Root) {
-    const toRemove: Array<postcss.Node | (() => void)> = [];
-    ast.walk((node) => {
-        const input = { node, toRemove };
-        // namespace
-        if (node.type === 'atrule' && node.name === `namespace`) {
-            toRemove.push(node);
-        }
-        // custom selectors
-        if (node.type === 'rule') {
-            expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
-        } else if (node.type === 'atrule' && node.name === 'custom-selector') {
-            toRemove.push(node);
-        }
-        // extracted features
-        STImport.hooks.prepareAST(input);
-        STScope.hooks.prepareAST(input);
-        STVar.hooks.prepareAST(input);
-        CSSCustomProperty.hooks.prepareAST(input);
-    });
-    for (const removeOrNode of toRemove) {
-        typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
-    }
 }
