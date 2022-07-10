@@ -6,7 +6,6 @@
   "references": [
     { "path": "../../core/src" },
     { "path": "../../webpack-plugin/src" },
-    { "path": "../../build-tools/src" },
-    { "path": "../../optimizer/src" },
+    { "path": "../../optimizer/src" }
   ]
 }

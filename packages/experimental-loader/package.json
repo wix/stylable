@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "@stylable/core": "^4.13.3",
-    "@stylable/build-tools": "^4.13.3",
     "@stylable/optimizer": "^4.13.3",
     "@stylable/runtime": "^4.13.3",
     "css-loader": "^6.7.1",

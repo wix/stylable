@@ -1,9 +1,6 @@
 import type { Stylable, StylableMeta } from '@stylable/core';
-import {
-    processUrlDependencies,
-    hasImportedSideEffects,
-    tryCollectImportsDeep,
-} from '@stylable/build-tools';
+import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
+import { processUrlDependencies, hasImportedSideEffects } from '@stylable/build-tools';
 
 export function getReplacementToken(token: string) {
     return `/* INJECT */ {__${token}__:true}`;

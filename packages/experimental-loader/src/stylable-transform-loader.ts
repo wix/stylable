@@ -1,7 +1,7 @@
 import postcss from 'postcss';
 import { processNamespace, emitDiagnostics, DiagnosticsMode, MinimalFS } from '@stylable/core';
+import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { tryCollectImportsDeep } from '@stylable/build-tools';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
