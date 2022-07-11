@@ -62,7 +62,11 @@ export const hooks = createFeature<{
         // native node does not resolve e.g. div
         if (resolved && resolved.length > 1) {
             const { symbol, meta } = getOriginDefinition(resolved);
-            CSSClass.namespaceClass(meta, symbol, node, selectorContext.originMeta);
+            if (symbol._kind === 'class') {
+                CSSClass.namespaceClass(meta, symbol, node, selectorContext.originMeta);
+            } else {
+                node.value = symbol.name;
+            }
         }
     },
 });
