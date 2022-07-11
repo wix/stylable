@@ -152,6 +152,45 @@ describe(`features/css-type`, () => {
                 root: `entry__root`,
             });
         });
+        it(`should resolve imported element type (no class)`, () => {
+            // element type is not namespaced and should be avoided
+            const { sheets } = testStylableCore({
+                '/before.st.css': `Part {}`,
+                '/after.st.css': `Part {}`,
+                '/entry.st.css': `
+                    /* @check .entry__root Part */
+                    .root BeforePart {}
+
+                    @st-import [Part as BeforePart] from './before.st.css';
+                    @st-import [Part as AfterPart] from './after.st.css';
+
+                    /* @check .entry__root Part */
+                    .root AfterPart {}
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            const importBeforeDef = meta.getImportStatements()[0];
+            const importAfterDef = meta.getImportStatements()[1];
+            expect(CSSType.get(meta, `BeforePart`), `before type symbol`).to.eql({
+                _kind: `element`,
+                name: 'BeforePart',
+                alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
+            });
+            expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql({
+                _kind: `element`,
+                name: 'AfterPart',
+                alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
+            });
+            // JS exports
+            expect(exports.classes, `not add as classes exports`).to.eql({
+                root: `entry__root`,
+            });
+        });
         it(`should resolve deep imported element type`, () => {
             testStylableCore({
                 '/base.st.css': ``,
