@@ -49,7 +49,7 @@
     "@types/validate-npm-package-name": "^4.0.0",
     "@types/yargs": "^17.0.10",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
-    "@typescript-eslint/parser": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.6",
     "autoprefixer": "^10.4.7",
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
