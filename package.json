@@ -13,6 +13,8 @@
     "test": "node --enable-source-maps scripts/test-runner.js --parallel",
     "test:integrations": "npm run test -- --i",
     "test:core-packages": "npm run test -- --cp",
+    "c8": "c8 -r html npm run test",
+    "c8:report": "npx serve coverage",
     "prettify": "npx prettier . --write"
   },
   "devDependencies": {
@@ -51,6 +53,7 @@
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "autoprefixer": "^10.4.7",
+    "c8": "^7.11.3",
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
     "create-listening-server": "^1.0.0",

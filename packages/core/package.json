@@ -5,6 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\"",
+    "c8": "c8 -r html npm run test",
+    "c8:report": "npx serve coverage",
     "start": "mocha-play \"./dist/test/**/*.spec.js\" -c ./webpack.config.js -w"
   },
   "browser": {
