@@ -1,8 +1,10 @@
-const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+// @ts-check
+
+import { StylableWebpackPlugin } from '@stylable/webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 /** @type {import('webpack').Configuration} */
-module.exports = {
+export default {
     mode: 'development',
     devtool: 'source-map',
     module: {

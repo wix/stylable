@@ -12,6 +12,9 @@
   ],
   "plugins": ["react-hooks"],
   "ignorePatterns": ["node_modules", "dist", "st-types"],
+  "parserOptions": {
+    "sourceType": "module"
+  },
   "settings": {
     "react": {
       "version": "detect"
