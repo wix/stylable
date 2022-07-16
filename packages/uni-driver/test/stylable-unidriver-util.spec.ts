@@ -1,18 +1,27 @@
-import { contractTest } from '@stylable/dom-test-kit/dist/test/contract-test';
+import {
+    contractTest,
+    testStylesheet,
+    createPartialElement,
+} from '@stylable/dom-test-kit/dist/test/contract-test';
+import type { PartialElement } from '@stylable/dom-test-kit';
 import { ElementRemoteApi, StylableUnidriverUtil } from '@stylable/uni-driver';
 
-function wrapWithMiniUni(el: HTMLElement): ElementRemoteApi {
-    return {
-        attr(name) {
+function createHost(): PartialElement & ElementRemoteApi {
+    const el = createPartialElement();
+    return Object.assign(el, {
+        attr(name: string) {
             return Promise.resolve(el.getAttribute(name));
         },
-        hasClass(className) {
+        hasClass(className: string) {
             return Promise.resolve(el.classList.contains(className));
         },
-    };
+    });
 }
 
-describe(
-    'stylable-dom-utils (UniDriver)',
-    contractTest(StylableUnidriverUtil, wrapWithMiniUni, { scopeSelectorTest: false })
-);
+describe('stylable-dom-utils (UniDriver)', () => {
+    contractTest<PartialElement & ElementRemoteApi>(
+        new StylableUnidriverUtil(testStylesheet),
+        testStylesheet,
+        createHost
+    );
+});
