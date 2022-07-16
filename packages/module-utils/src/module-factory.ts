@@ -1,5 +1,5 @@
 import { Stylable, StylableConfig } from '@stylable/core';
-import { generateStylableJSModuleSource } from './module-sources';
+import { generateStylableJSModuleSource } from './stylable-js-module-source';
 
 export interface Options {
     injectCSS: boolean;
