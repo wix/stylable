@@ -9,7 +9,7 @@ import {
 import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
-import { createRuntimeTargetCode } from './create-runtime-target-code';
+import { generateStylableJSModuleSource } from '@stylable/module-utils';
 import { addBuildInfo } from './add-build-info';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 
@@ -76,7 +76,7 @@ const stylableLoader: LoaderDefinition = function (content) {
         resolveNamespace,
     });
 
-    const { meta, exports } = stylable.transform(content, this.resourcePath);
+    const { meta, exports: jsExports } = stylable.transform(content, this.resourcePath);
 
     emitDiagnostics(this, meta, diagnosticsMode);
 
@@ -90,7 +90,14 @@ const stylableLoader: LoaderDefinition = function (content) {
     addBuildInfo(this, meta.namespace);
 
     if (exportsOnly) {
-        return callback(null, createRuntimeTargetCode(meta.namespace, exports));
+        return callback(
+            null,
+            generateStylableJSModuleSource({
+                format: 'esm',
+                namespace: meta.namespace,
+                jsExports,
+            })
+        );
     }
 
     const urlPluginImports: LoaderImport[] = [
@@ -157,7 +164,7 @@ const stylableLoader: LoaderDefinition = function (content) {
                 ${moduleCode}
 
                 // Patch exports with custom stylable API
-                ___CSS_LOADER_EXPORT___.locals = ${JSON.stringify([meta.namespace, exports])}
+                ___CSS_LOADER_EXPORT___.locals = ${JSON.stringify([meta.namespace, jsExports])}
 
                 module.exports = ___CSS_LOADER_EXPORT___;
                 `
