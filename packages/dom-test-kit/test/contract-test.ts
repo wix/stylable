@@ -1,88 +1,84 @@
-import { create } from '@stylable/runtime';
+import { statesRuntime } from '@stylable/runtime';
+import type { PartialElement } from '@stylable/dom-test-kit';
 import { expect } from 'chai';
-import { JSDOM } from 'jsdom';
 
-export const contractTest =
-    (
-        StylableUtilClass: any,
-        wrapEl: (el: HTMLElement) => any = (el) => el,
-        options: { scopeSelectorTest: boolean } = { scopeSelectorTest: true }
-    ) =>
-    () => {
-        const s = create(
-            'ns',
-            {
-                classes: { root: 'ns-root', x: 'ns__x', y: 'ns__y', z: 'ns__z ns__y' },
-                keyframes: {},
-                layers: {},
-                vars: {},
-                stVars: {},
-            },
-            '',
-            0,
-            '0',
-            null
-        );
+export interface ContractClassDOM<T> {
+    hasStyleState(el: T, stateName: string): boolean;
+    getStyleState(el: T, stateName: string): string | boolean | null;
+}
 
-        const util = new StylableUtilClass(s);
+export interface AsyncContractClassDOM<T> {
+    hasStyleState(el: T, stateName: string): Promise<boolean>;
+    getStyleState(el: T, stateName: string): Promise<string | boolean | null>;
+}
 
-        if (options.scopeSelectorTest) {
-            it('scopeSelector defaults to root', () => {
-                expect(util.scopeSelector()).to.equal(`.ns-root`);
-            });
-            it('scopeSelector local class', () => {
-                expect(util.scopeSelector('.x')).to.equal(`.ns__x`);
-            });
-            it('scopeSelector local class with compose', () => {
-                expect(util.scopeSelector('.z')).to.equal(`.ns__z`);
-            });
-            it('scopeSelector handle multiple local classes', () => {
-                expect(util.scopeSelector('.x .y')).to.equal(`.ns__x .ns__y`);
-            });
-            it('scopeSelector Error("pseudo-element")', () => {
-                expect(() => util.scopeSelector('.x::y')).to.throw(
-                    'selector with pseudo-element is not supported yet.'
-                );
-            });
-            it('scopeSelector Error("type")', () => {
-                expect(() => util.scopeSelector('x')).to.throw(
-                    'selector with type is not supported yet.'
-                );
-            });
-            it('scopeSelector handle local states', () => {
-                expect(util.scopeSelector('.x:loading')).to.equal(`.ns__x.ns--loading`);
-            });
-            it('scopeSelector handles local state with a paramter', () => {
-                expect(util.scopeSelector('.x:loading(done)')).to.equal(
-                    `.ns__x.ns---loading-4-done`
-                );
-            });
-            it('scopeSelector handle class local states (multiple)', () => {
-                expect(util.scopeSelector('.x:loading:thinking')).to.equal(
-                    `.ns__x.ns--loading.ns--thinking`
-                );
-            });
-        }
-
-        describe('Style state', () => {
-            const { window } = new JSDOM();
-            it('hasStyleState returns true if the requested style state exists', async () => {
-                const document = window.document;
-                const elem = document.createElement('a');
-                elem.classList.add(s.cssStates({ loading: true }));
-                expect(await util.hasStyleState(wrapEl(elem), 'loading')).to.equal(true);
-            });
-            it('getStyleState returns the requested boolean style state value', async () => {
-                const document = window.document;
-                const elem = document.createElement('a');
-                elem.classList.add(s.cssStates({ loading: true }));
-                expect(await util.getStyleState(wrapEl(elem), 'loading')).to.equal(true);
-            });
-            it('getStyleState returns the requested string style state value', async () => {
-                const document = window.document;
-                const elem = document.createElement('a');
-                elem.classList.add(s.cssStates({ loading: 'value' }));
-                expect(await util.getStyleState(wrapEl(elem), 'loading')).to.equal('value');
-            });
+export function contractTest<T extends PartialElement>(
+    util: ContractClassDOM<T> | AsyncContractClassDOM<T>,
+    stylesheet: typeof testStylesheet,
+    createElement: () => T
+) {
+    describe('Style state', () => {
+        it('hasStyleState returns true if the requested style state exists', async () => {
+            const elem = createElement();
+            elem.classList.add(stylesheet.cssStates({ loading: true }));
+            expect(await util.hasStyleState(elem, 'loading')).to.equal(true);
         });
+        it('getStyleState returns the requested boolean style state value', async () => {
+            const elem = createElement();
+            elem.classList.add(stylesheet.cssStates({ loading: true }));
+            expect(await util.getStyleState(elem, 'loading')).to.equal(true);
+        });
+        it('getStyleState returns the requested string style state value', async () => {
+            const elem = createElement();
+            elem.classList.add(stylesheet.cssStates({ loading: 'value' }));
+            expect(await util.getStyleState(elem, 'loading')).to.equal('value');
+        });
+    });
+}
+
+export const testStylesheet = {
+    namespace: 'ns',
+    classes: { root: 'ns-root', x: 'ns__x', y: 'ns__y', z: 'ns__z ns__y' },
+    cssStates: statesRuntime.bind(null, 'ns'),
+};
+
+export function createPartialElement(): PartialElement {
+    // make sure we implement public api correctly
+    // we don't need querySelector, querySelectorAll, for these test and we don't want JSDOM.
+    type IsTrue<T extends true> = T;
+    type _Check = IsTrue<HTMLElement extends PartialElement ? true : false>;
+
+    const el = {
+        __classes: new Set<string>(),
+        className: '',
+        classList: {
+            contains: (className: string) => el.__classes.has(className),
+            add: (className: string) => {
+                el.__classes.add(className);
+                el.className = [...el.__classes].join(' ');
+            },
+            remove: (className: string) => {
+                el.__classes.delete(className);
+                el.className = [...el.__classes].join(' ');
+            },
+            forEach(cb: (className: string) => void) {
+                for (const className of el.__classes) {
+                    cb(className);
+                }
+            },
+        },
+        getAttribute(attr: string) {
+            if (attr === 'class') {
+                return el.className;
+            }
+            throw new Error('Only class attribute is supported');
+        },
+        querySelector(_selector: string) {
+            throw new Error('Not implemented.');
+        },
+        querySelectorAll(_selector: string) {
+            throw new Error('Not implemented.');
+        },
     };
+    return el;
+}
