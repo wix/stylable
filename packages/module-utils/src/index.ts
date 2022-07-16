@@ -4,4 +4,4 @@ export { createModuleSource, generateModuleSource } from './module-source';
 export { Options, stylableModuleFactory } from './module-factory';
 export { generateDTSContent } from './generate-dts';
 export { generateDTSSourceMap } from './generate-dts-sourcemaps';
-export { generateStylableJSModuleSource } from './module-sources';
+export { generateStylableJSModuleSource } from './stylable-js-module-source';
