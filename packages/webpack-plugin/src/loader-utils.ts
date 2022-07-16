@@ -5,6 +5,10 @@ export function getReplacementToken(token: string) {
     return `/* INJECT */ {__${token}__:true}`;
 }
 
+export function getReplacementTokenJSON(token: string) {
+    return JSON.stringify(getReplacementToken(token));
+}
+
 export function getImports(
     stylable: Stylable,
     meta: StylableMeta,

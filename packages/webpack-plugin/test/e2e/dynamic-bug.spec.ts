@@ -24,11 +24,21 @@ describe(`(${project})`, () => {
         const chunkByName = projectRunner.getChunksModulesNames();
 
         expect(chunkByName.entryA).to.eql(
-            ['test-components/badge.st.css', 'test-components/badge.js', 'src/index-a.js'],
+            [
+                'esm/runtime.js',
+                'test-components/badge.st.css',
+                'test-components/badge.js',
+                'src/index-a.js',
+            ],
             'entryA'
         );
         expect(chunkByName.entryB).to.eql(
-            ['test-components/badge.st.css', 'test-components/badge.js', 'src/index-b.js'],
+            [
+                'esm/runtime.js',
+                'test-components/badge.st.css',
+                'test-components/badge.js',
+                'src/index-b.js',
+            ],
             'entryB'
         );
         expect(chunkByName.dynamicSplit).to.eql(

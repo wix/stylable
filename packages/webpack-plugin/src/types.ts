@@ -25,8 +25,9 @@ export type LoaderData = Pick<
 export interface StylableLoaderContext extends LoaderContext<{}> {
     resourcePath: string;
     stylable: Stylable;
-    assetsMode: 'loader' | 'url';
     diagnosticsMode: DiagnosticsMode;
+    assetsMode: 'loader' | 'url';
+    cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
     target: 'oldie' | 'modern';
     assetFilter: (url: string, context: string) => boolean;
     flagStylableModule: (loaderData: LoaderData) => void;
