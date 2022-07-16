@@ -16,12 +16,8 @@ import {
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import decache from 'decache';
-import {
-    emitAssets,
-    generateCssString,
-    generateStylableModuleCode,
-    getDefaultMode,
-} from './plugin-utils';
+import { emitAssets, generateCssString, getDefaultMode } from './plugin-utils';
+import { generateStylableJSModuleSource } from '@stylable/module-utils';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
 export interface StylableRollupPluginOptions {
@@ -164,7 +160,7 @@ export function stylableRollupPlugin({
             const moduleImports = [];
             for (const imported of meta.getImportStatements()) {
                 if (hasImportedSideEffects(stylable, meta, imported)) {
-                    moduleImports.push(`import ${JSON.stringify(imported.request)};`);
+                    moduleImports.push({ from: imported.request });
                 }
             }
             extracted.set(id, { css });
@@ -191,7 +187,13 @@ export function stylableRollupPlugin({
             }
 
             return {
-                code: generateStylableModuleCode(meta, exports, moduleImports),
+                code: generateStylableJSModuleSource({
+                    format: 'esm',
+                    jsExports: exports,
+                    namespace: meta.namespace,
+                    imports: moduleImports,
+                    varType: 'var',
+                }),
                 map: { mappings: '' },
             };
         },

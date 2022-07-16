@@ -13,6 +13,7 @@
   "dependencies": {
     "@stylable/build-tools": "^4.13.3",
     "@stylable/cli": "^4.13.3",
+    "@stylable/module-utils": "^4.13.3",
     "@stylable/node": "^4.13.3",
     "@stylable/optimizer": "^4.13.3",
     "@stylable/runtime": "^4.13.3",

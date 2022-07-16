@@ -1,4 +1,4 @@
-import type { Stylable, StylableExports, StylableMeta } from '@stylable/core';
+import type { Stylable, StylableMeta } from '@stylable/core';
 import type { PluginContext } from 'rollup';
 import type { StylableRollupPluginOptions } from './index';
 import { processUrlDependencies } from '@stylable/build-tools';
@@ -6,29 +6,6 @@ import fs from 'fs';
 import { basename, extname } from 'path';
 import { createHash } from 'crypto';
 import { getType } from 'mime';
-
-const runtimePath = JSON.stringify(require.resolve('@stylable/rollup-plugin/runtime'));
-const runtimeImport = `import { stc, sts } from ${runtimePath};`;
-
-export function generateStylableModuleCode(
-    meta: StylableMeta,
-    exports: StylableExports,
-    moduleImports: string[]
-) {
-    return `
-        ${runtimeImport}
-        ${moduleImports.join('\n')}
-        export var namespace = ${JSON.stringify(meta.namespace)};
-        export var st = sts.bind(null, namespace);
-        export var style = st;
-        export var cssStates = stc.bind(null, namespace);
-        export var classes = ${JSON.stringify(exports.classes)}; 
-        export var keyframes = ${JSON.stringify(exports.keyframes)};
-        export var layers = ${JSON.stringify(exports.layers)};
-        export var stVars = ${JSON.stringify(exports.stVars)}; 
-        export var vars = ${JSON.stringify(exports.vars)}; 
-    `;
-}
 
 export function generateCssString(
     meta: StylableMeta,
