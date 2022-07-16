@@ -6,6 +6,8 @@ import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { stripQuotation } from '../helpers/string';
 import { isCompRoot } from './selector';
 import type { ParsedValue } from '../types';
+import type { Stylable } from '../stylable';
+import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
 import postcssValueParser, {
     ParsedValue as PostCSSParsedValue,
@@ -540,4 +542,24 @@ function handleNamedTokens(
 
 function isImportAs(space: ParsedValue, as: ParsedValue) {
     return space?.type === 'space' && as?.type === 'word' && as?.value === 'as';
+}
+
+export function tryCollectImportsDeep(
+    stylable: Stylable,
+    meta: StylableMeta,
+    imports = new Set<string>()
+) {
+    for (const { context, request } of meta.getImportStatements()) {
+        try {
+            const resolved = stylable.resolver.resolvePath(context, request);
+
+            if (!imports.has(resolved)) {
+                imports.add(resolved);
+                tryCollectImportsDeep(stylable, stylable.analyze(resolved), imports);
+            }
+        } catch (e) {
+            /** */
+        }
+    }
+    return imports;
 }

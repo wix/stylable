@@ -89,7 +89,7 @@ export class Stylable {
         public optimizer?: IStylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
         public resolveNamespace?: typeof processNamespace,
-        public resolvePath: ModuleResolver = createDefaultResolver(fileSystem, resolveOptions),
+        private moduleResolver: ModuleResolver = createDefaultResolver(fileSystem, resolveOptions),
         protected cssParser: CssParser = cssParse,
         protected resolverCache?: StylableResolverCache, // ToDo: v5 default to `new Map()`
         // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
@@ -122,7 +122,7 @@ export class Stylable {
     public createResolver({
         requireModule = this.requireModule,
         resolverCache = this.resolverCache,
-        resolvePath = this.resolvePath,
+        resolvePath = this.moduleResolver,
     }: Pick<StylableConfig, 'requireModule' | 'resolverCache'> & {
         resolvePath?: ModuleResolver;
     } = {}) {
@@ -140,7 +140,7 @@ export class Stylable {
     private _createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
             delimiter: this.delimiter,
-            moduleResolver: this.resolvePath,
+            moduleResolver: this.moduleResolver,
             diagnostics: new Diagnostics(),
             fileProcessor: this.fileProcessor,
             requireModule: this.requireModule,
@@ -223,5 +223,8 @@ export class Stylable {
         return overrideSrc
             ? this.fileProcessor.processContent(overrideSrc, fullPath)
             : this.fileProcessor.process(fullPath);
+    }
+    public resolvePath(directoryPath: string, request: string) {
+        return this.resolver.resolvePath(directoryPath, request);
     }
 }
