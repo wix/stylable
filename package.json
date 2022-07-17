@@ -13,8 +13,7 @@
     "test": "node --enable-source-maps scripts/test-runner.js --parallel",
     "test:integrations": "npm run test -- --i",
     "test:core-packages": "npm run test -- --cp",
-    "c8": "c8 -r html npm run test",
-    "c8:report": "npx serve coverage",
+    "test:coverage": "npm run build && c8 -x 'packages/*/dist/test' -r html-spa npm run test && serve coverage",
     "prettify": "npx prettier . --write"
   },
   "devDependencies": {
@@ -78,6 +77,7 @@
     "react-dom": "^18.2.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.76.0",
+    "serve": "^14.0.1",
     "source-map": "^0.7.4",
     "source-map-loader": "^4.0.0",
     "style-loader": "^3.3.1",
