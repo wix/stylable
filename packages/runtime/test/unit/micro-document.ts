@@ -25,15 +25,22 @@ export class MicroElement {
         if (index >= 0) {
             this._children.splice(index, 1, newChild);
             this.removeChild(oldChild);
+        } else {
+            throw new Error('Child node found in parent');
         }
         return oldChild;
     }
 
-    insertBefore(newChild: MicroElement, refChild?: MicroElement): void {
+    insertBefore(newChild: MicroElement, refChild: MicroElement | null | undefined): void {
         newChild.remove();
-        const index = refChild ? this._children.indexOf(refChild) : -1;
-        if (index >= 0) {
-            this._children.splice(index, 0, newChild);
+        if (refChild) {
+            const index = refChild ? this._children.indexOf(refChild) : -1;
+
+            if (index >= 0) {
+                this._children.splice(index, 0, newChild);
+            } else {
+                throw new Error('Child node found in parent');
+            }
         } else {
             this._children.push(newChild);
         }
@@ -48,8 +55,8 @@ export class MicroElement {
         }
     }
 
-    append(newChild: MicroElement): void {
-        this.insertBefore(newChild);
+    appendChild(newChild: MicroElement): void {
+        this.insertBefore(newChild, null);
     }
     remove(): void {
         this.parentElement?.removeChild(this);

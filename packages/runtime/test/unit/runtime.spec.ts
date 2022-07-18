@@ -60,7 +60,6 @@ describe('css-runtime-renderer', () => {
     it('keep last with same id (reverse depth order)', () => {
         const document = new MicroDocument();
 
-        testInjectCSS(document, 'test-1', '* { --pos: 3; }', 3, 'test');
         testInjectCSS(document, 'test-1', '* { --pos: 2; }', 2, 'test');
         testInjectCSS(document, 'test-1', '* { --pos: 1; }', 1, 'test');
 
