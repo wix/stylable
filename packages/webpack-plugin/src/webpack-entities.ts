@@ -205,6 +205,7 @@ function replacePlaceholder(
     replacementPoint: string,
     value: string
 ) {
+    // we calculate the replacement from the original source. this way order does not matter 
     const t: any = source.original();
     const t1 = t.source ? t.source() : String(t);
     const i = t1.indexOf(replacementPoint);

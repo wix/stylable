@@ -142,8 +142,6 @@ export function buildSingleFile({
                         imports: injectCSSRequest ? [{ from: `./${cssAssetFilename}` }] : [],
                         jsExports: res.exports,
                         namespace: res.meta.namespace,
-                        footer: '',
-                        header: '',
                     },
                     includeCSSInJS
                         ? {
