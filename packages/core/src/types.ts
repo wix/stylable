@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
 import type { Box } from './custom-values';
-import type { StylableExports, StylableResults } from './stylable-transformer';
+import type { StylableExports } from './stylable-transformer';
 
 export interface ParsedValue {
     type: string;
@@ -36,18 +36,13 @@ export interface IStylableOptimizer {
     minifyCSS(css: string): string;
     optimize(
         config: OptimizeConfig,
-        stylableResult: StylableResults,
-        usageMapping: Record<string, boolean>
-    ): void;
-    getNamespace(namespace: string): string;
-    getClassName(className: string): string;
-    optimizeAst(
-        config: OptimizeConfig,
         targetAst: postcss.Root,
         usageMapping: Record<string, boolean>,
         jsExports: StylableExports,
         globals: Record<string, boolean>
     ): void;
+    getNamespace(namespace: string): string;
+    getClassName(className: string): string;
     removeStylableDirectives(root: postcss.Root, shouldComment?: boolean): void;
 }
 

@@ -7,21 +7,19 @@ describe('StylableOptimizer className optimizations', () => {
         const optimizer = new StylableOptimizer();
         const ast = parse(`.namespace__classname{} .namespace__thing{} .namespace__composed{}`);
         const exports = {
-            classname: 'namespace__classname',
-            thing: 'namespace__thing',
-            composed: 'namespace__composed namespace__classname',
+            layers: {},
+            keyframes: {},
+            stVars: {},
+            vars: {},
+            classes: {
+                classname: 'namespace__classname',
+                thing: 'namespace__thing',
+                composed: 'namespace__composed namespace__classname',
+            },
         };
 
-        optimizer.optimizeAstAndExports(
-            ast,
-            exports,
-            undefined,
-            { namespace: true },
-            {},
-            false,
-            true
-        );
-        expect(exports, 'exports rewrite').to.eql({
+        optimizer.optimizeAstAndExports(ast, exports, { namespace: true }, {}, false, true);
+        expect(exports.classes, 'exports rewrite').to.eql({
             classname: 's0',
             thing: 's1',
             composed: 's2 s0',
@@ -35,15 +33,20 @@ describe('StylableOptimizer className optimizations', () => {
             `.namespace__classname{} .namespace--state{} .namespace---otherState-5-value{} .namespace__thing{} .otherNamespace__imported{} .otherNamespace--state{}`
         );
         const exports = {
-            classname: 'namespace__classname',
-            thing: 'namespace__thing',
-            imported: 'otherNamespace__imported',
+            layers: {},
+            keyframes: {},
+            stVars: {},
+            vars: {},
+            classes: {
+                classname: 'namespace__classname',
+                thing: 'namespace__thing',
+                imported: 'otherNamespace__imported',
+            },
         };
 
         optimizer.optimizeAstAndExports(
             ast,
             exports,
-            undefined,
             {
                 namespace: true,
                 otherNamespace: true,
@@ -52,7 +55,7 @@ describe('StylableOptimizer className optimizations', () => {
             false,
             true
         );
-        expect(exports, 'exports rewrite').to.eql({
+        expect(exports.classes, 'exports rewrite').to.eql({
             classname: 's0',
             thing: 's1',
             imported: 's2',
@@ -78,21 +81,26 @@ describe('StylableOptimizer shortNamespaces', () => {
         `.trim()
         );
         const exports = {
-            classname: 'namespace__classname',
-            thing: 'namespace__thing',
-            composed: 'namespace__composed namespace__classname',
+            layers: {},
+            keyframes: {},
+            stVars: {},
+            vars: {},
+            classes: {
+                classname: 'namespace__classname',
+                thing: 'namespace__thing',
+                composed: 'namespace__composed namespace__classname',
+            },
         };
 
         optimizer.optimizeAstAndExports(
             ast,
             exports,
-            undefined,
             { namespace: true, otherNamespace: true },
             {},
             true,
             false
         );
-        expect(exports, 'exports rewrite').to.eql({
+        expect(exports.classes, 'exports rewrite').to.eql({
             classname: 'o0__classname',
             thing: 'o0__thing',
             composed: 'o0__composed o0__classname',

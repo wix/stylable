@@ -97,10 +97,14 @@ export function buildSingleFile({
                 removeComments: true,
                 removeEmptyNodes: true,
                 removeStylableDirectives: true,
-                classNameOptimizations: false,
                 removeUnusedComponents: false,
+                shortNamespaces: false,
+                classNameOptimizations: false,
             },
-            res,
+            res.meta.targetAst!,
+            // since we are only doing cosmetic optimizations, we can provide an empty usage mapping and empty globals
+            {},
+            res.exports,
             {}
         );
     }

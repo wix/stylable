@@ -1,4 +1,3 @@
-import type { StylableResults } from '@stylable/core';
 import {
     IStylableOptimizer,
     OptimizeConfig,
@@ -12,28 +11,19 @@ import postcss, { Declaration, Root, Rule, Node, Comment, Container } from 'post
 import { NameMapper } from './name-mapper';
 
 const { booleanStateDelimiter } = pseudoStates;
+
 const stateRegexp = new RegExp(`^(.*?)${booleanStateDelimiter}`);
+const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
+const matchNamespaceRegexp = new RegExp(`(.+)${delimiter}(.+)`);
 
 export class StylableOptimizer implements IStylableOptimizer {
     public names = new NameMapper();
     public classPrefix = 's';
     public namespacePrefix = 'o';
+
     public minifyCSS(css: string): string {
         // disabling restructuring as it breaks production mode by disappearing classes
         return csso.minify(css, { restructure: false }).css;
-    }
-
-    public optimize(
-        config: OptimizeConfig,
-        stylableResults: StylableResults,
-        usageMapping: Record<string, boolean>
-    ) {
-        const {
-            meta: { globals, targetAst },
-            exports: jsExports,
-        } = stylableResults;
-
-        this.optimizeAst(config, targetAst as Root, usageMapping, jsExports, globals);
     }
 
     public getNamespace(namespace: string) {
@@ -44,7 +34,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         return this.names.get(className, this.classPrefix);
     }
 
-    public optimizeAst(
+    public optimize(
         config: OptimizeConfig,
         targetAst: Root,
         usageMapping: Record<string, boolean>,
@@ -65,8 +55,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         }
         this.optimizeAstAndExports(
             targetAst,
-            jsExports.classes,
-            undefined,
+            jsExports,
             usageMapping,
             globals,
             config.shortNamespaces,
@@ -76,8 +65,7 @@ export class StylableOptimizer implements IStylableOptimizer {
 
     public optimizeAstAndExports(
         ast: Root,
-        exported: Record<string, string>,
-        classes = Object.keys(exported),
+        exported: StylableExports,
         usageMapping: Record<string, boolean>,
         globals: Record<string, boolean> = {},
         shortNamespaces?: boolean,
@@ -86,43 +74,31 @@ export class StylableOptimizer implements IStylableOptimizer {
         if (!shortNamespaces && !classNamespaceOptimizations) {
             return;
         }
+        this.optimizeAst(ast, usageMapping, globals, shortNamespaces, classNamespaceOptimizations);
+        this.optimizeExports(exported);
+    }
 
-        ast.walkRules((rule) => {
-            rule.selector = this.rewriteSelector(
-                rule.selector,
-                usageMapping,
-                globals,
-                shortNamespaces || false,
-                classNamespaceOptimizations || false
-            );
-        });
-        const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
-
-        classes.forEach((originName) => {
-            if (exported[originName]) {
-                exported[originName] = exported[originName]
-                    .split(' ')
-                    .map((renderedNamed) => {
-                        if (classNamespaceOptimizations) {
-                            return this.getClassName(renderedNamed);
-                        } else if (shortNamespaces) {
-                            const namespaceMatch = renderedNamed.match(namespaceRegexp);
-                            if (!namespaceMatch) {
-                                throw new Error(
-                                    `Stylable class dose not have proper export namespace ${renderedNamed}`
-                                );
-                            }
-                            return renderedNamed.replace(
-                                namespaceRegexp,
-                                `${this.getNamespace(namespaceMatch[1])}${delimiter}`
-                            );
-                        } else {
-                            throw new Error('Invalid optimization config');
-                        }
-                    })
-                    .join(' ');
+    private mapSingleClassName(
+        className: string,
+        shortNamespaces?: boolean,
+        classNamespaceOptimizations?: boolean
+    ): string {
+        if (classNamespaceOptimizations) {
+            return this.getClassName(className);
+        } else if (shortNamespaces) {
+            const namespaceMatch = className.match(namespaceRegexp);
+            if (!namespaceMatch) {
+                throw new Error(
+                    `Stylable class dose not have proper export namespace ${className}`
+                );
             }
-        });
+            return className.replace(
+                namespaceRegexp,
+                `${this.getNamespace(namespaceMatch[1])}${delimiter}`
+            );
+        } else {
+            throw new Error('Invalid optimization config');
+        }
     }
 
     public removeStylableDirectives(root: Root, shouldComment = false) {
@@ -142,7 +118,40 @@ export class StylableOptimizer implements IStylableOptimizer {
                   }
         );
     }
-
+    protected optimizeAst(
+        ast: Root,
+        usageMapping: Record<string, boolean>,
+        globals: Record<string, boolean>,
+        shortNamespaces: boolean | undefined,
+        classNamespaceOptimizations: boolean | undefined
+    ) {
+        ast.walkRules((rule) => {
+            rule.selector = this.rewriteSelector(
+                rule.selector,
+                usageMapping,
+                globals,
+                shortNamespaces || false,
+                classNamespaceOptimizations || false
+            );
+        });
+    }
+    protected optimizeExports(
+        exported: StylableExports,
+        shortNamespaces?: boolean,
+        classNamespaceOptimizations?: boolean
+    ) {
+        const { classes } = exported;
+        for (const [originName, originMappings] of Object.entries(classes)) {
+            if (originMappings) {
+                classes[originName] = originMappings
+                    .split(' ')
+                    .map((name) =>
+                        this.mapSingleClassName(name, shortNamespaces, classNamespaceOptimizations)
+                    )
+                    .join(' ');
+            }
+        }
+    }
     protected rewriteSelector(
         selector: string,
         usageMapping: Record<string, boolean>,
@@ -205,11 +214,10 @@ export class StylableOptimizer implements IStylableOptimizer {
         usageMapping: Record<string, boolean>,
         shouldComment = false
     ) {
-        const matchNamespace = new RegExp(`(.+)${delimiter}(.+)`);
         targetAst.walkRules((rule) => {
             const outputSelectors = rule.selectors.filter((selector) => {
                 const selectorAst = parseCssSelector(selector);
-                return !this.isContainsUnusedParts(selectorAst[0], usageMapping, matchNamespace);
+                return !this.isContainsUnusedParts(selectorAst[0], usageMapping);
             });
             if (outputSelectors.length) {
                 rule.selector = outputSelectors.join();
@@ -223,11 +231,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         });
     }
 
-    private isContainsUnusedParts(
-        selectorAst: Selector,
-        usageMapping: Record<string, boolean>,
-        matchNamespace: RegExp
-    ) {
+    private isContainsUnusedParts(selectorAst: Selector, usageMapping: Record<string, boolean>) {
         // TODO: !!-!-!! last working point
         let isContainsUnusedParts = false;
         walk(selectorAst, (node) => {
@@ -235,7 +239,7 @@ export class StylableOptimizer implements IStylableOptimizer {
                 return walk.stopAll;
             }
             if (node.type === 'class') {
-                const parts = matchNamespace.exec(node.value);
+                const parts = matchNamespaceRegexp.exec(node.value);
                 if (parts) {
                     if (usageMapping[parts[1]] === false) {
                         isContainsUnusedParts = true;

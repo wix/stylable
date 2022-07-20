@@ -555,7 +555,7 @@ export class StylableWebpackPlugin {
                     const buildData = stylableModules.get(module)!;
                     const ast = parse(css, { from: module.resource });
 
-                    optimizer.optimizeAst(
+                    optimizer.optimize(
                         optimizeOptions,
                         ast,
                         usageMapping,
