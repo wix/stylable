@@ -3,6 +3,7 @@ import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { processNamespace, processorWarnings } from '@stylable/core';
 import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
+import { STNamespace } from '@stylable/core/dist/features';
 
 chai.use(flatMatch);
 
@@ -21,7 +22,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: processorWarnings.INVALID_NAMESPACE_DEF(),
+            message: STNamespace.diagnostics.INVALID_NAMESPACE_DEF(),
         });
     });
 
@@ -30,7 +31,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: processorWarnings.EMPTY_NAMESPACE_DEF(),
+            message: STNamespace.diagnostics.EMPTY_NAMESPACE_DEF(),
         });
     });
 

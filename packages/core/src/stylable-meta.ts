@@ -18,6 +18,7 @@ import { setFieldForDeprecation } from './helpers/deprecation';
 import {
     STSymbol,
     STImport,
+    STNamespace,
     STGlobal,
     STVar,
     STMixin,
@@ -33,6 +34,7 @@ export const RESERVED_ROOT_NAME = 'root';
 const features = [
     STSymbol,
     STImport,
+    STNamespace,
     STGlobal,
     STVar,
     STMixin,

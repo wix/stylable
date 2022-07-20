@@ -6,6 +6,8 @@ export type { StylableSymbol } from './st-symbol';
 export * as STImport from './st-import';
 export type { ImportSymbol, Imported } from './st-import';
 
+export * as STNamespace from './st-namespace';
+
 export * as STGlobal from './st-global';
 
 export * as STScope from './st-scope';
