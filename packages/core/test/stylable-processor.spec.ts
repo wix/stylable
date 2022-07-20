@@ -6,10 +6,12 @@ import {
     knownPseudoClassesWithNestedSelectors,
     processorDiagnostics,
 } from '@stylable/core/dist/index-internal';
+import { STNamespace } from '@stylable/core/dist/features';
 
 chai.use(flatMatch);
 
 const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
+const stNamespaceDiagnostics = diagnosticBankReportToStrings(STNamespace.diagnostics);
 
 describe('Stylable postcss process', () => {
     it('report if missing filename', () => {
@@ -26,7 +28,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             severity: 'error',
-            message: processorStringDiagnostics.INVALID_NAMESPACE_DEF(),
+            message: stNamespaceDiagnostics.INVALID_NAMESPACE_DEF(),
         });
     });
 
@@ -35,7 +37,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             severity: 'error',
-            message: processorStringDiagnostics.EMPTY_NAMESPACE_DEF(),
+            message: stNamespaceDiagnostics.EMPTY_NAMESPACE_DEF(),
         });
     });
 
