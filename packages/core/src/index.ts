@@ -16,7 +16,8 @@ export type {
 export { StylableMeta } from './stylable-meta';
 export type { CSSResolve, JSResolve } from './stylable-resolver';
 export type { CSSDependency, JSDependency, Dependency } from './visit-meta-css-dependencies';
-export type { StylableResults, RuntimeStVar } from './stylable-transformer';
+export type { StylableResults } from './stylable-transformer';
+export type { RuntimeStVar } from './types';
 
 // utils
 export type { MinimalFS } from './cached-process-file';

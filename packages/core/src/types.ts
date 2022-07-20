@@ -1,6 +1,15 @@
 import type * as postcss from 'postcss';
 import type { Box } from './custom-values';
-import type { StylableExports } from './stylable-transformer';
+
+export type RuntimeStVar = string | { [key: string]: RuntimeStVar } | RuntimeStVar[];
+
+export interface StylableExports {
+    classes: Record<string, string>;
+    vars: Record<string, string>;
+    stVars: Record<string, RuntimeStVar>;
+    keyframes: Record<string, string>;
+    layers: Record<string, string>;
+}
 
 export interface ParsedValue {
     type: string;

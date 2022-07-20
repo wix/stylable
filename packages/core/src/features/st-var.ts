@@ -13,9 +13,8 @@ import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-pars
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from '../process-declaration-functions';
 import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
-import type { ParsedValue } from '../types';
+import type { ParsedValue, RuntimeStVar } from '../types';
 import type { Stylable } from '../stylable';
-import type { RuntimeStVar } from '../stylable-transformer';
 import postcssValueParser from 'postcss-value-parser';
 
 export interface VarSymbol {

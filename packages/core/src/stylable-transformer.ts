@@ -42,7 +42,7 @@ import {
 } from './stylable-resolver';
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import { namespaceEscape } from './helpers/escape';
-import type { ModuleResolver } from './types';
+import type { ModuleResolver, StylableExports } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
 
 const { hasOwnProperty } = Object.prototype;
@@ -51,16 +51,6 @@ export interface ResolvedElement {
     name: string;
     type: string;
     resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
-}
-
-export type RuntimeStVar = string | { [key: string]: RuntimeStVar } | RuntimeStVar[];
-
-export interface StylableExports {
-    classes: Record<string, string>;
-    vars: Record<string, string>;
-    stVars: Record<string, RuntimeStVar>;
-    keyframes: Record<string, string>;
-    layers: Record<string, string>;
 }
 
 export interface StylableResults {

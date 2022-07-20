@@ -10,10 +10,10 @@ import {
     createSymbolResolverWithCache,
     MetaResolvedSymbols,
 } from './stylable-resolver';
-import type { replaceValueHook, RuntimeStVar, StylableTransformer } from './stylable-transformer';
+import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
 import { unescapeCSS } from './helpers/escape';
-import type { ParsedValue } from './types';
+import type { ParsedValue, RuntimeStVar } from './types';
 import type { FeatureTransformContext } from './features/feature';
 import { CSSCustomProperty, STVar } from './features';
 import { unbox, CustomValueError } from './custom-values';

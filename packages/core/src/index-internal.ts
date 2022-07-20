@@ -4,14 +4,18 @@ export {
     StylableTransformer,
     postProcessor,
     replaceValueHook,
-    StylableExports,
     transformerDiagnostics,
     ResolvedElement,
 } from './stylable-transformer';
 export { MappedStates, STCustomSelector } from './features';
 export { murmurhash3_32_gc } from './murmurhash';
 export { cssParse } from './parser';
-export type { OptimizeConfig, IStylableOptimizer, StateParsedValue } from './types';
+export type {
+    OptimizeConfig,
+    IStylableOptimizer,
+    StateParsedValue,
+    StylableExports,
+} from './types';
 export {
     nativePseudoClasses,
     nativePseudoElements,
