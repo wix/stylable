@@ -8,7 +8,7 @@ import { murmurhash3_32_gc } from '../murmurhash';
 export const diagnostics = {
     INVALID_NAMESPACE_DEF: () => 'invalid @namespace',
     EMPTY_NAMESPACE_DEF: () => '@namespace must contain at least one character or digit',
-    INVALID_NAMESPACE_REFERENCE: () => 'st-namespace-reference dose not have any value', // ToDo: add test
+    INVALID_NAMESPACE_REFERENCE: () => 'st-namespace-reference dose not have any value',
 };
 
 const dataKey = plugableRecord.key<string[]>('namespace');
