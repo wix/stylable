@@ -17,7 +17,7 @@ export const diagnostics = {
         '11010',
         'error',
         () => 'st-namespace-reference dose not have any value'
-    ), // ToDo: add test
+    ),
 };
 
 const dataKey = plugableRecord.key<string[]>('namespace');
