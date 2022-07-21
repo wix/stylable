@@ -20,6 +20,9 @@ export const hooks = createFeature({
         plugableRecord.set(meta.data, dataKey, []);
     },
     analyzeAtRule({ context, atRule }) {
+        if (atRule.name !== 'st-namespace' && atRule.name !== 'namespace') {
+            return;
+        }
         const match = atRule.params.match(/["'](.*?)['"]/);
         if (match) {
             const collected = plugableRecord.getUnsafe(context.meta.data, dataKey);
@@ -33,7 +36,7 @@ export const hooks = createFeature({
         }
     },
     prepareAST({ node, toRemove }) {
-        if (node.type === 'atrule' && node.name === `namespace`) {
+        if (node.type === 'atrule' && (node.name === `st-namespace` || node.name === `namespace`)) {
             toRemove.push(node);
         }
     },
