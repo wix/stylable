@@ -25,11 +25,11 @@ describe('features/st-namespace', () => {
         expect(AMeta.namespace, 'a meta.namespace').to.eql('a');
         expect(BMeta.namespace, 'b meta.namespace').to.eql('b');
     });
-    it('should override default namespace', () => {
+    it('should override default namespace with @st-namespace', () => {
         const { sheets } = testStylableCore({
             '/other.st.css': `
                 /* @transform-remove */
-                @namespace "button";
+                @st-namespace "button";
 
                 /* @rule .button__x */
                 .x {}
@@ -45,7 +45,7 @@ describe('features/st-namespace', () => {
         // JS exports
         expect(exports.classes.x, `JS export`).to.eql('button__x');
     });
-    it('should prefer st-namespace-reference path to calculate hash', () => {
+    it('should prefer st-namespace-reference path to calculate hash part of namespace', () => {
         // assure namespace generated with st-namespace-reference
         // is identical between source and dist with the relative correction
         const { sheets } = testStylableCore(
@@ -114,7 +114,7 @@ describe('features/st-namespace', () => {
                     @transform-remove
                     @analyze-error ${diagnostics.EMPTY_NAMESPACE_DEF()}
                 */
-                @namespace '    ';
+                @st-namespace '    ';
             `,
         });
 
@@ -130,12 +130,43 @@ describe('features/st-namespace', () => {
             `,
         });
     });
+    describe('legacy @namespace behavior', () => {
+        /*
+            @namespace was previously used instead of @namespace
+            to preserve backwards compatibility, @namespace will
+            continue to define the stylable namespace under specific conditions.
+        */
+        it('should override default namespace with @namespace', () => {
+            const { sheets } = testStylableCore({
+                '/other.st.css': `
+                    /* @transform-remove */
+                    @namespace "button";
+    
+                    /* @rule .button__x */
+                    .x {}
+                `,
+            });
+
+            const { meta, exports } = sheets['/other.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(meta.namespace, 'meta.namespace').to.eql('button');
+            // ToDo: stop removing @namespace
+            // expect(meta.targetAst!.toString(), 'not removed').to.eql('@namespace "button"');
+
+            // JS exports
+            expect(exports.classes.x, `JS export`).to.eql('button__x');
+        });
+        it.skip('should prefer @st-namespace over @namespace');
+        it.skip('should not use @namespace with prefix or url()');
+    });
     describe('stylable API', () => {
         it('should resolve namespace via resolveNamespace', () => {
             const { sheets } = testStylableCore(
                 {
                     '/a.st.css': ``,
-                    '/b.st.css': `@namespace "x";`,
+                    '/b.st.css': `@st-namespace "x";`,
                 },
                 {
                     stylableConfig: {

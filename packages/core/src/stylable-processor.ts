@@ -161,7 +161,8 @@ export class StylableProcessor implements FeatureContext {
                     });
                     break;
                 }
-                case 'namespace': {
+                case 'namespace':
+                case 'st-namespace': {
                     STNamespace.hooks.analyzeAtRule({
                         context: this,
                         atRule,
