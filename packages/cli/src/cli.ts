@@ -15,7 +15,7 @@ async function main() {
         preserveWatchOutput,
         config,
     } = argv;
-    const { resolveNamespace } = require(namespaceResolver);
+    const { resolveNamespace } = require(resolve(namespaceResolver));
     const rootDir = resolve(argv.rootDir);
 
     //
