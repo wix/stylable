@@ -15,8 +15,10 @@ async function main() {
         preserveWatchOutput,
         config,
     } = argv;
-    const { resolveNamespace } = require(resolve(namespaceResolver));
     const rootDir = resolve(argv.rootDir);
+    const { resolveNamespace } = require(require.resolve(namespaceResolver, {
+        paths: [rootDir],
+    }));
 
     //
     const log = createLogger(
