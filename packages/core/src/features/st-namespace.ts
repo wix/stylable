@@ -3,15 +3,31 @@ import { createFeature, FeatureContext } from './feature';
 import { plugableRecord } from '../helpers/plugable-record';
 import { filename2varname } from '../helpers/string';
 import { stripQuotation } from '../helpers/string';
+import valueParser from 'postcss-value-parser';
 import { murmurhash3_32_gc } from '../murmurhash';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
+import type { AtRule } from 'postcss';
 
 export const diagnostics = {
-    INVALID_NAMESPACE_DEF: createDiagnosticReporter('11007', 'error', () => 'invalid @namespace'),
+    INVALID_NAMESPACE_DEF: createDiagnosticReporter(
+        '11007',
+        'error',
+        () => 'invalid @st-namespace'
+    ),
     EMPTY_NAMESPACE_DEF: createDiagnosticReporter(
         '11008',
         'error',
-        () => '@namespace must contain at least one character or digit'
+        () => '@st-namespace must contain at least one character or digit'
+    ),
+    EXTRA_DEFINITION: createDiagnosticReporter(
+        '11012',
+        'error',
+        () => '@st-namespace must contain a single string definition'
+    ),
+    INVALID_NAMESPACE_VALUE: createDiagnosticReporter(
+        '11013',
+        'error',
+        () => '@st-namespace must contain only letters, numbers or dashes'
     ),
     INVALID_NAMESPACE_REFERENCE: createDiagnosticReporter(
         '11010',
@@ -29,23 +45,16 @@ export const hooks = createFeature({
         plugableRecord.set(meta.data, dataKey, []);
     },
     analyzeAtRule({ context, atRule }) {
-        if (atRule.name !== 'st-namespace' && atRule.name !== 'namespace') {
+        const isSTNamespace = atRule.name === 'st-namespace';
+        const isNamespace = atRule.name === 'namespace';
+        if (!isSTNamespace && !isNamespace) {
             return;
         }
-        const match = atRule.params.match(/["'](.*?)['"]/);
+        const diag = isSTNamespace ? context.diagnostics : undefined;
+        const match = parseNamespace(atRule, diag);
         if (match) {
             const collected = plugableRecord.getUnsafe(context.meta.data, dataKey);
-            if (match[1].trim()) {
-                collected.push(match[1]);
-            } else {
-                context.diagnostics.report(diagnostics.EMPTY_NAMESPACE_DEF(), {
-                    node: atRule,
-                });
-            }
-        } else {
-            context.diagnostics.report(diagnostics.INVALID_NAMESPACE_DEF(), {
-                node: atRule,
-            });
+            collected.push(match);
         }
     },
     prepareAST({ node, toRemove }) {
@@ -56,6 +65,76 @@ export const hooks = createFeature({
 });
 
 // API
+
+function parseNamespace(node: AtRule, diag?: Diagnostics): string | undefined {
+    const { nodes } = valueParser(node.params);
+    if (!nodes.length) {
+        // empty params (not even empty quotes)
+        diag?.report(diagnostics.EMPTY_NAMESPACE_DEF(), { node });
+        return;
+    }
+    let isInvalid = false;
+    let namespace: string | undefined = undefined;
+    for (const valueNode of nodes) {
+        switch (valueNode.type) {
+            case 'string': {
+                if (namespace === undefined) {
+                    // first namespace
+                    if (!isInvalid) {
+                        namespace = stripQuotation(valueNode.value);
+                    }
+                } else {
+                    // extra definition - mark as invalid and clear namespace
+                    diag?.report(diagnostics.EXTRA_DEFINITION(), {
+                        node,
+                        word: valueParser.stringify(valueNode),
+                    });
+                    isInvalid = true;
+                    namespace = undefined;
+                }
+                break;
+            }
+            case 'comment':
+            case 'space':
+                // do nothing
+                break;
+            default: {
+                // invalid definition - mark as invalid and clear namespace
+                diag?.report(diagnostics.EXTRA_DEFINITION(), {
+                    node,
+                    word: valueParser.stringify(valueNode),
+                });
+                isInvalid = true;
+                namespace = undefined;
+            }
+        }
+    }
+    if (namespace === undefined) {
+        // no namespace found
+        diag?.report(diagnostics.INVALID_NAMESPACE_DEF(), {
+            node,
+        });
+        return;
+    }
+    if (namespace !== undefined && namespace.trim() === '') {
+        // empty namespace found
+        diag?.report(diagnostics.EMPTY_NAMESPACE_DEF(), {
+            node,
+        });
+        return;
+    }
+    // ident like - without escapes
+    // eslint-disable-next-line no-control-regex
+    if (!namespace.match(/^([a-zA-Z-_]|[^\x00-\x7F]+)([a-zA-Z-_0-9]|[^\x00-\x7F])*$/)) {
+        // empty namespace found
+        diag?.report(diagnostics.INVALID_NAMESPACE_VALUE(), {
+            node,
+            word: namespace,
+        });
+        return;
+    }
+    return namespace;
+}
 
 export function defaultProcessNamespace(namespace: string, origin: string, _source?: string) {
     return namespace + murmurhash3_32_gc(origin); // .toString(36);
