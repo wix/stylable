@@ -36,13 +36,15 @@ export const diagnostics = {
     ),
 };
 
-const dataKey = plugableRecord.key<string[]>('namespace');
+const dataKey = plugableRecord.key<{ namespaces: string[]; usedNativeNamespace: string[] }>(
+    'namespace'
+);
 
 // HOOKS
 
 export const hooks = createFeature({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, []);
+        plugableRecord.set(meta.data, dataKey, { namespaces: [], usedNativeNamespace: [] });
     },
     analyzeAtRule({ context, atRule }) {
         const isSTNamespace = atRule.name === 'st-namespace';
@@ -53,12 +55,24 @@ export const hooks = createFeature({
         const diag = isSTNamespace ? context.diagnostics : undefined;
         const match = parseNamespace(atRule, diag);
         if (match) {
-            const collected = plugableRecord.getUnsafe(context.meta.data, dataKey);
-            collected.push(match);
+            const { namespaces, usedNativeNamespace } = plugableRecord.getUnsafe(
+                context.meta.data,
+                dataKey
+            );
+            namespaces.push(match);
+            if (isNamespace) {
+                usedNativeNamespace.push(atRule.params);
+            }
         }
     },
-    prepareAST({ node, toRemove }) {
-        if (node.type === 'atrule' && (node.name === `st-namespace` || node.name === `namespace`)) {
+    prepareAST({ context, node, toRemove }) {
+        // remove @st-namespace or @namespace that was used as @st-namespace
+        const { usedNativeNamespace } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+        if (
+            node.type === 'atrule' &&
+            (node.name === 'st-namespace' ||
+                (node.name === 'namespace' && usedNativeNamespace.includes(node.params)))
+        ) {
             toRemove.push(node);
         }
     },
@@ -146,9 +160,9 @@ export function setMetaNamespace(
 ): void {
     const meta = context.meta;
     // resolve namespace
-    const collected = plugableRecord.getUnsafe(meta.data, dataKey);
+    const { namespaces } = plugableRecord.getUnsafe(meta.data, dataKey);
     const namespace =
-        collected[collected.length - 1] || filename2varname(path.basename(meta.source)) || 's';
+        namespaces[namespaces.length - 1] || filename2varname(path.basename(meta.source)) || 's';
     // resolve path origin
     let pathToSource: string | undefined;
     let length = meta.sourceAst.nodes.length;
