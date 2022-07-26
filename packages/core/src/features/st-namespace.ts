@@ -36,15 +36,21 @@ export const diagnostics = {
     ),
 };
 
-const dataKey = plugableRecord.key<{ namespaces: string[]; usedNativeNamespace: string[] }>(
-    'namespace'
-);
+const dataKey = plugableRecord.key<{
+    namespaces: string[];
+    usedNativeNamespace: string[];
+    foundStNamespace: boolean;
+}>('namespace');
 
 // HOOKS
 
 export const hooks = createFeature({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, { namespaces: [], usedNativeNamespace: [] });
+        plugableRecord.set(meta.data, dataKey, {
+            namespaces: [],
+            usedNativeNamespace: [],
+            foundStNamespace: false,
+        });
     },
     analyzeAtRule({ context, atRule }) {
         const isSTNamespace = atRule.name === 'st-namespace';
@@ -52,16 +58,22 @@ export const hooks = createFeature({
         if (!isSTNamespace && !isNamespace) {
             return;
         }
+        const data = plugableRecord.getUnsafe(context.meta.data, dataKey);
+        if (data.foundStNamespace && isNamespace) {
+            // ignore @namespace once @st-namespace was found
+            return;
+        }
         const diag = isSTNamespace ? context.diagnostics : undefined;
         const match = parseNamespace(atRule, diag);
         if (match) {
-            const { namespaces, usedNativeNamespace } = plugableRecord.getUnsafe(
-                context.meta.data,
-                dataKey
-            );
-            namespaces.push(match);
+            data.namespaces.push(match);
             if (isNamespace) {
-                usedNativeNamespace.push(atRule.params);
+                data.usedNativeNamespace.push(atRule.params);
+            } else {
+                // clear @namespace matches once @st-namespace if found
+                data.usedNativeNamespace.length = 0;
+                // mark to prevent any further @namespace collection
+                data.foundStNamespace = true;
             }
         }
     },
