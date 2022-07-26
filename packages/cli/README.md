@@ -154,7 +154,7 @@ export class Generator extends Base {
     }    
     protected generateIndexSource(indexFileTargetPath: string) {
         const source = super.generateIndexSource(indexFileTargetPath);
-        return '@namespace "INDEX";\n' + source;
+        return '@st-namespace "INDEX";\n' + source;
     }
 }
 ```
