@@ -136,6 +136,7 @@ export class CssService {
                     diag.code === 'unknownAtRules' &&
                     (atRuleName === '@custom-selector' ||
                         atRuleName === '@st-scope' ||
+                        atRuleName === '@st-namespace' ||
                         atRuleName === '@st-import' ||
                         atRuleName === '@st-global-custom-property')
                 ) {

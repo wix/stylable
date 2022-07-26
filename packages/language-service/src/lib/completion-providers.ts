@@ -292,7 +292,7 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
 };
 
 // Only top level
-// @namespace may not repeat
+// @st-namespace may not repeat
 export const TopLevelDirectiveProvider: CompletionProvider = {
     provide({
         parentSelector,
