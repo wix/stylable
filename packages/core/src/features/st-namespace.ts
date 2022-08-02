@@ -72,7 +72,7 @@ export const hooks = createFeature({
 
 // API
 
-function parseNamespace(node: AtRule, diag?: Diagnostics): string | undefined {
+export function parseNamespace(node: AtRule, diag?: Diagnostics): string | undefined {
     const { nodes } = valueParser(node.params);
     if (!nodes.length) {
         // empty params (not even empty quotes)

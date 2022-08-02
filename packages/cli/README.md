@@ -338,6 +338,8 @@ npx -p @stylable/cli stc-codemod --help
 
 - `st-global-custom-property-to-at-property` - Convert deprecated `@st-global-custom-property *;` to `@property st-global(*);` syntax.
 
+- `namespace-to-st-namespace` - Converts `@namespace` that would have been used as Stylable namespace configuration to `@st-namespace`.
+
 ### Provide an external codemod
 
 Codemods are transformation operations for code based on AST.
