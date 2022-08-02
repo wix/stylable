@@ -262,7 +262,33 @@ describe('features/st-namespace', () => {
             // JS exports
             expect(exports.classes.x, `JS export`).to.eql('button__x');
         });
-        it.skip('should prefer @st-namespace over @namespace');
+        it('should prefer @st-namespace over @namespace', () => {
+            const { sheets } = testStylableCore({
+                '/entry.st.css': `
+                    @namespace "ns1";
+
+                    /* @transform-remove */
+                    @st-namespace "button";
+
+                    @namespace "ns2";
+    
+                    /* @rule .button__x */
+                    .x {}
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(meta.namespace, 'meta.namespace').to.eql('button');
+            expect(
+                meta.outputAst!.toString(),
+                'not removed because @st-namespace exist'
+            ).to.satisfy((output: string) =>
+                ['@namespace "ns1";', '@namespace "ns2";'].every((def) => output.includes(def))
+            );
+        });
         it('should not use @namespace with prefix, url() or invalid namespace', () => {
             const { sheets } = testStylableCore({
                 '/entry.st.css': `
