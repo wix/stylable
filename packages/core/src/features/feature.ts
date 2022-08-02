@@ -47,6 +47,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
     prepareAST: (options: {
+        meta: StylableMeta;
         node: postcss.ChildNode;
         toRemove: Array<postcss.Node | (() => void)>;
     }) => void;

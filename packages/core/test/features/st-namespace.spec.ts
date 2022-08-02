@@ -258,8 +258,6 @@ describe('features/st-namespace', () => {
             shouldReportNoDiagnostics(meta);
 
             expect(meta.namespace, 'meta.namespace').to.eql('button');
-            // ToDo: stop removing @namespace
-            // expect(meta.targetAst!.toString(), 'not removed').to.eql('@namespace "button"');
 
             // JS exports
             expect(exports.classes.x, `JS export`).to.eql('button__x');
@@ -283,14 +281,15 @@ describe('features/st-namespace', () => {
             shouldReportNoDiagnostics(meta);
 
             expect(meta.namespace, 'meta.namespace').to.eql('entry');
-            // expect(meta.targetAst!.toString(), 'not removed').to.satisfy((output: string) =>
-            //     [
-            //         '@namespace "http://www.w3.org/1999/xhtml";',
-            //         '@namespace prefix "button"',
-            //         '@namespace url("button")',
-            //         '@namespace prefix url("button")',
-            //     ].every((def) => output.includes(def))
-            // );
+            expect(meta.outputAst!.toString(), 'not removed unused as @st-namespace').to.satisfy(
+                (output: string) =>
+                    [
+                        '@namespace "http://www.w3.org/1999/xhtml";',
+                        '@namespace prefix "button"',
+                        '@namespace url("button")',
+                        '@namespace prefix url("button")',
+                    ].every((def) => output.includes(def))
+            );
 
             // JS exports
             expect(exports.classes.x, `JS export`).to.eql('entry__x');

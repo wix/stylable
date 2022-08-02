@@ -469,7 +469,7 @@ export function process(
 export function prepareAST(meta: StylableMeta, ast: postcss.Root) {
     const toRemove: Array<postcss.Node | (() => void)> = [];
     ast.walk((node) => {
-        const input = { node, toRemove };
+        const input = { meta, node, toRemove };
         // namespace
         STNamespace.hooks.prepareAST(input);
         // custom selectors
