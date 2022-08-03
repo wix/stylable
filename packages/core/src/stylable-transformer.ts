@@ -18,7 +18,7 @@ import {
 } from '@tokey/css-selector-parser';
 import { createWarningRule, isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
-import type { ClassSymbol, ElementSymbol, FeatureTransformContext } from './features';
+import { ClassSymbol, ElementSymbol, FeatureTransformContext, STNamespace } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
@@ -838,11 +838,7 @@ function prepareAST(context: FeatureTransformContext, ast: postcss.Root) {
     const toRemove: Array<postcss.Node | (() => void)> = [];
     ast.walk((node) => {
         const input = { context, node, toRemove };
-        // namespace
-        if (node.type === 'atrule' && node.name === `namespace`) {
-            toRemove.push(node);
-        }
-        // extracted features
+        STNamespace.hooks.prepareAST(input);
         STImport.hooks.prepareAST(input);
         STScope.hooks.prepareAST(input);
         STVar.hooks.prepareAST(input);

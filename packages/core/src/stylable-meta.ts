@@ -7,6 +7,7 @@ import { getSourcePath } from './stylable-utils';
 import {
     STSymbol,
     STImport,
+    STNamespace,
     STGlobal,
     STScope,
     STVar,
@@ -22,6 +23,7 @@ import {
 const features = [
     STSymbol,
     STImport,
+    STNamespace,
     STGlobal,
     STScope,
     STVar,

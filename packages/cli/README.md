@@ -154,7 +154,7 @@ export class Generator extends Base {
     }    
     protected generateIndexSource(indexFileTargetPath: string) {
         const source = super.generateIndexSource(indexFileTargetPath);
-        return '@namespace "INDEX";\n' + source;
+        return '@st-namespace "INDEX";\n' + source;
     }
 }
 ```
@@ -337,6 +337,8 @@ npx -p @stylable/cli stc-codemod --help
 > Note that this codemod does not preserve comments inside the `:import` 
 
 - `st-global-custom-property-to-at-property` - Convert deprecated `@st-global-custom-property *;` to `@property st-global(*);` syntax.
+
+- `namespace-to-st-namespace` - Converts `@namespace` that would have been used as Stylable namespace configuration to `@st-namespace`.
 
 ### Provide an external codemod
 

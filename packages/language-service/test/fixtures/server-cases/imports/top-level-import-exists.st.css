@@ -1,4 +1,4 @@
-@namespace "moshe";
+@st-namespace "moshe";
 
 :import {
     -st-from: "./import-from-here.st.css";
