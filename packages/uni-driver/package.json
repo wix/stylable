@@ -1,6 +1,6 @@
 {
   "name": "@stylable/uni-driver",
-  "version": "4.14.2",
+  "version": "4.15.0",
   "description": "Stylable UniDriver testing utilities",
   "main": "dist/index.js",
   "scripts": {
