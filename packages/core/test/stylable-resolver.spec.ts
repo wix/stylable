@@ -43,7 +43,7 @@ describe('stylable-resolver', () => {
     it('should resolve extend classes', () => {
         const { fs } = testStylableCore({
             '/button.st.css': `
-                @namespace:'Button';
+                @st-namespace:'Button';
                 .root {
                     color:red;
                 }
@@ -69,7 +69,7 @@ describe('stylable-resolver', () => {
     it('should resolve extend elements', () => {
         const { fs } = testStylableCore({
             '/button.st.css': `
-                @namespace:'Button';
+                @st-namespace:'Button';
                 .root {
                     color:red;
                 }
@@ -94,7 +94,7 @@ describe('stylable-resolver', () => {
     it('should not enter infinite loops even with broken code', () => {
         const { fs } = testStylableCore({
             '/button.st.css': `
-                @namespace: 'Button';
+                @st-namespace: 'Button';
                 :import {
                     -st-from: './extended-button.st.css';
                     -st-default: Button;

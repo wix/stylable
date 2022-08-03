@@ -1,8 +1,6 @@
-import path from 'path';
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { parseSelector as deprecatedParseSelector } from './deprecated/deprecated-selector-utils';
-import { murmurhash3_32_gc } from './murmurhash';
 import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
 import {
@@ -18,6 +16,7 @@ import {
     FeatureContext,
     STSymbol,
     STImport,
+    STNamespace,
     STGlobal,
     STScope,
     CSSClass,
@@ -38,7 +37,6 @@ import { isChildOfAtRule } from './helpers/rule';
 import type { SRule } from './deprecated/postcss-ast-extension';
 import { stValuesMap } from './deprecated/value-mapping';
 import { SBTypesParsers } from './stylable-value-parsers';
-import { stripQuotation, filename2varname } from './helpers/string';
 import { warnOnce } from './helpers/deprecation';
 
 const parseStates = SBTypesParsers[`-st-states`];
@@ -61,16 +59,6 @@ export const processorWarnings = {
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
     },
-    INVALID_NAMESPACE_DEF() {
-        return 'invalid @namespace';
-    },
-    EMPTY_NAMESPACE_DEF() {
-        return '@namespace must contain at least one character or digit';
-    },
-
-    INVALID_NAMESPACE_REFERENCE() {
-        return 'st-namespace-reference dose not have any value';
-    },
     INVALID_NESTING(child: string, parent: string) {
         return `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`;
     },
@@ -81,7 +69,7 @@ export class StylableProcessor implements FeatureContext {
     private customSelectorData: Record<string, { isScoped: boolean }> = {};
     constructor(
         public diagnostics = new Diagnostics(),
-        private resolveNamespace = processNamespace
+        private resolveNamespace = STNamespace.defaultProcessNamespace
     ) {}
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics);
@@ -127,6 +115,8 @@ export class StylableProcessor implements FeatureContext {
             this.collectUrls(decl);
         });
 
+        STNamespace.setMetaNamespace(this, this.resolveNamespace);
+
         STSymbol.reportRedeclare(this);
 
         prepareAST(this.meta, root);
@@ -135,8 +125,6 @@ export class StylableProcessor implements FeatureContext {
     }
 
     protected handleAtRules(root: postcss.Root) {
-        let namespace = '';
-
         const analyzeRule = (rule: postcss.Rule, { isScoped }: { isScoped: boolean }) => {
             return this.handleRule(rule as SRule, {
                 isScoped,
@@ -154,17 +142,13 @@ export class StylableProcessor implements FeatureContext {
                     });
                     break;
                 }
-                case 'namespace': {
-                    const match = atRule.params.match(/["'](.*?)['"]/);
-                    if (match) {
-                        if (match[1].trim()) {
-                            namespace = match[1];
-                        } else {
-                            this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
-                        }
-                    } else {
-                        this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
-                    }
+                case 'namespace':
+                case 'st-namespace': {
+                    STNamespace.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
                     break;
                 }
                 case 'keyframes':
@@ -211,13 +195,15 @@ export class StylableProcessor implements FeatureContext {
                     break;
                 case 'property':
                 case 'st-global-custom-property': {
-                    CSSCustomProperty.hooks.analyzeAtRule({ context: this, atRule, analyzeRule });
+                    CSSCustomProperty.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
                     break;
                 }
             }
         });
-        namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
-        this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     private collectUrls(decl: postcss.Declaration) {
         processDeclarationFunctions(
@@ -230,33 +216,6 @@ export class StylableProcessor implements FeatureContext {
             false
         );
     }
-
-    private handleNamespaceReference(namespace: string): string {
-        let pathToSource: string | undefined;
-        let length = this.meta.ast.nodes.length;
-
-        while (length--) {
-            const node = this.meta.ast.nodes[length];
-            if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
-                const i = node.text.indexOf('=');
-                if (i === -1) {
-                    this.diagnostics.error(node, processorWarnings.INVALID_NAMESPACE_REFERENCE());
-                } else {
-                    pathToSource = stripQuotation(node.text.slice(i + 1));
-                }
-                break;
-            }
-        }
-
-        return this.resolveNamespace(
-            namespace,
-            pathToSource
-                ? path.resolve(path.dirname(this.meta.source), pathToSource)
-                : this.meta.source,
-            this.meta.source
-        );
-    }
-
     protected handleRule(
         rule: SRule,
         { isScoped, reportUnscoped }: { isScoped: boolean; reportUnscoped: boolean }
@@ -499,10 +458,6 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
     return new StylableMeta(root, diagnostics);
 }
 
-export function processNamespace(namespace: string, origin: string, _source?: string) {
-    return namespace + murmurhash3_32_gc(origin); // .toString(36);
-}
-
 export function process(
     root: postcss.Root,
     diagnostics = new Diagnostics(),
@@ -514,11 +469,9 @@ export function process(
 export function prepareAST(meta: StylableMeta, ast: postcss.Root) {
     const toRemove: Array<postcss.Node | (() => void)> = [];
     ast.walk((node) => {
-        const input = { node, toRemove };
+        const input = { meta, node, toRemove };
         // namespace
-        if (node.type === 'atrule' && node.name === `namespace`) {
-            toRemove.push(node);
-        }
+        STNamespace.hooks.prepareAST(input);
         // custom selectors
         if (node.type === 'rule') {
             expandCustomSelectors(node, meta.customSelectors, meta.diagnostics);
@@ -535,3 +488,5 @@ export function prepareAST(meta: StylableMeta, ast: postcss.Root) {
         typeof removeOrNode === 'function' ? removeOrNode() : removeOrNode.remove();
     }
 }
+// ToDo: remove export and reroute import from feature
+export const processNamespace = STNamespace.defaultProcessNamespace;
