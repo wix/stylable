@@ -6,7 +6,7 @@ import { promisify } from 'util';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
 import { symlinkSync, existsSync, realpathSync } from 'fs';
-import { deferred } from 'promise-assist';
+import { deferred, waitFor } from 'promise-assist';
 import { runServer } from './run-server';
 import { createTempDirectorySync } from './file-system-helpers';
 import { loadDirSync } from './file-system-helpers';
@@ -136,13 +136,18 @@ export class ProjectRunner {
     public async actAndWaitForRecompile(
         actionDesc: string,
         action: () => Promise<void> | void,
-        validate: () => Promise<void> | void = () => Promise.resolve()
+        validate: (controlledWaitFor: typeof waitFor) => Promise<void> | void = () =>
+            Promise.resolve()
     ) {
+        const controlledWaitFor: typeof waitFor = (action, options = {}) => {
+            // ToDo: figure out how to add time to the total test timeout
+            return waitFor(action, { timeout: 15000, ...options });
+        };
         try {
             const recompile = this.waitForRecompile();
             await action();
             await recompile;
-            await validate();
+            await validate(controlledWaitFor);
         } catch (e) {
             if (e) {
                 (e as Error).message = actionDesc + '\n' + (e as Error).message;
