@@ -47,7 +47,18 @@ export interface CachedJsModule {
     value: JsModule;
 }
 
-export type CachedModuleEntity = InvalidCachedModule | CachedStylableMeta | CachedJsModule;
+export interface ResolveOnly {
+    resolvedPath: string;
+    kind: 'resolve';
+    value: null;
+}
+
+export type CachedModuleEntity =
+    | InvalidCachedModule
+    | CachedStylableMeta
+    | CachedJsModule
+    | ResolveOnly;
+
 export type StylableResolverCache = Map<string, CachedModuleEntity>;
 
 export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
@@ -105,16 +116,22 @@ export class StylableResolver {
         protected cache?: StylableResolverCache
     ) {}
     private getModule({ context, request }: Imported): CachedModuleEntity {
+        let entity: CachedModuleEntity;
+        let resolvedPath: string | undefined;
+
         const key = cacheKey(context, request);
+
         if (this.cache?.has(key)) {
-            return this.cache.get(key)!;
+            const entity = this.cache.get(key)!;
+            if (entity.kind === 'resolve') {
+                resolvedPath = entity.resolvedPath;
+            } else {
+                return entity;
+            }
         }
 
-        let entity: CachedModuleEntity;
-        let resolvedPath: string;
-
         try {
-            resolvedPath = this.moduleResolver(context, request);
+            resolvedPath ||= this.moduleResolver(context, request);
         } catch (error) {
             entity = {
                 kind: request.endsWith('css') ? 'css' : 'js',
@@ -149,11 +166,18 @@ export class StylableResolver {
         return entity;
     }
     public resolvePath(directoryPath: string, request: string): string {
-        const resolvedPath = this.cache?.get(cacheKey(directoryPath, request))?.resolvedPath;
+        const key = cacheKey(directoryPath, request);
+        let resolvedPath = this.cache?.get(key)?.resolvedPath;
         if (resolvedPath) {
             return resolvedPath;
         }
-        return this.moduleResolver(directoryPath, request);
+        resolvedPath = this.moduleResolver(directoryPath, request);
+        this.cache?.set(key, {
+            resolvedPath,
+            value: null,
+            kind: 'resolve',
+        });
+        return resolvedPath;
     }
     public resolveImported(
         imported: Imported,
