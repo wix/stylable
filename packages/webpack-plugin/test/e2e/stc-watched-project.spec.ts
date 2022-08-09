@@ -2,7 +2,6 @@ import { promises } from 'fs';
 import { dirname, join } from 'path';
 import { expect } from 'chai';
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
-import { waitFor } from 'promise-assist';
 
 const { writeFile } = promises;
 
@@ -46,7 +45,7 @@ describe(`(${project})`, () => {
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
                     '.b{ color: green; }'
                 ),
-            () =>
+            (waitFor) =>
                 waitFor(() => {
                     expect(projectRunner.getProjectFiles()['style-output/style-b.st.css']).to.eql(
                         '.b{ color: green; }'
@@ -68,7 +67,7 @@ describe(`(${project})`, () => {
                     }
                 `
                 ),
-            () =>
+            (waitFor) =>
                 waitFor(async () => {
                     await page.reload();
                     const styleElements = await page.evaluate(
@@ -90,7 +89,7 @@ describe(`(${project})`, () => {
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
                     '.b{ color: blue; }'
                 ),
-            () =>
+            (waitFor) =>
                 waitFor(
                     async () => {
                         expect(
@@ -108,7 +107,7 @@ describe(`(${project})`, () => {
                             /\.index\d+__root \{ color: blue; z-index: 1; \}/
                         );
                     },
-                    { timeout: 5_000, delay: 0 }
+                    { delay: 0 }
                 )
         );
     });
