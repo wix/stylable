@@ -22,6 +22,7 @@ export interface Options {
     watchMode?: boolean;
     useTempDir?: boolean;
     tempDirPath?: string;
+    totalTestTime?: number;
 }
 
 type MochaHook = import('mocha').HookFunction;
@@ -38,7 +39,7 @@ export class ProjectRunner {
         const projectRunner = new this(runnerOptions);
 
         before('bundle and serve project', async function () {
-            this.timeout(40000);
+            this.timeout(runnerOptions.totalTestTime ?? 40000);
             await projectRunner.run();
             await projectRunner.serve();
         });
