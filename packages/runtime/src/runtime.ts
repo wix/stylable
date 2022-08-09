@@ -1,5 +1,6 @@
 /* eslint-disable no-var */
 import type { Host, StateMap, StateValue } from './types';
+import { injectStyles } from './inject-styles';
 
 export function stylesheet(host?: Host) {
     host = host || {};
@@ -87,3 +88,7 @@ export function stylesheet(host?: Host) {
     host.stc = cssStates;
     return host as Required<Pick<Host, 'stc' | 'sts'>>;
 }
+
+const { stc, sts } = stylesheet({});
+export { stc as statesRuntime, sts as classesRuntime };
+export { injectStyles };
