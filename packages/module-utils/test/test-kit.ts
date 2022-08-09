@@ -1,4 +1,4 @@
-import { classesRuntime, statesRuntime, injectCSS } from '@stylable/runtime';
+import * as runtime from '@stylable/runtime';
 import { stylableModuleFactory, Options } from '@stylable/module-utils';
 import type { IDirectoryContents } from '@file-services/types';
 import { createMemoryFs } from '@file-services/memory';
@@ -24,7 +24,7 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
 export function evalStylableModule<T = unknown>(source: string, fullPath: string): T {
     return evalModule(fullPath, source, (id) => {
         if (id === '@stylable/runtime' || id === '@stylable/runtime/dist/runtime') {
-            return { classesRuntime, statesRuntime, injectCSS };
+            return runtime;
         }
         throw new Error(`Could not find module: ${id}`);
     }) as T;

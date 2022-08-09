@@ -84,7 +84,7 @@ const stylableLoader: LoaderDefinition = function (content) {
         return callback(
             null,
             generateStylableJSModuleSource({
-                format: 'esm',
+                moduleType: 'esm',
                 namespace: meta.namespace,
                 jsExports,
             })

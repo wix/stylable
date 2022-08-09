@@ -44,7 +44,7 @@ export const testStylesheet = {
 
 export function createPartialElement(): PartialElement {
     // make sure we implement public api correctly
-    // we don't need querySelector, querySelectorAll, for these test and we don't want JSDOM.
+    // minimal DOM element interface
     type IsTrue<T extends true> = T;
     type _Check = IsTrue<HTMLElement extends PartialElement ? true : false>;
 

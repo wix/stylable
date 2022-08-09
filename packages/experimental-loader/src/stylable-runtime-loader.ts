@@ -32,7 +32,7 @@ const stylableRuntimeLoader: LoaderDefinition = function loader(content) {
     return generateStylableJSModuleSource({
         namespace,
         jsExports,
-        format: 'esm',
+        moduleType: 'esm',
     });
 };
 

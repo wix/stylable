@@ -138,7 +138,7 @@ export function buildSingleFile({
             () =>
                 generateStylableJSModuleSource(
                     {
-                        format,
+                        moduleType: format,
                         imports: injectCSSRequest ? [{ from: `./${cssAssetFilename}` }] : [],
                         jsExports: res.exports,
                         namespace: res.meta.namespace,

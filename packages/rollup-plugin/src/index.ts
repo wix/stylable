@@ -181,7 +181,7 @@ export function stylableRollupPlugin({
 
             return {
                 code: generateStylableJSModuleSource({
-                    format: 'esm',
+                    moduleType: 'esm',
                     jsExports: exports,
                     namespace: meta.namespace,
                     imports: moduleImports,

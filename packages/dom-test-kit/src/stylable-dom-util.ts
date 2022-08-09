@@ -126,6 +126,6 @@ export class StylableDOMUtil {
 
     public getBaseStateWithParam(stateName: string) {
         const singleCharState = 'x';
-        return this.cssStates({ [stateName]: singleCharState }).slice(0, -3);
+        return this.cssStates({ [stateName]: singleCharState }).slice(0, -3/* state delimiter `---` */);
     }
 }

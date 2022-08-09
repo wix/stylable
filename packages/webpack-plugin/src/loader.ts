@@ -42,7 +42,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
             },
             header: imports.join('\n'),
             footer: `if(import.meta.webpackHot /* HMR */) { import.meta.webpackHot.accept();}`,
-            format: 'esm',
+            moduleType: 'esm',
             varType,
         },
         this.cssInjection === 'js'

@@ -6,10 +6,10 @@ export interface Options {
     staticImports: string[];
     runtimePath: string;
     runtimeStylesheetId: 'module' | 'namespace';
-    /**@deprecated */
-    renderableOnly: boolean;
-    format: 'esm' | 'cjs';
+    moduleType: 'esm' | 'cjs';
     runtimeId: string;
+    /**@deprecated not in use */
+    renderableOnly: boolean;
 }
 
 export function stylableModuleFactory(
@@ -19,7 +19,7 @@ export function stylableModuleFactory(
         runtimeStylesheetId = 'module',
         injectCSS = true,
         staticImports = [],
-        format = 'cjs',
+        moduleType = 'cjs',
         runtimeId = '0',
     }: Partial<Options> = {}
 ) {
@@ -29,7 +29,7 @@ export function stylableModuleFactory(
 
         return generateStylableJSModuleSource(
             {
-                format,
+                moduleType: moduleType,
                 imports: staticImports.map((from) => ({ from })),
                 jsExports: exports,
                 namespace: meta.namespace,

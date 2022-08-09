@@ -39,13 +39,13 @@ interface ModuleOptions {
     /**
      * target module format
      */
-    format: 'esm' | 'cjs';
+    moduleType: 'esm' | 'cjs';
     /**
      * es3 compat mode
      */
     varType?: 'const' | 'var';
     /**
-     * inject code before right after imports
+     * inject code immediately after imports 
      */
     header?: string;
     /**
@@ -62,7 +62,7 @@ export function generateStylableJSModuleSource(
         namespace,
         imports = [],
         jsExports,
-        format,
+        moduleType,
         runtimeRequest,
         varType = 'const',
         header = '',
@@ -70,10 +70,10 @@ export function generateStylableJSModuleSource(
     } = moduleOptions;
 
     const { classes, keyframes, layers, stVars, vars } = jsExports;
-    const exportKind = format === 'esm' ? `export ${varType} ` : 'module.exports.';
+    const exportKind = moduleType === 'esm' ? `export ${varType} ` : 'module.exports.';
     return `
-${imports.map(moduleRequest(format)).join('\n')}
-${runtimeImport(format, runtimeRequest, injectOptions)}
+${imports.map(moduleRequest(moduleType)).join('\n')}
+${runtimeImport(moduleType, runtimeRequest, injectOptions)}
 
 ${header}
 
@@ -91,21 +91,21 @@ ${exportKind}layers = ${JSON.stringify(layers)};
 ${exportKind}stVars = ${JSON.stringify(stVars)}; 
 ${exportKind}vars = ${JSON.stringify(vars)}; 
 
-${runtimeExecuteInject(format, injectOptions)}
+${runtimeExecuteInject(moduleType, injectOptions)}
 
 ${footer}
 `;
 }
 
-function moduleRequest(format: 'esm' | 'cjs') {
+function moduleRequest(moduleType: 'esm' | 'cjs') {
     return (moduleRequest: { from: string }) => {
         const request = JSON.stringify(moduleRequest.from);
-        return format === 'esm' ? `import ${request};` : `require(${request});`;
+        return moduleType === 'esm' ? `import ${request};` : `require(${request});`;
     };
 }
 
 function runtimeImport(
-    format: 'esm' | 'cjs',
+    moduleType: 'esm' | 'cjs',
     runtimeRequest: string | undefined,
     injectOptions: InjectCSSOptions | undefined
 ) {
@@ -113,21 +113,21 @@ function runtimeImport(
     const request = JSON.stringify(
         runtimeRequest ??
             // TODO: we use direct requests here since we don't know how this will be resolved
-            (format === 'esm' ? '@stylable/runtime/esm/runtime' : '@stylable/runtime/dist/runtime')
+            (moduleType === 'esm' ? '@stylable/runtime/esm/runtime' : '@stylable/runtime/dist/runtime')
     );
-    return format === 'esm'
+    return moduleType === 'esm'
         ? `import { classesRuntime, statesRuntime${importInjectCSS} } from ${request};`
         : `const { classesRuntime, statesRuntime${importInjectCSS} } = require(${request});`;
 }
 
-function runtimeExecuteInject(format: 'esm' | 'cjs', injectOptions: InjectCSSOptions | undefined) {
+function runtimeExecuteInject(moduleType: 'esm' | 'cjs', injectOptions: InjectCSSOptions | undefined) {
     if (!injectOptions?.css) {
         return '';
     }
     const { id, css, depth, runtimeId } = injectOptions;
 
     let out = 'injectCSS(';
-    out += id ? JSON.stringify(id) : format === 'esm' ? 'import.meta.url' : 'module.id';
+    out += id ? JSON.stringify(id) : moduleType === 'esm' ? 'import.meta.url' : 'module.id';
     out += ', ';
     out += JSON.stringify(css);
     out += ', ';
