@@ -14,6 +14,10 @@ interface InjectCSSOptions {
      */
     depth: number | string;
     /**
+     *  use code to get the depth
+     */
+    depthCode?: string;
+    /**
      *  reconciliation will happen only for style with the same runtimeId
      */
     runtimeId: string;
@@ -45,7 +49,7 @@ interface ModuleOptions {
      */
     varType?: 'const' | 'var';
     /**
-     * inject code immediately after imports 
+     * inject code immediately after imports
      */
     header?: string;
     /**
@@ -113,25 +117,30 @@ function runtimeImport(
     const request = JSON.stringify(
         runtimeRequest ??
             // TODO: we use direct requests here since we don't know how this will be resolved
-            (moduleType === 'esm' ? '@stylable/runtime/esm/runtime' : '@stylable/runtime/dist/runtime')
+            (moduleType === 'esm'
+                ? '@stylable/runtime/esm/runtime'
+                : '@stylable/runtime/dist/runtime')
     );
     return moduleType === 'esm'
         ? `import { classesRuntime, statesRuntime${importInjectCSS} } from ${request};`
         : `const { classesRuntime, statesRuntime${importInjectCSS} } = require(${request});`;
 }
 
-function runtimeExecuteInject(moduleType: 'esm' | 'cjs', injectOptions: InjectCSSOptions | undefined) {
+function runtimeExecuteInject(
+    moduleType: 'esm' | 'cjs',
+    injectOptions: InjectCSSOptions | undefined
+) {
     if (!injectOptions?.css) {
         return '';
     }
-    const { id, css, depth, runtimeId } = injectOptions;
+    const { id, css, depthCode, depth, runtimeId } = injectOptions;
 
     let out = 'injectCSS(';
     out += id ? JSON.stringify(id) : moduleType === 'esm' ? 'import.meta.url' : 'module.id';
     out += ', ';
     out += JSON.stringify(css);
     out += ', ';
-    out += JSON.stringify(depth);
+    out += depthCode || JSON.stringify(depth) || '-1';
     out += ', ';
     out += JSON.stringify(runtimeId);
     out += ');';
