@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@file-services/types": "^7.0.0",
-    "@file-services/typescript": "^7.0.0",
+    "@file-services/typescript": "^7.0.1",
     "@stylable/code-formatter": "^5.1.0",
     "@stylable/core": "^5.1.0",
     "css-selector-tokenizer": "^0.8.0",
