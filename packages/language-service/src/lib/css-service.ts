@@ -138,6 +138,7 @@ export class CssService {
                         atRuleName === '@st-scope' ||
                         atRuleName === '@st-namespace' ||
                         atRuleName === '@st-import' ||
+                        atRuleName === '@property' ||
                         atRuleName === '@st-global-custom-property')
                 ) {
                     return false;
