@@ -407,4 +407,25 @@ describe('stylable-resolver', () => {
         expect(meta.diagnostics.reports).to.eql([]);
         expect(meta.transformDiagnostics!.reports).to.eql([]);
     });
+
+    it('should not hit the underling resolver more then once', () => {
+        let resolverHits = 0;
+        const { stylable } = testStylableCore(
+            {},
+            {
+                stylableConfig: {
+                    resolverCache: new Map(),
+                    resolveModule: () => {
+                        resolverHits++;
+                        return '';
+                    },
+                },
+            }
+        );
+
+        stylable.resolver.resolvePath('/', './entry.st.css');
+        stylable.resolver.resolvePath('/', './entry.st.css');
+
+        expect(resolverHits).to.equal(1);
+    });
 });

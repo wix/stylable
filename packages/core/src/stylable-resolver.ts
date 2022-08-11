@@ -168,7 +168,7 @@ export class StylableResolver {
     public resolvePath(directoryPath: string, request: string): string {
         const key = cacheKey(directoryPath, request);
         let resolvedPath = this.cache?.get(key)?.resolvedPath;
-        if (resolvedPath) {
+        if (resolvedPath !== undefined) {
             return resolvedPath;
         }
         resolvedPath = this.moduleResolver(directoryPath, request);
