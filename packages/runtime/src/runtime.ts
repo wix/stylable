@@ -89,6 +89,6 @@ export function stylesheet(host?: Host) {
     return host as Required<Pick<Host, 'stc' | 'sts'>>;
 }
 
+const { sti } = injectStyles({});
 const { stc, sts } = stylesheet({});
-export { stc as statesRuntime, sts as classesRuntime };
-export { injectStyles };
+export { sti as injectCSS, stc as statesRuntime, sts as classesRuntime };
