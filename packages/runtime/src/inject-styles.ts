@@ -44,4 +44,5 @@ export function injectStyles(host: Host) {
         }
     }
     host.sti = stylableRuntime;
+    return host;
 }

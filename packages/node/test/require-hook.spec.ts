@@ -62,6 +62,7 @@ describe('require hook', () => {
     it('should ignoreJSModules', () => {
         attachHook({ ignoreJSModules: true });
         const m = require(join(fixturesPath, 'has-js.st.css'));
-        expect(m.$id).to.contain('has-js.st.css');
+        expect(m.test).equal(undefined);
+        expect(m.namespace).to.match(/^hasjs/);
     });
 });
