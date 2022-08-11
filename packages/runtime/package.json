@@ -2,7 +2,8 @@
   "name": "@stylable/runtime",
   "version": "5.1.0",
   "description": "Stylable runtime DOM integration",
-  "main": "dist/index.js",
+  "main": "dist/runtime.js",
+  "module": "esm/runtime.js",
   "scripts": {
     "test": "run-p test:unit test:e2e",
     "test:unit": "mocha \"dist/test/unit/**/*.spec.js\"",

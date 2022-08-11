@@ -1,4 +1,4 @@
-import type { RuntimeStylesheet } from './dist';
+import type { RuntimeStylesheet } from './dist/types';
 
 export const classes: RuntimeStylesheet['classes'];
 export const keyframes: RuntimeStylesheet['keyframes'];
