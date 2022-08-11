@@ -6,7 +6,7 @@ import { promisify } from 'util';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
 import { symlinkSync, existsSync, realpathSync } from 'fs';
-import { deferred } from 'promise-assist';
+import { deferred, waitFor, timeout } from 'promise-assist';
 import { runServer } from './run-server';
 import { createTempDirectorySync } from './file-system-helpers';
 import { loadDirSync } from './file-system-helpers';
@@ -22,6 +22,7 @@ export interface Options {
     watchMode?: boolean;
     useTempDir?: boolean;
     tempDirPath?: string;
+    totalTestTime?: number;
 }
 
 type MochaHook = import('mocha').HookFunction;
@@ -38,7 +39,7 @@ export class ProjectRunner {
         const projectRunner = new this(runnerOptions);
 
         before('bundle and serve project', async function () {
-            this.timeout(40000);
+            this.timeout(runnerOptions.totalTestTime ?? 40000);
             await projectRunner.run();
             await projectRunner.serve();
         });
@@ -136,13 +137,23 @@ export class ProjectRunner {
     public async actAndWaitForRecompile(
         actionDesc: string,
         action: () => Promise<void> | void,
-        validate: () => Promise<void> | void = () => Promise.resolve()
+        validate: (controlledWaitFor: typeof waitFor) => Promise<void> | void = () =>
+            Promise.resolve()
     ) {
+        const timeoutMs = 15000;
+        const controlledWaitFor: typeof waitFor = (action, options = {}) => {
+            // ToDo: figure out how to add time to the total test timeout
+            return waitFor(action, { timeout: timeoutMs, ...options });
+        };
         try {
             const recompile = this.waitForRecompile();
             await action();
             await recompile;
-            await validate();
+            await timeout(
+                validate(controlledWaitFor) || Promise.resolve(),
+                timeoutMs + 100, // allow inner timeout to fail first
+                `[timeout after ${timeoutMs + 100}ms] "${actionDesc}"`
+            );
         } catch (e) {
             if (e) {
                 (e as Error).message = actionDesc + '\n' + (e as Error).message;
