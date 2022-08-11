@@ -1,9 +1,46 @@
 import { StylableDOMUtil } from '@stylable/dom-test-kit';
 import { DTSKit } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { contractTest } from './contract-test';
+import { contractTest, testStylesheet, createPartialElement } from './contract-test';
 
-describe('stylable-dom-utils', contractTest(StylableDOMUtil));
+describe('stylable-dom-utils', () => {
+    contractTest(new StylableDOMUtil(testStylesheet), testStylesheet, () => createPartialElement());
+});
+
+describe('stylable-dom-utils scopeSelectorContract', () => {
+    const util = new StylableDOMUtil(testStylesheet);
+    const scopeSelector = util.scopeSelector.bind(util);
+
+    it('scopeSelector defaults to root', () => {
+        expect(scopeSelector()).to.equal(`.ns-root`);
+    });
+    it('scopeSelector local class', () => {
+        expect(scopeSelector('.x')).to.equal(`.ns__x`);
+    });
+    it('scopeSelector local class with compose', () => {
+        expect(scopeSelector('.z')).to.equal(`.ns__z`);
+    });
+    it('scopeSelector handle multiple local classes', () => {
+        expect(scopeSelector('.x .y')).to.equal(`.ns__x .ns__y`);
+    });
+    it('scopeSelector Error("pseudo-element")', () => {
+        expect(() => scopeSelector('.x::y')).to.throw(
+            'selector with pseudo-element is not supported yet.'
+        );
+    });
+    it('scopeSelector Error("type")', () => {
+        expect(() => scopeSelector('x')).to.throw('selector with type is not supported yet.');
+    });
+    it('scopeSelector handle local states', () => {
+        expect(scopeSelector('.x:loading')).to.equal(`.ns__x.ns--loading`);
+    });
+    it('scopeSelector handles local state with a parameter', () => {
+        expect(scopeSelector('.x:loading(done)')).to.equal(`.ns__x.ns---loading-4-done`);
+    });
+    it('scopeSelector handle class local states (multiple)', () => {
+        expect(scopeSelector('.x:loading:thinking')).to.equal(`.ns__x.ns--loading.ns--thinking`);
+    });
+});
 
 describe('stylable-dom-utils type compliance', function () {
     this.timeout(25000);

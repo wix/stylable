@@ -280,11 +280,6 @@ export class StylableWebpackPlugin {
                     stylableModules,
                     assetsModules
                 );
-
-                /**
-                 * Here we inject our runtime code for the js modules and injection of css to head
-                 */
-                this.entities.injectRuntimeModules(StylableWebpackPlugin.name, compilation);
             }
         );
     }
@@ -385,6 +380,7 @@ export class StylableWebpackPlugin {
                     loaderContext.stylable = this.stylable;
                     loaderContext.assetsMode = this.options.assetsMode;
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
+                    loaderContext.cssInjection = this.options.cssInjection;
                     loaderContext.target = this.options.target;
                     loaderContext.assetFilter = this.options.assetFilter;
                     /**

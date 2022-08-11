@@ -9,11 +9,8 @@ describe('jest process', () => {
         const filename = require.resolve('@stylable/jest/test/fixtures/test.st.css');
         const content = readFileSync(filename, 'utf8');
         const transformer = stylableTransformer.createTransformer();
-
-        const module = nodeEval(
-            transformer.process(content, filename),
-            filename
-        ) as RuntimeStylesheet;
+        const code = transformer.process(content, filename);
+        const module = nodeEval(code, filename) as RuntimeStylesheet;
 
         expect(module.classes.root).to.equal(`${module.namespace}__root`);
         expect(module.classes.test).to.equal(`${module.namespace}__test`);
@@ -25,11 +22,8 @@ describe('jest process', () => {
         const transformer = stylableTransformer.createTransformer({
             stylable: { resolveNamespace: (ns, _srcPath) => `${ns}-custom` },
         });
-
-        const module = nodeEval(
-            transformer.process(content, filename),
-            filename
-        ) as RuntimeStylesheet;
+        const code = transformer.process(content, filename);
+        const module = nodeEval(code, filename) as RuntimeStylesheet;
 
         expect(module.classes.root).to.equal(`test-custom__root`);
         expect(module.classes.test).to.equal(`test-custom__test`);

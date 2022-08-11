@@ -1,7 +1,7 @@
 import type { Stylable, StylableResults } from '@stylable/core';
 import { isAsset } from '@stylable/core/dist/index-internal';
 import {
-    createModuleSource,
+    generateStylableJSModuleSource,
     generateDTSContent,
     generateDTSSourceMap,
 } from '@stylable/module-utils';
@@ -20,7 +20,7 @@ export interface BuildCommonOptions {
     fullSrcDir: string;
     log: Log;
     fs: IFileSystem;
-    moduleFormats: string[];
+    moduleFormats: Array<'esm' | 'cjs'>;
     outputCSS?: boolean;
     outputCSSNameTemplate?: string;
     outputSources?: boolean;
@@ -138,15 +138,21 @@ export function buildSingleFile({
         outputLogs.push(`${format} module`);
         const code = tryRun(
             () =>
-                createModuleSource(
-                    res,
-                    format,
-                    includeCSSInJS,
-                    undefined,
-                    undefined,
-                    undefined,
-                    injectCSSRequest ? [`./${cssAssetFilename}`] : [],
-                    '@stylable/runtime'
+                generateStylableJSModuleSource(
+                    {
+                        moduleType: format,
+                        imports: injectCSSRequest ? [{ from: `./${cssAssetFilename}` }] : [],
+                        jsExports: res.exports,
+                        namespace: res.meta.namespace,
+                    },
+                    includeCSSInJS
+                        ? {
+                              id: res.meta.namespace,
+                              css: res.meta.targetAst!.toString() ?? '',
+                              depth: -1,
+                              runtimeId: '0', //TODO: make this configurable in cli
+                          }
+                        : undefined
                 ),
             `Transform Error: ${filePath}`
         );

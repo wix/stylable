@@ -59,10 +59,10 @@ describe('require hook', () => {
         expect(m.test).to.equal(true);
     });
 
-    it('should ignoreJSModules', () => {
+    it('should not pick up .js extension when ignoreJSModules is true', () => {
         attachHook({ ignoreJSModules: true });
         const m = require(join(fixturesPath, 'has-js.st.css'));
-        expect(m.test).equal(undefined);
-        expect(m.namespace).to.match(/^hasjs/);
+        /** In the fixture the js module that we wanted to ignore has no namespace so if we accidentally picked it up this test will blowup */
+        expect(m.namespace).to.contain('hasjs');
     });
 });

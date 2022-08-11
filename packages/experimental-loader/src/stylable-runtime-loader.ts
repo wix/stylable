@@ -1,6 +1,6 @@
 import type { LoaderDefinition } from 'webpack';
 import type { StylableExports } from '@stylable/core/dist/index-internal';
-import { createRuntimeTargetCode } from './create-runtime-target-code';
+import { generateStylableJSModuleSource } from '@stylable/module-utils';
 import { addBuildInfo } from './add-build-info';
 
 function evalStylableExtractModule(source: string): [string, StylableExports] {
@@ -26,11 +26,14 @@ const stylableRuntimeLoader: LoaderDefinition = function loader(content) {
         throw new Error('content is not string');
     }
 
-    const [namespace, mapping] = evalStylableExtractModule(content);
+    const [namespace, jsExports] = evalStylableExtractModule(content);
 
     addBuildInfo(this, namespace);
-
-    return createRuntimeTargetCode(namespace, mapping);
+    return generateStylableJSModuleSource({
+        namespace,
+        jsExports,
+        moduleType: 'esm',
+    });
 };
 
 export const loaderPath = __filename;
