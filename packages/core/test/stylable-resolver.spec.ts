@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { testStylableCore, generateStylableResult } from '@stylable/core-test-kit';
-import { Stylable, MinimalFS, StylableMeta, createDefaultResolver } from '@stylable/core';
-import { StylableResolver, cachedProcessFile } from '@stylable/core/dist/index-internal';
+import { Stylable, MinimalFS } from '@stylable/core';
 
 function createResolveExtendsResults(
     fileSystem: MinimalFS,
@@ -10,27 +9,13 @@ function createResolveExtendsResults(
     classNameToLookup: string,
     isElement = false
 ) {
-    const moduleResolver = createDefaultResolver(fileSystem, {});
     const stylable = new Stylable({
         fileSystem,
         projectRoot: '/',
     });
 
-    const processFile = cachedProcessFile<StylableMeta>(
-        (fullPath, content) => {
-            return stylable.analyze(fullPath, content);
-        },
-        (filePath: string) => fileSystem.readFileSync(filePath, 'utf8')
-    );
-
-    const resolver = new StylableResolver(
-        processFile,
-        (module: string) => module && '',
-        (context = '/', request: string) => moduleResolver(context, request)
-    );
-
-    return resolver.resolveExtends(
-        processFile.process(fileToProcess),
+    return stylable.resolver.resolveExtends(
+        stylable.analyze(fileToProcess),
         classNameToLookup,
         isElement
     );
@@ -403,5 +388,26 @@ describe('stylable-resolver', () => {
         expect(rule.selector).to.equal('.A__root');
         expect(meta.diagnostics.reports).to.eql([]);
         expect(meta.transformDiagnostics!.reports).to.eql([]);
+    });
+
+    it('should not hit the underling resolver more then once', () => {
+        let resolverHits = 0;
+        const { stylable } = testStylableCore(
+            {},
+            {
+                stylableConfig: {
+                    resolverCache: new Map(),
+                    resolveModule: () => {
+                        resolverHits++;
+                        return '';
+                    },
+                },
+            }
+        );
+
+        stylable.resolver.resolvePath('/', './entry.st.css');
+        stylable.resolver.resolvePath('/', './entry.st.css');
+
+        expect(resolverHits).to.equal(1);
     });
 });
