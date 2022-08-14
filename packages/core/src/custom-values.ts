@@ -154,6 +154,13 @@ export const CustomValueStrategy = {
                     } else {
                         resolvedValue = unbox(getStringValue(valueNode), !boxPrimitive);
                     }
+                } else if (typeof resolvedValue === 'string') {
+                    const parsedArg = postcssValueParser(resolvedValue).nodes[0];
+                    const ct = parsedArg.type === 'function' && parsedArg.value;
+                    resolvedValue =
+                        typeof ct === 'string' && customTypes[ct]
+                            ? customTypes[ct].evalVarAst(parsedArg, customTypes, boxPrimitive)
+                            : unbox(resolvedValue, !boxPrimitive);
                 }
             } else {
                 resolvedValue = unbox(getStringValue(valueNodes), !boxPrimitive);
