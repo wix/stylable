@@ -1,14 +1,14 @@
 {
   "name": "@stylable/experimental-loader",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "dependencies": {
-    "@stylable/core": "^5.1.0",
-    "@stylable/optimizer": "^5.1.0",
-    "@stylable/runtime": "^5.1.0",
+    "@stylable/core": "^5.2.0",
+    "@stylable/optimizer": "^5.2.0",
+    "@stylable/runtime": "^5.2.0",
     "css-loader": "^6.7.1",
     "decache": "^4.6.1",
     "loader-utils": "^3.2.0"
