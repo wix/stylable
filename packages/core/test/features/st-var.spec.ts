@@ -427,16 +427,18 @@ describe(`features/st-var`, () => {
                     );
 
                     str: INLINE-VALUE;
+                    strWithComments: /*c1*/INLINE-VALUE/*c2*/;
 
                     deep: st-map(
                         inline-text INLINE-TEXT,
                         inline-value value(str),
                         concat abc value(str) xyz,
                         inline-map st-map(
-                            y Y, 
+                            y Y,
                             z Z
                         ),
                         ref-map value(shallow),
+                        comments /*c3*/value(strWithComments)/*c4*/,
                     );
                 }
                 .root {
@@ -448,10 +450,10 @@ describe(`features/st-var`, () => {
 
                     /* @decl(deep inline text) prop: INLINE-TEXT */
                     prop: value(deep, inline-text);
-                    
+
                     /* @decl(deep inline value) prop: INLINE-VALUE */
                     prop: value(deep, inline-value);
-                    
+
                     /* @decl(deep concat) prop: abc INLINE-VALUE xyz */
                     prop: value(deep, concat);
 
@@ -460,6 +462,9 @@ describe(`features/st-var`, () => {
 
                     /* @decl(deep ref map) prop: B */
                     prop: value(deep, ref-map, b);
+
+                    /* @decl(deep comments) prop: INLINE-VALUE */
+                    prop: value(deep, comments);
                 }
             `);
 
@@ -475,6 +480,7 @@ describe(`features/st-var`, () => {
                 concat: `abc INLINE-VALUE xyz`,
                 'inline-map': { y: `Y`, z: `Z` },
                 'ref-map': { a: 'A', b: 'B' },
+                comments: 'INLINE-VALUE',
             });
         });
         it(`should support extended custom type`, () => {

@@ -143,27 +143,30 @@ export const CustomValueStrategy = {
             let resolvedValue;
             if (valueNodes.length === 0) {
                 // TODO: error
-            } else if (valueNodes.length === 1) {
-                const valueNode = valueNodes[0];
-                resolvedValue = valueNode.resolvedValue;
-
-                if (!resolvedValue) {
-                    const ct = customTypes[valueNode.value];
-                    if (valueNode.type === 'function' && ct) {
-                        resolvedValue = ct.evalVarAst(valueNode, customTypes, boxPrimitive);
-                    } else {
-                        resolvedValue = unbox(getStringValue(valueNode), !boxPrimitive);
-                    }
-                } else if (typeof resolvedValue === 'string') {
-                    const parsedArg = postcssValueParser(resolvedValue).nodes[0];
-                    const ct = parsedArg.type === 'function' && parsedArg.value;
-                    resolvedValue =
-                        typeof ct === 'string' && customTypes[ct]
-                            ? customTypes[ct].evalVarAst(parsedArg, customTypes, boxPrimitive)
-                            : unbox(resolvedValue, !boxPrimitive);
-                }
             } else {
-                resolvedValue = unbox(getStringValue(valueNodes), !boxPrimitive);
+                const nonComments = valueNodes.filter((node) => node.type !== 'comment');
+                if (nonComments.length === 1) {
+                    const valueNode = nonComments[0];
+                    resolvedValue = valueNode.resolvedValue;
+
+                    if (!resolvedValue) {
+                        const ct = customTypes[valueNode.value];
+                        if (valueNode.type === 'function' && ct) {
+                            resolvedValue = ct.evalVarAst(valueNode, customTypes, boxPrimitive);
+                        } else {
+                            resolvedValue = unbox(getStringValue(valueNode), !boxPrimitive);
+                        }
+                    } else if (typeof resolvedValue === 'string') {
+                        const parsedArg = postcssValueParser(resolvedValue).nodes[0];
+                        const ct = parsedArg.type === 'function' && parsedArg.value;
+                        resolvedValue =
+                            typeof ct === 'string' && customTypes[ct]
+                                ? customTypes[ct].evalVarAst(parsedArg, customTypes, boxPrimitive)
+                                : unbox(resolvedValue, !boxPrimitive);
+                    }
+                } else {
+                    resolvedValue = unbox(getStringValue(valueNodes), !boxPrimitive);
+                }
             }
 
             if (resolvedValue) {
