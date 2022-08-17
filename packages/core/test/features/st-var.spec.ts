@@ -419,7 +419,6 @@ describe(`features/st-var`, () => {
             ]);
         });
         it(`should support build-in st-map`, () => {
-            // ToDo: fix path to nested reference map
             const { sheets } = testStylableCore(`
                 :vars {
                     shallow: st-map(
@@ -428,16 +427,18 @@ describe(`features/st-var`, () => {
                     );
 
                     str: INLINE-VALUE;
+                    strWithComments: /*c1*/INLINE-VALUE/*c2*/;
 
                     deep: st-map(
                         inline-text INLINE-TEXT,
                         inline-value value(str),
                         concat abc value(str) xyz,
                         inline-map st-map(
-                            y Y, 
+                            y Y,
                             z Z
                         ),
                         ref-map value(shallow),
+                        comments /*c3*/value(strWithComments)/*c4*/,
                     );
                 }
                 .root {
@@ -449,18 +450,21 @@ describe(`features/st-var`, () => {
 
                     /* @decl(deep inline text) prop: INLINE-TEXT */
                     prop: value(deep, inline-text);
-                    
+
                     /* @decl(deep inline value) prop: INLINE-VALUE */
                     prop: value(deep, inline-value);
-                    
+
                     /* @decl(deep concat) prop: abc INLINE-VALUE xyz */
                     prop: value(deep, concat);
 
                     /* @decl(deep inline map) prop: Z */
                     prop: value(deep, inline-map, z);
 
-                    /* @ToDo-decl(deep ref map) prop: B */
+                    /* @decl(deep ref map) prop: B */
                     prop: value(deep, ref-map, b);
+
+                    /* @decl(deep comments) prop: INLINE-VALUE */
+                    prop: value(deep, comments);
                 }
             `);
 
@@ -475,8 +479,8 @@ describe(`features/st-var`, () => {
                 'inline-value': `INLINE-VALUE`,
                 concat: `abc INLINE-VALUE xyz`,
                 'inline-map': { y: `Y`, z: `Z` },
-                // ToDo: fix
-                'ref-map': `st-map(\n                        a A,\n                        b B\n                    )`,
+                'ref-map': { a: 'A', b: 'B' },
+                comments: 'INLINE-VALUE',
             });
         });
         it(`should support extended custom type`, () => {
@@ -1311,13 +1315,14 @@ describe(`features/st-var`, () => {
                     a: red;
                     b: blue;
                     c: st-array(value(a), gold);
+                    d: st-map(x value(b), y silver);
                 }
                 `);
 
                 const { meta } = sheets['/entry.st.css'];
                 const computedVars = stylable.stVar.getComputed(meta);
 
-                expect(Object.keys(computedVars)).to.eql(['a', 'b', 'c']);
+                expect(Object.keys(computedVars)).to.eql(['a', 'b', 'c', 'd']);
                 expect(computedVars.a).to.containSubset({
                     value: 'red',
                     input: {
@@ -1352,6 +1357,25 @@ describe(`features/st-var`, () => {
                                 value: 'gold',
                             },
                         ],
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.d).to.containSubset({
+                    value: { x: 'blue', y: 'silver' },
+                    input: {
+                        type: 'st-map',
+                        value: {
+                            x: {
+                                flatValue: 'blue',
+                                type: 'st-string',
+                                value: 'blue',
+                            },
+                            y: {
+                                flatValue: 'silver',
+                                type: 'st-string',
+                                value: 'silver',
+                            },
+                        },
                     },
                     diagnostics: { reports: [] },
                 });
@@ -1504,6 +1528,7 @@ describe(`features/st-var`, () => {
                     :vars {
                         a: value(imported);
                         b: st-map(a value(imported));
+                        c: st-array(value(imported));
                     }
                     `,
                     'imported.st.css': `
@@ -1516,7 +1541,7 @@ describe(`features/st-var`, () => {
                 const { meta } = sheets['/entry.st.css'];
                 const computedVars = stylable.stVar.getComputed(meta);
 
-                expect(Object.keys(computedVars)).to.eql(['imported', 'a', 'b']);
+                expect(Object.keys(computedVars)).to.eql(['imported', 'a', 'b', 'c']);
                 expect(computedVars.imported).to.containSubset({
                     value: 'red',
                     input: {
@@ -1540,8 +1565,26 @@ describe(`features/st-var`, () => {
                     input: {
                         type: 'st-map',
                         value: {
-                            a: 'red',
+                            a: {
+                                flatValue: 'red',
+                                type: 'st-string',
+                                value: 'red',
+                            },
                         },
+                    },
+                    diagnostics: { reports: [] },
+                });
+                expect(computedVars.c).to.containSubset({
+                    value: ['red'],
+                    input: {
+                        type: 'st-array',
+                        value: [
+                            {
+                                flatValue: 'red',
+                                type: 'st-string',
+                                value: 'red',
+                            },
+                        ],
                     },
                     diagnostics: { reports: [] },
                 });
