@@ -68,8 +68,8 @@ export function bundleLibs(config: Configuration, packages: string[], isServer: 
                                 return false;
                             }
                         }
-                        return nextExternal(ctx, () => {
-                            // noop
+                        return nextExternal(ctx, (data) => {
+                            (data as any).resolve();
                         });
                     },
                 ];
