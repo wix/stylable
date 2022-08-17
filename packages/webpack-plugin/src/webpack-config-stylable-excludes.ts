@@ -73,12 +73,12 @@ export function bundleLibs(config: Configuration, packages: string[], isServer: 
                         });
                     },
                 ];
+            } else {
+                throw new Error(
+                    'Invalid configuration: expected config.externals to be an Array with a single function. got ' +
+                        JSON.stringify(config.externals)
+                );
             }
-        } else {
-            throw new Error(
-                'Invalid configuration: expected config.externals to be an Array with a single function. got ' +
-                    JSON.stringify(config.externals)
-            );
         }
     }
 }
