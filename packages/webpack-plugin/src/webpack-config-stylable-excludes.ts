@@ -54,3 +54,31 @@ function safelyWalkJSON(
         }
     }
 }
+
+export function bundleLibs(config: Configuration, packages: string[], isServer: boolean) {
+    if (isServer) {
+        if (Array.isArray(config.externals) && config.externals.length === 1) {
+            const nextExternal = config.externals[0];
+
+            if (typeof nextExternal === 'function') {
+                config.externals = [
+                    async (ctx: any) => {
+                        for (const pack of packages) {
+                            if (ctx.request.startsWith(pack)) {
+                                return false;
+                            }
+                        }
+                        return nextExternal(ctx, () => {
+                            // noop
+                        });
+                    },
+                ];
+            }
+        } else {
+            throw new Error(
+                'Invalid configuration: expected config.externals to be an Array with a single function. got ' +
+                    JSON.stringify(config.externals)
+            );
+        }
+    }
+}
