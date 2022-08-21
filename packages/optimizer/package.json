@@ -10,7 +10,7 @@
   "dependencies": {
     "@stylable/core": "^5.2.0",
     "@tokey/css-selector-parser": "^0.6.0",
-    "csso": "^5.0.4",
+    "csso": "^5.0.5",
     "postcss": "^8.4.16"
   },
   "files": [
