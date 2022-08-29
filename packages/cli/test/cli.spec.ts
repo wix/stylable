@@ -580,13 +580,14 @@ describe('Stylable Cli', function () {
                         }
                     }`,
                 'stylable.config.js': `
+                    const { join } = require('node:path');
                     const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
                     const { createDefaultResolver } = require('@stylable/core');
 
                     module.exports = {
                         createResolver(fs) {
                             return createDefaultResolver(fs, {
-                                plugins: [new TsconfigPathsPlugin({ configFile: '${tempDir.path}/tsconfig.json' })],
+                                plugins: [new TsconfigPathsPlugin({ configFile: join('${tempDir.path}','tsconfig.json') })],
                             });
                         }
                     }
