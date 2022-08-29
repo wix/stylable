@@ -13,18 +13,23 @@ import type {
 import { processProjects } from './process-projects';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 import { resolveNpmRequests } from './resolve-requests';
+import type { ModuleResolver } from '@stylable/core/src/types';
+import type { MinimalFS } from '@stylable/core';
+
+interface StylableCliConfigs {
+    stcConfig: Configuration<string> | undefined;
+    createResolver: ((fs: MinimalFS) => ModuleResolver) | undefined;
+}
 
 export async function projectsConfig(
     rootDir: string,
     overrideBuildOptions: Partial<BuildOptions>,
     defaultOptions: BuildOptions = createDefaultOptions(),
-    configFilePath?: string
+    config?: StylableCliConfigs
 ): Promise<STCProjects> {
-    const { config } = resolveConfig(rootDir, configFilePath) || {};
-
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
-        config?.options,
+        config?.stcConfig?.options,
         overrideBuildOptions
     );
 
@@ -33,14 +38,15 @@ export async function projectsConfig(
     let projects: STCProjects;
 
     if (isMultipleConfigProject(config)) {
-        const { entities } = processProjects(config, {
+        const { entities } = processProjects(config.stcConfig, {
             defaultOptions: topLevelOptions,
         });
 
         projects = await resolveProjectsRequests({
             rootDir,
             entities,
-            resolveRequests: config.projectsOptions?.resolveRequests ?? resolveNpmRequests,
+            resolveRequests:
+                config.stcConfig.projectsOptions?.resolveRequests ?? resolveNpmRequests,
         });
     } else {
         projects = [
@@ -70,13 +76,15 @@ function resolveConfigFile(context: string) {
 
 function resolveConfigValue(config: any) {
     return tryRun(
-        () =>
-            isSTCConfig(config)
+        () => ({
+            stcConfig: isSTCConfig(config)
                 ? typeof config.stcConfig === 'function'
                     ? config.stcConfig()
                     : config.stcConfig
                 : undefined,
-        'Failed to evaluate "stcConfig"'
+            createResolver: isResolverConfig(config) ? config.createResolver : undefined,
+        }),
+        'Failed to evaluate Stylable config'
     );
 }
 
@@ -88,8 +96,20 @@ function isSTCConfig(config: any): config is { stcConfig: Configuration | Config
     );
 }
 
-function isMultipleConfigProject(config: any): config is MultipleProjectsConfig<string> {
-    return Boolean(config?.projects);
+function isResolverConfig(
+    config: any
+): config is { createResolver: (fs: MinimalFS) => ModuleResolver } {
+    return (
+        typeof config === 'object' &&
+        config.createResolver &&
+        typeof config.createResolver === 'function'
+    );
+}
+
+function isMultipleConfigProject(
+    config: any
+): config is { stcConfig: MultipleProjectsConfig<string> } {
+    return Boolean(config?.stcConfig?.projects);
 }
 
 async function resolveProjectsRequests({

@@ -2,7 +2,7 @@ import { nodeFs as fs } from '@file-services/node';
 import { Stylable, StylableConfig } from '@stylable/core';
 import type { StylableResolverCache } from '@stylable/core/dist/index-internal';
 import { build } from './build';
-import { projectsConfig } from './config/projects-config';
+import { projectsConfig, resolveConfig } from './config/projects-config';
 import {
     createBuildIdentifier,
     createDefaultOptions,
@@ -56,12 +56,10 @@ export async function buildStylable(
         watchOptions = {},
     }: BuildStylableContext = {}
 ) {
-    const projects = await projectsConfig(
-        rootDir,
-        overrideBuildOptions,
-        defaultOptions,
-        configFilePath
-    );
+    const { config } = resolveConfig(rootDir, configFilePath) || {};
+    const resolveModule = config?.createResolver?.(fileSystem);
+
+    const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions, config);
     const watchHandler = new WatchHandler(fileSystem, {
         log,
         resolverCache,
@@ -97,6 +95,7 @@ export async function buildStylable(
                 resolveNamespace,
                 resolverCache,
                 fileProcessorCache,
+                resolveModule,
             });
 
             const { service, generatedFiles } = await build(buildOptions, {
