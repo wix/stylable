@@ -2,7 +2,7 @@ import { createFeature, FeatureContext } from './feature';
 import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
-import type { ImportSymbol } from './st-import';
+import type { ImportSymbol } from './st-module';
 import * as CSSClass from './css-class';
 import type { StylableMeta } from '../stylable-meta';
 import { isCompRoot, stringifySelector } from '../helpers/selector';

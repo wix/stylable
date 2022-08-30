@@ -1,4 +1,4 @@
-import { STImport, CSSCustomProperty, STSymbol } from '@stylable/core/dist/features';
+import { STModule, CSSCustomProperty, STSymbol } from '@stylable/core/dist/features';
 import { generateScopedCSSVar } from '@stylable/core/dist/helpers/css-custom-property';
 import {
     testStylableCore,
@@ -7,7 +7,7 @@ import {
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
-const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
+const stModuleDiagnostics = diagnosticBankReportToStrings(STModule.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
 const customPropertyDiagnostics = diagnosticBankReportToStrings(CSSCustomProperty.diagnostics);
 
@@ -629,7 +629,7 @@ describe(`features/css-custom-property`, () => {
             const { sheets } = testStylableCore({
                 '/props.st.css': ``,
                 '/entry.st.css': `
-                    /* @transform-error word(--unknown) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                    /* @transform-error word(--unknown) ${stModuleDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
                         '--unknown',
                         './props.st.css'
                     )} */

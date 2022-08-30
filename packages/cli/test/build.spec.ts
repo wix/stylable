@@ -3,11 +3,11 @@ import { Stylable } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
-import { STImport, STVar } from '@stylable/core/dist/features';
+import { STModule, STVar } from '@stylable/core/dist/features';
 import { processorDiagnostics, murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
 
-const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
+const stModuleDiagnostics = diagnosticBankReportToStrings(STModule.diagnostics);
 const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
 const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
 
@@ -199,7 +199,7 @@ describe('build stand alone', () => {
             processorStringDiagnostics.CANNOT_RESOLVE_EXTEND('MissingComp')
         );
         expect(messages[1].message).to.contain(
-            stImportDiagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
+            stModuleDiagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
         );
         expect(messages[2].message).to.contain(stVarDiagnostics.UNKNOWN_VAR('missingVar'));
     });

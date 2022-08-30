@@ -22,7 +22,7 @@ import { ClassSymbol, ElementSymbol, FeatureTransformContext, STNamespace } from
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
-    STImport,
+    STModule,
     STGlobal,
     STScope,
     STCustomSelector,
@@ -153,7 +153,7 @@ export class StylableTransformer {
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
         };
-        STImport.hooks.transformInit({ context });
+        STModule.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(meta.targetAst, meta, metaExports);
@@ -839,7 +839,7 @@ function prepareAST(context: FeatureTransformContext, ast: postcss.Root) {
     ast.walk((node) => {
         const input = { context, node, toRemove };
         STNamespace.hooks.prepareAST(input);
-        STImport.hooks.prepareAST(input);
+        STModule.hooks.prepareAST(input);
         STScope.hooks.prepareAST(input);
         STVar.hooks.prepareAST(input);
         STCustomSelector.hooks.prepareAST(input);

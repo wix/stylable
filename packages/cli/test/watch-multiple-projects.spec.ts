@@ -1,5 +1,5 @@
 import { buildMessages } from '@stylable/cli/dist/messages';
-import { STImport } from '@stylable/core/dist/features';
+import { STModule } from '@stylable/core/dist/features';
 import {
     createCliTester,
     loadDirSync,
@@ -472,7 +472,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     ),
                 },
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                    msg: STModule.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
                         .message,
                 },
             ],
@@ -526,7 +526,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
             args: ['-w'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                    msg: STModule.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
                         .message,
                 },
                 {
@@ -537,7 +537,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
 
         expect(
             output().match(
-                STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css').message
+                STModule.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css').message
             )
         ).to.lengthOf(1);
     });

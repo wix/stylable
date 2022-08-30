@@ -1,5 +1,5 @@
 import { errorMessages, buildMessages } from '@stylable/cli/dist/messages';
-import { STImport } from '@stylable/core/dist/features';
+import { STModule } from '@stylable/core/dist/features';
 import {
     createCliTester,
     escapeRegExp,
@@ -303,7 +303,7 @@ describe('Stylable Cli Watch - Single project', function () {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                    msg: STModule.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
                         .message,
                 },
                 {
@@ -336,7 +336,7 @@ describe('Stylable Cli Watch - Single project', function () {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                    msg: STModule.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
                         .message,
                 },
                 {
@@ -354,7 +354,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     },
                 },
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                    msg: STModule.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
                         .message,
                 },
             ],

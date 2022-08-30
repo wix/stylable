@@ -1,4 +1,4 @@
-import type { ImportSymbol } from './st-import';
+import type { ImportSymbol } from './st-module';
 import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import type { StateParsedValue } from '../types';

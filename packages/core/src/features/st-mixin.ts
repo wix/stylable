@@ -1,6 +1,6 @@
 import { createFeature, FeatureTransformContext } from './feature';
 import * as STSymbol from './st-symbol';
-import type { ImportSymbol } from './st-import';
+import type { ImportSymbol } from './st-module';
 import * as STCustomSelector from './st-custom-selector';
 import * as STVar from './st-var';
 import type { ElementSymbol } from './css-type';

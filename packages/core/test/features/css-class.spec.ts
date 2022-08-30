@@ -1,4 +1,4 @@
-import { STImport, CSSClass, STSymbol } from '@stylable/core/dist/features';
+import { STModule, CSSClass, STSymbol } from '@stylable/core/dist/features';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
@@ -360,12 +360,12 @@ describe(`features/css-class`, () => {
             expect(CSSClass.get(meta, `before`), `before symbol`).to.eql({
                 _kind: `class`,
                 name: 'before',
-                alias: STImport.createImportSymbol(importDef, `named`, `before`, `/`),
+                alias: STModule.createImportSymbol(importDef, `named`, `before`, `/`),
             });
             expect(CSSClass.get(meta, `after`), `after symbol`).to.eql({
                 _kind: `class`,
                 name: 'after',
-                alias: STImport.createImportSymbol(importDef, `named`, `after`, `/`),
+                alias: STModule.createImportSymbol(importDef, `named`, `after`, `/`),
             });
             expect(CSSClass.get(meta, `unused`), `unused symbol`).to.eql(undefined);
 
@@ -397,7 +397,7 @@ describe(`features/css-class`, () => {
             expect(CSSClass.get(meta, `unknown`), `unknown symbol`).to.eql({
                 _kind: `class`,
                 name: 'unknown',
-                alias: STImport.createImportSymbol(importDef, `named`, `unknown`, `/`),
+                alias: STModule.createImportSymbol(importDef, `named`, `unknown`, `/`),
             });
 
             // JS exports
@@ -431,7 +431,7 @@ describe(`features/css-class`, () => {
             expect(CSSClass.get(meta, `imported-part`), `imported-part symbol`).to.eql({
                 _kind: `class`,
                 name: 'imported-part',
-                alias: STImport.createImportSymbol(importDef, `named`, `imported-part`, `/`),
+                alias: STModule.createImportSymbol(importDef, `named`, `imported-part`, `/`),
             });
 
             // JS exports

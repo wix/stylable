@@ -3,8 +3,8 @@ export type { FeatureContext, FeatureTransformContext } from './feature';
 export * as STSymbol from './st-symbol';
 export type { StylableSymbol } from './st-symbol';
 
-export * as STImport from './st-import';
-export type { ImportSymbol, Imported } from './st-import';
+export * as STModule from './st-module';
+export type { ImportSymbol, Imported } from './st-module';
 
 export * as STNamespace from './st-namespace';
 

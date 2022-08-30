@@ -1,6 +1,6 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
-import * as STImport from './st-import';
+import * as STModule from './st-module';
 import type { StylableMeta } from '../stylable-meta';
 import { plugableRecord } from '../helpers/plugable-record';
 import { namespace } from '../helpers/namespace';
@@ -15,7 +15,7 @@ export interface LayerSymbol {
     name: string;
     alias: string;
     global?: boolean;
-    import?: STImport.Imported;
+    import?: STModule.Imported;
 }
 export interface ResolvedLayer {
     meta: StylableMeta;
@@ -69,7 +69,7 @@ const dataKey = plugableRecord.key<{
 
 // HOOKS
 
-STImport.ImportTypeHook.set(`layer`, (context, localName, importName, importDef) => {
+STModule.ImportTypeHook.set(`layer`, (context, localName, importName, importDef) => {
     addLayer({
         context,
         name: localName,
@@ -336,7 +336,7 @@ function addLayer({
     importName: string;
     ast: postcss.AtRule | postcss.Rule;
     global: boolean;
-    importDef?: STImport.Imported;
+    importDef?: STModule.Imported;
 }) {
     const definedSymbol = STSymbol.get(context.meta, name, 'layer');
     if (!definedSymbol) {

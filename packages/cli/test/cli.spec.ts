@@ -9,7 +9,7 @@ import {
     createTempDirectory,
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
-import { STImport, STVar } from '@stylable/core/dist/features';
+import { STModule, STVar } from '@stylable/core/dist/features';
 import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
 
 const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
@@ -497,7 +497,7 @@ describe('Stylable Cli', function () {
             expect(status).to.equal(1);
             expect(
                 stdout.match(
-                    new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE().message, 'g')
+                    new RegExp(STModule.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE().message, 'g')
                 )
             ).to.have.length(1);
         });

@@ -6,7 +6,7 @@ import type { PlugableRecord } from './helpers/plugable-record';
 import { getSourcePath } from './stylable-utils';
 import {
     STSymbol,
-    STImport,
+    STModule,
     STNamespace,
     STGlobal,
     STScope,
@@ -22,7 +22,7 @@ import {
 
 const features = [
     STSymbol,
-    STImport,
+    STModule,
     STNamespace,
     STGlobal,
     STScope,
@@ -78,7 +78,7 @@ export class StylableMeta {
         return CSSType.getAll(this);
     }
     getImportStatements() {
-        return STImport.getImportStatements(this);
+        return STModule.getImportStatements(this);
     }
     getStVar(name: string) {
         return STSymbol.get(this, name, `var`);

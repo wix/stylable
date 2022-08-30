@@ -1,6 +1,6 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
-import type { ImportSymbol } from './st-import';
+import type { ImportSymbol } from './st-module';
 import {
     validateAtProperty,
     validateCustomPropertyName,

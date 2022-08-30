@@ -3,7 +3,7 @@ import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
-import type { ImportSymbol } from './st-import';
+import type { ImportSymbol } from './st-module';
 import * as STGlobal from './st-global';
 import { getOriginDefinition } from '../helpers/resolve';
 import { namespace } from '../helpers/namespace';

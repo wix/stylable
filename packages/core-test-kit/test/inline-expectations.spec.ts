@@ -6,13 +6,13 @@ import {
     testInlineExpectsErrors,
 } from '@stylable/core-test-kit';
 import { transformerDiagnostics } from '@stylable/core/dist/stylable-transformer';
-import { STImport, CSSType, CSSClass } from '@stylable/core/dist/features';
+import { STModule, CSSType, CSSClass } from '@stylable/core/dist/features';
 import { expect } from 'chai';
 import type { Rule } from 'postcss';
 
 const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
-const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
+const stModuleDiagnostics = diagnosticBankReportToStrings(STModule.diagnostics);
 const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 describe('inline-expectations', () => {
@@ -871,10 +871,10 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @analyze-warn word(comp) ${stImportDiagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
+                            /* @analyze-warn word(comp) ${stModuleDiagnostics.DEFAULT_IMPORT_IS_LOWER_CASE()} */
                             @st-import comp from "./x.st.css";
                             
-                            /* @analyze-warn ${stImportDiagnostics.ST_IMPORT_EMPTY_FROM()} */
+                            /* @analyze-warn ${stModuleDiagnostics.ST_IMPORT_EMPTY_FROM()} */
                             @st-import comp from "./x.st.css";
                         `,
                     },
@@ -884,7 +884,7 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.diagnosticExpectedNotFound(
                     `analyze`,
-                    stImportDiagnostics.ST_IMPORT_EMPTY_FROM()
+                    stModuleDiagnostics.ST_IMPORT_EMPTY_FROM()
                 )
             );
         });
@@ -1031,10 +1031,10 @@ describe('inline-expectations', () => {
                             @st-import [unknown] from './unknown.st.css';
 
                             /* 
-                                @transform-warn ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
+                                @transform-warn ${stModuleDiagnostics.UNKNOWN_IMPORTED_FILE(
                                     `./unknown.st.css`
                                 )}
-                                @transform-warn(label) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
+                                @transform-warn(label) ${stModuleDiagnostics.UNKNOWN_IMPORTED_FILE(
                                     `./unknown.st.css`
                                 )}
                             */
@@ -1048,11 +1048,11 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `transform`,
-                        stImportDiagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`)
+                        stModuleDiagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`)
                     ),
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `transform`,
-                        stImportDiagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`),
+                        stModuleDiagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`),
                         `(label): `
                     ),
                 ])
@@ -1172,12 +1172,12 @@ describe('inline-expectations', () => {
                     '/style.st.css': {
                         namespace: 'entry',
                         content: `
-                            /* @transform-error(should match) word(./x.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
+                            /* @transform-error(should match) word(./x.st.css) ${stModuleDiagnostics.UNKNOWN_IMPORTED_FILE(
                                 `./x.st.css`
                             )} */
                             @st-import A from "./x.st.css";
 
-                            /* @transform-error(should fail) ${stImportDiagnostics.ST_IMPORT_EMPTY_FROM()} */
+                            /* @transform-error(should fail) ${stModuleDiagnostics.ST_IMPORT_EMPTY_FROM()} */
                             @st-import B from "./x.st.css";
                         `,
                     },
@@ -1188,7 +1188,7 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.diagnosticExpectedNotFound(
                     `transform`,
-                    stImportDiagnostics.ST_IMPORT_EMPTY_FROM()
+                    stModuleDiagnostics.ST_IMPORT_EMPTY_FROM()
                 )
             );
         });

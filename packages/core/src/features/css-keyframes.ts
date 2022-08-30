@@ -1,7 +1,6 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
-import * as STImport from './st-import';
-import type { Imported } from './st-import';
+import * as STModule from './st-module';
 import type { StylableMeta } from '../stylable-meta';
 import { plugableRecord } from '../helpers/plugable-record';
 import { isInConditionalGroup } from '../helpers/rule';
@@ -15,7 +14,7 @@ export interface KeyframesSymbol {
     _kind: 'keyframes';
     alias: string;
     name: string;
-    import?: Imported;
+    import?: STModule.Imported;
     global?: boolean;
 }
 
@@ -92,7 +91,7 @@ const dataKey = plugableRecord.key<{
 
 // HOOKS
 
-STImport.ImportTypeHook.set(`keyframes`, (context, localName, importName, importDef) => {
+STModule.ImportTypeHook.set(`keyframes`, (context, localName, importName, importDef) => {
     addKeyframes({
         context,
         name: localName,
@@ -230,7 +229,7 @@ function addKeyframes({
     importName: string;
     ast: postcss.AtRule | postcss.Rule;
     global?: boolean;
-    importDef?: Imported;
+    importDef?: STModule.Imported;
 }) {
     /**
      * keyframes are safe to redeclare in case they are unique within their context (applied

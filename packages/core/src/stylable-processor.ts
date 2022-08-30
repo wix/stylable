@@ -14,7 +14,7 @@ import { generalDiagnostics } from './features/diagnostics';
 import {
     FeatureContext,
     STSymbol,
-    STImport,
+    STModule,
     STNamespace,
     STGlobal,
     STScope,
@@ -94,7 +94,7 @@ export class StylableProcessor implements FeatureContext {
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics);
 
-        STImport.hooks.analyzeInit(this);
+        STModule.hooks.analyzeInit(this);
         CSSCustomProperty.hooks.analyzeInit(this);
 
         this.handleAtRules(root);
@@ -154,7 +154,7 @@ export class StylableProcessor implements FeatureContext {
         root.walkAtRules((atRule) => {
             switch (atRule.name) {
                 case 'st-import': {
-                    STImport.hooks.analyzeAtRule({
+                    STModule.hooks.analyzeAtRule({
                         context: this,
                         atRule,
                         analyzeRule,
@@ -243,7 +243,7 @@ export class StylableProcessor implements FeatureContext {
 
             if (node.type === 'pseudo_class') {
                 if (node.value === 'import') {
-                    STImport.hooks.analyzeSelectorNode({
+                    STModule.hooks.analyzeSelectorNode({
                         context: this,
                         node,
                         rule,

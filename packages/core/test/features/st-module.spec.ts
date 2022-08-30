@@ -1,4 +1,4 @@
-import { STImport, STSymbol } from '@stylable/core/dist/features';
+import { STModule, STSymbol } from '@stylable/core/dist/features';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
@@ -8,10 +8,10 @@ import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
 chai.use(chaiSubset);
 
-const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
+const stImportDiagnostics = diagnosticBankReportToStrings(STModule.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
 
-describe(`features/st-import`, () => {
+describe(`features/st-module`, () => {
     it(`should collect import statements`, () => {
         const { sheets } = testStylableCore(`
             /* @transform-remove */
@@ -33,7 +33,7 @@ describe(`features/st-import`, () => {
         const { meta } = sheets['/entry.st.css'];
 
         expect(
-            STImport.getImportStatements(meta),
+            STModule.getImportStatements(meta),
             `STImport.getImportStatements(meta)`
         ).to.containSubset([
             {
@@ -63,7 +63,7 @@ describe(`features/st-import`, () => {
             },
         ]);
         expect(meta.getImportStatements(), `meta.getImportStatements()`).to.eql(
-            STImport.getImportStatements(meta)
+            STModule.getImportStatements(meta)
         );
     });
     it(`should process imported symbols`, () => {
@@ -292,7 +292,7 @@ describe(`features/st-import`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             expect(
-                STImport.getImportStatements(meta),
+                STModule.getImportStatements(meta),
                 `STImport.getImportStatements(meta)`
             ).to.containSubset([
                 {
@@ -322,7 +322,7 @@ describe(`features/st-import`, () => {
                 },
             ]);
             expect(meta.getImportStatements(), `meta.getImportStatements()`).to.eql(
-                STImport.getImportStatements(meta)
+                STModule.getImportStatements(meta)
             );
         });
         it(`should process imported symbols`, () => {
