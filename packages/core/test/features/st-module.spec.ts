@@ -227,6 +227,82 @@ describe(`features/st-module`, () => {
             `,
         });
     });
+    describe('st-export', () => {
+        it('should collect public API mapping', () => {
+            const { sheets } = testStylableCore({
+                '/auto.st.css': `
+                    .root {}
+                    .part {}
+                `,
+                '/explicit-none.st.css': `
+                    .root {}
+                    .part {}
+                    /* @transform-remove */
+                    @st-export [];
+                `,
+                '/explicit-map.st.css': `
+                    .root {}
+                    .part {}
+                    /* @transform-remove */
+                    @st-export [
+                        root as btn,
+                        part as label,
+                    ];
+                `,
+            });
+
+            const { meta: autoMeta } = sheets['/auto.st.css'];
+            const { meta: explicitNoneMeta } = sheets['/explicit-none.st.css'];
+            const { meta: explicitMapMeta } = sheets['/explicit-map.st.css'];
+
+            shouldReportNoDiagnostics(autoMeta);
+            shouldReportNoDiagnostics(explicitNoneMeta);
+            shouldReportNoDiagnostics(explicitMapMeta);
+
+            expect(
+                {
+                    st_root: STModule.getExportInternalName(autoMeta, 'root', 'stylable'),
+                    st_part: STModule.getExportInternalName(autoMeta, 'part', 'stylable'),
+                    js_root: STModule.getExportInternalName(autoMeta, 'root', 'javascript'),
+                    js_part: STModule.getExportInternalName(autoMeta, 'part', 'javascript'),
+                },
+                'auto'
+            ).to.eql({
+                st_root: 'root',
+                st_part: 'part',
+                js_root: 'root',
+                js_part: 'part',
+            });
+            expect(
+                {
+                    st_root: STModule.getExportInternalName(explicitNoneMeta, 'root', 'stylable'),
+                    st_part: STModule.getExportInternalName(explicitNoneMeta, 'part', 'stylable'),
+                    js_root: STModule.getExportInternalName(explicitNoneMeta, 'root', 'javascript'),
+                    js_part: STModule.getExportInternalName(explicitNoneMeta, 'part', 'javascript'),
+                },
+                'explicit-none'
+            ).to.eql({
+                st_root: undefined,
+                st_part: undefined,
+                js_root: undefined,
+                js_part: undefined,
+            });
+            expect(
+                {
+                    st_root: STModule.getExportInternalName(explicitMapMeta, 'btn', 'stylable'),
+                    st_part: STModule.getExportInternalName(explicitMapMeta, 'label', 'stylable'),
+                    js_root: STModule.getExportInternalName(explicitMapMeta, 'btn', 'javascript'),
+                    js_part: STModule.getExportInternalName(explicitMapMeta, 'label', 'javascript'),
+                },
+                'explicit-none'
+            ).to.eql({
+                st_root: 'root',
+                st_part: 'part',
+                js_root: 'root',
+                js_part: 'part',
+            });
+        });
+    });
     describe(`st-symbol`, () => {
         it(`should warn on redeclare between multiple import statements`, () => {
             testStylableCore({

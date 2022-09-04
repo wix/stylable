@@ -3,6 +3,12 @@ import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
+import {
+    AnalyzedExports,
+    analyzeExportMessages,
+    analyzeStExport,
+    emptyAnalyzedExports,
+} from '../helpers/export';
 import { validateCustomPropertyName } from '../helpers/css-custom-property';
 import type { StylableMeta } from '../stylable-meta';
 import path from 'path';
@@ -61,9 +67,11 @@ export const ImportTypeHook = new Map<
 >();
 
 const dataKey = plugableRecord.key<Imported[]>('imports');
+const exportsDataKey = plugableRecord.key<AnalyzedExports>('exports');
 
 export const diagnostics = {
     ...parseImportMessages,
+    ...analyzeExportMessages,
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
     NO_ST_IMPORT_IN_NESTED_SCOPE: createDiagnosticReporter(
         '05011',
@@ -109,13 +117,22 @@ export const hooks = createFeature<{
         plugableRecord.set(meta.data, dataKey, []);
     },
     analyzeInit(context) {
-        const imports = plugableRecord.getUnsafe(context.meta.data, dataKey);
         const dirContext = path.dirname(context.meta.source);
         // collect shallow imports
         for (const node of context.meta.sourceAst.nodes) {
-            if (!isImportStatement(node)) {
+            if (!isModuleStatement(node)) {
                 continue;
             }
+            if (node.type === 'atrule' && node.name === 'st-export') {
+                let exports = plugableRecord.get(context.meta.data, exportsDataKey);
+                if (!exports) {
+                    exports = emptyAnalyzedExports();
+                    plugableRecord.set(context.meta.data, exportsDataKey, exports);
+                }
+                analyzeStExport(node, exports, context.diagnostics);
+                continue;
+            }
+            const imports = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const parsedImport =
                 node.type === `atrule`
                     ? parseStImport(node, dirContext, context.diagnostics)
@@ -152,7 +169,7 @@ export const hooks = createFeature<{
         }
     },
     prepareAST({ node, toRemove }) {
-        if (isImportStatement(node)) {
+        if (isModuleStatement(node)) {
             toRemove.push(node);
         }
     },
@@ -177,9 +194,9 @@ export class StylablePublicApi {
     }
 }
 
-function isImportStatement(node: postcss.ChildNode): node is postcss.Rule | postcss.AtRule {
+function isModuleStatement(node: postcss.ChildNode): node is postcss.Rule | postcss.AtRule {
     return (
-        (node.type === `atrule` && node.name === `st-import`) ||
+        (node.type === `atrule` && (node.name === `st-import` || node.name === `st-export`)) ||
         (node.type === `rule` && node.selector === `:import`)
     );
 }
@@ -202,6 +219,24 @@ export function createImportSymbol(
         import: importDef,
         context: dirContext,
     };
+}
+
+export function getExportInternalName(
+    meta: StylableMeta,
+    name: string,
+    exportTo: 'stylable' | 'javascript',
+    namespace: STSymbol.Namespaces = 'main'
+) {
+    const exportsData = plugableRecord.get(meta.data, exportsDataKey);
+    if (!exportsData) {
+        // auto exports
+        return STSymbol.getAll(meta, namespace)[name] ? name : undefined;
+    }
+    // explicit exports
+    const exportGroup = exportTo === 'stylable' ? 'stExports' : 'jsExports';
+    const publicToPrivate = exportsData[exportGroup].publicToPrivate;
+    const bucket = namespace === 'main' ? publicToPrivate.named : publicToPrivate.typed[namespace];
+    return bucket?.[name];
 }
 
 // internal

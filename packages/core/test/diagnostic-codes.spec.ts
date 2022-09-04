@@ -15,6 +15,7 @@ import {
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 import { atPropertyValidationWarnings } from '@stylable/core/dist/helpers/css-custom-property';
 import { parseImportMessages, ensureImportsMessages } from '@stylable/core/dist/helpers/import';
+import { analyzeExportMessages } from '@stylable/core/dist/helpers/export';
 import { mixinHelperDiagnostics } from '@stylable/core/dist/helpers/mixin';
 import { valueDiagnostics } from '@stylable/core/dist/helpers/value';
 import { functionDiagnostics } from '@stylable/core/dist/functions';
@@ -42,6 +43,7 @@ describe('diagnostics error codes', () => {
             ...STCustomSelector.diagnostics,
             ...atPropertyValidationWarnings,
             ...parseImportMessages,
+            ...analyzeExportMessages,
             ...ensureImportsMessages,
             ...mixinHelperDiagnostics,
             ...valueDiagnostics,
