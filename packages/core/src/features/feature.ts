@@ -74,7 +74,11 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         node: ParsedValue;
         data: EvalValueData;
     }) => void;
-    transformJSExports: (options: { exports: StylableExports; resolved: T['RESOLVED'] }) => void;
+    transformJSExports: (options: {
+        context: FeatureTransformContext;
+        exports: StylableExports;
+        resolved: T['RESOLVED'];
+    }) => void;
     transformLastPass: (options: {
         context: FeatureTransformContext;
         ast: postcss.Root;

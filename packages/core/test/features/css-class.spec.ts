@@ -4,10 +4,13 @@ import {
     shouldReportNoDiagnostics,
     diagnosticBankReportToStrings,
 } from '@stylable/core-test-kit';
+import { transformerDiagnostics } from '@stylable/core/dist/stylable-transformer';
 import { expect } from 'chai';
 
 const classDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
+const stModuleDiagnostics = diagnosticBankReportToStrings(STModule.diagnostics);
+const transDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 describe(`features/css-class`, () => {
     it(`should have root class`, () => {
@@ -438,6 +441,84 @@ describe(`features/css-class`, () => {
             expect(exports.classes[`imported-part`], `imported-part JS export`).to.eql(
                 `classes__imported-part`
             );
+        });
+        it('should map and filter explicit exports', () => {
+            // ToDo: move pseudo-element tests to feature spec
+            const { sheets } = testStylableCore({
+                '/api.st.css': `
+                    .cls-private, .cls-public, .cls-mapped {}
+                    @st-export [
+                        cls-public,
+                        cls-mapped as mappedCls,
+                    ];
+                `,
+                '/entry.st.css': `
+                    /*
+                        @transform-error(private class) ${stModuleDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                            'cls-private',
+                            './api.st.css'
+                        )}
+                    */
+                    @st-import Api, [
+                        cls-private, 
+                        cls-public,
+                        mappedCls as localMapped,
+                    ] from './api.st.css';
+
+                    /* 
+                        @transform-error(private class) ${classDiagnostics.UNKNOWN_IMPORT_ALIAS(
+                            'cls-private'
+                        )}
+                        @rule(private class) .entry__root .entry__cls-private
+                    */
+                    .root .cls-private {}
+                    
+                    /* @rule(public class) .entry__root .api__cls-public */
+                    .root .cls-public {}
+
+                    /* @rule(public mapped) .entry__root .api__cls-mapped */
+                    .root .localMapped {}
+
+                    /* @rule(public pseudo) .entry__root .api__root .api__cls-public */
+                    .root Api::cls-public {}
+                    
+                    /* 
+                        @transform-error(private pseudo) ${transDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                            'cls-private'
+                        )}
+                        @rule(private pseudo) .entry__root .api__root::cls-private 
+                    */
+                    .root Api::cls-private {}
+
+                    /* 
+                        @transform-error(private pseudo) ${transDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                            'cls-mapped'
+                        )}
+                        @rule(private mapped pseudo) .entry__root .api__root::cls-mapped 
+                    */
+                    .root Api::cls-mapped {}
+                    
+                    /* @rule(public mapped pseudo) .entry__root .api__root .api__cls-mapped */
+                    .root Api::mappedCls {}
+                `,
+            });
+
+            const { meta: apiMeta, exports: apiExports } = sheets['/api.st.css'];
+            const { exports: entryExports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(apiMeta);
+
+            // JS exports
+            expect(apiExports.classes, 'api JS exports').to.eql({
+                // named root is not automatically exported
+                'cls-public': 'api__cls-public',
+                mappedCls: 'api__cls-mapped',
+            });
+            expect(entryExports.classes, 'entry JS exports').to.eql({
+                root: 'entry__root',
+                'cls-public': 'api__cls-public',
+                localMapped: 'api__cls-mapped',
+            });
         });
         it(`should not override root`, () => {
             const { sheets } = testStylableCore({

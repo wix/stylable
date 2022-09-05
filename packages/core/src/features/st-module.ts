@@ -239,6 +239,43 @@ export function getExportInternalName(
     return bucket?.[name];
 }
 
+export function mapJavaScriptExports<T>({
+    meta,
+    data,
+    mapTo,
+    namespace = 'main',
+}: {
+    meta: StylableMeta;
+    data: Record<string, T>;
+    mapTo?: (value: T) => string;
+    namespace?: STSymbol.Namespaces;
+}) {
+    // generate unmapped exports
+    const unmapped = Object.entries(data).reduce((acc, [name, value]) => {
+        acc[name] = mapTo ? mapTo(value) : String(value);
+        return acc;
+    }, {} as Record<string, string>);
+    // check for explicit exports
+    const exportsData = plugableRecord.get(meta.data, exportsDataKey);
+    if (!exportsData) {
+        // no @st-export - all is exported as is
+        return unmapped;
+    }
+    // map imports according to export mapping
+    const privateToPublic = exportsData.jsExports.privateToPublic;
+    const bucket = namespace === 'main' ? privateToPublic.named : privateToPublic.typed[namespace];
+    // ToDo: test with no export - bucket=undefined
+    const mapped = Object.entries(unmapped).reduce((acc, [requestName, value]) => {
+        if (bucket[requestName]) {
+            for (const publicId of bucket[requestName]) {
+                acc[publicId] = value;
+            }
+        }
+        return acc;
+    }, {} as Record<string, string>);
+    return mapped;
+}
+
 // internal
 
 function addImportSymbols(importDef: Imported, context: FeatureContext, dirContext: string) {
@@ -307,7 +344,12 @@ function validateImports(context: FeatureTransformContext) {
             // warn about unknown named imported symbols
             for (const name in importObj.named) {
                 const origName = importObj.named[name];
-                const resolvedSymbol = context.resolver.resolveImported(importObj, origName);
+                const resolvedSymbol = context.resolver.resolveImported(
+                    importObj,
+                    origName,
+                    'main',
+                    true
+                );
                 if (resolvedSymbol === null || !resolvedSymbol.symbol) {
                     const namedDecl =
                         importObj.rule.nodes &&
@@ -321,6 +363,7 @@ function validateImports(context: FeatureTransformContext) {
                     );
                 }
             }
+            // ToDo: move typed imports validations here
         }
     }
 }

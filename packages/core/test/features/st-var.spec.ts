@@ -1,5 +1,5 @@
 import chaiSubset from 'chai-subset';
-import { STSymbol, STVar } from '@stylable/core/dist/features';
+import { STSymbol, STModule, STVar } from '@stylable/core/dist/features';
 import { functionDiagnostics } from '@stylable/core/dist/functions';
 import { stTypes, box } from '@stylable/core/dist/custom-values';
 import {
@@ -13,6 +13,7 @@ import postcssValueParser from 'postcss-value-parser';
 chai.use(chaiSubset);
 
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
+const stModuleDiagnostics = diagnosticBankReportToStrings(STModule.diagnostics);
 const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
 const functionStringDiagnostics = diagnosticBankReportToStrings(functionDiagnostics);
 
@@ -831,6 +832,61 @@ describe(`features/st-var`, () => {
                 localBefore: `before-val`,
                 localAfter: `after-val`,
             });
+        });
+        it('should map and filter explicit exports', () => {
+            const { sheets } = testStylableCore({
+                '/api.st.css': `
+                    :vars {
+                        private-var: pri;
+                        public-var: pub;
+                        mapped-var: map;
+                    }
+                    
+                    @st-export [
+                        public-var,
+                        mapped-var as mappedVar,
+                    ];
+                `,
+                '/entry.st.css': `
+                    /*
+                        @transform-error(private) ${stModuleDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                            'private-var',
+                            './api.st.css'
+                        )}
+                    */
+                    @st-import [
+                        private-var,
+                        public-var,
+                        mappedVar as localVar,
+                    ] from './api.st.css';
+
+                    .a {
+                        /* 
+                            @ToDo report unknown
+                            @decl(private) p: value(private-var) 
+                        */
+                        p: value(private-var);
+
+                        /* @decl(public) p: pub */
+                        p: value(public-var);
+
+                        /* @decl(mapped) p: map */
+                        p: value(localVar);
+                    }
+                `,
+            });
+
+            const { meta: apiMeta, exports: apiExports } = sheets['/api.st.css'];
+            const { exports: entryExports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(apiMeta);
+
+            // JS exports
+            expect(apiExports.stVars, 'api JS exports').to.eql({
+                'public-var': 'pub',
+                mappedVar: 'map',
+            });
+            expect(entryExports.stVars, 'entry JS exports').to.eql({});
         });
         it(`should resolve imported Javascript strings`, () => {
             const { sheets } = testStylableCore({

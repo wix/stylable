@@ -302,6 +302,31 @@ describe(`features/st-module`, () => {
                 js_part: 'part',
             });
         });
+        it('should allow default import without named root export', () => {
+            const { sheets } = testStylableCore({
+                '/api.st.css': `
+                    @st-export [];
+                `,
+                '/entry.st.css': `
+                    @st-import Api from './api.st.css';
+
+                    /* @rule(private class) .entry__root .api__root */
+                    .root Api {}
+                    
+                `,
+            });
+
+            const { meta: apiMeta, exports: apiExports } = sheets['/api.st.css'];
+            const { exports: entryExports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(apiMeta);
+
+            // JS exports
+            expect(apiExports.classes, 'api JS exports').to.eql({});
+            expect(entryExports.classes, 'entry JS exports').to.eql({
+                root: 'entry__root',
+            });
+        });
     });
     describe(`st-symbol`, () => {
         it(`should warn on redeclare between multiple import statements`, () => {

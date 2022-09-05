@@ -507,6 +507,60 @@ describe(`features/css-custom-property`, () => {
             expect(exports.vars.local, `mapped export`).to.eql(`--props-propB`);
             expect(exports.vars.deepProp, `deep export`).to.eql(`--base-deepProp`);
         });
+        it('should map and filter explicit exports', () => {
+            const { sheets } = testStylableCore({
+                '/api.st.css': `
+                    @property --private-prop;
+                    @property --public-prop;
+                    @property --mapped-prop;
+                    
+                    @st-export [
+                        --public-prop,
+                        --mapped-prop as --mappedProp,
+                    ];
+                `,
+                '/entry.st.css': `
+                    /*
+                        @transform-error(private) ${stModuleDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                            '--private-prop',
+                            './api.st.css'
+                        )}
+                    */
+                    @st-import [
+                        --private-prop,
+                        --public-prop,
+                        --mappedProp as --localProp,
+                    ] from './api.st.css';
+
+                    .a {
+                        /* @decl(private) p: var(--entry-private-prop) */
+                        p: var(--private-prop);
+
+                        /* @decl(public) p: var(--api-public-prop) */
+                        p: var(--public-prop);
+
+                        /* @decl(mapped) p: var(--api-mapped-prop) */
+                        p: var(--localProp);
+                    }
+                `,
+            });
+
+            const { meta: apiMeta, exports: apiExports } = sheets['/api.st.css'];
+            const { exports: entryExports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(apiMeta);
+
+            // JS exports
+            expect(apiExports.vars, 'api JS exports').to.eql({
+                'public-prop': '--api-public-prop',
+                mappedProp: '--api-mapped-prop',
+            });
+            expect(entryExports.vars, 'entry JS exports').to.eql({
+                'private-prop': '--entry-private-prop' /* ToDo: should this be exported? */,
+                'public-prop': '--api-public-prop',
+                localProp: '--api-mapped-prop',
+            });
+        });
         it(`should override imported with local definition`, () => {
             const { sheets } = testStylableCore({
                 '/props.st.css': `

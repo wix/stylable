@@ -1,3 +1,4 @@
+import type { RuntimeStylesheet } from '@stylable/runtime';
 import { expect } from 'chai';
 import { moduleFactoryTestKit } from './test-kit';
 
@@ -72,21 +73,27 @@ describe('Module Factory', () => {
         });
     });
 
-    it('api check', () => {
+    it('should generate runtime api', () => {
         const testFile = '/entry.st.css';
 
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
             [testFile]: `
-        
-            .part {
-                color: green;
+            .c1, .c2 {}
+            @layer l1, l2;
+            @keyframes k1;
+            @keyframes k2;
+            @property --p1;
+            @property --p2;
+            :vars {
+                v1: red;
+                v2: green;
             }
             `,
         });
 
         const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
 
-        const exports = evalStylableModule<{}>(moduleSource, testFile);
+        const exports = evalStylableModule<RuntimeStylesheet>(moduleSource, testFile);
         expect(Object.keys(exports).sort()).to.eql(
             [
                 'namespace',
@@ -100,5 +107,83 @@ describe('Module Factory', () => {
                 'st',
             ].sort()
         );
+        expect(exports.classes, 'classes').to.eql({
+            root: 'entry__root',
+            c1: 'entry__c1',
+            c2: 'entry__c2',
+        });
+        expect(exports.layers, 'layers').to.eql({
+            l1: 'entry__l1',
+            l2: 'entry__l2',
+        });
+        expect(exports.keyframes, 'keyframes').to.eql({
+            k1: 'entry__k1',
+            k2: 'entry__k2',
+        });
+        expect(exports.vars, 'vars (properties)').to.eql({
+            p1: '--entry-p1',
+            p2: '--entry-p2',
+        });
+        expect(exports.stVars, 'stylable vars').to.eql({
+            v1: 'red',
+            v2: 'green',
+        });
+    });
+    it('should generate runtime api from explicit export', () => {
+        const testFile = '/entry.st.css';
+
+        const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
+            [testFile]: `
+            .c1, .c2 {}
+            @layer l1, l2;
+            @keyframes k1;
+            @keyframes k2;
+            @property --p1;
+            @property --p2;
+            :vars {
+                v1: red;
+                v2: green;
+            }
+            @st-export [
+                c2,
+                layer(l2)
+                keyframes(k2),
+                --p2,
+                v2,
+            ];
+            `,
+        });
+
+        const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
+
+        const exports = evalStylableModule<RuntimeStylesheet>(moduleSource, testFile);
+        expect(Object.keys(exports).sort()).to.eql(
+            [
+                'namespace',
+                'classes',
+                'keyframes',
+                'layers',
+                'vars',
+                'stVars',
+                'cssStates',
+                'style',
+                'st',
+            ].sort()
+        );
+        expect(exports.classes, 'classes').to.eql({
+            c2: 'entry__c2',
+        });
+        expect(exports.layers, 'layers').to.eql({
+            l2: 'entry__l2',
+        });
+        expect(exports.keyframes, 'keyframes').to.eql({
+            k2: 'entry__k2',
+        });
+        expect(exports.vars, 'vars (properties)').to.eql({
+            p2: '--entry-p2',
+        });
+        expect(exports.stVars, 'stylable vars').to.eql({
+            v2: 'green',
+        });
     });
 });

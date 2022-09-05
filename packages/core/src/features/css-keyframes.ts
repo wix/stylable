@@ -194,10 +194,15 @@ export const hooks = createFeature<{
         });
         decl.value = parsed.toString();
     },
-    transformJSExports({ exports, resolved }) {
-        for (const [name, resolve] of Object.entries(resolved)) {
-            exports.keyframes[name] = getTransformedName(resolve);
-        }
+    transformJSExports({ context: { meta }, exports, resolved }) {
+        exports.keyframes = STModule.mapJavaScriptExports({
+            meta,
+            data: resolved,
+            mapTo(resolve) {
+                return getTransformedName(resolve);
+            },
+            namespace: 'keyframes',
+        });
     },
 });
 

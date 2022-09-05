@@ -155,10 +155,15 @@ export const hooks = createFeature<{
             }
         }
     },
-    transformJSExports({ exports, resolved }) {
-        for (const [name, resolve] of Object.entries(resolved)) {
-            exports.layers[name] = getTransformedName(resolve);
-        }
+    transformJSExports({ context: { meta }, exports, resolved }) {
+        exports.layers = STModule.mapJavaScriptExports({
+            meta,
+            data: resolved,
+            mapTo(resolve) {
+                return getTransformedName(resolve);
+            },
+            namespace: 'layer',
+        });
     },
 });
 

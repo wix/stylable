@@ -7,6 +7,7 @@ import {
 import { expect } from 'chai';
 
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
+const stModuleDiagnostics = diagnosticBankReportToStrings(STModule.diagnostics);
 
 describe(`features/css-type`, () => {
     it(`should process element types`, () => {
@@ -190,6 +191,47 @@ describe(`features/css-type`, () => {
             expect(exports.classes, `not add as classes exports`).to.eql({
                 root: `entry__root`,
             });
+        });
+        it('should map and filter explicit exports', () => {
+            // Elements are not namespaced, so even when not exported,
+            // attempting to use them might result in a targeting selector
+            const { sheets } = testStylableCore({
+                '/api.st.css': `
+                    .root Private-el Public-el Mapped-el {}
+                    @st-export [
+                        Public-el,
+                        Mapped-el as mappedEl,
+                    ];
+                `,
+                '/entry.st.css': `
+                    /*
+                        @transform-error(private) ${stModuleDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                            'Private-el',
+                            './api.st.css'
+                        )}
+                    */
+                    @st-import [
+                        Private-el, 
+                        Public-el,
+                        mappedEl as LocalEl,
+                    ] from './api.st.css';
+
+                    /* @rule(private) .entry__root Private-el */
+                    .root Private-el {}
+                    
+                    /* @rule(public) .entry__root Public-el */
+                    .root Public-el {}
+
+                    /* @rule(mapped) .entry__root Mapped-el */
+                    .root LocalEl {}
+                `,
+            });
+
+            const { meta: apiMeta } = sheets['/api.st.css'];
+
+            shouldReportNoDiagnostics(apiMeta);
+            // ToDo: fix resolve to handle mapping to lower case local name, or report an error on it
+            // (not picked up in css type transformSelectorNode)
         });
         it(`should resolve deep imported element type`, () => {
             testStylableCore({

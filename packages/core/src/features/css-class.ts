@@ -2,6 +2,7 @@ import { createFeature, FeatureContext } from './feature';
 import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
+import * as STModule from './st-module';
 import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-module';
 import * as STGlobal from './st-global';
@@ -158,8 +159,8 @@ export const hooks = createFeature<{
         }
         namespaceClass(meta, symbol, node, originMeta);
     },
-    transformJSExports({ exports, resolved }) {
-        Object.assign(exports.classes, resolved);
+    transformJSExports({ context: { meta }, exports, resolved }) {
+        Object.assign(exports.classes, STModule.mapJavaScriptExports({ meta, data: resolved }));
     },
 });
 

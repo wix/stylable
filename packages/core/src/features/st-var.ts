@@ -2,6 +2,7 @@ import { createFeature, FeatureContext, FeatureTransformContext } from './featur
 import { unbox, Box, deprecatedStFunctions, boxString } from '../custom-values';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
+import * as STModule from './st-module';
 import type { StylableMeta } from '../stylable-meta';
 import { createSymbolResolverWithCache, CSSResolve } from '../stylable-resolver';
 import { EvalValueData, EvalValueResult, StylableEvaluator } from '../functions';
@@ -154,10 +155,14 @@ export const hooks = createFeature<{
     transformValue({ context, node, data }) {
         evaluateValueCall(context, node, data);
     },
-    transformJSExports({ exports, resolved }) {
-        for (const [name, { topLevelType, outputValue }] of Object.entries(resolved)) {
-            exports.stVars[name] = topLevelType ? unbox(topLevelType) : outputValue;
-        }
+    transformJSExports({ context: { meta }, exports, resolved }) {
+        exports.stVars = STModule.mapJavaScriptExports({
+            meta,
+            data: resolved,
+            mapTo({ topLevelType, outputValue }) {
+                return topLevelType ? unbox(topLevelType) : outputValue;
+            },
+        });
     },
 });
 

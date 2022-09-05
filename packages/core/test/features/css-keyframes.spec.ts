@@ -455,6 +455,63 @@ describe(`features/css-keyframes`, () => {
             // JS exports
             expect(exports.keyframes, `JS exports`).to.eql({});
         });
+        it('should map and filter explicit exports', () => {
+            const { sheets } = testStylableCore({
+                '/api.st.css': `
+                    @keyframes private-keyframes {}
+                    @keyframes public-keyframes {}
+                    @keyframes mapped-keyframes {}
+                    
+                    @st-export [
+                        keyframes(
+                            public-keyframes,
+                            mapped-keyframes as mappedKeyframes,
+                        )
+                    ];
+                `,
+                '/entry.st.css': `
+                    /*
+                        @transform-error word(private-keyframes) ${keyframesDiagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
+                            `private-keyframes`,
+                            `./api.st.css`
+                        )}
+                    */
+                    @st-import [
+                        keyframes(
+                            private-keyframes,
+                            public-keyframes,
+                            mappedKeyframes as localKeyframes,
+                        )
+                    ] from './api.st.css';
+
+                    .a {
+                        /* @decl(private) animation-name: private-keyframes */
+                        animation-name: private-keyframes;
+
+                        /* @decl(public) animation-name: api__public-keyframes */
+                        animation-name: public-keyframes;
+
+                        /* @decl(mapped) animation-name: api__mapped-keyframes */
+                        animation-name: localKeyframes;
+                    }
+                `,
+            });
+
+            const { meta: apiMeta, exports: apiExports } = sheets['/api.st.css'];
+            const { exports: entryExports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(apiMeta);
+
+            // JS exports
+            expect(apiExports.keyframes, 'api JS exports').to.eql({
+                'public-keyframes': 'api__public-keyframes',
+                mappedKeyframes: 'api__mapped-keyframes',
+            });
+            expect(entryExports.keyframes, 'entry JS exports').to.eql({
+                'public-keyframes': 'api__public-keyframes',
+                localKeyframes: 'api__mapped-keyframes',
+            });
+        });
         it(`should not conflict with other imported symbol types`, () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': `

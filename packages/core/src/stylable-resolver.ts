@@ -9,6 +9,7 @@ import {
     StylableSymbol,
     CSSClass,
     STSymbol,
+    STModule,
     STCustomSelector,
     VarSymbol,
     CSSVarSymbol,
@@ -183,7 +184,8 @@ export class StylableResolver {
     public resolveImported(
         imported: Imported,
         name: string,
-        subtype: 'mappedSymbols' | 'mappedKeyframes' | STSymbol.Namespaces = 'mappedSymbols'
+        subtype: 'mappedSymbols' | 'mappedKeyframes' | STSymbol.Namespaces = 'mappedSymbols',
+        filterPrivate = false
     ): CSSResolve | JSResolve | null {
         const res = this.getModule(imported);
         if (res.value === null) {
@@ -199,10 +201,16 @@ export class StylableResolver {
                     ? `keyframes`
                     : subtype;
             name = !name && namespace === `main` ? `root` : name;
-            const symbol = STSymbol.getAll(meta, namespace)[name];
+
+            const internalId = STModule.getExportInternalName(meta, name, 'stylable', namespace);
+            let symbol: StylableSymbol | null = null;
+            if (!filterPrivate || (filterPrivate && internalId)) {
+                symbol = STSymbol.getAll(meta, namespace)[internalId || name];
+            }
+
             return {
                 _kind: 'css',
-                symbol,
+                symbol: symbol as StylableSymbol,
                 meta,
             };
         } else {
@@ -214,11 +222,16 @@ export class StylableResolver {
             };
         }
     }
-    public resolveImport(importSymbol: ImportSymbol) {
+    public resolveImport(importSymbol: ImportSymbol, filterPrivate?: boolean) {
         const name = importSymbol.type === 'named' ? importSymbol.name : '';
-        return this.resolveImported(importSymbol.import, name);
+        // stylesheet default is always public
+        filterPrivate = importSymbol.type === 'default' ? false : filterPrivate;
+        return this.resolveImported(importSymbol.import, name, 'main', filterPrivate);
     }
-    public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
+    public resolve(
+        maybeImport: StylableSymbol | undefined,
+        filterPrivate?: boolean
+    ): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
             if (
                 maybeImport &&
@@ -247,20 +260,21 @@ export class StylableResolver {
         if (!maybeImport || maybeImport._kind !== 'import') {
             return null;
         }
-        return this.resolveImport(maybeImport);
+        return this.resolveImport(maybeImport, filterPrivate);
     }
     public deepResolve(
         maybeImport: StylableSymbol | undefined,
-        path: StylableSymbol[] = []
+        path: StylableSymbol[] = [],
+        filterPrivate?: boolean
     ): CSSResolve | JSResolve | null {
-        let resolved = this.resolve(maybeImport);
+        let resolved = this.resolve(maybeImport, filterPrivate);
         while (
             resolved &&
             resolved._kind === 'css' &&
             resolved.symbol &&
             resolved.symbol._kind === 'import'
         ) {
-            resolved = this.resolve(resolved.symbol);
+            resolved = this.resolve(resolved.symbol, filterPrivate);
         }
         if (resolved && resolved.symbol && resolved.meta) {
             if (
@@ -273,7 +287,7 @@ export class StylableResolver {
                     return { _kind: 'css', symbol: resolved.symbol, meta: resolved.meta };
                 }
                 path.push(resolved.symbol);
-                return this.deepResolve(resolved.symbol.alias, path);
+                return this.deepResolve(resolved.symbol.alias, path, filterPrivate);
             }
         }
         return resolved;
@@ -327,7 +341,7 @@ export class StylableResolver {
         for (const [name, symbol] of Object.entries(meta.getAllSymbols())) {
             let deepResolved: CSSResolve | JSResolve | null;
             if (symbol._kind === `import` || (symbol._kind === `cssVar` && symbol.alias)) {
-                deepResolved = this.deepResolve(symbol);
+                deepResolved = this.deepResolve(symbol, [], true);
                 if (!deepResolved || !deepResolved.symbol) {
                     // diagnostics for unresolved imports are reported
                     // as part of st-import validateImports
@@ -461,7 +475,7 @@ export class StylableResolver {
 
             if (parent) {
                 if (parent._kind === 'import') {
-                    const res = this.resolve(parent);
+                    const res = this.resolve(parent, true);
                     if (
                         res &&
                         res._kind === 'css' &&
@@ -559,7 +573,12 @@ function resolveByNamespace<NS extends STSymbol.Namespaces>(
 ): CSSResolve<STSymbol.SymbolByNamespace<NS>> | undefined {
     const current = { meta, symbol };
     while ('import' in current.symbol && current.symbol.import) {
-        const res = resolver.resolveImported(current.symbol.import, current.symbol.name, type);
+        const res = resolver.resolveImported(
+            current.symbol.import,
+            current.symbol.name,
+            type,
+            true
+        );
         if (res?._kind === 'css' && res.symbol?._kind === type) {
             ({ meta: current.meta, symbol: current.symbol } = res);
         } else {

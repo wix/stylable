@@ -357,6 +357,57 @@ describe('features/css-layer', () => {
             // JS exports
             expect(exports.layers, `JS exports`).to.eql({});
         });
+        it('should map and filter explicit exports', () => {
+            const { sheets } = testStylableCore({
+                '/api.st.css': `
+                    @layer private-layer, public-layer, mapped-layer;
+                    @st-export [
+                        layer(
+                            public-layer,
+                            mapped-layer as mappedLayer,
+                        )
+                    ];
+                `,
+                '/entry.st.css': `
+                    /*
+                        @transform-error word(private-layer) ${cssLayerDiagnostics.UNKNOWN_IMPORTED_LAYER(
+                            `private-layer`,
+                            `./api.st.css`
+                        )}
+                    */
+                    @st-import [
+                        layer(
+                            private-layer,
+                            public-layer,
+                            mappedLayer as localLayer,
+                        )
+                    ] from './api.st.css';
+
+                    @layer private-layer {}
+
+                    /* @atrule(public) api__public-layer */
+                    @layer public-layer {}
+
+                    /* @atrule(public) api__mapped-layer */
+                    @layer localLayer {}
+                `,
+            });
+
+            const { meta: apiMeta, exports: apiExports } = sheets['/api.st.css'];
+            const { exports: entryExports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(apiMeta);
+
+            // JS exports
+            expect(apiExports.layers, 'api JS exports').to.eql({
+                'public-layer': 'api__public-layer',
+                mappedLayer: 'api__mapped-layer',
+            });
+            expect(entryExports.layers, 'entry JS exports').to.eql({
+                'public-layer': 'api__public-layer',
+                localLayer: 'api__mapped-layer',
+            });
+        });
         it('should transform nested layers (local and imported)', () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': `

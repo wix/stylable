@@ -285,22 +285,27 @@ export class StylableTransformer {
 
         if (metaExports) {
             CSSClass.hooks.transformJSExports({
+                context: transformContext,
                 exports: metaExports,
                 resolved: cssClassResolve,
             });
             STVar.hooks.transformJSExports({
+                context: transformContext,
                 exports: metaExports,
                 resolved: stVarResolve,
             });
             CSSKeyframes.hooks.transformJSExports({
+                context: transformContext,
                 exports: metaExports,
                 resolved: keyframesResolve,
             });
             CSSLayer.hooks.transformJSExports({
+                context: transformContext,
                 exports: metaExports,
                 resolved: layerResolve,
             });
             CSSCustomProperty.hooks.transformJSExports({
+                context: transformContext,
                 exports: metaExports,
                 resolved: cssVarsMapping,
             });
@@ -448,14 +453,17 @@ export class StylableTransformer {
                     return;
                 }
 
-                const requestedPart = CSSClass.get(meta, node.value);
+                const innerId = STModule.getExportInternalName(meta, node.value, 'stylable');
+                const requestedPart = innerId ? CSSClass.get(meta, innerId) : undefined;
 
-                if (symbol.alias || !requestedPart) {
+                if (symbol.alias || !requestedPart || !innerId) {
                     // skip alias since they cannot add parts
+                    // skip no innerId since the part is not public
+                    // skip no requestedPart as the part is not found
                     continue;
                 }
 
-                resolved = this.getResolvedSymbols(meta).class[node.value];
+                resolved = this.getResolvedSymbols(meta).class[innerId];
 
                 // first definition of a part in the extends/alias chain
                 context.setCurrentAnchor({

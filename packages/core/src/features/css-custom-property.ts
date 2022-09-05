@@ -1,6 +1,6 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
-import type { ImportSymbol } from './st-module';
+import * as STModule from './st-module';
 import {
     validateAtProperty,
     validateCustomPropertyName,
@@ -20,7 +20,7 @@ export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
     global: boolean;
-    alias: ImportSymbol | undefined;
+    alias: STModule.ImportSymbol | undefined;
 }
 
 export const diagnostics = {
@@ -192,10 +192,15 @@ export const hooks = createFeature<{
             node.resolvedValue = stringifyFunction(value, node);
         }
     },
-    transformJSExports({ exports, resolved }) {
-        for (const varName of Object.keys(resolved)) {
-            exports.vars[varName.slice(2)] = resolved[varName];
-        }
+    transformJSExports({ context: { meta }, exports, resolved }) {
+        const fullNameExports = STModule.mapJavaScriptExports({
+            meta,
+            data: resolved,
+        });
+        exports.vars = Object.entries(fullNameExports).reduce((acc, [local, global]) => {
+            acc[local.slice(2)] = global;
+            return acc;
+        }, {} as Record<string, string>);
     },
 });
 
@@ -218,7 +223,7 @@ function addCSSProperty({
     name: string;
     global: boolean;
     final: boolean;
-    alias?: ImportSymbol;
+    alias?: STModule.ImportSymbol;
 }) {
     // validate indent
     if (!validateCustomPropertyName(name)) {
