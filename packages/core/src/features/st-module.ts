@@ -14,7 +14,7 @@ import type { StylableMeta } from '../stylable-meta';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import type { Stylable } from '../stylable';
 
 export interface ImportSymbol {
@@ -33,6 +33,9 @@ export interface AnalyzedImport {
         keyframes: Record<string, string>;
     };
 }
+export type ResolvedPublicExports = {
+    [key in keyof typeof STSymbol.publicTypeMap]: string[];
+};
 
 export interface Imported {
     from: string;
@@ -192,6 +195,36 @@ export class StylablePublicApi {
             },
         }));
     }
+    public resolvePublicExports(
+        meta: StylableMeta,
+        { target = 'stylable' }: { target?: 'stylable' | 'javascript' } = {}
+    ) {
+        const symbols = this.stylable.resolver.resolveSymbols(meta, new Diagnostics());
+        return Object.entries(STSymbol.publicTypeMap).reduce(
+            (acc, [publicTypeName, internalTypeName]) => {
+                if (internalTypeName in symbols) {
+                    const record = symbols[internalTypeName as keyof typeof symbols];
+                    acc[publicTypeName] = [];
+                    for (const localSymbolName of Object.keys(record)) {
+                        const publicNames = getExportPublicNames(
+                            meta,
+                            localSymbolName,
+                            target,
+                            STSymbol.NAMESPACES[internalTypeName]
+                        );
+                        if (!publicNames) {
+                            continue;
+                        }
+                        for (const publicName of publicNames) {
+                            acc[publicTypeName].push(publicName);
+                        }
+                    }
+                }
+                return acc;
+            },
+            {} as ResolvedPublicExports
+        );
+    }
 }
 
 function isModuleStatement(node: postcss.ChildNode): node is postcss.Rule | postcss.AtRule {
@@ -236,6 +269,24 @@ export function getExportInternalName(
     const exportGroup = exportTo === 'stylable' ? 'stExports' : 'jsExports';
     const publicToPrivate = exportsData[exportGroup].publicToPrivate;
     const bucket = namespace === 'main' ? publicToPrivate.named : publicToPrivate.typed[namespace];
+    return bucket?.[name];
+}
+
+export function getExportPublicNames(
+    meta: StylableMeta,
+    name: string,
+    exportTo: 'stylable' | 'javascript',
+    namespace: STSymbol.Namespaces = 'main'
+) {
+    const exportsData = plugableRecord.get(meta.data, exportsDataKey);
+    if (!exportsData) {
+        // auto exports
+        return STSymbol.getAll(meta, namespace)[name] ? [name] : undefined;
+    }
+    // explicit exports
+    const exportGroup = exportTo === 'stylable' ? 'stExports' : 'jsExports';
+    const privateToPublic = exportsData[exportGroup].privateToPublic;
+    const bucket = namespace === 'main' ? privateToPublic.named : privateToPublic.typed[namespace];
     return bucket?.[name];
 }
 

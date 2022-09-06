@@ -23,7 +23,7 @@ export type StylableSymbol =
     | KeyframesSymbol
     | LayerSymbol;
 // the namespace that each symbol exists on
-const NAMESPACES = {
+export const NAMESPACES = {
     import: `main`,
     class: `main`,
     cssVar: `main`,
@@ -40,6 +40,14 @@ export const readableTypeMap: Record<StylableSymbol['_kind'], string> = {
     keyframes: 'css keyframes',
     layer: 'css layer',
     var: 'stylable var',
+};
+export const publicTypeMap: Record<string, keyof typeof NAMESPACES> = {
+    class: 'class',
+    typeSelector: 'element',
+    customProperty: 'cssVar',
+    keyframes: 'keyframes',
+    layer: 'layer',
+    stVar: 'var',
 };
 // state structure
 function createState(clone?: State): State {

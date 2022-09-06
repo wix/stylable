@@ -768,5 +768,94 @@ describe(`features/st-module`, () => {
                 },
             ]);
         });
+        it('should resolve public exports', () => {
+            const { stylable } = testStylableCore({
+                '/auto.st.css': `
+                    .root {}
+                    .part {}
+                `,
+                '/explicit-none.st.css': `
+                    .root {}
+                    .part {}
+                    @st-export [];
+                `,
+                '/explicit-map.st.css': `
+                    .root {}
+                    .part {}
+                    @st-export [
+                        root as btn,
+                        part as label,
+                    ];
+                `,
+                '/explicit-st-js.st.css': `
+                    .jsPart {}
+                    .stPart {}
+                    .commonPart {}
+                    @st-export to(js) [
+                        jsPart,
+                    ];
+                    @st-export to(css) [
+                        stPart,
+                    ];
+                    @st-export to(css, js) [
+                        commonPart,
+                    ];
+                `,
+            });
+
+            expect(
+                stylable.stModule.resolvePublicExports(stylable.analyze('/auto.st.css')),
+                'auto'
+            ).to.eql({
+                class: ['root', 'part'],
+                typeSelector: [],
+                customProperty: [],
+                keyframes: [],
+                layer: [],
+                stVar: [],
+            });
+            expect(
+                stylable.stModule.resolvePublicExports(stylable.analyze('/explicit-none.st.css')),
+                'explicit none'
+            ).to.eql({
+                class: [],
+                typeSelector: [],
+                customProperty: [],
+                keyframes: [],
+                layer: [],
+                stVar: [],
+            });
+            expect(
+                stylable.stModule.resolvePublicExports(stylable.analyze('/explicit-map.st.css')),
+                'explicit map'
+            ).to.eql({
+                class: ['btn', 'label'],
+                typeSelector: [],
+                customProperty: [],
+                keyframes: [],
+                layer: [],
+                stVar: [],
+            });
+            const stAndJsMeta = stylable.analyze('/explicit-st-js.st.css');
+            expect(stylable.stModule.resolvePublicExports(stAndJsMeta), 'explicit st').to.eql({
+                class: ['stPart', 'commonPart'],
+                typeSelector: [],
+                customProperty: [],
+                keyframes: [],
+                layer: [],
+                stVar: [],
+            });
+            expect(
+                stylable.stModule.resolvePublicExports(stAndJsMeta, { target: 'javascript' }),
+                'explicit js'
+            ).to.eql({
+                class: ['jsPart', 'commonPart'],
+                typeSelector: [],
+                customProperty: [],
+                keyframes: [],
+                layer: [],
+                stVar: [],
+            });
+        });
     });
 });
