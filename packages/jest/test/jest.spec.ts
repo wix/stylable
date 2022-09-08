@@ -11,7 +11,7 @@ describe('jest process', () => {
         const transformer = stylableTransformer.createTransformer();
 
         const module = nodeEval(
-            transformer.process(content, filename),
+            transformer.process(content, filename).code,
             filename
         ) as RuntimeStylesheet;
 
@@ -27,7 +27,7 @@ describe('jest process', () => {
         });
 
         const module = nodeEval(
-            transformer.process(content, filename),
+            transformer.process(content, filename).code,
             filename
         ) as RuntimeStylesheet;
 
