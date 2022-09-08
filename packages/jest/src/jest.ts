@@ -47,12 +47,7 @@ export const createTransformer = (options?: StylableJestConfig) => {
     );
 
     const process = (source: string, path: string) => {
-        const res = new String(moduleFactory(source, path));
-
-        // v28+ Jest transformer API expects a `code` property with the transformed source
-        (res as string & { code: string }).code = res.toString();
-
-        return res as string & { code: string };
+        return { code: moduleFactory(source, path) };
     };
 
     return {
