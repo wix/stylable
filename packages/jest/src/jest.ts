@@ -33,7 +33,7 @@ export interface StylableJestConfig {
 }
 
 export const createTransformer = (options?: StylableJestConfig) => {
-    const process = stylableModuleFactory(
+    const moduleFactory = stylableModuleFactory(
         {
             fileSystem: fs,
             requireModule: require,
@@ -45,6 +45,15 @@ export const createTransformer = (options?: StylableJestConfig) => {
         // this allows @stylable/jest to be used as part of a globally installed CLI
         { runtimePath: stylableRuntimePath }
     );
+
+    const process = (source: string, path: string) => {
+        const res = new String(moduleFactory(source, path));
+
+        // v28+ Jest transformer API expects a `code` property with the transformed source
+        (res as string & { code: string }).code = res.toString();
+
+        return res as string & { code: string };
+    };
 
     return {
         process,

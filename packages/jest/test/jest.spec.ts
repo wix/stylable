@@ -11,7 +11,7 @@ describe('jest process', () => {
         const transformer = stylableTransformer.createTransformer();
 
         const module = nodeEval(
-            transformer.process(content, filename),
+            transformer.process(content, filename).code,
             filename
         ) as RuntimeStylesheet;
 
@@ -27,11 +27,25 @@ describe('jest process', () => {
         });
 
         const module = nodeEval(
-            transformer.process(content, filename),
+            transformer.process(content, filename).code,
             filename
         ) as RuntimeStylesheet;
 
         expect(module.classes.root).to.equal(`test-custom__root`);
         expect(module.classes.test).to.equal(`test-custom__test`);
+    });
+
+    it('should maintain compatibility with previous string based transformers', () => {
+        const filename = require.resolve('@stylable/jest/test/fixtures/test.st.css');
+        const content = readFileSync(filename, 'utf8');
+        const transformer = stylableTransformer.createTransformer();
+
+        const code = transformer.process(content, filename).code;
+
+        expect(typeof code).to.equal('string');
+
+        const module = nodeEval(code, filename) as RuntimeStylesheet;
+
+        expect(module.classes.root).to.equal(`${module.namespace}__root`);
     });
 });
