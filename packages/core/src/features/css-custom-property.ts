@@ -168,8 +168,9 @@ export const hooks = createFeature<{
         }
 
         if (atRule.nodes?.length) {
-            if (resolved[atRule.params]) {
-                atRule.params = resolved[atRule.params] || atRule.params;
+            const propName = globalValue(atRule.params) || atRule.params;
+            if (resolved[propName]) {
+                atRule.params = resolved[propName] || atRule.params;
             }
         } else {
             // remove `@property` with no body
