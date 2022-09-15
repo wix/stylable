@@ -16,16 +16,16 @@ import { resolveNpmRequests } from './resolve-requests';
 import type { ModuleResolver } from '@stylable/core/src/types';
 import type { MinimalFS } from '@stylable/core';
 
-interface StylableCliConfigs {
-    stcConfig: Configuration<string> | undefined;
-    createResolver: ((fs: MinimalFS) => ModuleResolver) | undefined;
+interface StylableRuntimeConfigs {
+    stcConfig?: Configuration<string> | undefined;
+    defaultConfig?: { resolveModule?: ModuleResolver };
 }
 
 export async function projectsConfig(
     rootDir: string,
     overrideBuildOptions: Partial<BuildOptions>,
     defaultOptions: BuildOptions = createDefaultOptions(),
-    config?: StylableCliConfigs
+    config?: StylableRuntimeConfigs
 ): Promise<STCProjects> {
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
@@ -60,29 +60,30 @@ export async function projectsConfig(
     return projects;
 }
 
-export function resolveConfig(context: string, request?: string) {
-    return request ? requireConfigFile(request, context) : resolveConfigFile(context);
+export function resolveConfig(context: string, request?: string, fs?: MinimalFS) {
+    return request ? requireConfigFile(request, context, fs) : resolveConfigFile(context, fs);
 }
 
-function requireConfigFile(request: string, context: string) {
+function requireConfigFile(request: string, context: string, fs?: MinimalFS) {
     const path = require.resolve(request, { paths: [context] });
-    const config = resolveConfigValue(require(path));
+    const config = resolveConfigValue(require(path), fs);
     return config ? { config, path } : undefined;
 }
 
-function resolveConfigFile(context: string) {
-    return loadStylableConfig(context, (config) => resolveConfigValue(config));
+function resolveConfigFile(context: string, fs?: MinimalFS) {
+    return loadStylableConfig(context, (config) => resolveConfigValue(config, fs));
 }
 
-function resolveConfigValue(config: any) {
+function resolveConfigValue(config: any, fs?: MinimalFS) {
     return tryRun(
-        () => ({
+        (): StylableRuntimeConfigs => ({
             stcConfig: isSTCConfig(config)
                 ? typeof config.stcConfig === 'function'
                     ? config.stcConfig()
                     : config.stcConfig
                 : undefined,
-            createResolver: isResolverConfig(config) ? config.createResolver : undefined,
+            defaultConfig:
+                typeof config.defaultConfig === 'function' ? config.defaultConfig(fs) : undefined,
         }),
         'Failed to evaluate Stylable config'
     );
@@ -93,16 +94,6 @@ function isSTCConfig(config: any): config is { stcConfig: Configuration | Config
         typeof config === 'object' &&
         config.stcConfig &&
         (typeof config.stcConfig === 'function' || typeof config.stcConfig === 'object')
-    );
-}
-
-function isResolverConfig(
-    config: any
-): config is { createResolver: (fs: MinimalFS) => ModuleResolver } {
-    return (
-        typeof config === 'object' &&
-        config.createResolver &&
-        typeof config.createResolver === 'function'
     );
 }
 

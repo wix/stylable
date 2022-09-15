@@ -533,12 +533,14 @@ describe('Stylable Cli', function () {
                     const { createDefaultResolver } = require('@stylable/core');
 
                     module.exports = {
-                        createResolver(fs) {
-                            return createDefaultResolver(fs, {
-                                alias: {
-                                    '@colors': resolve(__dirname, './colors')
-                                }
-                            });
+                        defaultConfig(fs) {
+                            return {
+                                resolveModule: createDefaultResolver(fs, {
+                                    alias: {
+                                        '@colors': resolve(__dirname, './colors')
+                                    }
+                                })  
+                            };
                         }
                     }
                 `,
@@ -580,22 +582,24 @@ describe('Stylable Cli', function () {
                         }
                     }`,
                 'stylable.config.js': `
-                    const { join } = require('node:path');
-                    const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+                    const { join } = require('path');
+                    const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
                     const { createDefaultResolver } = require('@stylable/core');
 
                     module.exports = {
-                        createResolver(fs) {
-                            return createDefaultResolver(fs, {
-                                plugins: [new TsconfigPathsPlugin({ configFile: join('${tempDir.path}','tsconfig.json') })],
-                            });
+                        defaultConfig(fs) {
+                            return {
+                                resolveModule: createDefaultResolver(fs, {
+                                    plugins: [new TsconfigPathsPlugin({ configFile: join('${tempDir.path}','tsconfig.json') })],
+                                })
+                            };
                         }
                     }
                 `,
                 'entry.st.css': `
                     @st-import [green] from '@colors/green.st.css';
                     
-                    .root { -st-mixin: green;}`,
+                    .root { -st-mixin: green; }`,
                 colors: {
                     'green.st.css': `.green { color: green; }`,
                 },

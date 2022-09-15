@@ -56,8 +56,8 @@ export async function buildStylable(
         watchOptions = {},
     }: BuildStylableContext = {}
 ) {
-    const { config } = resolveConfig(rootDir, configFilePath) || {};
-    const resolveModule = config?.createResolver?.(fileSystem);
+    const { config } = resolveConfig(rootDir, configFilePath, fs) || {};
+    const resolveModule = config?.defaultConfig?.resolveModule;
 
     const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions, config);
     const watchHandler = new WatchHandler(fileSystem, {
