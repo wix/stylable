@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Native ESM</title>
+    <script>
+        import {css} from "../node_modules/comps/css";
+        css('button', 'label').theme('basic').inject('head');
+    </script>
+    <style>
+      @import "../node_modules/comps/dist/bare/button/button.css";
+      /* @import "../node_modules/comps/dist/bare/label/label.css"; */
+      /* @import "../node_modules/comps/dist/themes/basic/label/label.css"; */
+      @import "../node_modules/comps/dist/themes/basic/button/button.css";
+    </style>
+    <!-- <link rel="stylesheet" href="../node_modules/comps/dist/themes/basic/label/theme.css"> -->
+    <!-- <link rel="stylesheet" href="../node_modules/comps/dist/themes/basic/button/theme.css"> -->
+  </head>
+  <body>
+    <script type="module">
+      import * as Button from '../node_modules/comps/dist/bare/button/button.js';
+      // import * as Label from '../node_modules/comps/dist/bare/label/label.js';
+
+      const btn = Button.render('I am a button');
+      btn.id = 'btn';
+      document.body.appendChild(btn);
+
+      const label = Label.render('I am a label');
+      label.id = 'label';
+      document.body.appendChild(label);
+    </script>
+  </body>
+</html>
+
+
+

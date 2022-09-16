@@ -1,5 +1,5 @@
-import * as Button from 'comps/basic/button';
 import * as Label from 'comps/basic/label';
+import * as Button from 'comps/basic/button';
 
 const btn = Button.render('I am a button');
 btn.id = 'btn';
