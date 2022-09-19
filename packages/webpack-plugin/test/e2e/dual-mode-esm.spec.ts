@@ -6,7 +6,9 @@ const project = 'dual-mode-esm';
 const projectDir = dirname(
     require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
 );
-
+for (const configName of ['stylable-webpack.config.js', 'webpack.config.js']) {
+    `${configName}`;
+}
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
@@ -15,6 +17,7 @@ describe(`(${project})`, () => {
                 headless: false,
             },
             configName: 'webpack.config.js',
+            buildPackages: ['./node_modules/comps'],
             // configName: 'stylable-webpack.config.js',
         },
         before,

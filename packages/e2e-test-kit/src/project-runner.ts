@@ -10,6 +10,7 @@ import { deferred, waitFor, timeout } from 'promise-assist';
 import { runServer } from './run-server';
 import { createTempDirectorySync } from './file-system-helpers';
 import { loadDirSync } from './file-system-helpers';
+import { execSync } from 'child_process';
 
 export interface Options {
     projectDir: string;
@@ -23,6 +24,7 @@ export interface Options {
     useTempDir?: boolean;
     tempDirPath?: string;
     totalTestTime?: number;
+    buildPackages?: string[];
 }
 
 type MochaHook = import('mocha').HookFunction;
@@ -71,6 +73,7 @@ export class ProjectRunner {
     constructor(public options: Options) {}
     public run() {
         this.prepareTestDirectory();
+        this.buildPackages();
         return this.options.watchMode ? this.watch() : this.bundle();
     }
     public async bundle() {
@@ -83,6 +86,20 @@ export class ProjectRunner {
             throw new Error(this.stats.toString({ colors: true }));
         }
         this.log('Bundle Finished');
+    }
+    public buildPackages() {
+        if (!this.options.buildPackages) {
+            return;
+        }
+        for (const packagePath of this.options.buildPackages) {
+            const pkg = join(this.testDir, packagePath);
+            this.log(`Building ${pkg}`);
+            execSync('npm run build', {
+                cwd: pkg,
+                stdio: 'inherit',
+            });
+        }
+        this.log('Build Packaged Finished');
     }
     public async watch() {
         this.log('Watch Start');

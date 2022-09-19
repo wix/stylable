@@ -20,6 +20,8 @@ jspm_packages/
 # 3rd party testing fixtures (order matters!)
 !**/test/**/node_modules
 
+**/test/**/generated
+
 # Created by the extension "VS Live Share"
 .vs
 
@@ -83,3 +85,5 @@ build/Release
 
 # test temp directory
 .temp
+
+# /generated/
