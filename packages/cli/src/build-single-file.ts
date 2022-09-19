@@ -1,5 +1,5 @@
 import type { Stylable, StylableResults } from '@stylable/core';
-import { isAsset } from '@stylable/core/dist/index-internal';
+import { isAsset, tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
 import {
     createModuleSource,
     generateDTSContent,
@@ -13,6 +13,7 @@ import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { CLIDiagnostic } from './report-diagnostics';
 import { errorMessages } from './messages';
 import type { IFileSystem } from '@file-services/types';
+import { hasImportedSideEffects } from '@stylable/build-tools';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -135,7 +136,25 @@ export function buildSingleFile({
     }
     // st.css.js
     moduleFormats.forEach((format) => {
+        const ext = (format === 'esm' ? '.mjs' : '.js');
         outputLogs.push(`${format} module`);
+        const moduleCssImports = injectCSSRequest ? [`./${cssAssetFilename}`] : [];
+        let cssDepth = -1;
+        tryCollectImportsDeep(stylable, res.meta, new Set(), ({ depth }) => {
+            cssDepth = Math.max(cssDepth, depth);
+        });
+        for (const imported of res.meta.getImportStatements()) {
+            if (imported.request.endsWith('.st.css')) {
+                if (hasImportedSideEffects(stylable, res.meta, imported)) {
+                    if (format === 'cjs') {
+                        moduleCssImports.push(`require(${JSON.stringify(imported.request + ext)})`);
+                    } else {
+                        moduleCssImports.push(`import ${JSON.stringify(imported.request + ext)};`);
+                    }
+                }
+            }
+        }
+
         const code = tryRun(
             () =>
                 createModuleSource(
@@ -144,13 +163,13 @@ export function buildSingleFile({
                     includeCSSInJS,
                     undefined,
                     undefined,
-                    undefined,
-                    injectCSSRequest ? [`./${cssAssetFilename}`] : [],
+                    cssDepth,
+                    moduleCssImports,
                     '@stylable/runtime'
                 ),
             `Transform Error: ${filePath}`
         );
-        const outFilePath = targetFilePath + (format === 'esm' ? '.mjs' : '.js');
+        const outFilePath = targetFilePath + ext;
         generated.add(outFilePath);
         tryRun(() => fs.writeFileSync(outFilePath, code), `Write File Error: ${outFilePath}`);
     });

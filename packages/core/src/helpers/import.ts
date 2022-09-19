@@ -580,18 +580,36 @@ function isImportAs(space: ParsedValue, as: ParsedValue) {
     return space?.type === 'space' && as?.type === 'word' && as?.value === 'as';
 }
 
+type ImportEvent = {
+    context: string;
+    request: string;
+    resolved: string;
+    depth: number;
+};
+
 export function tryCollectImportsDeep(
     stylable: Stylable,
     meta: StylableMeta,
-    imports = new Set<string>()
+    imports = new Set<string>(),
+    onImport: undefined | ((e: ImportEvent) => void) = undefined,
+    depth = 0
 ) {
     for (const { context, request } of meta.getImportStatements()) {
         try {
             const resolved = stylable.resolver.resolvePath(context, request);
+            if (onImport) {
+                onImport({ context, request, resolved, depth });
+            }
 
             if (!imports.has(resolved)) {
                 imports.add(resolved);
-                tryCollectImportsDeep(stylable, stylable.analyze(resolved), imports);
+                tryCollectImportsDeep(
+                    stylable,
+                    stylable.analyze(resolved),
+                    imports,
+                    onImport,
+                    depth + 1
+                );
             }
         } catch (e) {
             /** */
