@@ -78,8 +78,7 @@ export class ProjectRunner {
     }
     public async bundle() {
         this.log('Bundle Start');
-        const webpackConfig = this.loadWebpackConfig();
-        const compiler = webpack(webpackConfig);
+        const compiler = webpack(this.loadWebpackConfig());
         this.compiler = compiler;
         this.stats = await promisify(compiler.run.bind(compiler))();
         if (this.throwOnBuildError && this.stats?.hasErrors()) {
@@ -103,8 +102,7 @@ export class ProjectRunner {
     }
     public async watch() {
         this.log('Watch Start');
-        const webpackConfig = this.loadWebpackConfig();
-        const compiler = webpack(webpackConfig);
+        const compiler = webpack(this.loadWebpackConfig());
         this.compiler = compiler;
 
         const firstCompile = deferred<webpack.Stats>();
@@ -178,7 +176,7 @@ export class ProjectRunner {
             throw e;
         }
     }
-    public async openInBrowser({ captureResponses = false } = {}) {
+    public async openInBrowser({ captureResponses = false, internalPath = '' } = {}) {
         if (!this.browser) {
             if (process.env.PLAYWRIGHT_SERVER) {
                 this.browser = await playwright.chromium.connect(
@@ -199,7 +197,10 @@ export class ProjectRunner {
         if (captureResponses) {
             page.on('response', (response) => responses.push(response));
         }
-        await page.goto(this.serverUrl, { waitUntil: captureResponses ? 'networkidle' : 'load' });
+        const segment = internalPath.startsWith('/') ? internalPath : '/' + internalPath;
+        await page.goto(this.serverUrl + segment, {
+            waitUntil: captureResponses ? 'networkidle' : 'load',
+        });
         return { page, responses };
     }
     public getProjectFiles() {
@@ -336,15 +337,32 @@ export class ProjectRunner {
     protected loadWebpackConfig(): webpack.Configuration {
         const config = require(join(this.testDir, this.options.configName || 'webpack.config'));
         const loadedConfig = config.default || config;
-        return {
-            ...loadedConfig,
-            ...this.options.webpackOptions,
-            output: {
-                ...loadedConfig?.output,
-                ...this.options.webpackOptions?.output,
-                path: this.outputDir,
-            },
-        };
+        if (Array.isArray(loadedConfig)) {
+            return loadedConfig.map((loadedConfig, i) => {
+                return {
+                    ...loadedConfig,
+                    ...this.options.webpackOptions,
+                    output: {
+                        ...loadedConfig?.output,
+                        ...this.options.webpackOptions?.output,
+                        path: join(
+                            this.outputDir,
+                            loadedConfig[Symbol.for('TestRunnerInternalPath')] ?? `output_${i + 1}`
+                        ),
+                    },
+                };
+            }) as webpack.Configuration;
+        } else {
+            return {
+                ...loadedConfig,
+                ...this.options.webpackOptions,
+                output: {
+                    ...loadedConfig?.output,
+                    ...this.options.webpackOptions?.output,
+                    path: this.outputDir,
+                },
+            };
+        }
     }
     private prepareTestDirectory() {
         this.log('Prepare Test Directory');
