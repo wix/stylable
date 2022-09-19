@@ -198,6 +198,11 @@ export function injectLoader(compiler: Compiler) {
         loader: require.resolve('./loader'),
         sideEffects: true,
     });
+    compiler.options.module.rules.unshift({
+        test: /\.st\.css.m?js$/,
+        loader: require.resolve('./redirect-to-source-loader'),
+        sideEffects: true,
+    });
 }
 
 export function createDecacheRequire(compiler: Compiler) {
