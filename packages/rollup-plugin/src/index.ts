@@ -78,6 +78,21 @@ export function stylableRollupPlugin({
         async buildStart() {
             extracted = extracted || new Map();
             emittedAssets = emittedAssets || new Map();
+
+            const configuration = resolveStcConfig(
+                projectRoot,
+                typeof stcConfig === 'string' ? stcConfig : undefined,
+                fs
+            );
+
+            if (stcConfig && !configuration) {
+                throw new Error(
+                    `Could not find Stylable config${
+                        typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
+                    }`
+                );
+            }
+
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
@@ -88,6 +103,7 @@ export function stylableRollupPlugin({
                     mode,
                     resolveNamespace,
                     optimizer: new StylableOptimizer(),
+                    resolveModule: configuration?.config?.defaultConfig?.resolveModule,
                     resolverCache: new Map(),
                     requireModule,
                 });
@@ -98,20 +114,7 @@ export function stylableRollupPlugin({
                     for (const sourceDirectory of stcBuilder.getProjectsSources()) {
                         this.addWatchFile(sourceDirectory);
                     }
-                } else {
-                    const configuration = resolveStcConfig(
-                        projectRoot,
-                        typeof stcConfig === 'string' ? stcConfig : undefined
-                    );
-
-                    if (!configuration) {
-                        throw new Error(
-                            `Could not find "stcConfig"${
-                                typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
-                            }`
-                        );
-                    }
-
+                } else if (configuration && configuration.config.stcConfig) {
                     stcBuilder = STCBuilder.create({
                         rootDir: projectRoot,
                         configFilePath: configuration.path,
