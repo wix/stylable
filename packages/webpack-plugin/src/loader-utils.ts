@@ -29,10 +29,15 @@ export function getImports(
             }
         }
     }
+    let cssDepth = -1;
     /**
      * Collect all deep dependencies since they can affect the output
      */
-    const buildDependencies: string[] = Array.from(tryCollectImportsDeep(stylable, meta));
+    const buildDependencies: string[] = Array.from(
+        tryCollectImportsDeep(stylable, meta, undefined, ({ depth }) => {
+            cssDepth = Math.max(cssDepth, depth);
+        })
+    );
 
     /**
      * @remove
@@ -42,5 +47,5 @@ export function getImports(
         urls.forEach((assetPath) => imports.push(`import ${JSON.stringify(assetPath)};`));
     }
 
-    return { urls, imports, buildDependencies, unusedImports };
+    return { urls, imports, buildDependencies, unusedImports, cssDepth };
 }

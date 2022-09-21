@@ -16,6 +16,9 @@ module.exports = [
         mode: 'development',
         context: __dirname,
         devtool: 'source-map',
-        plugins: [new HtmlWebpackPlugin(), new StylableWebpackPlugin()],
+        plugins: [
+            new HtmlWebpackPlugin(),
+            new StylableWebpackPlugin({ depthStrategy: 'css', runtimeStylesheetId: 'namespace' }),
+        ],
     },
 ];

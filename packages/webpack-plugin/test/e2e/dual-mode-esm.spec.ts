@@ -31,6 +31,22 @@ describe(`(${project})`, () => {
         const stylableStyles = await stylableBrowser.page.evaluate(getStyleElementsMetadata);
 
         expect(vanillaStyles).to.eql(stylableStyles);
-        
+
+        expect(normalizeNamespace(vanillaStyles)).to.eql([
+            { id: 'designsystem', depth: '-1' },
+            { id: 'label', depth: '-1' },
+            { id: 'button', depth: '0' },
+            { id: 'labeltheme', depth: '2' },
+            { id: 'buttontheme', depth: '2' },
+        ]);
     });
 });
+
+function normalizeNamespace(styles: Array<{ id?: string; depth?: string }>) {
+    return styles.map(({ id, depth }) => {
+        return {
+            id: id && id.replace(/\d+/g, ''),
+            depth,
+        };
+    });
+}

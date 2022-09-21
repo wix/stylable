@@ -42,8 +42,8 @@ export function calcDepth<T>(
     return cssDepth;
 }
 
-export function getCSSViewModule<T>(module: T, context: CalcDepthContext<T>) {
-    if (context.isStylableModule(module)) {
+export function getCSSViewModule<T>(module: T, context: CalcDepthContext<T>, force = false) {
+    if (context.isStylableModule(module) || force) {
         const parentViewsList: T[] = [];
         const viewPath = context.getModulePathNoExt(module);
         for (const importer of context.getImporters(module)) {
@@ -51,7 +51,8 @@ export function getCSSViewModule<T>(module: T, context: CalcDepthContext<T>) {
                 !context.isStylableModule(importer) &&
                 context.getModulePathNoExt(importer) === viewPath
             ) {
-                parentViewsList.push(importer);
+                const redirectedView = getCSSViewModule(importer, context, true);
+                parentViewsList.push(redirectedView || importer);
             }
         }
 

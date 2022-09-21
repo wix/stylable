@@ -136,9 +136,12 @@ export function buildSingleFile({
     }
     // st.css.js
     moduleFormats.forEach((format) => {
-        const ext = (format === 'esm' ? '.mjs' : '.js');
+        const ext = format === 'esm' ? '.mjs' : '.js';
         outputLogs.push(`${format} module`);
-        const moduleCssImports = injectCSSRequest ? [`./${cssAssetFilename}`] : [];
+
+        const moduleCssImports = injectCSSRequest
+            ? [moduleRequestSourceCode(format, './' + cssAssetFilename)]
+            : [];
         let cssDepth = -1;
         tryCollectImportsDeep(stylable, res.meta, new Set(), ({ depth }) => {
             cssDepth = Math.max(cssDepth, depth);
@@ -146,27 +149,25 @@ export function buildSingleFile({
         for (const imported of res.meta.getImportStatements()) {
             if (imported.request.endsWith('.st.css')) {
                 if (hasImportedSideEffects(stylable, res.meta, imported)) {
-                    if (format === 'cjs') {
-                        moduleCssImports.push(`require(${JSON.stringify(imported.request + ext)})`);
-                    } else {
-                        moduleCssImports.push(`import ${JSON.stringify(imported.request + ext)};`);
-                    }
+                    moduleCssImports.push(moduleRequestSourceCode(format, imported.request + ext));
                 }
             }
         }
 
         const code = tryRun(
             () =>
-                createModuleSource(
-                    res,
-                    format,
-                    includeCSSInJS,
-                    undefined,
-                    undefined,
-                    cssDepth,
-                    moduleCssImports,
-                    '@stylable/runtime'
-                ),
+                format === 'esm'
+                    ? generateStylableModuleCode(res, cssDepth, moduleCssImports)
+                    : createModuleSource(
+                          res,
+                          format,
+                          includeCSSInJS,
+                          undefined,
+                          undefined,
+                          cssDepth,
+                          moduleCssImports,
+                          '@stylable/runtime'
+                      ),
             `Transform Error: ${filePath}`
         );
         const outFilePath = targetFilePath + ext;
@@ -323,4 +324,33 @@ export function getAllDiagnostics(res: StylableResults): CLIDiagnostic[] {
 
         return diagnostic;
     });
+}
+
+/*****************************************/
+/***** Remove After Runtime Cleanups *****/
+/*****************************************/
+function generateStylableModuleCode(res: StylableResults, depth: number, moduleImports: string[]) {
+    const { meta, exports } = res;
+    const cssAsString = JSON.stringify(res.meta.targetAst!.toString());
+    return `
+        import { injectCSS, statesRuntime, classesRuntime } from "@stylable/runtime";
+        ${moduleImports.join('\n')}
+        export var namespace = ${JSON.stringify(meta.namespace)};
+        export var st = classesRuntime.bind(null, namespace);
+        export var style = st;
+        export var cssStates = statesRuntime.bind(null, namespace);
+        export var classes = ${JSON.stringify(exports.classes)}; 
+        export var keyframes = ${JSON.stringify(exports.keyframes)};
+        export var layers = ${JSON.stringify(exports.layers)};
+        export var stVars = ${JSON.stringify(exports.stVars)}; 
+        export var vars = ${JSON.stringify(exports.vars)}; 
+
+        injectCSS(${JSON.stringify(meta.namespace)}, ${cssAsString}, ${depth}, 'js');
+    `;
+}
+
+function moduleRequestSourceCode(format: string, request: string) {
+    return format === 'cjs'
+        ? `require(${JSON.stringify(request)});`
+        : `import ${JSON.stringify(request)};`;
 }

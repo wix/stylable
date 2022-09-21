@@ -7,6 +7,7 @@ export interface StylableBuildMeta {
     exports: StylableExports;
     urls: string[];
     depth: number;
+    cssDepth: number;
     namespace: string;
     isUsed: undefined | boolean;
     globals: Record<string, boolean>;
@@ -20,7 +21,7 @@ export type BuildData = Pick<
 
 export type LoaderData = Pick<
     StylableBuildMeta,
-    'css' | 'urls' | 'exports' | 'namespace' | 'globals' | 'unusedImports'
+    'css' | 'urls' | 'exports' | 'namespace' | 'globals' | 'unusedImports' | 'cssDepth'
 >;
 
 export interface StylableLoaderContext extends LoaderContext<{}> {

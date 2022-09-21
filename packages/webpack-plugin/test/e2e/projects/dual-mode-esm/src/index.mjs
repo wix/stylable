@@ -1,8 +1,5 @@
 import * as Label from 'component-library/basic/label';
 import * as Button from 'component-library/basic/button';
-import { $ } from '@stylable/runtime';
-
-$.init(window);
 
 const btn = Button.render('I am a button');
 btn.id = 'btn';

@@ -484,10 +484,14 @@ export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthConte
             ),
         getModulePathNoExt: (module) => {
             if (isStylableModule(module)) {
-                return module.resource.replace(/\.st\.css/g, '');
+                return module.resource.replace(/\.st\.css$/, '');
             }
             const { dir, name } = parse((module as NormalModule)?.resource || '');
-            return join(dir, name);
+            let finalName = name;
+            if(finalName.endsWith('.st.css')){
+                finalName = finalName.replace(/\.st\.css$/, '');
+            }
+            return join(dir, finalName);
         },
         isStylableModule: (module) => isStylableModule(module),
     };
