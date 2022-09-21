@@ -8,9 +8,7 @@ const project = 'dual-mode-esm';
 const projectDir = dirname(
     require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
 );
-for (const configName of ['stylable-webpack.config.js', 'webpack.config.js']) {
-    `${configName}`;
-}
+
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
@@ -33,5 +31,6 @@ describe(`(${project})`, () => {
         const stylableStyles = await stylableBrowser.page.evaluate(getStyleElementsMetadata);
 
         expect(vanillaStyles).to.eql(stylableStyles);
+        
     });
 });
