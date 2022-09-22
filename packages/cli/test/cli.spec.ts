@@ -590,7 +590,9 @@ describe('Stylable Cli', function () {
                         defaultConfig(fs) {
                             return {
                                 resolveModule: createDefaultResolver(fs, {
-                                    plugins: [new TsconfigPathsPlugin({ configFile: join('${tempDir.path}','tsconfig.json') })],
+                                    plugins: [new TsconfigPathsPlugin({ configFile: join(${JSON.stringify(
+                                        tempDir.path
+                                    )},'tsconfig.json') })],
                                 })
                             };
                         }
