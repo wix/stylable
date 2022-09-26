@@ -47,7 +47,7 @@
     "@types/react-dom": "^18.0.6",
     "@types/rimraf": "^3.0.2",
     "@types/validate-npm-package-name": "^4.0.0",
-    "@types/yargs": "^17.0.12",
+    "@types/yargs": "^17.0.13",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",
     "autoprefixer": "^10.4.12",
