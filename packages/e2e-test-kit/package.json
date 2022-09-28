@@ -10,7 +10,7 @@
     "@stylable/runtime": "^5.2.1",
     "express": "^4.18.1",
     "node-eval": "^2.0.0",
-    "playwright-core": "^1.26.0",
+    "playwright-core": "^1.26.1",
     "rimraf": "^3.0.2"
   },
   "files": [
