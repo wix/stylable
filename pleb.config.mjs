@@ -10,6 +10,8 @@ export default {
     { name: 'source-map-loader', reason: 'drops support for node v12' },
     { name: 'vscode-languageserver', reason: 'drops support for node v12' },
     { name: 'vscode-css-languageservice', reason: 'drops support for node v12' },
+    { name: 'playwright-core', reason: 'drops support for node v12' },
+    { name: 'playwright-chromium', reason: 'drops support for node v12' },
     {
       name: 'vscode-uri',
       reason: 'broken URI types - https://github.com/microsoft/vscode/issues/161166',
