@@ -69,6 +69,7 @@ interface ParsedNames {
 const dataKey = plugableRecord.key<{
     'container-name': Record<string, ParsedNames>;
     container: Record<string, ParsedNames>;
+    definitions: Record<string, postcss.Declaration | postcss.AtRule | postcss.Rule>;
 }>('container');
 
 // HOOKS
@@ -88,7 +89,11 @@ export const hooks = createFeature<{
     RESOLVED: Record<string, ResolvedContainer>;
 }>({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, { 'container-name': {}, container: {} });
+        plugableRecord.set(meta.data, dataKey, {
+            'container-name': {},
+            container: {},
+            definitions: {},
+        });
     },
     analyzeDeclaration({ context, decl }) {
         const prop = decl.prop.toLowerCase();
@@ -296,6 +301,13 @@ export function get(meta: StylableMeta, name: string): ContainerSymbol | undefin
 export function getAll(meta: StylableMeta): Record<string, ContainerSymbol> {
     return STSymbol.getAllByType(meta, `container`);
 }
+export function getDefinition(
+    meta: StylableMeta,
+    name: string
+): postcss.Declaration | postcss.AtRule | postcss.Rule | undefined {
+    const { definitions } = plugableRecord.getUnsafe(meta.data, dataKey);
+    return definitions[name];
+}
 
 function getTransformedName({ symbol, meta }: ResolvedContainer) {
     return symbol.global ? symbol.alias : namespace(symbol.alias, meta.namespace);
@@ -316,8 +328,10 @@ function addContainer({
     global: boolean;
     importDef?: STImport.Imported;
 }) {
+    const { definitions } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     const definedSymbol = STSymbol.get(context.meta, name, 'container');
     if (!definedSymbol || definedSymbol.import) {
+        definitions[name] = ast;
         STSymbol.addSymbol({
             context,
             node: ast,
@@ -331,7 +345,8 @@ function addContainer({
             },
             safeRedeclare: false,
         });
-    } else if (global) {
+    } else if (global && !definedSymbol.global) {
+        definitions[name] = ast;
         definedSymbol.global = true;
     }
 }

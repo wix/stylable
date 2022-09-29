@@ -93,6 +93,7 @@ describe('Module Factory', () => {
                 'classes',
                 'keyframes',
                 'layers',
+                'containers',
                 'vars',
                 'stVars',
                 'cssStates',

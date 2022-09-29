@@ -186,6 +186,35 @@ describe('Generate DTS', function () {
         expect(tk.typecheck('test.ts')).to.include(propUnknownNotOnType);
     });
 
+    it('should generate containers .d.ts', () => {
+        tk.populate({
+            'test.st.css': '.a { container: conA, conB; }',
+            'test.ts': `
+                import { eq } from "./test-kit";
+                import { containers } from "./test.st.css";
+                
+                eq<string>(containers.conA);
+                eq<string>(containers.conB);
+            `,
+        });
+
+        expect(tk.typecheck('test.ts')).to.equal('');
+    });
+
+    it('should warn about non-existing containers', () => {
+        tk.populate({
+            'test.st.css': '.a { container: conA, conB; }',
+            'test.ts': `
+                import { eq } from "./test-kit";
+                import { containers } from "./test.st.css";
+                
+                eq<string>(containers.unknown);
+            `,
+        });
+
+        expect(tk.typecheck('test.ts')).to.include(propUnknownNotOnType);
+    });
+
     describe('st function', () => {
         it('should support basic usage with root class', () => {
             tk.populate({
