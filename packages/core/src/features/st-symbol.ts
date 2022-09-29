@@ -6,6 +6,7 @@ import type { ElementSymbol } from './css-type';
 import type { CSSVarSymbol } from './css-custom-property';
 import type { KeyframesSymbol } from './css-keyframes';
 import type { LayerSymbol } from './css-layer';
+import type { ContainerSymbol } from './css-contains';
 import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
@@ -21,7 +22,8 @@ export type StylableSymbol =
     | ElementSymbol
     | CSSVarSymbol
     | KeyframesSymbol
-    | LayerSymbol;
+    | LayerSymbol
+    | ContainerSymbol;
 // the namespace that each symbol exists on
 const NAMESPACES = {
     import: `main`,
@@ -30,6 +32,7 @@ const NAMESPACES = {
     element: `main`,
     keyframes: `keyframes`,
     layer: `layer`,
+    container: `container`,
     var: `main`,
 } as const;
 export const readableTypeMap: Record<StylableSymbol['_kind'], string> = {
@@ -39,6 +42,7 @@ export const readableTypeMap: Record<StylableSymbol['_kind'], string> = {
     import: 'stylable imported symbol',
     keyframes: 'css keyframes',
     layer: 'css layer',
+    container: 'css container name',
     var: 'stylable var',
 };
 // state structure
@@ -48,11 +52,13 @@ function createState(clone?: State): State {
             main: clone ? [...clone.byNS.main] : [],
             keyframes: clone ? [...clone.byNS.keyframes] : [],
             layer: clone ? [...clone.byNS.layer] : [],
+            container: clone ? [...clone.byNS.container] : [],
         },
         byNSFlat: {
             main: clone ? { ...clone.byNSFlat.main } : {},
             keyframes: clone ? { ...clone.byNSFlat.keyframes } : {},
             layer: clone ? { ...clone.byNSFlat.layer } : {},
+            container: clone ? { ...clone.byNSFlat.container } : {},
         },
         byType: {
             import: clone ? { ...clone.byType.import } : {},
@@ -61,6 +67,7 @@ function createState(clone?: State): State {
             element: clone ? { ...clone.byType.element } : {},
             keyframes: clone ? { ...clone.byType.keyframes } : {},
             layer: clone ? { ...clone.byType.layer } : {},
+            container: clone ? { ...clone.byType.container } : {},
             var: clone ? { ...clone.byType.var } : {},
         },
     };

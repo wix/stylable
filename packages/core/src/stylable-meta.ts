@@ -18,6 +18,7 @@ import {
     CSSCustomProperty,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 } from './features';
 
 const features = [
@@ -34,6 +35,7 @@ const features = [
     CSSCustomProperty,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 ];
 
 export class StylableMeta {

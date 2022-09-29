@@ -22,6 +22,7 @@ import {
     CSSType,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 } from './features';
 import { getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
@@ -132,6 +133,7 @@ export class StylableProcessor implements FeatureContext {
                 this.handleDirectives(parent, decl);
             }
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
+            CSSContains.hooks.analyzeDeclaration({ context: this, decl });
 
             this.collectUrls(decl);
         });
