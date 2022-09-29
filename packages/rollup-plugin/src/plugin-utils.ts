@@ -26,6 +26,7 @@ export function generateStylableModuleCode(
         export var classes = ${JSON.stringify(exports.classes)}; 
         export var keyframes = ${JSON.stringify(exports.keyframes)};
         export var layers = ${JSON.stringify(exports.layers)};
+        export var containers = ${JSON.stringify(exports.containers)};
         export var stVars = ${JSON.stringify(exports.stVars)}; 
         export var vars = ${JSON.stringify(exports.vars)}; 
     `;
