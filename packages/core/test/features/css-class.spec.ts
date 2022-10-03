@@ -1,4 +1,5 @@
 import { STImport, CSSClass, STSymbol } from '@stylable/core/dist/features';
+import { createWarningRule } from '@stylable/core/dist/helpers/rule';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
@@ -332,6 +333,60 @@ describe(`features/css-class`, () => {
             expect(exports.classes.a, `a JS export`).to.eql(undefined);
             expect(exports.classes.b, `b JS export`).to.eql(undefined);
             expect(exports.classes.c, `c JS export`).to.eql(undefined);
+        });
+    });
+    describe('st-extends', () => {
+        it('should add inherit check rule in dev mode', () => {
+            const fs = {
+                '/deep.st.css': ``,
+                '/mid.st.css': `
+                    @st-import Deep from './deep.st.css';
+                    .root Deep {}
+                `,
+                '/entry.st.css': `
+                    @st-import [Deep] from './mid.st.css';
+                    .root {
+                        -st-extends: Deep;
+                    }
+                `,
+            };
+
+            const {
+                sheets: {
+                    '/entry.st.css': { meta: devEntry },
+                },
+            } = testStylableCore(fs, {
+                stylableConfig: {
+                    mode: 'development',
+                },
+            });
+            const {
+                sheets: {
+                    '/entry.st.css': { meta: prodEntry },
+                },
+            } = testStylableCore(fs, {
+                stylableConfig: {
+                    mode: 'production',
+                },
+            });
+
+            const devActual = devEntry.targetAst?.toString().replace(/\s\s+/g, ' ');
+            const prodActual = prodEntry.targetAst?.toString().replace(/\s\s+/g, ' ');
+            const expected = createWarningRule(
+                'root',
+                'deep__root',
+                'deep.st.css',
+                'root',
+                'entry__root',
+                'entry.st.css',
+                true
+            )
+                .toString()
+                .replace('!important\n', '!important;\n')
+                .replace(/\s\s+/g, ' ');
+
+            expect(devActual, 'development').to.contain(expected);
+            expect(prodActual, 'production').to.not.contain(expected);
         });
     });
     describe(`st-import`, () => {
