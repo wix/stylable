@@ -237,6 +237,14 @@ export function namespaceClass(
         node.value = namespaceEscape(symbol.name, meta.namespace);
     }
 }
+function getNamespacedClass(meta: StylableMeta, symbol: StylableSymbol) {
+    if (`-st-global` in symbol && symbol[`-st-global`]) {
+        const selector = symbol[`-st-global`];
+        return stringifySelectorAst(selector as any);
+    } else {
+        return '.' + namespaceEscape(symbol.name, meta.namespace);
+    }
+}
 
 export function addDevRules({ getResolvedSymbols, meta }: FeatureTransformContext) {
     const resolvedSymbols = getResolvedSymbols(meta);
@@ -246,11 +254,11 @@ export function addDevRules({ getResolvedSymbols, meta }: FeatureTransformContex
             const b = resolved[resolved.length - 1];
             meta.targetAst!.append(
                 createWarningRule(
-                    b.symbol.name,
-                    namespaceEscape(b.symbol.name, b.meta.namespace),
+                    '.' + b.symbol.name,
+                    getNamespacedClass(b.meta, b.symbol),
                     basename(b.meta.source),
-                    a.symbol.name,
-                    namespaceEscape(a.symbol.name, a.meta.namespace),
+                    '.' + a.symbol.name,
+                    getNamespacedClass(a.meta, a.symbol),
                     basename(a.meta.source),
                     true
                 )
@@ -268,9 +276,9 @@ export function createWarningRule(
     extendingFile: string,
     useScoped = false
 ) {
-    const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
+    const message = `"class extending component '${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({
-        selector: `.${useScoped ? scopedExtendingNode : extendingNode}:not(.${
+        selector: `${useScoped ? scopedExtendingNode : extendingNode}:not(${
             useScoped ? scopedExtendedNode : extendedNode
         })::before`,
         nodes: [

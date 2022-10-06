@@ -375,11 +375,11 @@ describe(`features/css-class`, () => {
             const devActual = devEntry.targetAst!.toString().replace(/\s\s+/g, ' ');
             const prodActual = prodEntry.targetAst?.toString().replace(/\s\s+/g, ' ');
             const expected = CSSClass.createWarningRule(
-                'root',
-                'deep__root',
+                '.root',
+                '.deep__root',
                 'deep.st.css',
-                'root',
-                'entry__root',
+                '.root',
+                '.entry__root',
                 'entry.st.css',
                 true
             )
@@ -415,6 +415,44 @@ describe(`features/css-class`, () => {
 
             expect((meta.targetAst!.nodes[0] as postcss.Rule).selector).to.equal('.entry__root');
             expect(meta.targetAst!.nodes.length).to.equal(1);
+        });
+        it('should use -st-global in inherit check', () => {
+            const { sheets } = testStylableCore(
+                {
+                    '/x.st.css': `
+                        .root {
+                            -st-global: ".y";
+                        }
+                    `,
+                    '/entry.st.css': `
+                        @st-import X from './x.st.css';
+                        .root {
+                            -st-extends: X;
+                        }
+                    `,
+                },
+                {
+                    stylableConfig: { mode: 'development' },
+                }
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            const actual = meta.targetAst!.toString().replace(/\s\s+/g, ' ');
+            const expected = CSSClass.createWarningRule(
+                '.root',
+                '.y',
+                'x.st.css',
+                '.root',
+                '.entry__root',
+                'entry.st.css',
+                true
+            )
+                .toString()
+                .replace('!important\n', '!important;\n')
+                .replace(/\s\s+/g, ' ');
+
+            expect(actual).to.contain(expected);
         });
     });
     describe(`st-import`, () => {
