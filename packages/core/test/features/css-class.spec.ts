@@ -380,8 +380,7 @@ describe(`features/css-class`, () => {
                 'deep.st.css',
                 '.root',
                 '.entry__root',
-                'entry.st.css',
-                true
+                'entry.st.css'
             )
                 .toString()
                 .replace('!important\n', '!important;\n')
@@ -445,8 +444,7 @@ describe(`features/css-class`, () => {
                 'x.st.css',
                 '.root',
                 '.entry__root',
-                'entry.st.css',
-                true
+                'entry.st.css'
             )
                 .toString()
                 .replace('!important\n', '!important;\n')

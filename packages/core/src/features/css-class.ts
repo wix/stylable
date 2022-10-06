@@ -259,8 +259,7 @@ export function addDevRules({ getResolvedSymbols, meta }: FeatureTransformContex
                     basename(b.meta.source),
                     '.' + a.symbol.name,
                     getNamespacedClass(a.meta, a.symbol),
-                    basename(a.meta.source),
-                    true
+                    basename(a.meta.source)
                 )
             );
         }
@@ -273,14 +272,11 @@ export function createWarningRule(
     extendedFile: string,
     extendingNode: string,
     scopedExtendingNode: string,
-    extendingFile: string,
-    useScoped = false
+    extendingFile: string
 ) {
     const message = `"class extending component '${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({
-        selector: `${useScoped ? scopedExtendingNode : extendingNode}:not(${
-            useScoped ? scopedExtendedNode : extendedNode
-        })::before`,
+        selector: `${scopedExtendingNode}:not(${scopedExtendedNode})::before`,
         nodes: [
             postcss.decl({
                 prop: 'content',
