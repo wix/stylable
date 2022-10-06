@@ -1,5 +1,4 @@
 import { STImport, CSSClass, STSymbol } from '@stylable/core/dist/features';
-import { createWarningRule } from '@stylable/core/dist/helpers/rule';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
@@ -375,7 +374,7 @@ describe(`features/css-class`, () => {
 
             const devActual = devEntry.targetAst!.toString().replace(/\s\s+/g, ' ');
             const prodActual = prodEntry.targetAst?.toString().replace(/\s\s+/g, ' ');
-            const expected = createWarningRule(
+            const expected = CSSClass.createWarningRule(
                 'root',
                 'deep__root',
                 'deep.st.css',

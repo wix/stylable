@@ -1,4 +1,4 @@
-import { createFeature, FeatureContext } from './feature';
+import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
@@ -19,7 +19,8 @@ import {
     ImmutableSelectorNode,
     stringifySelectorAst,
 } from '@tokey/css-selector-parser';
-import type * as postcss from 'postcss';
+import * as postcss from 'postcss';
+import { basename } from 'path';
 import { createDiagnosticReporter } from '../diagnostics';
 
 export interface ClassSymbol extends StylableDirectives {
@@ -235,6 +236,66 @@ export function namespaceClass(
         node = convertToClass(node);
         node.value = namespaceEscape(symbol.name, meta.namespace);
     }
+}
+
+export function addDevRules({ getResolvedSymbols, meta }: FeatureTransformContext) {
+    const resolvedSymbols = getResolvedSymbols(meta);
+    for (const resolved of Object.values(resolvedSymbols.class)) {
+        const a = resolved[0];
+        if (resolved.length > 1 && a.symbol['-st-extends']) {
+            const b = resolved[resolved.length - 1];
+            meta.targetAst!.append(
+                createWarningRule(
+                    b.symbol.name,
+                    namespaceEscape(b.symbol.name, b.meta.namespace),
+                    basename(b.meta.source),
+                    a.symbol.name,
+                    namespaceEscape(a.symbol.name, a.meta.namespace),
+                    basename(a.meta.source),
+                    true
+                )
+            );
+        }
+    }
+}
+
+export function createWarningRule(
+    extendedNode: string,
+    scopedExtendedNode: string,
+    extendedFile: string,
+    extendingNode: string,
+    scopedExtendingNode: string,
+    extendingFile: string,
+    useScoped = false
+) {
+    const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
+    return postcss.rule({
+        selector: `.${useScoped ? scopedExtendingNode : extendingNode}:not(.${
+            useScoped ? scopedExtendedNode : extendedNode
+        })::before`,
+        nodes: [
+            postcss.decl({
+                prop: 'content',
+                value: message,
+            }),
+            postcss.decl({
+                prop: 'display',
+                value: `block !important`,
+            }),
+            postcss.decl({
+                prop: 'font-family',
+                value: `monospace !important`,
+            }),
+            postcss.decl({
+                prop: 'background-color',
+                value: `red !important`,
+            }),
+            postcss.decl({
+                prop: 'color',
+                value: `white !important`,
+            }),
+        ],
+    });
 }
 
 export function validateClassScoping({
