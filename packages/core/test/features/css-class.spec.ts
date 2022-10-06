@@ -6,6 +6,7 @@ import {
     diagnosticBankReportToStrings,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import type * as postcss from 'postcss';
 
 const classDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
@@ -348,6 +349,8 @@ describe(`features/css-class`, () => {
                     .root {
                         -st-extends: Deep;
                     }
+                    /*another rule to check that dev rule is not added for every occurrence*/
+                    .root {}
                 `,
             };
 
@@ -370,7 +373,7 @@ describe(`features/css-class`, () => {
                 },
             });
 
-            const devActual = devEntry.targetAst?.toString().replace(/\s\s+/g, ' ');
+            const devActual = devEntry.targetAst!.toString().replace(/\s\s+/g, ' ');
             const prodActual = prodEntry.targetAst?.toString().replace(/\s\s+/g, ' ');
             const expected = createWarningRule(
                 'root',
@@ -386,7 +389,33 @@ describe(`features/css-class`, () => {
                 .replace(/\s\s+/g, ' ');
 
             expect(devActual, 'development').to.contain(expected);
+            expect(devActual.split(expected).length, 'only a single added rule').to.eql(2);
             expect(prodActual, 'production').to.not.contain(expected);
+        });
+        it('should not add inherit check rule for mixin', () => {
+            const { sheets } = testStylableCore(
+                {
+                    '/deep.st.css': ``,
+                    '/mid.st.css': `
+                    @st-import Deep from './deep.st.css';
+                    .root Deep {}
+                `,
+                    '/entry.st.css': `
+                    @st-import [Deep] from './mid.st.css';
+                    .root {
+                        -st-mixin: Deep;
+                    }
+                `,
+                },
+                {
+                    stylableConfig: { mode: 'development' },
+                }
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect((meta.targetAst!.nodes[0] as postcss.Rule).selector).to.equal('.entry__root');
+            expect(meta.targetAst!.nodes.length).to.equal(1);
         });
     });
     describe(`st-import`, () => {

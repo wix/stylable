@@ -637,25 +637,20 @@ export class StylableTransformer {
     }
     private addDevRules(meta: StylableMeta) {
         const resolvedSymbols = this.getResolvedSymbols(meta);
-        for (const [className, resolved] of Object.entries(resolvedSymbols.class)) {
-            if (resolved.length > 1) {
-                meta.targetAst!.walkRules(
-                    '.' + namespaceEscape(className, meta.namespace),
-                    (rule) => {
-                        const a = resolved[0];
-                        const b = resolved[resolved.length - 1];
-                        rule.after(
-                            createWarningRule(
-                                b.symbol.name,
-                                namespaceEscape(b.symbol.name, b.meta.namespace),
-                                basename(b.meta.source),
-                                a.symbol.name,
-                                namespaceEscape(a.symbol.name, a.meta.namespace),
-                                basename(a.meta.source),
-                                true
-                            )
-                        );
-                    }
+        for (const resolved of Object.values(resolvedSymbols.class)) {
+            const a = resolved[0];
+            if (resolved.length > 1 && a.symbol['-st-extends']) {
+                const b = resolved[resolved.length - 1];
+                meta.targetAst!.append(
+                    createWarningRule(
+                        b.symbol.name,
+                        namespaceEscape(b.symbol.name, b.meta.namespace),
+                        basename(b.meta.source),
+                        a.symbol.name,
+                        namespaceEscape(a.symbol.name, a.meta.namespace),
+                        basename(a.meta.source),
+                        true
+                    )
                 );
             }
         }
