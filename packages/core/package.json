@@ -23,7 +23,7 @@
     "lodash.clonedeepwith": "^4.5.0",
     "postcss": "^8.4.17",
     "postcss-js": "^4.0.0",
-    "postcss-nested": "^5.0.6",
+    "postcss-nested": "^6.0.0",
     "postcss-safe-parser": "^6.0.0",
     "postcss-value-parser": "^4.2.0"
   },
