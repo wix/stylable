@@ -18,7 +18,7 @@
   "devDependencies": {
     "@file-services/memory": "^7.0.1",
     "@file-services/node": "^7.0.1",
-    "@rollup/plugin-html": "^0.2.4",
+    "@rollup/plugin-html": "^1.0.0",
     "@rollup/plugin-node-resolve": "^14.1.0",
     "@types/balanced-match": "^1.0.2",
     "@types/chai": "^4.3.3",
