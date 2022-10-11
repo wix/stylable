@@ -211,14 +211,12 @@ export const isCompRoot = wrapFunctionForDeprecation(deprecatedIsCompRoot, {
     name: `isCompRoot`,
 });
 
-import {
-    isChildOfAtRule as deprecatedIsChildOfAtRule,
-    createWarningRule as deprecatedCreateWarningRule,
-} from './helpers/rule';
+import { isChildOfAtRule as deprecatedIsChildOfAtRule } from './helpers/rule';
 /**@deprecated*/
 export const isChildOfAtRule = wrapFunctionForDeprecation(deprecatedIsChildOfAtRule, {
     name: `isChildOfAtRule`,
 });
+import { createWarningRule as deprecatedCreateWarningRule } from './features/css-class';
 /**@deprecated*/
 export const createWarningRule = wrapFunctionForDeprecation(deprecatedCreateWarningRule, {
     name: `createWarningRule`,
