@@ -10,7 +10,7 @@
     "test": "tsc -p template/ts-react-webpack --noEmit && tsc -p template/ts-react-rollup --noEmit"
   },
   "dependencies": {
-    "validate-npm-package-name": "^4.0.0",
+    "validate-npm-package-name": "^5.0.0",
     "yargs": "^17.6.0"
   },
   "files": [
