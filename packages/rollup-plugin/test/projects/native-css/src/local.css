@@ -1,0 +1,4 @@
+body {
+  --local-color: green;
+  --local-side-effect: from local side-effect;
+}
