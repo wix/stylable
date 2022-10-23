@@ -9,6 +9,7 @@ import type * as postcss from 'postcss';
 
 const classDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
+const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
 
 describe(`features/css-class`, () => {
     it(`should have root class`, () => {
@@ -1215,6 +1216,104 @@ describe(`features/css-class`, () => {
 
                 shouldReportNoDiagnostics(meta);
             });
+        });
+    });
+    describe('native css', () => {
+        it('should not namespace', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': `
+                    .name {}
+                `,
+                '/entry.st.css': `
+                    @st-import [name] from './native.css';
+
+                    /* @rule .entry__root .name */
+                    .root .name {}
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+            const { meta, exports } = stylable.transform('/entry.st.css');
+
+            shouldReportNoDiagnostics(nativeMeta);
+            shouldReportNoDiagnostics(meta);
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                '.name {}'
+            );
+
+            // symbols
+            expect(CSSClass.get(meta, 'name'), 'imported symbol').to.contain({
+                _kind: 'class',
+                name: 'name',
+            });
+
+            // JS exports
+            expect(exports.classes, 'JS export').to.eql({
+                root: 'entry__root',
+                name: 'name',
+            });
+        });
+        it('should not contain default root class', () => {
+            testStylableCore({
+                '/native.css': ``,
+                '/entry.st.css': `
+                    /* @transform-error(no root) word(root) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                        `root`,
+                        `./native.css`
+                    )} */
+                    @st-import [root as nativeRoot] from './native.css';
+
+                    /*
+                        @rule .entry__root .entry__nativeRoot
+                        @transform-error(unresolved alias) word(nativeRoot) ${classDiagnostics.UNKNOWN_IMPORT_ALIAS(
+                            `nativeRoot`
+                        )}
+                    */
+                    .root .nativeRoot {}
+                `,
+            });
+        });
+        it('should not have a default export', () => {
+            testStylableCore({
+                '/native.css': `
+                    /* add root to see that it is not taken as default */
+                    .root {}
+                `,
+                '/entry.st.css': `
+                    /* @transform-error(no export) word(Native) ${stImportDiagnostics.NO_DEFAULT_EXPORT(
+                        `./native.css`
+                    )} */
+                    @st-import Native from './native.css';
+
+                    /* @rule .entry__root Native */
+                    .root Native {}
+                `,
+            });
+        });
+        it('should ignore stylable directives', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': `
+                    .a {}
+                    .b {
+                        -st-extends: a;
+                        -st-states: hover;
+                        -st-global: ".c";
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [b] from './native.css';
+
+                    /* @rule .entry__root .b */
+                    .root .b {}
+
+                    /* @rule .entry__root .b:hover */
+                    .root .b:hover {}
+                `,
+            });
+
+            shouldReportNoDiagnostics(stylable.transform('/native.css').meta);
+            shouldReportNoDiagnostics(stylable.transform('/entry.st.css').meta);
         });
     });
     describe(`stylable (public API)`, () => {

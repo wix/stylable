@@ -97,6 +97,11 @@ export const diagnostics = {
         'error',
         (type: string) => `Unknown type import "${type}"`
     ),
+    NO_DEFAULT_EXPORT: createDiagnosticReporter(
+        '05020',
+        'error',
+        (path: string) => `No default export for imported file: "${path}"`
+    ),
 };
 
 // HOOKS
@@ -269,6 +274,13 @@ function validateImports(context: FeatureTransformContext) {
                 word: importObj.request,
             });
         } else if (resolvedImport._kind === 'css') {
+            // report unsupported native CSS default import
+            if (resolvedImport.meta.type !== 'stylable' && importObj.defaultExport) {
+                context.diagnostics.report(diagnostics.NO_DEFAULT_EXPORT(importObj.request), {
+                    node: importObj.rule,
+                    word: importObj.defaultExport,
+                });
+            }
             // warn about unknown named imported symbols
             for (const name in importObj.named) {
                 const origName = importObj.named[name];

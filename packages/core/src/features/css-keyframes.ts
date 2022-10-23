@@ -124,8 +124,9 @@ export const hooks = createFeature<{
             return;
         }
         //
+        const isStylable = context.meta.type === 'stylable';
         let global: boolean | undefined;
-        const globalName = globalValue(name);
+        const globalName = isStylable ? globalValue(name) : undefined;
         if (globalName !== undefined) {
             name = globalName;
             global = true;
@@ -147,7 +148,7 @@ export const hooks = createFeature<{
             name,
             importName: name,
             ast: atRule,
-            global,
+            global: isStylable ? global : true,
         });
     },
     transformResolve({ context }) {
@@ -171,7 +172,8 @@ export const hooks = createFeature<{
         return resolved;
     },
     transformAtRuleNode({ context, atRule, resolved }) {
-        const globalName = globalValue(atRule.params);
+        const globalName =
+            context.meta.type === 'stylable' ? globalValue(atRule.params) : undefined;
         const name = globalName ?? atRule.params;
         if (!name) {
             return;

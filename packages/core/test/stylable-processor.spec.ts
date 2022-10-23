@@ -29,7 +29,7 @@ describe('Stylable postcss process', () => {
             }
         
         `,
-            { from: '/path/to/source' }
+            { from: '/path/to/source.st.css' }
         );
 
         expect(diagnostics.reports[0]).to.include({
@@ -55,14 +55,14 @@ describe('Stylable postcss process', () => {
         const result = processSource(
             `
             :import {
-                -st-from: './file.css';
+                -st-from: './file.st.css';
                 -st-default: Style;
             }
             .myclass {
                 -st-extends: Style;
             }
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -74,7 +74,7 @@ describe('Stylable postcss process', () => {
                     type: 'default',
                     import: {
                         // from: '/path/to/file.css',
-                        request: './file.css',
+                        request: './file.st.css',
                         defaultExport: 'Style',
                     },
                 },
@@ -96,7 +96,7 @@ describe('Stylable postcss process', () => {
                 )
                 .join(``)}
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         // unknown pseudo-class
@@ -119,7 +119,7 @@ describe('Stylable postcss process', () => {
             `
 
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         expect(result.getAllClasses()).to.eql({
@@ -141,7 +141,7 @@ describe('Stylable postcss process', () => {
             :not(.classD){}
             .classE:hover{}
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         expect(Object.keys(result.getAllClasses()).length).to.eql(6);
@@ -158,7 +158,7 @@ describe('Stylable postcss process', () => {
                 .classE:hover{}
             }
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         expect(Object.keys(result.getAllClasses()).length).to.eql(6);
@@ -172,7 +172,7 @@ describe('Stylable postcss process', () => {
                     img: url('./x.svg');
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: 'path/to/style.st.css' }
             );
 
             expect(result.urls.length).to.eql(1);
