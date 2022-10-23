@@ -113,7 +113,9 @@ export class StylableOptimizer implements IStylableOptimizer {
                 exported[originName] = exported[originName]
                     .split(' ')
                     .map((renderedNamed) => {
-                        if (classNamespaceOptimizations) {
+                        if (globals[renderedNamed]) {
+                            return renderedNamed;
+                        } else if (classNamespaceOptimizations) {
                             return this.getClassName(renderedNamed);
                         } else if (shortNamespaces) {
                             const namespaceMatch = renderedNamed.match(namespaceRegexp);

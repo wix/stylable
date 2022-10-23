@@ -1,0 +1,15 @@
+@st-import [lib-global, lib-multi-global] from 'test-components/lib.st.css';
+
+@property st-global(--local-global);
+.local-global {
+    -st-global: '.loc-glob';
+    -st-extends: lib-global;
+    --local-global: from local global;
+}
+
+.a {
+    -st-extends: local-global;
+}
+.b {
+    -st-extends: lib-multi-global;
+}

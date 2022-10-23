@@ -63,6 +63,24 @@ describe('StylableOptimizer className optimizations', () => {
             '.s0{} .namespace--state{} .namespace---otherState-5-value{} .s1{} .s2{} .otherNamespace--state{}'
         );
     });
+    it('should NOT optimize globals', () => {
+        const optimizer = new StylableOptimizer();
+        const ast = parse(`.aaa{} .bbb{} .ccc{}`);
+        const globals = { bbb: true };
+        const exports = {
+            aaa: 'aaa',
+            bbb: 'bbb',
+            ccc: 'ccc bbb',
+        };
+
+        optimizer.optimizeAstAndExports(ast, exports, undefined, {}, globals, '__', false, true);
+        expect(exports, 'exports rewrite').to.eql({
+            aaa: 's0',
+            bbb: 'bbb',
+            ccc: 's1 bbb',
+        });
+        expect(ast.toString(), 'ast optimized').to.equal('.s0{} .bbb{} .s1{}');
+    });
 });
 
 describe('StylableOptimizer shortNamespaces', () => {

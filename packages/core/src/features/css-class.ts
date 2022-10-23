@@ -98,6 +98,7 @@ export const hooks = createFeature<{
                         (globalClasses, node) => {
                             if (node.type === `class`) {
                                 globalClasses.push(node.value);
+                                context.meta.globals[node.value] = true;
                             } else {
                                 isOnlyClasses = false;
                             }

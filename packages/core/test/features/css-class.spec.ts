@@ -626,9 +626,12 @@ describe(`features/css-class`, () => {
                     .part {
                         -st-global: .p;
                     }
+                    .extended {
+                        -st-global: .e;
+                    }
                 `,
                 '/entry.st.css': `
-                    @st-import Comp, [root as iRoot, part as iPart] from './comp.st.css';
+                    @st-import Comp, [root as iRoot, part as iPart, extended as iExtended] from './comp.st.css';
 
                     /* @rule .r */
                     Comp {}
@@ -638,6 +641,11 @@ describe(`features/css-class`, () => {
 
                     /* @rule .p */
                     .iPart {}
+
+                    /* @rule .entry__local */
+                    .local {
+                        -st-extends: iExtended;
+                    }
                 `,
             });
 
@@ -655,11 +663,14 @@ describe(`features/css-class`, () => {
             expect(meta.globals).to.eql({
                 r: true,
                 p: true,
+                e: true,
             });
 
             // JS exports
             expect(exports.classes, `no root alias JS export`).to.not.haveOwnProperty(`iRoot`);
             expect(exports.classes.iPart, `class alias JS export`).to.eql(`p`);
+            expect(exports.classes.local, `extending class JS export`).to.eql(`entry__local e`);
+            expect(exports.classes.iExtended, `class alias JS export (2)`).to.eql(`e`);
         });
         it(`should handle -st-extends of imported class `, () => {
             const { sheets } = testStylableCore({
