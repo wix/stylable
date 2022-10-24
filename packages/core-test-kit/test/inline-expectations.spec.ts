@@ -523,9 +523,6 @@ describe('inline-expectations', () => {
                             .root {
                                 /* @decl(only prop) color */
                                 color: red;
-
-                                /* @decl(missing value) color: */
-                                color: red;
                                 
                                 /* @decl(missing prop) : red */
                                 color: red;
@@ -538,7 +535,6 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.declMalformed(`color`, ``, `(only prop): `),
-                    testInlineExpectsErrors.declMalformed(`color`, ``, `(missing value): `),
                     testInlineExpectsErrors.declMalformed(``, `red`, `(missing prop): `),
                 ])
             );
@@ -583,6 +579,9 @@ describe('inline-expectations', () => {
                                 
                                 /* @decl(all-spaces)  color  :      green */
                                 color: green;
+
+                                /* @decl(empty value) color: */
+                                color: ;
                             }
                             
                         `,
