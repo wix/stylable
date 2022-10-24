@@ -310,15 +310,16 @@ function declTest(
         expectation,
         errors: [],
     };
-    let { label, prop, value } = expectation.match(
-        /(?<label>\([^)]*\))*(?<prop>[^:]*)\s*:?\s*(?<value>.*)/
+    // eslint-disable-next-line prefer-const
+    let { label, prop, colon, value } = expectation.match(
+        /(?<label>\([^)]*\))*(?<prop>[^:]*)\s*(?<colon>:?)\s*(?<value>.*)/
     )!.groups!;
     label = label ? label + `: ` : ``;
     prop = prop.trim();
     value = value.trim();
     if (!targetNode) {
         result.errors.push(testInlineExpectsErrors.removedNode(srcNode.type, label));
-    } else if (!prop || !value) {
+    } else if (!prop || !colon) {
         result.errors.push(testInlineExpectsErrors.declMalformed(prop, value, label));
     } else if (targetNode.type === `decl`) {
         if (targetNode.prop !== prop.trim() || targetNode.value !== value) {
@@ -485,10 +486,8 @@ export const testInlineExpectsErrors = {
     declMalformed: (expectedProp: string, expectedLabel: string, label = ``) => {
         if (!expectedProp && !expectedLabel) {
             return `${label}malformed declaration expectation, format should be: "prop: value"`;
-        } else if (!expectedProp) {
-            return `${label}malformed declaration expectation missing prop: "???: ${expectedLabel}"`;
         } else {
-            return `${label}malformed declaration expectation missing value: "${expectedProp}: ???"`;
+            return `${label}malformed declaration expectation missing prop: "???: ${expectedLabel}"`;
         }
     },
     deprecatedRootInputNotSupported: (expectation: string) =>
