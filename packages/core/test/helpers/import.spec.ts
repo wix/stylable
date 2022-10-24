@@ -1,8 +1,17 @@
 import { expect } from 'chai';
 import { parse } from 'postcss';
 import { Diagnostics, ensureModuleImport } from '@stylable/core';
-import { ensureImportsMessages, parsePseudoImportNamed } from '@stylable/core/dist/helpers/import';
+import {
+    ensureImportsMessages,
+    parseImportMessages,
+    parsePseudoImportNamed,
+    tryCollectImportsDeep,
+} from '@stylable/core/dist/helpers/import';
+import { diagnosticBankReportToStrings, testStylableCore } from '@stylable/core-test-kit';
 import * as postcss from 'postcss';
+
+const parseImportsDiagnostics = diagnosticBankReportToStrings(parseImportMessages);
+const ensureImportsDiagnostics = diagnosticBankReportToStrings(ensureImportsMessages);
 
 describe(`helpers/import`, () => {
     describe('ensureModuleImport', () => {
@@ -39,7 +48,7 @@ describe(`helpers/import`, () => {
 
                 expect(diag.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diag.reports[0].message).to.equal(
-                    ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
+                    ensureImportsDiagnostics.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
                 );
                 expect(root.nodes, 'no imports added').to.have.lengthOf(0);
             });
@@ -465,7 +474,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import Test from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y')
                 );
             });
             it('should report collision diagnostics for named and not patch', () => {
@@ -481,7 +490,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y')
                 );
             });
             it('should report collision diagnostics for named "as" with "as" (no patch)', () => {
@@ -497,7 +506,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'X as Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'X as Y')
                 );
             });
             it('should report collision diagnostics for named "as" (no patch)', () => {
@@ -513,7 +522,7 @@ describe(`helpers/import`, () => {
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y')
                 );
             });
         });
@@ -523,85 +532,83 @@ describe(`helpers/import`, () => {
             const parseNamedImport = (value: string) =>
                 parsePseudoImportNamed(value, postcss.decl(), new Diagnostics());
             it('empty value', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({});
             });
             it('only named', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('a, b, c');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('a, b, c');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ a: 'a', b: 'b', c: 'c' });
             });
             it('named as', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('a as b, b as c, c as d');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('a as b, b as c, c as d');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ b: 'a', c: 'b', d: 'c' });
             });
             it('keyframes', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('keyframes(a)');
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a' });
+                const { typedMap, namedMap } = parseNamedImport('keyframes(a)');
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a' } });
                 expect(namedMap, 'named').to.eql({});
             });
             it('keyframes with as', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('keyframes(a as b)');
-                expect(keyframesMap, 'keyframes').to.eql({ b: 'a' });
+                const { typedMap, namedMap } = parseNamedImport('keyframes(a as b)');
+                expect(typedMap, 'typed').to.eql({ keyframes: { b: 'a' } });
                 expect(namedMap, 'named').to.eql({});
             });
             it('multiple keyframes', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('keyframes(a, b, c)');
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a', b: 'b', c: 'c' });
+                const { typedMap, namedMap } = parseNamedImport('keyframes(a, b, c)');
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', b: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({});
             });
             it('mix named and keyframes', () => {
-                const { keyframesMap, namedMap } = parseNamedImport(
-                    'a, b, keyframes(a, b, c), c, d'
-                );
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a', b: 'b', c: 'c' });
+                const { typedMap, namedMap } = parseNamedImport('a, b, keyframes(a, b, c), c, d');
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', b: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({ a: 'a', b: 'b', c: 'c', d: 'd' });
             });
             it('mix named and keyframes with as', () => {
-                const { keyframesMap, namedMap } = parseNamedImport(
+                const { typedMap, namedMap } = parseNamedImport(
                     'a as x, b, keyframes(a, b as z, c), c as y, d'
                 );
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a', z: 'b', c: 'c' });
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', z: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({ x: 'a', b: 'b', y: 'c', d: 'd' });
             });
 
             it('mix named and keyframes and comments', () => {
-                const { keyframesMap, namedMap } = parseNamedImport(
+                const { typedMap, namedMap } = parseNamedImport(
                     'a as x /* comment 0 */, b, /* comment 1 */keyframes(a, b as z, c), c as y, d'
                 );
-                expect(keyframesMap, 'keyframes').to.eql({ a: 'a', z: 'b', c: 'c' });
+                expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', z: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({ x: 'a', b: 'b', y: 'c', d: 'd' });
             });
 
             it('keyframes nested', () => {
-                const { keyframesMap, namedMap } = parseNamedImport(
+                const { typedMap, namedMap } = parseNamedImport(
                     'keyframes(a as b, keyframes(d), e), f'
                 );
-                expect(keyframesMap, 'keyframes').to.eql({ b: 'a', d: 'd', e: 'e' });
+                expect(typedMap, 'keyframes').to.eql({ keyframes: { b: 'a', e: 'e' } });
                 expect(namedMap, 'named').to.eql({ f: 'f' });
             });
 
             it('"as" edge case', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('as');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('as');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ as: 'as' });
             });
 
             it('broken "as" edge case (broken at end)', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('a as');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('a as');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({});
             });
             it('broken "as" edge case (with more nodes)', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('a as, x');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('a as, x');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ x: 'x' });
             });
             it('"as" "as"', () => {
-                const { keyframesMap, namedMap } = parseNamedImport('as as x');
-                expect(keyframesMap, 'keyframes').to.eql({});
+                const { typedMap, namedMap } = parseNamedImport('as as x');
+                expect(typedMap, 'typed').to.eql({});
                 expect(namedMap, 'named').to.eql({ x: 'as' });
             });
             describe('errors', () => {
@@ -615,7 +622,7 @@ describe(`helpers/import`, () => {
                     );
                     expect(diagnostics.reports).to.be.lengthOf(1);
                     expect(diagnostics.reports[0].message).to.equal(
-                        'Invalid named import "as" with name "x"'
+                        parseImportsDiagnostics.INVALID_NAMED_IMPORT_AS('x')
                     );
                 });
                 it('invalid nested keyframes', () => {
@@ -628,10 +635,66 @@ describe(`helpers/import`, () => {
                     );
                     expect(diagnostics.reports).to.be.lengthOf(1);
                     expect(diagnostics.reports[0].message).to.equal(
-                        'Invalid nested keyframes import "keyframes(b)"'
+                        parseImportsDiagnostics.INVALID_NESTED_KEYFRAMES('keyframes(b)')
                     );
                 });
             });
+        });
+    });
+    describe('tryCollectImportsDeep', () => {
+        it('should collect deep imports', () => {
+            const { stylable } = testStylableCore({
+                'deep.st.css': `
+                    .root {}
+                `,
+                'middle.st.css': `
+                    @st-import Deep from './deep.st.css';
+                `,
+                'entry.st.css': `
+                    @st-import Middle from './middle.st.css';
+                `,
+            });
+
+            const imports = tryCollectImportsDeep(stylable, stylable.analyze('/entry.st.css'));
+
+            expect(imports).to.eql(new Set(['/deep.st.css', '/middle.st.css']));
+        });
+
+        it('should collect deep imports with circularity', () => {
+            const { stylable } = testStylableCore({
+                'a.st.css': `
+                    @st-import B from './b.st.css';
+                `,
+                'b.st.css': `
+                    @st-import A from './a.st.css';
+                `,
+                'entry.st.css': `
+                    @st-import A from './a.st.css';
+                `,
+            });
+
+            const imports = tryCollectImportsDeep(stylable, stylable.analyze('/entry.st.css'));
+
+            expect(imports).to.eql(new Set(['/a.st.css', '/b.st.css']));
+        });
+
+        it.skip('should collect imports resiliently when an error occurs', () => {
+            // todo: remove skip once testStylableCore is resilient to errors
+            const { stylable } = testStylableCore({
+                'deep.st.css': `
+                    \\
+                `,
+                'middle.st.css': `
+                    @st-import Deep from './deep.st.css';
+                `,
+                'entry.st.css': `
+                    @st-import Middle from './middle.st.css';
+                `,
+            });
+
+            const imports = tryCollectImportsDeep(stylable, stylable.analyze('entry.st.css'));
+
+            expect(imports).to.eql(new Set(['/deep.st.css', '/middle.st.css']));
         });
     });
 });

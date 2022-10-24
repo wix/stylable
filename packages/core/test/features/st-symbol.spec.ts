@@ -8,12 +8,16 @@ import {
     ImportSymbol,
     KeyframesSymbol,
 } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { Diagnostics } from '@stylable/core/dist/diagnostics';
-import { testStylableCore } from '@stylable/core-test-kit';
+import { diagnosticBankReportToStrings, testStylableCore } from '@stylable/core-test-kit';
 import * as postcss from 'postcss';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiSubset from 'chai-subset';
 import { expectType, TypeEqual } from 'ts-expect';
+
+chai.use(chaiSubset);
+
+const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
 
 describe(`features/st-symbol`, () => {
     it(`should keep symbol on meta`, () => {
@@ -29,14 +33,6 @@ describe(`features/st-symbol`, () => {
         expect(meta.getSymbol(`a`), `meta.getSymbol`).to.equal(STSymbol.get(meta, `a`));
         expectType<TypeEqual<StylableSymbol | undefined, typeof savedSymbol>>(true);
         expectType<TypeEqual<ClassSymbol | undefined, typeof savedSymbol>>(false);
-        // deprecation
-        expect(
-            ignoreDeprecationWarn(() => meta.mappedSymbols),
-            `deprecated 'meta.mappedSymbols'`
-        ).to.eql({
-            root: STSymbol.get(meta, `root`),
-            a: STSymbol.get(meta, `a`),
-        });
     });
     it(`should keep track of symbols by type`, () => {
         const { sheets } = testStylableCore(``);
@@ -148,22 +144,18 @@ describe(`features/st-symbol`, () => {
             STSymbol.addSymbol({ context, symbol, node: ruleB });
             STSymbol.reportRedeclare(context);
 
-            expect(context.diagnostics.reports).to.eql([
+            expect(context.diagnostics.reports).to.containSubset([
                 {
-                    type: `warning`,
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
+                    severity: `warning`,
+                    message: stSymbolDiagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleA,
-                    options: {
-                        word: `a`,
-                    },
+                    word: `a`,
                 },
                 {
-                    type: `warning`,
-                    message: STSymbol.diagnostics.REDECLARE_SYMBOL('a'),
+                    severity: `warning`,
+                    message: stSymbolDiagnostics.REDECLARE_SYMBOL('a'),
                     node: ruleB,
-                    options: {
-                        word: `a`,
-                    },
+                    word: `a`,
                 },
             ]);
         });
@@ -193,14 +185,12 @@ describe(`features/st-symbol`, () => {
 
             STSymbol.addSymbol({ context, symbol, node: rule });
 
-            expect(context.diagnostics.reports).to.eql([
+            expect(context.diagnostics.reports).to.containSubset([
                 {
-                    type: `warning`,
-                    message: STSymbol.diagnostics.REDECLARE_ROOT(),
+                    severity: `error`,
+                    message: stSymbolDiagnostics.REDECLARE_ROOT(),
                     node: rule,
-                    options: {
-                        word: `root`,
-                    },
+                    word: `root`,
                 },
             ]);
         });

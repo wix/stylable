@@ -1,6 +1,6 @@
 {
   "name": "@stylable/optimizer",
-  "version": "4.13.3",
+  "version": "5.2.1",
   "description": "Stylable core optimizer",
   "main": "dist/index.js",
   "scripts": {
@@ -8,10 +8,10 @@
     "start": "mocha-play \"./dist/test/**/*.spec.js\" -c ./webpack.config.js -w"
   },
   "dependencies": {
-    "@stylable/core": "^4.13.3",
+    "@stylable/core": "^5.2.1",
     "@tokey/css-selector-parser": "^0.6.0",
-    "csso": "^5.0.3",
-    "postcss": "^8.4.14"
+    "csso": "^5.0.5",
+    "postcss": "^8.4.18"
   },
   "files": [
     "dist",
@@ -20,7 +20,7 @@
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=12"
+    "node": ">=14.14.0"
   },
   "publishConfig": {
     "access": "public"

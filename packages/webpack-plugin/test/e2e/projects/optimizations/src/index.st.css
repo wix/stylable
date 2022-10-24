@@ -15,10 +15,15 @@
     background-color: rgb(228, 228, 228);
 }
 
-.root ::part(name) Button {color: gold;}
+/* unused component */
+Button {
+    color: gold;
+}
 
 .root {
-    -st-states: /*x state*/ x;
+    -st-states:
+        /*x state*/
+        x;
 }
 
 .root:x {
@@ -42,6 +47,7 @@ Button {
     .empty-in-media {
         /* empty rule */
     }
+
     Button {
         /* unused component */
         font-size: 2em;

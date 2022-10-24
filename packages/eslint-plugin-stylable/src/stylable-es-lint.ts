@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Stylable, createDefaultResolver, StylableExports, StylableMeta } from '@stylable/core';
-import { safeParse } from '@stylable/core/dist/index-internal';
+import { Stylable, StylableMeta, createDefaultResolver } from '@stylable/core';
+import { safeParse, StylableExports } from '@stylable/core/dist/index-internal';
 import {
     ESLintUtils,
     AST_NODE_TYPES,
@@ -24,7 +24,7 @@ export default createRule({
         const [{ exposeDiagnosticsReports, resolveOptions }] = options as Options;
         const moduleResolver = createDefaultResolver(fs, resolveOptions);
 
-        const stylable = Stylable.create({
+        const stylable = new Stylable({
             fileSystem: fs,
             projectRoot: process.cwd(),
             resolveModule: moduleResolver,

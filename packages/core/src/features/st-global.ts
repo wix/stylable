@@ -13,13 +13,16 @@ import type {
     SelectorList,
     PseudoClass,
 } from '@tokey/css-selector-parser';
+import { createDiagnosticReporter } from '../diagnostics';
 
 const dataKey = plugableRecord.key<Record<string, true>>('globals');
 
 export const diagnostics = {
-    UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL() {
-        return `unsupported multi selector in :global()`;
-    },
+    UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL: createDiagnosticReporter(
+        '04001',
+        'error',
+        () => `unsupported multi selector in :global()`
+    ),
 };
 
 // HOOKS
@@ -33,7 +36,8 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
             return;
         }
         if (node.nodes && node.nodes?.length > 1) {
-            context.diagnostics.error(rule, diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(), {
+            context.diagnostics.report(diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(), {
+                node: rule,
                 word: stringifySelector(node.nodes),
             });
         }

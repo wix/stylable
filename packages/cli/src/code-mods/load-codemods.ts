@@ -4,10 +4,12 @@ import type { Log } from '../logger';
 // Builtin codemods
 import { stImportToAtImport } from './st-import-to-at-import';
 import { stGlobalCustomPropertyToAtProperty } from './st-global-custom-property-to-at-property';
+import { namespaceToStNamespace } from './namespace-to-st-namespace';
 
 export const registeredMods: Map<string, CodeMod> = new Map([
     ['st-import-to-at-import', stImportToAtImport],
     ['st-global-custom-property-to-at-property', stGlobalCustomPropertyToAtProperty],
+    ['namespace-to-st-namespace', namespaceToStNamespace],
 ]);
 
 export function loadBuiltInCodemods(

@@ -1,5 +1,8 @@
 import type { StylableResults } from '@stylable/core';
 
+/**
+ * @deprecated use generateStylableJSModuleSource
+ */
 export function generateModuleSource(
     stylableResult: StylableResults,
     moduleId: string,
@@ -32,6 +35,9 @@ ${exportsArgument} = ${createFunction}(
 `;
 }
 
+/**
+ * @deprecated use generateStylableJSModuleSource
+ */
 export function createModuleSource(
     stylableResult: StylableResults,
     moduleFormat = 'cjs',
@@ -51,7 +57,7 @@ export function createModuleSource(
         throw new Error('Configuration conflict (renderableOnly && !includeCSSInJS)');
     }
     const cssString = includeCSSInJS
-        ? JSON.stringify(stylableResult.meta.outputAst!.toString())
+        ? JSON.stringify(stylableResult.meta.targetAst!.toString())
         : '""';
 
     switch (moduleFormat) {

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { readdirSync } from 'fs';
-import { murmurhash3_32_gc } from '@stylable/core';
+import { murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 import { dirname, join } from 'path';
 import { attachHook } from '@stylable/node';
 
@@ -62,6 +62,7 @@ describe('require hook', () => {
     it('should ignoreJSModules', () => {
         attachHook({ ignoreJSModules: true });
         const m = require(join(fixturesPath, 'has-js.st.css'));
-        expect(m.$id).to.contain('has-js.st.css');
+        expect(m.test).equal(undefined);
+        expect(m.namespace).to.match(/^hasjs/);
     });
 });

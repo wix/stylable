@@ -37,9 +37,9 @@ describe('Stylable postcss transform (Global)', () => {
             d: true,
             e: true,
         });
-        expect((meta.outputAst!.nodes[1] as postcss.Rule).selector).to.equal('.global-test');
-        expect((meta.outputAst!.nodes[2] as postcss.Rule).selector).to.equal('.a .b');
-        expect((meta.outputAst!.nodes[3] as postcss.Rule).selector).to.equal('.c .d');
-        expect((meta.outputAst!.nodes[4] as postcss.Rule).selector).to.equal('.e');
+        expect((meta.targetAst!.nodes[1] as postcss.Rule).selector).to.equal('.global-test');
+        expect((meta.targetAst!.nodes[2] as postcss.Rule).selector).to.equal('.a .b');
+        expect((meta.targetAst!.nodes[3] as postcss.Rule).selector).to.equal('.c .d');
+        expect((meta.targetAst!.nodes[4] as postcss.Rule).selector).to.equal('.e');
     });
 });

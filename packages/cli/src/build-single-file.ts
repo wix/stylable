@@ -1,4 +1,5 @@
-import { isAsset, Stylable, StylableResults } from '@stylable/core';
+import type { Stylable, StylableResults } from '@stylable/core';
+import { isAsset } from '@stylable/core/dist/index-internal';
 import {
     createModuleSource,
     generateDTSContent,
@@ -9,15 +10,16 @@ import { ensureDirectory, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
 import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
-import type { Diagnostic } from './report-diagnostics';
+import type { CLIDiagnostic } from './report-diagnostics';
 import { errorMessages } from './messages';
+import type { IFileSystem } from '@file-services/types';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
     filePath: string;
     fullSrcDir: string;
     log: Log;
-    fs: any;
+    fs: IFileSystem;
     moduleFormats: string[];
     outputCSS?: boolean;
     outputCSSNameTemplate?: string;
@@ -85,7 +87,7 @@ export function buildSingleFile({
         `Read File Error: ${filePath}`
     );
     const res = tryRun(
-        () => stylable.transform(content, filePath),
+        () => stylable.transform(stylable.analyze(filePath)),
         errorMessages.STYLABLE_PROCESS(filePath)
     );
     const optimizer = new StylableOptimizer();
@@ -154,7 +156,7 @@ export function buildSingleFile({
     });
     // .css
     if (outputCSS) {
-        let cssCode = res.meta.outputAst!.toString();
+        let cssCode = res.meta.targetAst!.toString();
         if (minify) {
             cssCode = optimizer.minifyCSS(cssCode);
         }
@@ -211,6 +213,10 @@ export function buildSingleFile({
             projectAssets.add(resolve(fileDirectory, url));
         }
     }
+
+    return {
+        targetFilePath,
+    };
 }
 
 export function removeBuildProducts({
@@ -275,17 +281,23 @@ export function removeBuildProducts({
     }
 
     log(mode, `removed: [${outputLogs.join(', ')}]`);
+
+    return {
+        targetFilePath,
+    };
 }
 
-export function getAllDiagnostics(res: StylableResults): Diagnostic[] {
+export function getAllDiagnostics(res: StylableResults): CLIDiagnostic[] {
     const diagnostics = res.meta.transformDiagnostics
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
 
-    return diagnostics.map(({ message, node, options, type }) => {
-        const err = node.error(message, options);
-        const diagnostic: Diagnostic = {
-            type,
+    return diagnostics.map(({ message, node, word, severity, code }) => {
+        const err = node.error(message, { word });
+        const diagnostic: CLIDiagnostic = {
+            severity,
+            node,
+            code,
             message: `${message}\n${err.showSourceCode(true)}`,
             ...(node.source?.start && {}),
         };

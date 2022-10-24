@@ -16,12 +16,12 @@ export function mediaQuery(chai: Chai.ChaiStatic, util: Chai.ChaiUtils) {
             );
         }
 
-        const { outputAst } = actual.meta;
-        if (!outputAst) {
-            throw new Error(`expected result to be transformed - missing outputAst on meta`);
+        const { targetAst } = actual.meta;
+        if (!targetAst) {
+            throw new Error(`expected result to be transformed - missing targetAst on meta`);
         }
 
-        const nodes = outputAst.nodes;
+        const nodes = targetAst.nodes;
 
         if (!nodes) {
             throw new Error(`no rules found for media`);
@@ -54,13 +54,13 @@ export function styleRules(chai: Chai.ChaiStatic, util: Chai.ChaiUtils) {
 
             let scopeRule: postcss.Container | undefined = flag(this, 'actualRule');
             if (!scopeRule) {
-                const { outputAst } = actual.meta;
-                if (!outputAst) {
+                const { targetAst } = actual.meta;
+                if (!targetAst) {
                     throw new Error(
-                        `expected result to be transfromed - missing outputAst on meta`
+                        `expected result to be transfromed - missing targetAst on meta`
                     );
                 } else {
-                    scopeRule = outputAst;
+                    scopeRule = targetAst;
                 }
             }
 

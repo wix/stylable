@@ -1,4 +1,5 @@
-//@ts-check
+// @ts-check
+
 /** @type {import('create-stylable-app').TemplateDefinition} */
 module.exports = {
     dependencies: ['react', 'react-dom'],
@@ -9,7 +10,6 @@ module.exports = {
         '@rollup/plugin-node-resolve',
         '@rollup/plugin-replace',
         '@rollup/plugin-typescript',
-        '@stylable/core',
         '@stylable/cli',
         '@stylable/rollup-plugin',
         '@stylable/runtime',
@@ -32,6 +32,7 @@ module.exports = {
         description: 'Stylable App',
         private: true,
         license: 'UNLICENSED',
+        type: 'module',
         scripts: {
             clean: 'rimraf dist',
             prebuild: 'npm run clean',

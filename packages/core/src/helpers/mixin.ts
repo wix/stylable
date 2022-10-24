@@ -1,28 +1,30 @@
-import type { Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, DiagnosticBase, Diagnostics } from '../diagnostics';
 import { strategies, valueDiagnostics } from './value';
 import type { MixinValue } from '../features';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 
-export const diagnostics = {
+export const mixinHelperDiagnostics = {
     INVALID_NAMED_PARAMS: valueDiagnostics.INVALID_NAMED_PARAMS,
-    VALUE_CANNOT_BE_STRING() {
-        return 'value can not be a string (remove quotes?)';
-    },
+    VALUE_CANNOT_BE_STRING: createDiagnosticReporter(
+        '10008',
+        'error',
+        () => 'value can not be a string (remove quotes?)'
+    ),
 };
 
 export function parseStMixin(
     mixinNode: postcss.Declaration,
     strategy: (type: string) => 'named' | 'args',
-    report?: Diagnostics,
+    diagnostics?: Diagnostics,
     emitStrategyDiagnostics = true
 ) {
     const ast = postcssValueParser(mixinNode.value);
     const mixins: Array<MixinValue> = [];
 
-    function reportWarning(message: string, options?: { word: string }) {
+    function reportWarning(diagnostic: DiagnosticBase, options?: { word: string }) {
         if (emitStrategyDiagnostics) {
-            report?.warn(mixinNode, message, options);
+            diagnostics?.report(diagnostic, { ...options, node: mixinNode });
         }
     }
 
@@ -42,7 +44,8 @@ export function parseStMixin(
                 originDecl: mixinNode,
             });
         } else if (node.type === 'string') {
-            report?.error(mixinNode, diagnostics.VALUE_CANNOT_BE_STRING(), {
+            diagnostics?.report(mixinHelperDiagnostics.VALUE_CANNOT_BE_STRING(), {
+                node: mixinNode,
                 word: mixinNode.value,
             });
         }

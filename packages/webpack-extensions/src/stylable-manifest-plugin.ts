@@ -55,7 +55,7 @@ export class StylableManifestPlugin {
         this.options = Object.assign({}, defaultOptions, options);
     }
     public apply(compiler: Compiler) {
-        const stylable = Stylable.create({
+        const stylable = new Stylable({
             projectRoot: compiler.context,
             fileSystem: {
                 readlinkSync: (filePath) =>

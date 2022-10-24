@@ -257,24 +257,6 @@ describe('Stylable JSON Schema Extractor', () => {
             });
         });
 
-        it('schema with a tags state', () => {
-            const css = `.root{
-                -st-states: size(tag);
-            }`;
-
-            const res = extractSchema(css, '/entry.st.css', '/', path);
-            expect(res.properties).to.eql({
-                root: {
-                    $ref: stylableClass,
-                    states: {
-                        size: {
-                            type: 'tag',
-                        },
-                    },
-                },
-            });
-        });
-
         it('schema with mapped states', () => {
             const css = `.root{
                 -st-states: state("custom");

@@ -9,9 +9,11 @@ import {
     generateStylableResult,
     processSource,
     testInlineExpects,
+    diagnosticBankReportToStrings,
 } from '@stylable/core-test-kit';
-import { processorWarnings, nativePseudoClasses, pseudoStates } from '@stylable/core';
+import { processorDiagnostics, nativePseudoClasses } from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
+import { stateDiagnostics } from '@stylable/core/dist/pseudo-states';
 import { CSSType } from '@stylable/core/dist/features';
 
 chai.use(chaiSubset); // move all of these to a central place
@@ -19,11 +21,13 @@ chai.use(styleRules);
 chai.use(mediaQuery);
 chai.use(flatMatch);
 
-const { stateErrors } = pseudoStates;
-
 // testing concerns for feature
 // - states belonging to an extended class (multi level)
 // - lookup order
+
+const stateStringDiagnostics = diagnosticBankReportToStrings(stateDiagnostics);
+const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
+const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
 
 describe('pseudo-states', () => {
     describe('process', () => {
@@ -52,7 +56,7 @@ describe('pseudo-states', () => {
                         }`,
                         [
                             {
-                                message: stateErrors.RESERVED_NATIVE_STATE(name),
+                                message: stateStringDiagnostics.RESERVED_NATIVE_STATE(name),
                                 file: 'main.css',
                             },
                         ]
@@ -114,7 +118,7 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateErrors.TOO_MANY_STATE_TYPES('state1', [
+                            message: stateStringDiagnostics.TOO_MANY_STATE_TYPES('state1', [
                                 'string',
                                 'number(x)',
                             ]),
@@ -133,7 +137,7 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateErrors.NO_STATE_TYPE_GIVEN('state1'),
+                            message: stateStringDiagnostics.NO_STATE_TYPE_GIVEN('state1'),
                             file: 'main.css',
                         },
                     ]
@@ -149,10 +153,11 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateErrors.TOO_MANY_ARGS_IN_VALIDATOR('state1', 'contains', [
-                                'one',
-                                'two',
-                            ]),
+                            message: stateStringDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(
+                                'state1',
+                                'contains',
+                                ['one', 'two']
+                            ),
                             file: 'main.css',
                         },
                     ]
@@ -168,7 +173,7 @@ describe('pseudo-states', () => {
                 `,
                     [
                         {
-                            message: stateErrors.UNKNOWN_STATE_TYPE('state1', 'unknown'),
+                            message: stateStringDiagnostics.UNKNOWN_STATE_TYPE('state1', 'unknown'),
                             file: 'main.css',
                         },
                     ]
@@ -475,54 +480,6 @@ describe('pseudo-states', () => {
                     });
                 });
             });
-
-            describe('tag', () => {
-                it('as a simple validator', () => {
-                    const res = processSource(
-                        `
-                        .root {
-                            -st-states: category(tag);
-                        }
-                    `,
-                        { from: 'path/to/style.css' }
-                    );
-
-                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-
-                    expect(res.getAllClasses()).to.containSubset({
-                        root: {
-                            '-st-states': {
-                                category: {
-                                    type: 'tag',
-                                },
-                            },
-                        },
-                    });
-                });
-
-                it('including a default value', () => {
-                    const res = processSource(
-                        `
-                        .root {
-                            -st-states: category(tag) movie;
-                        }
-                    `,
-                        { from: 'path/to/style.css' }
-                    );
-
-                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
-                    expect(res.getAllClasses()).to.containSubset({
-                        root: {
-                            '-st-states': {
-                                category: {
-                                    defaultValue: 'movie',
-                                    type: 'tag',
-                                },
-                            },
-                        },
-                    });
-                });
-            });
         });
 
         describe('custom mapping', () => {
@@ -705,35 +662,6 @@ describe('pseudo-states', () => {
         });
 
         describe('advanced type / validation', () => {
-            xit('should default to a boolean state when state is a function but receives no type', () => {
-                // TODO: Make this pass?
-
-                const res = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                            .my-class| {
-                                -st-states: |state1|();
-                            }
-                            .my-class:state1 {}
-                            `,
-                        },
-                    },
-                });
-
-                // const res = expectTransformDiagnostics(config, [{
-                //     message: [
-                //         'pseudo-state "state1" expected a definition of a single type, but received none'
-                //     ].join('\n'),
-                //     file: '/entry.st.css'
-                // }]);
-                expect(res).to.have.styleRules({
-                    1: '.entry__my-class[data-entry-state1] {}',
-                });
-            });
-
             it('should strip quotation marks when transform any state parameter', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,
@@ -1393,7 +1321,7 @@ describe('pseudo-states', () => {
                         },
                     });
 
-                    testInlineExpects(res.meta.outputAst!);
+                    testInlineExpects(res.meta.targetAst!);
                     expect(
                         res.meta.diagnostics.reports,
                         'no diagnostics reported for native states'
@@ -1695,91 +1623,6 @@ describe('pseudo-states', () => {
                     ]);
                     expect(res).to.have.styleRules({
                         1: '.entry__my-class.entry---size-4-huge {}',
-                    });
-                });
-            });
-
-            describe('tag', () => {
-                it('should transform tag validator', () => {
-                    const res = generateStylableResult({
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                .my-class {
-                                    -st-states: category( tag );
-                                }
-                                .my-class:category(movie) {}
-                                `,
-                            },
-                        },
-                    });
-
-                    expect(
-                        res.meta.diagnostics.reports,
-                        'no diagnostics reported for native states'
-                    ).to.eql([]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---category-5-movie {}',
-                    });
-                });
-
-                it('should transform tag validator with a variable in its usage', () => {
-                    const res = generateStylableResult({
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                :vars {
-                                    category: disco;
-                                }
-                                .my-class {
-                                    -st-states: category( tag() );
-                                }
-                                .my-class:category(value(category)) {}
-                                `,
-                            },
-                        },
-                    });
-
-                    expect(
-                        res.meta.diagnostics.reports,
-                        'no diagnostics reported for native states'
-                    ).to.eql([]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---category-5-disco {}',
-                    });
-                });
-
-                it('should warn when a value includes a space', () => {
-                    const config = {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                .my-class {
-                                    -st-states: category( tag );
-                                }
-                                |.my-class:category($one two$)| {}
-                                `,
-                            },
-                        },
-                    };
-
-                    const res = expectTransformDiagnostics(config, [
-                        {
-                            message: [
-                                'pseudo-state "category" with parameter "one two" failed validation:',
-                                'expected "one two" to be a single value with no spaces',
-                            ].join('\n'),
-                            file: '/entry.st.css',
-                        },
-                    ]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---category-7-one_two {}',
                     });
                 });
             });
@@ -2177,7 +2020,6 @@ describe('pseudo-states', () => {
                     },
                 });
 
-                // result.meta.outputAst.toString();
                 expect(
                     result.meta.diagnostics.reports,
                     'no diagnostics reported for imported states'
@@ -2225,9 +2067,9 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
+                    message: stateStringDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
 
@@ -2254,9 +2096,9 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateErrors.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
+                    message: stateStringDiagnostics.NO_STATE_ARGUMENT_GIVEN('state1', 'string'),
                     file: '/entry.st.css',
-                    severity: 'warning',
+                    severity: 'error',
                 },
             ]);
 
@@ -2277,7 +2119,10 @@ describe('pseudo-states', () => {
             };
 
             const res = expectTransformDiagnostics(config, [
-                { message: stateErrors.UNKNOWN_STATE_USAGE('unknownState'), file: '/entry.st.css' },
+                {
+                    message: stateStringDiagnostics.UNKNOWN_STATE_USAGE('unknownState'),
+                    file: '/entry.st.css',
+                },
             ]);
             expect(res, 'keep unknown state').to.have.styleRules([`.entry__root:unknownState{}`]);
         });
@@ -2309,12 +2154,12 @@ describe('pseudo-states', () => {
                 [
                     // skipping root scoping warning
                     {
-                        message: CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR('MyElement'),
+                        message: cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR('MyElement'),
                         file: 'main.css',
                         skip: true,
                     },
                     {
-                        message: processorWarnings.STATE_DEFINITION_IN_ELEMENT(),
+                        message: processorStringDiagnostics.STATE_DEFINITION_IN_ELEMENT(),
                         file: 'main.css',
                     },
                 ]
@@ -2331,7 +2176,15 @@ describe('pseudo-states', () => {
                     |-st-states: mystate2;|
                 }
             `,
-                [{ message: 'override "-st-states" on typed rule "root"', file: 'main.css' }]
+                [
+                    {
+                        message: processorStringDiagnostics.OVERRIDE_TYPED_RULE(
+                            '-st-states',
+                            'root'
+                        ),
+                        file: 'main.css',
+                    },
+                ]
             );
         });
 
@@ -2344,7 +2197,7 @@ describe('pseudo-states', () => {
             `,
                 [
                     {
-                        message: stateErrors.STATE_STARTS_WITH_HYPHEN('-someState'),
+                        message: stateStringDiagnostics.STATE_STARTS_WITH_HYPHEN('-someState'),
                         file: 'main.css',
                         severity: 'error',
                     },

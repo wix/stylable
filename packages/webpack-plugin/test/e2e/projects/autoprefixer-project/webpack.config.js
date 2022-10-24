@@ -17,7 +17,7 @@ module.exports = {
                     ...config,
                     hooks: {
                         postProcessor: (stylableResult) => {
-                            autoprefixProcessor.process(stylableResult.meta.outputAst).sync();
+                            autoprefixProcessor.process(stylableResult.meta.targetAst).sync();
                             return stylableResult;
                         },
                     },

@@ -50,6 +50,8 @@ export const nativePseudoClasses = [
     'where',
 ];
 
+export const CSSWideKeywords = ['initial', 'inherit', 'unset'];
+
 /**
  * list names of functional pseudo classes
  * - cannot be overridden by custom states

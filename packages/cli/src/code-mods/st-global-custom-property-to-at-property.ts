@@ -9,13 +9,19 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = ({ ast, diagnostics, 
         const properties = parseStGlobalCustomProperty(atRule, diagnostics);
 
         if (!diagnostics.reports.length) {
+            let first = true;
             for (const property of properties) {
-                atRule.before(
-                    postcss.atRule({
-                        name: 'property',
-                        params: `st-global(${property.name})`,
-                    })
-                );
+                const propertyAtRule = postcss.atRule({
+                    name: 'property',
+                    params: `st-global(${property.name})`,
+                });
+                atRule.before(propertyAtRule);
+                if (!first) {
+                    // adding after insert "before" because the before changes
+                    // the insertion raws.before according to the reference before
+                    propertyAtRule.raws.before = '\n';
+                }
+                first = false;
             }
             atRule.remove();
             changed = true;
@@ -36,10 +42,10 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
         .filter((s) => s !== ',');
 
     if (cssVarsBySpacing.length > cssVarsByComma.length) {
-        diagnostics.warn(
-            atRule,
+        diagnostics.report(
             CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
             {
+                node: atRule,
                 word: atRule.params,
             }
         );
@@ -57,7 +63,8 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
                 alias: undefined,
             });
         } else {
-            diagnostics.warn(atRule, CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
+            diagnostics.report(CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(cssVar), {
+                node: atRule,
                 word: cssVar,
             });
         }

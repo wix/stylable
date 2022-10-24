@@ -1,4 +1,4 @@
-import { nativePseudoClasses, pseudoStates } from '@stylable/core';
+import { nativePseudoClasses, pseudoStates } from '@stylable/core/dist/index-internal';
 import {
     parseCssSelector,
     stringifySelectorAst,
@@ -35,7 +35,7 @@ export function createDataAttr(dataAttrPrefix: string, stateName: string, param?
 }
 
 export function applyStylableForceStateSelectors(
-    outputAst: postcss.Root,
+    targetAst: postcss.Root,
     namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean) = {},
     dataPrefix = OVERRIDE_STATE_PREFIX,
     plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext = (id) => id
@@ -47,7 +47,7 @@ export function applyStylableForceStateSelectors(
 
     const mapping: Record<string, string> = {};
     addForceStateSelectors(
-        outputAst,
+        targetAst,
         plugin({
             getForceStateAttrContentFromNative(name) {
                 return this.getForceStateAttrContent(name);

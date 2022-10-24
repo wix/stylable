@@ -1,5 +1,6 @@
 import type { UrlNode } from 'css-selector-tokenizer';
-import { isAsset, makeAbsolute, StylableMeta } from '@stylable/core';
+import type { StylableMeta } from '@stylable/core';
+import { isAsset, makeAbsolute } from '@stylable/core/dist/index-internal';
 import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
 import { dirname } from 'path';
 
@@ -25,7 +26,7 @@ export function processUrlDependencies(
         }
     };
 
-    meta.outputAst!.walkDecls((node) => {
+    meta.targetAst!.walkDecls((node) => {
         processDeclarationFunctions(
             node,
             (functionNode) => {

@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import deindent from 'deindent';
 import type { Position } from 'postcss';
-import { Diagnostics, DiagnosticType, StylableMeta, StylableResults } from '@stylable/core';
-import { safeParse, process } from '@stylable/core/dist/index-internal';
+import { Diagnostics, DiagnosticSeverity, StylableMeta, StylableResults } from '@stylable/core';
+import { DiagnosticBase, safeParse, StylableProcessor } from '@stylable/core/dist/index-internal';
 import { Config, generateStylableResult } from './generate-test-util';
 
 export interface Diagnostic {
-    severity?: DiagnosticType;
+    severity?: DiagnosticSeverity;
     message: string;
     file: string;
     skipLocationCheck?: boolean;
@@ -32,7 +32,8 @@ const createMatchDiagnosticState = (): MatchState => ({
     word: ``,
     severity: ``,
 });
-const isSupportedSeverity = (val: string): val is DiagnosticType => !!val.match(/info|warn|error/);
+const isSupportedSeverity = (val: string): val is DiagnosticSeverity =>
+    !!val.match(/info|warn|error/);
 export function matchDiagnostic(
     type: `analyze` | `transform`,
     meta: Pick<StylableMeta, `diagnostics` | `transformDiagnostics`>,
@@ -94,7 +95,7 @@ export function matchDiagnostic(
         matchState.matches++;
         // }
         if (expected.location.word) {
-            if (report.options.word !== expected.location.word) {
+            if (report.word !== expected.location.word) {
                 matchState.word = errors.wordMismatch(
                     type,
                     expected.location.word,
@@ -107,11 +108,11 @@ export function matchDiagnostic(
             matchState.matches++;
         }
         if (expected.severity) {
-            if (report.type !== expectedSeverity) {
+            if (report.severity !== expectedSeverity) {
                 matchState.location = errors.severityMismatch(
                     type,
                     expectedSeverity,
-                    report.type,
+                    report.severity,
                     expected.message,
                     expected.label
                 );
@@ -170,7 +171,7 @@ export function expectAnalyzeDiagnostics(
 ) {
     const source = findTestLocations(css);
     const root = safeParse(source.css);
-    const res = process(root);
+    const res = new StylableProcessor(new Diagnostics()).process(root);
 
     if (partial) {
         if (warnings.length === 0) {
@@ -191,13 +192,13 @@ export function expectAnalyzeDiagnostics(
                 expect(report.node.source!.start, 'start').to.eql(source.start);
             }
             if (source.word !== null) {
-                expect(report.options.word).to.equal(source.word);
+                expect(report.word).to.equal(source.word);
             }
 
             if (expectedWarning.severity) {
                 expect(
-                    report.type,
-                    `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.type}"`
+                    report.severity,
+                    `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.severity}"`
                 ).to.equal(expectedWarning.severity);
             }
         });
@@ -229,13 +230,13 @@ function matchPartialDiagnostics(
                     matches++;
                 }
                 if (locations[path].word !== null) {
-                    expect(report.options.word).to.eql(locations[path].word);
+                    expect(report.word).to.eql(locations[path].word);
                     matches++;
                 }
                 if (expectedWarning.severity) {
                     expect(
-                        report.type,
-                        `${report.message}: severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
+                        report.severity,
+                        `${report.message}: severity mismatch, expected ${expectedWarning.severity} but received ${report.severity}`
                     ).to.equal(expectedWarning.severity);
                     matches++;
                 }
@@ -297,13 +298,13 @@ export function expectTransformDiagnostics(
             }
 
             if (locations[path].word !== null) {
-                expect(report.options.word).to.eql(locations[path].word);
+                expect(report.word).to.eql(locations[path].word);
             }
 
             if (expectedWarning.severity) {
                 expect(
-                    report.type,
-                    `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
+                    report.severity,
+                    `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.severity}`
                 ).to.equal(expectedWarning.severity);
             }
         }
@@ -335,4 +336,24 @@ export function shouldReportNoDiagnostics(meta: StylableMeta, checkTransformDiag
             `transforming diagnostics: ${transformerReports.map((r) => r.message)}`
         ).to.equal(0);
     }
+}
+
+export type DiagnosticsBank = Record<string, (...args: any[]) => DiagnosticBase>;
+
+export type UnwrapDiagnosticMessage<T extends DiagnosticsBank> = {
+    [K in keyof T]: (...args: Parameters<T[K]>) => string;
+};
+
+export function diagnosticBankReportToStrings<T extends DiagnosticsBank>(
+    bank: T
+): UnwrapDiagnosticMessage<T> {
+    const cleaned = {} as UnwrapDiagnosticMessage<T>;
+
+    for (const [diagName, diagFunc] of Object.entries(bank)) {
+        cleaned[diagName as keyof T] = (...args) => {
+            return diagFunc(...args).message;
+        };
+    }
+
+    return cleaned;
 }

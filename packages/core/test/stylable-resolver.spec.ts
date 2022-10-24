@@ -1,39 +1,21 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { testStylableCore, generateStylableResult } from '@stylable/core-test-kit';
-import {
-    cssParse,
-    StylableResolver,
-    cachedProcessFile,
-    MinimalFS,
-    StylableMeta,
-    createDefaultResolver,
-} from '@stylable/core';
-import { process } from '@stylable/core/dist/index-internal';
+import { Stylable, MinimalFS } from '@stylable/core';
 
 function createResolveExtendsResults(
-    fs: MinimalFS,
+    fileSystem: MinimalFS,
     fileToProcess: string,
     classNameToLookup: string,
     isElement = false
 ) {
-    const moduleResolver = createDefaultResolver(fs, {});
+    const stylable = new Stylable({
+        fileSystem,
+        projectRoot: '/',
+    });
 
-    const processFile = cachedProcessFile<StylableMeta>(
-        (fullpath, content) => {
-            return process(cssParse(content, { from: fullpath }));
-        },
-        (filePath: string) => fs.readFileSync(filePath, 'utf8')
-    );
-
-    const resolver = new StylableResolver(
-        processFile,
-        (module: string) => module && '',
-        (context = '/', request: string) => moduleResolver(context, request)
-    );
-
-    return resolver.resolveExtends(
-        processFile.process(fileToProcess),
+    return stylable.resolver.resolveExtends(
+        stylable.analyze(fileToProcess),
         classNameToLookup,
         isElement
     );
@@ -43,7 +25,7 @@ describe('stylable-resolver', () => {
     it('should resolve extend classes', () => {
         const { fs } = testStylableCore({
             '/button.st.css': `
-                @namespace:'Button';
+                @st-namespace:'Button';
                 .root {
                     color:red;
                 }
@@ -69,7 +51,7 @@ describe('stylable-resolver', () => {
     it('should resolve extend elements', () => {
         const { fs } = testStylableCore({
             '/button.st.css': `
-                @namespace:'Button';
+                @st-namespace:'Button';
                 .root {
                     color:red;
                 }
@@ -94,7 +76,7 @@ describe('stylable-resolver', () => {
     it('should not enter infinite loops even with broken code', () => {
         const { fs } = testStylableCore({
             '/button.st.css': `
-                @namespace: 'Button';
+                @st-namespace: 'Button';
                 :import {
                     -st-from: './extended-button.st.css';
                     -st-default: Button;
@@ -402,9 +384,30 @@ describe('stylable-resolver', () => {
             },
         });
 
-        const rule = meta.outputAst!.nodes[0] as postcss.Rule;
+        const rule = meta.targetAst!.nodes[0] as postcss.Rule;
         expect(rule.selector).to.equal('.A__root');
         expect(meta.diagnostics.reports).to.eql([]);
         expect(meta.transformDiagnostics!.reports).to.eql([]);
+    });
+
+    it('should not hit the underling resolver more then once', () => {
+        let resolverHits = 0;
+        const { stylable } = testStylableCore(
+            {},
+            {
+                stylableConfig: {
+                    resolverCache: new Map(),
+                    resolveModule: () => {
+                        resolverHits++;
+                        return '';
+                    },
+                },
+            }
+        );
+
+        stylable.resolver.resolvePath('/', './entry.st.css');
+        stylable.resolver.resolvePath('/', './entry.st.css');
+
+        expect(resolverHits).to.equal(1);
     });
 });

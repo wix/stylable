@@ -30,7 +30,7 @@ export const rulesetDirectives = {
 
 export const topLevelDirectives = {
     root: '.root' as const,
-    namespace: '@namespace' as const,
+    namespace: '@st-namespace' as const,
     customSelector: '@custom-selector :--' as const,
     vars: ':vars' as const,
     import: ':import' as const,
@@ -116,7 +116,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 topLevelDirectives.namespace,
                 'Declare a namespace for the file',
                 'a',
-                new Snippet('@namespace "$1";\n'),
+                new Snippet('@st-namespace "$1";\n'),
                 rng
             );
         case topLevelDirectives.customSelector:

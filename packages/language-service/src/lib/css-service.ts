@@ -130,32 +130,31 @@ export class CssService {
                 const diagStart = diag.range.start;
                 const diagEnd = diag.range.end;
 
+                const line = readDocRange(
+                    document,
+                    Range.create(Position.create(diagStart.line, 0), diagEnd)
+                );
+
                 if (diag.code === 'emptyRules') {
                     return false;
                 } else if (
                     diag.code === 'unknownAtRules' &&
                     (atRuleName === '@custom-selector' ||
                         atRuleName === '@st-scope' ||
+                        atRuleName === '@st-namespace' ||
                         atRuleName === '@st-import' ||
                         atRuleName === '@st-global-custom-property')
                 ) {
                     return false;
                 } else if (
                     diag.code === 'css-lcurlyexpected' &&
-                    readDocRange(
-                        document,
-                        Range.create(Position.create(diagStart.line, 0), diagEnd)
-                    ).startsWith('@custom-selector')
+                    (line.startsWith('@custom-selector') || line.startsWith('@property'))
                 ) {
                     return false;
                 } else if (
                     diag.code === 'css-rparentexpected' ||
                     diag.code === 'css-identifierexpected'
                 ) {
-                    const line = readDocRange(
-                        document,
-                        Range.create(Position.create(diagStart.line, 0), diagEnd)
-                    );
                     const stateStart = findPseudoStateStart(line, diagStart.character);
 
                     if (stateStart.index !== -1 && stateStart.openParens > 0) {

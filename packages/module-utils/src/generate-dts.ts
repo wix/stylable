@@ -1,11 +1,9 @@
-import type {
-    ClassSymbol,
+import type { ClassSymbol, StylableMeta, StylableResults, StylableSymbol } from '@stylable/core';
+import {
+    MappedStates,
     StateParsedValue,
-    StylableMeta,
-    StylableResults,
-    StylableSymbol,
-} from '@stylable/core';
-import type { MappedStates } from '@stylable/core/dist/index-internal';
+    namespace as scope,
+} from '@stylable/core/dist/index-internal';
 
 export const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
@@ -130,17 +128,13 @@ function wrapNL(code: string) {
     return code ? `\n${code}\n` : code;
 }
 
-// TODO: make available from core currently defined in transformer class
-function scope(name: string, namespace: string, delimiter = '__') {
-    return namespace ? namespace + delimiter + name : name;
-}
-
 export function generateDTSContent({ exports, meta }: StylableResults) {
     const namespace = asString(meta.namespace);
     const classes = wrapNL(stringifyClasses(exports.classes, meta.namespace));
     const vars = wrapNL(stringifyStringRecord(exports.vars));
     const stVars = wrapNL(stringifyStringRecord(exports.stVars));
     const keyframes = wrapNL(stringifyStringRecord(exports.keyframes));
+    const layers = wrapNL(stringifyStringRecord(exports.layers));
     const states = wrapNL(stringifyStates(meta));
 
     return `/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */
@@ -155,6 +149,8 @@ declare const vars: {${vars}};
 declare const stVars: {${stVars}};
 
 declare const keyframes: {${keyframes}};
+
+declare const layers: {${layers}};
 
 declare function st<T extends string = keyof states>(
     ctx: T | NullableString,
@@ -174,6 +170,7 @@ export {
     vars,
     stVars,
     keyframes,
+    layers,
     namespace,
     st,
     style,

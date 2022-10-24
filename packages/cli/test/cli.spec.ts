@@ -10,6 +10,9 @@ import {
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { STImport, STVar } from '@stylable/core/dist/features';
+import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
+
+const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
 
 describe('Stylable Cli', function () {
     this.timeout(25000);
@@ -29,7 +32,7 @@ describe('Stylable Cli', function () {
             'style.st.css': `.root{color:red}`,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath]);
+        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--cjs']);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(
@@ -46,7 +49,15 @@ describe('Stylable Cli', function () {
             'style.st.css': `.root{color:red}`,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--outDir', './dist']);
+        runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--nsr',
+            testNsrPath,
+            '--outDir',
+            './dist',
+            '--cjs',
+        ]);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(Object.keys(dirContent)).to.eql([
@@ -110,7 +121,7 @@ describe('Stylable Cli', function () {
         });
 
         const nsr = require.resolve('@stylable/node');
-        runCliSync(['--rootDir', tempDir.path, '--nsr', nsr]);
+        runCliSync(['--rootDir', tempDir.path, '--nsr', nsr, '--cjs']);
 
         const dirContent = loadDirSync(tempDir.path);
 
@@ -166,6 +177,36 @@ describe('Stylable Cli', function () {
         expect(
             dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
         ).to.equal(true);
+    });
+
+    it('build only .st.css.d.ts and .st.css.d.ts.map files ', () => {
+        const srcContent = '.root{color:red}';
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': srcContent,
+        });
+
+        const { stdout, status } = runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            'dist',
+            '--dts',
+        ]);
+
+        const dirContent = loadDirSync(tempDir.path);
+        const dtsContent = dirContent['dist/style.st.css.d.ts'];
+        const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
+
+        expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
+            true
+        );
+        expect(
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+        ).to.equal(true);
+
+        expect(status).to.equal(0);
+        expect(stdout, 'stdout').to.not.match(new RegExp(`No target output declared for "(.*?)"`));
     });
 
     it('build .st.css.d.ts source-map and target the source file path relatively', () => {
@@ -356,6 +397,22 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
         });
 
+        it('should report when there are no css output formats', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{}`,
+            });
+
+            const { stdout, status } = runCliSync(['--rootDir', tempDir.path]);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(
+                new RegExp(
+                    `No target output declared for "(.*?)", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`
+                )
+            );
+        });
+
         it('(diagnosticsMode) should not exit with error when using strict mode with only info diagnostics', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -373,7 +430,7 @@ describe('Stylable Cli', function () {
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(
                 new RegExp(
-                    `\\[info\\]: ${STVar.diagnostics.DEPRECATED_ST_FUNCTION_NAME(
+                    `\\[info\\: \\d+]: ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         'stArray',
                         'st-array'
                     )}`
@@ -439,7 +496,9 @@ describe('Stylable Cli', function () {
 
             expect(status).to.equal(1);
             expect(
-                stdout.match(new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE(), 'g'))
+                stdout.match(
+                    new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE().message, 'g')
+                )
             ).to.have.length(1);
         });
 

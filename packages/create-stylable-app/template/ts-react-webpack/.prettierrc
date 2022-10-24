@@ -3,7 +3,7 @@
   "singleQuote": true,
   "overrides": [
     {
-      "files": ["*.js", "*.ts", "*.tsx"],
+      "files": ["*.js", "*.cjs", "*.mjs", "*.ts", "*.tsx", "*.cts", "*.mts"],
       "options": {
         "tabWidth": 4
       }

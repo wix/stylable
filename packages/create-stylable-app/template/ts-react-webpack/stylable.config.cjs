@@ -1,4 +1,5 @@
-//@ts-check
+// @ts-check
+
 const { typedConfiguration } = require('@stylable/cli');
 
 exports.stcConfig = typedConfiguration({
@@ -6,6 +7,5 @@ exports.stcConfig = typedConfiguration({
         srcDir: './src',
         outDir: './st-types',
         dts: true,
-        cjs: false,
     },
 });

@@ -50,7 +50,9 @@ export function resolveDocumentColors(
                     const impMeta = processor.process(
                         stylable.resolvePath(dirname(meta.source), sym.import.request)
                     );
-                    const relevantVar = Object.values(impMeta.getAllStVars()).find((v) => v.name === sym.name);
+                    const relevantVar = Object.values(impMeta.getAllStVars()).find(
+                        (v) => v.name === sym.name
+                    );
                     if (relevantVar) {
                         const doc = TextDocument.create(
                             '',
@@ -91,7 +93,7 @@ export function resolveDocumentColors(
         });
 
         const cleanDocument = cssService.createSanitizedDocument(
-            meta.rawAst,
+            meta.sourceAst,
             filePath,
             document.version
         );
@@ -116,7 +118,7 @@ export function getColorPresentation(
         params.range.start.character + 1
     );
     let noPicker = false;
-    meta?.rawAst.walkDecls(`-st-named`, (node) => {
+    meta?.sourceAst.walkDecls(`-st-named`, (node) => {
         if (
             node &&
             ((wordStart.line === node.source!.start!.line &&

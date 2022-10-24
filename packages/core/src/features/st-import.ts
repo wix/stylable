@@ -1,15 +1,15 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
-import type { StylableSymbol } from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
 import { validateCustomPropertyName } from '../helpers/css-custom-property';
 import type { StylableMeta } from '../stylable-meta';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
+import { createDiagnosticReporter } from '../diagnostics';
+import type { Stylable } from '../stylable';
 
 export interface ImportSymbol {
     _kind: 'import';
@@ -19,11 +19,22 @@ export interface ImportSymbol {
     context: string;
 }
 
+export interface AnalyzedImport {
+    from: string;
+    default: string;
+    named: Record<string, string>;
+    typed: {
+        keyframes: Record<string, string>;
+    };
+}
+
 export interface Imported {
     from: string;
     defaultExport: string;
     named: Record<string, string>;
+    /**@deprecated use imported.typed.keyframes (remove in stylable 5) */
     keyframes: Record<string, string>;
+    typed: Record<string, Record<string, string>>;
     rule: postcss.Rule | postcss.AtRule;
     request: string;
     context: string;
@@ -45,7 +56,7 @@ export const PseudoImportDecl = {
  * have to move into the `metaInit` hook.
  */
 export const ImportTypeHook = new Map<
-    StylableSymbol['_kind'] & keyof Imported,
+    string,
     (context: FeatureContext, localName: string, importName: string, importDef: Imported) => void
 >();
 
@@ -53,22 +64,39 @@ const dataKey = plugableRecord.key<Imported[]>('imports');
 
 export const diagnostics = {
     ...parseImportMessages,
-    NO_ST_IMPORT_IN_NESTED_SCOPE() {
-        return `cannot use "@st-import" inside of nested scope`;
-    },
-    NO_PSEUDO_IMPORT_IN_NESTED_SCOPE() {
-        return `cannot use ":import" inside of nested scope`;
-    },
-    INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
-        return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
-    },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR: generalDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR,
-    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) {
-        return `cannot resolve imported symbol "${name}" from stylesheet "${path}"`;
-    },
-    UNKNOWN_IMPORTED_FILE(path: string) {
-        return `cannot resolve imported file: "${path}"`;
-    },
+    NO_ST_IMPORT_IN_NESTED_SCOPE: createDiagnosticReporter(
+        '05011',
+        'error',
+        () => `cannot use "@st-import" inside of nested scope`
+    ),
+    NO_PSEUDO_IMPORT_IN_NESTED_SCOPE: createDiagnosticReporter(
+        '05012',
+        'error',
+        () => `cannot use ":import" inside of nested scope`
+    ),
+    INVALID_CUSTOM_PROPERTY_AS_VALUE: createDiagnosticReporter(
+        '05013',
+        'error',
+        (name: string, as: string) =>
+            `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`
+    ),
+    UNKNOWN_IMPORTED_SYMBOL: createDiagnosticReporter(
+        '05015',
+        'error',
+        (name: string, path: string) =>
+            `cannot resolve imported symbol "${name}" from stylesheet "${path}"`
+    ),
+    UNKNOWN_IMPORTED_FILE: createDiagnosticReporter(
+        '05016',
+        'error',
+        (path: string) => `cannot resolve imported file: "${path}"`
+    ),
+    UNKNOWN_TYPED_IMPORT: createDiagnosticReporter(
+        '05018',
+        'error',
+        (type: string) => `Unknown type import "${type}"`
+    ),
 };
 
 // HOOKS
@@ -84,7 +112,7 @@ export const hooks = createFeature<{
         const imports = plugableRecord.getUnsafe(context.meta.data, dataKey);
         const dirContext = path.dirname(context.meta.source);
         // collect shallow imports
-        for (const node of context.meta.ast.nodes) {
+        for (const node of context.meta.sourceAst.nodes) {
             if (!isImportStatement(node)) {
                 continue;
             }
@@ -93,9 +121,6 @@ export const hooks = createFeature<{
                     ? parseStImport(node, dirContext, context.diagnostics)
                     : parsePseudoImport(node, dirContext, context.diagnostics);
             imports.push(parsedImport);
-            ignoreDeprecationWarn(() => {
-                context.meta.imports.push(parsedImport);
-            });
             addImportSymbols(parsedImport, context, dirContext);
         }
     },
@@ -104,7 +129,9 @@ export const hooks = createFeature<{
             return;
         }
         if (atRule.parent?.type !== `root`) {
-            context.diagnostics.warn(atRule, diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE());
+            context.diagnostics.report(diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE(), {
+                node: atRule,
+            });
         }
     },
     analyzeSelectorNode({ context, rule, node }) {
@@ -112,14 +139,16 @@ export const hooks = createFeature<{
             return;
         }
         if (rule.selector !== `:import`) {
-            context.diagnostics.warn(
-                rule,
-                diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(PseudoImport)
+            context.diagnostics.report(
+                diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(PseudoImport),
+                { node: rule }
             );
             return;
         }
         if (rule.parent?.type !== `root`) {
-            context.diagnostics.warn(rule, diagnostics.NO_PSEUDO_IMPORT_IN_NESTED_SCOPE());
+            context.diagnostics.report(diagnostics.NO_PSEUDO_IMPORT_IN_NESTED_SCOPE(), {
+                node: rule,
+            });
         }
     },
     prepareAST({ node, toRemove }) {
@@ -133,6 +162,20 @@ export const hooks = createFeature<{
 });
 
 // API
+
+export class StylablePublicApi {
+    constructor(private stylable: Stylable) {}
+    public analyze(meta: StylableMeta): AnalyzedImport[] {
+        return getImportStatements(meta).map(({ request, defaultExport, named, keyframes }) => ({
+            from: request,
+            default: defaultExport,
+            named,
+            typed: {
+                keyframes,
+            },
+        }));
+    }
+}
 
 function isImportStatement(node: postcss.ChildNode): node is postcss.Rule | postcss.AtRule {
     return (
@@ -182,11 +225,17 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
         });
     });
     // import as typed symbol
-    for (const [type, handler] of ImportTypeHook.entries()) {
-        if (type in importDef) {
-            for (const [localName, importName] of Object.entries(importDef[type])) {
+    for (const [type, imports] of Object.entries(importDef.typed)) {
+        const handler = ImportTypeHook.get(type);
+        if (handler) {
+            for (const [localName, importName] of Object.entries(imports)) {
                 handler(context, localName, importName, importDef);
             }
+        } else {
+            context.diagnostics.report(diagnostics.UNKNOWN_TYPED_IMPORT(type), {
+                node: importDef.rule,
+                word: type,
+            });
         }
     }
 }
@@ -194,9 +243,9 @@ function addImportSymbols(importDef: Imported, context: FeatureContext, dirConte
 function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {
     for (const [local, imported] of Object.entries(importDef.named)) {
         if (validateCustomPropertyName(imported) && !validateCustomPropertyName(local)) {
-            context.diagnostics.warn(
-                importDef.rule,
-                diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local)
+            context.diagnostics.report(
+                diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local),
+                { node: importDef.rule }
             );
         }
     }
@@ -215,11 +264,10 @@ function validateImports(context: FeatureTransformContext) {
                     (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.FROM
                 );
 
-            context.diagnostics.warn(
-                fromDecl || importObj.rule,
-                diagnostics.UNKNOWN_IMPORTED_FILE(importObj.request),
-                { word: importObj.request }
-            );
+            context.diagnostics.report(diagnostics.UNKNOWN_IMPORTED_FILE(importObj.request), {
+                node: fromDecl || importObj.rule,
+                word: importObj.request,
+            });
         } else if (resolvedImport._kind === 'css') {
             // warn about unknown named imported symbols
             for (const name in importObj.named) {
@@ -232,10 +280,9 @@ function validateImports(context: FeatureTransformContext) {
                             (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.NAMED
                         );
 
-                    context.diagnostics.warn(
-                        namedDecl || importObj.rule,
+                    context.diagnostics.report(
                         diagnostics.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
-                        { word: origName }
+                        { node: namedDecl || importObj.rule, word: origName }
                     );
                 }
             }

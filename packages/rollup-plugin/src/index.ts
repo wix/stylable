@@ -1,12 +1,12 @@
 import type { Plugin } from 'rollup';
 import fs from 'fs';
 import { join, parse } from 'path';
+import { Stylable } from '@stylable/core';
 import {
-    Stylable,
-    visitMetaCSSDependenciesBFS,
     emitDiagnostics,
     DiagnosticsMode,
-} from '@stylable/core';
+    tryCollectImportsDeep,
+} from '@stylable/core/dist/index-internal';
 import {
     sortModulesByDepth,
     calcDepth,
@@ -82,7 +82,7 @@ export function stylableRollupPlugin({
                 clearRequireCache();
                 stylable.initCache();
             } else {
-                stylable = Stylable.create({
+                stylable = new Stylable({
                     fileSystem: fs,
                     projectRoot,
                     mode,
@@ -158,7 +158,7 @@ export function stylableRollupPlugin({
             if (!id.endsWith(ST_CSS)) {
                 return null;
             }
-            const { meta, exports } = stylable.transform(source, id);
+            const { meta, exports } = stylable.transform(stylable.analyze(id, source));
             const assetsIds = emitAssets(this, stylable, meta, emittedAssets, inlineAssets);
             const css = generateCssString(meta, minify, stylable, assetsIds);
             const moduleImports = [];
@@ -169,12 +169,9 @@ export function stylableRollupPlugin({
             }
             extracted.set(id, { css });
 
-            visitMetaCSSDependenciesBFS(
-                meta,
-                (dep) => this.addWatchFile(dep.source),
-                stylable.createResolver(),
-                (resolvedPath) => this.addWatchFile(resolvedPath)
-            );
+            for (const filePath of tryCollectImportsDeep(stylable, meta)) {
+                this.addWatchFile(filePath);
+            }
 
             /**
              * In case this Stylable module has sources the diagnostics will be emitted in `watchChange` hook.

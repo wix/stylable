@@ -1,36 +1,23 @@
 import { resolve } from 'path';
 import chai, { expect } from 'chai';
-import { flatMatch, processSource } from '@stylable/core-test-kit';
-import { processNamespace, processorWarnings } from '@stylable/core';
-import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
+import { flatMatch, processSource, diagnosticBankReportToStrings } from '@stylable/core-test-kit';
+import { processNamespace } from '@stylable/core';
+import {
+    knownPseudoClassesWithNestedSelectors,
+    processorDiagnostics,
+} from '@stylable/core/dist/index-internal';
 
 chai.use(flatMatch);
+
+const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
 
 describe('Stylable postcss process', () => {
     it('report if missing filename', () => {
         const { diagnostics, namespace } = processSource(``);
         expect(namespace).to.equal('s0');
         expect(diagnostics.reports[0]).to.include({
-            type: 'error',
+            severity: 'error',
             message: 'missing source filename',
-        });
-    });
-
-    it('report on invalid namespace', () => {
-        const { diagnostics } = processSource(`@namespace App;`, { from: '/path/to/source' });
-
-        expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.INVALID_NAMESPACE_DEF(),
-        });
-    });
-
-    it('warn on empty-ish namespace', () => {
-        const { diagnostics } = processSource(`@namespace '   ';`, { from: '/path/to/source' });
-
-        expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.EMPTY_NAMESPACE_DEF(),
         });
     });
 
@@ -46,51 +33,9 @@ describe('Stylable postcss process', () => {
         );
 
         expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.INVALID_NESTING('.y', '.x'),
+            severity: 'error',
+            message: processorStringDiagnostics.INVALID_NESTING('.y', '.x'),
         });
-    });
-
-    it('collect namespace', () => {
-        const from = resolve('/path/to/style.css');
-        const result = processSource(
-            `
-            @namespace "name";
-            @namespace 'anther-name';
-        `,
-            { from }
-        );
-
-        expect(result.namespace).to.equal(processNamespace('anther-name', from));
-    });
-
-    it('resolve namespace hook', () => {
-        const from = resolve('/path/to/style.css');
-        const result = processSource(
-            `
-            @namespace "name";
-        `,
-            { from },
-            (s) => 'Test-' + s
-        );
-
-        expect(result.namespace).to.equal('Test-name');
-    });
-
-    it('use filename as default namespace prefix', () => {
-        const from = resolve('/path/to/style.st.css');
-        const distFrom = resolve('/dist/path/to/style.st.css');
-
-        const result = processSource(
-            `
-            /* st-namespace-reference="../../../path/to/style.st.css" */\n
-        `,
-            { from: distFrom }
-        );
-
-        // assure namespace generated with st-namespace-reference
-        // is identical between source and dist with the relative correction
-        expect(result.namespace).to.eql(processNamespace('style', from));
     });
 
     it('use filename as default namespace prefix (empty)', () => {

@@ -79,7 +79,7 @@ export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions)
 function logReports(reports: Map<string, Diagnostic[]>, filePath: string, log: Log) {
     for (const [name, diagnosticsReports] of reports) {
         for (const report of diagnosticsReports) {
-            const error = report.node.error(report.message, report.options);
+            const error = report.node.error(report.message, { word: report.word });
             log(`[${name}]`, `${filePath}: ${report.message}\n${error.showSourceCode()}`);
         }
     }
