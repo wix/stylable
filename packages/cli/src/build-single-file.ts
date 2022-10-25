@@ -213,6 +213,21 @@ export function buildSingleFile({
             projectAssets.add(resolve(fileDirectory, url));
         }
     }
+    // add native css imports as assets
+    for (const { request } of res.meta.getImportStatements()) {
+        try {
+            const resolvedRequest = stylable.resolver.resolvePath(fileDirectory, request);
+            if (
+                resolvedRequest.endsWith('.css') &&
+                !resolvedRequest.endsWith('.st.css') &&
+                isAsset(resolvedRequest)
+            ) {
+                projectAssets.add(resolvedRequest);
+            }
+        } catch (_e) {
+            // resolve diagnostics reported by core
+        }
+    }
 
     return {
         targetFilePath,
