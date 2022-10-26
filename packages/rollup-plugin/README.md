@@ -35,8 +35,6 @@ interface StylableRollupPluginOptions {
     inlineAssets?: boolean;
     fileName?: string;
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
-    resolveNamespace?: (namespace: string, source: string) => string;
-    projectRoot?: string; // default is process.cwd()
     /**
      * A function to override Stylable instance default configuration options
      */
