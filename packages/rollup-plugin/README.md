@@ -38,6 +38,10 @@ interface StylableRollupPluginOptions {
     resolveNamespace?: (namespace: string, source: string) => string;
     projectRoot?: string; // default is process.cwd()
     /**
+     * A function to override Stylable instance default configuration options
+     */
+    stylableConfig?: (config: StylableConfig) => StylableConfig;
+    /**
      * Runs "stc" programmatically with the webpack compilation.
      * true - it will automatically detect the closest "stylable.config.js" file and use it.
      * string - it will use the provided string as the "stcConfig" file path.
