@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@stylable/runtime": "^4.15.1",
-    "express": "^4.18.1",
+    "express": "^4.18.2",
     "node-eval": "^2.0.0",
     "playwright-core": "1.25.2",
     "rimraf": "^3.0.2"

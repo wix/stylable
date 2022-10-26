@@ -12,6 +12,9 @@ export default {
     { name: 'vscode-css-languageservice', reason: 'drops support for node v12' },
     { name: 'playwright-core', reason: 'drops support for node v12' },
     { name: 'playwright-chromium', reason: 'drops support for node v12' },
+    { name: 'validate-npm-package-name', reason: 'drops support for node v12' },
+    { name: 'rollup', reason: 'drops support for node v12' },
+    { name: 'jest-docblock', reason: 'drops support for node v12' },
     {
       name: 'vscode-uri',
       reason: 'broken URI types - https://github.com/microsoft/vscode/issues/161166',
