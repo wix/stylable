@@ -1,7 +1,7 @@
 import type { Plugin } from 'rollup';
 import fs from 'fs';
 import { join, parse } from 'path';
-import { Stylable } from '@stylable/core';
+import { Stylable, StylableConfig } from '@stylable/core';
 import {
     emitDiagnostics,
     DiagnosticsMode,
@@ -30,15 +30,22 @@ export interface StylableRollupPluginOptions {
     };
     inlineAssets?: boolean | ((filepath: string, buffer: Buffer) => boolean);
     fileName?: string;
+    /** @deprecated use stylableConfig to configure */
     mode?: 'development' | 'production';
     diagnosticsMode?: DiagnosticsMode;
+    /** @deprecated use stylableConfig to configure */
     resolveNamespace?: typeof resolveNamespaceNode;
+    /**
+     * A function to override Stylable instance default configuration options
+     */
+    stylableConfig?: (config: StylableConfig) => StylableConfig;
     /**
      * Runs "stc" programmatically with the webpack compilation.
      * true - it will automatically detect the closest "stylable.config.js" file and use it.
      * string - it will use the provided string as the "stcConfig" file path.
      */
     stcConfig?: boolean | string;
+    /** @deprecated use stylableConfig to configure */
     projectRoot?: string;
 }
 
@@ -62,10 +69,11 @@ export function stylableRollupPlugin({
     inlineAssets = true,
     fileName = 'stylable.css',
     diagnosticsMode = 'strict',
-    mode = getDefaultMode(),
-    resolveNamespace = resolveNamespaceNode,
+    mode,
+    resolveNamespace,
+    stylableConfig = (config: StylableConfig) => config,
     stcConfig,
-    projectRoot = process.cwd(),
+    projectRoot,
 }: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
@@ -78,19 +86,20 @@ export function stylableRollupPlugin({
         async buildStart() {
             extracted = extracted || new Map();
             emittedAssets = emittedAssets || new Map();
+            const stConfig = stylableConfig({
+                fileSystem: fs,
+                optimizer: new StylableOptimizer(),
+                resolverCache: new Map(),
+                requireModule,
+                mode: mode || getDefaultMode(),
+                projectRoot: projectRoot || process.cwd(),
+                resolveNamespace: resolveNamespace || resolveNamespaceNode,
+            });
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
             } else {
-                stylable = new Stylable({
-                    fileSystem: fs,
-                    projectRoot,
-                    mode,
-                    resolveNamespace,
-                    optimizer: new StylableOptimizer(),
-                    resolverCache: new Map(),
-                    requireModule,
-                });
+                stylable = new Stylable(stConfig);
             }
 
             if (stcConfig) {
@@ -100,7 +109,7 @@ export function stylableRollupPlugin({
                     }
                 } else {
                     const configuration = resolveStcConfig(
-                        projectRoot,
+                        stConfig.projectRoot,
                         typeof stcConfig === 'string' ? stcConfig : undefined
                     );
 
@@ -113,7 +122,7 @@ export function stylableRollupPlugin({
                     }
 
                     stcBuilder = STCBuilder.create({
-                        rootDir: projectRoot,
+                        rootDir: stConfig.projectRoot,
                         configFilePath: configuration.path,
                         watchMode: this.meta.watchMode,
                     });

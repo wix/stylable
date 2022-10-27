@@ -1,5 +1,5 @@
 import { promises } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { expect } from 'chai';
 import { rollupRunner } from './test-kit/rollup-runner';
 import { getProjectPath } from './test-kit/test-helpers';
@@ -75,5 +75,38 @@ describe('StylableRollupPlugin', function () {
         const { body: body3 } = await page.evaluate(getElementsStyles);
 
         expect(body3.backgroundColor).to.equal('rgb(255, 0, 0)');
+    });
+    it('should accept custom stylable configuration', async () => {
+        const resolvedList: string[] = [];
+        const { ready, serve, open } = rollupRunner({
+            projectPath: getProjectPath(project),
+            pluginOptions: {
+                stylableConfig(config) {
+                    config.resolveModule = (dirPath, request) => {
+                        resolvedList.push(request);
+                        return resolve(dirPath, request);
+                    };
+                    config.resolveNamespace = (namespace) => {
+                        return namespace + '_OVERRIDE_';
+                    };
+                    return config;
+                },
+            },
+        });
+
+        await ready;
+
+        const url = await serve();
+        const page = await open(url);
+
+        const { root, part, state } = await page.evaluate(() => ({
+            root: !!document.querySelector('.index_OVERRIDE___root'),
+            part: !!document.querySelector('.index_OVERRIDE___part'),
+            state: !!document.querySelector('.index_OVERRIDE_--myState'),
+        }));
+        expect(root, 'root class').to.eql(true);
+        expect(part, 'part class').to.eql(true);
+        expect(state, 'state class').to.eql(true);
+        expect(resolvedList, 'resolved').to.eql(['./js-function']);
     });
 });
