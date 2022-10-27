@@ -10,6 +10,8 @@ This loader supports working with `mini-css-extract-plugin`. Internally, this se
 This loader is **experimental** and currently **not the recommended way** of integrating Stylable into your project.  
 Use `@stylable/webpack-plugin` for the latest stable integration.
 
+- native css import is not supported
+
 ## Example
 
 A minimal webpack configuration using the two Stylable loaders in conjunction with the `mini-css-extract-plugin` loader:
