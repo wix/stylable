@@ -14,7 +14,7 @@ describe(`(${project})`, () => {
         {
             projectDir,
             launchOptions: {
-                headless: false,
+                // headless: false,
             },
             configName: 'webpack.config.js',
             buildPackages: ['./node_modules/component-library'],
