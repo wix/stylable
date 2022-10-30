@@ -307,6 +307,7 @@ describe('build stand alone', () => {
                 outDir: './dist',
                 srcDir: '.',
                 cjs: true,
+                esm: true,
                 outputCSS: true,
                 injectCSSRequest: true,
                 outputCSSNameTemplate: '[filename].global.css',
@@ -322,6 +323,9 @@ describe('build stand alone', () => {
 
         expect(fs.readFileSync('/dist/comp.st.css.js', 'utf8')).contains(
             `require("./comp.global.css")`
+        );
+        expect(fs.readFileSync('/dist/comp.st.css.mjs', 'utf8')).contains(
+            `import "./comp.global.css"`
         );
         expect(fs.existsSync('/dist/comp.global.css')).to.equal(true);
     });

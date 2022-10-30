@@ -351,6 +351,6 @@ function generateStylableModuleCode(res: StylableResults, depth: number, moduleI
 
 function moduleRequestSourceCode(format: string, request: string) {
     return format === 'cjs'
-        ? `require(${JSON.stringify(request)});`
+        ? request
         : `import ${JSON.stringify(request)};`;
 }
