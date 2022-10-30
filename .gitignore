@@ -85,5 +85,3 @@ build/Release
 
 # test temp directory
 .temp
-
-# /generated/
