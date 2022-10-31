@@ -34,7 +34,7 @@ After installing `@stylable/cli`, the `stc` command will be available, running `
 | `--srcDir`                |        | source directory relative to root                                                      | `./`             |
 | `--outDir`                |        | target directory relative to root                                                      | `./`             |
 | `--indexFile`             |        | filename of the generated index                                                        | `false`          |
-| `--cjs`                   |        | output commonjs modules (`.js`)                                                        | `true`           |
+| `--cjs`                   |        | output commonjs modules (`.js`)                                                        | `false`          |
 | `--esm`                   |        | output esm modules (`.mjs`)                                                            | `false`          |
 | `--css`                   |        | output transpiled css files (`.css`)                                                   | `false`          |
 | `--stcss`                 |        | output stylable source files (`.st.css`)                                               | `false`          |

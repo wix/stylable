@@ -7,7 +7,7 @@
     "test": "mocha \"dist/test/**/*.spec.js\""
   },
   "peerDependencies": {
-    "rollup": "^2.70.0"
+    "rollup": "^2.70.0 || ^3.0.0"
   },
   "dependencies": {
     "@stylable/build-tools": "^5.2.1",

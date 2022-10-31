@@ -185,8 +185,15 @@ describe(`features/css-custom-property`, () => {
     });
     it(`should collect global css props`, () => {
         const { sheets } = testStylableCore(`
-            /* @transform-remove(definition)*/
+            /* @transform-remove(build-def)*/
             @property st-global(--propX);
+
+            /* @atrule(runtime-def) --propY */
+            @property st-global(--propY) {
+                syntax: '<color>';
+                initial-value: green;
+                inherits: false;
+            }
 
             .root {
                 /* @decl(prop) --propX: green */
@@ -194,6 +201,9 @@ describe(`features/css-custom-property`, () => {
 
                 /* @decl(value) prop: var(--propX) */
                 prop: var(--propX);
+
+                /* @decl(value) --propY: var(--propY) */
+                --propY: var(--propY);
             }
         `);
 
