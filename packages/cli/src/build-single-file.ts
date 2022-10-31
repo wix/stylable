@@ -142,12 +142,19 @@ export function buildSingleFile({
         const moduleCssImports = injectCSSRequest
             ? [moduleRequestSourceCode(format, './' + cssAssetFilename)]
             : [];
-        let cssDepth = -1;
+        let cssDepth = 0;
         tryCollectImportsDeep(stylable, res.meta, new Set(), ({ depth }) => {
             cssDepth = Math.max(cssDepth, depth);
-        });
+        }, 1);
         for (const imported of res.meta.getImportStatements()) {
-            if (imported.request.endsWith('.st.css')) {
+            let resolved = imported.request;
+            try {
+                resolved = stylable.resolver.resolvePath(imported.context, imported.request);
+            } catch {
+                // use the fallback
+            }
+
+            if (resolved.endsWith('.st.css')) {
                 if (hasImportedSideEffects(stylable, res.meta, imported)) {
                     moduleCssImports.push(moduleRequestSourceCode(format, imported.request + ext));
                 }
@@ -350,7 +357,5 @@ function generateStylableModuleCode(res: StylableResults, depth: number, moduleI
 }
 
 function moduleRequestSourceCode(format: string, request: string) {
-    return format === 'cjs'
-        ? request
-        : `import ${JSON.stringify(request)};`;
+    return format === 'cjs' ? request : `import ${JSON.stringify(request)};`;
 }

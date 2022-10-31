@@ -597,9 +597,7 @@ export function tryCollectImportsDeep(
     for (const { context, request } of meta.getImportStatements()) {
         try {
             const resolved = stylable.resolver.resolvePath(context, request);
-            if (onImport) {
-                onImport({ context, request, resolved, depth });
-            }
+            onImport?.({ context, request, resolved, depth });
 
             if (!imports.has(resolved)) {
                 imports.add(resolved);

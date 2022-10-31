@@ -29,14 +29,14 @@ export function getImports(
             }
         }
     }
-    let cssDepth = -1;
+    let cssDepth = 0;
     /**
      * Collect all deep dependencies since they can affect the output
      */
     const buildDependencies: string[] = Array.from(
         tryCollectImportsDeep(stylable, meta, undefined, ({ depth }) => {
             cssDepth = Math.max(cssDepth, depth);
-        })
+        }, 1)
     );
 
     /**

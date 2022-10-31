@@ -14,7 +14,7 @@ describe(`(${project})`, () => {
         {
             projectDir,
             launchOptions: {
-                // headless: false,
+                headless: false,
             },
             configName: 'webpack.config.js',
             buildPackages: ['./node_modules/component-library'],
@@ -30,14 +30,25 @@ describe(`(${project})`, () => {
         const stylableBrowser = await projectRunner.openInBrowser({ internalPath: 'stylable' });
         const stylableStyles = await stylableBrowser.page.evaluate(getStyleElementsMetadata);
 
+        const { buttonColor, labelFontSize } = await vanillaBrowser.page.evaluate(() => {
+            return {
+                buttonColor: getComputedStyle(document.querySelector('#btn')!).backgroundColor,
+                labelFontSize: getComputedStyle(document.querySelector('#label')!).fontSize,
+            };
+        });
+
+        expect(buttonColor).to.eql('rgb(0, 255, 0)');
+        expect(labelFontSize).to.eql('50px');
+
         expect(vanillaStyles).to.eql(stylableStyles);
 
         expect(normalizeNamespace(vanillaStyles)).to.eql([
-            { id: 'designsystem', depth: '-1' },
-            { id: 'label', depth: '-1' },
-            { id: 'button', depth: '0' },
-            { id: 'labeltheme', depth: '2' },
-            { id: 'buttontheme', depth: '2' },
+            { id: 'designsystem', depth: '0' },
+            { id: 'label', depth: '0' },
+            { id: 'button', depth: '1' },
+            { id: 'basictheme', depth: '2' },
+            { id: 'labeltheme', depth: '3' },
+            { id: 'buttontheme', depth: '3' },
         ]);
     });
 });
