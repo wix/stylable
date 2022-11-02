@@ -95,7 +95,7 @@ export class ProjectRunner {
             this.log(`Building ${pkg}`);
             execSync('npm run build', {
                 cwd: pkg,
-                stdio: 'inherit',
+                stdio: 'pipe',
             });
         }
         this.log('Build Packaged Finished');
