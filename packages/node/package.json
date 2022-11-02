@@ -1,14 +1,14 @@
 {
   "name": "@stylable/node",
-  "version": "5.2.1",
+  "version": "5.3.0-rc.1",
   "description": "Integrate Stylable into your node application",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 10000"
   },
   "dependencies": {
-    "@stylable/core": "^5.2.1",
-    "@stylable/module-utils": "^5.2.1",
+    "@stylable/core": "5.3.0-rc.1",
+    "@stylable/module-utils": "5.3.0-rc.1",
     "find-config": "^1.0.0"
   },
   "files": [
