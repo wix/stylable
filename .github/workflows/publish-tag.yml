@@ -1,0 +1,23 @@
+name: publish-tag
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'npm publish tag'
+        required: true
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org/'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx pleb@5 publish --tag ${{ github.event.inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
