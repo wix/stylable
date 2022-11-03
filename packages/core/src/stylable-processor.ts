@@ -186,6 +186,11 @@ export class StylableProcessor implements FeatureContext {
                     });
                     break;
                 case 'import':
+                    STImport.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
                     CSSLayer.hooks.analyzeAtRule({
                         context: this,
                         atRule,

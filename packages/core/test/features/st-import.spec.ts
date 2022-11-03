@@ -255,6 +255,19 @@ describe(`features/st-import`, () => {
             expect(reports.length, `for both default and name`).to.eql(2);
         });
     });
+    describe('native css', () => {
+        it('should report unsupported native import', () => {
+            testStylableCore({
+                '/native.css': `
+                    /* @analyze-warn ${stImportDiagnostics.UNSUPPORTED_NATIVE_IMPORT()} */
+                    @import './something-else.css';
+                `,
+                '/entry.st.css': `
+                    @st-import './native.css';
+                `,
+            });
+        });
+    });
     describe(`:import (legacy pseudo-import syntax)`, () => {
         it(`should collect import statements`, () => {
             const { sheets } = testStylableCore(`

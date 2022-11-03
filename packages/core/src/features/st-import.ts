@@ -102,6 +102,11 @@ export const diagnostics = {
         'error',
         (path: string) => `Native CSS files have no default export. Imported file: "${path}"`
     ),
+    UNSUPPORTED_NATIVE_IMPORT: createDiagnosticReporter(
+        '05021',
+        'warning',
+        () => `Unsupported @import within imported native CSS file`
+    ),
 };
 
 // HOOKS
@@ -130,11 +135,12 @@ export const hooks = createFeature<{
         }
     },
     analyzeAtRule({ context, atRule }) {
-        if (atRule.name !== `st-import`) {
-            return;
-        }
-        if (atRule.parent?.type !== `root`) {
+        if (atRule.name === `st-import` && atRule.parent?.type !== `root`) {
             context.diagnostics.report(diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE(), {
+                node: atRule,
+            });
+        } else if (atRule.name === `import` && context.meta.type === 'css') {
+            context.diagnostics.report(diagnostics.UNSUPPORTED_NATIVE_IMPORT(), {
                 node: atRule,
             });
         }
