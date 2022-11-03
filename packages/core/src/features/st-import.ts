@@ -100,7 +100,7 @@ export const diagnostics = {
     NO_DEFAULT_EXPORT: createDiagnosticReporter(
         '05020',
         'error',
-        (path: string) => `No default export for imported file: "${path}"`
+        (path: string) => `Native CSS files have no default export. Imported file: "${path}"`
     ),
 };
 
