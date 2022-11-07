@@ -4,7 +4,9 @@ import { murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 import { dirname, join } from 'path';
 import { attachHook } from '@stylable/node';
 
-const fixturesPath = dirname(require.resolve('@stylable/node/test/fixtures/package.json'));
+const fixturesPath = dirname(
+    require.resolve('@stylable/node/test/fixtures/base-project/package.json')
+);
 
 describe('require hook', () => {
     afterEach(() => {
