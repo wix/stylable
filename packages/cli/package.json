@@ -24,7 +24,7 @@
     "decache": "^4.6.1",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
-    "yargs": "^17.6.0"
+    "yargs": "^17.6.2"
   },
   "files": [
     "bin",
