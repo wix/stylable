@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Stylable } from '@stylable/core';
+import { Stylable, createDefaultResolver } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 
@@ -11,11 +11,14 @@ describe('assets', function () {
                 @st-import './relative.css';
                 @st-import './resolved-me';
                 @st-import './other.st.css';
+                @st-import 'styles/3rd-party.css';
             `,
             '/src/relative.css': '.native {}',
             '/src/custom-resolved.css': '.resolved {}',
             '/src/other.st.css': '.other {}',
+            '/node_modules/styles/3rd-party.css': '.third-party {}',
         });
+        const resolve = createDefaultResolver(fs, {});
         const stylable = new Stylable({
             projectRoot: '/',
             fileSystem: fs,
@@ -24,7 +27,7 @@ describe('assets', function () {
                 if (request === './resolved-me') {
                     return '/src/custom-resolved.css';
                 }
-                return fs.resolve(path, request);
+                return resolve(path, request);
             },
         });
 
@@ -46,11 +49,11 @@ describe('assets', function () {
             }
         );
 
-        ['/dist/entry.css', '/dist/relative.css', '/dist/custom-resolved.css'].forEach((p) => {
-            expect(fs.existsSync(p), p).to.equal(true);
-        });
-        ['/dist/other.st.css'].forEach((p) => {
-            expect(fs.existsSync(p), p).to.equal(false);
-        });
+        expect(fs.readdirSync('/dist')).to.eql([
+            'entry.css',
+            'other.css',
+            'relative.css',
+            'custom-resolved.css',
+        ]);
     });
 });

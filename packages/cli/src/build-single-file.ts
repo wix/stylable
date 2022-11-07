@@ -1,5 +1,5 @@
 import type { Stylable, StylableResults } from '@stylable/core';
-import { isAsset } from '@stylable/core/dist/index-internal';
+import { isAsset, isRelativeNativeCss } from '@stylable/core/dist/index-internal';
 import {
     createModuleSource,
     generateDTSContent,
@@ -217,11 +217,7 @@ export function buildSingleFile({
     for (const { request } of res.meta.getImportStatements()) {
         try {
             const resolvedRequest = stylable.resolver.resolvePath(fileDirectory, request);
-            if (
-                resolvedRequest.endsWith('.css') &&
-                !resolvedRequest.endsWith('.st.css') &&
-                isAsset(resolvedRequest)
-            ) {
+            if (isRelativeNativeCss(resolvedRequest)) {
                 projectAssets.add(resolvedRequest);
             }
         } catch (_e) {
