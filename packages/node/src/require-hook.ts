@@ -9,6 +9,7 @@ export interface Options {
     afterCompile?: (code: string, filename: string) => string;
     runtimePath?: string;
     ignoreJSModules?: boolean;
+    configPath?: string;
 }
 
 const HOOK_EXTENSION = '.css';
@@ -21,7 +22,19 @@ export function attachHook({
     stylableConfig,
     runtimePath,
     ignoreJSModules,
+    configPath,
 }: Partial<Options> = {}) {
+    let resolveModule;
+
+    if (configPath) {
+        const { defaultConfig } = require(configPath);
+
+        resolveModule =
+            defaultConfig && typeof defaultConfig === 'function'
+                ? defaultConfig(fs).resolveModule
+                : undefined;
+    }
+
     const stylableToModule = stylableModuleFactory(
         {
             projectRoot: 'root',
@@ -29,6 +42,7 @@ export function attachHook({
             requireModule: require,
             resolveNamespace,
             resolverCache: new Map(),
+            resolveModule,
             ...stylableConfig,
         },
         { runtimePath }
