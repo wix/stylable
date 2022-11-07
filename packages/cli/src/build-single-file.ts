@@ -219,6 +219,29 @@ export function buildSingleFile({
             const resolvedRequest = stylable.resolver.resolvePath(fileDirectory, request);
             if (isRelativeNativeCss(resolvedRequest)) {
                 projectAssets.add(resolvedRequest);
+                buildSingleFile({
+                    fullOutDir,
+                    filePath: resolvedRequest,
+                    fullSrcDir,
+                    log,
+                    fs,
+                    moduleFormats,
+                    outputCSS: false,
+                    outputSources: false,
+                    generated,
+                    mode,
+                    stylable,
+                    includeCSSInJS,
+                    projectAssets,
+                    useNamespaceReference,
+                    injectCSSRequest,
+                    optimize,
+                    minify,
+                    dts: false,
+                    dtsSourceMap: false,
+                    diagnosticsMode,
+                    diagnosticsManager,
+                });
             }
         } catch (_e) {
             // resolve diagnostics reported by core
