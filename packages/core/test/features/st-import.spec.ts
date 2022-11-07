@@ -259,10 +259,10 @@ describe(`features/st-import`, () => {
         it('should report unsupported native import', () => {
             testStylableCore({
                 '/native.css': `
-                    /* @analyze-warn ${stImportDiagnostics.UNSUPPORTED_NATIVE_IMPORT()} */
                     @import './something-else.css';
                 `,
                 '/entry.st.css': `
+                    /* @transform-warn ${stImportDiagnostics.UNSUPPORTED_NATIVE_IMPORT()} */
                     @st-import './native.css';
                 `,
             });

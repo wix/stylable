@@ -280,6 +280,22 @@ function validateImports(context: FeatureTransformContext) {
                 word: importObj.request,
             });
         } else if (resolvedImport._kind === 'css') {
+            // propagate some native CSS diagnostics to st-import
+            if (resolvedImport.meta.type === 'css') {
+                let foundUnsupportedNativeImport = false;
+                for (const report of resolvedImport.meta.diagnostics.reports) {
+                    if (report.code === '05021') {
+                        foundUnsupportedNativeImport = true;
+                        break;
+                    }
+                }
+                if (foundUnsupportedNativeImport) {
+                    context.diagnostics.report(diagnostics.UNSUPPORTED_NATIVE_IMPORT(), {
+                        node: importObj.rule,
+                        word: importObj.defaultExport,
+                    });
+                }
+            }
             // report unsupported native CSS default import
             if (resolvedImport.meta.type !== 'stylable' && importObj.defaultExport) {
                 context.diagnostics.report(diagnostics.NO_DEFAULT_EXPORT(importObj.request), {
