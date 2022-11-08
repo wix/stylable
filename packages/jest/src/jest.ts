@@ -30,15 +30,28 @@ function getCacheKey(
 
 export interface StylableJestConfig {
     stylable?: Partial<StylableConfig>;
+    configPath?: string;
 }
 
 export const createTransformer = (options?: StylableJestConfig) => {
+    let resolveModule;
+
+    if (options?.configPath && !options.stylable?.resolveModule) {
+        const { defaultConfig } = require(options.configPath);
+
+        resolveModule =
+            defaultConfig && typeof defaultConfig === 'function'
+                ? defaultConfig(fs).resolveModule
+                : undefined;
+    }
+
     const process = stylableModuleFactory(
         {
             fileSystem: fs,
             requireModule: require,
             projectRoot: '',
             resolveNamespace,
+            resolveModule,
             ...options?.stylable,
         },
         // ensure the generated module points to our own @stylable/runtime copy

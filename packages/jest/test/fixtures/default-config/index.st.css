@@ -1,0 +1,10 @@
+@st-import [test] from "wp-alias/green.st.css";
+@st-import [overrideTest] from "wp-alias/override.st.css";
+
+.root {
+    -st-extends: test;
+}
+
+.override {
+    -st-extends: overrideTest;
+}
