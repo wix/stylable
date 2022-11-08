@@ -156,7 +156,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
              * the order is coupled with "loader.ts".
              */
             const stylableBuildData = getStylableBuildData(this.stylableModules, module);
-            if (!stylableBuildData.isUsed) {
+            if (!stylableBuildData.isUsed || stylableBuildData.isDuplicate) {
                 return;
             }
             if (this.cssInjection === 'js') {

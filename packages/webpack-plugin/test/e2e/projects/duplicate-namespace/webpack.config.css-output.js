@@ -8,8 +8,9 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({
+            cssInjection: 'css',
             optimize: {
-                dedupeSimilarStylesheets: true
+                dedupeSimilarStylesheets: true,
             },
         }),
         new HtmlWebpackPlugin(),
