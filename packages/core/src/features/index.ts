@@ -17,6 +17,8 @@ export type { VarSymbol, ComputedStVar, FlatComputedStVar } from './st-var';
 
 export * as STCustomSelector from './st-custom-selector';
 
+export * as STCustomState from './st-custom-state';
+
 export * as STMixin from './st-mixin';
 export type { MixinReflection, MixinValue } from './st-mixin';
 
@@ -35,4 +37,4 @@ export type { KeyframesSymbol } from './css-keyframes';
 export * as CSSLayer from './css-layer';
 export type { LayerSymbol } from './css-layer';
 
-export type { StylableDirectives, MappedStates } from './types';
+export type { StylableDirectives } from './types';

@@ -5,7 +5,6 @@ import type { FileProcessor } from './cached-process-file';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
-import { setStateToNode, stateDiagnostics } from './pseudo-states';
 import { parseSelectorWithCache, stringifySelector } from './helpers/selector';
 import {
     SelectorNode,
@@ -25,6 +24,7 @@ import {
     STGlobal,
     STScope,
     STCustomSelector,
+    STCustomState,
     STVar,
     STMixin,
     CSSClass,
@@ -502,7 +502,7 @@ export class StylableTransformer {
                 if (states && hasOwnProperty.call(states, node.value)) {
                     foundCustomState = true;
                     // transform custom state
-                    setStateToNode(
+                    STCustomState.transformPseudoClassToCustomState(
                         states,
                         meta,
                         node.value,
@@ -547,7 +547,7 @@ export class StylableTransformer {
                 !isVendorPrefixed(node.value) &&
                 !this.isDuplicateStScopeDiagnostic(context)
             ) {
-                this.diagnostics.report(stateDiagnostics.UNKNOWN_STATE_USAGE(node.value), {
+                this.diagnostics.report(STCustomState.diagnostics.UNKNOWN_STATE_USAGE(node.value), {
                     node: context.rule,
                     word: node.value,
                 });

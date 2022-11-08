@@ -4,7 +4,7 @@ import type {
     SignatureHelp,
     SignatureInformation,
 } from 'vscode-languageserver';
-import { StateParsedValue, systemValidators } from '@stylable/core/dist/index-internal';
+import { StateParsedValue, STCustomState } from '@stylable/core/dist/index-internal';
 import type { ProviderPosition } from '../completion-providers';
 
 // Goes over an '-st-states' declaration value
@@ -154,7 +154,7 @@ function isValidatorsHintingRequired(
 }
 
 export function createStateValidatorSignature(type: string) {
-    const valiadtors = systemValidators[type].subValidators;
+    const valiadtors = STCustomState.systemValidators[type].subValidators;
 
     if (valiadtors) {
         const validatorsString = Object.keys(valiadtors).join(', ');
@@ -174,7 +174,7 @@ export function createStateValidatorSignature(type: string) {
 }
 
 export function createStateTypeSignature() {
-    const stateTypes = Object.keys(systemValidators).join(' | ');
+    const stateTypes = Object.keys(STCustomState.systemValidators).join(' | ');
     const sigInfo: SignatureInformation = {
         label: `Supported state types:\n- "${stateTypes}"`,
         parameters: [{ label: stateTypes }] as ParameterInformation[],

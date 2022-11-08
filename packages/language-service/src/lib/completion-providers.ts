@@ -18,7 +18,7 @@ import {
     nativePseudoElements,
     ResolvedElement,
     STCustomSelector,
-    systemValidators,
+    STCustomState,
 } from '@stylable/core/dist/index-internal';
 import type { IFileSystem } from '@file-services/types';
 import {
@@ -1204,12 +1204,12 @@ export const StateTypeCompletionProvider: CompletionProvider = {
 
                 if (stateDeclInPos) {
                     const toSuggest = resolveStateTypeOrValidator(position, fullLineText);
-                    const types = Object.keys(systemValidators);
+                    const types = Object.keys(STCustomState.systemValidators);
                     const input = getStateDefinitionInput(fullLineText, position);
 
                     // validator completion
                     if (typeof toSuggest === 'string') {
-                        const validators = systemValidators[toSuggest].subValidators;
+                        const validators = STCustomState.systemValidators[toSuggest].subValidators;
 
                         if (validators) {
                             const validatorNames = Object.keys(validators);

@@ -13,8 +13,7 @@ import {
 } from '@stylable/core-test-kit';
 import { processorDiagnostics, nativePseudoClasses } from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
-import { stateDiagnostics } from '@stylable/core/dist/pseudo-states';
-import { CSSType } from '@stylable/core/dist/features';
+import { STCustomState, CSSType } from '@stylable/core/dist/features';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -25,7 +24,7 @@ chai.use(flatMatch);
 // - states belonging to an extended class (multi level)
 // - lookup order
 
-const stateStringDiagnostics = diagnosticBankReportToStrings(stateDiagnostics);
+const stateStringDiagnostics = diagnosticBankReportToStrings(STCustomState.diagnostics);
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
 

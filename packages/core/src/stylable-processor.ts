@@ -16,6 +16,7 @@ import {
     STSymbol,
     STImport,
     STNamespace,
+    STCustomState,
     STGlobal,
     STScope,
     CSSClass,
@@ -35,7 +36,6 @@ import {
 import { isChildOfAtRule } from './helpers/rule';
 import { SBTypesParsers } from './stylable-value-parsers';
 
-const parseStates = SBTypesParsers[`-st-states`];
 const parseGlobal = SBTypesParsers[`-st-global`];
 const parseExtends = SBTypesParsers[`-st-extends`];
 
@@ -359,7 +359,7 @@ export class StylableProcessor implements FeatureContext {
                     decl,
                     rule.selector,
                     `-st-states`,
-                    parseStates(decl.value, decl, this.diagnostics)
+                    STCustomState.parsePseudoStates(decl.value, decl, this.diagnostics)
                 );
             } else {
                 if (type === 'type') {

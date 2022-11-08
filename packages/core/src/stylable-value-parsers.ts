@@ -1,7 +1,6 @@
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import type { Diagnostics } from './diagnostics';
-import { processPseudoStates } from './pseudo-states';
 import { parseSelectorWithCache } from './helpers/selector';
 import { parseStMixin, parseStPartialMixin } from './helpers/mixin';
 import { getNamedArgs } from './helpers/value';
@@ -37,13 +36,6 @@ export const SBTypesParsers = {
             });
         }
         return selector[0].nodes;
-    },
-    '-st-states'(value: string, decl: postcss.Declaration, diagnostics: Diagnostics) {
-        if (!value) {
-            return {};
-        }
-
-        return processPseudoStates(value, decl, diagnostics);
     },
     '-st-extends'(value: string) {
         const ast = postcssValueParser(value);
