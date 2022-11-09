@@ -107,7 +107,7 @@ export function stylableRollupPlugin({
             } else {
                 stylable = new Stylable({
                     resolveModule: configFromFile?.config?.defaultConfig?.resolveModule,
-                    ...stConfig
+                    ...stConfig,
                 });
             }
 
