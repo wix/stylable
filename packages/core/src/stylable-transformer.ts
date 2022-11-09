@@ -1,6 +1,5 @@
 import isVendorPrefixed from 'is-vendor-prefixed';
 import cloneDeep from 'lodash.clonedeep';
-import { basename } from 'path';
 import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
@@ -16,7 +15,7 @@ import {
     CompoundSelector,
     splitCompoundSelectors,
 } from '@tokey/css-selector-parser';
-import { createWarningRule, isChildOfAtRule } from './helpers/rule';
+import { isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import { ClassSymbol, ElementSymbol, FeatureTransformContext, STNamespace } from './features';
 import type { StylableMeta } from './stylable-meta';
@@ -41,7 +40,6 @@ import {
     createSymbolResolverWithCache,
 } from './stylable-resolver';
 import { validateCustomPropertyName } from './helpers/css-custom-property';
-import { namespaceEscape } from './helpers/escape';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
 
@@ -268,7 +266,7 @@ export class StylableTransformer {
         });
 
         if (!mixinTransform && meta.targetAst && this.mode === 'development') {
-            this.addDevRules(meta);
+            CSSClass.addDevRules(transformContext);
         }
 
         const lastPassParams = {
@@ -633,31 +631,6 @@ export class StylableTransformer {
             context.additionalSelectors.push(
                 lazyCreateSelector(customAstSelectors[i], selectorNode, nodeIndex)
             );
-        }
-    }
-    private addDevRules(meta: StylableMeta) {
-        const resolvedSymbols = this.getResolvedSymbols(meta);
-        for (const [className, resolved] of Object.entries(resolvedSymbols.class)) {
-            if (resolved.length > 1) {
-                meta.targetAst!.walkRules(
-                    '.' + namespaceEscape(className, meta.namespace),
-                    (rule) => {
-                        const a = resolved[0];
-                        const b = resolved[resolved.length - 1];
-                        rule.after(
-                            createWarningRule(
-                                b.symbol.name,
-                                namespaceEscape(b.symbol.name, b.meta.namespace),
-                                basename(b.meta.source),
-                                a.symbol.name,
-                                namespaceEscape(a.symbol.name, a.meta.namespace),
-                                basename(a.meta.source),
-                                true
-                            )
-                        );
-                    }
-                );
-            }
         }
     }
 }

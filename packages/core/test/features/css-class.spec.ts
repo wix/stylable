@@ -5,6 +5,7 @@ import {
     diagnosticBankReportToStrings,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import type * as postcss from 'postcss';
 
 const classDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
@@ -334,6 +335,124 @@ describe(`features/css-class`, () => {
             expect(exports.classes.c, `c JS export`).to.eql(undefined);
         });
     });
+    describe('st-extends', () => {
+        it('should add inherit check rule in dev mode', () => {
+            const fs = {
+                '/deep.st.css': ``,
+                '/mid.st.css': `
+                    @st-import Deep from './deep.st.css';
+                    .root Deep {}
+                `,
+                '/entry.st.css': `
+                    @st-import [Deep] from './mid.st.css';
+                    .root {
+                        -st-extends: Deep;
+                    }
+                    /*another rule to check that dev rule is not added for every occurrence*/
+                    .root {}
+                `,
+            };
+
+            const {
+                sheets: {
+                    '/entry.st.css': { meta: devEntry },
+                },
+            } = testStylableCore(fs, {
+                stylableConfig: {
+                    mode: 'development',
+                },
+            });
+            const {
+                sheets: {
+                    '/entry.st.css': { meta: prodEntry },
+                },
+            } = testStylableCore(fs, {
+                stylableConfig: {
+                    mode: 'production',
+                },
+            });
+
+            const devActual = devEntry.targetAst!.toString().replace(/\s\s+/g, ' ');
+            const prodActual = prodEntry.targetAst?.toString().replace(/\s\s+/g, ' ');
+            const expected = CSSClass.createWarningRule(
+                '.root',
+                '.deep__root',
+                'deep.st.css',
+                '.root',
+                '.entry__root',
+                'entry.st.css'
+            )
+                .toString()
+                .replace('!important\n', '!important;\n')
+                .replace(/\s\s+/g, ' ');
+
+            expect(devActual, 'development').to.contain(expected);
+            expect(devActual.split(expected).length, 'only a single added rule').to.eql(2);
+            expect(prodActual, 'production').to.not.contain(expected);
+        });
+        it('should not add inherit check rule for mixin', () => {
+            const { sheets } = testStylableCore(
+                {
+                    '/deep.st.css': ``,
+                    '/mid.st.css': `
+                    @st-import Deep from './deep.st.css';
+                    .root Deep {}
+                `,
+                    '/entry.st.css': `
+                    @st-import [Deep] from './mid.st.css';
+                    .root {
+                        -st-mixin: Deep;
+                    }
+                `,
+                },
+                {
+                    stylableConfig: { mode: 'development' },
+                }
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect((meta.targetAst!.nodes[0] as postcss.Rule).selector).to.equal('.entry__root');
+            expect(meta.targetAst!.nodes.length).to.equal(1);
+        });
+        it('should use -st-global in inherit check', () => {
+            const { sheets } = testStylableCore(
+                {
+                    '/x.st.css': `
+                        .root {
+                            -st-global: ".y";
+                        }
+                    `,
+                    '/entry.st.css': `
+                        @st-import X from './x.st.css';
+                        .root {
+                            -st-extends: X;
+                        }
+                    `,
+                },
+                {
+                    stylableConfig: { mode: 'development' },
+                }
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            const actual = meta.targetAst!.toString().replace(/\s\s+/g, ' ');
+            const expected = CSSClass.createWarningRule(
+                '.root',
+                '.y',
+                'x.st.css',
+                '.root',
+                '.entry__root',
+                'entry.st.css'
+            )
+                .toString()
+                .replace('!important\n', '!important;\n')
+                .replace(/\s\s+/g, ' ');
+
+            expect(actual).to.contain(expected);
+        });
+    });
     describe(`st-import`, () => {
         it(`should resolve imported classes`, () => {
             const { sheets } = testStylableCore({
@@ -499,9 +618,12 @@ describe(`features/css-class`, () => {
                     .part {
                         -st-global: .p;
                     }
+                    .extended {
+                        -st-global: .e;
+                    }
                 `,
                 '/entry.st.css': `
-                    @st-import Comp, [root as iRoot, part as iPart] from './comp.st.css';
+                    @st-import Comp, [root as iRoot, part as iPart, extended as iExtended] from './comp.st.css';
 
                     /* @rule .r */
                     Comp {}
@@ -511,6 +633,11 @@ describe(`features/css-class`, () => {
 
                     /* @rule .p */
                     .iPart {}
+
+                    /* @rule .entry__local */
+                    .local {
+                        -st-extends: iExtended;
+                    }
                 `,
             });
 
@@ -528,11 +655,14 @@ describe(`features/css-class`, () => {
             expect(meta.globals).to.eql({
                 r: true,
                 p: true,
+                e: true,
             });
 
             // JS exports
             expect(exports.classes, `no root alias JS export`).to.not.haveOwnProperty(`iRoot`);
             expect(exports.classes.iPart, `class alias JS export`).to.eql(`p`);
+            expect(exports.classes.local, `extending class JS export`).to.eql(`entry__local e`);
+            expect(exports.classes.iExtended, `class alias JS export (2)`).to.eql(`e`);
         });
         it(`should handle -st-extends of imported class `, () => {
             const { sheets } = testStylableCore({

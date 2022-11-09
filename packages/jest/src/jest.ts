@@ -45,7 +45,7 @@ export const createTransformer = (options?: StylableJestConfig) => {
                 : undefined;
     }
 
-    const process = stylableModuleFactory(
+    const moduleFactory = stylableModuleFactory(
         {
             fileSystem: fs,
             requireModule: require,
@@ -58,6 +58,10 @@ export const createTransformer = (options?: StylableJestConfig) => {
         // this allows @stylable/jest to be used as part of a globally installed CLI
         { runtimePath: stylableRuntimePath }
     );
+
+    const process = (source: string, path: string) => {
+        return { code: moduleFactory(source, path) };
+    };
 
     return {
         process,

@@ -3,8 +3,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { join } = require('path');
 const { createDefaultResolver } = require('@stylable/core');
 
-console.log('########', join(__dirname, 'src/webpack-alias'));
-
 /** @type {import('webpack').Configuration} */
 module.exports = {
     mode: 'development',

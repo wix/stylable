@@ -11,8 +11,11 @@ describe('StylableRollupPlugin - js exports', function () {
         projectPath: getProjectPath(project),
         entry: './src/index.js',
         pluginOptions: {
-            // keep namespace with no hash for test expectations
-            resolveNamespace: (namespace) => namespace,
+            stylableConfig(config) {
+                // keep namespace with no hash for test expectations
+                config.resolveNamespace = (namespace) => namespace;
+                return config;
+            },
         },
     });
 

@@ -39,7 +39,8 @@
         "@typescript-eslint/prefer-regexp-exec": "off",
         "@typescript-eslint/restrict-plus-operands": "off",
         "@typescript-eslint/restrict-template-expressions": "off",
-        "@typescript-eslint/unbound-method": "off"
+        "@typescript-eslint/unbound-method": "off",
+        "@typescript-eslint/no-misused-promises": "off" // ToDo: remove once eslint fix issue
       }
     }
   ]
