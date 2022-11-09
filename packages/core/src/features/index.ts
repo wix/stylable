@@ -28,6 +28,8 @@ export type { ClassSymbol } from './css-class';
 export * as CSSType from './css-type';
 export type { ElementSymbol } from './css-type';
 
+export * as CSSPseudoClass from './css-pseudo-class';
+
 export * as CSSCustomProperty from './css-custom-property';
 export type { CSSVarSymbol } from './css-custom-property';
 

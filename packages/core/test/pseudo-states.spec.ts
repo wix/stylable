@@ -13,7 +13,7 @@ import {
 } from '@stylable/core-test-kit';
 import { nativePseudoClasses } from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
-import { STCustomState, CSSClass, CSSType } from '@stylable/core/dist/features';
+import { STCustomState, CSSClass, CSSType, CSSPseudoClass } from '@stylable/core/dist/features';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -27,6 +27,7 @@ chai.use(flatMatch);
 const stateStringDiagnostics = diagnosticBankReportToStrings(STCustomState.diagnostics);
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
+const CSSPseudoClassDiagnostics = diagnosticBankReportToStrings(CSSPseudoClass.diagnostics);
 
 describe('pseudo-states', () => {
     describe('process', () => {
@@ -2119,7 +2120,7 @@ describe('pseudo-states', () => {
 
             const res = expectTransformDiagnostics(config, [
                 {
-                    message: stateStringDiagnostics.UNKNOWN_STATE_USAGE('unknownState'),
+                    message: CSSPseudoClassDiagnostics.UNKNOWN_STATE_USAGE('unknownState'),
                     file: '/entry.st.css',
                 },
             ]);

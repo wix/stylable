@@ -38,11 +38,6 @@ export const booleanStateDelimiter = '--';
 export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
 export const stateDiagnostics = {
-    UNKNOWN_STATE_USAGE: createDiagnosticReporter(
-        '08001',
-        'error',
-        (name: string) => `unknown pseudo-state "${name}"`
-    ),
     UNKNOWN_STATE_TYPE: createDiagnosticReporter(
         '08002',
         'error',
