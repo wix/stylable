@@ -85,14 +85,6 @@ export function stylableRollupPlugin({
                 fs
             );
 
-            if (stcConfig && !configuration) {
-                throw new Error(
-                    `Could not find Stylable config${
-                        typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
-                    }`
-                );
-            }
-
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();

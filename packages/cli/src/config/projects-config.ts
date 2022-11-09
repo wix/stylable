@@ -60,6 +60,7 @@ export async function projectsConfig(
     return projects;
 }
 
+// todo: make fs not optional next major version
 export function resolveConfig(context: string, request?: string, fs?: MinimalFS) {
     return request ? requireConfigFile(request, context, fs) : resolveConfigFile(context, fs);
 }

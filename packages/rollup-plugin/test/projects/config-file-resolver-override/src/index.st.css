@@ -1,4 +1,4 @@
-@st-import Comp from "components/comp.st.css";
+@st-import Comp from "components/green.st.css";
 
 .root {
     -st-mixin: Comp;
