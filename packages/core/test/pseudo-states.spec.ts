@@ -11,9 +11,9 @@ import {
     testInlineExpects,
     diagnosticBankReportToStrings,
 } from '@stylable/core-test-kit';
-import { processorDiagnostics, nativePseudoClasses } from '@stylable/core/dist/index-internal';
+import { nativePseudoClasses } from '@stylable/core/dist/index-internal';
 import { reservedFunctionalPseudoClasses } from '@stylable/core/dist/native-reserved-lists';
-import { STCustomState, CSSType } from '@stylable/core/dist/features';
+import { STCustomState, CSSClass, CSSType } from '@stylable/core/dist/features';
 
 chai.use(chaiSubset); // move all of these to a central place
 chai.use(styleRules);
@@ -26,7 +26,7 @@ chai.use(flatMatch);
 
 const stateStringDiagnostics = diagnosticBankReportToStrings(STCustomState.diagnostics);
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
-const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
+const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 
 describe('pseudo-states', () => {
     describe('process', () => {
@@ -2158,7 +2158,7 @@ describe('pseudo-states', () => {
                         skip: true,
                     },
                     {
-                        message: processorStringDiagnostics.STATE_DEFINITION_IN_ELEMENT(),
+                        message: cssClassDiagnostics.STATE_DEFINITION_IN_ELEMENT(),
                         file: 'main.css',
                     },
                 ]
@@ -2177,10 +2177,7 @@ describe('pseudo-states', () => {
             `,
                 [
                     {
-                        message: processorStringDiagnostics.OVERRIDE_TYPED_RULE(
-                            '-st-states',
-                            'root'
-                        ),
+                        message: cssClassDiagnostics.OVERRIDE_TYPED_RULE('-st-states', 'root'),
                         file: 'main.css',
                     },
                 ]

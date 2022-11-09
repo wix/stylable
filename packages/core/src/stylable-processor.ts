@@ -2,21 +2,13 @@ import type * as postcss from 'postcss';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
-import {
-    ClassSymbol,
-    CSSCustomProperty,
-    ElementSymbol,
-    StylableDirectives,
-    STVar,
-    STCustomSelector,
-} from './features';
+import { CSSCustomProperty, STVar, STCustomSelector } from './features';
 import { generalDiagnostics } from './features/diagnostics';
 import {
     FeatureContext,
     STSymbol,
     STImport,
     STNamespace,
-    STCustomState,
     STGlobal,
     STScope,
     CSSClass,
@@ -24,59 +16,16 @@ import {
     CSSKeyframes,
     CSSLayer,
 } from './features';
-import { getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
     walkSelector,
-    isSimpleSelector,
     isInPseudoClassContext,
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
-import { SBTypesParsers } from './stylable-value-parsers';
-
-const parseGlobal = SBTypesParsers[`-st-global`];
-const parseExtends = SBTypesParsers[`-st-extends`];
-
-const stValuesMap = {
-    '-st-from': true,
-    '-st-named': true,
-    '-st-default': true,
-    '-st-root': true,
-    '-st-states': true,
-    '-st-extends': true,
-    '-st-mixin': true,
-    '-st-partial-mixin': true,
-    '-st-global': true,
-} as const;
 
 export const processorDiagnostics = {
-    STATE_DEFINITION_IN_ELEMENT: createDiagnosticReporter(
-        '11002',
-        'error',
-        () => 'cannot define pseudo states inside a type selector'
-    ),
-    STATE_DEFINITION_IN_COMPLEX: createDiagnosticReporter(
-        '11003',
-        'error',
-        () => 'cannot define pseudo states inside complex selectors'
-    ),
-    CANNOT_RESOLVE_EXTEND: createDiagnosticReporter(
-        '11004',
-        'error',
-        (name: string) => `cannot resolve '-st-extends' type for '${name}'`
-    ),
-    CANNOT_EXTEND_IN_COMPLEX: createDiagnosticReporter(
-        '11005',
-        'error',
-        () => `cannot define "-st-extends" inside a complex selector`
-    ),
-    OVERRIDE_TYPED_RULE: createDiagnosticReporter(
-        '11006',
-        'warning',
-        (key: string, name: string) => `override "${key}" on typed rule "${name}"`
-    ),
     INVALID_NESTING: createDiagnosticReporter(
         '11011',
         'error',
@@ -126,10 +75,7 @@ export class StylableProcessor implements FeatureContext {
                 // - url collection is removed from st-var
                 return;
             }
-            // ToDo: refactor to be hooked by features
-            if (decl.prop in stValuesMap && parent.type === 'rule') {
-                this.handleDirectives(parent, decl);
-            }
+            CSSClass.hooks.analyzeDeclaration({ context: this, decl });
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
 
             this.collectUrls(decl);
@@ -345,103 +291,6 @@ export class StylableProcessor implements FeatureContext {
         });
 
         return locallyScoped;
-    }
-
-    protected handleDirectives(rule: postcss.Rule, decl: postcss.Declaration) {
-        const isSimplePerSelector = isSimpleSelector(rule.selector);
-        const type = isSimplePerSelector.reduce((accType, { type }) => {
-            return !accType ? type : accType !== type ? `complex` : type;
-        }, `` as typeof isSimplePerSelector[number]['type']);
-        const isSimple = type !== `complex`;
-        if (decl.prop === `-st-states`) {
-            if (isSimple && type !== 'type') {
-                this.extendTypedRule(
-                    decl,
-                    rule.selector,
-                    `-st-states`,
-                    STCustomState.parsePseudoStates(decl.value, decl, this.diagnostics)
-                );
-            } else {
-                if (type === 'type') {
-                    this.diagnostics.report(processorDiagnostics.STATE_DEFINITION_IN_ELEMENT(), {
-                        node: decl,
-                    });
-                } else {
-                    this.diagnostics.report(processorDiagnostics.STATE_DEFINITION_IN_COMPLEX(), {
-                        node: decl,
-                    });
-                }
-            }
-        } else if (decl.prop === `-st-extends`) {
-            if (isSimple) {
-                const parsed = parseExtends(decl.value);
-                const symbolName = parsed.types[0] && parsed.types[0].symbolName;
-
-                const extendsRefSymbol = STSymbol.get(this.meta, symbolName)!;
-                if (
-                    (extendsRefSymbol &&
-                        (extendsRefSymbol._kind === 'import' ||
-                            extendsRefSymbol._kind === 'class' ||
-                            extendsRefSymbol._kind === 'element')) ||
-                    decl.value === this.meta.root
-                ) {
-                    this.extendTypedRule(
-                        decl,
-                        rule.selector,
-                        `-st-extends`,
-                        getAlias(extendsRefSymbol) || extendsRefSymbol
-                    );
-                } else {
-                    this.diagnostics.report(
-                        processorDiagnostics.CANNOT_RESOLVE_EXTEND(decl.value),
-                        {
-                            node: decl,
-                            word: decl.value,
-                        }
-                    );
-                }
-            } else {
-                this.diagnostics.report(processorDiagnostics.CANNOT_EXTEND_IN_COMPLEX(), {
-                    node: decl,
-                });
-            }
-        } else if (decl.prop === `-st-global`) {
-            if (isSimple && type !== 'type') {
-                this.setClassGlobalMapping(decl, rule);
-            } else {
-                // TODO: diagnostics - scoped on none class
-            }
-        }
-    }
-
-    protected setClassGlobalMapping(decl: postcss.Declaration, rule: postcss.Rule) {
-        const name = rule.selector.replace('.', '');
-        const classSymbol = CSSClass.get(this.meta, name);
-        if (classSymbol) {
-            const globalSelectorAst = parseGlobal(decl, this.diagnostics);
-            if (globalSelectorAst) {
-                classSymbol[`-st-global`] = globalSelectorAst;
-            }
-        }
-    }
-
-    protected extendTypedRule(
-        node: postcss.Node,
-        selector: string,
-        key: keyof StylableDirectives,
-        value: any
-    ) {
-        const name = selector.replace('.', '');
-        const typedRule = STSymbol.get(this.meta, name) as ClassSymbol | ElementSymbol;
-        if (typedRule && typedRule[key]) {
-            this.diagnostics.report(processorDiagnostics.OVERRIDE_TYPED_RULE(key, name), {
-                node,
-                word: name,
-            });
-        }
-        if (typedRule) {
-            typedRule[key] = value;
-        }
     }
 }
 

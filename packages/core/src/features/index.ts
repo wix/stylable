@@ -36,5 +36,3 @@ export type { KeyframesSymbol } from './css-keyframes';
 
 export * as CSSLayer from './css-layer';
 export type { LayerSymbol } from './css-layer';
-
-export type { StylableDirectives } from './types';

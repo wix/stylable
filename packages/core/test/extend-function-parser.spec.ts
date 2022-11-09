@@ -1,19 +1,21 @@
 import { expect } from 'chai';
-import { SBTypesParsers } from '@stylable/core/dist/stylable-value-parsers';
+import { CSSClass } from '@stylable/core/dist/features';
 
-const parseExtends = SBTypesParsers[`-st-extends`];
-
-describe('SBTypesParsers.extends', () => {
+describe('CSS class -st-extends parsing', () => {
     it('should parse type extends', () => {
-        expect(parseExtends('Button').types).to.eql([{ args: null, symbolName: 'Button' }]);
+        expect(CSSClass.parseStExtends('Button').types).to.eql([
+            { args: null, symbolName: 'Button' },
+        ]);
     });
 
     it('should parse function extends with no arguments', () => {
-        expect(parseExtends('Button()').types).to.eql([{ args: [], symbolName: 'Button' }]);
+        expect(CSSClass.parseStExtends('Button()').types).to.eql([
+            { args: [], symbolName: 'Button' },
+        ]);
     });
 
     it('should parse type extends with value arguments separated by comma', () => {
-        expect(parseExtends('Button(1px solid, red)').types).to.eql([
+        expect(CSSClass.parseStExtends('Button(1px solid, red)').types).to.eql([
             {
                 args: [
                     [
@@ -29,7 +31,7 @@ describe('SBTypesParsers.extends', () => {
     });
 
     it('should parse multiple extends separated by space', () => {
-        expect(parseExtends('Button(1px solid, red) Mixin').types).to.eql([
+        expect(CSSClass.parseStExtends('Button(1px solid, red) Mixin').types).to.eql([
             {
                 args: [
                     [
