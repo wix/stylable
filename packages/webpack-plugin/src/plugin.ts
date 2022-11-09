@@ -307,16 +307,6 @@ export class StylableWebpackPlugin {
             getTopLevelInputFilesystem(compiler)
         );
 
-        if (this.options.stcConfig && !configuration) {
-            throw new Error(
-                `Could not find "stcConfig"${
-                    typeof this.options.stcConfig === 'string'
-                        ? ` at "${this.options.stcConfig}"`
-                        : ''
-                }`
-            );
-        }
-
         return configuration;
     }
     private createStcBuilder(compiler: Compiler) {
@@ -352,6 +342,17 @@ export class StylableWebpackPlugin {
         const topLevelFs = getTopLevelInputFilesystem(compiler);
         const stylableConfig = this.getStylableConfig(compiler)?.config;
 
+        const resolver =
+            (this.userOptions.stylableConfig &&
+                this.userOptions.stylableConfig?.(
+                    {
+                        fileSystem: topLevelFs,
+                        projectRoot: compiler.context,
+                    },
+                    compiler
+                ).resolveModule) ||
+            undefined;
+
         this.stylable = new Stylable(
             this.options.stylableConfig(
                 {
@@ -363,12 +364,12 @@ export class StylableWebpackPlugin {
                     fileSystem: topLevelFs,
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
                     /**
-                     * resolveModule config order
-                     * 1. webpackPlugin in stylable config file
-                     * 2. defaultConfig in stylable config file
-                     * 3. stylableConfig in webpack config
+                     * resolveModule config order ()
+                     * 1. stylableConfig in webpack config
+                     * 2. webpackPlugin in stylable config file
+                     * 3. defaultConfig in stylable config file
                      */
-                    resolveModule: stylableConfig?.defaultConfig?.resolveModule,
+                    resolveModule: resolver || stylableConfig?.defaultConfig?.resolveModule,
                     resolveOptions: {
                         ...resolverOptions,
                         extensions: [], // use Stylable's default extensions
