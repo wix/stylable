@@ -41,7 +41,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: custom-only, ${name};
                         }`,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
                     expect(meta.getAllClasses()).to.flatMatch({
                         root: {
@@ -72,7 +72,7 @@ describe('pseudo-states', () => {
                         -st-states: state1, state2;
                     }
                 `,
-                    { from: 'path/to/style.css' }
+                    { from: 'path/to/style.st.css' }
                 );
 
                 expect(meta.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -93,7 +93,7 @@ describe('pseudo-states', () => {
                         -st-states: state1(boolean);
                     }
                 `,
-                    { from: 'path/to/style.css' }
+                    { from: 'path/to/style.st.css' }
                 );
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -188,7 +188,7 @@ describe('pseudo-states', () => {
                             -st-states: state1(string);
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -211,7 +211,7 @@ describe('pseudo-states', () => {
                             -st-states: state1(string());
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -234,7 +234,7 @@ describe('pseudo-states', () => {
                             -st-states: state1(string) some Default String;
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -257,7 +257,7 @@ describe('pseudo-states', () => {
                             -st-states: state1( string( regex("^user") ));
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -286,7 +286,7 @@ describe('pseudo-states', () => {
                             -st-states: state1(string(minLength(2)));
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -316,7 +316,7 @@ describe('pseudo-states', () => {
                             -st-states: state1(string(minLength(2), maxLength("7")));
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -349,7 +349,7 @@ describe('pseudo-states', () => {
                             -st-states: state1(string( regex("^user"), contains(user) ));
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -384,7 +384,7 @@ describe('pseudo-states', () => {
                             -st-states: state1(number), state2(number());
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -410,7 +410,7 @@ describe('pseudo-states', () => {
                             -st-states: state1(number) 7;
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -435,7 +435,7 @@ describe('pseudo-states', () => {
                             -st-states: size(enum(small, medium, large)), color(enum(red, green, blue));
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -463,7 +463,7 @@ describe('pseudo-states', () => {
                             -st-states: size(enum(small, large)) small;
                         }
                     `,
-                        { from: 'path/to/style.css' }
+                        { from: 'path/to/style.st.css' }
                     );
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -490,7 +490,7 @@ describe('pseudo-states', () => {
                         -st-states: state1, state2("[data-mapped]");
                     }
                 `,
-                    { from: 'path/to/style.css' }
+                    { from: 'path/to/style.st.css' }
                 );
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -515,9 +515,9 @@ describe('pseudo-states', () => {
             nativePseudoClasses.forEach((nativeClass: string) => {
                 it(`should keep native ${nativeClass} pseudo-class`, () => {
                     const res = generateStylableResult({
-                        entry: '/entry.css',
+                        entry: '/entry.st.css',
                         files: {
-                            '/entry.css': {
+                            '/entry.st.css': {
                                 namespace: 'entry',
                                 content: `.root:${nativeClass}{}`,
                             },

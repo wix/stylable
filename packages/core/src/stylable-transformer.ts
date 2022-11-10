@@ -169,6 +169,9 @@ export class StylableTransformer {
         mixinTransform = false,
         topNestClassName = ``
     ) {
+        if (meta.type !== 'stylable') {
+            return;
+        }
         const prevStVarOverride = this.evaluator.stVarOverride;
         this.evaluator.stVarOverride = stVarOverride;
         const transformContext = {

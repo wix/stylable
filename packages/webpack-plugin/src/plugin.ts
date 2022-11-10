@@ -13,6 +13,7 @@ import type { Compilation, Compiler, NormalModule, WebpackError } from 'webpack'
 import {
     getStaticPublicPath,
     isStylableModule,
+    isLoadedNativeCSSModule,
     isAssetModule,
     isLoadedWithKnownAssetLoader,
     injectLoader,
@@ -381,7 +382,7 @@ export class StylableWebpackPlugin {
             StylableWebpackPlugin.name,
             (webpackLoaderContext, module) => {
                 const loaderContext = webpackLoaderContext as StylableLoaderContext;
-                if (isStylableModule(module)) {
+                if (isStylableModule(module) || isLoadedNativeCSSModule(module, moduleGraph)) {
                     loaderContext.stylable = this.stylable;
                     loaderContext.assetsMode = this.options.assetsMode;
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
@@ -465,7 +466,10 @@ export class StylableWebpackPlugin {
          */
         compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, (modules) => {
             for (const module of modules) {
-                if (isStylableModule(module) && module.buildMeta.stylable) {
+                if (
+                    (isStylableModule(module) || isLoadedNativeCSSModule(module, moduleGraph)) &&
+                    module.buildMeta.stylable
+                ) {
                     stylableModules.set(module, null);
                 }
                 if (isAssetModule(module)) {

@@ -1,0 +1,4 @@
+body {
+  --custom-resolved-color: purple;
+  --custom-resolved-side-effect: from custom resolved side-effect;
+}

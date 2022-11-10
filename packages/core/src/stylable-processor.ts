@@ -118,16 +118,17 @@ export class StylableProcessor implements FeatureContext {
             }
         });
 
+        const isStylable = this.meta.type === 'stylable';
         root.walkDecls((decl) => {
             const parent = decl.parent as postcss.ChildNode;
-            if (parent.type === 'rule' && parent.selector === ':vars') {
+            if (parent.type === 'rule' && parent.selector === ':vars' && isStylable) {
                 // ToDo: remove once
                 // - custom property definition is allowed in var value
                 // - url collection is removed from st-var
                 return;
             }
             // ToDo: refactor to be hooked by features
-            if (decl.prop in stValuesMap && parent.type === 'rule') {
+            if (decl.prop in stValuesMap && parent.type === 'rule' && isStylable) {
                 this.handleDirectives(parent, decl);
             }
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
@@ -185,6 +186,11 @@ export class StylableProcessor implements FeatureContext {
                     });
                     break;
                 case 'import':
+                    STImport.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
                     CSSLayer.hooks.analyzeAtRule({
                         context: this,
                         atRule,

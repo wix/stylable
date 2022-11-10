@@ -198,7 +198,7 @@ export class StylableResolver {
                     : subtype === 'mappedKeyframes'
                     ? `keyframes`
                     : subtype;
-            name = !name && namespace === `main` ? `root` : name;
+            name = !name && namespace === `main` ? meta.root : name;
             const symbol = STSymbol.getAll(meta, namespace)[name];
             return {
                 _kind: 'css',
