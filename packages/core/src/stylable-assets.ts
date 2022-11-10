@@ -23,12 +23,12 @@ export function isAsset(url: string) {
     return !isExternal(url);
 }
 
-export function isRelativeNativeCss(request: string) {
+export function isRelativeNativeCss(fullPath: string) {
     return (
-        request.endsWith('.css') &&
-        !request.endsWith('.st.css') &&
-        !request.includes(path.sep + 'node_modules' + path.sep) &&
-        !isUrl(request)
+        fullPath.endsWith('.css') &&
+        !fullPath.endsWith('.st.css') &&
+        !fullPath.includes(path.sep + 'node_modules' + path.sep) &&
+        !isUrl(fullPath)
     );
 }
 
