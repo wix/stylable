@@ -108,6 +108,7 @@ export interface CliArguments {
     watch: boolean;
     preserveWatchOutput: boolean;
     config: string | undefined;
+    inlineRuntime: boolean | undefined;
 }
 
 export interface BuildOptions {
@@ -149,6 +150,12 @@ export interface BuildOptions {
     diagnostics?: boolean;
     /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
     diagnosticsMode?: DiagnosticsMode;
+    /** generate local copy of stylable runtime in outDir and reference it in generated JS modules */
+    inlineRuntime?: boolean;
+    /** request for the cjs runtime */
+    runtimeCjsRequest?: string;
+    /** request for the esm runtime */
+    runtimeEsmRequest?: string;
 }
 
 export interface BuildContext {

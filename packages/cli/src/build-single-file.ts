@@ -1,10 +1,6 @@
 import type { Stylable, StylableResults } from '@stylable/core';
 import { isAsset, tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
-import {
-    createModuleSource,
-    generateDTSContent,
-    generateDTSSourceMap,
-} from '@stylable/module-utils';
+import { generateDTSContent, generateDTSSourceMap } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { ensureDirectory, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
@@ -21,7 +17,7 @@ export interface BuildCommonOptions {
     fullSrcDir: string;
     log: Log;
     fs: IFileSystem;
-    moduleFormats: string[];
+    moduleFormats: Array<'esm' | 'cjs'>;
     outputCSS?: boolean;
     outputCSSNameTemplate?: string;
     outputSources?: boolean;
@@ -33,6 +29,7 @@ export interface BuildCommonOptions {
 }
 
 export interface BuildFileOptions extends BuildCommonOptions {
+    resolveRuntimeRequest: (targetFilePath: string, moduleFormat: 'esm' | 'cjs') => string;
     identifier?: string;
     stylable: Stylable;
     diagnosticsManager: DiagnosticsManager;
@@ -68,6 +65,7 @@ export function buildSingleFile({
     dts = false,
     dtsSourceMap,
     diagnosticsMode = 'loose',
+    resolveRuntimeRequest,
     diagnosticsManager = new DiagnosticsManager({ log }),
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve, isAbsolute } = fs;
@@ -143,9 +141,15 @@ export function buildSingleFile({
             ? [moduleRequestSourceCode(format, './' + cssAssetFilename)]
             : [];
         let cssDepth = 0;
-        tryCollectImportsDeep(stylable, res.meta, new Set(), ({ depth }) => {
-            cssDepth = Math.max(cssDepth, depth);
-        }, 1);
+        tryCollectImportsDeep(
+            stylable,
+            res.meta,
+            new Set(),
+            ({ depth }) => {
+                cssDepth = Math.max(cssDepth, depth);
+            },
+            1
+        );
         for (const imported of res.meta.getImportStatements()) {
             let resolved = imported.request;
             try {
@@ -164,16 +168,19 @@ export function buildSingleFile({
         const code = tryRun(
             () =>
                 format === 'esm'
-                    ? generateStylableModuleCode(res, cssDepth, moduleCssImports)
-                    : createModuleSource(
+                    ? generateStylableModuleCode(
                           res,
-                          format,
-                          includeCSSInJS,
-                          undefined,
-                          undefined,
                           cssDepth,
                           moduleCssImports,
-                          '@stylable/runtime'
+                          resolveRuntimeRequest(targetFilePath, format),
+                          includeCSSInJS
+                      )
+                    : generateStylableCjsModuleCode(
+                          res,
+                          cssDepth,
+                          moduleCssImports,
+                          resolveRuntimeRequest(targetFilePath, format),
+                          includeCSSInJS
                       ),
             `Transform Error: ${filePath}`
         );
@@ -336,11 +343,17 @@ export function getAllDiagnostics(res: StylableResults): CLIDiagnostic[] {
 /*****************************************/
 /***** Remove After Runtime Cleanups *****/
 /*****************************************/
-function generateStylableModuleCode(res: StylableResults, depth: number, moduleImports: string[]) {
+function generateStylableModuleCode(
+    res: StylableResults,
+    depth: number,
+    moduleImports: string[],
+    runtimeRequest: string,
+    includeCSSInJS: boolean
+) {
     const { meta, exports } = res;
     const cssAsString = JSON.stringify(res.meta.targetAst!.toString());
     return `
-        import { injectCSS, statesRuntime, classesRuntime } from "@stylable/runtime";
+        import { injectCSS, statesRuntime, classesRuntime } from ${JSON.stringify(runtimeRequest)};
         ${moduleImports.join('\n')}
         export var namespace = ${JSON.stringify(meta.namespace)};
         export var st = classesRuntime.bind(null, namespace);
@@ -352,10 +365,47 @@ function generateStylableModuleCode(res: StylableResults, depth: number, moduleI
         export var stVars = ${JSON.stringify(exports.stVars)}; 
         export var vars = ${JSON.stringify(exports.vars)}; 
 
-        injectCSS(${JSON.stringify(meta.namespace)}, ${cssAsString}, ${depth}, 'js');
+        ${
+            includeCSSInJS
+                ? `injectCSS(namespace, ${cssAsString}, ${depth}, "esm");`
+                : ``
+        }
+    `;
+}
+
+function generateStylableCjsModuleCode(
+    res: StylableResults,
+    depth: number,
+    moduleImports: string[],
+    runtimeRequest: string,
+    includeCSSInJS: boolean
+) {
+    const { meta, exports } = res;
+    const cssAsString = JSON.stringify(res.meta.targetAst!.toString());
+    return `
+        const { injectCSS, statesRuntime, classesRuntime } = require(${JSON.stringify(
+            runtimeRequest
+        )});
+        ${moduleImports.join('\n')}
+        var namespace = ${JSON.stringify(meta.namespace)};
+        module.exports.namespace = namespace;
+        module.exports.st = classesRuntime.bind(null, namespace);
+        module.exports.style = module.exports.st;
+        module.exports.cssStates = statesRuntime.bind(null, namespace);
+        module.exports.classes = ${JSON.stringify(exports.classes)}; 
+        module.exports.keyframes = ${JSON.stringify(exports.keyframes)};
+        module.exports.layers = ${JSON.stringify(exports.layers)};
+        module.exports.stVars = ${JSON.stringify(exports.stVars)}; 
+        module.exports.vars = ${JSON.stringify(exports.vars)}; 
+
+        ${
+            includeCSSInJS
+                ? `injectCSS(namespace, ${cssAsString}, ${depth}, "cjs");`
+                : ``
+        }
     `;
 }
 
 function moduleRequestSourceCode(format: string, request: string) {
-    return format === 'cjs' ? request : `import ${JSON.stringify(request)};`;
+    return format === 'cjs' ? `require(${JSON.stringify(request)});` : `import ${JSON.stringify(request)};`;
 }

@@ -287,6 +287,57 @@ describe('build stand alone', () => {
         expect(builtFile).to.contain(`.test__root{color:red}`);
     });
 
+    it('inline runtime', async () => {
+        const fs = createMemoryFs({
+            '/comp.st.css': `
+                .root {
+                    color: rgb(255,0,0);
+                }
+            `,
+            '/node_modules/@stylable/runtime/dist/index.js': `// runtime cjs`,
+            '/node_modules/@stylable/runtime/esm/index.js': `// runtime esm`,
+        });
+
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            resolveNamespace() {
+                return 'test';
+            },
+        });
+
+        await build(
+            {
+                outDir: './dist',
+                srcDir: '.',
+                cjs: true,
+                esm: true,
+                inlineRuntime: true,
+                runtimeCjsRequest: '/node_modules/@stylable/runtime/dist/index.js',
+                runtimeEsmRequest: '/node_modules/@stylable/runtime/esm/index.js',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        const builtFileEsm = fs.readFileSync('/dist/comp.st.css.mjs', 'utf8');
+        const builtFileCjs = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
+
+        // this makes sure that we actually copied the runtime
+        const runtimeCjs = fs.readFileSync('/dist/runtime.js', 'utf8');
+        const runtimeMjs = fs.readFileSync('/dist/runtime.mjs', 'utf8');
+
+        expect(builtFileEsm, 'imports the esm runtime').to.contain(`./runtime.mjs`);
+        expect(builtFileCjs, 'imports the cjs runtime').to.contain(`./runtime.js`);
+        expect(runtimeCjs).to.eql(`// runtime cjs`);
+        expect(runtimeMjs).to.eql(`// runtime esm`);
+    });
+
     it('should inject request to output module', async () => {
         const fs = createMemoryFs({
             '/comp.st.css': `

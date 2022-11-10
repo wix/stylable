@@ -32,6 +32,9 @@ export async function build(
         dtsSourceMap,
         diagnostics,
         diagnosticsMode,
+        inlineRuntime,
+        runtimeCjsRequest = '@stylable/runtime/dist/runtime.js',
+        runtimeEsmRequest = '@stylable/runtime/esm/runtime.js',
     }: BuildOptions,
     {
         projectRoot: _projectRoot,
@@ -45,7 +48,7 @@ export async function build(
         diagnosticsManager = new DiagnosticsManager({ log }),
     }: BuildContext
 ) {
-    const { join, realpathSync, relative } = fs;
+    const { join, realpathSync, relative, dirname } = fs;
     const projectRoot = realpathSync(_projectRoot);
     const rootDir = realpathSync(_rootDir);
     const fullSrcDir = join(projectRoot, srcDir);
@@ -65,6 +68,17 @@ export async function build(
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
     const moduleFormats = getModuleFormats({ cjs, esm });
+
+    const { runtimeCjsOutPath, runtimeEsmOutPath } = copyRuntime(
+        inlineRuntime,
+        projectRoot,
+        fullOutDir,
+        cjs,
+        esm,
+        runtimeCjsRequest,
+        runtimeEsmRequest,
+        fs
+    );
 
     const service = new DirectoryProcessService(fs, {
         watchMode: watch,
@@ -236,6 +250,24 @@ export async function build(
                     dtsSourceMap,
                     minify,
                     generated,
+                    resolveRuntimeRequest: (targetFilePath, moduleFormat) => {
+                        if (inlineRuntime) {
+                            if (moduleFormat === 'cjs' && runtimeCjsOutPath) {
+                                return './' + relative(dirname(targetFilePath), runtimeCjsOutPath);
+                            }
+                            if (moduleFormat === 'esm' && runtimeEsmOutPath) {
+                                return './' + relative(dirname(targetFilePath), runtimeEsmOutPath);
+                            }
+                        } else {
+                            if (moduleFormat === 'cjs') {
+                                return runtimeCjsRequest;
+                            }
+                            if (moduleFormat === 'esm') {
+                                return runtimeEsmRequest;
+                            }
+                        }
+                        return '@stylable/runtime';
+                    },
                 });
 
                 if (indexFileGenerator) {
@@ -310,6 +342,49 @@ export async function build(
             }
         }
     }
+}
+
+function copyRuntime(
+    inlineRuntime: boolean | undefined,
+    projectRoot: string,
+    fullOutDir: string,
+    cjs: boolean | undefined,
+    esm: boolean | undefined,
+    runtimeCjsRequest: string,
+    runtimeEsmRequest: string,
+    fs: BuildContext['fs']
+) {
+    let runtimeCjsOutPath;
+    let runtimeEsmOutPath;
+
+    if (inlineRuntime) {
+        const runtimeCjsPath = fs.isAbsolute(runtimeCjsRequest)
+            ? runtimeCjsRequest
+            : require.resolve(runtimeCjsRequest, {
+                  paths: [projectRoot],
+              });
+        const runtimeEsmPath = fs.isAbsolute(runtimeEsmRequest)
+            ? runtimeEsmRequest
+            : require.resolve(runtimeEsmRequest, {
+                  paths: [projectRoot],
+              });
+
+        // TODO: inline the inject styles. done in the #2615
+        if (cjs) {
+            fs.ensureDirectorySync(fullOutDir);
+            runtimeCjsOutPath = fs.join(fullOutDir, 'runtime.js');
+            const runtimeCjsContent = fs.readFileSync(runtimeCjsPath, 'utf8');
+            fs.writeFileSync(runtimeCjsOutPath, runtimeCjsContent);
+        }
+        if (esm) {
+            fs.ensureDirectorySync(fullOutDir);
+            runtimeEsmOutPath = fs.join(fullOutDir, 'runtime.mjs');
+            const runtimeEsmContent = fs.readFileSync(runtimeEsmPath, 'utf8');
+            fs.writeFileSync(runtimeEsmOutPath, runtimeEsmContent);
+        }
+    }
+
+    return { runtimeCjsOutPath, runtimeEsmOutPath };
 }
 
 export function createGenerator(

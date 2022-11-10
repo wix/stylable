@@ -78,6 +78,13 @@ export function getCliArguments(): Arguments<CliArguments> {
             alias: 'icr',
             defaultDescription: String(defaults.injectCSSRequest),
         })
+        .option('inlineRuntime', {
+            type: 'boolean',
+            description:
+                'copy stylable runtime in the output directory and use it in the js module output',
+            alias: 'ir',
+            defaultDescription: String(defaults.inlineRuntime),
+        })
         .option('cssFilename', {
             type: 'string',
             description: 'pattern of the generated css file',
@@ -195,6 +202,7 @@ export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): P
         outputCSSNameTemplate: argv.cssFilename,
         diagnosticsMode: argv.diagnosticsMode as BuildOptions['diagnosticsMode'],
         IndexGenerator: createGenerator(rootDir, argv.customGenerator),
+        inlineRuntime: argv.inlineRuntime,
     };
 }
 
@@ -215,6 +223,7 @@ export function createDefaultOptions(): BuildOptions {
         outputSources: false,
         outputCSSNameTemplate: '[filename].css',
         diagnosticsMode: 'strict',
+        inlineRuntime: false,
     };
 }
 
