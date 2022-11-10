@@ -493,4 +493,42 @@ describe('features/css-contains', () => {
             );
         });
     });
+    describe('native css', () => {
+        it('should not namespace', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent`
+                    .x {
+                        container-name: a;
+                    }
+                    @container a (inline-size > 100px) {}
+                `,
+                '/entry.st.css': `
+                    @st-import [container(a)] from './native.css';
+
+                    /* @atrule a (inline-size > 200px) */
+                    @container a (inline-size > 200px) {}
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+            const { meta, exports } = stylable.transform('/entry.st.css');
+
+            shouldReportNoDiagnostics(nativeMeta);
+            shouldReportNoDiagnostics(meta);
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                deindent`
+                    .x {
+                        container-name: a;
+                    }
+                    @container a (inline-size > 100px) {}
+            `.trim()
+            );
+
+            // JS exports
+            expect(exports.containers, `JS export`).to.eql({
+                a: 'a',
+            });
+        });
+    });
 });

@@ -331,6 +331,9 @@ function addContainer({
     const { definitions } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     const definedSymbol = STSymbol.get(context.meta, name, 'container');
     if (!definedSymbol || definedSymbol.import) {
+        if (context.meta.type !== 'stylable') {
+            global = true;
+        }
         definitions[name] = ast;
         STSymbol.addSymbol({
             context,
