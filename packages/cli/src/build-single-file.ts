@@ -1,5 +1,5 @@
 import type { Stylable, StylableResults } from '@stylable/core';
-import { isAsset, tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
+import { isAsset } from '@stylable/core/dist/index-internal';
 import {
     generateDTSContent,
     generateDTSSourceMap,
@@ -143,17 +143,8 @@ export function buildSingleFile({
 
         const moduleCssImports = injectCSSRequest ? [{ from: './' + cssAssetFilename }] : [];
 
-        let cssDepth = 0;
-        tryCollectImportsDeep(
-            stylable,
-            res.meta,
-            new Set(),
-            ({ depth }) => {
-                cssDepth = Math.max(cssDepth, depth);
-            },
-            1
-        );
-
+        const cssDepth = res.meta.transformCssDepth?.cssDepth ?? 0;
+        
         for (const imported of res.meta.getImportStatements()) {
             let resolved = imported.request;
             try {

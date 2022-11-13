@@ -42,6 +42,7 @@ import {
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
+import { tryCollectImportsDeep } from './helpers/import';
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -156,6 +157,7 @@ export class StylableTransformer {
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(meta.targetAst, meta, metaExports);
         meta.transformDiagnostics = this.diagnostics;
+        meta.transformCssDepth = this.calcCssDepth(meta);
         const result = { meta, exports: metaExports };
 
         return this.postProcessor ? this.postProcessor(result, this) : result;
@@ -567,6 +569,22 @@ export class StylableTransformer {
                 resolved: resolvedSymbols[origin._kind][origin.name],
             });
         }
+    }
+    private calcCssDepth(meta: StylableMeta) {
+        let cssDepth = 0;
+        const deepDependencies = tryCollectImportsDeep(
+            {
+                resolver: this.resolver,
+                analyze: (filePath) => this.fileProcessor.process(filePath),
+            },
+            meta,
+            new Set(),
+            ({ depth }) => {
+                cssDepth = Math.max(cssDepth, depth);
+            },
+            1
+        );
+        return { cssDepth, deepDependencies };
     }
     private isDuplicateStScopeDiagnostic(context: ScopeContext) {
         const transformedScope =

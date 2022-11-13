@@ -42,6 +42,7 @@ export class StylableMeta {
     public source: string = getSourcePath(this.sourceAst, this.diagnostics);
     public namespace = '';
     public urls: string[] = [];
+    public transformCssDepth: { cssDepth: number; deepDependencies: Set<string> } | undefined;
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
     /** @deprecated */

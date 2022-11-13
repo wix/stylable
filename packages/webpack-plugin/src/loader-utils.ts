@@ -29,15 +29,14 @@ export function getImports(
             }
         }
     }
-    let cssDepth = 0;
     /**
-     * Collect all deep dependencies since they can affect the output
+     * Get the transformed css depth
      */
-    const buildDependencies: string[] = Array.from(
-        tryCollectImportsDeep(stylable, meta, undefined, ({ depth }) => {
-            cssDepth = Math.max(cssDepth, depth);
-        }, 1)
-    );
+    const cssDepth = meta.transformCssDepth?.cssDepth ?? 0;
+    /**
+     * Take all deep dependencies since they can affect the output
+     */
+    const buildDependencies: string[] = Array.from(meta.transformCssDepth?.deepDependencies ?? []);
 
     /**
      * @remove

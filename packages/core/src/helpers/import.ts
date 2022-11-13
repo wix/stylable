@@ -6,13 +6,13 @@ import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { stripQuotation } from '../helpers/string';
 import { isCompRoot } from './selector';
 import type { ParsedValue } from '../types';
-import type { Stylable } from '../stylable';
 import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
 import postcssValueParser, {
     ParsedValue as PostCSSParsedValue,
     FunctionNode,
 } from 'postcss-value-parser';
+import type { StylableResolver } from '../stylable-resolver';
 
 export const parseImportMessages = {
     ST_IMPORT_STAR: createDiagnosticReporter(
@@ -587,8 +587,13 @@ type ImportEvent = {
     depth: number;
 };
 
+type ImportCollectionHost = {
+    resolver: StylableResolver;
+    analyze: (fullPath: string) => StylableMeta;
+};
+
 export function tryCollectImportsDeep(
-    stylable: Stylable,
+    host: ImportCollectionHost,
     meta: StylableMeta,
     imports = new Set<string>(),
     onImport: undefined | ((e: ImportEvent) => void) = undefined,
@@ -596,20 +601,14 @@ export function tryCollectImportsDeep(
 ) {
     for (const { context, request } of meta.getImportStatements()) {
         try {
-            const resolved = stylable.resolver.resolvePath(context, request);
+            const resolved = host.resolver.resolvePath(context, request);
             onImport?.({ context, request, resolved, depth });
 
             if (!imports.has(resolved)) {
                 imports.add(resolved);
-                tryCollectImportsDeep(
-                    stylable,
-                    stylable.analyze(resolved),
-                    imports,
-                    onImport,
-                    depth + 1
-                );
+                tryCollectImportsDeep(host, host.analyze(resolved), imports, onImport, depth + 1);
             }
-        } catch (e) {
+        } catch {
             /** */
         }
     }
