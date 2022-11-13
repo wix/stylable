@@ -21,5 +21,4 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run lint
-      - run: npm run test:core-packages
-      - run: npm run test:integrations
+      - run: npm run test:coverage

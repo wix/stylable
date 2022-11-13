@@ -13,7 +13,8 @@
     "test": "node --enable-source-maps scripts/test-runner.js --parallel",
     "test:integrations": "npm run test -- --i",
     "test:core-packages": "npm run test -- --cp",
-    "test:coverage": "npm run build && c8 -x 'packages/*/dist/test' -r html-spa npm run test && serve coverage",
+    "test:coverage": "npm run build && c8 -x 'packages/*/dist/test' npm run test && serve coverage",
+    "test:coverage:dev": "npm run build && c8 -x 'packages/*/dist/test' -r html-spa npm run test && serve coverage",
     "prettify": "npx prettier . --write"
   },
   "devDependencies": {
@@ -53,7 +54,7 @@
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^5.42.0",
     "autoprefixer": "^10.4.13",
-    "c8": "^7.11.3",
+    "c8": "^7.12.0",
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
     "create-listening-server": "^1.0.0",
