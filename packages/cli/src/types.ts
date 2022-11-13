@@ -88,6 +88,8 @@ export interface CliArguments {
     cjs: boolean | undefined;
     css: boolean | undefined;
     stcss: boolean | undefined;
+    esmExt: string | undefined;
+    cjsExt: string | undefined;
     dts: boolean | undefined;
     dtsSourceMap: boolean | undefined;
     useNamespaceReference: boolean | undefined;
@@ -122,10 +124,14 @@ export interface BuildOptions {
     indexFile?: string;
     /** custom cli index generator class */
     IndexGenerator?: typeof IndexGenerator;
-    /** output commonjs module (.js) */
+    /** output commonjs module */
     cjs?: boolean;
+    /** commonjs module extension */
+    cjsExt?: '.cjs' | '.js';
     /** output esm module (.mjs) */
     esm?: boolean;
+    /** esm module extension */
+    esmExt?: '.mjs' | '.js';
     /** template of the css file emitted when using outputCSS */
     outputCSSNameTemplate?: string;
     /** should include the css in the generated JS module */
@@ -178,3 +184,5 @@ export interface BuildContext {
     /** stores and report diagnostics */
     diagnosticsManager?: DiagnosticsManager;
 }
+
+export type ModuleFormats = Array<['esm', '.js' | '.mjs'] | ['cjs', '.js' | '.cjs']>;

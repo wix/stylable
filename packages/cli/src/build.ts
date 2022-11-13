@@ -1,5 +1,5 @@
 import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
-import type { BuildContext, BuildOptions } from './types';
+import type { BuildContext, BuildOptions, ModuleFormats } from './types';
 import { IndexGenerator as BaseIndexGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
@@ -18,7 +18,9 @@ export async function build(
         indexFile,
         IndexGenerator = BaseIndexGenerator,
         cjs,
+        cjsExt,
         esm,
+        esmExt,
         includeCSSInJS,
         outputCSS,
         outputCSSNameTemplate,
@@ -33,8 +35,8 @@ export async function build(
         diagnostics,
         diagnosticsMode,
         inlineRuntime,
-        runtimeCjsRequest = '@stylable/runtime/dist/runtime.js',
-        runtimeEsmRequest = '@stylable/runtime/esm/runtime.js',
+        runtimeCjsRequest = '@stylable/runtime/dist/pure.js',
+        runtimeEsmRequest = '@stylable/runtime/esm/pure.js',
     }: BuildOptions,
     {
         projectRoot: _projectRoot,
@@ -67,7 +69,7 @@ export async function build(
     const buildGeneratedFiles = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
-    const moduleFormats = getModuleFormats({ cjs, esm });
+    const moduleFormats = getModuleFormats({ cjs, esm, esmExt, cjsExt });
 
     const { runtimeCjsOutPath, runtimeEsmOutPath } = copyRuntime(
         inlineRuntime,
@@ -372,13 +374,12 @@ function copyRuntime(
         // TODO: inline the inject styles. done in the #2615
         if (cjs) {
             fs.ensureDirectorySync(fullOutDir);
-            runtimeCjsOutPath = fs.join(fullOutDir, 'runtime.js');
-            const runtimeCjsContent = fs.readFileSync(runtimeCjsPath, 'utf8');
-            fs.writeFileSync(runtimeCjsOutPath, runtimeCjsContent);
+            runtimeCjsOutPath = fs.join(fullOutDir, 'cjs-runtime.js');
+            fs.writeFileSync(runtimeCjsOutPath, fs.readFileSync(runtimeCjsPath, 'utf8'));
         }
         if (esm) {
             fs.ensureDirectorySync(fullOutDir);
-            runtimeEsmOutPath = fs.join(fullOutDir, 'runtime.mjs');
+            runtimeEsmOutPath = fs.join(fullOutDir, 'esm-runtime.js');
             const runtimeEsmContent = fs.readFileSync(runtimeEsmPath, 'utf8');
             fs.writeFileSync(runtimeEsmOutPath, runtimeEsmContent);
         }
@@ -406,13 +407,23 @@ export function createGenerator(
     }, `Could not resolve custom generator from "${absoluteGeneratorPath}"`);
 }
 
-function getModuleFormats({ esm, cjs }: { [k: string]: boolean | undefined }) {
-    const formats: Array<'esm' | 'cjs'> = [];
+function getModuleFormats({
+    esm,
+    cjs,
+    cjsExt,
+    esmExt,
+}: {
+    esm: boolean | undefined;
+    cjs: boolean | undefined;
+    cjsExt: '.cjs' | '.js' | undefined;
+    esmExt: '.mjs' | '.js' | undefined;
+}): ModuleFormats {
+    const formats: ModuleFormats = [];
     if (esm) {
-        formats.push('esm');
+        formats.push(['esm', esmExt || '.mjs']);
     }
     if (cjs) {
-        formats.push('cjs');
+        formats.push(['cjs', cjsExt || '.js']);
     }
     return formats;
 }

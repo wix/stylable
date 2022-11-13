@@ -325,17 +325,67 @@ describe('build stand alone', () => {
             }
         );
 
-        const builtFileEsm = fs.readFileSync('/dist/comp.st.css.mjs', 'utf8');
         const builtFileCjs = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
+        const builtFileEsm = fs.readFileSync('/dist/comp.st.css.mjs', 'utf8');
 
         // this makes sure that we actually copied the runtime
-        const runtimeCjs = fs.readFileSync('/dist/runtime.js', 'utf8');
-        const runtimeMjs = fs.readFileSync('/dist/runtime.mjs', 'utf8');
+        const runtimeCjs = fs.readFileSync('/dist/cjs-runtime.js', 'utf8');
+        const runtimeMjs = fs.readFileSync('/dist/esm-runtime.js', 'utf8');
 
-        expect(builtFileEsm, 'imports the esm runtime').to.contain(`./runtime.mjs`);
-        expect(builtFileCjs, 'imports the cjs runtime').to.contain(`./runtime.js`);
+        expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
+            `./cjs-runtime.js`
+        );
+        expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
+            `./esm-runtime.js`
+        );
         expect(runtimeCjs).to.eql(`// runtime cjs`);
         expect(runtimeMjs).to.eql(`// runtime esm`);
+    });
+
+    it('cjsExt/esmExt', async () => {
+        const fs = createMemoryFs({
+            '/comp.st.css': `
+                .root {
+                    color: rgb(255,0,0);
+                }
+            `,
+        });
+
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            resolveNamespace() {
+                return 'test';
+            },
+        });
+
+        await build(
+            {
+                outDir: './dist',
+                srcDir: '.',
+                cjs: true,
+                esm: true,
+                cjsExt: '.cjs', // not the default
+                esmExt: '.js', // not the default
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        const builtFileCjs = fs.readFileSync('/dist/comp.st.css.cjs', 'utf8');
+        const builtFileEsm = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
+
+        expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
+            `"@stylable/runtime/dist/pure.js"`
+        );
+        expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
+            `"@stylable/runtime/esm/pure.js"`
+        );
     });
 
     it('should inject request to output module', async () => {

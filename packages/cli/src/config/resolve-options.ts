@@ -60,6 +60,18 @@ export function getCliArguments(): Arguments<CliArguments> {
                 'output source maps for stylable definition files for sources (.st.css.d.ts.map). It will use the origin file path unless `--stcss` is set, then it will use the outputted file path as the source-map source',
             defaultDescription: 'true if "--dts" option is enabled, otherwise false',
         })
+        .option('esmExt', {
+            type: 'string',
+            choices: ['.mjs', '.js'],
+            description: 'esm module extension',
+            defaultDescription: defaults.esmExt,
+        })
+        .option('cjsExt', {
+            type: 'string',
+            choices: ['.cjs', '.js'],
+            description: 'commonjs module extension',
+            defaultDescription: defaults.cjsExt,
+        })
         .option('useNamespaceReference', {
             type: 'boolean',
             description:
@@ -189,6 +201,8 @@ export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): P
         esm: argv.esm,
         cjs: argv.cjs,
         dts: argv.dts,
+        esmExt: argv.esmExt as BuildOptions['esmExt'],
+        cjsExt: argv.cjsExt as BuildOptions['cjsExt'],
         dtsSourceMap: argv.dtsSourceMap ?? argv.dts,
         injectCSSRequest: argv.injectCSSRequest,
         optimize: argv.optimize,
@@ -213,6 +227,8 @@ export function createDefaultOptions(): BuildOptions {
         cjs: false,
         esm: false,
         dts: false,
+        esmExt: '.mjs',
+        cjsExt: '.js',
         injectCSSRequest: false,
         optimize: false,
         minify: false,
