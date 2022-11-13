@@ -22,6 +22,7 @@ import {
     CSSType,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 } from './features';
 import { getAlias } from './stylable-utils';
 import { processDeclarationFunctions } from './process-declaration-functions';
@@ -132,6 +133,7 @@ export class StylableProcessor implements FeatureContext {
                 this.handleDirectives(parent, decl);
             }
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
+            CSSContains.hooks.analyzeDeclaration({ context: this, decl });
 
             this.collectUrls(decl);
         });
@@ -211,6 +213,14 @@ export class StylableProcessor implements FeatureContext {
                 case 'property':
                 case 'st-global-custom-property': {
                     CSSCustomProperty.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                }
+                case 'container': {
+                    CSSContains.hooks.analyzeAtRule({
                         context: this,
                         atRule,
                         analyzeRule,

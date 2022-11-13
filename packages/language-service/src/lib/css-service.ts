@@ -143,6 +143,7 @@ export class CssService {
                         atRuleName === '@st-scope' ||
                         atRuleName === '@st-namespace' ||
                         atRuleName === '@st-import' ||
+                        atRuleName === '@container' ||
                         atRuleName === '@st-global-custom-property')
                 ) {
                     return false;
@@ -163,7 +164,7 @@ export class CssService {
                 } else if (diag.code === 'unknownProperties') {
                     const prop = diag.message.match(/'(.*)'/)![1];
 
-                    if (meta.getStVar(prop)) {
+                    if (meta.getStVar(prop) || prop === 'container' || prop === 'container-name') {
                         return false;
                     }
                 }
