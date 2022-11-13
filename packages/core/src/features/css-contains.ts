@@ -287,11 +287,16 @@ function parseContainerDecl(decl: postcss.Declaration, context: FeatureContext):
                 node: decl,
                 word,
             });
+            return false;
         }
+        return true;
     };
     if (prop.toLowerCase() === 'container-name') {
         for (const node of ast) {
-            checkNextName(node);
+            const continueParse = checkNextName(node);
+            if (!continueParse) {
+                break;
+            }
         }
     } else {
         let nextExpected: 'name' | 'type' | '' = 'name';
@@ -304,7 +309,10 @@ function parseContainerDecl(decl: postcss.Declaration, context: FeatureContext):
                 if (type === 'div' && value === '/') {
                     nextExpected = 'type';
                 } else {
-                    checkNextName(node);
+                    const continueParse = checkNextName(node);
+                    if (!continueParse) {
+                        break;
+                    }
                 }
             } else if (type === 'word' && nextExpected === 'type') {
                 if (value !== 'normal' && value !== 'size' && value !== 'inline-size') {

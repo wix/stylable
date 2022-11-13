@@ -184,9 +184,9 @@ describe('features/css-contains', () => {
                     @analyze-error(longhand unexpected) word("?") ${diagnostics.UNEXPECTED_DECL_VALUE(
                         '"?"'
                     )}
-                    @decl(longhand unexpected) container-name: entry__a "?" 
+                    @decl(longhand unexpected) container-name: entry__a "?" not_a_container_name
                 */
-                container-name: a "?";
+                container-name: a "?" not_a_container_name;
                 
                 /* 
                     @analyze-error(shorthand unknown type) word(unknown-type) ${diagnostics.UNKNOWN_DECL_TYPE(
@@ -206,9 +206,9 @@ describe('features/css-contains', () => {
                     @analyze-error(shorthand unexpected) word("?") ${diagnostics.UNEXPECTED_DECL_VALUE(
                         '"?"'
                     )}
-                    @decl(shorthand unexpected) container: "?"
+                    @decl(shorthand unexpected) container: entry__a "?" b
                 */
-                container: "?";
+                container: a "?" b;
 
                 /* 
                     @analyze-warning(empty global) ${diagnostics.MISSING_CONTAINER_NAME_INSIDE_GLOBAL()}
@@ -351,7 +351,7 @@ describe('features/css-contains', () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': `
                     .a {
-                        container-name: c1, c2;
+                        container-name: c1 c2;
                     }
                 `,
                 '/entry.st.css': `
@@ -468,7 +468,7 @@ describe('features/css-contains', () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': `
                     .a {
-                        container-name: before, after;
+                        container-name: before after;
                     }
                 `,
                 '/entry.st.css': `
