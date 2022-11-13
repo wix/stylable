@@ -1,43 +1,46 @@
 import { Stylable, StylableConfig } from '@stylable/core';
-import { generateModuleSource } from './module-source';
+import { generateStylableJSModuleSource } from './stylable-js-module-source';
 
 export interface Options {
+    injectCSS: boolean;
+    staticImports: string[];
     runtimePath: string;
     runtimeStylesheetId: 'module' | 'namespace';
-    injectCSS: boolean;
+    moduleType: 'esm' | 'cjs';
+    runtimeId: string;
+    /**@deprecated not in use */
     renderableOnly: boolean;
-    staticImports: string[];
 }
 
 export function stylableModuleFactory(
     stylableOptions: StylableConfig,
     {
-        runtimePath = '@stylable/runtime',
+        runtimePath,
         runtimeStylesheetId = 'module',
         injectCSS = true,
-        renderableOnly = false,
         staticImports = [],
+        moduleType = 'cjs',
+        runtimeId = '0',
     }: Partial<Options> = {}
 ) {
     const stylable = new Stylable(stylableOptions);
     return function stylableToModule(source: string, path: string) {
-        const meta = stylable.analyze(path, source);
-        const res = stylable.transform(meta);
-        return generateModuleSource(
-            res,
-            runtimeStylesheetId === 'module' ? 'module.id' : res.meta.namespace,
-            [
-                ...staticImports.map((request) => `import ${JSON.stringify(request)}`),
-                `const runtime = require(${JSON.stringify(runtimePath)})`,
-            ],
-            `runtime.$`,
-            `runtime.create`,
-            `runtime.createRenderable`,
-            injectCSS ? JSON.stringify(res.meta.targetAst!.toString()) : '""',
-            '-1', // ToDo: calc depth for node as well
-            'module.exports',
-            '' /* afterModule */,
-            renderableOnly
+        const { meta, exports } = stylable.transform(stylable.analyze(path, source));
+        return generateStylableJSModuleSource(
+            {
+                moduleType: moduleType,
+                imports: staticImports.map((from) => ({ from })),
+                jsExports: exports,
+                namespace: meta.namespace,
+                runtimeRequest: runtimePath,
+                varType: 'var',
+            },
+            {
+                id: runtimeStylesheetId === 'module' ? undefined : meta.namespace,
+                css: injectCSS ? meta.targetAst!.toString() : '',
+                depth: -1,
+                runtimeId,
+            }
         );
     };
 }

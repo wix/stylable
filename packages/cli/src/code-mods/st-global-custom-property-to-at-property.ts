@@ -9,13 +9,19 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = ({ ast, diagnostics, 
         const properties = parseStGlobalCustomProperty(atRule, diagnostics);
 
         if (!diagnostics.reports.length) {
+            let first = true;
             for (const property of properties) {
-                atRule.before(
-                    postcss.atRule({
-                        name: 'property',
-                        params: `st-global(${property.name})`,
-                    })
-                );
+                const propertyAtRule = postcss.atRule({
+                    name: 'property',
+                    params: `st-global(${property.name})`,
+                });
+                atRule.before(propertyAtRule);
+                if (!first) {
+                    // adding after insert "before" because the before changes
+                    // the insertion raws.before according to the reference before
+                    propertyAtRule.raws.before = '\n';
+                }
+                first = false;
             }
             atRule.remove();
             changed = true;

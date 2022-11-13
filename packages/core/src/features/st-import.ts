@@ -97,6 +97,16 @@ export const diagnostics = {
         'error',
         (type: string) => `Unknown type import "${type}"`
     ),
+    NO_DEFAULT_EXPORT: createDiagnosticReporter(
+        '05020',
+        'error',
+        (path: string) => `Native CSS files have no default export. Imported file: "${path}"`
+    ),
+    UNSUPPORTED_NATIVE_IMPORT: createDiagnosticReporter(
+        '05021',
+        'warning',
+        () => `Unsupported @import within imported native CSS file`
+    ),
 };
 
 // HOOKS
@@ -125,11 +135,12 @@ export const hooks = createFeature<{
         }
     },
     analyzeAtRule({ context, atRule }) {
-        if (atRule.name !== `st-import`) {
-            return;
-        }
-        if (atRule.parent?.type !== `root`) {
+        if (atRule.name === `st-import` && atRule.parent?.type !== `root`) {
             context.diagnostics.report(diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE(), {
+                node: atRule,
+            });
+        } else if (atRule.name === `import` && context.meta.type === 'css') {
+            context.diagnostics.report(diagnostics.UNSUPPORTED_NATIVE_IMPORT(), {
                 node: atRule,
             });
         }
@@ -269,6 +280,29 @@ function validateImports(context: FeatureTransformContext) {
                 word: importObj.request,
             });
         } else if (resolvedImport._kind === 'css') {
+            // propagate some native CSS diagnostics to st-import
+            if (resolvedImport.meta.type === 'css') {
+                let foundUnsupportedNativeImport = false;
+                for (const report of resolvedImport.meta.diagnostics.reports) {
+                    if (report.code === '05021') {
+                        foundUnsupportedNativeImport = true;
+                        break;
+                    }
+                }
+                if (foundUnsupportedNativeImport) {
+                    context.diagnostics.report(diagnostics.UNSUPPORTED_NATIVE_IMPORT(), {
+                        node: importObj.rule,
+                        word: importObj.defaultExport,
+                    });
+                }
+            }
+            // report unsupported native CSS default import
+            if (resolvedImport.meta.type !== 'stylable' && importObj.defaultExport) {
+                context.diagnostics.report(diagnostics.NO_DEFAULT_EXPORT(importObj.request), {
+                    node: importObj.rule,
+                    word: importObj.defaultExport,
+                });
+            }
             // warn about unknown named imported symbols
             for (const name in importObj.named) {
                 const origName = importObj.named[name];

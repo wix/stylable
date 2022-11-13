@@ -99,11 +99,12 @@ export const hooks = createFeature<{
         }
     },
     analyzeAtRule({ context, atRule }) {
+        const isStylable = context.meta.type === 'stylable';
         if (atRule.name === `property`) {
             let name = atRule.params;
-            let global = false;
+            let global = !isStylable;
             // check global
-            const globalVarName = globalValue(name);
+            const globalVarName = isStylable ? globalValue(name) : undefined;
             if (globalVarName !== undefined) {
                 name = globalVarName.trim();
                 global = true;
@@ -120,7 +121,7 @@ export const hooks = createFeature<{
                 final: true,
             });
             validateAtProperty(atRule, context.diagnostics);
-        } else if (atRule.name === `st-global-custom-property`) {
+        } else if (atRule.name === `st-global-custom-property` && isStylable) {
             analyzeDeprecatedStGlobalCustomProperty(context, atRule);
         }
     },
@@ -131,7 +132,7 @@ export const hooks = createFeature<{
                 context,
                 node: decl,
                 name: decl.prop,
-                global: false,
+                global: context.meta.type === 'css',
                 final: false,
             });
         }
@@ -140,8 +141,12 @@ export const hooks = createFeature<{
             analyzeDeclValueVarCalls(context, decl);
         }
     },
-    prepareAST({ node, toRemove }) {
-        if (node.type === `atrule` && node.name === 'st-global-custom-property') {
+    prepareAST({ context, node, toRemove }) {
+        if (
+            node.type === `atrule` &&
+            node.name === 'st-global-custom-property' &&
+            context.meta.type === 'stylable'
+        ) {
             toRemove.push(node);
         }
     },
@@ -162,16 +167,17 @@ export const hooks = createFeature<{
 
         return customPropsMapping;
     },
-    transformAtRuleNode({ atRule, resolved }) {
+    transformAtRuleNode({ context, atRule, resolved }) {
         if (atRule.name !== `property`) {
             return;
         }
 
         if (atRule.nodes?.length) {
-            if (resolved[atRule.params]) {
-                atRule.params = resolved[atRule.params] || atRule.params;
+            const propName = globalValue(atRule.params) || atRule.params;
+            if (resolved[propName]) {
+                atRule.params = resolved[propName] || atRule.params;
             }
-        } else {
+        } else if (context.meta.type === 'stylable') {
             // remove `@property` with no body
             atRule.remove();
         }
@@ -271,7 +277,7 @@ function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declara
                 context,
                 name: postcssValueParser.stringify(varName)?.trim() || ``,
                 node: decl,
-                global: false,
+                global: context.meta.type === 'css',
                 final: false,
             });
         }

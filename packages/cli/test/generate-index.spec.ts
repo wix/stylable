@@ -311,7 +311,7 @@ describe('build index', () => {
             ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}\n.root Style0{}'
         );
     });
-    it('should create index file using a custom generator with named exports generation and @namespace', async () => {
+    it('should create index file using a custom generator with named exports generation and @st-namespace', async () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
                 :vars {
@@ -353,7 +353,7 @@ describe('build index', () => {
 
         expect(res.trim()).to.equal(
             [
-                '@namespace "INDEX";',
+                '@st-namespace "INDEX";',
                 ':import {-st-from: "./comp-A.st.css";-st-default:CompA;-st-named: a as CompA__a, color1 as CompA__color1, --color2 as --CompA__color2, keyframes(X as CompA__X);}',
                 '.root CompA{}',
                 '.root .CompA__a{}',

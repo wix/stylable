@@ -13,7 +13,7 @@ export function cssObjectToAst(cssObject: CSSObject, sourceFile = '') {
 
 export type CssParser = typeof safeParse;
 
-export function safeParse(css: string, options: ProcessOptions = { from: 'style.css' }): Root {
+export function safeParse(css: string, options: ProcessOptions = { from: 'style.st.css' }): Root {
     return safeParser(css, options);
 }
 

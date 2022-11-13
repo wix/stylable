@@ -10,7 +10,7 @@ const projectDir = dirname(
     require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`)
 );
 
-describe(`${project} - manifest`, () => {
+describe(`${project} - manifest (e2e)`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir,

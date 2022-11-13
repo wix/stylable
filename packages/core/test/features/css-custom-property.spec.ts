@@ -6,6 +6,7 @@ import {
     diagnosticBankReportToStrings,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import deindent from 'deindent';
 
 const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
@@ -185,8 +186,15 @@ describe(`features/css-custom-property`, () => {
     });
     it(`should collect global css props`, () => {
         const { sheets } = testStylableCore(`
-            /* @transform-remove(definition)*/
+            /* @transform-remove(build-def)*/
             @property st-global(--propX);
+
+            /* @atrule(runtime-def) --propY */
+            @property st-global(--propY) {
+                syntax: '<color>';
+                initial-value: green;
+                inherits: false;
+            }
 
             .root {
                 /* @decl(prop) --propX: green */
@@ -194,6 +202,9 @@ describe(`features/css-custom-property`, () => {
 
                 /* @decl(value) prop: var(--propX) */
                 prop: var(--propX);
+
+                /* @decl(value) --propY: var(--propY) */
+                --propY: var(--propY);
             }
         `);
 
@@ -883,6 +894,89 @@ describe(`features/css-custom-property`, () => {
             expect(
                 CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--local-global')
             ).to.equal('--local-global');
+        });
+    });
+    describe('native css', () => {
+        it('should not namespace', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent`
+                    @property --a {
+                        syntax: '<color>';
+                        initial-value: green;
+                        inherits: false;
+                    }
+                    .x {
+                        --b: var(--c);
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [--a, --b, --c] from './native.css';
+
+                    .root {
+                        /* @decl --a: var(--a) */
+                        --a: var(--a);
+
+                        /* @decl --b: var(--b) */
+                        --b: var(--b);
+
+                        /* @decl --c: var(--c) */
+                        --c: var(--c);
+                    }
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+            const { meta, exports } = stylable.transform('/entry.st.css');
+
+            shouldReportNoDiagnostics(nativeMeta);
+            shouldReportNoDiagnostics(meta);
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                deindent`
+                    @property --a {
+                        syntax: '<color>';
+                        initial-value: green;
+                        inherits: false;
+                    }
+                    .x {
+                        --b: var(--c);
+                    }
+            `.trim()
+            );
+
+            // JS exports
+            expect(exports.vars, `JS export`).to.eql({
+                a: '--a',
+                b: '--b',
+                c: '--c',
+            });
+        });
+        it('should ignore stylable specific transformations', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent`
+                    @st-global-custom-property --a;
+                    @property st-global(--a) {
+                        syntax: '<color>';
+                        initial-value: green;
+                        inherits: false;
+                    }
+                    @property --no-body;
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                deindent`
+                    @st-global-custom-property --a;
+                    @property st-global(--a) {
+                        syntax: '<color>';
+                        initial-value: green;
+                        inherits: false;
+                    }
+                    @property --no-body;
+            `.trim()
+            );
         });
     });
 });

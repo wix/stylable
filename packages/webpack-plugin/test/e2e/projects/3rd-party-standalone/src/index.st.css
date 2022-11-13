@@ -1,4 +1,4 @@
-@namespace "SRCIndex";
+@st-namespace "SRCIndex";
 
 :import {
     -st-from: "test-components/index.st.css";
