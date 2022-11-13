@@ -87,6 +87,7 @@ STImport.ImportTypeHook.set(`container`, (context, localName, importName, import
         ast: importDef.rule,
         global: false,
         importDef,
+        forceDefinition: true,
     });
 });
 
@@ -113,7 +114,14 @@ export const hooks = createFeature<{
         }
         const parsed = (bucket[value] = parseContainerDecl(decl, context));
         for (const { name, global } of parsed.containers) {
-            addContainer({ context, ast: decl, name, importName: name, global });
+            addContainer({
+                context,
+                ast: decl,
+                name,
+                importName: name,
+                global,
+                forceDefinition: false,
+            });
         }
     },
     analyzeAtRule({ context, atRule }) {
@@ -149,7 +157,14 @@ export const hooks = createFeature<{
                         word: name,
                     });
                 }
-                addContainer({ context, ast: atRule, name, importName: name, global });
+                addContainer({
+                    context,
+                    ast: atRule,
+                    name,
+                    importName: name,
+                    global,
+                    forceDefinition: true,
+                });
             }
         }
     },
@@ -387,6 +402,7 @@ function addContainer({
     ast,
     global,
     importDef,
+    forceDefinition,
 }: {
     context: FeatureContext;
     name: string;
@@ -394,16 +410,12 @@ function addContainer({
     ast: postcss.Declaration | postcss.AtRule | postcss.Rule;
     global: boolean;
     importDef?: STImport.Imported;
+    forceDefinition: boolean;
 }) {
     const { definitions } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     const definedSymbol = STSymbol.get(context.meta, name, 'container');
-    // import - first
-    // import - existing import
-    // decl - first
-    // decl - existing import / decl
-    const isImportDef = !!importDef;
     const isFirst = !definedSymbol;
-    if (isFirst || isImportDef) {
+    if (forceDefinition || isFirst) {
         if (context.meta.type !== 'stylable') {
             global = true;
         }

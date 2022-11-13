@@ -218,6 +218,21 @@ describe('features/css-contains', () => {
             }
         `);
     });
+    it('should report redeclare container name', () => {
+        testStylableCore(`
+            /* @analyze-warning(same1) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`aaa`)} */
+            @container aaa;
+
+            /* @analyze-warning(same2) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`aaa`)} */
+            @container aaa;
+
+            /* @analyze-warning(namespaced) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`bbb`)} */
+            @container bbb;
+
+            /* @analyze-warning(global) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`bbb`)} */
+            @container st-global(bbb);
+        `);
+    });
     it('should report unexpected @container definition value', () => {
         testStylableCore(`
             /* 
