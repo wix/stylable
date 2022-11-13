@@ -99,12 +99,9 @@ describe('features/css-contains', () => {
         // JS exports
         expect(exports.containers).to.eql({});
     });
-    it('should mark as global', () => {
+    it('should allow use of global names without symbol creation', () => {
         const { sheets } = testStylableCore(`
             .a {
-                /* @decl(use global) container-name: a b c d e */
-                container-name: a b c d e;
-                
                 /* @decl(longhand) container-name: a */
                 container-name: st-global(a);
 
@@ -116,6 +113,9 @@ describe('features/css-contains', () => {
 
                 /* @decl(shorthand) container: d e / normal */
                 container: st-global(d) st-global(e) / normal;
+
+                /* @decl(unrelated) container-name: entry__a entry__z */
+                container-name: a z;
             }
         `);
 
@@ -128,45 +128,53 @@ describe('features/css-contains', () => {
             _kind: 'container',
             name: 'a',
             alias: 'a',
-            global: true,
+            global: false,
             import: undefined,
         });
-        expect(CSSContains.get(meta, 'b'), 'b symbol').to.eql({
+        expect(CSSContains.get(meta, 'z'), 'z symbol').to.eql({
             _kind: 'container',
-            name: 'b',
-            alias: 'b',
-            global: true,
+            name: 'z',
+            alias: 'z',
+            global: false,
             import: undefined,
         });
-        expect(CSSContains.get(meta, 'c'), 'c symbol').to.eql({
-            _kind: 'container',
-            name: 'c',
-            alias: 'c',
-            global: true,
-            import: undefined,
+
+        // JS exports
+        expect(exports.containers).to.eql({
+            a: 'entry__a',
+            z: 'entry__z',
         });
-        expect(CSSContains.get(meta, 'd'), 'd symbol').to.eql({
+    });
+    it('should define container name with @container with no body', () => {
+        const { sheets } = testStylableCore(`
+            /* @transform-remove */
+            @container st-global(aaa);
+        
+            .a {
+                /* @decl container-name: aaa */
+                container-name: aaa;
+            }
+
+            /* @atrule aaa (inline-size > 100px) */
+            @container aaa (inline-size > 100px) {}
+        `);
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+
+        // symbols
+        expect(CSSContains.get(meta, 'aaa'), 'aaa symbol').to.eql({
             _kind: 'container',
-            name: 'd',
-            alias: 'd',
-            global: true,
-            import: undefined,
-        });
-        expect(CSSContains.get(meta, 'e'), 'e symbol').to.eql({
-            _kind: 'container',
-            name: 'e',
-            alias: 'e',
+            name: 'aaa',
+            alias: 'aaa',
             global: true,
             import: undefined,
         });
 
         // JS exports
         expect(exports.containers).to.eql({
-            a: 'a',
-            b: 'b',
-            c: 'c',
-            d: 'd',
-            e: 'e',
+            aaa: 'aaa',
         });
     });
     it('should report invalid decls', () => {
@@ -208,6 +216,19 @@ describe('features/css-contains', () => {
                 */
                 container-name: st-global();
             }
+        `);
+    });
+    it('should report unexpected @container definition value', () => {
+        testStylableCore(`
+            /* 
+                @analyze-error(string) ${diagnostics.UNEXPECTED_DEFINITION('"str"')} 
+            */
+            @container "str";
+
+            /* 
+                @analyze-error(div) ${diagnostics.UNEXPECTED_DEFINITION('+')} 
+            */
+            @container contA +;
         `);
     });
     it('should report invalid container name', () => {
@@ -253,6 +274,19 @@ describe('features/css-contains', () => {
                 */
                 container: xxx none / normal;
             }
+
+            /* @analyze-error(hard-def and) word(and) ${diagnostics.INVALID_CONTAINER_NAME(
+                'and'
+            )} */
+            @container and;
+
+            /* @analyze-error(hard-def not) word(not) ${diagnostics.INVALID_CONTAINER_NAME(
+                'not'
+            )} */
+            @container not;
+
+            /* @analyze-error(hard-def or) word(or) ${diagnostics.INVALID_CONTAINER_NAME('or')} */
+            @container or;
         `);
     });
     it('should transform namespace container name in @container', () => {
@@ -369,12 +403,54 @@ describe('features/css-contains', () => {
                 `,
             });
         });
+        it('should report redeclare of imported container name', () => {
+            const { sheets } = testStylableCore({
+                '/a.st.css': `
+                    .root {
+                        container-name: x;
+                    }
+                `,
+                '/b.st.css': `
+                    .root {
+                        container-name: x;
+                    }
+                `,
+                '/entry.st.css': `
+                    /* @analyze-warn(a) word(x) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`x`)} */
+                    @st-import [container(x)] from './a.st.css';
+
+                    /* @analyze-warn(b) word(x) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`x`)} */
+                    @st-import [container(x)] from './b.st.css';
+                    
+                    .a {
+                        /* @decl container: b__x */
+                        container: x;
+                    }
+                    /* @atrule b__x (inline-size > 1px) */
+                    @container x (inline-size > 1px) {}
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            // symbols
+            expect(CSSContains.get(meta, `x`), `x symbol`).to.eql({
+                _kind: 'container',
+                alias: 'x',
+                name: 'x',
+                global: false,
+                import: meta.getImportStatements()[1],
+            });
+
+            // JS exports
+            expect(exports.containers, `JS exports`).to.eql({
+                x: `b__x`,
+            });
+        });
         it('should resolve imported global container name', () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': `
-                    .a {
-                        container-name: st-global(c1);
-                    }
+                    @container st-global(c1);
                 `,
                 '/entry.st.css': `
                     @st-import [container(c1)] from './imported.st.css';
@@ -388,7 +464,7 @@ describe('features/css-contains', () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        it('should override imported with local container name', () => {
+        it('should use imported container name', () => {
             const { sheets } = testStylableCore({
                 '/imported.st.css': `
                     .a {
@@ -397,42 +473,26 @@ describe('features/css-contains', () => {
                 `,
                 '/entry.st.css': `
                     .a {
-                        /* 
-                            @analyze-warn(local before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                                `before`
-                            )}
-                            @decl(before decl) container: entry__before 
-                        */
+                        /* @decl(before decl) container: imported__before */
                         container: before;
                     }
-                    /* @atrule(before) entry__before (inline-size > 1px) */
+                    /* @atrule(before) imported__before (inline-size > 1px) */
                     @container before (inline-size > 1px) {}
                     
-                    /*
-                        @analyze-warn(import before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                            `before`
-                        )}
-                        @analyze-warn(import after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                            `after`
-                        )}
-                    */
                     @st-import [container(before, after)] from './imported.st.css';
                     
                     .a {
-                        /* 
-                            @analyze-warn(local after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                                `after`
-                            )}
-                            @decl(after decl) container: entry__after 
-                        */
+                        /* @decl(after decl) container: imported__after */
                         container: after;
                     }
-                    /* @atrule(after) entry__after (inline-size > 1px) */
+                    /* @atrule(after) imported__after (inline-size > 1px) */
                     @container after (inline-size > 1px) {}
                 `,
             });
 
             const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
 
             // symbols
             expect(CSSContains.get(meta, `before`), `before symbol`).to.eql({
@@ -440,20 +500,20 @@ describe('features/css-contains', () => {
                 alias: 'before',
                 name: 'before',
                 global: false,
-                import: undefined,
+                import: meta.getImportStatements()[0],
             });
             expect(CSSContains.get(meta, `after`), `after symbol`).to.eql({
                 _kind: 'container',
                 alias: 'after',
                 name: 'after',
                 global: false,
-                import: undefined,
+                import: meta.getImportStatements()[0],
             });
 
             // JS exports
             expect(exports.containers, `JS exports`).to.eql({
-                before: `entry__before`,
-                after: `entry__after`,
+                before: `imported__before`,
+                after: `imported__after`,
             });
         });
     });

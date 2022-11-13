@@ -219,6 +219,14 @@ export class StylableProcessor implements FeatureContext {
                     });
                     break;
                 }
+                case 'container': {
+                    CSSContains.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                }
             }
         });
     }

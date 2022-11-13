@@ -59,6 +59,11 @@ export const diagnostics = {
         'warning',
         () => `Missing container name inside "${GLOBAL_FUNC}()"`
     ),
+    UNEXPECTED_DEFINITION: createDiagnosticReporter(
+        '20008',
+        'error',
+        (def: string) => `Unexpected value in container definition: "${def}""`
+    ),
 };
 
 interface ParsedNames {
@@ -111,6 +116,43 @@ export const hooks = createFeature<{
             addContainer({ context, ast: decl, name, importName: name, global });
         }
     },
+    analyzeAtRule({ context, atRule }) {
+        if (!atRule.nodes) {
+            // treat @container with no body as definition
+            const ast = valueParser(atRule.params).nodes;
+            let searching = true;
+            let name = '';
+            let global = false;
+            for (const node of ast) {
+                if (node.type === 'comment' || node.type === 'space') {
+                    // do nothing
+                    continue;
+                } else if (searching && node.type === 'word') {
+                    name = node.value;
+                } else if (searching && node.type === 'function' && node.value === GLOBAL_FUNC) {
+                    name = globalValueFromFunctionNode(node) || '';
+                    global = true;
+                } else {
+                    const def = valueParser.stringify(node);
+                    context.diagnostics.report(diagnostics.UNEXPECTED_DEFINITION(def), {
+                        node: atRule,
+                        word: def,
+                    });
+                    break;
+                }
+                searching = false;
+            }
+            if (name) {
+                if (invalidContainerNames[name]) {
+                    context.diagnostics.report(diagnostics.INVALID_CONTAINER_NAME(name), {
+                        node: atRule,
+                        word: name,
+                    });
+                }
+                addContainer({ context, ast: atRule, name, importName: name, global });
+            }
+        }
+    },
     transformResolve({ context }) {
         const symbols = STSymbol.getAllByType(context.meta, `container`);
         const resolved: Record<string, ResolvedContainer> = {};
@@ -145,10 +187,15 @@ export const hooks = createFeature<{
         });
     },
     transformAtRuleNode({ context, atRule, resolved }) {
+        if (!atRule.nodes) {
+            // remove definition only @container
+            atRule.remove();
+            return;
+        }
         const ast = valueParser(atRule.params).nodes;
         let changed = false;
         search: for (const node of ast) {
-            if (node.type === 'comment' && node.value === 'space') {
+            if (node.type === 'comment' || node.type === 'space') {
                 // do nothing
             } else if (node.type === 'word') {
                 const resolve = resolved[node.value];
@@ -191,6 +238,12 @@ export const hooks = createFeature<{
     },
 });
 
+const invalidContainerNames: Record<string, true> = {
+    and: true,
+    not: true,
+    or: true,
+};
+
 function parseContainerDecl(decl: postcss.Declaration, context: FeatureContext): ParsedNames {
     const { prop, value } = decl;
     const containers: Array<{ name: string; global: boolean }> = [];
@@ -213,10 +266,16 @@ function parseContainerDecl(decl: postcss.Declaration, context: FeatureContext):
                 noneFound = true;
                 return;
             }
-            containers.push({ name, global });
-            namedNodeRefs[name] ??= [];
-            namedNodeRefs[name].push(node);
-            if (name === 'and' || name === 'not' || name === 'or') {
+            if (!global) {
+                containers.push({ name, global });
+                namedNodeRefs[name] ??= [];
+                namedNodeRefs[name].push(node);
+            } else {
+                // mutate to word - this is safe since this node is not exposed
+                (node as any).type = 'word';
+                (node as any).value = name;
+            }
+            if (invalidContainerNames[name]) {
                 context.diagnostics.report(diagnostics.INVALID_CONTAINER_NAME(name), {
                     node: decl,
                     word: name,
@@ -330,7 +389,13 @@ function addContainer({
 }) {
     const { definitions } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     const definedSymbol = STSymbol.get(context.meta, name, 'container');
-    if (!definedSymbol || definedSymbol.import) {
+    // import - first
+    // import - existing import
+    // decl - first
+    // decl - existing import / decl
+    const isImportDef = !!importDef;
+    const isFirst = !definedSymbol;
+    if (isFirst || isImportDef) {
         if (context.meta.type !== 'stylable') {
             global = true;
         }
@@ -348,8 +413,5 @@ function addContainer({
             },
             safeRedeclare: false,
         });
-    } else if (global && !definedSymbol.global) {
-        definitions[name] = ast;
-        definedSymbol.global = true;
     }
 }
