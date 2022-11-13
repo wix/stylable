@@ -13,7 +13,7 @@
     "test": "node --enable-source-maps scripts/test-runner.js --parallel",
     "test:integrations": "npm run test -- --i",
     "test:core-packages": "npm run test -- --cp",
-    "test:coverage": "npm run build && c8 -x 'packages/*/dist/test' npm run test && serve coverage",
+    "test:coverage": "npm run build && c8 -x 'packages/*/dist/test' npm run test",
     "test:coverage:dev": "npm run build && c8 -x 'packages/*/dist/test' -r html-spa npm run test && serve coverage",
     "prettify": "npx prettier . --write"
   },
