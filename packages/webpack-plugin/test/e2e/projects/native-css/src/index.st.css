@@ -1,0 +1,10 @@
+@st-import [--lib-color, lib] from 'test-components/lib.css';
+@st-import [--local-color] from './local.css';
+@st-import [--custom-resolved-color] from './resolve-me';
+
+.root {
+    -st-extends: lib;
+    background-color: var(--local-color);
+    color: var(--lib-color);
+    border-color: var(--custom-resolved-color);
+}

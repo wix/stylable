@@ -17,7 +17,13 @@ import {
 } from '@tokey/css-selector-parser';
 import { isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
-import { ClassSymbol, ElementSymbol, FeatureTransformContext, STNamespace } from './features';
+import {
+    ClassSymbol,
+    CSSContains,
+    ElementSymbol,
+    FeatureTransformContext,
+    STNamespace,
+} from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
     STSymbol,
@@ -59,6 +65,7 @@ export interface StylableExports {
     stVars: Record<string, RuntimeStVar>;
     keyframes: Record<string, string>;
     layers: Record<string, string>;
+    containers: Record<string, string>;
 }
 
 export interface StylableResults {
@@ -141,6 +148,7 @@ export class StylableTransformer {
             stVars: {},
             keyframes: {},
             layers: {},
+            containers: {},
         };
         meta.transformedScopes = null;
         meta.targetAst = meta.sourceAst.clone();
@@ -169,6 +177,9 @@ export class StylableTransformer {
         mixinTransform = false,
         topNestClassName = ``
     ) {
+        if (meta.type !== 'stylable') {
+            return;
+        }
         const prevStVarOverride = this.evaluator.stVarOverride;
         this.evaluator.stVarOverride = stVarOverride;
         const transformContext = {
@@ -186,6 +197,7 @@ export class StylableTransformer {
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
         const keyframesResolve = CSSKeyframes.hooks.transformResolve(transformResolveOptions);
         const layerResolve = CSSLayer.hooks.transformResolve(transformResolveOptions);
+        const containsResolve = CSSContains.hooks.transformResolve(transformResolveOptions);
         const cssVarsMapping = CSSCustomProperty.hooks.transformResolve(transformResolveOptions);
 
         ast.walkRules((rule) => {
@@ -230,6 +242,12 @@ export class StylableTransformer {
                     atRule,
                     resolved: layerResolve,
                 });
+            } else if (name === 'container') {
+                CSSContains.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: containsResolve,
+                });
             }
         });
 
@@ -245,6 +263,12 @@ export class StylableTransformer {
                     context: transformContext,
                     decl,
                     resolved: keyframesResolve,
+                });
+            } else if (decl.prop === 'container' || decl.prop === 'container-name') {
+                CSSContains.hooks.transformDeclaration({
+                    context: transformContext,
+                    decl,
+                    resolved: containsResolve,
                 });
             }
 
@@ -297,6 +321,10 @@ export class StylableTransformer {
             CSSLayer.hooks.transformJSExports({
                 exports: metaExports,
                 resolved: layerResolve,
+            });
+            CSSContains.hooks.transformJSExports({
+                exports: metaExports,
+                resolved: containsResolve,
             });
             CSSCustomProperty.hooks.transformJSExports({
                 exports: metaExports,

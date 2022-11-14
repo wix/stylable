@@ -238,6 +238,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
             );
             replacePlaceholder(
                 source,
+                getReplacementToken('containers'),
+                JSON.stringify(stylableBuildData.exports.containers)
+            );
+            replacePlaceholder(
+                source,
                 getReplacementToken('layers'),
                 JSON.stringify(stylableBuildData.exports.layers)
             );

@@ -18,6 +18,7 @@ import {
     CSSCustomProperty,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 } from './features';
 
 const features = [
@@ -34,12 +35,14 @@ const features = [
     CSSCustomProperty,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 ];
 
 export class StylableMeta {
     public data: PlugableRecord = {};
-    public root = 'root';
+    public root = '';
     public source: string = getSourcePath(this.sourceAst, this.diagnostics);
+    public type: 'stylable' | 'css' = this.source.endsWith('.st.css') ? 'stylable' : 'css';
     public namespace = '';
     public urls: string[] = [];
     public transformDiagnostics: Diagnostics | null = null;
@@ -56,8 +59,11 @@ export class StylableMeta {
             hooks.metaInit(context);
         }
         // set default root
-        const rootSymbol = CSSClass.addClass(context, 'root');
-        rootSymbol[`-st-root`] = true;
+        if (this.type === 'stylable') {
+            this.root = 'root';
+            const rootSymbol = CSSClass.addClass(context, 'root');
+            rootSymbol[`-st-root`] = true;
+        }
     }
     getSymbol(name: string) {
         return STSymbol.get(this, name);
