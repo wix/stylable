@@ -17,7 +17,7 @@ export {
     nativePseudoElements,
     knownPseudoClassesWithNestedSelectors,
 } from './native-reserved-lists';
-export { isAsset, makeAbsolute } from './stylable-assets';
+export { isAsset, makeAbsolute, fixRelativeUrls } from './stylable-assets';
 export { namespace, namespaceDelimiter } from './helpers/namespace';
 export {
     emitDiagnostics,

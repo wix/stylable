@@ -49,6 +49,12 @@ export function getCliArguments(): Arguments<CliArguments> {
             description: 'output stylable sources (.st.css)',
             defaultDescription: String(defaults.outputSources),
         })
+        .option('bundle', {
+            type: 'string',
+            description: 'output file path relative to the outDir for a css bundle file including all built files',
+            defaultDescription: 'no bundle',
+            default: '',
+        })
         .option('dts', {
             type: 'boolean',
             description: 'output stylable definition files for sources (.st.css.d.ts)',
@@ -217,6 +223,7 @@ export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): P
         diagnosticsMode: argv.diagnosticsMode as BuildOptions['diagnosticsMode'],
         IndexGenerator: createGenerator(rootDir, argv.customGenerator),
         inlineRuntime: argv.inlineRuntime,
+        bundle: argv.bundle,
     };
 }
 
@@ -240,6 +247,7 @@ export function createDefaultOptions(): BuildOptions {
         outputCSSNameTemplate: '[filename].css',
         diagnosticsMode: 'strict',
         inlineRuntime: false,
+        bundle: '',
     };
 }
 

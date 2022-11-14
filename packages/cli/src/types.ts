@@ -91,6 +91,7 @@ export interface CliArguments {
     esmExt: string | undefined;
     cjsExt: string | undefined;
     dts: boolean | undefined;
+    bundle: string;
     dtsSourceMap: boolean | undefined;
     useNamespaceReference: boolean | undefined;
     namespaceResolver: string;
@@ -120,6 +121,8 @@ export interface BuildOptions {
     outDir: string;
     /** should the build need to output manifest file */
     manifest?: string;
+    /** output file path relative to the outDir for a css bundle file including all built files */
+    bundle?: string;
     /** generates Stylable index file for the given name, the index file will reference Stylable sources from the `srcDir` unless the `outputSources` option is `true` in which case it will reference the `outDir` */
     indexFile?: string;
     /** custom cli index generator class */

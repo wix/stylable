@@ -568,3 +568,103 @@ describe('build stand alone', () => {
         expect(dtsSourceMapContent).to.contain(`"main.st.css"`);
     });
 });
+
+describe('build - bundle', () => {
+    it('should create modules and copy source css files', async () => {
+        const fs = createMemoryFs({
+            '/main.st.css': `
+                :import{
+                    -st-from: "./components/comp.st.css";
+                    -st-default:Comp;
+                }
+                .gaga{
+                    -st-extends:Comp;
+                    color:blue;
+                }
+            `,
+            '/components/comp.st.css': `
+                .baga{
+                    color:red;
+                }
+            `,
+        });
+
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+            resolveNamespace(namespace) {
+                return namespace;
+            },
+        });
+
+        await build(
+            {
+                outDir: 'lib',
+                srcDir: '.',
+                optimize: true,
+                minify: true,
+                bundle: 'bundle.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        expect(fs.readFileSync('/lib/bundle.css', 'utf8')).to.equal(
+            '.comp__baga{color:red}.main__gaga{color:#00f}'
+        );
+    });
+    it('should rewrite relative urls', async () => {
+        const fs = createMemoryFs({
+            '/components/button/button.st.css': `
+                :import{
+                    -st-from: "../label/label.st.css";
+                    -st-named: part;
+                }
+                .root{
+                    -st-mixin: part;
+                }
+            `,
+            '/components/label/label.st.css': `
+                .part {
+                    background-image: url("./image.png");
+                }
+            `,
+        });
+
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            requireModule: () => ({}),
+            resolveNamespace(namespace) {
+                return namespace;
+            },
+        });
+
+        await build(
+            {
+                outDir: 'lib',
+                srcDir: '.',
+                optimize: true,
+                minify: true,
+                bundle: 'bundle.css',
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        expect(fs.readFileSync('/lib/bundle.css', 'utf8')).to.equal(
+            '.label__part{background-image:url(./components/label/image.png)}.button__root{background-image:url(./components/label/image.png)}'
+        );
+    });
+});

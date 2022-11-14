@@ -1,4 +1,4 @@
-import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
+import { fixRelativeUrls, tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
 import type { BuildContext, BuildOptions, ModuleFormats } from './types';
 import { IndexGenerator as BaseIndexGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
@@ -10,6 +10,8 @@ import type { CLIDiagnostic } from './report-diagnostics';
 import { tryRun } from './build-tools';
 import { errorMessages, buildMessages } from './messages';
 import postcss from 'postcss';
+import { sortModulesByDepth } from '@stylable/build-tools';
+import { StylableOptimizer } from '@stylable/optimizer';
 
 export async function build(
     {
@@ -30,6 +32,7 @@ export async function build(
         optimize,
         minify,
         manifest,
+        bundle,
         dts,
         dtsSourceMap,
         diagnostics,
@@ -222,6 +225,39 @@ export async function build(
 
     if (sourceFiles.size === 0) {
         log(mode, buildMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined));
+    } else if (bundle) {
+        tryRun(() => {
+            const sortedModules = sortModulesByDepth(
+                Array.from(sourceFiles),
+                (m) => {
+                    return stylable.analyze(m).transformCssDepth?.cssDepth ?? 0;
+                },
+                (m) => {
+                    return m;
+                },
+                -1 /** PRINT_ORDER */
+            );
+            const cssBundleCode = sortedModules
+                .map((m) => {
+                    const meta = stylable.analyze(m);
+                    const targetFilePath = join(fullOutDir, relative(fullSrcDir, meta.source));
+                    const ast = meta.targetAst!;
+                    fixRelativeUrls(
+                        ast,
+                        targetFilePath,
+                        join(fullOutDir, bundle)
+                    );
+                
+                    return ast.toString();
+                })
+                .join('\n');
+
+            const optimizer = new StylableOptimizer();
+            fs.writeFileSync(
+                join(fullOutDir, bundle),
+                minify ? optimizer.minifyCSS(cssBundleCode) : cssBundleCode
+            );
+        }, 'failed to write or minify bundle file');
     }
 
     return { service, generatedFiles: buildGeneratedFiles };
