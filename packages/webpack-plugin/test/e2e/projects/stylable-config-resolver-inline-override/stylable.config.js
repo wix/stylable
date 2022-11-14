@@ -12,18 +12,11 @@ module.exports = {
             }),
         };
     },
-    webpackPlugin(defaultWebpackConfig, _compiler, fs) {
+    webpackPlugin(defaultWebpackConfig) {
         return {
             ...defaultWebpackConfig,
             stylableConfig(defaultStylableConfig) {
-                return {
-                    resolveModule: createDefaultResolver(fs, {
-                        alias: {
-                            'wp-alias': join(__dirname, 'src/still-wrong'),
-                        },
-                    }),
-                    ...defaultStylableConfig,
-                };
+                return { ...defaultStylableConfig };
             },
         };
     },

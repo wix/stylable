@@ -52,7 +52,7 @@ describe('jest process', () => {
             filename
         ) as RuntimeStylesheet;
 
-        expect(module.classes.root).to.equal(`index-custom__root green-custom__test`);
+        expect(module.classes.root).to.equal(`index-custom__root wp-a-custom__test`);
     });
 
     it('should use inline resolver over default config one', () => {
@@ -65,7 +65,7 @@ describe('jest process', () => {
                 resolveNamespace: (ns, _srcPath) => `${ns}-custom`,
                 resolveModule: createDefaultResolver(fs, {
                     alias: {
-                        'wp-alias': join(dirname(filename), 'webpack-alias'),
+                        'wp-alias': join(dirname(filename), 'webpack-alias2'),
                     },
                 }),
             },
@@ -77,8 +77,28 @@ describe('jest process', () => {
             filename
         ) as RuntimeStylesheet;
 
-        expect(module.classes.override).to.equal(
-            `index-custom__override override-custom__overrideTest`
+        expect(module.classes.root).to.equal(`index-custom__root wp-b-custom__test`);
+    });
+
+    it('should emit diagnostics when not able to load stylable config file', () => {
+        const filename = require.resolve(
+            '@stylable/jest/test/fixtures/default-config/index.st.css'
         );
+        const content = readFileSync(filename, 'utf8');
+        let foundError = false;
+
+        try {
+            const transformer = stylableTransformer.createTransformer({
+                configPath: join(dirname(filename), 'MISSING'),
+            });
+
+            nodeEval(transformer.process(content, filename).code, filename) as RuntimeStylesheet;
+        } catch (error: any) {
+            if (error.message.includes('Failed to load Stylable config')) {
+                foundError = true;
+            }
+        }
+
+        expect(foundError, 'expected to be unable to load config file').to.equal(true);
     });
 });

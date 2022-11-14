@@ -342,16 +342,13 @@ export class StylableWebpackPlugin {
         const topLevelFs = getTopLevelInputFilesystem(compiler);
         const stylableConfig = this.getStylableConfig(compiler)?.config;
 
-        const resolver =
-            (this.userOptions.stylableConfig &&
-                this.userOptions.stylableConfig?.(
-                    {
-                        fileSystem: topLevelFs,
-                        projectRoot: compiler.context,
-                    },
-                    compiler
-                ).resolveModule) ||
-            undefined;
+        const resolver = this.userOptions.stylableConfig?.(
+            {
+                fileSystem: topLevelFs,
+                projectRoot: compiler.context,
+            },
+            compiler
+        ).resolveModule;
 
         this.stylable = new Stylable(
             this.options.stylableConfig(
@@ -364,10 +361,9 @@ export class StylableWebpackPlugin {
                     fileSystem: topLevelFs,
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
                     /**
-                     * resolveModule config order ()
-                     * 1. stylableConfig in webpack config
-                     * 2. webpackPlugin in stylable config file
-                     * 3. defaultConfig in stylable config file
+                     * resolveModule config order is user determined
+                     * each configuration points receives the default options,
+                     * and lets the user mix and match the options as they wish
                      */
                     resolveModule: resolver || stylableConfig?.defaultConfig?.resolveModule,
                     resolveOptions: {

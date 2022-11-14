@@ -67,4 +67,19 @@ describe('require hook', () => {
         expect(m.test).equal(undefined);
         expect(m.namespace).to.match(/^hasjs/);
     });
+
+    it('should throw on missing config file', () => {
+        let foundError = false;
+
+        try {
+            attachHook({
+                configPath: join(fixturesPath, 'MISSING'),
+            });
+        } catch (error: any) {
+            if (error.message.includes('MISSING')) {
+                foundError = true;
+            }
+        }
+        expect(foundError, 'expected to be unable to load config file').to.equal(true);
+    });
 });

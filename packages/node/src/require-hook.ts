@@ -26,13 +26,17 @@ export function attachHook({
 }: Partial<Options> = {}) {
     let resolveModule;
 
-    if (configPath) {
-        const { defaultConfig } = require(configPath);
+    try {
+        if (configPath) {
+            const { defaultConfig } = require(configPath);
 
-        resolveModule =
-            defaultConfig && typeof defaultConfig === 'function'
-                ? defaultConfig(fs).resolveModule
-                : undefined;
+            resolveModule =
+                defaultConfig && typeof defaultConfig === 'function'
+                    ? defaultConfig(fs).resolveModule
+                    : undefined;
+        }
+    } catch (e) {
+        throw new Error(`Failed to load Stylable config from ${configPath}:\n${e}`);
     }
 
     const stylableToModule = stylableModuleFactory(

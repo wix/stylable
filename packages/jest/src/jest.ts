@@ -36,13 +36,17 @@ export interface StylableJestConfig {
 export const createTransformer = (options?: StylableJestConfig) => {
     let resolveModule;
 
-    if (options?.configPath && !options.stylable?.resolveModule) {
-        const { defaultConfig } = require(options.configPath);
+    try {
+        if (options?.configPath && !options.stylable?.resolveModule) {
+            const { defaultConfig } = require(options.configPath);
 
-        resolveModule =
-            defaultConfig && typeof defaultConfig === 'function'
-                ? defaultConfig(fs).resolveModule
-                : undefined;
+            resolveModule =
+                defaultConfig && typeof defaultConfig === 'function'
+                    ? defaultConfig(fs).resolveModule
+                    : undefined;
+        }
+    } catch (e) {
+        throw new Error(`Failed to load Stylable config from ${options?.configPath}:\n${e}`);
     }
 
     const moduleFactory = stylableModuleFactory(

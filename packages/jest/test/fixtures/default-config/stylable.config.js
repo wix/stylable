@@ -7,7 +7,7 @@ module.exports = {
         return {
             resolveModule: createDefaultResolver(fs, {
                 alias: {
-                    'wp-alias': join(__dirname, 'webpack-alias'),
+                    'wp-alias': join(__dirname, 'webpack-alias1'),
                 },
             }),
         };

@@ -15,10 +15,10 @@ describe('require hook', () => {
         }
     });
 
-    it('should work on .st.css', () => {
+    it('should resolve using provided default configuration from file', () => {
         attachHook({ configPath: join(fixturesPath, 'stylable.config.js') });
         const indexModule = require(join(fixturesPath, 'index.st.css'));
-        const mappedModule = require(join(fixturesPath, 'webpack-alias/green.st.css'));
+        const mappedModule = require(join(fixturesPath, 'webpack-alias1/green.st.css'));
 
         // this checks that a mapped module was correctly resolved using -st-extends
         expect(indexModule.classes.root).to.equal(
