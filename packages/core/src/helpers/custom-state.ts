@@ -251,7 +251,7 @@ export interface StateResult {
     errors: string[] | null;
 }
 
-const validationErrors = {
+export const validationErrors = {
     string: {
         STRING_TYPE_VALIDATION_FAILED: (actualParam: string) =>
             `"${actualParam}" should be of type string`,

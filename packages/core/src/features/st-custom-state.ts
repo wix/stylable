@@ -9,6 +9,7 @@ import {
     createBooleanStateClassName,
     createStateWithParamClassName,
     systemValidators,
+    validationErrors as sysValidationErrors,
     resolveStateParam,
 } from '../helpers/custom-state';
 
@@ -32,5 +33,6 @@ export {
     createBooleanStateClassName,
     createStateWithParamClassName,
     systemValidators,
+    sysValidationErrors,
     resolveStateParam,
 };
