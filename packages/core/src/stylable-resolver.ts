@@ -14,8 +14,10 @@ import {
     CSSVarSymbol,
     KeyframesSymbol,
     LayerSymbol,
+    ContainerSymbol,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { findRule } from './helpers/rule';
@@ -85,6 +87,7 @@ export interface MetaResolvedSymbols {
     cssVar: Record<string, CSSResolve<CSSVarSymbol>>;
     keyframes: Record<string, CSSResolve<KeyframesSymbol>>;
     layer: Record<string, CSSResolve<LayerSymbol>>;
+    container: Record<string, CSSResolve<ContainerSymbol>>;
     import: Record<string, CSSResolve<ImportSymbol>>;
 }
 
@@ -198,7 +201,7 @@ export class StylableResolver {
                     : subtype === 'mappedKeyframes'
                     ? `keyframes`
                     : subtype;
-            name = !name && namespace === `main` ? `root` : name;
+            name = !name && namespace === `main` ? meta.root : name;
             const symbol = STSymbol.getAll(meta, namespace)[name];
             return {
                 _kind: 'css',
@@ -225,7 +228,8 @@ export class StylableResolver {
                 maybeImport._kind !== 'var' &&
                 maybeImport._kind !== 'cssVar' &&
                 maybeImport._kind !== 'keyframes' &&
-                maybeImport._kind !== 'layer'
+                maybeImport._kind !== 'layer' &&
+                maybeImport._kind !== 'container'
             ) {
                 if (maybeImport.alias && !maybeImport[`-st-extends`]) {
                     maybeImport = maybeImport.alias;
@@ -320,6 +324,7 @@ export class StylableResolver {
             customValues: { ...stTypes },
             keyframes: {},
             layer: {},
+            container: {},
             cssVar: {},
             import: {},
         };
@@ -399,6 +404,17 @@ export class StylableResolver {
             const result = resolveByNamespace(meta, symbol, this, 'layer');
             if (result) {
                 resolvedSymbols.layer[name] = {
+                    _kind: `css`,
+                    meta: result.meta,
+                    symbol: result.symbol,
+                };
+            }
+        }
+        // resolve containers
+        for (const [name, symbol] of Object.entries(CSSContains.getAll(meta))) {
+            const result = resolveByNamespace(meta, symbol, this, 'container');
+            if (result) {
+                resolvedSymbols.container[name] = {
                     _kind: `css`,
                     meta: result.meta,
                     symbol: result.symbol,

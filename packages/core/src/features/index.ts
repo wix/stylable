@@ -38,3 +38,6 @@ export type { KeyframesSymbol } from './css-keyframes';
 
 export * as CSSLayer from './css-layer';
 export type { LayerSymbol } from './css-layer';
+
+export * as CSSContains from './css-contains';
+export type { ContainerSymbol } from './css-contains';

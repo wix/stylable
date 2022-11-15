@@ -220,9 +220,9 @@ describe('diagnostics: warnings and errors', () => {
             describe('elements', () => {
                 it('should return a warning for an unknown pseudo element', () => {
                     const config = {
-                        entry: '/main.css',
+                        entry: '/main.st.css',
                         files: {
-                            '/main.css': {
+                            '/main.st.css': {
                                 content: `
                                 |.root::$myBtn$|{
 
@@ -233,7 +233,7 @@ describe('diagnostics: warnings and errors', () => {
                     expectTransformDiagnostics(config, [
                         {
                             message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('myBtn'),
-                            file: '/main.css',
+                            file: '/main.st.css',
                         },
                     ]);
                 });

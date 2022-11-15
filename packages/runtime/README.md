@@ -22,6 +22,7 @@ import {
     stVars, 
     keyframes, 
     layers, 
+    containers, 
     cssStates 
 } from './local.st.css';
 ```
@@ -34,6 +35,7 @@ import {
 |`stVars`|an object mapping build time Stylable variables to their build time values (these cannot be overridden in runtime) |
 |`keyframes`|an object mapping exported keyframes from their source name to their scoped name |
 |`layers`|an object mapping exported layers from their source name to their scoped name |
+|`containers`|an object mapping exported containers from their source name to their scoped name |
 |`cssStates`|utility function that maps an object representing states and their values to a string with all required classes |
 
 #### Style utility function

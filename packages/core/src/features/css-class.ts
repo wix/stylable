@@ -141,7 +141,7 @@ export const hooks = createFeature<{
         addClass(context, node.value, rule);
     },
     analyzeDeclaration({ context, decl }) {
-        if (decl.prop in stPartDirectives) {
+        if (context.meta.type === 'stylable' && decl.prop in stPartDirectives) {
             handleDirectives(context, decl);
         }
     },
@@ -272,7 +272,20 @@ export function addClass(context: FeatureContext, name: string, rule?: postcss.R
             safeRedeclare: !!alias,
         });
     }
-    return STSymbol.get(context.meta, name, `class`)!;
+    const symbol = STSymbol.get(context.meta, name, `class`)!;
+    // mark native css as global
+    if (context.meta.type === 'css' && !symbol['-st-global']) {
+        symbol['-st-global'] = [
+            {
+                type: 'class',
+                value: name,
+                dotComments: [],
+                start: 0,
+                end: 0,
+            },
+        ];
+    }
+    return symbol;
 }
 
 export function namespaceClass(
@@ -377,6 +390,10 @@ export function validateClassScoping({
     index: number;
     rule: postcss.Rule;
 }): boolean {
+    if (context.meta.type !== 'stylable') {
+        // ignore in native CSS
+        return true;
+    }
     if (!classSymbol.alias) {
         return true;
     } else if (locallyScoped === false) {

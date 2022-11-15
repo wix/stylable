@@ -73,7 +73,7 @@ export function generateStylableJSModuleSource(
         footer = '',
     } = moduleOptions;
 
-    const { classes, keyframes, layers, stVars, vars } = jsExports;
+    const { classes, keyframes, layers, containers, stVars, vars } = jsExports;
     const exportKind = moduleType === 'esm' ? `export ${varType} ` : 'module.exports.';
     return `
 ${imports.map(moduleRequest(moduleType)).join('\n')}
@@ -92,6 +92,7 @@ ${exportKind}namespace = _namespace_;
 ${exportKind}classes = ${JSON.stringify(classes)};
 ${exportKind}keyframes = ${JSON.stringify(keyframes)}; 
 ${exportKind}layers = ${JSON.stringify(layers)};
+${exportKind}containers = ${JSON.stringify(containers)};
 ${exportKind}stVars = ${JSON.stringify(stVars)}; 
 ${exportKind}vars = ${JSON.stringify(vars)}; 
 

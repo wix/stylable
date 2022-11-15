@@ -15,6 +15,7 @@ import {
     CSSType,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 } from './features';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
@@ -67,9 +68,10 @@ export class StylableProcessor implements FeatureContext {
             }
         });
 
+        const isStylable = this.meta.type === 'stylable';
         root.walkDecls((decl) => {
             const parent = decl.parent as postcss.ChildNode;
-            if (parent.type === 'rule' && parent.selector === ':vars') {
+            if (parent.type === 'rule' && parent.selector === ':vars' && isStylable) {
                 // ToDo: remove once
                 // - custom property definition is allowed in var value
                 // - url collection is removed from st-var
@@ -77,6 +79,7 @@ export class StylableProcessor implements FeatureContext {
             }
             CSSClass.hooks.analyzeDeclaration({ context: this, decl });
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
+            CSSContains.hooks.analyzeDeclaration({ context: this, decl });
 
             this.collectUrls(decl);
         });
@@ -131,6 +134,11 @@ export class StylableProcessor implements FeatureContext {
                     });
                     break;
                 case 'import':
+                    STImport.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
                     CSSLayer.hooks.analyzeAtRule({
                         context: this,
                         atRule,
@@ -151,6 +159,14 @@ export class StylableProcessor implements FeatureContext {
                 case 'property':
                 case 'st-global-custom-property': {
                     CSSCustomProperty.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                }
+                case 'container': {
+                    CSSContains.hooks.analyzeAtRule({
                         context: this,
                         atRule,
                         analyzeRule,
