@@ -14,10 +14,6 @@ function addStatesEntries(
 ) {
     if (stStates) {
         for (const [stateName, stateDef] of Object.entries(stStates)) {
-            if (typeof stateDef === 'string') {
-                continue;
-            }
-
             if (!stateEntries.has(stateName)) {
                 stateEntries.set(stateName, stateDef);
             }
@@ -44,7 +40,11 @@ function collectLocalStates(cls: ClassSymbol) {
 
     // stringify states for current class
     for (const [stateName, stateDef] of stateEntries.entries()) {
-        stateEntriesString += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
+        const booleanState = !stateDef;
+        const mappedState = typeof stateDef === 'string';
+        if (booleanState || !mappedState) {
+            stateEntriesString += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
+        }
     }
 
     return stateEntriesString;
