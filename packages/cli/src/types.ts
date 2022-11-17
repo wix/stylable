@@ -91,7 +91,7 @@ export interface CliArguments {
     esmExt: string | undefined;
     cjsExt: string | undefined;
     dts: boolean | undefined;
-    bundle: string;
+    bundle: string | undefined;
     dtsSourceMap: boolean | undefined;
     useNamespaceReference: boolean | undefined;
     namespaceResolver: string;

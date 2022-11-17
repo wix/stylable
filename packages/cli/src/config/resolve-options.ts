@@ -51,9 +51,9 @@ export function getCliArguments(): Arguments<CliArguments> {
         })
         .option('bundle', {
             type: 'string',
-            description: 'output file path relative to the outDir for a css bundle file including all built files',
+            description:
+                'output file path relative to the outDir for a css bundle file including all built files',
             defaultDescription: 'no bundle',
-            default: '',
         })
         .option('dts', {
             type: 'boolean',
