@@ -436,6 +436,95 @@ describe('features/css-pseudo-class', () => {
                 const { meta } = sheets['/entry.st.css'];
                 shouldReportNoDiagnostics(meta);
             });
+            it('should transform parameter into custom template', () => {
+                const { sheets } = testStylableCore(`
+                    .root {
+                        -st-states: class-name(string, ".$0"),
+                                    multi-insertion(string, ".$0[attr='$0']"),
+                                    paramOnly(string, "$0");
+                    }
+    
+                    /* @rule(base) .entry__root.abc */
+                    .root:class-name(abc) {}
+
+                    /* @rule(strip quotes) .entry__root.abc */
+                    .root:class-name("abc") {}
+
+                    /* @rule(multi insertion) .entry__root.abc[attr='abc'] */
+                    .root:multi-insertion("abc") {}
+
+                    /* @rule(nested complex) .entry__root:is(.a .b) */
+                    .root:paramOnly(":is(.a .b)") {}
+
+                    /* @rule(no escape) .entry__root.abc */
+                    .root:paramOnly(.abc) {}
+
+                    /* @rule(preserve escape) .entry__root.ab\\.c */
+                    .root:paramOnly(.ab\\.c) {}
+                `);
+
+                const { meta } = sheets['/entry.st.css'];
+                shouldReportNoDiagnostics(meta);
+            });
+            it('should report invalid template selector', () => {
+                /**
+                 * currently only checks template with parameter
+                 * for backwards compatibility standalone template can accept
+                 * any kind of selector - we might want to limit this in a future
+                 * major version.
+                 */
+                testStylableCore(`
+                    .root {
+                        -st-states: classAndThenParam(string, ".x$0"),
+                                    paramAndThenClass(string, "$0.x");
+                    }
+
+                    /* 
+                        @transform-error(multi) ${stCustomStateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(
+                            'classAndThenParam',
+                            '.x.a,.b'
+                        )}
+                        @rule(multi) .entry__root:classAndThenParam(.a,.b) 
+                    */
+                    .root:classAndThenParam(.a,.b) {}
+    
+                    /* 
+                        @transform-error(complex) ${stCustomStateDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR(
+                            'classAndThenParam',
+                            '.x.a .b'
+                        )}
+                        @rule(complex) .entry__root:classAndThenParam(.a .b) 
+                    */
+                    .root:classAndThenParam(.a .b) {}
+
+                    /* 
+                        @transform-error(invalid) ${stCustomStateDiagnostics.INVALID_SELECTOR(
+                            'classAndThenParam',
+                            '.x:unclosed('
+                        )}
+                        @rule(invalid) .entry__root:classAndThenParam(":unclosed(") 
+                    */
+                    .root:classAndThenParam(":unclosed(") {}
+
+                    /* 
+                        @transform-error(invalid start) ${stCustomStateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(
+                            'paramAndThenClass',
+                            'div.x'
+                        )}
+                        @rule(invalid start) .entry__root:paramAndThenClass(div) 
+                    */
+                    .root:paramAndThenClass(div) {}
+
+                    /* 
+                        @transform-error(invalid start2) ${stCustomStateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(
+                            'paramAndThenClass',
+                            '*.x'
+                        )}
+                        @rule(invalid start2) .entry__root:paramAndThenClass(*) 
+                    */
+                    .root:paramAndThenClass(*) {}
+                `);
+            });
         });
         it('should handle escaped characters', () => {
             const { sheets } = testStylableCore(

@@ -4,13 +4,14 @@ import postcssValueParser, {
     type FunctionNode,
 } from 'postcss-value-parser';
 import cssesc from 'cssesc';
-import type { PseudoClass } from '@tokey/css-selector-parser';
+import type { PseudoClass, SelectorNode } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import {
     parseSelectorWithCache,
     stringifySelector,
     convertToClass,
     convertToInvalid,
+    convertToSelector,
 } from './selector';
 import { groupValues, listOptions } from './value';
 import { stripQuotation } from './string';
@@ -126,6 +127,30 @@ export const stateDiagnostics = {
         'error',
         (state: string) =>
             `pseudo-state "${state}" template defined expect only a single string value`
+    ),
+    UNSUPPORTED_MULTI_SELECTOR: createDiagnosticReporter(
+        '08015',
+        'error',
+        (state: string, finalSelector: string) =>
+            `pseudo-state "${state}" resulted in an unsupported multi selector "${finalSelector}"`
+    ),
+    UNSUPPORTED_COMPLEX_SELECTOR: createDiagnosticReporter(
+        '08016',
+        'error',
+        (state: string, finalSelector: string) =>
+            `pseudo-state "${state}" resulted in an unsupported complex selector "${finalSelector}"`
+    ),
+    INVALID_SELECTOR: createDiagnosticReporter(
+        '08017',
+        'error',
+        (state: string, finalSelector: string) =>
+            `pseudo-state "${state}" resulted in an invalid selector "${finalSelector}"`
+    ),
+    UNSUPPORTED_INITIAL_SELECTOR: createDiagnosticReporter(
+        '08018',
+        'error',
+        (state: string, finalSelector: string) =>
+            `pseudo-state "${state}" result cannot start with a type or universal selector "${finalSelector}"`
     ),
 };
 
@@ -739,13 +764,14 @@ export function transformPseudoClassToCustomState(
 
     if (stateDef === null) {
         convertToClass(node).value = createBooleanStateClassName(name, namespace);
+        delete node.nodes;
     } else if (typeof stateDef === 'string') {
         // simply concat global mapped selector - ToDo: maybe change to 'selector'
         convertToInvalid(node).value = stateDef;
+        delete node.nodes;
     } else if (typeof stateDef === 'object') {
         resolveStateValue(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
     }
-    delete node.nodes;
 }
 
 export function createBooleanStateClassName(stateName: string, namespace: string) {
@@ -832,7 +858,96 @@ function resolveStateValue(
     }
 
     const strippedParam = stripQuotation(actualParam);
-    convertToClass(node).value = createStateWithParamClassName(name, namespace, strippedParam);
+    if (stateDef.template) {
+        transformMappedStateWithParam({
+            stateName: name,
+            template: stateDef.template,
+            param: strippedParam,
+            node,
+            rule,
+            diagnostics,
+        });
+    } else {
+        convertToClass(node).value = createStateWithParamClassName(name, namespace, strippedParam);
+        delete node.nodes;
+    }
+}
+
+function transformMappedStateWithParam({
+    stateName,
+    template,
+    param,
+    node,
+    rule,
+    diagnostics,
+}: {
+    stateName: string;
+    template: string;
+    param: string;
+    node: PseudoClass;
+    rule?: postcss.Rule;
+    diagnostics: Diagnostics;
+}) {
+    const targetSelectorStr = template.replace(/\$0/g, param);
+    const selectorAst = parseSelectorWithCache(targetSelectorStr, { clone: true });
+    if (selectorAst.length > 1) {
+        if (rule) {
+            diagnostics.report(
+                stateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(stateName, targetSelectorStr),
+                {
+                    node: rule,
+                }
+            );
+        }
+        return;
+    } else {
+        const firstSelector = selectorAst[0].nodes.find(({ type }) => type !== 'comment');
+        if (firstSelector?.type === 'type' || firstSelector?.type === 'universal') {
+            if (rule) {
+                diagnostics.report(
+                    stateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(stateName, targetSelectorStr),
+                    {
+                        node: rule,
+                    }
+                );
+            }
+            return;
+        }
+        let unexpectedSelector: undefined | SelectorNode = undefined;
+        for (const node of selectorAst[0].nodes) {
+            if (node.type === 'combinator' || node.type === 'invalid') {
+                unexpectedSelector = node;
+                break;
+            }
+        }
+        if (unexpectedSelector) {
+            if (rule) {
+                switch (unexpectedSelector.type) {
+                    case 'combinator':
+                        diagnostics.report(
+                            stateDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR(
+                                stateName,
+                                targetSelectorStr
+                            ),
+                            {
+                                node: rule,
+                            }
+                        );
+                        break;
+                    case 'invalid':
+                        diagnostics.report(
+                            stateDiagnostics.INVALID_SELECTOR(stateName, targetSelectorStr),
+                            {
+                                node: rule,
+                            }
+                        );
+                        break;
+                }
+            }
+            return;
+        }
+    }
+    convertToSelector(node).nodes = selectorAst[0].nodes;
 }
 
 function resolveParam(
