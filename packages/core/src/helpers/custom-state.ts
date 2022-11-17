@@ -1,5 +1,8 @@
 import type * as postcss from 'postcss';
-import postcssValueParser from 'postcss-value-parser';
+import postcssValueParser, {
+    type Node as ValueNode,
+    type FunctionNode,
+} from 'postcss-value-parser';
 import cssesc from 'cssesc';
 import type { PseudoClass } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
@@ -25,6 +28,7 @@ export interface StateParsedValue {
     type: string;
     defaultValue?: string;
     arguments: StateArguments;
+    template: string;
 }
 export interface StateTypeValidator {
     name: string;
@@ -38,6 +42,11 @@ export const booleanStateDelimiter = '--';
 export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
 export const stateDiagnostics = {
+    MISSING_TYPE_OR_TEMPLATE: createDiagnosticReporter(
+        '08013',
+        'error',
+        (name: string) => `pseudo-state "${name}" missing type or template`
+    ),
     UNKNOWN_STATE_TYPE: createDiagnosticReporter(
         '08002',
         'error',
@@ -98,6 +107,26 @@ export const stateDiagnostics = {
                 ...errors,
             ].join('\n')
     ),
+    TEMPLATE_MISSING_PLACEHOLDER: createDiagnosticReporter(
+        '08011',
+        'warning',
+        (state: string, template: string) =>
+            `pseudo-state "${state}" template "${template}" is missing a placeholder, use "$0" to set the parameter insertion place`
+    ),
+    TEMPLATE_UNSUPPORTED_PLACEHOLDER: createDiagnosticReporter(
+        '08012',
+        'warning',
+        (state: string, template: string, placeholders: string[]) =>
+            `pseudo-state "${state}" template "${template}" contains unsupported placeholders (${placeholders.join(
+                ', '
+            )}), only a single parameter is currently supported`
+    ),
+    TEMPLATE_UNEXPECTED_ARGS: createDiagnosticReporter(
+        '08014',
+        'error',
+        (state: string) =>
+            `pseudo-state "${state}" template defined expect only a single string value`
+    ),
 };
 
 // parse
@@ -128,7 +157,13 @@ export function parsePseudoStates(
         }
 
         if (stateDefinition.type === 'function') {
-            resolveStateType(stateDefinition, mappedStates, stateDefault, diagnostics, decl);
+            resolveStateType(
+                stateDefinition as FunctionNode,
+                mappedStates,
+                stateDefault,
+                diagnostics,
+                decl
+            );
         } else if (stateDefinition.type === 'word') {
             resolveBooleanState(mappedStates, stateDefinition);
         } else {
@@ -147,28 +182,37 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
     }
 }
 function resolveStateType(
-    stateDefinition: ParsedValue,
+    stateDefinition: FunctionNode,
     mappedStates: MappedStates,
     stateDefault: ParsedValue[],
     diagnostics: Diagnostics,
     decl: postcss.Declaration
 ) {
-    if (stateDefinition.type === 'function' && stateDefinition.nodes.length === 0) {
+    const stateName = stateDefinition.value;
+    if (stateDefinition.nodes.length === 0) {
         resolveBooleanState(mappedStates, stateDefinition);
 
-        diagnostics.report(stateDiagnostics.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
+        diagnostics.report(stateDiagnostics.NO_STATE_TYPE_GIVEN(stateName), {
             node: decl,
             word: decl.value,
         });
 
         return;
     }
+    const { paramType, template, argsFirstNode, argsFullValue } = collectStateArgsDef(
+        stateDefinition.nodes,
+        stateName,
+        decl,
+        diagnostics
+    );
 
-    if (stateDefinition.nodes.length > 1) {
+    if (argsFullValue.length > 2 || (argsFirstNode[1] && argsFirstNode[1].type !== 'string')) {
         diagnostics.report(
             stateDiagnostics.TOO_MANY_STATE_TYPES(
-                stateDefinition.value,
-                listOptions(stateDefinition)
+                stateName,
+                argsFirstNode.map((argNode) =>
+                    argNode ? postcssValueParser.stringify(argNode) : ''
+                )
             ),
             {
                 node: decl,
@@ -177,39 +221,129 @@ function resolveStateType(
         );
     }
 
-    const paramType = stateDefinition.nodes[0];
+    if (!paramType) {
+        return;
+    }
+
     const stateType: StateParsedValue = {
         type: paramType.value,
         arguments: [],
         defaultValue: postcssValueParser
             .stringify(stateDefault as postcssValueParser.Node[])
             .trim(),
+        template,
     };
 
-    if (isCustomMapping(stateDefinition)) {
-        mappedStates[stateDefinition.value] = stateType.type.trim().replace(/\\["']/g, '"');
+    if (paramType.type === 'string') {
+        // template
+        mappedStates[stateName] = stateType.type.trim().replace(/\\["']/g, '"');
+        if (argsFullValue.length > 1) {
+            diagnostics.report(stateDiagnostics.TEMPLATE_UNEXPECTED_ARGS(stateName), {
+                node: decl,
+            });
+        }
     } else if (typeof stateType === 'object' && stateType.type === 'boolean') {
+        // explicit boolean
         resolveBooleanState(mappedStates, stateDefinition);
         return;
     } else if (paramType.type === 'function' && stateType.type in systemValidators) {
+        // typed parameter with custom validation
         if (paramType.nodes.length > 0) {
-            resolveArguments(paramType, stateType, stateDefinition.value, diagnostics, decl);
+            resolveArguments(paramType, stateType, stateName, diagnostics, decl);
         }
-        mappedStates[stateDefinition.value] = stateType;
+        mappedStates[stateName] = stateType;
     } else if (stateType.type in systemValidators) {
-        mappedStates[stateDefinition.value] = stateType;
+        // typed parameter
+        mappedStates[stateName] = stateType;
     } else {
+        diagnostics.report(stateDiagnostics.UNKNOWN_STATE_TYPE(stateName, paramType.value), {
+            node: decl,
+            word: paramType.value,
+        });
+    }
+}
+function collectStateArgsDef(
+    nodes: ValueNode[],
+    stateName: string,
+    decl: postcss.Declaration,
+    diagnostics: Diagnostics
+) {
+    const argsFullValue: ValueNode[][] = [];
+    const argsFirstNode: Array<ValueNode | undefined> = [];
+    let collectedArg: ValueNode[] = [];
+    let firstActualValue: ValueNode | undefined = undefined;
+
+    for (const node of nodes) {
+        if (node.type === 'div') {
+            argsFullValue.push(collectedArg);
+            argsFirstNode.push(firstActualValue);
+            collectedArg = [];
+            firstActualValue = undefined;
+        } else {
+            collectedArg.push(node);
+            if (!firstActualValue && node.type !== 'space' && node.type !== 'comment') {
+                firstActualValue = node;
+            }
+        }
+    }
+
+    if (collectedArg.length) {
+        argsFullValue.push(collectedArg);
+        argsFirstNode.push(firstActualValue);
+    }
+
+    if (argsFullValue.length > 2 || (argsFirstNode[1] && argsFirstNode[1].type !== 'string')) {
         diagnostics.report(
-            stateDiagnostics.UNKNOWN_STATE_TYPE(stateDefinition.value, paramType.value),
+            stateDiagnostics.TOO_MANY_STATE_TYPES(
+                stateName,
+                argsFirstNode.map((argNode) =>
+                    argNode ? postcssValueParser.stringify(argNode) : ''
+                )
+            ),
             {
                 node: decl,
-                word: paramType.value,
+                word: decl.value,
             }
         );
     }
-}
-function isCustomMapping(stateDefinition: ParsedValue) {
-    return stateDefinition.nodes.length === 1 && stateDefinition.nodes[0].type === 'string';
+
+    const paramType = argsFirstNode[0];
+
+    if (!paramType) {
+        diagnostics.report(stateDiagnostics.MISSING_TYPE_OR_TEMPLATE(stateName), {
+            node: decl,
+        });
+    }
+
+    const template = argsFirstNode[1]
+        ? stripQuotation(postcssValueParser.stringify(argsFirstNode[1]))
+        : '';
+
+    if (template) {
+        if (!template.includes('$0')) {
+            diagnostics.report(stateDiagnostics.TEMPLATE_MISSING_PLACEHOLDER(stateName, template), {
+                node: decl,
+                word: template,
+            });
+        }
+        const placeholders = template.match(/\$\d+/g) || [];
+        const unsupportedPlaceholders = placeholders.filter((ph) => ph !== '$0');
+        if (unsupportedPlaceholders.length) {
+            diagnostics.report(
+                stateDiagnostics.TEMPLATE_UNSUPPORTED_PLACEHOLDER(
+                    stateName,
+                    template,
+                    unsupportedPlaceholders
+                ),
+                {
+                    node: decl,
+                    word: template,
+                }
+            );
+        }
+    }
+
+    return { paramType, template, argsFullValue, argsFirstNode };
 }
 function resolveArguments(
     paramType: ParsedValue,

@@ -36,29 +36,32 @@ describe('features/st-custom-state', () => {
                as there is not direct user API to define states */
         it('should collect states on classes', () => {
             const { sheets } = testStylableCore(`
-                .bool {
-                    -st-states: b1, b2(boolean);
-                }
-                .enum {
-                    -st-states: e1(enum(small, medium, large)),
-                                e2(enum(red, green, blue)) green;
-                }
-                .num {
-                    -st-states: n1(number), 
-                                n2(number()),
-                                n3(number(min(2), max(6), multipleOf(2))),
-                                n4(number) 4;
-                }
-                .str {
-                    -st-states: s1(string), 
-                                s2(string()),
-                                s3(string(minLength(2), maxLength(5), contains(abc), regex("^user"))),
-                                s4(string) def val;
-                }
-                .map {
-                    -st-states: m1("[some-attr]"), m2('.global-cls');
-                }
-            `);
+                    .bool {
+                        -st-states: b1, b2(boolean);
+                    }
+                    .enum {
+                        -st-states: e1(enum(small, medium, large)),
+                                    e2(enum(red, green, blue)) green,
+                                    e3(enum(red, green, blue), ".color-$0");
+                    }
+                    .num {
+                        -st-states: n1(number), 
+                                    n2(number()),
+                                    n3(number(min(2), max(6), multipleOf(2))),
+                                    n4(number) 4,
+                                    n5(number(min(1), max(5)), "[color-$0]");
+                    }
+                    .str {
+                        -st-states: s1(string), 
+                                    s2(string()),
+                                    s3(string(minLength(2), maxLength(5), contains(abc), regex("^user"))),
+                                    s4(string) def val,
+                                    s5(string(regex("^x")), '.$0');
+                    }
+                    .map {
+                        -st-states: m1("[some-attr]"), m2('.global-cls'), m3("[attr='$0$1']"); /* ToDo: add test for template with placeholder like strings*/
+                    }
+                `);
 
             const { meta } = sheets['/entry.st.css'];
             const classes = meta.getAllClasses();
@@ -72,16 +75,24 @@ describe('features/st-custom-state', () => {
                     type: 'enum',
                     arguments: ['small', 'medium', 'large'],
                     defaultValue: '',
+                    template: '',
                 },
                 e2: {
                     type: 'enum',
                     arguments: ['red', 'green', 'blue'],
                     defaultValue: 'green',
+                    template: '',
+                },
+                e3: {
+                    type: 'enum',
+                    arguments: ['red', 'green', 'blue'],
+                    defaultValue: '',
+                    template: '.color-$0',
                 },
             });
             expect(classes.num['-st-states'], 'number states').to.eql({
-                n1: { type: 'number', arguments: [], defaultValue: '' },
-                n2: { type: 'number', arguments: [], defaultValue: '' },
+                n1: { type: 'number', arguments: [], defaultValue: '', template: '' },
+                n2: { type: 'number', arguments: [], defaultValue: '', template: '' },
                 n3: {
                     type: 'number',
                     arguments: [
@@ -99,12 +110,28 @@ describe('features/st-custom-state', () => {
                         },
                     ],
                     defaultValue: '',
+                    template: '',
                 },
-                n4: { type: 'number', arguments: [], defaultValue: '4' },
+                n4: { type: 'number', arguments: [], defaultValue: '4', template: '' },
+                n5: {
+                    type: 'number',
+                    arguments: [
+                        {
+                            name: 'min',
+                            args: ['1'],
+                        },
+                        {
+                            name: 'max',
+                            args: ['5'],
+                        },
+                    ],
+                    defaultValue: '',
+                    template: '[color-$0]',
+                },
             });
             expect(classes.str['-st-states'], 'string states').to.eql({
-                s1: { type: 'string', arguments: [], defaultValue: '' },
-                s2: { type: 'string', arguments: [], defaultValue: '' },
+                s1: { type: 'string', arguments: [], defaultValue: '', template: '' },
+                s2: { type: 'string', arguments: [], defaultValue: '', template: '' },
                 s3: {
                     type: 'string',
                     arguments: [
@@ -126,12 +153,25 @@ describe('features/st-custom-state', () => {
                         },
                     ],
                     defaultValue: '',
+                    template: '',
                 },
-                s4: { type: 'string', arguments: [], defaultValue: 'def val' },
+                s4: { type: 'string', arguments: [], defaultValue: 'def val', template: '' },
+                s5: {
+                    type: 'string',
+                    arguments: [
+                        {
+                            name: 'regex',
+                            args: ['^x'],
+                        },
+                    ],
+                    defaultValue: '',
+                    template: '.$0',
+                },
             });
             expect(classes.map['-st-states'], 'mapped states').to.eql({
                 m1: '[some-attr]',
                 m2: '.global-cls',
+                m3: "[attr='$0$1']",
             });
         });
         it('should report missing state type', () => {
@@ -178,6 +218,31 @@ describe('features/st-custom-state', () => {
                 }
             `);
         });
+        it('should report template issues', () => {
+            testStylableCore(`
+                .a {
+                    /* @analyze-warn(missing placeholder) word(.no-placeholder) ${stCustomStateDiagnostics.TEMPLATE_MISSING_PLACEHOLDER(
+                        's1',
+                        '.no-placeholder'
+                    )} */
+                    -st-states: s1(string, '.no-placeholder');
+                }
+                .b {
+                    /* @analyze-warn(unsupported placeholder) word(.x$1$99-$5.$with-no-digits-is-fine) ${stCustomStateDiagnostics.TEMPLATE_UNSUPPORTED_PLACEHOLDER(
+                        's1',
+                        '.x$1$99-$5.$with-no-digits-is-fine',
+                        ['$1', '$99', '$5']
+                    )} */
+                    -st-states: s1(string, '.x$1$99-$5.$with-no-digits-is-fine');
+                }
+                .c {
+                    /* @analyze-error(unexpected definition)  ${stCustomStateDiagnostics.TEMPLATE_UNEXPECTED_ARGS(
+                        's1'
+                    )} */
+                    -st-states: s1('.x', '.y');
+                }
+            `);
+        });
         it('should report on validator definition issues', () => {
             /* ToDo(tech-debt): move "unknown validator" to analyze phase 
                 - An issue while build-vars are supported to define default
@@ -189,6 +254,13 @@ describe('features/st-custom-state', () => {
                         ['string', 'number']
                     )} */
                     -st-states: s1(string, number);
+                }
+                .a2 {
+                    /* @analyze-error(multi types after template) ${stCustomStateDiagnostics.TOO_MANY_STATE_TYPES(
+                        's1-2',
+                        ['string', `".x"`, 'number']
+                    )} */
+                    -st-states: s1-2(string, ".x", number);
                 }
                 .b {
                     /* @analyze-error(multi validation args) ${stCustomStateDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(

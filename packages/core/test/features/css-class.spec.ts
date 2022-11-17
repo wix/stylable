@@ -512,8 +512,8 @@ describe(`features/css-class`, () => {
             const { meta } = sheets['/entry.st.css'];
             expect(meta.getClass('root')!['-st-states']).to.eql({
                 bool: null,
-                str: { type: 'string', arguments: [], defaultValue: 'def-val' },
-                opt: { type: 'enum', arguments: ['a', 'b'], defaultValue: '' },
+                str: { type: 'string', arguments: [], defaultValue: 'def-val', template: '' },
+                opt: { type: 'enum', arguments: ['a', 'b'], defaultValue: '', template: '' },
             });
         });
         it('should report state definition in complex or type selector', () => {
