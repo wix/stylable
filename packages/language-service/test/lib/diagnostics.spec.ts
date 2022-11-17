@@ -22,7 +22,7 @@ describe('diagnostics', () => {
                 start: { line: 0, character: 6 },
                 end: { line: 0, character: 13 },
             },
-            message: 'unknown pseudo-state "unknown"',
+            message: 'unknown pseudo-class "unknown"',
             severity: 1,
             source: 'stylable',
         });
