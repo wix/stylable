@@ -294,6 +294,9 @@ describe('build stand alone', () => {
                     color: rgb(255,0,0);
                 }
             `,
+            '/common/project.st.css': `
+                .root {}
+            `,
             '/node_modules/@stylable/runtime/dist/index.js': `// runtime cjs`,
             '/node_modules/@stylable/runtime/esm/index.js': `// runtime esm`,
         });
@@ -327,6 +330,7 @@ describe('build stand alone', () => {
 
         const builtFileCjs = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
         const builtFileEsm = fs.readFileSync('/dist/comp.st.css.mjs', 'utf8');
+        const innerPathBuiltFileEsm = fs.readFileSync('/dist/common/project.st.css.mjs', 'utf8');
 
         // this makes sure that we actually copied the runtime
         const runtimeCjs = fs.readFileSync('/dist/cjs-runtime.js', 'utf8');
@@ -337,6 +341,9 @@ describe('build stand alone', () => {
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
             `./esm-runtime.js`
+        );
+        expect(innerPathBuiltFileEsm, 'imports the esm runtime with full extension with relative path').to.contain(
+            `./../esm-runtime.js`
         );
         expect(runtimeCjs).to.eql(`// runtime cjs`);
         expect(runtimeMjs).to.eql(`// runtime esm`);

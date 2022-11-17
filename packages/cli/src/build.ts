@@ -242,12 +242,8 @@ export async function build(
                     const meta = stylable.analyze(m);
                     const targetFilePath = join(fullOutDir, relative(fullSrcDir, meta.source));
                     const ast = meta.targetAst!;
-                    fixRelativeUrls(
-                        ast,
-                        targetFilePath,
-                        join(fullOutDir, bundle)
-                    );
-                
+                    fixRelativeUrls(ast, targetFilePath, join(fullOutDir, bundle));
+
                     return ast.toString();
                 })
                 .join('\n');
@@ -291,10 +287,22 @@ export async function build(
                     resolveRuntimeRequest: (targetFilePath, moduleFormat) => {
                         if (inlineRuntime) {
                             if (moduleFormat === 'cjs' && runtimeCjsOutPath) {
-                                return './' + relative(dirname(targetFilePath), runtimeCjsOutPath);
+                                return (
+                                    './' +
+                                    relative(dirname(targetFilePath), runtimeCjsOutPath).replace(
+                                        /\\/g,
+                                        '/'
+                                    )
+                                );
                             }
                             if (moduleFormat === 'esm' && runtimeEsmOutPath) {
-                                return './' + relative(dirname(targetFilePath), runtimeEsmOutPath);
+                                return (
+                                    './' +
+                                    relative(dirname(targetFilePath), runtimeEsmOutPath).replace(
+                                        /\\/g,
+                                        '/'
+                                    )
+                                );
                             }
                         } else {
                             if (moduleFormat === 'cjs') {
