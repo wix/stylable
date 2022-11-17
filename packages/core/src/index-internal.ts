@@ -8,10 +8,11 @@ export {
     transformerDiagnostics,
     ResolvedElement,
 } from './stylable-transformer';
-export { MappedStates, STCustomSelector } from './features';
+export { STCustomSelector, STCustomState } from './features';
+export type { MappedStates, StateParsedValue } from './helpers/custom-state';
 export { murmurhash3_32_gc } from './murmurhash';
 export { cssParse } from './parser';
-export type { OptimizeConfig, IStylableOptimizer, StateParsedValue } from './types';
+export type { OptimizeConfig, IStylableOptimizer } from './types';
 export {
     nativePseudoClasses,
     nativePseudoElements,
@@ -29,22 +30,7 @@ export { StylableResolver, StylableResolverCache } from './stylable-resolver';
 export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
 export { createStylableFileProcessor } from './create-stylable-processor';
 export { packageNamespaceFactory } from './resolve-namespace-factories';
-import {
-    createBooleanStateClassName,
-    createStateWithParamClassName,
-    resolveStateParam,
-    stateMiddleDelimiter,
-    booleanStateDelimiter,
-} from './pseudo-states';
-export const pseudoStates = {
-    createBooleanStateClassName,
-    createStateWithParamClassName,
-    resolveStateParam,
-    stateMiddleDelimiter,
-    booleanStateDelimiter,
-};
 export { BoxedValueArray, BoxedValueMap, createCustomValue } from './custom-values';
-export { systemValidators } from './state-validators';
 export { DiagnosticBase } from './diagnostics';
 export { getAstNodeAt } from './helpers/ast';
 export { tryCollectImportsDeep } from './helpers/import';

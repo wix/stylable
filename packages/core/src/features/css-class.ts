@@ -1,16 +1,25 @@
 import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-import';
+import type { ElementSymbol } from './css-type';
 import * as STGlobal from './st-global';
+import * as STCustomState from './st-custom-state';
 import { getOriginDefinition } from '../helpers/resolve';
 import { namespace } from '../helpers/namespace';
 import { namespaceEscape, unescapeCSS } from '../helpers/escape';
-import { convertToSelector, convertToClass, stringifySelector } from '../helpers/selector';
+import { getNamedArgs } from '../helpers/value';
+import {
+    convertToSelector,
+    convertToClass,
+    stringifySelector,
+    isSimpleSelector,
+    parseSelectorWithCache,
+} from '../helpers/selector';
+import { getAlias } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
-import { validateRuleStateDefinition } from '../helpers/custom-state';
+import { validateRuleStateDefinition, MappedStates } from '../helpers/custom-state';
 import type { Stylable } from '../stylable';
 import {
     ImmutableClass,
@@ -18,12 +27,28 @@ import {
     SelectorNode,
     ImmutableSelectorNode,
     stringifySelectorAst,
+    SelectorNodes,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
 import { basename } from 'path';
 import { createDiagnosticReporter } from '../diagnostics';
+import postcssValueParser from 'postcss-value-parser';
 
-export interface ClassSymbol extends StylableDirectives {
+export interface StPartDirectives {
+    '-st-root'?: boolean;
+    '-st-states'?: MappedStates;
+    '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
+    '-st-global'?: SelectorNode[];
+}
+
+const stPartDirectives = {
+    '-st-root': true,
+    '-st-states': true,
+    '-st-extends': true,
+    '-st-global': true,
+} as const;
+
+export interface ClassSymbol extends StPartDirectives {
     _kind: 'class';
     name: string;
     alias?: ImportSymbol;
@@ -37,6 +62,31 @@ export const diagnostics = {
         'warning',
         (name: string) =>
             `unscoped class "${name}" will affect all elements of the same type in the document`
+    ),
+    STATE_DEFINITION_IN_ELEMENT: createDiagnosticReporter(
+        '11002',
+        'error',
+        () => 'cannot define pseudo states inside a type selector'
+    ),
+    STATE_DEFINITION_IN_COMPLEX: createDiagnosticReporter(
+        '11003',
+        'error',
+        () => 'cannot define pseudo states inside complex selectors'
+    ),
+    OVERRIDE_TYPED_RULE: createDiagnosticReporter(
+        '11006',
+        'warning',
+        (key: string, name: string) => `override "${key}" on typed rule "${name}"`
+    ),
+    CANNOT_RESOLVE_EXTEND: createDiagnosticReporter(
+        '11004',
+        'error',
+        (name: string) => `cannot resolve '-st-extends' type for '${name}'`
+    ),
+    CANNOT_EXTEND_IN_COMPLEX: createDiagnosticReporter(
+        '11005',
+        'error',
+        () => `cannot define "-st-extends" inside a complex selector`
     ),
     EMPTY_ST_GLOBAL: createDiagnosticReporter(
         '00003',
@@ -89,6 +139,11 @@ export const hooks = createFeature<{
             );
         }
         addClass(context, node.value, rule);
+    },
+    analyzeDeclaration({ context, decl }) {
+        if (context.meta.type === 'stylable' && decl.prop in stPartDirectives) {
+            handleDirectives(context, decl);
+        }
     },
     transformResolve({ context }) {
         const resolvedSymbols = context.getResolvedSymbols(context.meta);
@@ -382,4 +437,159 @@ export function checkForScopedNodeAfter(
         }
     }
     return false;
+}
+
+function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
+    const rule = decl.parent as postcss.Rule;
+    if (rule?.type !== 'rule') {
+        return;
+    }
+    const isSimplePerSelector = isSimpleSelector(rule.selector);
+    const type = isSimplePerSelector.reduce((accType, { type }) => {
+        return !accType ? type : accType !== type ? `complex` : type;
+    }, `` as typeof isSimplePerSelector[number]['type']);
+    const isSimple = type !== `complex`;
+    if (decl.prop === `-st-states`) {
+        if (isSimple && type !== 'type') {
+            extendTypedRule(
+                context,
+                decl,
+                rule.selector,
+                `-st-states`,
+                STCustomState.parsePseudoStates(decl.value, decl, context.diagnostics)
+            );
+        } else {
+            if (type === 'type') {
+                context.diagnostics.report(diagnostics.STATE_DEFINITION_IN_ELEMENT(), {
+                    node: decl,
+                });
+            } else {
+                context.diagnostics.report(diagnostics.STATE_DEFINITION_IN_COMPLEX(), {
+                    node: decl,
+                });
+            }
+        }
+    } else if (decl.prop === `-st-extends`) {
+        if (isSimple) {
+            const parsed = parseStExtends(decl.value);
+            const symbolName = parsed.types[0] && parsed.types[0].symbolName;
+
+            const extendsRefSymbol = STSymbol.get(context.meta, symbolName)!;
+            if (
+                (extendsRefSymbol &&
+                    (extendsRefSymbol._kind === 'import' ||
+                        extendsRefSymbol._kind === 'class' ||
+                        extendsRefSymbol._kind === 'element')) ||
+                decl.value === context.meta.root
+            ) {
+                extendTypedRule(
+                    context,
+                    decl,
+                    rule.selector,
+                    `-st-extends`,
+                    getAlias(extendsRefSymbol) || extendsRefSymbol
+                );
+            } else {
+                context.diagnostics.report(diagnostics.CANNOT_RESOLVE_EXTEND(decl.value), {
+                    node: decl,
+                    word: decl.value,
+                });
+            }
+        } else {
+            context.diagnostics.report(diagnostics.CANNOT_EXTEND_IN_COMPLEX(), {
+                node: decl,
+            });
+        }
+    } else if (decl.prop === `-st-global`) {
+        if (isSimple && type !== 'type') {
+            // set class global mapping
+            const name = rule.selector.replace('.', '');
+            const classSymbol = get(context.meta, name);
+            if (classSymbol) {
+                const globalSelectorAst = parseStGlobal(context, decl);
+                if (globalSelectorAst) {
+                    classSymbol[`-st-global`] = globalSelectorAst;
+                }
+            }
+        } else {
+            // TODO: diagnostics - scoped on none class
+        }
+    }
+}
+
+function extendTypedRule(
+    context: FeatureContext,
+    node: postcss.Node,
+    selector: string,
+    key: keyof StPartDirectives,
+    value: any
+) {
+    const name = selector.replace('.', '');
+    const typedRule = STSymbol.get(context.meta, name) as ClassSymbol | ElementSymbol;
+    if (typedRule && typedRule[key]) {
+        context.diagnostics.report(diagnostics.OVERRIDE_TYPED_RULE(key, name), {
+            node,
+            word: name,
+        });
+    }
+    if (typedRule) {
+        typedRule[key] = value;
+    }
+}
+
+export interface ArgValue {
+    type: string;
+    value: string;
+}
+export interface ExtendsValue {
+    symbolName: string;
+    args: ArgValue[][] | null;
+}
+
+export function parseStExtends(value: string) {
+    const ast = postcssValueParser(value);
+    const types: ExtendsValue[] = [];
+
+    ast.walk((node) => {
+        if (node.type === 'function') {
+            const args = getNamedArgs(node);
+
+            types.push({
+                symbolName: node.value,
+                args,
+            });
+
+            return false;
+        } else if (node.type === 'word') {
+            types.push({
+                symbolName: node.value,
+                args: null,
+            });
+        }
+        return undefined;
+    }, false);
+
+    return {
+        ast,
+        types,
+    };
+}
+function parseStGlobal(
+    context: FeatureContext,
+    decl: postcss.Declaration
+): SelectorNodes | undefined {
+    const selector = parseSelectorWithCache(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''), {
+        clone: true,
+    });
+    if (!selector[0]) {
+        context.diagnostics.report(diagnostics.EMPTY_ST_GLOBAL(), {
+            node: decl,
+        });
+        return;
+    } else if (selector.length > 1) {
+        context.diagnostics.report(diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL(), {
+            node: decl,
+        });
+    }
+    return selector[0].nodes;
 }

@@ -17,6 +17,8 @@ export type { VarSymbol, ComputedStVar, FlatComputedStVar } from './st-var';
 
 export * as STCustomSelector from './st-custom-selector';
 
+export * as STCustomState from './st-custom-state';
+
 export * as STMixin from './st-mixin';
 export type { MixinReflection, MixinValue } from './st-mixin';
 
@@ -25,6 +27,8 @@ export type { ClassSymbol } from './css-class';
 
 export * as CSSType from './css-type';
 export type { ElementSymbol } from './css-type';
+
+export * as CSSPseudoClass from './css-pseudo-class';
 
 export * as CSSCustomProperty from './css-custom-property';
 export type { CSSVarSymbol } from './css-custom-property';
@@ -37,5 +41,3 @@ export type { LayerSymbol } from './css-layer';
 
 export * as CSSContains from './css-contains';
 export type { ContainerSymbol } from './css-contains';
-
-export type { StylableDirectives, MappedStates } from './types';

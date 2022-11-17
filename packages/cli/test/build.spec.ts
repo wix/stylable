@@ -3,13 +3,13 @@ import { Stylable } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
-import { STImport, STVar } from '@stylable/core/dist/features';
-import { processorDiagnostics, murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
+import { STImport, STVar, CSSClass } from '@stylable/core/dist/features';
+import { murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
 
 const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
 const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
-const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
+const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 
 const log = () => {
     /**/
@@ -196,7 +196,7 @@ describe('build stand alone', () => {
         const messages = diagnosticsManager.get(identifier, '/comp.st.css')!.diagnostics;
 
         expect(messages[0].message).to.contain(
-            processorStringDiagnostics.CANNOT_RESOLVE_EXTEND('MissingComp')
+            cssClassDiagnostics.CANNOT_RESOLVE_EXTEND('MissingComp')
         );
         expect(messages[1].message).to.contain(
             stImportDiagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')

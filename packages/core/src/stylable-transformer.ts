@@ -4,8 +4,7 @@ import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
-import { nativePseudoClasses, nativePseudoElements } from './native-reserved-lists';
-import { setStateToNode, stateDiagnostics } from './pseudo-states';
+import { nativePseudoElements } from './native-reserved-lists';
 import { parseSelectorWithCache, stringifySelector } from './helpers/selector';
 import {
     SelectorNode,
@@ -35,6 +34,7 @@ import {
     STMixin,
     CSSClass,
     CSSType,
+    CSSPseudoClass,
     CSSKeyframes,
     CSSLayer,
     CSSCustomProperty,
@@ -48,8 +48,6 @@ import {
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
-
-const { hasOwnProperty } = Object.prototype;
 
 export interface ResolvedElement {
     name: string;
@@ -359,6 +357,7 @@ export class StylableTransformer {
             this.resolver,
             parseSelectorWithCache(selector, { clone: true }),
             rule || postcss.rule({ selector }),
+            this.scopeSelectorAst.bind(this),
             topNestClassName
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
@@ -511,7 +510,7 @@ export class StylableTransformer {
                 if (
                     !nativePseudoElements.includes(node.value) &&
                     !isVendorPrefixed(node.value) &&
-                    !this.isDuplicateStScopeDiagnostic(context)
+                    !context.isDuplicateStScopeDiagnostic()
                 ) {
                     this.diagnostics.report(
                         transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT(node.value),
@@ -523,63 +522,11 @@ export class StylableTransformer {
                 }
             }
         } else if (node.type === 'pseudo_class') {
-            // find matching custom state
-            let foundCustomState = false;
-            for (const { symbol, meta } of currentAnchor.resolved) {
-                const states = symbol[`-st-states`];
-                if (states && hasOwnProperty.call(states, node.value)) {
-                    foundCustomState = true;
-                    // transform custom state
-                    setStateToNode(
-                        states,
-                        meta,
-                        node.value,
-                        node,
-                        meta.namespace,
-                        this.resolver,
-                        this.diagnostics,
-                        context.rule
-                    );
-                    break;
-                }
-            }
-            // handle nested pseudo classes
-            if (node.nodes && !foundCustomState) {
-                if (node.value === 'global') {
-                    // ignore `:st-global` since it is handled after the mixin transformation
-                    return;
-                } else {
-                    // pickup all nested selectors except nth initial selector
-                    const innerSelectors = (
-                        node.nodes[0] && node.nodes[0].type === `nth`
-                            ? node.nodes.slice(1)
-                            : node.nodes
-                    ) as Selector[];
-                    const nestedContext = context.createNestedContext(innerSelectors);
-                    this.scopeSelectorAst(nestedContext);
-                    /**
-                     * ToDo: remove once elements is deprecated!
-                     * support deprecated elements.
-                     * used to flatten nested elements for some native pseudo classes.
-                     */
-                    if (node.value.match(/not|any|-\w+?-any|matches|is|where|has|local/)) {
-                        // delegate elements of first selector
-                        context.elements[context.selectorIndex].push(...nestedContext.elements[0]);
-                    }
-                }
-            }
-            // warn unknown state
-            if (
-                !foundCustomState &&
-                !nativePseudoClasses.includes(node.value) &&
-                !isVendorPrefixed(node.value) &&
-                !this.isDuplicateStScopeDiagnostic(context)
-            ) {
-                this.diagnostics.report(stateDiagnostics.UNKNOWN_STATE_USAGE(node.value), {
-                    node: context.rule,
-                    word: node.value,
-                });
-            }
+            CSSPseudoClass.hooks.transformSelectorNode({
+                context: transformerContext,
+                selectorContext: context,
+                node,
+            });
         } else if (node.type === `nesting`) {
             /**
              * although it is always assumed to be class symbol, the get is done from
@@ -596,27 +543,6 @@ export class StylableTransformer {
             });
         }
     }
-    private isDuplicateStScopeDiagnostic(context: ScopeContext) {
-        const transformedScope =
-            context.originMeta.transformedScopes?.[getRuleScopeSelector(context.rule) || ``];
-        if (transformedScope && context.selector && context.compoundSelector) {
-            const currentCompoundSelector = stringifySelector(context.compoundSelector);
-            const i = context.selector.nodes.indexOf(context.compoundSelector);
-            for (const stScopeSelectorCompounded of transformedScope) {
-                // if we are in a chunk index that is in the rage of the @st-scope param
-                if (i <= stScopeSelectorCompounded.nodes.length) {
-                    for (const scopeNode of stScopeSelectorCompounded.nodes) {
-                        const scopeNodeSelector = stringifySelector(scopeNode);
-                        // if the two chunks match the error is already reported by the @st-scope validation
-                        if (scopeNodeSelector === currentCompoundSelector) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
     private handleCustomSelector(
         customSelector: string,
         meta: StylableMeta,
@@ -631,7 +557,8 @@ export class StylableTransformer {
             meta,
             this.resolver,
             removeFirstRootInFirstCompound(selectorList, meta),
-            context.rule
+            context.rule,
+            this.scopeSelectorAst.bind(this)
         );
         const customAstSelectors = this.scopeSelectorAst(internalContext);
         if (!isFirstInSelector) {
@@ -673,7 +600,8 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
             meta,
             transformer.resolver,
             parseSelectorWithCache(rule.selector, { clone: true }),
-            rule
+            rule,
+            transformer.scopeSelectorAst.bind(transformer)
         );
         transformedScopes[rule.selector] = groupCompoundSelectors(
             transformer.scopeSelectorAst(context)
@@ -777,6 +705,7 @@ export class ScopeContext {
         public resolver: StylableResolver,
         public selectorAst: SelectorList,
         public rule: postcss.Rule,
+        public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
         public topNestClassName: string = ``
     ) {}
     public initRootAnchor(anchor: ScopeAnchor) {
@@ -816,6 +745,7 @@ export class ScopeContext {
             this.resolver,
             selectorAst,
             this.rule,
+            this.scopeSelectorAst,
             this.topNestClassName
         );
         Object.assign(ctx, this);
@@ -826,6 +756,28 @@ export class ScopeContext {
         ctx.additionalSelectors = [];
 
         return ctx;
+    }
+    public isDuplicateStScopeDiagnostic() {
+        // ToDo: should be removed once st-scope transformation moves to the end of the transform process
+        const transformedScope =
+            this.originMeta.transformedScopes?.[getRuleScopeSelector(this.rule) || ``];
+        if (transformedScope && this.selector && this.compoundSelector) {
+            const currentCompoundSelector = stringifySelector(this.compoundSelector);
+            const i = this.selector.nodes.indexOf(this.compoundSelector);
+            for (const stScopeSelectorCompounded of transformedScope) {
+                // if we are in a chunk index that is in the rage of the @st-scope param
+                if (i <= stScopeSelectorCompounded.nodes.length) {
+                    for (const scopeNode of stScopeSelectorCompounded.nodes) {
+                        const scopeNodeSelector = stringifySelector(scopeNode);
+                        // if the two chunks match the error is already reported by the @st-scope validation
+                        if (scopeNodeSelector === currentCompoundSelector) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
 
