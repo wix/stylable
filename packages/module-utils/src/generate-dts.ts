@@ -41,7 +41,7 @@ function collectLocalStates(cls: ClassSymbol) {
     // stringify states for current class
     for (const [stateName, stateDef] of stateEntries.entries()) {
         const booleanState = !stateDef;
-        const mappedState = typeof stateDef === 'string';
+        const mappedState = stateDef?.template || typeof stateDef === 'string';
         if (booleanState || !mappedState) {
             stateEntriesString += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
         }

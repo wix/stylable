@@ -379,6 +379,20 @@ describe('Generate DTS', function () {
             );
         });
 
+        it('should warn on mapped state accepts a param', () => {
+            tk.populate({
+                'test.st.css': '.root { -st-states: mappedWithParam(string, "$0"); }',
+                'test.ts': `
+                    import { st, classes } from "./test.st.css";
+                    
+                    st(classes.root, { mappedWithParam: 'paramVal' });
+                `,
+            });
+            expect(tk.typecheck('test.ts')).to.include(
+                "Argument of type '{ mappedWithParam: string; }' is not assignable"
+            );
+        });
+
         describe('state overrides', () => {
             it('should support states overridden through a local extend', () => {
                 tk.populate({
@@ -433,6 +447,23 @@ describe('Generate DTS', function () {
                 tk.populate({
                     'test.st.css':
                         '.base { -st-states: state1; } .test { -st-states: state1(".abc"); -st-extends: base; }',
+                    'test.ts': `
+                        import { eq } from "./test-kit";
+                        import { st, classes } from "./test.st.css";
+                        
+                        eq<string>(st(classes.test, { state1: 'value' }));
+                    `,
+                });
+
+                expect(tk.typecheck('test.ts')).to.include(
+                    "Argument of type '{ state1: string; }' is not assignable"
+                );
+            });
+
+            it('should warn about setting a state that extends with a mapped (with param)', () => {
+                tk.populate({
+                    'test.st.css':
+                        '.base { -st-states: state1; } .test { -st-states: state1(string, ".$0"); -st-extends: base; }',
                     'test.ts': `
                         import { eq } from "./test-kit";
                         import { st, classes } from "./test.st.css";
