@@ -63,7 +63,7 @@ export function buildSingleFile({
     stylable,
     includeCSSInJS = false,
     projectAssets,
-    useNamespaceReference = false,
+    useNamespaceReference = true,
     injectCSSRequest = false,
     optimize = false,
     minify = false,
@@ -141,10 +141,10 @@ export function buildSingleFile({
     moduleFormats.forEach(([format, ext]) => {
         outputLogs.push(`${format} module`);
 
-        const moduleCssImports = injectCSSRequest ? [{ from: './' + cssAssetFilename }] : [];
+        const moduleCssImports = [];
 
         const cssDepth = res.meta.transformCssDepth?.cssDepth ?? 0;
-        
+
         for (const imported of res.meta.getImportStatements()) {
             let resolved = imported.request;
             try {
@@ -159,6 +159,10 @@ export function buildSingleFile({
                     moduleCssImports.push({ from: imported.request + ext });
                 }
             }
+        }
+
+        if (injectCSSRequest) {
+            moduleCssImports.push({ from: './' + cssAssetFilename });
         }
 
         const code = generateStylableJSModuleSource(

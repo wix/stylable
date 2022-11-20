@@ -239,7 +239,7 @@ export function createDefaultOptions(): BuildOptions {
         injectCSSRequest: false,
         optimize: false,
         minify: false,
-        useNamespaceReference: false,
+        useNamespaceReference: true,
         diagnostics: true,
         outputCSS: false,
         includeCSSInJS: false,
