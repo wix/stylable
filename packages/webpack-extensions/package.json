@@ -14,6 +14,7 @@
     "@stylable/node": "^5.3.0",
     "@stylable/webpack-plugin": "^5.3.0",
     "@tokey/css-selector-parser": "^0.6.0",
+    "find-config": "^1.0.0",
     "lodash.clonedeep": "^4.5.0"
   },
   "files": [
