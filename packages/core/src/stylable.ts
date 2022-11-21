@@ -38,6 +38,20 @@ export interface StylableConfig {
     fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
 }
 
+// This defines and validates known configs for the defaultConfig in 'stylable.config.js
+const globalDefaultSupportedConfigs = new Set(['resolveModule', 'resolveNamespace']);
+export function validateDefaultConfig(defaultConfigObj: any) {
+    if (typeof defaultConfigObj === 'object') {
+        for (const configName of Object.keys(defaultConfigObj)) {
+            if (!globalDefaultSupportedConfigs.has(configName)) {
+                console.warn(
+                    `Caution: loading "${configName}" config is experimental, and may behave unexpectedly`
+                );
+            }
+        }
+    }
+}
+
 interface InitCacheParams {
     /* Keeps cache entities that meet the condition specified in a callback function. Return `true` to keep the iterated entity. */
     filter?(key: string, entity: CachedModuleEntity): boolean;

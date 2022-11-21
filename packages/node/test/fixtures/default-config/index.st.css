@@ -1,0 +1,5 @@
+@st-import [test] from "wp-alias/green.st.css";
+
+.root {
+    -st-extends: test;
+}

@@ -13,18 +13,23 @@ import type {
 import { processProjects } from './process-projects';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 import { resolveNpmRequests } from './resolve-requests';
+import type { ModuleResolver } from '@stylable/core/src/types';
+import type { MinimalFS } from '@stylable/core';
+
+interface StylableRuntimeConfigs {
+    stcConfig?: Configuration<string> | undefined;
+    defaultConfig?: { resolveModule?: ModuleResolver };
+}
 
 export async function projectsConfig(
     rootDir: string,
     overrideBuildOptions: Partial<BuildOptions>,
     defaultOptions: BuildOptions = createDefaultOptions(),
-    configFilePath?: string
+    config?: StylableRuntimeConfigs
 ): Promise<STCProjects> {
-    const { config } = resolveConfig(rootDir, configFilePath) || {};
-
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
-        config?.options,
+        config?.stcConfig?.options,
         overrideBuildOptions
     );
 
@@ -33,14 +38,15 @@ export async function projectsConfig(
     let projects: STCProjects;
 
     if (isMultipleConfigProject(config)) {
-        const { entities } = processProjects(config, {
+        const { entities } = processProjects(config.stcConfig, {
             defaultOptions: topLevelOptions,
         });
 
         projects = await resolveProjectsRequests({
             rootDir,
             entities,
-            resolveRequests: config.projectsOptions?.resolveRequests ?? resolveNpmRequests,
+            resolveRequests:
+                config.stcConfig.projectsOptions?.resolveRequests ?? resolveNpmRequests,
         });
     } else {
         projects = [
@@ -54,29 +60,33 @@ export async function projectsConfig(
     return projects;
 }
 
-export function resolveConfig(context: string, request?: string) {
-    return request ? requireConfigFile(request, context) : resolveConfigFile(context);
+// todo: make fs not optional next major version
+export function resolveConfig(context: string, request?: string, fs?: MinimalFS) {
+    return request ? requireConfigFile(request, context, fs) : resolveConfigFile(context, fs);
 }
 
-function requireConfigFile(request: string, context: string) {
+function requireConfigFile(request: string, context: string, fs?: MinimalFS) {
     const path = require.resolve(request, { paths: [context] });
-    const config = resolveConfigValue(require(path));
+    const config = resolveConfigValue(require(path), fs);
     return config ? { config, path } : undefined;
 }
 
-function resolveConfigFile(context: string) {
-    return loadStylableConfig(context, (config) => resolveConfigValue(config));
+function resolveConfigFile(context: string, fs?: MinimalFS) {
+    return loadStylableConfig(context, (config) => resolveConfigValue(config, fs));
 }
 
-function resolveConfigValue(config: any) {
+function resolveConfigValue(config: any, fs?: MinimalFS) {
     return tryRun(
-        () =>
-            isSTCConfig(config)
+        (): StylableRuntimeConfigs => ({
+            stcConfig: isSTCConfig(config)
                 ? typeof config.stcConfig === 'function'
                     ? config.stcConfig()
                     : config.stcConfig
                 : undefined,
-        'Failed to evaluate "stcConfig"'
+            defaultConfig:
+                typeof config.defaultConfig === 'function' ? config.defaultConfig(fs) : undefined,
+        }),
+        'Failed to evaluate Stylable config'
     );
 }
 
@@ -88,8 +98,10 @@ function isSTCConfig(config: any): config is { stcConfig: Configuration | Config
     );
 }
 
-function isMultipleConfigProject(config: any): config is MultipleProjectsConfig<string> {
-    return Boolean(config?.projects);
+function isMultipleConfigProject(
+    config: any
+): config is { stcConfig: MultipleProjectsConfig<string> } {
+    return Boolean(config?.stcConfig?.projects);
 }
 
 async function resolveProjectsRequests({

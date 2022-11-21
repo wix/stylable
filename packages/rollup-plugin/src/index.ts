@@ -108,11 +108,20 @@ export function stylableRollupPlugin({
                 projectRoot: projectRoot || process.cwd(),
                 resolveNamespace: resolveNamespace || resolveNamespaceNode,
             });
+            const configFromFile = resolveStcConfig(
+                stConfig.projectRoot,
+                typeof stcConfig === 'string' ? stcConfig : undefined,
+                fs
+            );
+
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
             } else {
-                stylable = new Stylable(stConfig);
+                stylable = new Stylable({
+                    resolveModule: configFromFile?.config?.defaultConfig?.resolveModule,
+                    ...stConfig,
+                });
             }
 
             if (stcConfig) {
@@ -120,23 +129,10 @@ export function stylableRollupPlugin({
                     for (const sourceDirectory of stcBuilder.getProjectsSources()) {
                         this.addWatchFile(sourceDirectory);
                     }
-                } else {
-                    const configuration = resolveStcConfig(
-                        stConfig.projectRoot,
-                        typeof stcConfig === 'string' ? stcConfig : undefined
-                    );
-
-                    if (!configuration) {
-                        throw new Error(
-                            `Could not find "stcConfig"${
-                                typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
-                            }`
-                        );
-                    }
-
+                } else if (configFromFile && configFromFile.config.stcConfig) {
                     stcBuilder = STCBuilder.create({
                         rootDir: stConfig.projectRoot,
-                        configFilePath: configuration.path,
+                        configFilePath: configFromFile.path,
                         watchMode: this.meta.watchMode,
                     });
 

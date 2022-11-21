@@ -8,6 +8,7 @@ export {
     transformerDiagnostics,
     ResolvedElement,
 } from './stylable-transformer';
+export { validateDefaultConfig } from './stylable';
 export { STCustomSelector, STCustomState } from './features';
 export type { MappedStates, StateParsedValue } from './helpers/custom-state';
 export { murmurhash3_32_gc } from './murmurhash';
