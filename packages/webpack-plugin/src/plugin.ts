@@ -1,8 +1,9 @@
 import { MinimalFS, Stylable, StylableConfig } from '@stylable/core';
-import type {
+import {
     OptimizeConfig,
     DiagnosticsMode,
     IStylableOptimizer,
+    validateDefaultConfig,
 } from '@stylable/core/dist/index-internal';
 import { createNamespaceStrategyNode } from '@stylable/node';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
@@ -343,13 +344,7 @@ export class StylableWebpackPlugin {
         const topLevelFs = getTopLevelInputFilesystem(compiler);
         const stylableConfig = this.getStylableConfig(compiler)?.config;
 
-        const resolver = this.userOptions.stylableConfig?.(
-            {
-                fileSystem: topLevelFs,
-                projectRoot: compiler.context,
-            },
-            compiler
-        ).resolveModule;
+        validateDefaultConfig(stylableConfig?.defaultConfig);
 
         this.stylable = new Stylable(
             this.options.stylableConfig(
@@ -361,12 +356,6 @@ export class StylableWebpackPlugin {
                      */
                     fileSystem: topLevelFs,
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
-                    /**
-                     * resolveModule config order is user determined
-                     * each configuration points receives the default options,
-                     * and lets the user mix and match the options as they wish
-                     */
-                    resolveModule: resolver || stylableConfig?.defaultConfig?.resolveModule,
                     resolveOptions: {
                         ...resolverOptions,
                         extensions: [], // use Stylable's default extensions
@@ -377,6 +366,12 @@ export class StylableWebpackPlugin {
                     requireModule: createDecacheRequire(compiler),
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
+                    /**
+                     * config order is user determined
+                     * each configuration points receives the default options,
+                     * and lets the user mix and match the options as they wish
+                     */
+                    ...stylableConfig?.defaultConfig,
                 },
                 compiler
             )

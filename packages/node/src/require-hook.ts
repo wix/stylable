@@ -1,4 +1,5 @@
 import type { StylableConfig } from '@stylable/core';
+import { validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { stylableModuleFactory } from '@stylable/module-utils';
 import fs from 'fs';
 import { resolveNamespace } from './resolve-namespace';
@@ -24,16 +25,18 @@ export function attachHook({
     ignoreJSModules,
     configPath,
 }: Partial<Options> = {}) {
-    let resolveModule;
+    let options: Partial<StylableConfig> = {
+        ...stylableConfig,
+    };
 
     try {
         if (configPath) {
             const { defaultConfig } = require(configPath);
+            const defaultConfigObj = defaultConfig(fs);
 
-            resolveModule =
-                defaultConfig && typeof defaultConfig === 'function'
-                    ? defaultConfig(fs).resolveModule
-                    : undefined;
+            validateDefaultConfig(defaultConfigObj);
+
+            options = { ...defaultConfigObj, ...options };
         }
     } catch (e) {
         throw new Error(`Failed to load Stylable config from ${configPath}:\n${e}`);
@@ -46,8 +49,7 @@ export function attachHook({
             requireModule: require,
             resolveNamespace,
             resolverCache: new Map(),
-            resolveModule,
-            ...stylableConfig,
+            ...options,
         },
         { runtimePath }
     );

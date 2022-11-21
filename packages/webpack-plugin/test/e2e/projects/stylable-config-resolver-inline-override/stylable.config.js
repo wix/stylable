@@ -16,7 +16,7 @@ module.exports = {
         return {
             ...defaultWebpackConfig,
             stylableConfig(defaultStylableConfig) {
-                return { ...defaultStylableConfig };
+                return { ...defaultWebpackConfig.stylableConfig(defaultStylableConfig) };
             },
         };
     },
