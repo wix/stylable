@@ -60,7 +60,7 @@ export interface StylableWebpackEntities {
     StylableRuntimeStylesheet: typeof RuntimeModule;
     CSSURLDependency: typeof dependencies.ModuleDependency;
     NoopTemplate: typeof dependencies.ModuleDependency.Template;
-    UnusedDependency: typeof dependencies.ModuleDependency;
+    UnusedDependency: typeof dependencies.HarmonyImportDependency;
 }
 
 export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpackEntities {
@@ -301,7 +301,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
     );
 
     /* The request is empty for both dependencies and it will be overridden by the de-serialization process */
-    registerSerialization(webpack, UnusedDependency, () => [''] as [string]);
+    registerSerialization(
+        webpack,
+        UnusedDependency,
+        () => ['', 0, undefined] as [string, number, undefined]
+    );
     registerSerialization(webpack, CSSURLDependency, () => [''] as [string]);
 
     entities = {
