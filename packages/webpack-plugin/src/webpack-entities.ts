@@ -65,7 +65,7 @@ export interface StylableWebpackEntities {
 
 export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpackEntities {
     const {
-        dependencies: { ModuleDependency },
+        dependencies: { ModuleDependency, HarmonyImportDependency },
         Dependency,
         NormalModule,
         RuntimeModule,
@@ -88,7 +88,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
         }
     }
 
-    class UnusedDependency extends ModuleDependency {
+    class UnusedDependency extends HarmonyImportDependency {
         weak = true;
         // @ts-expect-error webpack types are wrong consider this as property
         get type() {
