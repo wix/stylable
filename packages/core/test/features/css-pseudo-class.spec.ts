@@ -439,9 +439,9 @@ describe('features/css-pseudo-class', () => {
             it('should transform parameter into custom template', () => {
                 const { sheets } = testStylableCore(`
                     .root {
-                        -st-states: class-name(string, ".$0"),
-                                    multi-insertion(string, ".$0[attr='$0']"),
-                                    paramOnly(string, "$0");
+                        -st-states: class-name(".$0", string),
+                                    multi-insertion(".$0[attr='$0']", string),
+                                    paramOnly("$0", string);
                     }
     
                     /* @rule(base) .entry__root.abc */
@@ -475,8 +475,9 @@ describe('features/css-pseudo-class', () => {
                  */
                 testStylableCore(`
                     .root {
-                        -st-states: classAndThenParam(string, ".x$0"),
-                                    paramAndThenClass(string, "$0.x");
+                        -st-states: classAndThenParam(".x$0", string),
+                                    paramAndThenClass("$0.x", string),
+                                    size("[size='$0']", number);
                     }
 
                     /* 
@@ -523,6 +524,20 @@ describe('features/css-pseudo-class', () => {
                         @rule(invalid start2) .entry__root:paramAndThenClass(*) 
                     */
                     .root:paramAndThenClass(*) {}
+                    
+                    /* 
+                        @transform-error(param validation) ${stCustomStateDiagnostics.FAILED_STATE_VALIDATION(
+                            'size',
+                            'text',
+                            [
+                                STCustomState.sysValidationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(
+                                    'text'
+                                ),
+                            ]
+                        )} 
+                        @rule(param validation) .entry__root[size='text']
+                    */
+                    .root:size(text) {}
                 `);
             });
         });

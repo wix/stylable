@@ -9,7 +9,7 @@ export const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
 
 function addStatesEntries(
-    stateEntries: Map<string, StateParsedValue | string | null>,
+    stateEntries: Map<string, MappedStates[string]>,
     stStates: MappedStates | undefined
 ) {
     if (stStates) {
@@ -41,7 +41,7 @@ function collectLocalStates(cls: ClassSymbol) {
     // stringify states for current class
     for (const [stateName, stateDef] of stateEntries.entries()) {
         const booleanState = !stateDef;
-        const mappedState = stateDef?.template || typeof stateDef === 'string';
+        const mappedState = stateDef?.type === 'template' || typeof stateDef === 'string';
         if (booleanState || !mappedState) {
             stateEntriesString += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
         }

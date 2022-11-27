@@ -11,6 +11,7 @@ import {
     systemValidators,
     validationErrors as sysValidationErrors,
     resolveStateParam,
+    isTemplateState,
 } from '../helpers/custom-state';
 
 export const diagnostics = {
@@ -35,4 +36,5 @@ export {
     systemValidators,
     sysValidationErrors,
     resolveStateParam,
+    isTemplateState,
 };

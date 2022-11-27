@@ -381,7 +381,7 @@ describe('Generate DTS', function () {
 
         it('should warn on mapped state accepts a param', () => {
             tk.populate({
-                'test.st.css': '.root { -st-states: mappedWithParam(string, "$0"); }',
+                'test.st.css': '.root { -st-states: mappedWithParam("$0", string); }',
                 'test.ts': `
                     import { st, classes } from "./test.st.css";
                     
@@ -463,7 +463,7 @@ describe('Generate DTS', function () {
             it('should warn about setting a state that extends with a mapped (with param)', () => {
                 tk.populate({
                     'test.st.css':
-                        '.base { -st-states: state1; } .test { -st-states: state1(string, ".$0"); -st-extends: base; }',
+                        '.base { -st-states: state1; } .test { -st-states: state1(".$0", string); -st-extends: base; }',
                     'test.ts': `
                         import { eq } from "./test-kit";
                         import { st, classes } from "./test.st.css";

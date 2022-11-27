@@ -1,3 +1,4 @@
 .root {
-    -st-states: shmover(number(min(3), max(42)));
+    -st-states: shmover(number(min(3), max(42))),
+                templateWithParam("[attr='$0']", string(minLength(2), maxLength(6)));
 }
