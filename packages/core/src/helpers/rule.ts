@@ -85,7 +85,8 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 node.name === 'media' ||
                 node.name === 'supports' ||
                 node.name === 'st-scope' ||
-                node.name === 'layer'
+                node.name === 'layer' ||
+                node.name === 'container'
             ) {
                 const scopeSelector = node.name === 'st-scope' ? node.params : '';
                 const atRuleSubset = createSubsetAst(

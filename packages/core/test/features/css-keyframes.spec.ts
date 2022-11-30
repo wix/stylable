@@ -6,6 +6,7 @@ import {
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
+import deindent from 'deindent';
 chai.use(chaiSubset);
 
 const mixinDiagnostics = diagnosticBankReportToStrings(STMixin.diagnostics);
@@ -613,6 +614,57 @@ describe(`features/css-keyframes`, () => {
                     100% {}
                 }
             `);
+        });
+    });
+    describe('native css', () => {
+        it('should not namespace', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent`
+                    @keyframes jump {}
+                    .x {
+                        animation: jump;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [keyframes(jump)] from './native.css';
+
+                    .root {
+                        /* @decl animation: jump */
+                        animation: jump;
+                    }
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+            const { meta, exports } = stylable.transform('/entry.st.css');
+
+            shouldReportNoDiagnostics(nativeMeta);
+            shouldReportNoDiagnostics(meta);
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                deindent`
+                    @keyframes jump {}
+                    .x {
+                        animation: jump;
+                    }
+            `.trim()
+            );
+
+            // JS exports
+            expect(exports.keyframes, `JS export`).to.eql({
+                jump: 'jump',
+            });
+        });
+        it('should ignore stylable specific transformations', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': '@keyframes st-global(name) {}',
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                '@keyframes st-global(name) {}'
+            );
         });
     });
 });

@@ -23,6 +23,15 @@ export function isAsset(url: string) {
     return !isExternal(url);
 }
 
+export function isRelativeNativeCss(fullPath: string) {
+    return (
+        fullPath.endsWith('.css') &&
+        !fullPath.endsWith('.st.css') &&
+        !fullPath.includes(path.sep + 'node_modules' + path.sep) &&
+        !isUrl(fullPath)
+    );
+}
+
 export function makeAbsolute(resourcePath: string, rootContext: string, moduleContext: string) {
     const isAbs = path.isAbsolute(resourcePath);
     let abs: string;

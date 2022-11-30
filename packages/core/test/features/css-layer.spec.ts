@@ -541,4 +541,57 @@ describe('features/css-layer', () => {
             `);
         });
     });
+    describe('native css', () => {
+        it('should not namespace', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent`
+                    @layer a, b;
+                    @layer c {}
+                `,
+                '/entry.st.css': `
+                    @st-import [layer(a, b, c)] from './native.css';
+
+                    /* @atrule a.b.c */
+                    @layer a.b.c {}
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+            const { meta, exports } = stylable.transform('/entry.st.css');
+
+            shouldReportNoDiagnostics(nativeMeta);
+            shouldReportNoDiagnostics(meta);
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                deindent`
+                    @layer a, b;
+                    @layer c {}
+                `.trim()
+            );
+
+            // JS exports
+            expect(exports.layers, 'JS export').to.eql({
+                a: 'a',
+                b: 'b',
+                c: 'c',
+            });
+        });
+        it('should ignore stylable specific transformations', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent`
+                    @layer a, st-global(b);
+                    @layer st-global(c) {}
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                deindent`
+                    @layer a, st-global(b);
+                    @layer st-global(c) {}
+            `.trim()
+            );
+        });
+    });
 });

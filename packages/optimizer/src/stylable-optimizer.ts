@@ -3,7 +3,7 @@ import {
     IStylableOptimizer,
     OptimizeConfig,
     StylableExports,
-    pseudoStates,
+    STCustomState,
     namespaceDelimiter as delimiter,
 } from '@stylable/core/dist/index-internal';
 import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
@@ -11,7 +11,7 @@ import csso from 'csso';
 import postcss, { Declaration, Root, Rule, Node, Comment, Container } from 'postcss';
 import { NameMapper } from './name-mapper';
 
-const { booleanStateDelimiter } = pseudoStates;
+const { booleanStateDelimiter } = STCustomState.delimiters;
 const stateRegexp = new RegExp(`^(.*?)${booleanStateDelimiter}`);
 
 export class StylableOptimizer implements IStylableOptimizer {

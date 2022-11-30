@@ -62,6 +62,19 @@ const clearRequireCache = () => {
 };
 
 const ST_CSS = '.st.css';
+const LOADABLE_CSS_QUERY = '?stylable-plain-css';
+const LOADABLE_CSS = '.css' + LOADABLE_CSS_QUERY;
+
+function getLoadableModuleData(id: string) {
+    const isStFile = id.endsWith(ST_CSS);
+    const isLoadableCssFile = id.endsWith(LOADABLE_CSS);
+    const path = isLoadableCssFile ? id.substring(0, id.length - 19) : id;
+    return {
+        isStFile,
+        isLoadableCssFile,
+        path,
+    };
+}
 
 const PRINT_ORDER = -1;
 export function stylableRollupPlugin({
@@ -95,11 +108,20 @@ export function stylableRollupPlugin({
                 projectRoot: projectRoot || process.cwd(),
                 resolveNamespace: resolveNamespace || resolveNamespaceNode,
             });
+            const configFromFile = resolveStcConfig(
+                stConfig.projectRoot,
+                typeof stcConfig === 'string' ? stcConfig : undefined,
+                fs
+            );
+
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
             } else {
-                stylable = new Stylable(stConfig);
+                stylable = new Stylable({
+                    resolveModule: configFromFile?.config?.defaultConfig?.resolveModule,
+                    ...stConfig,
+                });
             }
 
             if (stcConfig) {
@@ -107,23 +129,10 @@ export function stylableRollupPlugin({
                     for (const sourceDirectory of stcBuilder.getProjectsSources()) {
                         this.addWatchFile(sourceDirectory);
                     }
-                } else {
-                    const configuration = resolveStcConfig(
-                        stConfig.projectRoot,
-                        typeof stcConfig === 'string' ? stcConfig : undefined
-                    );
-
-                    if (!configuration) {
-                        throw new Error(
-                            `Could not find "stcConfig"${
-                                typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
-                            }`
-                        );
-                    }
-
+                } else if (configFromFile && configFromFile.config.stcConfig) {
                     stcBuilder = STCBuilder.create({
                         rootDir: stConfig.projectRoot,
-                        configFilePath: configuration.path,
+                        configFilePath: configFromFile.path,
                         watchMode: this.meta.watchMode,
                     });
 
@@ -157,26 +166,38 @@ export function stylableRollupPlugin({
             }
         },
         load(id) {
-            if (id.endsWith(ST_CSS)) {
-                const code = fs.readFileSync(id, 'utf8');
-                return { code, moduleSideEffects: false };
+            const { isStFile, isLoadableCssFile, path } = getLoadableModuleData(id);
+            if (isLoadableCssFile || isStFile) {
+                const code = fs.readFileSync(path, 'utf8');
+                return { code, moduleSideEffects: isLoadableCssFile };
             }
             return null;
         },
         transform(source, id) {
-            if (!id.endsWith(ST_CSS)) {
+            const { isStFile, isLoadableCssFile, path } = getLoadableModuleData(id);
+            if (!isStFile && !isLoadableCssFile) {
                 return null;
             }
-            const { meta, exports } = stylable.transform(stylable.analyze(id, source));
+            const { meta, exports } = stylable.transform(stylable.analyze(path, source));
             const assetsIds = emitAssets(this, stylable, meta, emittedAssets, inlineAssets);
             const css = generateCssString(meta, minify, stylable, assetsIds);
             const moduleImports = [];
             for (const imported of meta.getImportStatements()) {
-                if (hasImportedSideEffects(stylable, meta, imported)) {
+                // attempt to resolve the request through stylable resolveModule,
+                let resolved = imported.request;
+                try {
+                    resolved = stylable.resolver.resolvePath(imported.context, imported.request);
+                } catch (e) {
+                    // fallback to request
+                }
+                // include Stylable and native css files that have effects on other files as regular imports
+                if (resolved.endsWith('.css') && !resolved.endsWith(ST_CSS)) {
+                    moduleImports.push(`import ${JSON.stringify(resolved + LOADABLE_CSS_QUERY)};`);
+                } else if (hasImportedSideEffects(stylable, meta, imported)) {
                     moduleImports.push(`import ${JSON.stringify(imported.request)};`);
                 }
             }
-            extracted.set(id, { css });
+            extracted.set(path, { css });
 
             for (const filePath of tryCollectImportsDeep(stylable, meta)) {
                 this.addWatchFile(filePath);
@@ -185,7 +206,7 @@ export function stylableRollupPlugin({
             /**
              * In case this Stylable module has sources the diagnostics will be emitted in `watchChange` hook.
              */
-            if (!stcBuilder?.getSourcesFiles(id)) {
+            if (isStFile && !stcBuilder?.getSourcesFiles(id)) {
                 emitDiagnostics(
                     {
                         emitWarning: (e: Error) => this.warn(e),
@@ -219,26 +240,27 @@ export function stylableRollupPlugin({
             };
 
             for (const moduleId of this.getModuleIds()) {
-                if (moduleId.endsWith(ST_CSS)) {
-                    modules.push({ depth: calcDepth(moduleId, context, [], cache), moduleId });
+                const { isStFile, isLoadableCssFile, path } = getLoadableModuleData(moduleId);
+                if (isStFile || isLoadableCssFile) {
+                    modules.push({ depth: calcDepth(moduleId, context, [], cache), path });
                 }
             }
 
             sortModulesByDepth(
                 modules,
                 (m) => m.depth,
-                (m) => m.moduleId,
+                (m) => m.path,
                 PRINT_ORDER
             );
 
             outputCSS = '';
 
-            for (const { moduleId } of modules) {
-                const stored = extracted.get(moduleId);
+            for (const { path } of modules) {
+                const stored = extracted.get(path);
                 if (stored) {
-                    outputCSS += extracted.get(moduleId).css + '\n';
+                    outputCSS += extracted.get(path).css + '\n';
                 } else {
-                    this.error(`Missing transformed css for ${moduleId}`);
+                    this.error(`Missing transformed css for ${path}`);
                 }
             }
             this.emitFile({ source: outputCSS, type: 'asset', fileName });

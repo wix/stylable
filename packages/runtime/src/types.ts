@@ -25,6 +25,7 @@ export interface StylableExports {
     classes: ClassesMap;
     keyframes: Record<string, string>;
     layers: Record<string, string>;
+    containers: Record<string, string>;
     stVars: Record<string, RuntimeStVar>;
     vars: Record<string, string>;
 }

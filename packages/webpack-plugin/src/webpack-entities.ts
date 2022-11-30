@@ -78,11 +78,9 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
     }
 
     class CSSURLDependency extends ModuleDependency {
-        // @ts-expect-error webpack types are wrong consider this as property
         get type() {
             return 'url()';
         }
-        // @ts-expect-error webpack types are wrong consider this as property
         get category() {
             return 'url';
         }
@@ -90,11 +88,9 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
 
     class UnusedDependency extends HarmonyImportDependency {
         weak = true;
-        // @ts-expect-error webpack types are wrong consider this as property
         get type() {
             return '@st-unused-import';
         }
-        // @ts-expect-error webpack types are wrong consider this as property
         get category() {
             return 'esm';
         }
@@ -235,6 +231,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
                 source,
                 getReplacementToken('stVars'),
                 JSON.stringify(stylableBuildData.exports.stVars)
+            );
+            replacePlaceholder(
+                source,
+                getReplacementToken('containers'),
+                JSON.stringify(stylableBuildData.exports.containers)
             );
             replacePlaceholder(
                 source,

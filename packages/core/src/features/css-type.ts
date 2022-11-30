@@ -1,5 +1,4 @@
 import { createFeature, FeatureContext } from './feature';
-import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
@@ -11,7 +10,8 @@ import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-sele
 import type * as postcss from 'postcss';
 import { createDiagnosticReporter } from '../diagnostics';
 
-export interface ElementSymbol extends StylableDirectives {
+// ToDo: should probably consider removing StylableDirectives from this symbol
+export interface ElementSymbol extends CSSClass.StPartDirectives {
     _kind: 'element';
     name: string;
     alias?: ImportSymbol;
@@ -119,6 +119,10 @@ export function validateTypeScoping({
     index: number;
     rule: postcss.Rule;
 }): boolean {
+    if (context.meta.type !== 'stylable') {
+        // ignore in native CSS
+        return true;
+    }
     if (locallyScoped === false) {
         if (CSSClass.checkForScopedNodeAfter(context, rule, nodes, index) === false) {
             if (reportUnscoped) {
