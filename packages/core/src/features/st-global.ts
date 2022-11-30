@@ -9,13 +9,17 @@ import {
 import type { StylableMeta } from '../stylable-meta';
 import type {
     SelectorNode,
-    ImmutablePseudoClass,
+    ImmutableSelectorNode,
     SelectorList,
     PseudoClass,
 } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter } from '../diagnostics';
+import type * as postcss from 'postcss';
 
-const dataKey = plugableRecord.key<Record<string, true>>('globals');
+const dataKey = plugableRecord.key<{
+    rules: Map<postcss.Rule, { isGlobal: boolean; isInSource: boolean; selectors: boolean[] }>;
+    replacementRules: Map<postcss.AtRule, postcss.Rule>;
+}>('globals');
 
 export const diagnostics = {
     UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL: createDiagnosticReporter(
@@ -27,21 +31,62 @@ export const diagnostics = {
 
 // HOOKS
 
-export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>({
+export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutableSelectorNode }>({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, {});
+        plugableRecord.set(meta.data, dataKey, { rules: new Map(), replacementRules: new Map() });
     },
-    analyzeSelectorNode({ context, node, rule }) {
-        if (node.value !== `global`) {
+    analyzeSelectorNode({ context, node, topSelectorIndex, rule, originalNode }) {
+        const { rules } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+        if (node.type === 'selector' || node.type === 'combinator' || node.type === 'comment') {
             return;
         }
-        if (node.nodes && node.nodes?.length > 1) {
-            context.diagnostics.report(diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(), {
-                node: rule,
-                word: stringifySelector(node.nodes),
+        if (!rules.has(rule)) {
+            rules.set(rule, {
+                isGlobal: true,
+                isInSource: rule === originalNode,
+                selectors: [],
             });
         }
-        return walkSelector.skipNested;
+        const ruleData = rules.get(rule)!;
+        if (node.type === 'pseudo_class' && node.value === `global`) {
+            // mark selector as global only if it isn't set
+            if (ruleData.selectors[topSelectorIndex] === undefined) {
+                ruleData.selectors[topSelectorIndex] = true;
+            }
+            if (node.nodes && node.nodes?.length > 1) {
+                context.diagnostics.report(diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(), {
+                    node: rule,
+                    word: stringifySelector(node.nodes),
+                });
+            }
+            return walkSelector.skipNested;
+        } else {
+            // mark selector as local if it has a local selector
+            ruleData.selectors[topSelectorIndex] = false;
+        }
+        return;
+    },
+    analyzeSelectorDone({ context, rule }) {
+        const { rules, replacementRules } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+        const data = rules.get(rule);
+        if (!data) {
+            return;
+        }
+
+        let foundLocalParent = false;
+        let parent: postcss.Container | postcss.Document | undefined = rule.parent;
+        while (parent) {
+            const actualRule = replacementRules.get(parent as postcss.AtRule) || parent;
+            if (actualRule.type === 'rule') {
+                if (rules.get(actualRule as postcss.Rule)?.isGlobal === false) {
+                    foundLocalParent = true;
+                    break;
+                }
+            }
+            parent = parent.parent;
+        }
+        // rule is global is it doesn't has a local parent parent and at least one global selector
+        data.isGlobal = foundLocalParent ? false : !!data.selectors.find((isGlobal) => isGlobal);
     },
     transformInit({ context }) {
         context.meta.globals = {};
@@ -60,6 +105,26 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
 });
 
 // API
+
+export function registerReplacementRule(
+    meta: StylableMeta,
+    atRule: postcss.AtRule,
+    rule: postcss.Rule
+) {
+    const { replacementRules } = plugableRecord.getUnsafe(meta.data, dataKey);
+    replacementRules.set(atRule, rule);
+}
+
+export function getGlobalRules(meta: StylableMeta) {
+    const { rules } = plugableRecord.getUnsafe(meta.data, dataKey);
+    const globalRules: postcss.Rule[] = [];
+    for (const [rule, { isGlobal, isInSource }] of rules) {
+        if (isGlobal && isInSource) {
+            globalRules.push(rule);
+        }
+    }
+    return globalRules;
+}
 
 export function unwrapPseudoGlobals(selectorAst: SelectorList) {
     const collectedGlobals: PseudoClass[] = [];

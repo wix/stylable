@@ -3,6 +3,7 @@ import {
     testStylableCore,
     shouldReportNoDiagnostics,
     diagnosticBankReportToStrings,
+    collectAst,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
@@ -50,5 +51,42 @@ describe(`features/st-global`, () => {
             */
             :global(.a, .b) {}
         `);
+    });
+    it('should collect global rules', () => {
+        const { sheets } = testStylableCore(`
+            /* global: single */
+            :global(*) {}
+
+            /* global: multiple globals */
+            :global(*):global(.x) /*comment*/ :global(.y) {}
+
+            /* local: simple */
+            .x {}
+
+            /* global: mixed multi selectors */
+            .x, :global(*) {}
+
+            /* local: unhandled universal without :global */
+            * {}
+
+            /* local: unhandled type without :global */
+            div {}
+
+            /* local: mix start with global */
+            :global(.x) .local {}
+
+            /* local: mix ends with global */
+            .local :global(.x) {}
+
+            /* local: mix ends with global in pseudo-class */
+            :is(:global(.x), .local)  {} 
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        const actualGlobalRules = STGlobal.getGlobalRules(meta);
+
+        const expectedGlobalRules = collectAst(meta.sourceAst, ['global']);
+        expect(actualGlobalRules).to.eql(expectedGlobalRules['global']);
     });
 });

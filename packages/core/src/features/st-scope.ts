@@ -1,4 +1,5 @@
 import { createFeature } from './feature';
+import * as STGlobal from './st-global';
 import { parseSelectorWithCache, scopeNestedSelector } from '../helpers/selector';
 import type { Stylable } from '../stylable';
 import type { ImmutablePseudoClass } from '@tokey/css-selector-parser';
@@ -24,15 +25,15 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         if (!atRule.params) {
             context.diagnostics.report(diagnostics.MISSING_SCOPING_PARAM(), { node: atRule });
         }
-        analyzeRule(
-            postcss.rule({
-                selector: atRule.params,
-                source: atRule.source,
-            }),
-            {
-                isScoped: true,
-            }
-        );
+        const replacementRule = postcss.rule({
+            selector: atRule.params,
+            source: atRule.source,
+        });
+        STGlobal.registerReplacementRule(context.meta, atRule, replacementRule);
+        analyzeRule(replacementRule, {
+            isScoped: true,
+            originalNode: atRule,
+        });
         context.meta.scopes.push(atRule);
     },
     prepareAST({ node, toRemove }) {
