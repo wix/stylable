@@ -7,7 +7,10 @@ import type {
     Module,
     ModuleGraph,
     NormalModule,
+    Resolver,
 } from 'webpack';
+import type { ResolveRequest } from 'enhanced-resolve';
+
 import type {
     BuildData,
     DependencyTemplates,
@@ -208,11 +211,15 @@ export function injectLoader(compiler: Compiler) {
         loader: LOADER_NAME,
         sideEffects: true,
     });
-    options.module.rules.unshift({
-        test: /\.st\.css.m?js$/,
-        loader: require.resolve('./redirect-to-source-loader'),
-        sideEffects: true,
-    });
+    options.resolve ||= {};
+    options.resolve.plugins ||= [];
+
+    options.resolve.plugins.push(new ReExt(/./, /\.st\.css\.js$/, '.st.css'));
+    // options.module.rules.unshift({
+    //     test: /\.st\.css.m?js$/,
+    //     loader: require.resolve('./redirect-to-source-loader'),
+    //     sideEffects: true,
+    // });
     options.resolveLoader ??= {};
     options.resolveLoader.alias ??= {};
     if (Array.isArray(options.resolveLoader.alias)) {
@@ -508,7 +515,7 @@ export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthConte
             }
             const { dir, name } = parse((module as NormalModule)?.resource || '');
             let finalName = name;
-            if(finalName.endsWith('.st.css')){
+            if (finalName.endsWith('.st.css')) {
                 finalName = finalName.replace(/\.st\.css$/, '');
             }
             return join(dir, finalName);
@@ -592,4 +599,66 @@ export function isDependencyOf(entryPoint: EntryPoint, entrypoints: Iterable<Ent
         }
     }
     return false;
+}
+
+class ReExt {
+    private newExt: string[];
+    constructor(
+        private matchPackageRegExp: RegExp,
+        private matchExtRegExp: RegExp,
+        newExt: string | string[]
+    ) {
+        this.newExt = Array.isArray(newExt) ? newExt : [newExt];
+    }
+    apply(resolver: Resolver) {
+        const target = resolver.ensureHook('normal-resolve');
+        resolver.getHook('raw-resolve').tapAsync('ReExt', (request, resolveContext, callback) => {
+            const requestPath = request.request;
+            const matchExtRegExp = this.matchExtRegExp;
+            if (
+                !((request?.descriptionFileData as any)?.name ?? '').match(
+                    this.matchPackageRegExp
+                ) ||
+                !requestPath ||
+                !requestPath.match(matchExtRegExp)
+            ) {
+                return callback();
+            }
+
+            async function runMatchExt(newExt: string[]) {
+                for (const ext of newExt) {
+                    const resolved = await resolveExt(ext);
+                    if (resolved) return resolved;
+                }
+                return undefined;
+            }
+
+            runMatchExt(this.newExt)
+                .then((res) => {
+                    res ? callback(null, res as ResolveRequest) : callback();
+                })
+                .catch((err) => {
+                    callback(err);
+                });
+
+            function resolveExt(newExt: string) {
+                return new Promise((res) => {
+                    resolver.doResolve(
+                        target,
+                        {
+                            ...request,
+
+                            request: requestPath!.replace(matchExtRegExp, newExt),
+                            fullySpecified: true,
+                        },
+                        `replacing extension for ${requestPath} to ${newExt}`,
+                        resolveContext,
+                        (err: Error, resolved: unknown) => {
+                            err ? res(undefined) : res(resolved);
+                        }
+                    );
+                });
+            }
+        });
+    }
 }
