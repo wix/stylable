@@ -119,7 +119,7 @@ export class StylableResolver {
         protected moduleResolver: ModuleResolver,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, request }: Imported): CachedModuleEntity {
+    public getModule({ context, request }: Imported): CachedModuleEntity {
         let entity: CachedModuleEntity;
         let resolvedPath: string | undefined;
 
@@ -182,22 +182,6 @@ export class StylableResolver {
             kind: 'resolve',
         });
         return resolvedPath;
-    }
-    
-    public getErrorText(imported: Imported) {
-        const res = this.getModule(imported);
-        if ('error' in res) {
-            const { error } = res;
-            if (typeof error === 'object' && error) {
-                return 'details' in error
-                    ? String(error.details)
-                    : 'message' in error
-                    ? String(error.message)
-                    : String(error);
-            }
-            return String(error);
-        }
-        return '';
     }
     public resolveImported(
         imported: Imported,

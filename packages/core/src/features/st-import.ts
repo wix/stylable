@@ -10,6 +10,7 @@ import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-pars
 import type * as postcss from 'postcss';
 import { createDiagnosticReporter } from '../diagnostics';
 import type { Stylable } from '../stylable';
+import type { CachedModuleEntity } from '../stylable-resolver';
 
 export interface ImportSymbol {
     _kind: 'import';
@@ -266,9 +267,8 @@ function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {
 function validateImports(context: FeatureTransformContext) {
     const imports = plugableRecord.getUnsafe(context.meta.data, dataKey);
     for (const importObj of imports) {
-        const resolvedImport = context.resolver.resolveImported(importObj, '');
-
-        if (!resolvedImport) {
+        const entity = context.resolver.getModule(importObj);
+        if (!entity.value) {
             // warn about unknown imported files
             const fromDecl =
                 importObj.rule.nodes &&
@@ -277,20 +277,18 @@ function validateImports(context: FeatureTransformContext) {
                 );
 
             context.diagnostics.report(
-                diagnostics.UNKNOWN_IMPORTED_FILE(
-                    importObj.request,
-                    context.resolver.getErrorText(importObj)
-                ),
+                diagnostics.UNKNOWN_IMPORTED_FILE(importObj.request, getErrorText(entity)),
                 {
                     node: fromDecl || importObj.rule,
                     word: importObj.request,
                 }
             );
-        } else if (resolvedImport._kind === 'css') {
+        } else if (entity.kind === 'css') {
+            const meta = entity.value;
             // propagate some native CSS diagnostics to st-import
-            if (resolvedImport.meta.type === 'css') {
+            if (meta.type === 'css') {
                 let foundUnsupportedNativeImport = false;
-                for (const report of resolvedImport.meta.diagnostics.reports) {
+                for (const report of meta.diagnostics.reports) {
                     if (report.code === '05021') {
                         foundUnsupportedNativeImport = true;
                         break;
@@ -304,7 +302,7 @@ function validateImports(context: FeatureTransformContext) {
                 }
             }
             // report unsupported native CSS default import
-            if (resolvedImport.meta.type !== 'stylable' && importObj.defaultExport) {
+            if (meta.type !== 'stylable' && importObj.defaultExport) {
                 context.diagnostics.report(diagnostics.NO_DEFAULT_EXPORT(importObj.request), {
                     node: importObj.rule,
                     word: importObj.defaultExport,
@@ -327,6 +325,23 @@ function validateImports(context: FeatureTransformContext) {
                     );
                 }
             }
+        } else if (entity.kind === 'js') {
+            // TODO: add diagnostics for JS imports (typeof checks)
         }
     }
+}
+
+function getErrorText(res: CachedModuleEntity) {
+    if ('error' in res) {
+        const { error } = res;
+        if (typeof error === 'object' && error) {
+            return 'details' in error
+                ? String(error.details)
+                : 'message' in error
+                ? String(error.message)
+                : String(error);
+        }
+        return String(error);
+    }
+    return '';
 }
