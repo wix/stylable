@@ -490,6 +490,11 @@ export class StylableWebpackPlugin {
                 if (isAssetModule(module)) {
                     assetsModules.set(module.resource, module);
                 }
+                module.dependencies.forEach((dep) => {
+                    if (dep instanceof this.entities.UnusedDependency) {
+                        compilation.moduleGraph.getConnection(dep)?.setActive(false);
+                    }
+                });
                 /**
                  * @remove
                  * This part supports old loaders and should be removed
