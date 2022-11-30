@@ -1,6 +1,7 @@
 @property --P1;
 .root, .part {
     --P2: green;
+    container: C1 C2;
 }
 :vars {
     V1: green;

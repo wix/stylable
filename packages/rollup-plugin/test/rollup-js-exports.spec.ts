@@ -35,6 +35,7 @@ describe('StylableRollupPlugin - js exports', function () {
             vars: { P1: '--index-P1', P2: '--index-P2' },
             keyframes: { K1: 'index__K1', K2: 'index__K2' },
             layers: { L1: 'index__L1', L2: 'index__L2' },
+            containers: { C1: 'index__C1', C2: 'index__C2' },
             namespace: 'index',
             // non serializable
             st: undefined,

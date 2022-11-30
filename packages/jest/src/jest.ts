@@ -1,5 +1,6 @@
 import fs from 'fs';
 import type { StylableConfig } from '@stylable/core';
+import { validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { stylableModuleFactory } from '@stylable/module-utils';
 import { resolveNamespace } from '@stylable/node';
 
@@ -30,16 +31,36 @@ function getCacheKey(
 
 export interface StylableJestConfig {
     stylable?: Partial<StylableConfig>;
+    configPath?: string;
 }
 
 export const createTransformer = (options?: StylableJestConfig) => {
+    let config: Partial<StylableConfig> = {
+        ...options?.stylable,
+    };
+
+    try {
+        if (options && options.configPath) {
+            const { defaultConfig } = require(options.configPath);
+            const defaultConfigObj = defaultConfig(fs);
+
+            validateDefaultConfig(defaultConfigObj);
+
+            config = { ...defaultConfigObj, ...options.stylable };
+        }
+    } catch (e) {
+        throw new Error(
+            `Failed to load Stylable config from ${options?.configPath || 'unknown'}:\n${e}`
+        );
+    }
+
     const moduleFactory = stylableModuleFactory(
         {
             fileSystem: fs,
             requireModule: require,
             projectRoot: '',
             resolveNamespace,
-            ...options?.stylable,
+            ...config,
         },
         // ensure the generated module points to our own @stylable/runtime copy
         // this allows @stylable/jest to be used as part of a globally installed CLI

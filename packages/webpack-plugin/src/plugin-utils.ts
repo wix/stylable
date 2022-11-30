@@ -49,6 +49,12 @@ export function isSameResourceModule(moduleA: any, moduleB: any) {
 export function isStylableModule(module: any): module is NormalModule {
     return module.resource?.endsWith('.st.css');
 }
+export function isLoadedNativeCSSModule(
+    module: any,
+    moduleGraph: ModuleGraph
+): module is NormalModule {
+    return module.resource?.endsWith('.css') && isStylableModule(moduleGraph.getIssuer(module));
+}
 
 export function isAssetModule(module: Module): module is NormalModule {
     return module.type.startsWith('asset/') || module.type === 'asset';
@@ -189,20 +195,34 @@ export function outputOptionsAwareHashContent(
     return contentHash.toString();
 }
 
+export const LOADER_NAME = 'stylable-plugin-loader';
+
 export function injectLoader(compiler: Compiler) {
-    if (!compiler.options.module.rules) {
+    const options = compiler.options;
+    if (!options.module.rules) {
         compiler.options.module.rules = [];
     }
-    compiler.options.module.rules.unshift({
+    const loaderPath = require.resolve('./loader');
+    options.module.rules.unshift({
         test: /\.st\.css$/,
-        loader: require.resolve('./loader'),
+        loader: LOADER_NAME,
         sideEffects: true,
     });
-    compiler.options.module.rules.unshift({
+    options.module.rules.unshift({
         test: /\.st\.css.m?js$/,
         loader: require.resolve('./redirect-to-source-loader'),
         sideEffects: true,
     });
+    options.resolveLoader ??= {};
+    options.resolveLoader.alias ??= {};
+    if (Array.isArray(options.resolveLoader.alias)) {
+        options.resolveLoader.alias.unshift({
+            name: LOADER_NAME,
+            alias: loaderPath,
+        });
+    } else {
+        options.resolveLoader.alias[LOADER_NAME] = loaderPath;
+    }
 }
 
 export function createDecacheRequire(compiler: Compiler) {

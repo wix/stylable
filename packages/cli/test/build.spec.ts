@@ -3,13 +3,13 @@ import { Stylable } from '@stylable/core';
 import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 import { DiagnosticsManager } from '@stylable/cli/dist/diagnostics-manager';
-import { STImport, STVar } from '@stylable/core/dist/features';
-import { processorDiagnostics, murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
+import { STImport, STVar, CSSClass } from '@stylable/core/dist/features';
+import { murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
 
 const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
 const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
-const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
+const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 
 const log = () => {
     /**/
@@ -196,7 +196,7 @@ describe('build stand alone', () => {
         const messages = diagnosticsManager.get(identifier, '/comp.st.css')!.diagnostics;
 
         expect(messages[0].message).to.contain(
-            processorStringDiagnostics.CANNOT_RESOLVE_EXTEND('MissingComp')
+            cssClassDiagnostics.CANNOT_RESOLVE_EXTEND('MissingComp')
         );
         expect(messages[1].message).to.contain(
             stImportDiagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
@@ -573,6 +573,60 @@ describe('build stand alone', () => {
         expect(dtsSourceMapContent).to.contain(`"file": "main.st.css.d.ts",`);
         expect(dtsSourceMapContent).to.contain(`"sources": [`);
         expect(dtsSourceMapContent).to.contain(`"main.st.css"`);
+    });
+
+    describe('resolver', () => {
+        it('should be able to build with enhanced-resolver alias configured', async () => {
+            const identifier = 'build-identifier';
+            const fs = createMemoryFs({
+                '/entry.st.css': `
+                    @st-import [green] from '@colors/green.st.css';
+                    
+                    .root { -st-mixin: green;}`,
+                '/colors/green.st.css': `
+                    .green { color: green; }`,
+            });
+
+            const diagnosticsManager = new DiagnosticsManager();
+            const stylable = new Stylable({
+                projectRoot: '/',
+                fileSystem: fs,
+                requireModule: () => ({}),
+                resolveOptions: {
+                    alias: {
+                        '@colors': '/colors',
+                    },
+                },
+            });
+
+            await build(
+                {
+                    outDir: '.',
+                    srcDir: '.',
+                    outputCSS: true,
+                    diagnostics: true,
+                },
+                {
+                    fs,
+                    stylable,
+                    rootDir: '/',
+                    projectRoot: '/',
+                    log,
+                    diagnosticsManager,
+                    identifier,
+                }
+            );
+
+            ['/entry.st.css', '/entry.css'].forEach((p) => {
+                expect(fs.existsSync(p), p).to.equal(true);
+            });
+
+            const messages = diagnosticsManager.get(identifier, '/entry.st.css')?.diagnostics;
+            expect(messages).to.eql(undefined);
+
+            const entryCSSContent = fs.readFileSync('/entry.css', 'utf8');
+            expect(entryCSSContent).to.contain(`color: green;`);
+        });
     });
 });
 

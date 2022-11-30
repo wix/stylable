@@ -1,4 +1,4 @@
-import { STImport, CSSClass, STSymbol } from '@stylable/core/dist/features';
+import { STImport, STCustomState, CSSClass, STSymbol } from '@stylable/core/dist/features';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
@@ -9,6 +9,8 @@ import type * as postcss from 'postcss';
 
 const classDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
+const stCustomStateDiagnostics = diagnosticBankReportToStrings(STCustomState.diagnostics);
+const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
 
 describe(`features/css-class`, () => {
     it(`should have root class`, () => {
@@ -451,6 +453,103 @@ describe(`features/css-class`, () => {
                 .replace(/\s\s+/g, ' ');
 
             expect(actual).to.contain(expected);
+        });
+        describe('parsing (unit tests)', () => {
+            it('should parse type extends', () => {
+                expect(CSSClass.parseStExtends('Button').types).to.eql([
+                    { args: null, symbolName: 'Button' },
+                ]);
+            });
+            it('should parse function extends with no arguments', () => {
+                expect(CSSClass.parseStExtends('Button()').types).to.eql([
+                    { args: [], symbolName: 'Button' },
+                ]);
+            });
+            it('should parse type extends with value arguments separated by comma', () => {
+                expect(CSSClass.parseStExtends('Button(1px solid, red)').types).to.eql([
+                    {
+                        args: [
+                            [
+                                { type: 'word', value: '1px' },
+                                { type: 'space', value: ' ' },
+                                { type: 'word', value: 'solid' },
+                            ],
+                            [{ type: 'word', value: 'red' }],
+                        ],
+                        symbolName: 'Button',
+                    },
+                ]);
+            });
+            it('should parse multiple extends separated by space', () => {
+                expect(CSSClass.parseStExtends('Button(1px solid, red) Mixin').types).to.eql([
+                    {
+                        args: [
+                            [
+                                { type: 'word', value: '1px' },
+                                { type: 'space', value: ' ' },
+                                { type: 'word', value: 'solid' },
+                            ],
+                            [{ type: 'word', value: 'red' }],
+                        ],
+                        symbolName: 'Button',
+                    },
+                    {
+                        args: null,
+                        symbolName: 'Mixin',
+                    },
+                ]);
+            });
+        });
+    });
+    describe('st-custom-state', () => {
+        it('should define state on class symbol', () => {
+            const { sheets } = testStylableCore(`
+                .root {
+                    -st-states: bool, str(string) def-val, opt(enum(a, b)); 
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+            expect(meta.getClass('root')!['-st-states']).to.eql({
+                bool: null,
+                str: { type: 'string', arguments: [], defaultValue: 'def-val' },
+                opt: { type: 'enum', arguments: ['a', 'b'], defaultValue: '' },
+            });
+        });
+        it('should report state definition in complex or type selector', () => {
+            testStylableCore(`
+                .a.b {
+                    /* @analyze-error ${classDiagnostics.STATE_DEFINITION_IN_COMPLEX()} */
+                    -st-states: some-state;
+                }
+
+                div {
+                    /* @analyze-error ${classDiagnostics.STATE_DEFINITION_IN_ELEMENT()} */
+                    -st-states: some-state;
+                }
+            `);
+        });
+        it('should report overridden states', () => {
+            testStylableCore(`
+                .a {
+                    -st-states: some-state;
+                }
+
+                .a {
+                    /* @analyze-warn ${classDiagnostics.OVERRIDE_TYPED_RULE('-st-states', 'a')} */
+                    -st-states: some-state;
+                }
+            `);
+        });
+        it('should report parsing diagnostics on -st-states decl', () => {
+            testStylableCore(`
+                .a {
+                    /* @analyze-warn ${stCustomStateDiagnostics.NO_STATE_TYPE_GIVEN(
+                        'state-with-param'
+                    )} */
+                    -st-states: state-with-param();
+                }
+            `);
         });
     });
     describe(`st-import`, () => {
@@ -896,202 +995,6 @@ describe(`features/css-class`, () => {
             });
         });
     });
-    describe(`css-pseudo-class`, () => {
-        // ToDo: move to css-pseudo-class spec once feature is created
-        describe(`st-var`, () => {
-            it('should unsupported value() within var definition / call', () => {
-                const { sheets } = testStylableCore(`
-                    :vars {
-                        optionA: a;
-                        optionB: b;
-                        optionC: c;
-                    }
-
-                    .root {
-                        -st-states: 
-                            option(enum(
-                                value(optionA),
-                                value(optionB)
-                            )) value(optionB);
-                    }
-
-                    /* @rule(default) .entry__root.entry---option-1-b */
-                    .root:option {}
-
-                    /* @rule(target value) .entry__root.entry---option-1-a */
-                    .root:option(value(optionA)) {}
-                    
-                    /* 
-                        @x-transform-error(target invalid) invalid optionC
-                        @rule(target invalid) .entry__root.entry---option-1-c 
-                    */
-                    .root:option(value(optionC)) {}
-                `);
-
-                const { meta } = sheets['/entry.st.css'];
-
-                shouldReportNoDiagnostics(meta); // ToDo: `target invalid` should report
-            });
-        });
-        describe(`st-mixin`, () => {
-            it.skip('should override value() within var definition / call', () => {
-                // mixins could be able to gain more power by overriding st-var in state definitions and selectors
-                const { sheets } = testStylableCore(`
-                    :vars {
-                        optionA: a;
-                        optionB: b;
-                        optionC: c;
-                        optionD: c;
-                    }
-    
-                    .mix {
-                        -st-states: 
-                            option(enum(
-                                value(optionA),
-                                value(optionB)
-                            )) value(optionB);
-                    }
-                    .mix:option {}
-                    .mix:option(value(optionA)) {}
-
-                    /* 
-                        @rule[1](default) .entry__into.entry---option-1-d 
-                        @rule[2](target value) .entry__into.entry---option-1-c 
-                    */
-                    .into {
-                        -st-mixin: mix(
-                            optionA value(optionC),
-                            optionB value(optionD)
-                        );
-                    }
-                `);
-
-                const { meta } = sheets['/entry.st.css'];
-
-                shouldReportNoDiagnostics(meta);
-            });
-            it(`should mix custom state`, () => {
-                const { sheets } = testStylableCore({
-                    '/base.st.css': `
-                        .root {
-                            -st-states: toggled;
-                        }
-                        .root:toggled {
-                            value: from base;
-                        }
-                    `,
-                    '/extend.st.css': `
-                        @st-import Base from './base.st.css';
-                        Base {}
-                        .root {
-                            -st-extends: Base;
-                        }
-                        .root:toggled {
-                            value: from extend;
-                        }
-                    `,
-                    '/entry.st.css': `
-                        @st-import Extend, [Base] from './extend.st.css';
-    
-                        /* @rule[1] 
-                        .entry__a.base--toggled {
-                            value: from base;
-                        } */
-                        .a {
-                            -st-mixin: Base;
-                        }
-
-                        /* 
-                        ToDo: change to 1 once empty AST is filtered
-                        @rule[2] 
-                        .entry__a.base--toggled {
-                            value: from extend;
-                        } */
-                        .a {
-                            -st-mixin: Extend;
-                        }
-                    `,
-                });
-
-                const { meta } = sheets['/entry.st.css'];
-
-                shouldReportNoDiagnostics(meta);
-            });
-            it(`should mix imported class with custom-pseudo-state`, () => {
-                // ToDo: fix case where extend.st.css has .root between mix rules: https://shorturl.at/cwBMP
-                const { sheets } = testStylableCore({
-                    '/base.st.css': `
-                        .root {
-                            /* not going to be mixed through -st-extends */
-                            id: base-root;
-                            -st-states: state;
-                        }
-                    `,
-                    '/extend.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root {
-                            -st-extends: Base;
-                        }
-                        .mix {
-                            -st-extends: Base;
-                            id: extend-mix;
-                        }
-                        .mix:state {
-                            id: extend-mix-state;
-                        };
-                        .root:state {
-                            id: extend-root-state;
-                        }
-
-                    `,
-                    '/enrich.st.css': `
-                        @st-import MixRoot, [mix as mixClass] from './extend.st.css';
-                        MixRoot {
-                            id: enrich-MixRoot;
-                        }
-                        MixRoot:state {
-                            id: enrich-MixRoot-state;
-                        }
-                        .mixClass {
-                            id: enrich-mixClass;
-                        }
-                        .mixClass:state {
-                            id: enrich-mixClass-state;
-                        }
-                    `,
-                    '/entry.st.css': `
-                        @st-import [MixRoot, mixClass] from './enrich.st.css';
-
-                        /*
-                            @rule[0] .entry__a { -st-extends: Base; id: extend-mix; }
-                            @rule[1] .entry__a.base--state { id: extend-mix-state; }
-                            @rule[2] .entry__a { id: enrich-mixClass; }
-                            @rule[3] .entry__a.base--state { id: enrich-mixClass-state; }
-                        */
-                        .a {
-                            -st-mixin: mixClass;
-                        }
-
-                        /*
-                            @rule[0] .entry__a { -st-extends: Base; }
-                            @rule[1] .entry__a .extend__mix { -st-extends: Base; id: extend-mix; }
-                            @rule[2] .entry__a .extend__mix.base--state { id: extend-mix-state; }
-                            @rule[3] .entry__a.base--state { id: extend-root-state; }
-                            @rule[4] .entry__a { id: enrich-MixRoot; }
-                            @rule[5] .entry__a.base--state { id: enrich-MixRoot-state; }
-                        */
-                        .a {
-                            -st-mixin: MixRoot;
-                        }
-                    `,
-                });
-
-                const { meta } = sheets['/entry.st.css'];
-
-                shouldReportNoDiagnostics(meta);
-            });
-        });
-    });
     describe(`css-pseudo-element`, () => {
         // ToDo: move to css-pseudo-element spec once feature is created
         describe(`st-mixin`, () => {
@@ -1215,6 +1118,104 @@ describe(`features/css-class`, () => {
 
                 shouldReportNoDiagnostics(meta);
             });
+        });
+    });
+    describe('native css', () => {
+        it('should not namespace', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': `
+                    .name {}
+                `,
+                '/entry.st.css': `
+                    @st-import [name] from './native.css';
+
+                    /* @rule .entry__root .name */
+                    .root .name {}
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+            const { meta, exports } = stylable.transform('/entry.st.css');
+
+            shouldReportNoDiagnostics(nativeMeta);
+            shouldReportNoDiagnostics(meta);
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                '.name {}'
+            );
+
+            // symbols
+            expect(CSSClass.get(meta, 'name'), 'imported symbol').to.contain({
+                _kind: 'class',
+                name: 'name',
+            });
+
+            // JS exports
+            expect(exports.classes, 'JS export').to.eql({
+                root: 'entry__root',
+                name: 'name',
+            });
+        });
+        it('should not contain default root class', () => {
+            testStylableCore({
+                '/native.css': ``,
+                '/entry.st.css': `
+                    /* @transform-error(no root) word(root) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                        `root`,
+                        `./native.css`
+                    )} */
+                    @st-import [root as nativeRoot] from './native.css';
+
+                    /*
+                        @rule .entry__root .entry__nativeRoot
+                        @transform-error(unresolved alias) word(nativeRoot) ${classDiagnostics.UNKNOWN_IMPORT_ALIAS(
+                            `nativeRoot`
+                        )}
+                    */
+                    .root .nativeRoot {}
+                `,
+            });
+        });
+        it('should not have a default export', () => {
+            testStylableCore({
+                '/native.css': `
+                    /* add root to see that it is not taken as default */
+                    .root {}
+                `,
+                '/entry.st.css': `
+                    /* @transform-error(no export) word(Native) ${stImportDiagnostics.NO_DEFAULT_EXPORT(
+                        `./native.css`
+                    )} */
+                    @st-import Native from './native.css';
+
+                    /* @rule .entry__root Native */
+                    .root Native {}
+                `,
+            });
+        });
+        it('should ignore stylable directives', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': `
+                    .a {}
+                    .b {
+                        -st-extends: a;
+                        -st-states: hover;
+                        -st-global: ".c";
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [b] from './native.css';
+
+                    /* @rule .entry__root .b */
+                    .root .b {}
+
+                    /* @rule .entry__root .b:hover */
+                    .root .b:hover {}
+                `,
+            });
+
+            shouldReportNoDiagnostics(stylable.transform('/native.css').meta);
+            shouldReportNoDiagnostics(stylable.transform('/entry.st.css').meta);
         });
     });
     describe(`stylable (public API)`, () => {

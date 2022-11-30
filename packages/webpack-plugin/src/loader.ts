@@ -41,6 +41,7 @@ export ${varType} namespace = ${getReplacementToken('namespace')};
 export ${varType} classes = ${getReplacementToken('classes')};
 export ${varType} keyframes = ${getReplacementToken('keyframes')}; 
 export ${varType} layers = ${getReplacementToken('layers')};
+export ${varType} containers = ${getReplacementToken('containers')};
 export ${varType} stVars = ${getReplacementToken('stVars')}; 
 export ${varType} vars = ${getReplacementToken('vars')}; 
 export ${varType} cssStates = ${getReplacementToken('stc')};

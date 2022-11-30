@@ -1,5 +1,5 @@
 import type { Stylable, StylableResults } from '@stylable/core';
-import { isAsset } from '@stylable/core/dist/index-internal';
+import { isAsset, isRelativeNativeCss } from '@stylable/core/dist/index-internal';
 import {
     generateDTSContent,
     generateDTSSourceMap,
@@ -244,6 +244,40 @@ export function buildSingleFile({
     for (const url of res.meta.urls) {
         if (isAsset(url)) {
             projectAssets.add(resolve(fileDirectory, url));
+        }
+    }
+    // add native css imports as assets
+    for (const { request } of res.meta.getImportStatements()) {
+        try {
+            const resolvedRequest = stylable.resolver.resolvePath(fileDirectory, request);
+            if (isRelativeNativeCss(resolvedRequest)) {
+                projectAssets.add(resolvedRequest);
+                buildSingleFile({
+                    fullOutDir,
+                    filePath: resolvedRequest,
+                    fullSrcDir,
+                    log,
+                    fs,
+                    moduleFormats,
+                    outputCSS: false,
+                    outputSources: false,
+                    generated,
+                    mode,
+                    stylable,
+                    includeCSSInJS,
+                    projectAssets,
+                    useNamespaceReference,
+                    injectCSSRequest,
+                    optimize,
+                    minify,
+                    dts: false,
+                    dtsSourceMap: false,
+                    diagnosticsMode,
+                    diagnosticsManager,
+                });
+            }
+        } catch (_e) {
+            // resolve diagnostics reported by core
         }
     }
 
