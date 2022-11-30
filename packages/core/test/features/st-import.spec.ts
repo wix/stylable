@@ -197,14 +197,19 @@ describe(`features/st-import`, () => {
         `);
     });
     it(`should error on unresolved file`, () => {
+        const resolveErrorMessage = `resolve './missing.st.css' in '/'\n  No description file found in / or above\n  No description file found in / or above\n  no extension\n    /missing.st.css doesn't exist\n  .js\n    /missing.st.css.js doesn't exist\n  .json\n    /missing.st.css.json doesn't exist\n  .node\n    /missing.st.css.node doesn't exist\n  as directory\n    /missing.st.css doesn't exist`;
+        const resolveErrorMessagePackage = `resolve 'missing-package/index.st.css' in '/'\n  Parsed request is a module\n  No description file found in / or above\n  resolve as module\n    /node_modules doesn't exist or is not a directory`;
+
         testStylableCore(`
             /* @transform-error(relative) word(./missing.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
-                `./missing.st.css`
+                `./missing.st.css`,
+                resolveErrorMessage
             )} */
             @st-import "./missing.st.css";
 
             /* @transform-error(3rd party) word(missing-package/index.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
-                `missing-package/index.st.css`
+                `missing-package/index.st.css`,
+                resolveErrorMessagePackage
             )} */
             @st-import "missing-package/index.st.css";
         `);
@@ -514,17 +519,22 @@ describe(`features/st-import`, () => {
             `);
         });
         it(`should error on unresolved file`, () => {
+            const resolveErrorMessage = `resolve './missing.st.css' in '/'\n  No description file found in / or above\n  No description file found in / or above\n  no extension\n    /missing.st.css doesn't exist\n  .js\n    /missing.st.css.js doesn't exist\n  .json\n    /missing.st.css.json doesn't exist\n  .node\n    /missing.st.css.node doesn't exist\n  as directory\n    /missing.st.css doesn't exist`;
+            const resolveErrorMessagePackage = `resolve 'missing-package/index.st.css' in '/'\n  Parsed request is a module\n  No description file found in / or above\n  resolve as module\n    /node_modules doesn't exist or is not a directory`;
+
             testStylableCore(`
                 :import{
                     /* @transform-error(relative) word(./missing.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
-                        `./missing.st.css`
+                        `./missing.st.css`,
+                        resolveErrorMessage
                     )} */
                     -st-from: "./missing.st.css";
                 }
     
                 :import{
                     /* @transform-error(3rd party) word(missing-package/index.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
-                        `missing-package/index.st.css`
+                        `missing-package/index.st.css`,
+                        resolveErrorMessagePackage
                     )} */
                     -st-from: "missing-package/index.st.css";
                 }

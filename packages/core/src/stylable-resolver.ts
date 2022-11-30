@@ -119,7 +119,7 @@ export class StylableResolver {
         protected moduleResolver: ModuleResolver,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, request }: Imported): CachedModuleEntity {
+    public getModule({ context, request }: Imported): CachedModuleEntity {
         let entity: CachedModuleEntity;
         let resolvedPath: string | undefined;
 
