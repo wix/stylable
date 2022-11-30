@@ -159,6 +159,9 @@ export function buildSingleFile({
                     moduleCssImports.push({ from: imported.request + ext });
                 }
             }
+            if (resolved.endsWith('.css')) {
+                moduleCssImports.push({ from: imported.request + ext });
+            }
         }
 
         if (injectCSSRequest) {
@@ -274,6 +277,7 @@ export function buildSingleFile({
                     dtsSourceMap: false,
                     diagnosticsMode,
                     diagnosticsManager,
+                    resolveRuntimeRequest,
                 });
             }
         } catch (_e) {
