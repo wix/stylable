@@ -416,7 +416,8 @@ export class StylableWebpackPlugin {
                         for (const request of stylableBuildMeta.unusedImports) {
                             module.addDependency(
                                 new this.entities.UnusedDependency(
-                                    this.stylable.resolver.resolvePath(module.context!, request)
+                                    this.stylable.resolver.resolvePath(module.context!, request),
+                                    0
                                 )
                             );
                         }

@@ -322,7 +322,7 @@ export function getStylableBuildData(
 export function findIfStylableModuleUsed(
     m: Module,
     compilation: Compilation,
-    UnusedDependency: typeof dependencies.ModuleDependency
+    UnusedDependency: typeof dependencies.HarmonyImportDependency
 ) {
     const moduleGraph = compilation.moduleGraph;
     const chunkGraph = compilation.chunkGraph;
