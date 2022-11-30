@@ -47,7 +47,7 @@ describe('Stylable Cli Watch - Single project', function () {
 
         await run({
             dirPath: tempDir.path,
-            args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss'],
+            args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss', '--unsr=false'],
             steps: [
                 {
                     msg: buildMessages.START_WATCHING(),

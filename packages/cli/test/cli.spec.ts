@@ -163,7 +163,7 @@ describe('Stylable Cli', function () {
             'style.st.css': srcContent,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--outDir', 'dist', '--stcss', '--dts']);
+        runCliSync(['--rootDir', tempDir.path, '--outDir', 'dist', '--stcss', '--dts', '--unsr', 'false']);
 
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent['dist/style.st.css'];
@@ -275,7 +275,7 @@ describe('Stylable Cli', function () {
             `,
         });
 
-        runCliSync(['--rootDir', tempDir.path]);
+        runCliSync(['--rootDir', tempDir.path, '--unsr', 'false']);
 
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent['dist/style.st.css'];
@@ -306,6 +306,8 @@ describe('Stylable Cli', function () {
             '--stcss',
             '--dts',
             '--dtsSourceMap',
+            'false',
+            '--unsr',
             'false',
         ]);
 
