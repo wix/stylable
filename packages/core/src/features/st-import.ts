@@ -90,7 +90,8 @@ export const diagnostics = {
     UNKNOWN_IMPORTED_FILE: createDiagnosticReporter(
         '05016',
         'error',
-        (path: string) => `cannot resolve imported file: "${path}"`
+        (path: string, error?: unknown) =>
+            `cannot resolve imported file: "${path}"${error ? `\nFailed with:\n${error}` : ''}`
     ),
     UNKNOWN_TYPED_IMPORT: createDiagnosticReporter(
         '05018',
@@ -275,10 +276,16 @@ function validateImports(context: FeatureTransformContext) {
                     (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.FROM
                 );
 
-            context.diagnostics.report(diagnostics.UNKNOWN_IMPORTED_FILE(importObj.request), {
-                node: fromDecl || importObj.rule,
-                word: importObj.request,
-            });
+            context.diagnostics.report(
+                diagnostics.UNKNOWN_IMPORTED_FILE(
+                    importObj.request,
+                    context.resolver.getErrorText(importObj)
+                ),
+                {
+                    node: fromDecl || importObj.rule,
+                    word: importObj.request,
+                }
+            );
         } else if (resolvedImport._kind === 'css') {
             // propagate some native CSS diagnostics to st-import
             if (resolvedImport.meta.type === 'css') {
