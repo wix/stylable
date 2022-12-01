@@ -1,4 +1,5 @@
 import type { Imported, Stylable, StylableMeta } from '@stylable/core';
+import { STSymbol, CSSCustomProperty } from '@stylable/core/dist/index-internal';
 
 export function hasImportedSideEffects(stylable: Stylable, meta: StylableMeta, imported: Imported) {
     // direct import usage
@@ -10,7 +11,20 @@ export function hasImportedSideEffects(stylable: Stylable, meta: StylableMeta, i
         return true;
     }
 
-    //compose usage
+    const m = stylable.resolver.getModule(imported);
+    if (m.kind === 'css' && m.value) {
+        const runtimeDefs = CSSCustomProperty.getRuntimeTypedDefinitionNames(m.value);
+        for (const propSymbol of Object.values(STSymbol.getAllByType(meta, 'cssVar'))) {
+            if (
+                propSymbol.alias?.import === imported &&
+                runtimeDefs.includes(propSymbol.alias.name)
+            ) {
+                return true;
+            }
+        }
+    }
+
+    //compose usage // ToDo: run once ouside
     for (const localSymbol of Object.values(meta.getAllClasses())) {
         if (
             localSymbol['-st-extends'] &&
