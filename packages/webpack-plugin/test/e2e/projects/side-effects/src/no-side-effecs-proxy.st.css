@@ -1,0 +1,14 @@
+@st-import './global-selector.st.css';
+@st-import './global-keyframes.st.css';
+@st-import './global-layer.st.css';
+@st-import './global-custom-property.st.css';
+@st-import './native.css';
+
+.localClass {
+    color: red;
+}
+@property --localProp {
+    syntax: '<color>';
+    initial-value: red;
+    inherits: false;
+}

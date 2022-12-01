@@ -131,6 +131,11 @@ export interface StylableWebpackPluginOptions {
      * @deprecated webpack 5 recommendation is to use AssetsModules for loading assets
      */
     assetsMode?: 'url' | 'loader';
+    /**
+     * Set true for an improved side-effect detection to include stylesheets with deep global side-effects.
+     * Defaults to false.
+     */
+    includeGlobalSideEffects?: boolean;
 }
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
@@ -163,6 +168,7 @@ const defaultOptions = (
     assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
     stcConfig: userOptions.stcConfig ?? false,
+    includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? false,
 });
 
 export class StylableWebpackPlugin {
@@ -398,6 +404,7 @@ export class StylableWebpackPlugin {
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.target = this.options.target;
                     loaderContext.assetFilter = this.options.assetFilter;
+                    loaderContext.includeGlobalSideEffects = this.options.includeGlobalSideEffects;
                     /**
                      * Every Stylable file that our loader handles will be call this function to add additional build data
                      */
