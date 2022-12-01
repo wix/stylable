@@ -1,11 +1,12 @@
 import { matchDiagnostic } from './diagnostics';
-import type { StylableMeta } from '@stylable/core';
+import type { Diagnostic, StylableMeta } from '@stylable/core';
 import type * as postcss from 'postcss';
 
 interface Test {
     type: TestScopes;
     expectation: string;
     errors: string[];
+    hasMissingDiagnostic: boolean;
 }
 
 type AST = postcss.Rule | postcss.AtRule | postcss.Declaration;
@@ -23,7 +24,10 @@ const testScopes = Object.keys(tests) as TestScopes[];
 const testScopesRegex = () => testScopes.join(`|`);
 
 interface Context {
-    meta: Pick<StylableMeta, 'sourceAst' | 'targetAst' | 'diagnostics' | 'transformDiagnostics'>;
+    meta: Pick<
+        StylableMeta,
+        'source' | 'sourceAst' | 'targetAst' | 'diagnostics' | 'transformDiagnostics'
+    >;
 }
 const isRoot = (val: any): val is postcss.Root => val.type === `root`;
 
@@ -65,6 +69,7 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
     const context = isDeprecatedInput
         ? {
               meta: {
+                  source: '/undefined.st.css',
                   sourceAst: result,
                   targetAst: result,
                   diagnostics: null as unknown as StylableMeta['diagnostics'],
@@ -116,6 +121,7 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
                                         testScope + testInput
                                     ),
                                 ],
+                                hasMissingDiagnostic: false,
                             };
                             errors.push(...result.errors);
                             checks.push(result);
@@ -136,6 +142,9 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
         }
     });
     // report errors
+    if (checks.find((error) => error.hasMissingDiagnostic)) {
+        errors.push(testInlineExpectsErrors.diagnosticsDump(context.meta));
+    }
     if (errors.length) {
         throw new Error(testInlineExpectsErrors.combine(errors));
     }
@@ -163,6 +172,7 @@ function checkTest(
                 type: `@check`,
                 expectation,
                 errors: [testInlineExpectsErrors.unsupportedNode(`@check`, type)],
+                hasMissingDiagnostic: false,
             };
     }
 }
@@ -176,6 +186,7 @@ function ruleTest(
         type: `@rule`,
         expectation,
         errors: [],
+        hasMissingDiagnostic: false,
     };
     const { msg, ruleIndex, expectedSelector, expectedBody } = expectation.match(
         /(?<msg>\([^)]*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
@@ -273,6 +284,7 @@ function atRuleTest(
         type: `@atrule`,
         expectation,
         errors: [],
+        hasMissingDiagnostic: false,
     };
     const { msg, expectedParams } = expectation.match(/(?<msg>\([^)]*\))*(?<expectedParams>.*)/)!
         .groups!;
@@ -309,6 +321,7 @@ function declTest(
         type: `@decl`,
         expectation,
         errors: [],
+        hasMissingDiagnostic: false,
     };
     // eslint-disable-next-line prefer-const
     let { label, prop, colon, value } = expectation.match(
@@ -362,6 +375,7 @@ function transformTest(
             type: `@transform`,
             expectation,
             errors: isRemoved ? [] : [testInlineExpectsErrors.transformRemoved(node.type, label)],
+            hasMissingDiagnostic: false,
         };
     }
     // check transform diagnostics
@@ -378,6 +392,7 @@ function diagnosticTest(
         type: `@${type}`,
         expectation,
         errors: [],
+        hasMissingDiagnostic: false,
     };
     const matchResult = expectation.match(
         /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>[\s\S]*)/
@@ -417,7 +432,10 @@ function diagnosticTest(
             locationMismatch: testInlineExpectsErrors.diagnosticsLocationMismatch,
             wordMismatch: testInlineExpectsErrors.diagnosticsWordMismatch,
             severityMismatch: testInlineExpectsErrors.diagnosticsSeverityMismatch,
-            expectedNotFound: testInlineExpectsErrors.diagnosticExpectedNotFound,
+            expectedNotFound: (...args) => {
+                result.hasMissingDiagnostic = true;
+                return testInlineExpectsErrors.diagnosticExpectedNotFound(...args);
+            },
         }
     );
     if (error) {
@@ -515,4 +533,36 @@ export const testInlineExpectsErrors = {
     diagnosticExpectedNotFound: (type: string, message: string, label = ``) =>
         `${label}no "${type}" diagnostic found for "${message}"`,
     combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
+    diagnosticsDump: ({ source, diagnostics, transformDiagnostics }: Context['meta']) => {
+        const transformReport = (diagnostics: Diagnostic[]) => {
+            return JSON.stringify(
+                diagnostics.map((diagnostic) => {
+                    const node = diagnostic.node.clone();
+                    if ('nodes' in node) {
+                        (node as any).nodes = [];
+                    }
+                    return {
+                        ...diagnostic,
+                        node: node.toString(),
+                    };
+                }),
+                null,
+                2
+            );
+        };
+        const analyzedReports = transformReport(diagnostics.reports);
+        const transformReports = transformDiagnostics
+            ? transformReport(transformDiagnostics.reports)
+            : 'not transformed';
+
+        return [
+            `********* Diagnostics DUMP *********`,
+            `Diagnostics found in ${source}:`,
+            ' - analyze:',
+            analyzedReports,
+            ' - transform:',
+            transformReports,
+            '***********************************',
+        ].join('\n');
+    },
 };
