@@ -3,15 +3,27 @@ import { createDiagnostics } from '../../test-kit/diagnostics-setup';
 import deindent from 'deindent';
 
 describe('custom property', () => {
-    it('should ignore native css lsp diagnostics unknown @property at-rule', () => {
-        // remove once css lsp supports is added or we implement the complete lsp ourselves
+    it('should ignore native css lsp diagnostics for @property body', () => {
         const filePath = '/style.st.css';
 
         const diagnostics = createDiagnostics(
             {
                 [filePath]: deindent`
                     @property --x;
-                    @property --y {
+                `,
+            },
+            filePath
+        );
+
+        expect(diagnostics).to.eql([]);
+    });
+    it('should clear st-global from ident to allow css-lsp to function', () => {
+        const filePath = '/style.st.css';
+
+        const diagnostics = createDiagnostics(
+            {
+                [filePath]: deindent`
+                    @property st-global(--y) {
                         syntax: '<color>';
                         inherits: true; 
                         initial-value: green;
