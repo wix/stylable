@@ -1,5 +1,4 @@
 import type { Stylable, StylableMeta } from '@stylable/core';
-import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
 import { processUrlDependencies, hasImportedSideEffects } from '@stylable/build-tools';
 import { LOADER_NAME } from './plugin-utils';
 
