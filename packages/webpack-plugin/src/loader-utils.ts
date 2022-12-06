@@ -2,11 +2,10 @@ import type { Stylable, StylableMeta } from '@stylable/core';
 import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
 import {
     processUrlDependencies,
-    collectSheetsWithSideEffects,
+    collectImportsWithSideEffects,
     hasImportedSideEffects,
 } from '@stylable/build-tools';
 import { LOADER_NAME } from './plugin-utils';
-import { dirname, relative } from 'path';
 
 export function getReplacementToken(token: string) {
     return `/* INJECT */ {__${token}__:true}`;
@@ -31,29 +30,17 @@ export function getImports(
 
     if (includeGlobalSideEffects) {
         // new mode that collect deep side effects
-        const resolvedSideEffectRequests = collectSheetsWithSideEffects(stylable, meta);
-        const contextDir = dirname(meta.source);
-        // add side-effects sheets as imports
-        for (const resolvedRequest of resolvedSideEffectRequests) {
-            const relativePath = normalizeRelative(relative(contextDir, resolvedRequest));
-            if (!relativePath.endsWith('.st.css')) {
-                imports.push(`import ${JSON.stringify(`!!${LOADER_NAME}!` + relativePath)};`);
-            } else {
-                imports.push(`import ${JSON.stringify(relativePath)};`);
+        collectImportsWithSideEffects(stylable, meta, (contextMeta, absPath, isUsed) => {
+            if (isUsed) {
+                if (!absPath.endsWith('.st.css')) {
+                    imports.push(`import ${JSON.stringify(`!!${LOADER_NAME}!` + absPath)};`);
+                } else {
+                    imports.push(`import ${JSON.stringify(absPath)};`);
+                }
+            } else if (contextMeta === meta) {
+                unusedImports.push(absPath);
             }
-        }
-        // collect unused imports
-        for (const imported of meta.getImportStatements()) {
-            let resolved = imported.request;
-            try {
-                resolved = stylable.resolver.resolvePath(imported.context, imported.request);
-            } catch (e) {
-                // fallback to request
-            }
-            if (resolved.endsWith('.css') && !resolvedSideEffectRequests.has(resolved)) {
-                unusedImports.push(imported.request); // ToDo: should we change to relative resolved?
-            }
-        }
+        });
     } else {
         // legacy mode - only shallow imported side-effects
         for (const imported of meta.getImportStatements()) {

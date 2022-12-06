@@ -3,6 +3,7 @@
 @st-import './global-layer.st.css';
 @st-import './global-custom-property.st.css';
 @st-import './native.css';
+@st-import './circular.st.css';
 
 .localClass {
     color: red;

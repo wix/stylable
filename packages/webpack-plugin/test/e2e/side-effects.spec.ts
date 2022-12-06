@@ -33,8 +33,9 @@ describe(`(${project})`, () => {
             { id: './src/global-keyframes.st.css', depth: '1' },
             { id: './src/global-layer.st.css', depth: '1' },
             { id: './src/global-custom-property.st.css', depth: '1' },
-            // { id: './src/no-side-effects-proxy.st.css', depth: '2' },
-            { id: './src/index.st.css', depth: '3' },
+            // { id: './src/circular.st.css', depth: '2' },
+            // { id: './src/no-side-effects-proxy.st.css', depth: '3' },
+            { id: './src/index.st.css', depth: '4' },
         ]);
     });
 });

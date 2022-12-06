@@ -6,16 +6,12 @@ import { STSymbol, STGlobal, CSSCustomProperty } from '@stylable/core/dist/index
     - skip over sheets with no side-effects
     - search for deep only in case a shallow import has no side-effect
 */
-export function collectSheetsWithSideEffects(stylable: Stylable, meta: StylableMeta) {
-    const absolutePathImports = getImportsWithSideEffects(stylable, meta);
-    return new Set(absolutePathImports);
-}
-
-/**
- * return a list of paths to sheets that have side effects from meta (deep)
- */
-function getImportsWithSideEffects(stylable: Stylable, meta: StylableMeta) {
-    const imports: string[] = [];
+export function collectImportsWithSideEffects(
+    stylable: Stylable,
+    meta: StylableMeta,
+    visit: (contextMeta: StylableMeta, absPath: string, isUsed: boolean) => void,
+    visited: Set<string> = new Set()
+) {
     for (const importData of meta.getImportStatements()) {
         // attempt to resolve the request through stylable resolveModule,
         // is case of an error fall back to the original request
@@ -28,27 +24,31 @@ function getImportsWithSideEffects(stylable: Stylable, meta: StylableMeta) {
         } catch (e) {
             // fallback to request // TODO: check if this is correct
         }
+        if (visited.has(resolvedImportPath)) {
+            continue;
+        }
+        visited.add(resolvedImportPath);
         if (resolvedImportPath.endsWith('.css')) {
             // We want to include Stylable and native css files
             // that have effects on other files
             if (!resolvedImportPath.endsWith('.st.css')) {
-                imports.push(resolvedImportPath);
+                visit(meta, resolvedImportPath, true);
             } else if (hasImportedSideEffects(stylable, meta, importData)) {
                 // direct side effects required by importing context
-                imports.push(resolvedImportPath);
+                visit(meta, resolvedImportPath, true);
             } else {
                 const importMeta = stylable.analyze(resolvedImportPath);
                 // check for global side-effects
                 if (hasGlobalSideEffects(importMeta)) {
-                    imports.push(resolvedImportPath);
+                    visit(meta, resolvedImportPath, true);
                 } else {
                     // collect deep side-effects
-                    imports.push(...getImportsWithSideEffects(stylable, importMeta));
+                    visit(meta, resolvedImportPath, false);
+                    collectImportsWithSideEffects(stylable, importMeta, visit, visited);
                 }
             }
         }
     }
-    return imports;
 }
 
 /*
