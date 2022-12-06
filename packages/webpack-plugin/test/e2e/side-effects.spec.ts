@@ -28,7 +28,7 @@ describe(`(${project})`, () => {
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
 
         expect(styleElements).to.eql([
-            { id: './src/native.css', depth: '0' },
+            { id: './src/native.css', depth: '0' } /* ToDo: should probably have depth 1 */,
             { id: './src/global-selector.st.css', depth: '1' },
             { id: './src/global-keyframes.st.css', depth: '1' },
             { id: './src/global-layer.st.css', depth: '1' },
