@@ -1,0 +1,5 @@
+@property st-global(--globalCustomProp) {
+    syntax: '<color>';
+    initial-value: green;
+    inherits: false;
+}
