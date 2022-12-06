@@ -265,6 +265,31 @@ describe(`features/css-custom-property`, () => {
             }
         `);
     });
+    it(`should collect runtime @property definitions`, () => {
+        const { sheets } = testStylableCore(`
+            @property --a;
+            @property st-global(--b);
+
+            @property --c {
+                syntax: '<color>';
+                initial-value: green;
+                inherits: false;
+            }
+            @property st-global(--d) {
+                syntax: '<color>';
+                initial-value: green;
+                inherits: false;
+            }
+
+            .root {
+                --e: var(--f);
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        expect(CSSCustomProperty.getRuntimeTypedDefinitionNames(meta)).to.eql(['--c', '--d']);
+    });
     it.skip(`should escape`, () => {
         const { sheets } = testStylableCore(`
             .root {
