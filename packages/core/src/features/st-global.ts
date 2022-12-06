@@ -5,6 +5,7 @@ import {
     stringifySelector,
     parseSelectorWithCache,
     flattenFunctionalSelector,
+    isCompRoot,
 } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
 import type {
@@ -56,9 +57,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutableSelectorNode }
         const ruleData = rules.get(originalNode)!;
         if (node.type === 'pseudo_class' && node.value === `global`) {
             // mark selector as global only if it isn't set
-            if (ruleData.topLevelSelectorsFlags[topSelectorIndex] === undefined) {
-                ruleData.topLevelSelectorsFlags[topSelectorIndex] = true;
-            }
+            ruleData.topLevelSelectorsFlags[topSelectorIndex] ??= true;
             if (node.nodes && node.nodes?.length > 1) {
                 context.diagnostics.report(diagnostics.UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL(), {
                     node: rule,
@@ -66,6 +65,9 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutableSelectorNode }
                 });
             }
             return walkSelector.skipNested;
+        } else if (node.type === 'universal' || (node.type === 'type' && !isCompRoot(node.value))) {
+            // mark selector as global only if it isn't set
+            ruleData.topLevelSelectorsFlags[topSelectorIndex] ??= true;
         } else {
             // mark selector as local if it has a local selector
             ruleData.topLevelSelectorsFlags[topSelectorIndex] = false;

@@ -66,10 +66,10 @@ describe(`features/st-global`, () => {
             /* global: mixed multi selectors */
             .x, :global(*) {}
 
-            /* local: unhandled universal without :global */
+            /* global: universal without :global */
             * {}
 
-            /* local: unhandled type without :global */
+            /* global: type without :global */
             div {}
 
             /* local: mix start with global */
