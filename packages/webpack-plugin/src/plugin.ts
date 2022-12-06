@@ -133,7 +133,7 @@ export interface StylableWebpackPluginOptions {
     assetsMode?: 'url' | 'loader';
     /**
      * Set true for an improved side-effect detection to include stylesheets with deep global side-effects.
-     * Defaults to false.
+     * Defaults to true.
      */
     includeGlobalSideEffects?: boolean;
 }
@@ -168,7 +168,7 @@ const defaultOptions = (
     assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
     stcConfig: userOptions.stcConfig ?? false,
-    includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? false,
+    includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? true,
 });
 
 export class StylableWebpackPlugin {

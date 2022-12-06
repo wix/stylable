@@ -50,7 +50,7 @@ export interface StylableRollupPluginOptions {
     projectRoot?: string;
     /**
      * Set true for an improved side-effect detection to include stylesheets with deep global side-effects.
-     * Defaults to false.
+     * Defaults to true.
      */
     includeGlobalSideEffects?: boolean;
 }
@@ -93,7 +93,7 @@ export function stylableRollupPlugin({
     stylableConfig = (config: StylableConfig) => config,
     stcConfig,
     projectRoot,
-    includeGlobalSideEffects = false,
+    includeGlobalSideEffects = true,
 }: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
