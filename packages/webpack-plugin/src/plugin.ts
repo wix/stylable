@@ -420,11 +420,9 @@ export class StylableWebpackPlugin {
                          * We want to add the unused imports because we need them to calculate the depth correctly
                          * They might be used by other stylesheets so they might end up in the final build
                          */
-                        for (const request of stylableBuildMeta.unusedImports) {
+                        for (const resolvedAbsPath of stylableBuildMeta.unusedImports) {
                             module.addDependency(
-                                new this.entities.UnusedDependency(
-                                    this.stylable.resolver.resolvePath(module.context!, request)
-                                )
+                                new this.entities.UnusedDependency(resolvedAbsPath)
                             );
                         }
 

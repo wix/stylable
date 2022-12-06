@@ -60,9 +60,9 @@ export function getImports(
                     continue;
                 }
                 if (hasImportedSideEffects(stylable, meta, imported)) {
-                    imports.push(`import ${JSON.stringify(imported.request)};`);
+                    imports.push(`import ${JSON.stringify(resolved)};`);
                 } else {
-                    unusedImports.push(imported.request);
+                    unusedImports.push(resolved);
                 }
             }
         }
