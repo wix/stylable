@@ -12,6 +12,8 @@ import { errorMessages, buildMessages } from './messages';
 import postcss from 'postcss';
 import { sortModulesByDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
+import type { Stylable } from '@stylable/core';
+import type { IFileSystem } from '@file-services/types';
 
 export async function build(
     {
@@ -195,12 +197,30 @@ export async function build(
             updateWatcherDependencies(affectedFiles);
             // rebuild assets from aggregated content: index files and assets
             await buildAggregatedEntities(affectedFiles, processGeneratedFiles);
-
+            // rebundle
+            if (bundle) {
+                tryRun(() => {
+                    const outputs = bundleFiles({
+                        stylable,
+                        sourceFiles,
+                        fullSrcDir,
+                        fullOutDir,
+                        bundle,
+                        minify,
+                        fs,
+                    });
+                    for (const { filePath, content, files } of outputs) {
+                        processGeneratedFiles.add(filePath);
+                        log(mode, buildMessages.EMIT_BUNDLE(filePath, files.length));
+                        fs.writeFileSync(filePath, content);
+                    }
+                }, 'failed to write or minify bundle file');
+            }
             if (!diagnostics) {
                 diagnosticsManager.delete(identifier);
             }
 
-            const count = deletedFiles.size + affectedFiles.size + assets.size;
+            const count = deletedFiles.size + affectedFiles.size + assets.size + (bundle ? 1 : 0);
 
             if (count) {
                 log(
@@ -225,35 +245,6 @@ export async function build(
 
     if (sourceFiles.size === 0) {
         log(mode, buildMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined));
-    } else if (bundle) {
-        tryRun(() => {
-            const sortedModules = sortModulesByDepth(
-                Array.from(sourceFiles),
-                (m) => {
-                    return stylable.analyze(m).transformCssDepth?.cssDepth ?? 0;
-                },
-                (m) => {
-                    return m;
-                },
-                -1 /** PRINT_ORDER */
-            );
-            const cssBundleCode = sortedModules
-                .map((m) => {
-                    const meta = stylable.analyze(m);
-                    const targetFilePath = join(fullOutDir, relative(fullSrcDir, meta.source));
-                    const ast = meta.targetAst!;
-                    fixRelativeUrls(ast, targetFilePath, join(fullOutDir, bundle));
-
-                    return ast.toString();
-                })
-                .join('\n');
-
-            const optimizer = new StylableOptimizer();
-            fs.writeFileSync(
-                join(fullOutDir, bundle),
-                minify ? optimizer.minifyCSS(cssBundleCode) : cssBundleCode
-            );
-        }, 'failed to write or minify bundle file');
     }
 
     return { service, generatedFiles: buildGeneratedFiles };
@@ -388,6 +379,54 @@ export async function build(
             }
         }
     }
+}
+
+function bundleFiles({
+    stylable,
+    sourceFiles,
+    fullSrcDir,
+    fullOutDir,
+    bundle,
+    minify,
+    fs,
+}: {
+    sourceFiles: Set<string>;
+    stylable: Stylable;
+    fullOutDir: string;
+    fullSrcDir: string;
+    bundle: string;
+    fs: IFileSystem;
+    minify: boolean | undefined;
+}) {
+    const { join, relative } = fs;
+    const sortedModules = sortModulesByDepth(
+        Array.from(sourceFiles),
+        (m) => {
+            return stylable.analyze(m).transformCssDepth?.cssDepth ?? 0;
+        },
+        (m) => {
+            return m;
+        },
+        -1 /** PRINT_ORDER */
+    );
+    const cssBundleCode = sortedModules
+        .map((m) => {
+            const meta = stylable.analyze(m);
+            const targetFilePath = join(fullOutDir, relative(fullSrcDir, meta.source));
+            const ast = meta.targetAst!;
+            fixRelativeUrls(ast, targetFilePath, join(fullOutDir, bundle));
+            return ast.toString();
+        })
+        .join('\n');
+
+    const optimizer = new StylableOptimizer();
+    return [
+        {
+            filePath: join(fullOutDir, bundle),
+            content: minify ? optimizer.minifyCSS(cssBundleCode) : cssBundleCode,
+            files: sortedModules,
+        },
+    ];
 }
 
 function copyRuntime(

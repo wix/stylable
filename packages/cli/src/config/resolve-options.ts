@@ -304,6 +304,7 @@ export function hasStylableCSSOutput(options: BuildOptions): boolean {
         options.outputCSS ||
         options.outputSources ||
         options.dts ||
+        Boolean(options.bundle) ||
         Boolean(options.indexFile)
     );
 }
