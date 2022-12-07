@@ -587,10 +587,10 @@ type ImportEvent = {
     depth: number;
 };
 
-type ImportCollectionHost = {
+export interface ImportCollectionHost {
     resolver: StylableResolver;
     analyze: (fullPath: string) => StylableMeta;
-};
+}
 
 export function tryCollectImportsDeep(
     host: ImportCollectionHost,

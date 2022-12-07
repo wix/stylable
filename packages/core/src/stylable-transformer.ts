@@ -48,7 +48,6 @@ import {
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
-import { tryCollectImportsDeep } from './helpers/import';
 
 export interface ResolvedElement {
     name: string;
@@ -123,7 +122,7 @@ export class StylableTransformer {
     private defaultStVarOverride: Record<string, string>;
     private evaluator: StylableEvaluator = new StylableEvaluator();
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
-
+    private analyze: (filePath: string) => StylableMeta;
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;
@@ -139,6 +138,7 @@ export class StylableTransformer {
         this.mode = options.mode || 'production';
         this.defaultStVarOverride = options.stVarOverride || {};
         this.getResolvedSymbols = createSymbolResolverWithCache(this.resolver, this.diagnostics);
+        this.analyze = (filePath: string) => this.fileProcessor.process(filePath);
     }
     public transform(meta: StylableMeta): StylableResults {
         const metaExports: StylableExports = {
@@ -157,13 +157,13 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            analyze: this.analyze,
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
         meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(meta.targetAst, meta, metaExports);
         meta.transformDiagnostics = this.diagnostics;
-        meta.transformCssDepth = this.calcCssDepth(meta);
         const result = { meta, exports: metaExports };
 
         return this.postProcessor ? this.postProcessor(result, this) : result;
@@ -188,6 +188,7 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            analyze: this.analyze,
         };
         const transformResolveOptions = {
             context: transformContext,
@@ -431,6 +432,7 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            analyze: this.analyze,
         };
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({
@@ -544,43 +546,6 @@ export class StylableTransformer {
                 resolved: resolvedSymbols[origin._kind][origin.name],
             });
         }
-    }
-    private calcCssDepth(meta: StylableMeta) {
-        let cssDepth = 0;
-        const deepDependencies = tryCollectImportsDeep(
-            {
-                resolver: this.resolver,
-                analyze: (filePath) => this.fileProcessor.process(filePath),
-            },
-            meta,
-            new Set(),
-            ({ depth }) => {
-                cssDepth = Math.max(cssDepth, depth);
-            },
-            1
-        );
-        return { cssDepth, deepDependencies };
-    }
-    private isDuplicateStScopeDiagnostic(context: ScopeContext) {
-        const transformedScope =
-            context.originMeta.transformedScopes?.[getRuleScopeSelector(context.rule) || ``];
-        if (transformedScope && context.selector && context.compoundSelector) {
-            const currentCompoundSelector = stringifySelector(context.compoundSelector);
-            const i = context.selector.nodes.indexOf(context.compoundSelector);
-            for (const stScopeSelectorCompounded of transformedScope) {
-                // if we are in a chunk index that is in the rage of the @st-scope param
-                if (i <= stScopeSelectorCompounded.nodes.length) {
-                    for (const scopeNode of stScopeSelectorCompounded.nodes) {
-                        const scopeNodeSelector = stringifySelector(scopeNode);
-                        // if the two chunks match the error is already reported by the @st-scope validation
-                        if (scopeNodeSelector === currentCompoundSelector) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
     private handleCustomSelector(
         customSelector: string,

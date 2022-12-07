@@ -402,7 +402,11 @@ function bundleFiles({
     const sortedModules = sortModulesByDepth(
         Array.from(sourceFiles),
         (m) => {
-            return stylable.analyze(m).transformCssDepth?.cssDepth ?? 0;
+            const meta = stylable.analyze(m);
+            if (!meta.transformCssDepth) {
+                stylable.transform(meta);
+            }
+            return meta.transformCssDepth?.cssDepth ?? 0;
         },
         (m) => {
             return m;
@@ -419,11 +423,10 @@ function bundleFiles({
         })
         .join('\n');
 
-    const optimizer = new StylableOptimizer();
     return [
         {
             filePath: join(fullOutDir, bundle),
-            content: minify ? optimizer.minifyCSS(cssBundleCode) : cssBundleCode,
+            content: minify ? new StylableOptimizer().minifyCSS(cssBundleCode) : cssBundleCode,
             files: sortedModules,
         },
     ];
@@ -443,18 +446,8 @@ function copyRuntime(
     let runtimeEsmOutPath;
 
     if (inlineRuntime) {
-        const runtimeCjsPath = fs.isAbsolute(runtimeCjsRequest)
-            ? runtimeCjsRequest
-            : require.resolve(runtimeCjsRequest, {
-                  paths: [projectRoot],
-              });
-        const runtimeEsmPath = fs.isAbsolute(runtimeEsmRequest)
-            ? runtimeEsmRequest
-            : require.resolve(runtimeEsmRequest, {
-                  paths: [projectRoot],
-              });
-
-        // TODO: inline the inject styles. done in the #2615
+        const runtimeCjsPath = resolveRequestInContext(fs, runtimeCjsRequest, projectRoot);
+        const runtimeEsmPath = resolveRequestInContext(fs, runtimeEsmRequest, projectRoot);
         if (cjs) {
             fs.ensureDirectorySync(fullOutDir);
             runtimeCjsOutPath = fs.join(fullOutDir, 'cjs-runtime.js');
@@ -463,12 +456,19 @@ function copyRuntime(
         if (esm) {
             fs.ensureDirectorySync(fullOutDir);
             runtimeEsmOutPath = fs.join(fullOutDir, 'esm-runtime.js');
-            const runtimeEsmContent = fs.readFileSync(runtimeEsmPath, 'utf8');
-            fs.writeFileSync(runtimeEsmOutPath, runtimeEsmContent);
+            fs.writeFileSync(runtimeEsmOutPath, fs.readFileSync(runtimeEsmPath, 'utf8'));
         }
     }
 
     return { runtimeCjsOutPath, runtimeEsmOutPath };
+}
+
+function resolveRequestInContext(fs: IFileSystem, request: string, projectRoot: string) {
+    return fs.isAbsolute(request)
+        ? request
+        : require.resolve(request, {
+              paths: [projectRoot],
+          });
 }
 
 export function createGenerator(
