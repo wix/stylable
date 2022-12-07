@@ -49,7 +49,7 @@ const { mods, rootDir: rawRootDir, require: requires, external } = argv;
 const rootDir = resolve(rawRootDir);
 // execute all require hooks before running the CLI build
 for (const request of requires) {
-    if (request) {
+    if (typeof request === 'string') {
         require(request);
     }
 }
@@ -61,8 +61,8 @@ const log = createLogger(
 
 const loadedMods = new Set<{ id: string; apply: CodeMod }>();
 
-loadExternalCodemods(external, rootDir, loadedMods, log);
-loadBuiltInCodemods(mods, loadedMods, log);
+loadExternalCodemods(external as string[], rootDir, loadedMods, log);
+loadBuiltInCodemods(mods as string[], loadedMods, log);
 
 if (loadedMods.size !== mods.length + external.length) {
     log(`Not all codemods has been found. Bail execution.`);

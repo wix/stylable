@@ -116,7 +116,7 @@ if (debug) {
 
 // execute all require hooks before running the CLI build
 for (const request of requires) {
-    if (request) {
+    if (typeof request === 'string') {
         require(request);
     }
 }
