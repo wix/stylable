@@ -122,7 +122,6 @@ export class StylableTransformer {
     private defaultStVarOverride: Record<string, string>;
     private evaluator: StylableEvaluator = new StylableEvaluator();
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
-    private analyze: (filePath: string) => StylableMeta;
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;
@@ -138,7 +137,6 @@ export class StylableTransformer {
         this.mode = options.mode || 'production';
         this.defaultStVarOverride = options.stVarOverride || {};
         this.getResolvedSymbols = createSymbolResolverWithCache(this.resolver, this.diagnostics);
-        this.analyze = (filePath: string) => this.fileProcessor.process(filePath);
     }
     public transform(meta: StylableMeta): StylableResults {
         const metaExports: StylableExports = {
@@ -157,7 +155,6 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
-            analyze: this.analyze,
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
@@ -188,7 +185,6 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
-            analyze: this.analyze,
         };
         const transformResolveOptions = {
             context: transformContext,
@@ -432,7 +428,6 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
-            analyze: this.analyze,
         };
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({

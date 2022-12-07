@@ -229,7 +229,7 @@ export function stylableRollupPlugin({
 
             extracted.set(path, { css });
 
-            for (const filePath of tryCollectImportsDeep(stylable, meta)) {
+            for (const filePath of tryCollectImportsDeep(stylable.resolver, meta)) {
                 this.addWatchFile(filePath);
             }
 

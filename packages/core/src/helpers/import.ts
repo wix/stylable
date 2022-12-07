@@ -587,13 +587,8 @@ type ImportEvent = {
     depth: number;
 };
 
-export interface ImportCollectionHost {
-    resolver: StylableResolver;
-    analyze: (fullPath: string) => StylableMeta;
-}
-
 export function tryCollectImportsDeep(
-    host: ImportCollectionHost,
+    resolver: StylableResolver,
     meta: StylableMeta,
     imports = new Set<string>(),
     onImport: undefined | ((e: ImportEvent) => void) = undefined,
@@ -601,12 +596,18 @@ export function tryCollectImportsDeep(
 ) {
     for (const { context, request } of meta.getImportStatements()) {
         try {
-            const resolved = host.resolver.resolvePath(context, request);
+            const resolved = resolver.resolvePath(context, request);
             onImport?.({ context, request, resolved, depth });
 
             if (!imports.has(resolved)) {
                 imports.add(resolved);
-                tryCollectImportsDeep(host, host.analyze(resolved), imports, onImport, depth + 1);
+                tryCollectImportsDeep(
+                    resolver,
+                    resolver.analyze(resolved),
+                    imports,
+                    onImport,
+                    depth + 1
+                );
             }
         } catch {
             /** */

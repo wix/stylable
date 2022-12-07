@@ -20,7 +20,6 @@ export interface FeatureContext {
 export interface FeatureTransformContext extends FeatureContext {
     resolver: StylableResolver;
     evaluator: StylableEvaluator;
-    analyze: (filePath: string) => StylableMeta;
     getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols;
 }
 

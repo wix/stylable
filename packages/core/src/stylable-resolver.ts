@@ -169,6 +169,9 @@ export class StylableResolver {
 
         return entity;
     }
+    public analyze(filePath: string) {
+        return this.fileProcessor.process(filePath);
+    }
     public resolvePath(directoryPath: string, request: string): string {
         const key = cacheKey(directoryPath, request);
         let resolvedPath = this.cache?.get(key)?.resolvedPath;
@@ -313,7 +316,6 @@ export class StylableResolver {
         }
         return null;
     }
-
     public resolveSymbols(meta: StylableMeta, diagnostics: Diagnostics) {
         const resolvedSymbols: MetaResolvedSymbols = {
             mainNamespace: {},

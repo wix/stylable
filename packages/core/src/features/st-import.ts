@@ -199,7 +199,7 @@ export class StylablePublicApi {
 function calcCssDepth(context: FeatureTransformContext) {
     let cssDepth = 0;
     const deepDependencies = tryCollectImportsDeep(
-        context,
+        context.resolver,
         context.meta,
         new Set(),
         ({ depth }) => {

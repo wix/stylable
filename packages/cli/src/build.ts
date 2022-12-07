@@ -327,7 +327,7 @@ export async function build(
                     errorMessages.STYLABLE_PROCESS(filePath)
                 );
                 // todo: consider merging this API with stylable.getDependencies()
-                for (const depFilePath of tryCollectImportsDeep(stylable, meta)) {
+                for (const depFilePath of tryCollectImportsDeep(stylable.resolver, meta)) {
                     registerInvalidation(depFilePath, filePath);
                 }
             } catch (error) {
