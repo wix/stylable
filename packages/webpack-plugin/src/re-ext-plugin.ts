@@ -7,11 +7,12 @@ export class ReExt {
         this.newExt = Array.isArray(newExt) ? newExt : [newExt];
     }
     apply(resolver: Resolver) {
-        const target = resolver.ensureHook('normal-resolve');
-        resolver.getHook('raw-resolve').tapAsync('ReExt', (request, resolveContext, callback) => {
-            const requestPath = request.request;
+        const target = resolver.ensureHook('file');
+        resolver.getHook('raw-file').tapAsync('ReExt', (request, resolveContext, callback) => {
+            const relativeFilePath = request.relativePath;
+            const requestedPath = request.path;
             const matchExtRegExp = this.matchExtRegExp;
-            if (!requestPath || !requestPath.match(matchExtRegExp)) {
+            if (!requestedPath || !relativeFilePath || !relativeFilePath.match(matchExtRegExp)) {
                 return callback();
             }
 
@@ -37,11 +38,10 @@ export class ReExt {
                         target,
                         {
                             ...request,
-
-                            request: requestPath!.replace(matchExtRegExp, newExt),
-                            fullySpecified: true,
+                            path: (requestedPath as string).replace(matchExtRegExp, newExt),
+                            relativePath: relativeFilePath!.replace(matchExtRegExp, newExt),
                         },
-                        `replacing extension for ${requestPath} to ${newExt}`,
+                        `replacing extension for ${relativeFilePath} to ${newExt}`,
                         resolveContext,
                         (err: Error, resolved: unknown) => {
                             err ? res(undefined) : res(resolved);

@@ -26,9 +26,13 @@ describe(`(${project})`, () => {
 
     it('output same styles depth with both integrations', async () => {
         const vanillaBrowser = await projectRunner.openInBrowser({ internalPath: 'vanilla' });
-        const vanillaStyles = await vanillaBrowser.page.evaluate(getStyleElementsMetadata);
+        const vanillaStyles = await vanillaBrowser.page.evaluate(getStyleElementsMetadata, {
+            includeRuntimeId: true,
+        });
         const stylableBrowser = await projectRunner.openInBrowser({ internalPath: 'stylable' });
-        const stylableStyles = await stylableBrowser.page.evaluate(getStyleElementsMetadata);
+        const stylableStyles = await stylableBrowser.page.evaluate(getStyleElementsMetadata, {
+            includeRuntimeId: true,
+        });
 
         const { buttonColor, labelFontSize } = await vanillaBrowser.page.evaluate(() => {
             return {
@@ -40,7 +44,23 @@ describe(`(${project})`, () => {
         expect(buttonColor).to.eql('rgb(0, 255, 0)');
         expect(labelFontSize).to.eql('50px');
 
-        expect(vanillaStyles).to.eql(stylableStyles);
+        const vanillaStylesNoRuntime = vanillaStyles.map(({ runtime, id, depth }) => {
+            expect(runtime).to.eql('esm');
+            return {
+                id,
+                depth,
+            };
+        });
+
+        const stylableStylesNoRuntime = stylableStyles.map(({ runtime, id, depth }) => {
+            expect(runtime).to.eql('0');
+            return {
+                id,
+                depth,
+            };
+        });
+
+        expect(vanillaStylesNoRuntime).to.eql(stylableStylesNoRuntime);
 
         expect(normalizeNamespace(vanillaStyles)).to.eql([
             { id: 'designsystem', depth: '0' },
