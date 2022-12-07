@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@stylable/core": "5.4.1-rc.1",
-    "@stylable/runtime": "^5.4.1-rc.1",
+    "@stylable/runtime": "5.4.1-rc.1",
     "@tokey/css-selector-parser": "^0.6.0"
   },
   "files": [

@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "@stylable/core": "5.4.1-rc.1",
-    "@stylable/module-utils": "^5.4.1-rc.1",
-    "@stylable/node": "^5.4.1-rc.1",
-    "@stylable/runtime": "^5.4.1-rc.1"
+    "@stylable/module-utils": "5.4.1-rc.1",
+    "@stylable/node": "5.4.1-rc.1",
+    "@stylable/runtime": "5.4.1-rc.1"
   },
   "files": [
     "dist",
