@@ -31,6 +31,7 @@ describe('Stylable Cli Watch - Single project', function () {
     afterEach(async () => {
         cleanup();
         await tempDir.remove();
+        console.log('cleaned up');
     });
 
     it('simple watch mode', async () => {
@@ -418,7 +419,7 @@ describe('Stylable Cli Watch - Single project', function () {
 
         await run({
             dirPath: tempDir.path,
-            args: ['--outDir', './dist', '-w', '--bundle', 'bundle.css'],
+            args: ['--srcDir', './src', '--outDir', './dist', '-w', '--bundle', 'bundle.css'],
             steps: [
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -426,16 +427,22 @@ describe('Stylable Cli Watch - Single project', function () {
                         const files = loadDirSync(tempDir.path);
                         expect(files['dist/bundle.css']).to.include('z-index:0');
                         expect(files['dist/bundle.css']).to.include('z-index:1');
-                        return writeFile(join(tempDir.path, 'comp.st.css'), `.root{ z-index:2 }`);
+                        return writeFile(
+                            join(tempDir.path, 'src', 'comp.st.css'),
+                            `.root{ z-index:2 }`
+                        );
                     },
                 },
                 {
-                    msg: buildMessages.FINISHED_PROCESSING(3),
+                    msg: buildMessages.FINISHED_PROCESSING(2),
                     action() {
                         const files = loadDirSync(tempDir.path);
                         expect(files['dist/bundle.css']).to.include('z-index:2');
                         expect(files['dist/bundle.css']).to.include('z-index:1');
-                        return writeFile(join(tempDir.path, 'style.st.css'), `.root{ z-index:3 }`);
+                        return writeFile(
+                            join(tempDir.path, 'src', 'style.st.css'),
+                            `.root{ z-index:3 }`
+                        );
                     },
                 },
                 {
