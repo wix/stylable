@@ -6,5 +6,6 @@ exports.stcConfig = typedConfiguration({
         outDir: './style-output',
         cjs: false,
         outputSources: true,
+        useNamespaceReference: false,
     },
 });
