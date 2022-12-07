@@ -38,13 +38,23 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     analyzeAtRule: (options: {
         context: FeatureContext;
         atRule: postcss.AtRule;
-        analyzeRule: (rule: postcss.Rule, options: { isScoped: boolean }) => boolean;
+        analyzeRule: (
+            rule: postcss.Rule,
+            options: { isScoped: boolean; originalNode: postcss.AtRule | postcss.Rule }
+        ) => boolean;
     }) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
         node: T['IMMUTABLE_SELECTOR'];
+        topSelectorIndex: number;
         rule: postcss.Rule;
+        originalNode: postcss.AtRule | postcss.Rule; // used by rules generated from at-rules
         walkContext: SelectorNodeContext;
+    }) => SelectorWalkReturn;
+    analyzeSelectorDone: (options: {
+        context: FeatureContext;
+        rule: postcss.Rule;
+        originalNode: postcss.AtRule | postcss.Rule; // used by rules generated from at-rules
     }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
     analyzeDone: (context: FeatureContext) => void;
@@ -95,6 +105,9 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
         /**/
     },
     analyzeSelectorNode() {
+        /**/
+    },
+    analyzeSelectorDone() {
         /**/
     },
     analyzeDeclaration() {

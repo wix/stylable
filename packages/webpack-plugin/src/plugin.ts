@@ -137,6 +137,11 @@ export interface StylableWebpackPluginOptions {
      * 'css' - use only css files to calculate depth
      */
     depthStrategy?: 'css+js' | 'css';
+    /**
+     * Improved side-effect detection to include stylesheets with deep global side-effects.
+     * Defaults to true.
+     */
+    includeGlobalSideEffects?: boolean;
 }
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
@@ -170,6 +175,7 @@ const defaultOptions = (
     extractMode: userOptions.extractMode ?? 'single',
     stcConfig: userOptions.stcConfig ?? false,
     depthStrategy: userOptions.depthStrategy ?? 'css+js',
+    includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? true,
 });
 
 export class StylableWebpackPlugin {
@@ -405,6 +411,7 @@ export class StylableWebpackPlugin {
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.target = this.options.target;
                     loaderContext.assetFilter = this.options.assetFilter;
+                    loaderContext.includeGlobalSideEffects = this.options.includeGlobalSideEffects;
                     /**
                      * Every Stylable file that our loader handles will be call this function to add additional build data
                      */
@@ -420,11 +427,9 @@ export class StylableWebpackPlugin {
                          * We want to add the unused imports because we need them to calculate the depth correctly
                          * They might be used by other stylesheets so they might end up in the final build
                          */
-                        for (const request of stylableBuildMeta.unusedImports) {
+                        for (const resolvedAbsPath of stylableBuildMeta.unusedImports) {
                             module.addDependency(
-                                new this.entities.UnusedDependency(
-                                    this.stylable.resolver.resolvePath(module.context!, request)
-                                )
+                                new this.entities.UnusedDependency(resolvedAbsPath)
                             );
                         }
 

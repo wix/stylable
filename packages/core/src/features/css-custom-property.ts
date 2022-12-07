@@ -64,6 +64,7 @@ export const diagnostics = {
 
 const dataKey = plugableRecord.key<{
     stCustomGlobalProperty: Record<string, CSSVarSymbol>;
+    typedDefinitions: Record<string, postcss.AtRule[]>;
 }>('custom-property');
 
 // HOOKS
@@ -72,7 +73,10 @@ export const hooks = createFeature<{
     RESOLVED: Record<string, string>;
 }>({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, { stCustomGlobalProperty: {} });
+        plugableRecord.set(meta.data, dataKey, {
+            stCustomGlobalProperty: {},
+            typedDefinitions: {},
+        });
     },
     analyzeInit(context) {
         // ToDo: move to `STImport.ImportTypeHook`
@@ -109,8 +113,12 @@ export const hooks = createFeature<{
                 name = globalVarName.trim();
                 global = true;
             }
+            const { stCustomGlobalProperty, typedDefinitions } = plugableRecord.getUnsafe(
+                context.meta.data,
+                dataKey
+            );
             // handle conflict with deprecated `@st-global-custom-property`
-            if (plugableRecord.getUnsafe(context.meta.data, dataKey).stCustomGlobalProperty[name]) {
+            if (stCustomGlobalProperty[name]) {
                 global = true;
             }
             addCSSProperty({
@@ -121,6 +129,11 @@ export const hooks = createFeature<{
                 final: true,
             });
             validateAtProperty(atRule, context.diagnostics);
+            // save reference to runtime definitions
+            if (atRule.nodes) {
+                typedDefinitions[name] ??= [];
+                typedDefinitions[name].push(atRule);
+            }
         } else if (atRule.name === `st-global-custom-property` && isStylable) {
             analyzeDeprecatedStGlobalCustomProperty(context, atRule);
         }
@@ -326,6 +339,11 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
             });
         }
     }
+}
+
+export function getRuntimeTypedDefinitionNames(meta: StylableMeta) {
+    const { typedDefinitions } = plugableRecord.getUnsafe(meta.data, dataKey);
+    return Object.keys(typedDefinitions);
 }
 export function getTransformedName({ symbol, meta }: CSSResolve<CSSVarSymbol>) {
     return symbol.global ? symbol.name : generateScopedCSSVar(meta.namespace, symbol.name.slice(2));

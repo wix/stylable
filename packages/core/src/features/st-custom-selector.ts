@@ -43,6 +43,7 @@ export const hooks = createFeature({
             const ast = parseSelectorWithCache(selector, { clone: true });
             const isScoped = analyzeRule(postcss.rule({ selector, source: atRule.source }), {
                 isScoped: false,
+                originalNode: atRule,
             });
             const analyzed = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const name = customSelector.slice(3);

@@ -12,7 +12,8 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         meta,
         this.stylable.projectRoot,
         this.assetFilter,
-        this.assetsMode
+        this.assetsMode,
+        this.includeGlobalSideEffects
     );
 
     for (const dep of buildDependencies) {

@@ -7,7 +7,7 @@ module.exports = {
     context: __dirname,
     devtool: 'source-map',
     plugins: [
-        new StylableWebpackPlugin({ includeGlobalSideEffects: false /*legacy mode*/ }),
+        new StylableWebpackPlugin({ includeGlobalSideEffects: true }),
         new HtmlWebpackPlugin(),
     ],
 };

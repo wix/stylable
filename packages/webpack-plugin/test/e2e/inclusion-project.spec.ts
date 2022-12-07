@@ -28,6 +28,7 @@ describe(`(${project})`, () => {
             { id: './src/included-via-compse.st.css', depth: '1' },
             { id: './src/included-via-keyframes.st.css', depth: '1' },
             { id: './src/included-via-layer.st.css', depth: '1' },
+            { id: './src/included-via-property.st.css', depth: '1' },
             { id: './src/included-via-js.st.css', depth: '1' },
             { id: './src/index.st.css', depth: '2' },
         ]);

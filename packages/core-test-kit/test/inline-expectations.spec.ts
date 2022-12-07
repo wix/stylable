@@ -1247,4 +1247,43 @@ describe('inline-expectations', () => {
             );
         });
     });
+    describe('diagnostics dump', () => {
+        it('should report all diagnostics once for multiple diagnostic expectation fails', () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform-warn msg 1 */
+                            .root {}
+
+                            /* @analyze-warn msg 2 */
+                            .root {}
+                            
+                            /* @transform-warn(label) msg 3 */
+                            .root {}
+
+                            /* actual diagnostics */
+                            @st-import './unknown.st.css';
+                            div {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(`transform`, `msg 1`),
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(`analyze`, `msg 2`),
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(
+                        `transform`,
+                        `msg 3`,
+                        `(label): `
+                    ),
+                    testInlineExpectsErrors.diagnosticsDump(result.meta),
+                ])
+            );
+        });
+    });
 });
