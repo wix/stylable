@@ -383,14 +383,14 @@ describe('build stand alone', () => {
         const innerPathBuiltFileEsm = fs.readFileSync('/dist/common/project.st.css.mjs', 'utf8');
 
         // this makes sure that we actually copied the runtime
-        const runtimeCjs = fs.readFileSync('/dist/cjs-runtime.js', 'utf8');
-        const runtimeMjs = fs.readFileSync('/dist/esm-runtime.js', 'utf8');
+        const runtimeCjs = fs.readFileSync('/dist/stylable-cjs-runtime.js', 'utf8');
+        const runtimeMjs = fs.readFileSync('/dist/stylable-esm-runtime.js', 'utf8');
 
         expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
-            `./cjs-runtime.js`
+            `./stylable-cjs-runtime.js`
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
-            `./esm-runtime.js`
+            `./stylable-esm-runtime.js`
         );
         expect(
             innerPathBuiltFileEsm,

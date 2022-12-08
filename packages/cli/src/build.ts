@@ -450,12 +450,12 @@ function copyRuntime(
         const runtimeEsmPath = resolveRequestInContext(fs, runtimeEsmRequest, projectRoot);
         if (cjs) {
             fs.ensureDirectorySync(fullOutDir);
-            runtimeCjsOutPath = fs.join(fullOutDir, 'cjs-runtime.js');
+            runtimeCjsOutPath = fs.join(fullOutDir, 'stylable-cjs-runtime.js');
             fs.writeFileSync(runtimeCjsOutPath, fs.readFileSync(runtimeCjsPath, 'utf8'));
         }
         if (esm) {
             fs.ensureDirectorySync(fullOutDir);
-            runtimeEsmOutPath = fs.join(fullOutDir, 'esm-runtime.js');
+            runtimeEsmOutPath = fs.join(fullOutDir, 'stylable-esm-runtime.js');
             fs.writeFileSync(runtimeEsmOutPath, fs.readFileSync(runtimeEsmPath, 'utf8'));
         }
     }
