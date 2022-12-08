@@ -395,7 +395,7 @@ describe('build stand alone', () => {
         expect(
             innerPathBuiltFileEsm,
             'imports the esm runtime with full extension with relative path'
-        ).to.contain(`./../esm-runtime.js`);
+        ).to.contain(`./../stylable-esm-runtime.js`);
         expect(runtimeCjs).to.eql(`// runtime cjs`);
         expect(runtimeMjs).to.eql(`// runtime esm`);
     });
