@@ -297,6 +297,52 @@ describe('build stand alone', () => {
         expect(builtFile).to.not.contain(`.x`);
     });
 
+    it('should inline assets into data uri in the js module output', async () => {
+        const imageSvgAsBase64 = Buffer.from(
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+            </svg>`
+        ).toString('base64');
+        const fs = createMemoryFs({
+            '/src/comp.st.css': `
+                .root {
+                    background-image: url("./image.svg");
+                }
+            `,
+            // We are converting the svg to base64 here because the memory-fs does not support binary files
+            // later in the process we assume this string is a buffer and call toString('base64') on it
+            '/src/image.svg': imageSvgAsBase64,
+        });
+
+        const stylable = new Stylable({
+            projectRoot: '/',
+            fileSystem: fs,
+            resolveNamespace() {
+                return 'test';
+            },
+        });
+
+        await build(
+            {
+                outDir: './dist',
+                srcDir: './src',
+                cjs: true,
+                includeCSSInJS: true,
+            },
+            {
+                fs,
+                stylable,
+                rootDir: '/',
+                projectRoot: '/',
+                log,
+            }
+        );
+
+        const builtFile = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
+
+        expect(builtFile).to.contain(imageSvgAsBase64);
+    });
+
     it('should minify', async () => {
         const fs = createMemoryFs({
             '/comp.st.css': `

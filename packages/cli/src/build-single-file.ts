@@ -7,7 +7,7 @@ import {
 } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
 import type { IFileSystem } from '@file-services/types';
-import { hasImportedSideEffects } from '@stylable/build-tools';
+import { hasImportedSideEffects, processUrlDependencies } from '@stylable/build-tools';
 import { ensureDirectory, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
@@ -15,6 +15,7 @@ import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { CLIDiagnostic } from './report-diagnostics';
 import { errorMessages } from './messages';
 import type { ModuleFormats } from './types';
+import { fileToDataUri } from './file-to-data-uri';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -138,6 +139,14 @@ export function buildSingleFile({
         );
     }
     // st.css.js
+
+    const ast = includeCSSInJS
+        ? tryRun(
+              () => inlineAssetsForJsModule(res, stylable, fs),
+              `Inline assets failed for: ${filePath}`
+          )
+        : res.meta.targetAst!;
+
     moduleFormats.forEach(([format, ext]) => {
         outputLogs.push(`${format} module`);
 
@@ -179,7 +188,7 @@ export function buildSingleFile({
             },
             includeCSSInJS
                 ? {
-                      css: res.meta.targetAst!.toString(),
+                      css: ast.toString(),
                       depth: cssDepth,
                       id: res.meta.namespace,
                       runtimeId: format,
@@ -288,6 +297,23 @@ export function buildSingleFile({
     return {
         targetFilePath,
     };
+}
+
+function inlineAssetsForJsModule(res: StylableResults, stylable: Stylable, fs: IFileSystem) {
+    const ast = res.meta.targetAst!.clone();
+    processUrlDependencies({
+        meta: { targetAst: ast, source: res.meta.source },
+        rootContext: stylable.projectRoot,
+        getReplacement: ({ absoluteRequest, url }) => {
+            if (isAsset(url)) {
+                const content = fs.readFileSync(absoluteRequest);
+                return fileToDataUri(absoluteRequest, content);
+            }
+            return url;
+        },
+        host: fs,
+    });
+    return ast;
 }
 
 export function removeBuildProducts({

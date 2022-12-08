@@ -5,6 +5,7 @@ import {
     hasImportedSideEffects,
 } from '@stylable/build-tools';
 import { LOADER_NAME } from './plugin-utils';
+import { isAbsolute, join } from 'path';
 
 export function getReplacementToken(token: string) {
     return `/* INJECT */ {__${token}__:true}`;
@@ -23,7 +24,15 @@ export function getImports(
     assetsMode: 'url' | 'loader',
     includeGlobalSideEffects: boolean
 ) {
-    const urls = processUrlDependencies(meta, projectRoot, assetFilter);
+    const urls = processUrlDependencies({
+        meta,
+        rootContext: projectRoot,
+        filter: assetFilter,
+        host: {
+            isAbsolute,
+            join,
+        },
+    });
     const imports: string[] = [];
     const unusedImports: string[] = [];
 
