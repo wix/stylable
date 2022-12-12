@@ -572,23 +572,28 @@ export class StylableWebpackPlugin {
             );
 
             for (const module of sortedModules) {
-                const { css, globals, namespace } = getStylableBuildMeta(module);
+                const { css, globals, namespace, type } = getStylableBuildMeta(module);
 
                 try {
                     const buildData = stylableModules.get(module)!;
-                    const ast = parse(css, { from: module.resource });
+                    let cssOutput = css;
+                    if (type === 'stylable') {
+                        const ast = parse(css, { from: module.resource });
 
-                    optimizer.optimizeAst(
-                        optimizeOptions,
-                        ast,
-                        usageMapping,
-                        buildData.exports,
-                        globals
-                    );
+                        optimizer.optimizeAst(
+                            optimizeOptions,
+                            ast,
+                            usageMapping,
+                            buildData.exports,
+                            globals
+                        );
+
+                        cssOutput = ast.toString();
+                    }
 
                     buildData.css = optimizeOptions.minify
-                        ? optimizer.minifyCSS(ast.toString())
-                        : ast.toString();
+                        ? optimizer.minifyCSS(cssOutput)
+                        : cssOutput;
 
                     if (optimizeOptions.shortNamespaces) {
                         buildData.namespace = namespaceMapping[namespace];

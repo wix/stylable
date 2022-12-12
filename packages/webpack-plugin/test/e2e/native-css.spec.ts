@@ -67,3 +67,35 @@ describe(`(${project})`, () => {
         ]);
     });
 });
+
+describe(`(${project}) (production)`, () => {
+    const projectRunner = StylableProjectRunner.mochaSetup(
+        {
+            projectDir,
+            webpackOptions: {
+                mode: 'production',
+            },
+            launchOptions: {
+                // headless: false,
+            },
+        },
+        before,
+        afterEach,
+        after
+    );
+
+    it('include native CSS imports from local and 3rd party', async () => {
+        const { page } = await projectRunner.openInBrowser();
+
+        const { nativeClassProp } = await page.evaluate(() => {
+            const element = document.querySelector('.native-class');
+            const computedStyle = getComputedStyle(element!);
+            return {
+                nativeClassProp: computedStyle.getPropertyValue('--native-class'),
+            };
+        });
+        expect(nativeClassProp, 'un-optimized native class').to.eql(
+            'from local un-optimized class'
+        );
+    });
+});
