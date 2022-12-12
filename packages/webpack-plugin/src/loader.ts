@@ -30,6 +30,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         namespace: meta.namespace,
         urls,
         unusedImports,
+        type: meta.type,
     });
     /**
      * NOTICE: order of replacements is coupled with "webpack-entities.ts"

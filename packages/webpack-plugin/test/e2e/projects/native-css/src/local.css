@@ -2,3 +2,6 @@ body {
   --local-color: green;
   --local-side-effect: from local side-effect;
 }
+.native-class {
+  --native-class: from local un-optimized class;
+}
