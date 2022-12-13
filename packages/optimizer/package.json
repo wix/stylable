@@ -1,6 +1,6 @@
 {
   "name": "@stylable/optimizer",
-  "version": "5.4.1-rc.1",
+  "version": "5.4.0",
   "description": "Stylable core optimizer",
   "main": "dist/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "start": "mocha-play \"./dist/test/**/*.spec.js\" -c ./webpack.config.js -w"
   },
   "dependencies": {
-    "@stylable/core": "5.4.1-rc.1",
+    "@stylable/core": "^5.4.0",
     "@tokey/css-selector-parser": "^0.6.0",
     "csso": "^5.0.5",
     "postcss": "^8.4.19"
