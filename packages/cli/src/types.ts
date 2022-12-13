@@ -104,7 +104,7 @@ export interface CliArguments {
     manifest: boolean | undefined;
     manifestFilepath: string;
     customGenerator: string | undefined;
-    require: (number|string)[];
+    require: string[];
     log: boolean | undefined;
     diagnostics: boolean | undefined;
     diagnosticsMode: string | undefined;

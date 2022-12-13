@@ -146,6 +146,7 @@ export function getCliArguments(): Arguments<CliArguments> {
         })
         .option('require', {
             type: 'array',
+            string: true,
             description: 'require hooks',
             alias: 'r',
             default: [] as string[],

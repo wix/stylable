@@ -31,9 +31,7 @@ async function main() {
 
     // execute all require hooks before running the CLI build
     for (const request of requires) {
-        if (typeof request === 'string') {
-            require(request);
-        }
+        require(request);
     }
 
     const defaultOptions = createDefaultOptions();
