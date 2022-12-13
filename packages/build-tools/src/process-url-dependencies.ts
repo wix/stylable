@@ -12,7 +12,7 @@ export function processUrlDependencies({
     meta,
     rootContext,
     filter = defaultFilter,
-    getReplacement = ({ urls }) => `__stylable_url_asset_${urls.length}__`,
+    getReplacement = ({ index }) => `__stylable_url_asset_${index}__`,
     host,
 }: {
     meta: {
@@ -27,6 +27,7 @@ export function processUrlDependencies({
         rootContext: string;
         importerDir: string;
         absoluteRequest: string;
+        index: number;
     }) => string;
     host: {
         join: (...paths: string[]) => string;
@@ -48,6 +49,7 @@ export function processUrlDependencies({
                 rootContext,
                 importerDir,
                 absoluteRequest,
+                index: urls.length,
             });
             urls.push(absoluteRequest);
         }

@@ -306,7 +306,10 @@ function inlineAssetsForJsModule(res: StylableResults, stylable: Stylable, fs: I
         rootContext: stylable.projectRoot,
         getReplacement: ({ absoluteRequest, url }) => {
             if (isAsset(url)) {
-                const content = fs.readFileSync(absoluteRequest);
+                let content = fs.readFileSync(absoluteRequest);
+                if (typeof content === 'string') {
+                    content = Buffer.from(content);
+                }
                 return fileToDataUri(absoluteRequest, content);
             }
             return url;

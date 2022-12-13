@@ -298,20 +298,29 @@ describe('build stand alone', () => {
     });
 
     it('should inline assets into data uri in the js module output', async () => {
-        const imageSvgAsBase64 = Buffer.from(
-            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
-            </svg>`
-        ).toString('base64');
+        const rawSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
+        </svg>`;
+
+        const rawSvg2 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <circle cx="150" cy="150" r="40" stroke="green" stroke-width="4" fill="black" />
+        </svg>`;
+
+        const imageSvgAsBase64 = Buffer.from(rawSvg).toString('base64');
+        const imageSvg2AsBase64 = Buffer.from(rawSvg2).toString('base64');
         const fs = createMemoryFs({
             '/src/comp.st.css': `
                 .root {
                     background-image: url("./image.svg");
+                    background-image: url("~assets/image.svg");
                 }
             `,
-            // We are converting the svg to base64 here because the memory-fs does not support binary files
-            // later in the process we assume this string is a buffer and call toString('base64') on it
-            '/src/image.svg': imageSvgAsBase64,
+            '/src/image.svg': rawSvg,
+            '/node_modules/assets/package.json': JSON.stringify({
+                name: 'assets',
+                version: '1.0.0',
+            }),
+            '/node_modules/assets/image.svg': rawSvg2,
         });
 
         const stylable = new Stylable({
@@ -341,6 +350,7 @@ describe('build stand alone', () => {
         const builtFile = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
 
         expect(builtFile).to.contain(imageSvgAsBase64);
+        expect(builtFile).to.contain(imageSvg2AsBase64);
     });
 
     it('should minify', async () => {
