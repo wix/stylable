@@ -1405,22 +1405,27 @@ export const StateEnumCompletionProvider: CompletionProvider = {
                     resolvedElements[0][resolvedElements[0].length - 1] || resolvedRoot;
 
                 const resolvedStates: MappedStates = collectStates(lastNode);
-
-                if (Object.keys(resolvedStates).length) {
-                    const resolvedStateNode = lastNode.resolved.find((node: any) => {
-                        const states = node.symbol[`-st-states`];
-                        return states && states[stateName] && states[stateName].type === 'enum';
+                const resolvedState = resolvedStates[stateName];
+                if (
+                    resolvedState &&
+                    typeof resolvedState !== 'string' &&
+                    (resolvedState.type === 'enum' ||
+                        (STCustomState.isTemplateState(resolvedState) &&
+                            resolvedState.params[0].type === 'enum'))
+                ) {
+                    const resolvedStateNode = lastNode.resolved.find(({ symbol }: any) => {
+                        const states = symbol['-st-states'];
+                        return states?.[stateName] === resolvedState;
                     });
                     if (resolvedStateNode) {
-                        const resolvedState = resolvedStateNode.symbol[`-st-states`]![stateName];
+                        const enumStateParam = STCustomState.isTemplateState(resolvedState)
+                            ? resolvedState.params[0]
+                            : resolvedState;
                         let existingInput = fullLineText.slice(0, position.character);
                         existingInput = existingInput.slice(existingInput.lastIndexOf('(') + 1);
 
-                        if (
-                            typeof resolvedState !== 'string' &&
-                            resolvedState?.arguments.every((opt) => typeof opt === 'string')
-                        ) {
-                            const options = resolvedState.arguments as string[];
+                        if (enumStateParam?.arguments.every((opt) => typeof opt === 'string')) {
+                            const options = enumStateParam.arguments as string[];
                             let filteredOptions = options.filter((opt: string) =>
                                 opt.startsWith(existingInput)
                             );

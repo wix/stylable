@@ -418,6 +418,37 @@ describe('Signature Help', () => {
                     }
                 );
             });
+
+            str.split('').forEach((_c, i) => {
+                const prefix = str.slice(0, i);
+                it(
+                    'Provides signature help and identifies imported template state with parameter type definition and validators, with prefix ' +
+                        prefix,
+                    () => {
+                        const filePath =
+                            'states/with-param/imported-template-state-param-and-validators-suggestion.st.css';
+
+                        const sig = getSignatureHelp(filePath, prefix);
+
+                        const exp: SignatureHelp = {
+                            activeSignature: 0,
+                            activeParameter: 0,
+                            signatures: [
+                                SignatureInformation.create(
+                                    'templateWithParam(string(minLength(2), maxLength(6)))',
+                                    undefined,
+                                    ParameterInformation.create(
+                                        'string(minLength(2), maxLength(6))'
+                                    )
+                                ),
+                            ],
+                        };
+
+                        expect(sig).to.not.equal(null);
+                        expect(sig).to.deep.equal(exp);
+                    }
+                );
+            });
         });
     });
 

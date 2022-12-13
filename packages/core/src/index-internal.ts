@@ -10,7 +10,7 @@ export {
 } from './stylable-transformer';
 export { validateDefaultConfig } from './stylable';
 export { STSymbol, STGlobal, STCustomSelector, STCustomState, CSSCustomProperty } from './features';
-export type { MappedStates, StateParsedValue } from './helpers/custom-state';
+export type { MappedStates, StateParsedValue, TemplateStateParsedValue } from './helpers/custom-state';
 export { murmurhash3_32_gc } from './murmurhash';
 export { cssParse } from './parser';
 export type { OptimizeConfig, IStylableOptimizer } from './types';
