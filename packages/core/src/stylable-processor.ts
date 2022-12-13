@@ -93,9 +93,16 @@ export class StylableProcessor implements FeatureContext {
     }
 
     protected handleAtRules(root: postcss.Root) {
-        const analyzeRule = (rule: postcss.Rule, { isScoped }: { isScoped: boolean }) => {
+        const analyzeRule = (
+            rule: postcss.Rule,
+            {
+                isScoped,
+                originalNode,
+            }: { isScoped: boolean; originalNode: postcss.AtRule | postcss.Rule }
+        ) => {
             return this.handleRule(rule, {
                 isScoped,
+                originalNode,
                 reportUnscoped: false,
             });
         };
@@ -189,18 +196,39 @@ export class StylableProcessor implements FeatureContext {
     }
     protected handleRule(
         rule: postcss.Rule,
-        { isScoped, reportUnscoped }: { isScoped: boolean; reportUnscoped: boolean }
+        {
+            isScoped,
+            reportUnscoped,
+            originalNode = rule,
+        }: {
+            isScoped: boolean;
+            reportUnscoped: boolean;
+            originalNode?: postcss.AtRule | postcss.Rule;
+        }
     ) {
         const selectorAst = parseSelectorWithCache(rule.selector);
 
         let locallyScoped = isScoped;
-
+        let topSelectorIndex = -1;
         walkSelector(selectorAst, (node, ...nodeContext) => {
             const [index, nodes, parents] = nodeContext;
             const type = node.type;
             if (type === 'selector' && !isInPseudoClassContext(parents)) {
                 // reset scope check between top level selectors
                 locallyScoped = isScoped;
+                topSelectorIndex++;
+            }
+
+            const walkSkip = STGlobal.hooks.analyzeSelectorNode({
+                context: this,
+                node,
+                topSelectorIndex,
+                rule,
+                originalNode,
+                walkContext: nodeContext,
+            });
+            if (walkSkip !== undefined) {
+                return walkSkip;
             }
 
             if (node.type === 'pseudo_class') {
@@ -208,21 +236,18 @@ export class StylableProcessor implements FeatureContext {
                     STImport.hooks.analyzeSelectorNode({
                         context: this,
                         node,
+                        topSelectorIndex,
                         rule,
+                        originalNode,
                         walkContext: nodeContext,
                     });
                 } else if (node.value === 'vars') {
                     return STVar.hooks.analyzeSelectorNode({
                         context: this,
                         node,
+                        topSelectorIndex,
                         rule,
-                        walkContext: nodeContext,
-                    });
-                } else if (node.value === `global`) {
-                    return STGlobal.hooks.analyzeSelectorNode({
-                        context: this,
-                        node,
-                        rule,
+                        originalNode,
                         walkContext: nodeContext,
                     });
                 } else if (node.value.startsWith('--')) {
@@ -238,7 +263,9 @@ export class StylableProcessor implements FeatureContext {
                 CSSClass.hooks.analyzeSelectorNode({
                     context: this,
                     node,
+                    topSelectorIndex,
                     rule,
+                    originalNode,
                     walkContext: nodeContext,
                 });
 
@@ -256,7 +283,9 @@ export class StylableProcessor implements FeatureContext {
                 CSSType.hooks.analyzeSelectorNode({
                     context: this,
                     node,
+                    topSelectorIndex,
                     rule,
+                    originalNode,
                     walkContext: nodeContext,
                 });
 
@@ -305,7 +334,11 @@ export class StylableProcessor implements FeatureContext {
             }
             return;
         });
-
+        STGlobal.hooks.analyzeSelectorDone({
+            context: this,
+            rule,
+            originalNode,
+        });
         return locallyScoped;
     }
 }

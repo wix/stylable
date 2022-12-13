@@ -12,7 +12,8 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         meta,
         this.stylable.projectRoot,
         this.assetFilter,
-        this.assetsMode
+        this.assetsMode,
+        this.includeGlobalSideEffects
     );
 
     for (const dep of buildDependencies) {
@@ -29,6 +30,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         namespace: meta.namespace,
         urls,
         unusedImports,
+        type: meta.type,
     });
     /**
      * NOTICE: order of replacements is coupled with "webpack-entities.ts"

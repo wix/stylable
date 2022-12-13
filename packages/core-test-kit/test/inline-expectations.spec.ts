@@ -1021,6 +1021,7 @@ describe('inline-expectations', () => {
             );
         });
         it(`should throw on possible location mismatch`, () => {
+            const resolveErrorMessage = `resolve './unknown.st.css' in '/'\n  No description file found in / or above\n  No description file found in / or above\n  no extension\n    /unknown.st.css doesn't exist\n  .js\n    /unknown.st.css.js doesn't exist\n  .json\n    /unknown.st.css.json doesn't exist\n  .node\n    /unknown.st.css.node doesn't exist\n  as directory\n    /unknown.st.css doesn't exist`;
             const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
@@ -1031,10 +1032,12 @@ describe('inline-expectations', () => {
 
                             /* 
                                 @transform-warn ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
-                                    `./unknown.st.css`
+                                    `./unknown.st.css`,
+                                    resolveErrorMessage
                                 )}
                                 @transform-warn(label) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
-                                    `./unknown.st.css`
+                                    `./unknown.st.css`,
+                                    resolveErrorMessage
                                 )}
                             */
                             .root {}
@@ -1047,11 +1050,17 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `transform`,
-                        stImportDiagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`)
+                        stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
+                            `./unknown.st.css`,
+                            resolveErrorMessage
+                        )
                     ),
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `transform`,
-                        stImportDiagnostics.UNKNOWN_IMPORTED_FILE(`./unknown.st.css`),
+                        stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
+                            `./unknown.st.css`,
+                            resolveErrorMessage
+                        ),
                         `(label): `
                     ),
                 ])
@@ -1235,6 +1244,45 @@ describe('inline-expectations', () => {
 
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.unsupportedNode(`@check`, `decl`)
+            );
+        });
+    });
+    describe('diagnostics dump', () => {
+        it('should report all diagnostics once for multiple diagnostic expectation fails', () => {
+            const result = generateStylableResult({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            /* @transform-warn msg 1 */
+                            .root {}
+
+                            /* @analyze-warn msg 2 */
+                            .root {}
+                            
+                            /* @transform-warn(label) msg 3 */
+                            .root {}
+
+                            /* actual diagnostics */
+                            @st-import './unknown.st.css';
+                            div {}
+                        `,
+                    },
+                },
+            });
+
+            expect(() => testInlineExpects(result)).to.throw(
+                testInlineExpectsErrors.combine([
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(`transform`, `msg 1`),
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(`analyze`, `msg 2`),
+                    testInlineExpectsErrors.diagnosticExpectedNotFound(
+                        `transform`,
+                        `msg 3`,
+                        `(label): `
+                    ),
+                    testInlineExpectsErrors.diagnosticsDump(result.meta),
+                ])
             );
         });
     });

@@ -23,5 +23,6 @@ export {
 export { flatMatch } from './matchers/flat-match';
 export { matchCSSMatchers } from './matchers/match-css';
 export { matchAllRulesAndDeclarations, matchRuleAndDeclaration } from './match-rules';
+export { collectAst } from './collect-ast';
 export { testInlineExpects, testInlineExpectsErrors } from './inline-expectation';
 export { testStylableCore } from './test-stylable-core';

@@ -1,13 +1,13 @@
 {
   "name": "@stylable/custom-value",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "Custom values (variables) for Stylable",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "dependencies": {
-    "@stylable/core": "^5.3.0"
+    "@stylable/core": "^5.4.0"
   },
   "files": [
     "dist",

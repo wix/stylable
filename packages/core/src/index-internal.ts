@@ -8,12 +8,9 @@ export {
     transformerDiagnostics,
     ResolvedElement,
 } from './stylable-transformer';
-export { STCustomSelector, STCustomState } from './features';
-export type {
-    MappedStates,
-    StateParsedValue,
-    TemplateStateParsedValue,
-} from './helpers/custom-state';
+export { validateDefaultConfig } from './stylable';
+export { STSymbol, STGlobal, STCustomSelector, STCustomState, CSSCustomProperty } from './features';
+export type { MappedStates, StateParsedValue, TemplateStateParsedValue } from './helpers/custom-state';
 export { murmurhash3_32_gc } from './murmurhash';
 export { cssParse } from './parser';
 export type { OptimizeConfig, IStylableOptimizer } from './types';

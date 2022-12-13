@@ -308,7 +308,7 @@ describe('Stylable CLI config file options', function () {
 
         expect(stdout, 'has diagnostic error').not.to.match(/error/i);
 
-        expect(stderr).to.match(/Error: Failed to evaluate "stcConfig"/);
+        expect(stderr).to.match(/Error: Failed to evaluate Stylable config/);
         expect(stderr).to.match(/Custom Error/);
     });
 });

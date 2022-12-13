@@ -12,6 +12,7 @@ import {
     calcDepth,
     CalcDepthContext,
     hasImportedSideEffects,
+    collectImportsWithSideEffects,
 } from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -47,6 +48,11 @@ export interface StylableRollupPluginOptions {
     stcConfig?: boolean | string;
     /** @deprecated use stylableConfig to configure */
     projectRoot?: string;
+    /**
+     * Set true for an improved side-effect detection to include stylesheets with deep global side-effects.
+     * Defaults to true.
+     */
+    includeGlobalSideEffects?: boolean;
 }
 
 const requireModuleCache = new Set<string>();
@@ -87,6 +93,7 @@ export function stylableRollupPlugin({
     stylableConfig = (config: StylableConfig) => config,
     stcConfig,
     projectRoot,
+    includeGlobalSideEffects = true,
 }: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
@@ -108,11 +115,20 @@ export function stylableRollupPlugin({
                 projectRoot: projectRoot || process.cwd(),
                 resolveNamespace: resolveNamespace || resolveNamespaceNode,
             });
+            const configFromFile = resolveStcConfig(
+                stConfig.projectRoot,
+                typeof stcConfig === 'string' ? stcConfig : undefined,
+                fs
+            );
+
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
             } else {
-                stylable = new Stylable(stConfig);
+                stylable = new Stylable({
+                    resolveModule: configFromFile?.config?.defaultConfig?.resolveModule,
+                    ...stConfig,
+                });
             }
 
             if (stcConfig) {
@@ -120,23 +136,10 @@ export function stylableRollupPlugin({
                     for (const sourceDirectory of stcBuilder.getProjectsSources()) {
                         this.addWatchFile(sourceDirectory);
                     }
-                } else {
-                    const configuration = resolveStcConfig(
-                        stConfig.projectRoot,
-                        typeof stcConfig === 'string' ? stcConfig : undefined
-                    );
-
-                    if (!configuration) {
-                        throw new Error(
-                            `Could not find "stcConfig"${
-                                typeof stcConfig === 'string' ? ` at "${stcConfig}"` : ''
-                            }`
-                        );
-                    }
-
+                } else if (configFromFile && configFromFile.config.stcConfig) {
                     stcBuilder = STCBuilder.create({
                         rootDir: stConfig.projectRoot,
-                        configFilePath: configuration.path,
+                        configFilePath: configFromFile.path,
                         watchMode: this.meta.watchMode,
                     });
 
@@ -185,22 +188,45 @@ export function stylableRollupPlugin({
             const { meta, exports } = stylable.transform(stylable.analyze(path, source));
             const assetsIds = emitAssets(this, stylable, meta, emittedAssets, inlineAssets);
             const css = generateCssString(meta, minify, stylable, assetsIds);
-            const moduleImports = [];
-            for (const imported of meta.getImportStatements()) {
-                // attempt to resolve the request through stylable resolveModule,
-                let resolved = imported.request;
-                try {
-                    resolved = stylable.resolver.resolvePath(imported.context, imported.request);
-                } catch (e) {
-                    // fallback to request
-                }
-                // include Stylable and native css files that have effects on other files as regular imports
-                if (resolved.endsWith('.css') && !resolved.endsWith(ST_CSS)) {
-                    moduleImports.push(`import ${JSON.stringify(resolved + LOADABLE_CSS_QUERY)};`);
-                } else if (hasImportedSideEffects(stylable, meta, imported)) {
-                    moduleImports.push(`import ${JSON.stringify(imported.request)};`);
+            const moduleImports: string[] = [];
+
+            if (includeGlobalSideEffects) {
+                // new mode that collect deep side effects
+                collectImportsWithSideEffects(stylable, meta, (_contextMeta, absPath, isUsed) => {
+                    if (isUsed) {
+                        if (!absPath.endsWith(ST_CSS)) {
+                            moduleImports.push(
+                                `import ${JSON.stringify(absPath + LOADABLE_CSS_QUERY)};`
+                            );
+                        } else {
+                            moduleImports.push(`import ${JSON.stringify(absPath)};`);
+                        }
+                    }
+                });
+            } else {
+                // legacy mode - only shallow imported side-effects
+                for (const imported of meta.getImportStatements()) {
+                    // attempt to resolve the request through stylable resolveModule,
+                    let resolved = imported.request;
+                    try {
+                        resolved = stylable.resolver.resolvePath(
+                            imported.context,
+                            imported.request
+                        );
+                    } catch (e) {
+                        // fallback to request
+                    }
+                    // include Stylable and native css files that have effects on other files as regular imports
+                    if (resolved.endsWith('.css') && !resolved.endsWith(ST_CSS)) {
+                        moduleImports.push(
+                            `import ${JSON.stringify(resolved + LOADABLE_CSS_QUERY)};`
+                        );
+                    } else if (hasImportedSideEffects(stylable, meta, imported)) {
+                        moduleImports.push(`import ${JSON.stringify(imported.request)};`);
+                    }
                 }
             }
+
             extracted.set(path, { css });
 
             for (const filePath of tryCollectImportsDeep(stylable, meta)) {
