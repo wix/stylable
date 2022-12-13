@@ -31,6 +31,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         urls,
         unusedImports,
         cssDepth,
+        type: meta.type,
     });
     /**
      * NOTICE: order of replacements is coupled with "webpack-entities.ts"
