@@ -126,7 +126,7 @@ export const stateDiagnostics = {
     TEMPLATE_MISSING_PARAMETER: createDiagnosticReporter(
         '08013',
         'error',
-        (state: string) => `pseudo-state "${state}" template expected s parameter definition`
+        (state: string) => `pseudo-state "${state}" template expected a parameter definition`
     ),
     UNSUPPORTED_MULTI_SELECTOR: createDiagnosticReporter(
         '08014',
