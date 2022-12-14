@@ -7,7 +7,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         this.stylable.analyze(this.resourcePath, source)
     );
 
-    const { urls, imports, buildDependencies, unusedImports } = getImports(
+    const { urls, imports, buildDependencies, unusedImports, cssDepth } = getImports(
         this.stylable,
         meta,
         this.stylable.projectRoot,
@@ -30,6 +30,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         namespace: meta.namespace,
         urls,
         unusedImports,
+        cssDepth,
         type: meta.type,
     });
     /**

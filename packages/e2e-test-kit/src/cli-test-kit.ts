@@ -85,7 +85,6 @@ export function createCliTester() {
             for (const process of processes) {
                 process.kill();
             }
-
             processes.length = 0;
         },
     };

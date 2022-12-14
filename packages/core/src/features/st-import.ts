@@ -2,7 +2,12 @@ import { createFeature, FeatureContext, FeatureTransformContext } from './featur
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import { plugableRecord } from '../helpers/plugable-record';
-import { parseStImport, parsePseudoImport, parseImportMessages } from '../helpers/import';
+import {
+    parseStImport,
+    parsePseudoImport,
+    parseImportMessages,
+    tryCollectImportsDeep,
+} from '../helpers/import';
 import { validateCustomPropertyName } from '../helpers/css-custom-property';
 import type { StylableMeta } from '../stylable-meta';
 import path from 'path';
@@ -171,6 +176,7 @@ export const hooks = createFeature<{
     },
     transformInit({ context }) {
         validateImports(context);
+        calcCssDepth(context);
     },
 });
 
@@ -188,6 +194,20 @@ export class StylablePublicApi {
             },
         }));
     }
+}
+
+function calcCssDepth(context: FeatureTransformContext) {
+    let cssDepth = 0;
+    const deepDependencies = tryCollectImportsDeep(
+        context.resolver,
+        context.meta,
+        new Set(),
+        ({ depth }) => {
+            cssDepth = Math.max(cssDepth, depth);
+        },
+        1
+    );
+    context.meta.transformCssDepth = { cssDepth, deepDependencies };
 }
 
 function isImportStatement(node: postcss.ChildNode): node is postcss.Rule | postcss.AtRule {

@@ -122,7 +122,6 @@ export class StylableTransformer {
     private defaultStVarOverride: Record<string, string>;
     private evaluator: StylableEvaluator = new StylableEvaluator();
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
-
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;

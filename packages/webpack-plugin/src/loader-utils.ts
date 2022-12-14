@@ -1,11 +1,11 @@
 import type { Stylable, StylableMeta } from '@stylable/core';
-import { tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
 import {
     processUrlDependencies,
     collectImportsWithSideEffects,
     hasImportedSideEffects,
 } from '@stylable/build-tools';
 import { LOADER_NAME } from './plugin-utils';
+import { isAbsolute, join } from 'path';
 
 export function getReplacementToken(token: string) {
     return `/* INJECT */ {__${token}__:true}`;
@@ -24,7 +24,15 @@ export function getImports(
     assetsMode: 'url' | 'loader',
     includeGlobalSideEffects: boolean
 ) {
-    const urls = processUrlDependencies(meta, projectRoot, assetFilter);
+    const urls = processUrlDependencies({
+        meta,
+        rootContext: projectRoot,
+        filter: assetFilter,
+        host: {
+            isAbsolute,
+            join,
+        },
+    });
     const imports: string[] = [];
     const unusedImports: string[] = [];
 
@@ -69,9 +77,13 @@ export function getImports(
     }
 
     /**
-     * Collect all deep dependencies since they can affect the output
+     * Get the transformed css depth
      */
-    const buildDependencies: string[] = Array.from(tryCollectImportsDeep(stylable, meta));
+    const cssDepth = meta.transformCssDepth?.cssDepth ?? 0;
+    /**
+     * Take all deep dependencies since they can affect the output
+     */
+    const buildDependencies: string[] = Array.from(meta.transformCssDepth?.deepDependencies ?? []);
 
     /**
      * @remove
@@ -81,5 +93,5 @@ export function getImports(
         urls.forEach((assetPath) => imports.push(`import ${JSON.stringify(assetPath)};`));
     }
 
-    return { urls, imports, buildDependencies, unusedImports };
+    return { urls, imports, buildDependencies, unusedImports, cssDepth };
 }

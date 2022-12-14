@@ -1,4 +1,7 @@
 export const buildMessages = {
+    EMIT_BUNDLE(filePath: string, fileCount: number) {
+        return `Emitting bundle to "${filePath}" contains ${fileCount} files.`;
+    },
     START_WATCHING() {
         return 'Start watching...';
     },

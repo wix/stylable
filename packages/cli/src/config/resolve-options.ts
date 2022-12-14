@@ -49,6 +49,12 @@ export function getCliArguments(): Arguments<CliArguments> {
             description: 'output stylable sources (.st.css)',
             defaultDescription: String(defaults.outputSources),
         })
+        .option('bundle', {
+            type: 'string',
+            description:
+                'output file path relative to the outDir for a css bundle file including all built files',
+            defaultDescription: 'no bundle',
+        })
         .option('dts', {
             type: 'boolean',
             description: 'output stylable definition files for sources (.st.css.d.ts)',
@@ -59,6 +65,18 @@ export function getCliArguments(): Arguments<CliArguments> {
             description:
                 'output source maps for stylable definition files for sources (.st.css.d.ts.map). It will use the origin file path unless `--stcss` is set, then it will use the outputted file path as the source-map source',
             defaultDescription: 'true if "--dts" option is enabled, otherwise false',
+        })
+        .option('esmExt', {
+            type: 'string',
+            choices: ['.mjs', '.js'],
+            description: 'esm module extension',
+            defaultDescription: defaults.esmExt,
+        })
+        .option('cjsExt', {
+            type: 'string',
+            choices: ['.cjs', '.js'],
+            description: 'commonjs module extension',
+            defaultDescription: defaults.cjsExt,
         })
         .option('useNamespaceReference', {
             type: 'boolean',
@@ -77,6 +95,13 @@ export function getCliArguments(): Arguments<CliArguments> {
             description: 'add a static import for the generated css in the js module output',
             alias: 'icr',
             defaultDescription: String(defaults.injectCSSRequest),
+        })
+        .option('inlineRuntime', {
+            type: 'boolean',
+            description:
+                'copy stylable runtime in the output directory and use it in the js module output',
+            alias: 'ir',
+            defaultDescription: String(defaults.inlineRuntime),
         })
         .option('cssFilename', {
             type: 'string',
@@ -121,6 +146,7 @@ export function getCliArguments(): Arguments<CliArguments> {
         })
         .option('require', {
             type: 'array',
+            string: true,
             description: 'require hooks',
             alias: 'r',
             default: [] as string[],
@@ -182,6 +208,8 @@ export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): P
         esm: argv.esm,
         cjs: argv.cjs,
         dts: argv.dts,
+        esmExt: argv.esmExt as BuildOptions['esmExt'],
+        cjsExt: argv.cjsExt as BuildOptions['cjsExt'],
         dtsSourceMap: argv.dtsSourceMap ?? argv.dts,
         injectCSSRequest: argv.injectCSSRequest,
         optimize: argv.optimize,
@@ -195,6 +223,8 @@ export function resolveCliOptions(argv: CliArguments, defaults: BuildOptions): P
         outputCSSNameTemplate: argv.cssFilename,
         diagnosticsMode: argv.diagnosticsMode as BuildOptions['diagnosticsMode'],
         IndexGenerator: createGenerator(rootDir, argv.customGenerator),
+        inlineRuntime: argv.inlineRuntime,
+        bundle: argv.bundle,
     };
 }
 
@@ -205,16 +235,20 @@ export function createDefaultOptions(): BuildOptions {
         cjs: false,
         esm: false,
         dts: false,
+        esmExt: '.mjs',
+        cjsExt: '.js',
         injectCSSRequest: false,
         optimize: false,
         minify: false,
-        useNamespaceReference: false,
+        useNamespaceReference: true,
         diagnostics: true,
         outputCSS: false,
         includeCSSInJS: false,
         outputSources: false,
         outputCSSNameTemplate: '[filename].css',
         diagnosticsMode: 'strict',
+        inlineRuntime: false,
+        bundle: '',
     };
 }
 
@@ -271,6 +305,7 @@ export function hasStylableCSSOutput(options: BuildOptions): boolean {
         options.outputCSS ||
         options.outputSources ||
         options.dts ||
+        Boolean(options.bundle) ||
         Boolean(options.indexFile)
     );
 }

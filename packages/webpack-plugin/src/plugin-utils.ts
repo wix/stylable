@@ -8,6 +8,7 @@ import type {
     ModuleGraph,
     NormalModule,
 } from 'webpack';
+
 import type {
     BuildData,
     DependencyTemplates,
@@ -22,6 +23,7 @@ import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core/d
 import decache from 'decache';
 import { CalcDepthContext, getCSSViewModule } from '@stylable/build-tools';
 import { join, parse } from 'path';
+import { ReExt } from './re-ext-plugin';
 
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
@@ -208,6 +210,12 @@ export function injectLoader(compiler: Compiler) {
         loader: LOADER_NAME,
         sideEffects: true,
     });
+    options.resolve ||= {};
+    options.resolve.plugins ||= [];
+
+    // dual mode support
+    options.resolve.plugins.push(new ReExt(/\.st\.css\.(c|m)?js$/, '.st.css'));
+
     options.resolveLoader ??= {};
     options.resolveLoader.alias ??= {};
     if (Array.isArray(options.resolveLoader.alias)) {
@@ -499,7 +507,7 @@ export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthConte
             ),
         getModulePathNoExt: (module) => {
             if (isStylableModule(module)) {
-                return module.resource.replace(/\.st\.css/g, '');
+                return module.resource.replace(/\.st\.css$/, '');
             }
             const { dir, name } = parse((module as NormalModule)?.resource || '');
             return join(dir, name);

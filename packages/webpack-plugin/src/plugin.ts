@@ -132,7 +132,13 @@ export interface StylableWebpackPluginOptions {
      */
     assetsMode?: 'url' | 'loader';
     /**
-     * Set true for an improved side-effect detection to include stylesheets with deep global side-effects.
+     * The strategy used to calculate stylesheet override depth
+     * 'css+js' - use css and js files to calculate depth
+     * 'css' - use only css files to calculate depth
+     */
+    depthStrategy?: 'css+js' | 'css';
+    /**
+     * Improved side-effect detection to include stylesheets with deep global side-effects.
      * Defaults to true.
      */
     includeGlobalSideEffects?: boolean;
@@ -168,6 +174,7 @@ const defaultOptions = (
     assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
     stcConfig: userOptions.stcConfig ?? false,
+    depthStrategy: userOptions.depthStrategy ?? 'css+js',
     includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? true,
 });
 
@@ -531,13 +538,19 @@ export class StylableWebpackPlugin {
             const cache = new Map();
             const context = createCalcDepthContext(moduleGraph);
             for (const [module] of stylableModules) {
-                module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(
+                const stylableBuildMeta = getStylableBuildMeta(module);
+
+                stylableBuildMeta.isUsed = findIfStylableModuleUsed(
                     module,
                     compilation,
                     this.entities.UnusedDependency
                 );
                 /** legacy flow */
-                module.buildMeta.stylable.depth = calcDepth(module, context, [], cache);
+
+                stylableBuildMeta.depth =
+                    this.options.depthStrategy === 'css'
+                        ? stylableBuildMeta.cssDepth
+                        : calcDepth(module, context, [], cache);
 
                 const { css, urls, exports, namespace } = getStylableBuildMeta(module);
                 stylableModules.set(module, {
@@ -545,8 +558,8 @@ export class StylableWebpackPlugin {
                     urls: cloneDeep(urls),
                     namespace,
                     css,
-                    isUsed: module.buildMeta.stylable.isUsed,
-                    depth: module.buildMeta.stylable.depth,
+                    isUsed: stylableBuildMeta.isUsed,
+                    depth: stylableBuildMeta.depth,
                 });
             }
         });
