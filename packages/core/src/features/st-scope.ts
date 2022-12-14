@@ -31,6 +31,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
             }),
             {
                 isScoped: true,
+                originalNode: atRule,
             }
         );
         context.meta.scopes.push(atRule);

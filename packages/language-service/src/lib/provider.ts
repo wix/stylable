@@ -17,7 +17,7 @@ import {
     safeParse,
     StylableProcessor,
     STCustomSelector,
-    StateParsedValue,
+    MappedStates,
 } from '@stylable/core/dist/index-internal';
 import type {
     Location,
@@ -675,7 +675,7 @@ export class Provider {
             });
         }
 
-        let stateDef = null as StateParsedValue | string | null;
+        let stateDef = null as MappedStates[string];
 
         if (word) {
             const resolvedElements = this.stylable.transformSelector(meta, line).resolved;

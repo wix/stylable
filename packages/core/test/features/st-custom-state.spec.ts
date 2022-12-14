@@ -36,29 +36,32 @@ describe('features/st-custom-state', () => {
                as there is not direct user API to define states */
         it('should collect states on classes', () => {
             const { sheets } = testStylableCore(`
-                .bool {
-                    -st-states: b1, b2(boolean);
-                }
-                .enum {
-                    -st-states: e1(enum(small, medium, large)),
-                                e2(enum(red, green, blue)) green;
-                }
-                .num {
-                    -st-states: n1(number), 
-                                n2(number()),
-                                n3(number(min(2), max(6), multipleOf(2))),
-                                n4(number) 4;
-                }
-                .str {
-                    -st-states: s1(string), 
-                                s2(string()),
-                                s3(string(minLength(2), maxLength(5), contains(abc), regex("^user"))),
-                                s4(string) def val;
-                }
-                .map {
-                    -st-states: m1("[some-attr]"), m2('.global-cls');
-                }
-            `);
+                    .bool {
+                        -st-states: b1, b2(boolean);
+                    }
+                    .enum {
+                        -st-states: e1(enum(small, medium, large)),
+                                    e2(enum(red, green, blue)) green;
+                    }
+                    .num {
+                        -st-states: n1(number), 
+                                    n2(number()),
+                                    n3(number(min(2), max(6), multipleOf(2))),
+                                    n4(number) 4;
+                    }
+                    .str {
+                        -st-states: s1(string), 
+                                    s2(string()),
+                                    s3(string(minLength(2), maxLength(5), contains(abc), regex("^user"))),
+                                    s4(string) def val;
+                    }
+                    .map {
+                        -st-states: m1("[some-attr]"), 
+                                    m2('.global-cls'), 
+                                    m3("[attr='$0$1']"),
+                                    m4(".color-$0", enum(red, green, blue) green);
+                    }
+                `);
 
             const { meta } = sheets['/entry.st.css'];
             const classes = meta.getAllClasses();
@@ -132,6 +135,18 @@ describe('features/st-custom-state', () => {
             expect(classes.map['-st-states'], 'mapped states').to.eql({
                 m1: '[some-attr]',
                 m2: '.global-cls',
+                m3: "[attr='$0$1']",
+                m4: {
+                    type: 'template',
+                    template: '.color-$0',
+                    params: [
+                        {
+                            type: 'enum',
+                            arguments: ['red', 'green', 'blue'],
+                            defaultValue: 'green',
+                        },
+                    ],
+                },
             });
         });
         it('should report missing state type', () => {
@@ -175,6 +190,36 @@ describe('features/st-custom-state', () => {
                         [STCustomState.sysValidationErrors.enum.NO_OPTIONS_DEFINED()]
                     )} */
                     -st-states: e1(enum());
+                }
+            `);
+        });
+        it('should report template issues', () => {
+            testStylableCore(`
+                .a {
+                    /* @analyze-warn(missing placeholder) word(.no-placeholder) ${stCustomStateDiagnostics.TEMPLATE_MISSING_PLACEHOLDER(
+                        's1',
+                        '.no-placeholder'
+                    )} */
+                    -st-states: s1('.no-placeholder', string);
+                }
+                .b {
+                    /* @analyze-error(unexpected param definition) word('.y')  ${stCustomStateDiagnostics.UNKNOWN_STATE_TYPE(
+                        's1 parameter',
+                        "'.y'"
+                    )} */
+                    -st-states: s1('.b$0', '.y');
+                }
+                .c {
+                    /* @analyze-error(missing param definition) ${stCustomStateDiagnostics.TEMPLATE_MISSING_PARAMETER(
+                        's1'
+                    )} */
+                    -st-states: s1('.c$0', ,);
+                }
+                .d {
+                    /* @analyze-error(multiple parameters) ${stCustomStateDiagnostics.TEMPLATE_MULTI_PARAMETERS(
+                        's1'
+                    )} */
+                    -st-states: s1('.c$0', string, number);
                 }
             `);
         });
@@ -245,6 +290,18 @@ describe('features/st-custom-state', () => {
                         ]
                     )} */
                     -st-states: e1(enum(small, large)) huge;
+                }
+                .c {
+                    /* @transform-error(template param) ${stCustomStateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
+                        'tn1',
+                        'abc',
+                        [
+                            STCustomState.sysValidationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(
+                                'abc'
+                            ),
+                        ]
+                    )} */
+                    -st-states: tn1('[x=$0]', number abc);
                 }
             `);
         });

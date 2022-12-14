@@ -10,6 +10,7 @@ import {
     cssParse,
     StateParsedValue,
     StylableProcessor,
+    STCustomState,
 } from '@stylable/core/dist/index-internal';
 import { getCssDocsForSymbol } from './cssdocs';
 import {
@@ -133,6 +134,12 @@ function getStatesForSymbol(states: MappedStates): StateDict {
         if (stateDef === null) {
             // handle boolean states
             res[stateName] = { type: 'boolean' };
+        } else if (STCustomState.isTemplateState(stateDef)) {
+            // template state (mapped with param)
+            res[stateName] = {
+                type: 'mapped',
+                params: [convertMappedStateToSchema(stateDef.params[0])],
+            };
         } else if (typeof stateDef === 'object') {
             // handle typed states
             res[stateName] = convertMappedStateToSchema(stateDef);

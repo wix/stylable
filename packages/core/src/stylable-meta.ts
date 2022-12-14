@@ -49,6 +49,7 @@ export class StylableMeta {
     public type: 'stylable' | 'css' = this.source.endsWith('.st.css') ? 'stylable' : 'css';
     public namespace = '';
     public urls: string[] = [];
+    public transformCssDepth: { cssDepth: number; deepDependencies: Set<string> } | undefined;
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
     /** @deprecated */

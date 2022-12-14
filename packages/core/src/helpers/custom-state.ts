@@ -1,13 +1,17 @@
 import type * as postcss from 'postcss';
-import postcssValueParser from 'postcss-value-parser';
+import postcssValueParser, {
+    type Node as ValueNode,
+    type FunctionNode,
+} from 'postcss-value-parser';
 import cssesc from 'cssesc';
-import type { PseudoClass } from '@tokey/css-selector-parser';
+import type { PseudoClass, SelectorNode } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import {
     parseSelectorWithCache,
     stringifySelector,
     convertToClass,
     convertToInvalid,
+    convertToSelector,
 } from './selector';
 import { groupValues, listOptions } from './value';
 import { stripQuotation } from './string';
@@ -19,7 +23,12 @@ import { CSSClass } from '../features';
 import { reservedFunctionalPseudoClasses } from '../native-reserved-lists';
 
 export interface MappedStates {
-    [s: string]: StateParsedValue | string | null;
+    [s: string]: StateParsedValue | string | TemplateStateParsedValue | null;
+}
+export interface TemplateStateParsedValue {
+    type: 'template';
+    template: string;
+    params: [StateParsedValue];
 }
 export interface StateParsedValue {
     type: string;
@@ -38,6 +47,11 @@ export const booleanStateDelimiter = '--';
 export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
 export const stateDiagnostics = {
+    MISSING_TYPE_OR_TEMPLATE: createDiagnosticReporter(
+        '08000',
+        'error',
+        (name: string) => `pseudo-state "${name}" missing type or template`
+    ),
     UNKNOWN_STATE_TYPE: createDiagnosticReporter(
         '08002',
         'error',
@@ -98,6 +112,46 @@ export const stateDiagnostics = {
                 ...errors,
             ].join('\n')
     ),
+    TEMPLATE_MISSING_PLACEHOLDER: createDiagnosticReporter(
+        '08011',
+        'warning',
+        (state: string, template: string) =>
+            `pseudo-state "${state}" template "${template}" is missing a placeholder, use "$0" to set the parameter insertion place`
+    ),
+    TEMPLATE_MULTI_PARAMETERS: createDiagnosticReporter(
+        '08012',
+        'error',
+        (state: string) => `pseudo-state "${state}" template only supports a single parameter`
+    ),
+    TEMPLATE_MISSING_PARAMETER: createDiagnosticReporter(
+        '08013',
+        'error',
+        (state: string) => `pseudo-state "${state}" template expected a parameter definition`
+    ),
+    UNSUPPORTED_MULTI_SELECTOR: createDiagnosticReporter(
+        '08014',
+        'error',
+        (state: string, finalSelector: string) =>
+            `pseudo-state "${state}" resulted in an unsupported multi selector "${finalSelector}"`
+    ),
+    UNSUPPORTED_COMPLEX_SELECTOR: createDiagnosticReporter(
+        '08015',
+        'error',
+        (state: string, finalSelector: string) =>
+            `pseudo-state "${state}" resulted in an unsupported complex selector "${finalSelector}"`
+    ),
+    INVALID_SELECTOR: createDiagnosticReporter(
+        '08016',
+        'error',
+        (state: string, finalSelector: string) =>
+            `pseudo-state "${state}" resulted in an invalid selector "${finalSelector}"`
+    ),
+    UNSUPPORTED_INITIAL_SELECTOR: createDiagnosticReporter(
+        '08017',
+        'error',
+        (state: string, finalSelector: string) =>
+            `pseudo-state "${state}" result cannot start with a type or universal selector "${finalSelector}"`
+    ),
 };
 
 // parse
@@ -128,7 +182,13 @@ export function parsePseudoStates(
         }
 
         if (stateDefinition.type === 'function') {
-            resolveStateType(stateDefinition, mappedStates, stateDefault, diagnostics, decl);
+            resolveStateType(
+                stateDefinition as FunctionNode,
+                mappedStates,
+                stateDefault,
+                diagnostics,
+                decl
+            );
         } else if (stateDefinition.type === 'word') {
             resolveBooleanState(mappedStates, stateDefinition);
         } else {
@@ -139,7 +199,7 @@ export function parsePseudoStates(
     return mappedStates;
 }
 function resolveBooleanState(mappedStates: MappedStates, stateDefinition: ParsedValue) {
-    const currentState = mappedStates[stateDefinition.type];
+    const currentState = mappedStates[stateDefinition.value];
     if (!currentState) {
         mappedStates[stateDefinition.value] = null; // add boolean state
     } else {
@@ -147,69 +207,206 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
     }
 }
 function resolveStateType(
-    stateDefinition: ParsedValue,
+    stateDefinition: FunctionNode,
     mappedStates: MappedStates,
     stateDefault: ParsedValue[],
     diagnostics: Diagnostics,
     decl: postcss.Declaration
 ) {
-    if (stateDefinition.type === 'function' && stateDefinition.nodes.length === 0) {
+    const stateName = stateDefinition.value;
+    if (stateDefinition.nodes.length === 0) {
         resolveBooleanState(mappedStates, stateDefinition);
 
-        diagnostics.report(stateDiagnostics.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
+        diagnostics.report(stateDiagnostics.NO_STATE_TYPE_GIVEN(stateName), {
             node: decl,
             word: decl.value,
         });
 
         return;
     }
+    const { paramType, argsFirstNode, argsFullValue } = collectStateArgsDef(stateDefinition.nodes);
 
-    if (stateDefinition.nodes.length > 1) {
-        diagnostics.report(
-            stateDiagnostics.TOO_MANY_STATE_TYPES(
-                stateDefinition.value,
-                listOptions(stateDefinition)
-            ),
-            {
-                node: decl,
-                word: decl.value,
-            }
-        );
+    if (!paramType) {
+        diagnostics.report(stateDiagnostics.MISSING_TYPE_OR_TEMPLATE(stateName), {
+            node: decl,
+        });
+        return;
     }
 
-    const paramType = stateDefinition.nodes[0];
-    const stateType: StateParsedValue = {
-        type: paramType.value,
-        arguments: [],
-        defaultValue: postcssValueParser
-            .stringify(stateDefault as postcssValueParser.Node[])
-            .trim(),
-    };
-
-    if (isCustomMapping(stateDefinition)) {
-        mappedStates[stateDefinition.value] = stateType.type.trim().replace(/\\["']/g, '"');
-    } else if (typeof stateType === 'object' && stateType.type === 'boolean') {
-        resolveBooleanState(mappedStates, stateDefinition);
-        return;
-    } else if (paramType.type === 'function' && stateType.type in systemValidators) {
-        if (paramType.nodes.length > 0) {
-            resolveArguments(paramType, stateType, stateDefinition.value, diagnostics, decl);
-        }
-        mappedStates[stateDefinition.value] = stateType;
-    } else if (stateType.type in systemValidators) {
-        mappedStates[stateDefinition.value] = stateType;
+    if (paramType?.type === 'string') {
+        defineTemplateState(
+            stateName,
+            paramType,
+            argsFirstNode,
+            argsFullValue,
+            mappedStates,
+            diagnostics,
+            decl
+        );
     } else {
-        diagnostics.report(
-            stateDiagnostics.UNKNOWN_STATE_TYPE(stateDefinition.value, paramType.value),
-            {
-                node: decl,
-                word: paramType.value,
-            }
+        if (argsFullValue.length > 1) {
+            diagnostics.report(
+                stateDiagnostics.TOO_MANY_STATE_TYPES(
+                    stateName,
+                    argsFirstNode.map((argNode) =>
+                        argNode ? postcssValueParser.stringify(argNode) : ''
+                    )
+                ),
+                {
+                    node: decl,
+                    word: decl.value,
+                }
+            );
+        }
+        defineParamState(
+            stateName,
+            paramType,
+            stateDefault,
+            mappedStates,
+            diagnostics,
+            stateDefinition,
+            decl
         );
     }
 }
-function isCustomMapping(stateDefinition: ParsedValue) {
-    return stateDefinition.nodes.length === 1 && stateDefinition.nodes[0].type === 'string';
+function defineTemplateState(
+    stateName: string,
+    templateDef: postcssValueParser.StringNode,
+    argsFirstNode: (postcssValueParser.Node | undefined)[],
+    argsFullValue: postcssValueParser.Node[][],
+    mappedStates: MappedStates,
+    diagnostics: Diagnostics,
+    decl: postcss.Declaration
+) {
+    const template = stripQuotation(postcssValueParser.stringify(templateDef));
+    if (argsFullValue.length === 1) {
+        // simple template with no params
+        mappedStates[stateName] = template.trim().replace(/\\["']/g, '"');
+    } else if (argsFullValue.length === 2) {
+        // single parameter template
+        if (!template.includes('$0')) {
+            diagnostics.report(stateDiagnostics.TEMPLATE_MISSING_PLACEHOLDER(stateName, template), {
+                node: decl,
+                word: template,
+            });
+        }
+
+        const paramFullDef = argsFullValue[1];
+        const paramTypeDef = argsFirstNode[1];
+        if (!paramTypeDef) {
+            diagnostics.report(stateDiagnostics.TEMPLATE_MISSING_PARAMETER(stateName), {
+                node: decl,
+            });
+            return;
+        }
+        const param = createStateParamDef(
+            stateName + ' parameter',
+            paramTypeDef,
+            paramFullDef.splice(paramFullDef.indexOf(paramTypeDef) + 1),
+            diagnostics,
+            decl
+        );
+        if (!param) {
+            // UNKNOWN_STATE_TYPE reported in createStateParamDef
+            return;
+        }
+
+        const templateStateType: TemplateStateParsedValue = {
+            type: 'template',
+            template,
+            params: [param],
+        };
+
+        mappedStates[stateName] = templateStateType;
+    } else {
+        // unsupported multiple params
+        diagnostics.report(stateDiagnostics.TEMPLATE_MULTI_PARAMETERS(stateName), {
+            node: decl,
+        });
+    }
+}
+function defineParamState(
+    stateName: string,
+    paramType: postcssValueParser.Node,
+    stateDefault: ParsedValue[],
+    mappedStates: MappedStates,
+    diagnostics: Diagnostics,
+    stateDefinition: FunctionNode,
+    decl: postcss.Declaration
+) {
+    if (paramType.value === 'boolean') {
+        // explicit boolean // ToDo: remove support
+        resolveBooleanState(mappedStates, stateDefinition);
+    } else {
+        const stateParamDef = createStateParamDef(
+            stateName,
+            paramType,
+            stateDefault,
+            diagnostics,
+            decl
+        );
+        if (stateParamDef) {
+            mappedStates[stateName] = stateParamDef;
+        }
+    }
+}
+function createStateParamDef(
+    stateName: string,
+    typeDef: postcssValueParser.Node,
+    stateDefault: ParsedValue[],
+    diagnostics: Diagnostics,
+    decl: postcss.Declaration
+): StateParsedValue | undefined {
+    const type = typeDef.value;
+    if (type in systemValidators && (typeDef.type === 'function' || typeDef.type === 'word')) {
+        const stateType: StateParsedValue = {
+            type,
+            arguments: [],
+            defaultValue: postcssValueParser
+                .stringify(stateDefault as postcssValueParser.Node[])
+                .trim(),
+        };
+        if (typeDef.type === 'function' && typeDef.nodes.length > 0) {
+            resolveArguments(typeDef, stateType, stateName, diagnostics, decl);
+        }
+        return stateType;
+    } else {
+        const srcValue = postcssValueParser.stringify(typeDef);
+        diagnostics.report(stateDiagnostics.UNKNOWN_STATE_TYPE(stateName, srcValue), {
+            node: decl,
+            word: srcValue,
+        });
+        return;
+    }
+}
+function collectStateArgsDef(nodes: ValueNode[]) {
+    const argsFullValue: ValueNode[][] = [];
+    const argsFirstNode: Array<ValueNode | undefined> = [];
+    let collectedArg: ValueNode[] = [];
+    let firstActualValue: ValueNode | undefined = undefined;
+
+    for (const node of nodes) {
+        if (node.type === 'div') {
+            argsFullValue.push(collectedArg);
+            argsFirstNode.push(firstActualValue);
+            collectedArg = [];
+            firstActualValue = undefined;
+        } else {
+            collectedArg.push(node);
+            if (!firstActualValue && node.type !== 'space' && node.type !== 'comment') {
+                firstActualValue = node;
+            }
+        }
+    }
+
+    if (collectedArg.length) {
+        argsFullValue.push(collectedArg);
+        argsFirstNode.push(firstActualValue);
+    }
+
+    const paramType = argsFirstNode[0];
+
+    return { paramType, argsFullValue, argsFirstNode };
 }
 function resolveArguments(
     paramType: ParsedValue,
@@ -515,15 +712,16 @@ export function validateRuleStateDefinition(
                     // TODO: Sort out types
                     const state = states[stateName];
                     if (state && typeof state === 'object') {
+                        const stateParam = isTemplateState(state) ? state.params[0] : state;
                         const { errors } = validateStateArgument(
-                            state,
+                            stateParam,
                             meta,
-                            state.defaultValue || '',
+                            stateParam.defaultValue || '',
                             resolver,
                             diagnostics,
                             parentRule,
                             true,
-                            !!state.defaultValue
+                            !!stateParam.defaultValue
                         );
                         if (errors) {
                             rule.walkDecls((decl) => {
@@ -531,7 +729,7 @@ export function validateRuleStateDefinition(
                                     diagnostics.report(
                                         stateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
                                             stateName,
-                                            state.defaultValue || '',
+                                            stateParam.defaultValue || '',
                                             errors
                                         ),
                                         {
@@ -605,13 +803,21 @@ export function transformPseudoClassToCustomState(
 
     if (stateDef === null) {
         convertToClass(node).value = createBooleanStateClassName(name, namespace);
+        delete node.nodes;
     } else if (typeof stateDef === 'string') {
         // simply concat global mapped selector - ToDo: maybe change to 'selector'
         convertToInvalid(node).value = stateDef;
+        delete node.nodes;
     } else if (typeof stateDef === 'object') {
-        resolveStateValue(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
+        if (isTemplateState(stateDef)) {
+            convertTemplateState(meta, resolver, diagnostics, rule, node, stateDef, name);
+        } else {
+            resolveStateValue(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
+        }
     }
-    delete node.nodes;
+}
+export function isTemplateState(state: MappedStates[string]): state is TemplateStateParsedValue {
+    return !!state && typeof state === 'object' && state.type === 'template';
 }
 
 export function createBooleanStateClassName(stateName: string, namespace: string) {
@@ -635,40 +841,80 @@ export function resolveStateParam(param: string, escape = false) {
     // adding/removing initial `s` to indicate that it's not the first param of the identifier
     return escape ? cssesc(`s` + result, { isIdentifier: true }).slice(1) : result;
 }
-
-function resolveStateValue(
+function convertTemplateState(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
     rule: postcss.Rule | undefined,
     node: PseudoClass,
-    stateDef: StateParsedValue,
-    name: string,
-    namespace: string
+    stateParamDef: TemplateStateParsedValue,
+    name: string
 ) {
-    const inputValue = node.nodes && node.nodes.length ? stringifySelector(node.nodes) : ``;
-    let actualParam = resolveParam(
+    const paramStateDef = stateParamDef.params[0];
+    const resolvedParam = getParamInput(
         meta,
         resolver,
         diagnostics,
         rule,
-        inputValue ? inputValue : stateDef.defaultValue
+        node,
+        paramStateDef,
+        name
     );
 
-    if (rule && !inputValue && !stateDef.defaultValue) {
-        diagnostics.report(stateDiagnostics.NO_STATE_ARGUMENT_GIVEN(name, stateDef.type), {
+    validateParam(meta, resolver, diagnostics, rule, paramStateDef, resolvedParam, name);
+
+    const strippedParam = stripQuotation(resolvedParam);
+    transformMappedStateWithParam({
+        stateName: name,
+        template: stateParamDef.template,
+        param: strippedParam,
+        node,
+        rule,
+        diagnostics,
+    });
+}
+function getParamInput(
+    meta: StylableMeta,
+    resolver: StylableResolver,
+    diagnostics: Diagnostics,
+    rule: postcss.Rule | undefined,
+    node: PseudoClass,
+    stateParamDef: StateParsedValue,
+    name: string
+) {
+    const inputValue = node.nodes && node.nodes.length ? stringifySelector(node.nodes) : ``;
+    const resolvedParam = resolveParam(
+        meta,
+        resolver,
+        diagnostics,
+        rule,
+        inputValue ? inputValue : stateParamDef.defaultValue
+    );
+
+    if (rule && !inputValue && !stateParamDef.defaultValue) {
+        diagnostics.report(stateDiagnostics.NO_STATE_ARGUMENT_GIVEN(name, stateParamDef.type), {
             node: rule,
             word: name,
         });
     }
-
-    const validator = systemValidators[stateDef.type];
+    return resolvedParam;
+}
+function validateParam(
+    meta: StylableMeta,
+    resolver: StylableResolver,
+    diagnostics: Diagnostics,
+    rule: postcss.Rule | undefined,
+    stateParamDef: StateParsedValue,
+    resolvedParam: string,
+    name: string
+) {
+    const validator = systemValidators[stateParamDef.type];
 
     let stateParamOutput: StateResult | undefined;
     try {
         stateParamOutput = validator.validate(
-            actualParam,
-            stateDef.arguments,
+            resolvedParam,
+            stateParamDef.arguments,
             resolveParam.bind(null, meta, resolver, diagnostics, rule),
             false,
             true
@@ -678,27 +924,127 @@ function resolveStateValue(
     }
 
     if (stateParamOutput !== undefined) {
-        if (stateParamOutput.res !== actualParam) {
-            actualParam = stateParamOutput.res;
+        if (stateParamOutput.res !== resolvedParam) {
+            resolvedParam = stateParamOutput.res;
         }
 
         if (rule && stateParamOutput.errors) {
             diagnostics.report(
                 stateDiagnostics.FAILED_STATE_VALIDATION(
                     name,
-                    actualParam,
+                    resolvedParam,
                     stateParamOutput.errors
                 ),
                 {
                     node: rule,
-                    word: actualParam,
+                    word: resolvedParam,
                 }
             );
         }
     }
+}
+function resolveStateValue(
+    meta: StylableMeta,
+    resolver: StylableResolver,
+    diagnostics: Diagnostics,
+    rule: postcss.Rule | undefined,
+    node: PseudoClass,
+    stateParamDef: StateParsedValue,
+    name: string,
+    namespace: string
+) {
+    const resolvedParam = getParamInput(
+        meta,
+        resolver,
+        diagnostics,
+        rule,
+        node,
+        stateParamDef,
+        name
+    );
 
-    const strippedParam = stripQuotation(actualParam);
+    validateParam(meta, resolver, diagnostics, rule, stateParamDef, resolvedParam, name);
+
+    const strippedParam = stripQuotation(resolvedParam);
     convertToClass(node).value = createStateWithParamClassName(name, namespace, strippedParam);
+    delete node.nodes;
+}
+
+function transformMappedStateWithParam({
+    stateName,
+    template,
+    param,
+    node,
+    rule,
+    diagnostics,
+}: {
+    stateName: string;
+    template: string;
+    param: string;
+    node: PseudoClass;
+    rule?: postcss.Rule;
+    diagnostics: Diagnostics;
+}) {
+    const targetSelectorStr = template.replace(/\$0/g, param);
+    const selectorAst = parseSelectorWithCache(targetSelectorStr, { clone: true });
+    if (selectorAst.length > 1) {
+        if (rule) {
+            diagnostics.report(
+                stateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(stateName, targetSelectorStr),
+                {
+                    node: rule,
+                }
+            );
+        }
+        return;
+    } else {
+        const firstSelector = selectorAst[0].nodes.find(({ type }) => type !== 'comment');
+        if (firstSelector?.type === 'type' || firstSelector?.type === 'universal') {
+            if (rule) {
+                diagnostics.report(
+                    stateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(stateName, targetSelectorStr),
+                    {
+                        node: rule,
+                    }
+                );
+            }
+            return;
+        }
+        let unexpectedSelector: undefined | SelectorNode = undefined;
+        for (const node of selectorAst[0].nodes) {
+            if (node.type === 'combinator' || node.type === 'invalid') {
+                unexpectedSelector = node;
+                break;
+            }
+        }
+        if (unexpectedSelector) {
+            if (rule) {
+                switch (unexpectedSelector.type) {
+                    case 'combinator':
+                        diagnostics.report(
+                            stateDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR(
+                                stateName,
+                                targetSelectorStr
+                            ),
+                            {
+                                node: rule,
+                            }
+                        );
+                        break;
+                    case 'invalid':
+                        diagnostics.report(
+                            stateDiagnostics.INVALID_SELECTOR(stateName, targetSelectorStr),
+                            {
+                                node: rule,
+                            }
+                        );
+                        break;
+                }
+            }
+            return;
+        }
+    }
+    convertToSelector(node).nodes = selectorAst[0].nodes;
 }
 
 function resolveParam(

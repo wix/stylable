@@ -9,8 +9,8 @@ export {
     ResolvedElement,
 } from './stylable-transformer';
 export { validateDefaultConfig } from './stylable';
-export { STCustomSelector, STCustomState } from './features';
-export type { MappedStates, StateParsedValue } from './helpers/custom-state';
+export { STSymbol, STGlobal, STCustomSelector, STCustomState, CSSCustomProperty } from './features';
+export type { MappedStates, StateParsedValue, TemplateStateParsedValue } from './helpers/custom-state';
 export { murmurhash3_32_gc } from './murmurhash';
 export { cssParse } from './parser';
 export type { OptimizeConfig, IStylableOptimizer } from './types';
@@ -19,7 +19,7 @@ export {
     nativePseudoElements,
     knownPseudoClassesWithNestedSelectors,
 } from './native-reserved-lists';
-export { isAsset, makeAbsolute, isRelativeNativeCss } from './stylable-assets';
+export { isAsset, makeAbsolute, isRelativeNativeCss, fixRelativeUrls } from './stylable-assets';
 export { namespace, namespaceDelimiter } from './helpers/namespace';
 export {
     emitDiagnostics,

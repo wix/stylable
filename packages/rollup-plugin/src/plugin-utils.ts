@@ -4,7 +4,7 @@ import type { PluginContext } from 'rollup';
 import type { StylableRollupPluginOptions } from './index';
 import { processUrlDependencies } from '@stylable/build-tools';
 import fs from 'fs';
-import { basename, extname } from 'path';
+import { basename, extname, isAbsolute, join } from 'path';
 import { createHash } from 'crypto';
 import { getType } from 'mime';
 
@@ -55,7 +55,14 @@ export function emitAssets(
     emittedAssets: Map<string, string>,
     inlineAssets: StylableRollupPluginOptions['inlineAssets']
 ): string[] {
-    const assets = processUrlDependencies(meta, stylable.projectRoot);
+    const assets = processUrlDependencies({
+        meta,
+        rootContext: stylable.projectRoot,
+        host: {
+            isAbsolute,
+            join,
+        },
+    });
     const assetsIds: string[] = [];
     for (const asset of assets) {
         const fileBuffer = fs.readFileSync(asset);

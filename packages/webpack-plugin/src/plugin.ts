@@ -131,6 +131,17 @@ export interface StylableWebpackPluginOptions {
      * @deprecated webpack 5 recommendation is to use AssetsModules for loading assets
      */
     assetsMode?: 'url' | 'loader';
+    /**
+     * The strategy used to calculate stylesheet override depth
+     * 'css+js' - use css and js files to calculate depth
+     * 'css' - use only css files to calculate depth
+     */
+    depthStrategy?: 'css+js' | 'css';
+    /**
+     * Improved side-effect detection to include stylesheets with deep global side-effects.
+     * Defaults to true.
+     */
+    includeGlobalSideEffects?: boolean;
 }
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
@@ -163,6 +174,8 @@ const defaultOptions = (
     assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
     stcConfig: userOptions.stcConfig ?? false,
+    depthStrategy: userOptions.depthStrategy ?? 'css+js',
+    includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? true,
 });
 
 export class StylableWebpackPlugin {
@@ -398,6 +411,7 @@ export class StylableWebpackPlugin {
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.target = this.options.target;
                     loaderContext.assetFilter = this.options.assetFilter;
+                    loaderContext.includeGlobalSideEffects = this.options.includeGlobalSideEffects;
                     /**
                      * Every Stylable file that our loader handles will be call this function to add additional build data
                      */
@@ -413,13 +427,8 @@ export class StylableWebpackPlugin {
                          * We want to add the unused imports because we need them to calculate the depth correctly
                          * They might be used by other stylesheets so they might end up in the final build
                          */
-                        for (const request of stylableBuildMeta.unusedImports) {
-                            module.addDependency(
-                                new this.entities.UnusedDependency(
-                                    this.stylable.resolver.resolvePath(module.context!, request),
-                                    0
-                                )
-                            );
+                        for (const resolvedAbsPath of stylableBuildMeta.unusedImports) {
+                            module.addDependency(new this.entities.UnusedDependency(resolvedAbsPath));
                         }
 
                         /**
@@ -532,13 +541,19 @@ export class StylableWebpackPlugin {
             const cache = new Map();
             const context = createCalcDepthContext(moduleGraph);
             for (const [module] of stylableModules) {
-                module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(
+                const stylableBuildMeta = getStylableBuildMeta(module);
+
+                stylableBuildMeta.isUsed = findIfStylableModuleUsed(
                     module,
                     compilation,
                     this.entities.UnusedDependency
                 );
                 /** legacy flow */
-                module.buildMeta.stylable.depth = calcDepth(module, context, [], cache);
+
+                stylableBuildMeta.depth =
+                    this.options.depthStrategy === 'css'
+                        ? stylableBuildMeta.cssDepth
+                        : calcDepth(module, context, [], cache);
 
                 const { css, urls, exports, namespace } = getStylableBuildMeta(module);
                 stylableModules.set(module, {
@@ -546,8 +561,8 @@ export class StylableWebpackPlugin {
                     urls: cloneDeep(urls),
                     namespace,
                     css,
-                    isUsed: module.buildMeta.stylable.isUsed,
-                    depth: module.buildMeta.stylable.depth,
+                    isUsed: stylableBuildMeta.isUsed,
+                    depth: stylableBuildMeta.depth,
                 });
             }
         });
@@ -573,23 +588,28 @@ export class StylableWebpackPlugin {
             );
 
             for (const module of sortedModules) {
-                const { css, globals, namespace } = getStylableBuildMeta(module);
+                const { css, globals, namespace, type } = getStylableBuildMeta(module);
 
                 try {
                     const buildData = stylableModules.get(module)!;
-                    const ast = parse(css, { from: module.resource });
+                    let cssOutput = css;
+                    if (type === 'stylable') {
+                        const ast = parse(css, { from: module.resource });
 
-                    optimizer.optimizeAst(
-                        optimizeOptions,
-                        ast,
-                        usageMapping,
-                        buildData.exports,
-                        globals
-                    );
+                        optimizer.optimizeAst(
+                            optimizeOptions,
+                            ast,
+                            usageMapping,
+                            buildData.exports,
+                            globals
+                        );
+
+                        cssOutput = ast.toString();
+                    }
 
                     buildData.css = optimizeOptions.minify
-                        ? optimizer.minifyCSS(ast.toString())
-                        : ast.toString();
+                        ? optimizer.minifyCSS(cssOutput)
+                        : cssOutput;
 
                     if (optimizeOptions.shortNamespaces) {
                         buildData.namespace = namespaceMapping[namespace];

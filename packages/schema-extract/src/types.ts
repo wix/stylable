@@ -24,13 +24,17 @@ export interface StylableSymbolSchema extends JSONSchema7 {
     docTags?: Record<string, string>;
 }
 
-export type StateDict = { [stateName: string]: SchemaStates } & object;
+export type StateDict = { [stateName: string]: SchemaStates | TemplateStateSchema } & object;
 
 export interface SchemaStates {
     type: string;
     default?: string;
     enum?: string[];
 }
+type TemplateStateSchema = {
+    type: 'mapped';
+    params: [SchemaStates];
+};
 
 export interface MinimalPath {
     dirname: (p: string) => string;

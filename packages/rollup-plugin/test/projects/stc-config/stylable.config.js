@@ -6,5 +6,6 @@ exports.stcConfig = typedConfiguration({
         outDir: './dist',
         cjs: false,
         outputSources: true,
+        useNamespaceReference: false,
     },
 });
