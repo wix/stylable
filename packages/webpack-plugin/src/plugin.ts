@@ -428,7 +428,9 @@ export class StylableWebpackPlugin {
                          * They might be used by other stylesheets so they might end up in the final build
                          */
                         for (const resolvedAbsPath of stylableBuildMeta.unusedImports) {
-                            module.addDependency(new this.entities.UnusedDependency(resolvedAbsPath));
+                            module.addDependency(
+                                new this.entities.UnusedDependency(resolvedAbsPath, 0)
+                            );
                         }
 
                         /**
