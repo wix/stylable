@@ -10,7 +10,7 @@
   "dependencies": {
     "@stylable/core": "^5.4.0",
     "@stylable/runtime": "^5.4.0",
-    "@tokey/css-selector-parser": "^0.6.0"
+    "@tokey/css-selector-parser": "^0.6.1"
   },
   "files": [
     "dist",
