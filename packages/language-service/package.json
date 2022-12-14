@@ -11,17 +11,17 @@
     "typescript": ">=3.8"
   },
   "dependencies": {
-    "@file-services/types": "^7.0.1",
-    "@file-services/typescript": "^7.0.1",
+    "@file-services/types": "^7.2.0",
+    "@file-services/typescript": "^7.2.0",
     "@stylable/code-formatter": "^5.4.0",
     "@stylable/core": "^5.4.0",
     "css-selector-tokenizer": "^0.8.0",
-    "postcss": "^8.4.19",
+    "postcss": "^8.4.20",
     "postcss-value-parser": "^4.2.0",
     "vscode-css-languageservice": "^6.2.1",
     "vscode-languageserver": "^8.0.2",
-    "vscode-languageserver-textdocument": "^1.0.7",
-    "vscode-uri": "^3.0.6"
+    "vscode-languageserver-textdocument": "^1.0.8",
+    "vscode-uri": "^3.0.7"
   },
   "author": "Wix.com",
   "files": [
