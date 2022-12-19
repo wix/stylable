@@ -163,7 +163,7 @@ describe('Stylable Cli', function () {
             'style.st.css': srcContent,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--outDir', 'dist', '--stcss', '--dts']);
+        runCliSync(['--rootDir', tempDir.path, '--outDir', 'dist', '--stcss', '--dts', '--unsr', 'false']);
 
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent['dist/style.st.css'];
@@ -275,7 +275,7 @@ describe('Stylable Cli', function () {
             `,
         });
 
-        runCliSync(['--rootDir', tempDir.path]);
+        runCliSync(['--rootDir', tempDir.path, '--unsr', 'false']);
 
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent['dist/style.st.css'];
@@ -306,6 +306,8 @@ describe('Stylable Cli', function () {
             '--stcss',
             '--dts',
             '--dtsSourceMap',
+            'false',
+            '--unsr',
             'false',
         ]);
 
@@ -521,6 +523,108 @@ describe('Stylable Cli', function () {
             expect(res.stderr).to.contain(
                 'Error: Invalid configuration: When using "stcss" outDir and srcDir must be different.'
             );
+        });
+    });
+
+    describe('resolver', () => {
+        it('should be able to build with enhanced-resolver alias configured', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'stylable.config.js': `
+                    const { resolve } = require('node:path');
+                    const { createDefaultResolver } = require('@stylable/core');
+
+                    module.exports = {
+                        defaultConfig(fs) {
+                            return {
+                                resolveModule: createDefaultResolver(fs, {
+                                    alias: {
+                                        '@colors': resolve(__dirname, './colors')
+                                    }
+                                })  
+                            };
+                        }
+                    }
+                `,
+                'entry.st.css': `
+                    @st-import [green] from '@colors/green.st.css';
+                    
+                    .root { -st-mixin: green;}`,
+                colors: {
+                    'green.st.css': `.green { color: green; }`,
+                },
+            });
+
+            const { status } = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--outDir',
+                './',
+                '--srcDir',
+                './',
+                '--css',
+            ]);
+
+            const dirContent = loadDirSync(tempDir.path);
+
+            expect(dirContent['entry.css']).to.include('color: green;');
+            expect(status).to.equal(0);
+        });
+
+        it('should be able to build with TypeScript paths configured', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'tsconfig.json': `
+                    {
+                        "compilerOptions": {
+                            "baseUrl": ".",
+                            "paths": {
+                                "@colors/*": ["colors/*"]
+                            }
+                        }
+                    }`,
+                'stylable.config.js': `
+                    const { join } = require('path');
+                    const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
+                    const { createDefaultResolver } = require('@stylable/core');
+
+                    module.exports = {
+                        defaultConfig(fs) {
+                            return {
+                                resolveModule: createDefaultResolver(fs, {
+                                    plugins: [new TsconfigPathsPlugin({ configFile: join(${JSON.stringify(
+                                        tempDir.path
+                                    )},'tsconfig.json') })],
+                                })
+                            };
+                        }
+                    }
+                `,
+                'entry.st.css': `
+                    @st-import [green] from '@colors/green.st.css';
+                    
+                    .root { -st-mixin: green; }`,
+                colors: {
+                    'green.st.css': `.green { color: green; }`,
+                },
+            });
+
+            const { status, output } = runCliSync([
+                '--rootDir',
+                tempDir.path,
+                '--outDir',
+                './',
+                '--srcDir',
+                './',
+                '--css',
+            ]);
+
+            console.log(output);
+
+            const dirContent = loadDirSync(tempDir.path);
+
+            expect(dirContent['entry.css']).to.include('color: green;');
+            expect(status).to.equal(0);
         });
     });
 });

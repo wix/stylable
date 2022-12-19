@@ -6,6 +6,6 @@ export class Generator extends IndexGenerator {
     }
     protected generateIndexSource() {
         const source = super.generateIndexSource();
-        return '@namespace "INDEX";\n' + source;
+        return '@st-namespace "INDEX";\n' + source;
     }
 }

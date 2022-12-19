@@ -1,4 +1,5 @@
-//@ts-check
+// @ts-check
+
 /** @type {import('create-stylable-app').TemplateDefinition} */
 module.exports = {
     dependencies: ['react', 'react-dom'],
@@ -31,6 +32,7 @@ module.exports = {
         description: 'Stylable App',
         private: true,
         license: 'UNLICENSED',
+        type: 'module',
         scripts: {
             clean: 'rimraf dist',
             prebuild: 'npm run clean',

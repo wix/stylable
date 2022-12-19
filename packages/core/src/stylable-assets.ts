@@ -23,17 +23,34 @@ export function isAsset(url: string) {
     return !isExternal(url);
 }
 
-export function makeAbsolute(resourcePath: string, rootContext: string, moduleContext: string) {
-    const isAbs = path.isAbsolute(resourcePath);
+export function isRelativeNativeCss(fullPath: string) {
+    return (
+        fullPath.endsWith('.css') &&
+        !fullPath.endsWith('.st.css') &&
+        !fullPath.includes(path.sep + 'node_modules' + path.sep) &&
+        !isUrl(fullPath)
+    );
+}
+
+export function makeAbsolute(
+    host: {
+        join: (...paths: string[]) => string;
+        isAbsolute: (path: string) => boolean;
+    },
+    resourcePath: string,
+    rootContext: string,
+    moduleContext: string
+) {
+    const isAbs = host.isAbsolute(resourcePath);
     let abs: string;
     if (isExternal(resourcePath) || resourcePath.startsWith('~')) {
         abs = resourcePath;
     } else if (isAbs && resourcePath.startsWith('/')) {
-        abs = path.join(rootContext, resourcePath);
+        abs = host.join(rootContext, resourcePath);
     } else if (isAbs) {
         abs = resourcePath;
     } else {
-        abs = path.join(moduleContext, resourcePath);
+        abs = host.join(moduleContext, resourcePath);
     }
     return abs;
 }

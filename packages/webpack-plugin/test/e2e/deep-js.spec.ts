@@ -2,7 +2,6 @@ import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { promises } from 'fs';
 import { dirname, join } from 'path';
-import { waitFor } from 'promise-assist';
 
 const project = 'deep-js';
 const projectDir = dirname(
@@ -37,7 +36,7 @@ describe(`(${project})`, () => {
                     join(projectRunner.testDir, 'src', 'mixin.js'),
                     `module.exports = () => ({ color: 'green' });`
                 ),
-            () =>
+            (waitFor) =>
                 waitFor(
                     async () => {
                         await page.reload();

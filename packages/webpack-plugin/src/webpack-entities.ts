@@ -60,12 +60,12 @@ export interface StylableWebpackEntities {
     StylableRuntimeStylesheet: typeof RuntimeModule;
     CSSURLDependency: typeof dependencies.ModuleDependency;
     NoopTemplate: typeof dependencies.ModuleDependency.Template;
-    UnusedDependency: typeof dependencies.ModuleDependency;
+    UnusedDependency: typeof dependencies.HarmonyImportDependency;
 }
 
 export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpackEntities {
     const {
-        dependencies: { ModuleDependency },
+        dependencies: { ModuleDependency, HarmonyImportDependency },
         Dependency,
         NormalModule,
         RuntimeModule,
@@ -78,23 +78,19 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
     }
 
     class CSSURLDependency extends ModuleDependency {
-        // @ts-expect-error webpack types are wrong consider this as property
         get type() {
             return 'url()';
         }
-        // @ts-expect-error webpack types are wrong consider this as property
         get category() {
             return 'url';
         }
     }
 
-    class UnusedDependency extends ModuleDependency {
+    class UnusedDependency extends HarmonyImportDependency {
         weak = true;
-        // @ts-expect-error webpack types are wrong consider this as property
         get type() {
             return '@st-unused-import';
         }
-        // @ts-expect-error webpack types are wrong consider this as property
         get category() {
             return 'esm';
         }
@@ -238,6 +234,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
             );
             replacePlaceholder(
                 source,
+                getReplacementToken('containers'),
+                JSON.stringify(stylableBuildData.exports.containers)
+            );
+            replacePlaceholder(
+                source,
                 getReplacementToken('layers'),
                 JSON.stringify(stylableBuildData.exports.layers)
             );
@@ -301,7 +302,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
     );
 
     /* The request is empty for both dependencies and it will be overridden by the de-serialization process */
-    registerSerialization(webpack, UnusedDependency, () => [''] as [string]);
+    registerSerialization(
+        webpack,
+        UnusedDependency,
+        () => ['', 0, undefined] as [string, number, undefined]
+    );
     registerSerialization(webpack, CSSURLDependency, () => [''] as [string]);
 
     entities = {

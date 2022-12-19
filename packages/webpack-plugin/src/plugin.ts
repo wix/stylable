@@ -1,8 +1,9 @@
-import { Stylable, StylableConfig } from '@stylable/core';
-import type {
+import { MinimalFS, Stylable, StylableConfig } from '@stylable/core';
+import {
     OptimizeConfig,
     DiagnosticsMode,
     IStylableOptimizer,
+    validateDefaultConfig,
 } from '@stylable/core/dist/index-internal';
 import { createNamespaceStrategyNode } from '@stylable/node';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
@@ -13,6 +14,7 @@ import type { Compilation, Compiler, NormalModule, WebpackError } from 'webpack'
 import {
     getStaticPublicPath,
     isStylableModule,
+    isLoadedNativeCSSModule,
     isAssetModule,
     isLoadedWithKnownAssetLoader,
     injectLoader,
@@ -129,6 +131,17 @@ export interface StylableWebpackPluginOptions {
      * @deprecated webpack 5 recommendation is to use AssetsModules for loading assets
      */
     assetsMode?: 'url' | 'loader';
+    /**
+     * The strategy used to calculate stylesheet override depth
+     * 'css+js' - use css and js files to calculate depth
+     * 'css' - use only css files to calculate depth
+     */
+    depthStrategy?: 'css+js' | 'css';
+    /**
+     * Improved side-effect detection to include stylesheets with deep global side-effects.
+     * Defaults to true.
+     */
+    includeGlobalSideEffects?: boolean;
 }
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
@@ -161,6 +174,8 @@ const defaultOptions = (
     assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
     stcConfig: userOptions.stcConfig ?? false,
+    depthStrategy: userOptions.depthStrategy ?? 'css+js',
+    includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? true,
 });
 
 export class StylableWebpackPlugin {
@@ -294,40 +309,38 @@ export class StylableWebpackPlugin {
         const options =
             loadStylableConfig(compiler.context, (config) => {
                 return isWebpackConfigProcessor(config)
-                    ? config.webpackPlugin(defaults, compiler)
+                    ? config.webpackPlugin(defaults, compiler, getTopLevelInputFilesystem(compiler))
                     : undefined;
             })?.config || defaults;
 
         this.options = options;
+    }
+    private getStylableConfig(compiler: Compiler) {
+        const configuration = resolveStcConfig(
+            compiler.context,
+            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined,
+            getTopLevelInputFilesystem(compiler)
+        );
+
+        return configuration;
     }
     private createStcBuilder(compiler: Compiler) {
         if (!this.options.stcConfig) {
             return;
         }
 
-        const configuration = resolveStcConfig(
-            compiler.context,
-            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined
-        );
-
-        if (!configuration) {
-            throw new Error(
-                `Could not find "stcConfig"${
-                    typeof this.options.stcConfig === 'string'
-                        ? ` at "${this.options.stcConfig}"`
-                        : ''
-                }`
-            );
-        }
+        const config = this.getStylableConfig(compiler);
 
         /**
          * In case the user uses STC we can run his config in this process.
          */
-        this.stcBuilder = STCBuilder.create({
-            rootDir: compiler.context,
-            watchMode: compiler.watchMode,
-            configFilePath: configuration.path,
-        });
+        if (config) {
+            this.stcBuilder = STCBuilder.create({
+                rootDir: compiler.context,
+                watchMode: compiler.watchMode,
+                configFilePath: config.path,
+            });
+        }
     }
     private createStylable(compiler: Compiler) {
         if (this.stylable) {
@@ -341,6 +354,11 @@ export class StylableWebpackPlugin {
                 compiler.options.resolve.aliasFields,
         };
 
+        const topLevelFs = getTopLevelInputFilesystem(compiler);
+        const stylableConfig = this.getStylableConfig(compiler)?.config;
+
+        validateDefaultConfig(stylableConfig?.defaultConfig);
+
         this.stylable = new Stylable(
             this.options.stylableConfig(
                 {
@@ -349,7 +367,7 @@ export class StylableWebpackPlugin {
                      * We need to get the top level file system
                      * because issue with the sync resolver we create inside Stylable
                      */
-                    fileSystem: getTopLevelInputFilesystem(compiler),
+                    fileSystem: topLevelFs,
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
                     resolveOptions: {
                         ...resolverOptions,
@@ -361,6 +379,12 @@ export class StylableWebpackPlugin {
                     requireModule: createDecacheRequire(compiler),
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
+                    /**
+                     * config order is user determined
+                     * each configuration points receives the default options,
+                     * and lets the user mix and match the options as they wish
+                     */
+                    ...stylableConfig?.defaultConfig,
                 },
                 compiler
             )
@@ -381,12 +405,13 @@ export class StylableWebpackPlugin {
             StylableWebpackPlugin.name,
             (webpackLoaderContext, module) => {
                 const loaderContext = webpackLoaderContext as StylableLoaderContext;
-                if (isStylableModule(module)) {
+                if (isStylableModule(module) || isLoadedNativeCSSModule(module, moduleGraph)) {
                     loaderContext.stylable = this.stylable;
                     loaderContext.assetsMode = this.options.assetsMode;
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.target = this.options.target;
                     loaderContext.assetFilter = this.options.assetFilter;
+                    loaderContext.includeGlobalSideEffects = this.options.includeGlobalSideEffects;
                     /**
                      * Every Stylable file that our loader handles will be call this function to add additional build data
                      */
@@ -402,8 +427,10 @@ export class StylableWebpackPlugin {
                          * We want to add the unused imports because we need them to calculate the depth correctly
                          * They might be used by other stylesheets so they might end up in the final build
                          */
-                        for (const request of stylableBuildMeta.unusedImports) {
-                            module.addDependency(new this.entities.UnusedDependency(request));
+                        for (const resolvedAbsPath of stylableBuildMeta.unusedImports) {
+                            module.addDependency(
+                                new this.entities.UnusedDependency(resolvedAbsPath, 0)
+                            );
                         }
 
                         /**
@@ -465,12 +492,20 @@ export class StylableWebpackPlugin {
          */
         compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, (modules) => {
             for (const module of modules) {
-                if (isStylableModule(module) && module.buildMeta.stylable) {
+                if (
+                    (isStylableModule(module) || isLoadedNativeCSSModule(module, moduleGraph)) &&
+                    module.buildMeta.stylable
+                ) {
                     stylableModules.set(module, null);
                 }
                 if (isAssetModule(module)) {
                     assetsModules.set(module.resource, module);
                 }
+                module.dependencies.forEach((dep) => {
+                    if (dep instanceof this.entities.UnusedDependency) {
+                        compilation.moduleGraph.getConnection(dep)?.setActive(false);
+                    }
+                });
                 /**
                  * @remove
                  * This part supports old loaders and should be removed
@@ -508,13 +543,19 @@ export class StylableWebpackPlugin {
             const cache = new Map();
             const context = createCalcDepthContext(moduleGraph);
             for (const [module] of stylableModules) {
-                module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(
+                const stylableBuildMeta = getStylableBuildMeta(module);
+
+                stylableBuildMeta.isUsed = findIfStylableModuleUsed(
                     module,
                     compilation,
                     this.entities.UnusedDependency
                 );
                 /** legacy flow */
-                module.buildMeta.stylable.depth = calcDepth(module, context, [], cache);
+
+                stylableBuildMeta.depth =
+                    this.options.depthStrategy === 'css'
+                        ? stylableBuildMeta.cssDepth
+                        : calcDepth(module, context, [], cache);
 
                 const { css, urls, exports, namespace } = getStylableBuildMeta(module);
                 stylableModules.set(module, {
@@ -522,8 +563,8 @@ export class StylableWebpackPlugin {
                     urls: cloneDeep(urls),
                     namespace,
                     css,
-                    isUsed: module.buildMeta.stylable.isUsed,
-                    depth: module.buildMeta.stylable.depth,
+                    isUsed: stylableBuildMeta.isUsed,
+                    depth: stylableBuildMeta.depth,
                 });
             }
         });
@@ -549,23 +590,28 @@ export class StylableWebpackPlugin {
             );
 
             for (const module of sortedModules) {
-                const { css, globals, namespace } = getStylableBuildMeta(module);
+                const { css, globals, namespace, type } = getStylableBuildMeta(module);
 
                 try {
                     const buildData = stylableModules.get(module)!;
-                    const ast = parse(css, { from: module.resource });
+                    let cssOutput = css;
+                    if (type === 'stylable') {
+                        const ast = parse(css, { from: module.resource });
 
-                    optimizer.optimizeAst(
-                        optimizeOptions,
-                        ast,
-                        usageMapping,
-                        buildData.exports,
-                        globals
-                    );
+                        optimizer.optimizeAst(
+                            optimizeOptions,
+                            ast,
+                            usageMapping,
+                            buildData.exports,
+                            globals
+                        );
+
+                        cssOutput = ast.toString();
+                    }
 
                     buildData.css = optimizeOptions.minify
-                        ? optimizer.minifyCSS(ast.toString())
-                        : ast.toString();
+                        ? optimizer.minifyCSS(cssOutput)
+                        : cssOutput;
 
                     if (optimizeOptions.shortNamespaces) {
                         buildData.namespace = namespaceMapping[namespace];
@@ -717,7 +763,8 @@ export class StylableWebpackPlugin {
 function isWebpackConfigProcessor(config: any): config is {
     webpackPlugin: (
         options: Required<StylableWebpackPluginOptions>,
-        compiler: Compiler
+        compiler: Compiler,
+        fs: MinimalFS
     ) => Required<StylableWebpackPluginOptions>;
 } {
     return typeof config === 'object' && typeof config.webpackPlugin === 'function';

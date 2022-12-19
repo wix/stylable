@@ -1,5 +1,5 @@
 .root {
-    -st-states: hello(enum(bob, alice, eve)), otherState;
+    -st-states: hello(enum(bob, alice, eve)), otherState, templateEnum(".$0", enum(aaa, eee, bbb, e22));
 }
 
 .root .part {

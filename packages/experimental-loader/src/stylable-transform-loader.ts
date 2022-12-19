@@ -78,7 +78,7 @@ const stylableLoader: LoaderDefinition = function (content) {
     const { meta, exports } = stylable.transform(stylable.analyze(this.resourcePath, content));
 
     emitDiagnostics(this, meta, diagnosticsMode);
-    for (const filePath of tryCollectImportsDeep(stylable, meta)) {
+    for (const filePath of tryCollectImportsDeep(stylable.resolver, meta)) {
         this.addDependency(filePath);
     }
 

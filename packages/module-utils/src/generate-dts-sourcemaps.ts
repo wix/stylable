@@ -1,6 +1,6 @@
 import { basename } from 'path';
 import type { ClassSymbol, StylableMeta } from '@stylable/core';
-import { STSymbol, CSSKeyframes, CSSLayer } from '@stylable/core/dist/features';
+import { STSymbol, CSSKeyframes, CSSLayer, CSSContains } from '@stylable/core/dist/features';
 import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
 import { encode } from 'vlq';
 import {
@@ -121,6 +121,18 @@ function getKeyframeSrcPosition(keyframeName: string, meta: StylableMeta): Posit
 }
 function getLayersSrcPosition(layerName: string, meta: StylableMeta): Position | undefined {
     const definitionNode = CSSLayer.getDefinition(meta, layerName);
+
+    if (definitionNode && definitionNode.source && definitionNode.source.start) {
+        return {
+            line: definitionNode.source.start.line - 1,
+            column: definitionNode.source.start.column - 1,
+        };
+    }
+
+    return;
+}
+function getContainersSrcPosition(containerName: string, meta: StylableMeta): Position | undefined {
+    const definitionNode = CSSContains.getDefinition(meta, containerName);
 
     if (definitionNode && definitionNode.source && definitionNode.source.start) {
         return {
@@ -283,6 +295,9 @@ export function generateDTSSourceMap(
                         break;
                     case 'layers':
                         currentSrcPosition = getLayersSrcPosition(tokenName, meta);
+                        break;
+                    case 'containers':
+                        currentSrcPosition = getContainersSrcPosition(tokenName, meta);
                         break;
                 }
 

@@ -655,7 +655,10 @@ describe(`helpers/import`, () => {
                 `,
             });
 
-            const imports = tryCollectImportsDeep(stylable, stylable.analyze('/entry.st.css'));
+            const imports = tryCollectImportsDeep(
+                stylable.resolver,
+                stylable.analyze('/entry.st.css')
+            );
 
             expect(imports).to.eql(new Set(['/deep.st.css', '/middle.st.css']));
         });
@@ -673,7 +676,10 @@ describe(`helpers/import`, () => {
                 `,
             });
 
-            const imports = tryCollectImportsDeep(stylable, stylable.analyze('/entry.st.css'));
+            const imports = tryCollectImportsDeep(
+                stylable.resolver,
+                stylable.analyze('/entry.st.css')
+            );
 
             expect(imports).to.eql(new Set(['/a.st.css', '/b.st.css']));
         });
@@ -692,7 +698,10 @@ describe(`helpers/import`, () => {
                 `,
             });
 
-            const imports = tryCollectImportsDeep(stylable, stylable.analyze('entry.st.css'));
+            const imports = tryCollectImportsDeep(
+                stylable.resolver,
+                stylable.analyze('entry.st.css')
+            );
 
             expect(imports).to.eql(new Set(['/deep.st.css', '/middle.st.css']));
         });

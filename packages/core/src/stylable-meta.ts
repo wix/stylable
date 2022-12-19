@@ -7,39 +7,49 @@ import { getSourcePath } from './stylable-utils';
 import {
     STSymbol,
     STImport,
+    STNamespace,
     STGlobal,
     STScope,
     STVar,
     STCustomSelector,
+    STCustomState,
     STMixin,
     CSSClass,
     CSSType,
+    CSSPseudoClass,
     CSSCustomProperty,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 } from './features';
 
 const features = [
     STSymbol,
     STImport,
+    STNamespace,
     STGlobal,
     STScope,
     STVar,
     STCustomSelector,
+    STCustomState,
     STMixin,
     CSSClass,
     CSSType,
+    CSSPseudoClass,
     CSSCustomProperty,
     CSSKeyframes,
     CSSLayer,
+    CSSContains,
 ];
 
 export class StylableMeta {
     public data: PlugableRecord = {};
-    public root = 'root';
+    public root = '';
     public source: string = getSourcePath(this.sourceAst, this.diagnostics);
+    public type: 'stylable' | 'css' = this.source.endsWith('.st.css') ? 'stylable' : 'css';
     public namespace = '';
     public urls: string[] = [];
+    public transformCssDepth: { cssDepth: number; deepDependencies: Set<string> } | undefined;
     public transformDiagnostics: Diagnostics | null = null;
     public transformedScopes: Record<string, SelectorList> | null = null;
     /** @deprecated */
@@ -54,8 +64,11 @@ export class StylableMeta {
             hooks.metaInit(context);
         }
         // set default root
-        const rootSymbol = CSSClass.addClass(context, 'root');
-        rootSymbol[`-st-root`] = true;
+        if (this.type === 'stylable') {
+            this.root = 'root';
+            const rootSymbol = CSSClass.addClass(context, 'root');
+            rootSymbol[`-st-root`] = true;
+        }
     }
     getSymbol(name: string) {
         return STSymbol.get(this, name);

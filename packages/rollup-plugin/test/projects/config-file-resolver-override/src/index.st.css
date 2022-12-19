@@ -1,0 +1,5 @@
+@st-import Comp from "components/green.st.css";
+
+.root {
+    -st-mixin: Comp;
+}

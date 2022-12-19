@@ -3,13 +3,18 @@ import {
     CSSClass,
     CSSCustomProperty,
     CSSKeyframes,
+    CSSLayer,
+    CSSContains,
     CSSType,
+    CSSPseudoClass,
+    STNamespace,
     STGlobal,
     STImport,
     STMixin,
     STSymbol,
     STVar,
     STCustomSelector,
+    STCustomState,
 } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 import { atPropertyValidationWarnings } from '@stylable/core/dist/helpers/css-custom-property';
@@ -17,7 +22,6 @@ import { parseImportMessages, ensureImportsMessages } from '@stylable/core/dist/
 import { mixinHelperDiagnostics } from '@stylable/core/dist/helpers/mixin';
 import { valueDiagnostics } from '@stylable/core/dist/helpers/value';
 import { functionDiagnostics } from '@stylable/core/dist/functions';
-import { stateDiagnostics } from '@stylable/core/dist/pseudo-states';
 import { processorDiagnostics } from '@stylable/core/dist/stylable-processor';
 import { transformerDiagnostics } from '@stylable/core/dist/stylable-transformer';
 import { utilDiagnostics, sourcePathDiagnostics } from '@stylable/core/dist/stylable-utils';
@@ -31,7 +35,11 @@ describe('diagnostics error codes', () => {
             ...CSSClass.diagnostics,
             ...CSSCustomProperty.diagnostics,
             ...CSSKeyframes.diagnostics,
+            ...CSSLayer.diagnostics,
+            ...CSSContains.diagnostics,
             ...CSSType.diagnostics,
+            ...CSSPseudoClass.diagnostics,
+            ...STNamespace.diagnostics,
             ...STGlobal.diagnostics,
             ...STImport.diagnostics,
             ...STMixin.diagnostics,
@@ -44,7 +52,7 @@ describe('diagnostics error codes', () => {
             ...mixinHelperDiagnostics,
             ...valueDiagnostics,
             ...functionDiagnostics,
-            ...stateDiagnostics,
+            ...STCustomState.diagnostics,
             ...processorDiagnostics,
             ...transformerDiagnostics,
             ...utilDiagnostics,

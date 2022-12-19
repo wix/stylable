@@ -274,6 +274,31 @@ describe('Stylable JSON Schema Extractor', () => {
                 },
             });
         });
+
+        it('schema with mapped state with parameter', () => {
+            const css = `.root{
+                -st-states: state(".$0", enum(big, small));
+            }`;
+
+            const res = extractSchema(css, '/entry.st.css', '/', path);
+
+            expect(res.properties).to.eql({
+                root: {
+                    $ref: stylableClass,
+                    states: {
+                        state: {
+                            type: 'mapped',
+                            params: [
+                                {
+                                    type: 'string',
+                                    enum: ['big', 'small'],
+                                },
+                            ],
+                        },
+                    },
+                },
+            });
+        });
     });
 
     describe('extends', () => {

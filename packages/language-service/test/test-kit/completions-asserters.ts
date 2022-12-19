@@ -130,10 +130,10 @@ export const stScopeDirectiveCompletion: (rng: ProviderRange) => Partial<Complet
 };
 export const namespaceDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
     return {
-        label: '@namespace',
+        label: '@st-namespace',
         detail: 'Declare a namespace for the file',
         sortText: 'a',
-        insertText: '@namespace "$1";\n',
+        insertText: '@st-namespace "$1";\n',
         range: rng,
     };
 };

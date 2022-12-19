@@ -34,7 +34,7 @@ After installing `@stylable/cli`, the `stc` command will be available, running `
 | `--srcDir`                |        | source directory relative to root                                                      | `./`             |
 | `--outDir`                |        | target directory relative to root                                                      | `./`             |
 | `--indexFile`             |        | filename of the generated index                                                        | `false`          |
-| `--cjs`                   |        | output commonjs modules (`.js`)                                                        | `true`           |
+| `--cjs`                   |        | output commonjs modules (`.js`)                                                        | `false`          |
 | `--esm`                   |        | output esm modules (`.mjs`)                                                            | `false`          |
 | `--css`                   |        | output transpiled css files (`.css`)                                                   | `false`          |
 | `--stcss`                 |        | output stylable source files (`.st.css`)                                               | `false`          |
@@ -154,7 +154,7 @@ export class Generator extends Base {
     }    
     protected generateIndexSource(indexFileTargetPath: string) {
         const source = super.generateIndexSource(indexFileTargetPath);
-        return '@namespace "INDEX";\n' + source;
+        return '@st-namespace "INDEX";\n' + source;
     }
 }
 ```
@@ -337,6 +337,8 @@ npx -p @stylable/cli stc-codemod --help
 > Note that this codemod does not preserve comments inside the `:import` 
 
 - `st-global-custom-property-to-at-property` - Convert deprecated `@st-global-custom-property *;` to `@property st-global(*);` syntax.
+
+- `namespace-to-st-namespace` - Converts `@namespace` that would have been used as Stylable namespace configuration to `@st-namespace`.
 
 ### Provide an external codemod
 

@@ -196,6 +196,44 @@ describe('.d.ts source-maps', () => {
         ).to.eql({ line: 2, column: 0, source: 'entry.st.css', name: null });
     });
 
+    it('maps the container in the ".d.ts" to its position in the original ".st.css" file', async () => {
+        const res = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/another.st.css': {
+                    namespace: 'another',
+                    content: `.a { container: C1; }`,
+                },
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: deindent`
+                        @st-import [container(C1 as imported-container)] from "./another.st.css";
+                        .a {
+                            container: C2;
+                        }
+                    `,
+                },
+            },
+        });
+
+        const dtsText = generateDTSContent(res);
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta);
+
+        sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
+        // local container
+        expect(
+            sourceMapConsumer.originalPositionFor(
+                getPosition(dtsText, 'C2":') // source mapping starts after the first double quote
+            )
+        ).to.eql({ line: 4, column: 4, source: 'entry.st.css', name: null });
+        // imported container
+        expect(
+            sourceMapConsumer.originalPositionFor(
+                getPosition(dtsText, 'imported-container":') // source mapping starts after the first double quote
+            )
+        ).to.eql({ line: 2, column: 0, source: 'entry.st.css', name: null });
+    });
+
     it('maps states in the ".d.ts" to their positions in the original ".st.css" file', async () => {
         const res = generateStylableResult({
             entry: `/entry.st.css`,
