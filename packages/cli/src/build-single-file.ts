@@ -101,7 +101,6 @@ export function buildSingleFile({
             {
                 removeComments: true,
                 removeEmptyNodes: true,
-                removeStylableDirectives: true,
                 classNameOptimizations: false,
                 removeUnusedComponents: false,
             },

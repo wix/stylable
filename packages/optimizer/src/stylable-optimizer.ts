@@ -8,7 +8,7 @@ import {
 } from '@stylable/core/dist/index-internal';
 import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
 import csso from 'csso';
-import postcss, { Declaration, Root, Rule, Node, Comment, Container } from 'postcss';
+import postcss, { Root, Rule, Node, Comment, Container } from 'postcss';
 import { NameMapper } from './name-mapper';
 
 const { booleanStateDelimiter } = STCustomState.delimiters;
@@ -54,8 +54,11 @@ export class StylableOptimizer implements IStylableOptimizer {
         if (config.removeComments) {
             this.removeComments(targetAst);
         }
-        if (config.removeStylableDirectives) {
-            this.removeStylableDirectives(targetAst);
+        if ((config as any).removeStylableDirectives !== undefined) {
+            // ToDo(major): remove warning
+            console.warn(
+                `optimizer "removeStylableDirectives" is no longer required as "-st-*" declarations are removed during transformation`
+            );
         }
         if (config.removeUnusedComponents && usageMapping) {
             this.removeUnusedComponents(targetAst, usageMapping);
@@ -125,24 +128,6 @@ export class StylableOptimizer implements IStylableOptimizer {
                     .join(' ');
             }
         });
-    }
-
-    public removeStylableDirectives(root: Root, shouldComment = false) {
-        const toRemove: Node[] = [];
-        root.walkDecls((decl: Declaration) => {
-            if (decl.prop.startsWith('-st-')) {
-                toRemove.push(decl);
-            }
-        });
-        toRemove.forEach(
-            shouldComment
-                ? (node) => {
-                      node.replaceWith(...createLineByLineComment(node));
-                  }
-                : (node) => {
-                      node.remove();
-                  }
-        );
     }
 
     protected rewriteSelector(

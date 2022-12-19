@@ -146,7 +146,6 @@ export interface StylableWebpackPluginOptions {
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
     removeUnusedComponents: true,
-    removeStylableDirectives: true,
     removeComments: isProd,
     classNameOptimizations: isProd,
     shortNamespaces: isProd,
