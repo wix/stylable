@@ -122,6 +122,7 @@ export class StylableTransformer {
     private defaultStVarOverride: Record<string, string>;
     private evaluator: StylableEvaluator = new StylableEvaluator();
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
+    private directiveNodes: postcss.Declaration[] = [];
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;
@@ -269,6 +270,12 @@ export class StylableTransformer {
                 });
             }
 
+            if (this.mode === 'production') {
+                if (decl.prop.startsWith('-st-')) {
+                    this.directiveNodes.push(decl);
+                }
+            }
+
             switch (decl.prop) {
                 case `-st-partial-mixin`:
                 case `-st-mixin`:
@@ -300,6 +307,9 @@ export class StylableTransformer {
         STMixin.hooks.transformLastPass(lastPassParams);
         if (!mixinTransform) {
             STGlobal.hooks.transformLastPass(lastPassParams);
+            for (const node of this.directiveNodes) {
+                node.remove();
+            }
         }
 
         if (metaExports) {

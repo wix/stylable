@@ -35,6 +35,7 @@ describe('features/css-pseudo-class', () => {
         it('should transform boolean state', () => {
             const { sheets } = testStylableCore(`
                 .root {
+                    /* @transform-remove(removed decl) */
                     -st-states: bool,
                                 exBool(boolean);
                 }
@@ -782,7 +783,7 @@ describe('features/css-pseudo-class', () => {
                     @st-import [MixRoot, mixClass] from './enrich.st.css';
 
                     /*
-                        @rule[0] .entry__a { -st-extends: Base; id: extend-mix; }
+                        @rule[0] .entry__a { id: extend-mix; }
                         @rule[1] .entry__a.base--state { id: extend-mix-state; }
                         @rule[2] .entry__a { id: enrich-mixClass; }
                         @rule[3] .entry__a.base--state { id: enrich-mixClass-state; }
@@ -792,8 +793,8 @@ describe('features/css-pseudo-class', () => {
                     }
 
                     /*
-                        @rule[0] .entry__a { -st-extends: Base; }
-                        @rule[1] .entry__a .extend__mix { -st-extends: Base; id: extend-mix; }
+                        @rule[0] .entry__a { }
+                        @rule[1] .entry__a .extend__mix { id: extend-mix; }
                         @rule[2] .entry__a .extend__mix.base--state { id: extend-mix-state; }
                         @rule[3] .entry__a.base--state { id: extend-root-state; }
                         @rule[4] .entry__a { id: enrich-MixRoot; }
