@@ -130,26 +130,31 @@ describe(`features/css-class`, () => {
         const { sheets } = testStylableCore(`
             /* @rule(simple class) .x */
             .a {
+                /* @transform-remove */
                 -st-global: ".x";
             }
 
             /* @rule(compound classes) .z.zz */
             .b {
+                /* @transform-remove */
                 -st-global: ".z.zz";
             }
 
             /* @rule(no class) [attr=val] */
             .c {
+                /* @transform-remove */
                 -st-global: "[attr=val]";
             }
             
             /* @rule(complex) .y .z */
             .d {
+                /* @transform-remove */
                 -st-global: ".y .z";
             }
 
             /* @rule(not only classes compound) .yy[attr] */
             .e {
+                /* @transform-remove */
                 -st-global: ".yy[attr]";
             }
         `);
@@ -254,11 +259,13 @@ describe(`features/css-class`, () => {
 
             /* @rule(root extend class) .entry__root */
             .root {
+                /* @transform-remove */
                 -st-extends: a;
             }
 
             /* @rule(class extend class) .entry__class */
             .class {
+                /* @transform-remove */
                 -st-extends: a;
             }
         `);
@@ -1090,7 +1097,7 @@ describe(`features/css-class`, () => {
                         @st-import [MixRoot, mixClass] from './enrich.st.css';
 
                         /* 
-                            @rule[0] .entry__a { -st-extends: Base; id: extend-mix; } 
+                            @rule[0] .entry__a { id: extend-mix; } 
                             @rule[1] .entry__a .base__part .extend__part { id: extend-mix-part; } 
                             @rule[2] .entry__a { id: enrich-mixClass; } 
                             @rule[3] .entry__a .base__part .enrich__part { id: enrich-mixClass-part; } 
@@ -1100,9 +1107,9 @@ describe(`features/css-class`, () => {
                         }
 
                         /* 
-                            @rule[0] .entry__a { -st-extends: Base; } 
+                            @rule[0] .entry__a { } 
                             @rule[1] .entry__a .extend__part { id: extend-part; } 
-                            @rule[2] .entry__a .extend__mix { -st-extends: Base; id: extend-mix; } 
+                            @rule[2] .entry__a .extend__mix { id: extend-mix; } 
                             @rule[3] .entry__a .extend__mix .base__part .extend__part { id: extend-mix-part; } 
                             @rule[4] .entry__a .base__part .extend__part { id: extend-root-part; } 
                             @rule[5] .entry__a { id: enrich-MixRoot; }

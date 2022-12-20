@@ -1,4 +1,4 @@
-import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
+import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { dirname } from 'path';
 
@@ -12,7 +12,7 @@ describe(`(${project})`, () => {
         {
             projectDir,
             launchOptions: {
-                // headless: false
+                // headless: false,
             },
         },
         before,
@@ -20,30 +20,11 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('renders css', async () => {
-        const { page } = await projectRunner.openInBrowser();
-        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
-            includeCSSContent: true,
-        });
-
-        expect(styleElements).to.eql([
-            // {
-            //     id: './node_modules/test-components/button.st.css',
-            //     depth: '1',
-            //     css: ''
-            // },
-            // {
-            //     id: './node_modules/test-components/index.st.css',
-            //     depth: '2',
-            //     css: ''
-            // },
-            {
-                id: './src/index.st.css',
-                depth: '3',
-
-                css: '.global1{background:gray}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}',
-            },
-        ]);
+    it('generate minimal optimized css', () => {
+        const files = projectRunner.getProjectFiles();
+        expect(files['dist/stylable.css']).to.eql(
+            '.global1{background:gray}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}'
+        );
     });
 
     it('css is working', async () => {

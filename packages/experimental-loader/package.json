@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "@stylable/core": "^5.5.0",
-    "@stylable/optimizer": "^5.5.0",
     "@stylable/runtime": "^5.5.0",
     "css-loader": "^6.7.3",
     "decache": "^4.6.1",

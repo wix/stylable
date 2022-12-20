@@ -75,8 +75,6 @@ interface StylableWebpackPluginOptions {
     optimize?: {
         /* Removes comments from output css */
         removeComments?: boolean;
-        /* Removes all Stylable directives like -st-extends */
-        removeStylableDirectives?: boolean;
         /* Removes unused rules that target unused components */
         removeUnusedComponents?: boolean;
         /* Remove empty css rules */
@@ -160,7 +158,6 @@ new StylableWebpackPlugin({
     diagnosticsMode: 'auto',
     optimize: {
       removeUnusedComponents: true,
-      removeStylableDirectives: true,
       removeComments: false,
       classNameOptimizations: false,
       shortNamespaces: false,
@@ -179,7 +176,6 @@ new StylableWebpackPlugin({
     diagnosticsMode: 'auto',
     optimize: {
       removeUnusedComponents: true,
-      removeStylableDirectives: true,
       removeComments: true,
       classNameOptimizations: true,
       shortNamespaces: true,
