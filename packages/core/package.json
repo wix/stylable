@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@tokey/css-selector-parser": "^0.6.1",
-    "@tokey/imports-parser": "^0.1.2",
+    "@tokey/imports-parser": "^1.0.0",
     "balanced-match": "^2.0.0",
     "css-selector-tokenizer": "^0.8.0",
     "cssesc": "^3.0.0",

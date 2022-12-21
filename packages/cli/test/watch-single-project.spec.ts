@@ -31,7 +31,6 @@ describe('Stylable Cli Watch - Single project', function () {
     afterEach(async () => {
         cleanup();
         await tempDir.remove();
-        console.log('cleaned up');
     });
 
     it('simple watch mode', async () => {
