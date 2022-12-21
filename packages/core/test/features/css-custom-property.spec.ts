@@ -4,9 +4,9 @@ import {
     testStylableCore,
     shouldReportNoDiagnostics,
     diagnosticBankReportToStrings,
+    deindent,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import deindent from 'deindent';
 
 const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
@@ -924,7 +924,7 @@ describe(`features/css-custom-property`, () => {
     describe('native css', () => {
         it('should not namespace', () => {
             const { stylable } = testStylableCore({
-                '/native.css': deindent`
+                '/native.css': deindent(`
                     @property --a {
                         syntax: '<color>';
                         initial-value: green;
@@ -933,7 +933,7 @@ describe(`features/css-custom-property`, () => {
                     .x {
                         --b: var(--c);
                     }
-                `,
+                `),
                 '/entry.st.css': `
                     @st-import [--a, --b, --c] from './native.css';
 
@@ -957,7 +957,7 @@ describe(`features/css-custom-property`, () => {
             shouldReportNoDiagnostics(meta);
 
             expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
-                deindent`
+                deindent(`
                     @property --a {
                         syntax: '<color>';
                         initial-value: green;
@@ -966,7 +966,7 @@ describe(`features/css-custom-property`, () => {
                     .x {
                         --b: var(--c);
                     }
-            `.trim()
+                `)
             );
 
             // JS exports
@@ -978,7 +978,7 @@ describe(`features/css-custom-property`, () => {
         });
         it('should ignore stylable specific transformations', () => {
             const { stylable } = testStylableCore({
-                '/native.css': deindent`
+                '/native.css': deindent(`
                     @st-global-custom-property --a;
                     @property st-global(--a) {
                         syntax: '<color>';
@@ -986,13 +986,13 @@ describe(`features/css-custom-property`, () => {
                         inherits: false;
                     }
                     @property --no-body;
-                `,
+                `),
             });
 
             const { meta: nativeMeta } = stylable.transform('/native.css');
 
             expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
-                deindent`
+                deindent(`
                     @st-global-custom-property --a;
                     @property st-global(--a) {
                         syntax: '<color>';
@@ -1000,7 +1000,7 @@ describe(`features/css-custom-property`, () => {
                         inherits: false;
                     }
                     @property --no-body;
-            `.trim()
+                `)
             );
         });
     });

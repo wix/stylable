@@ -1,6 +1,6 @@
+import { deindent } from '@stylable/core-test-kit';
 import { getDocumentFormatting } from '@stylable/code-formatter';
 import { expect } from 'chai';
-import deindent from 'deindent';
 
 describe('Formatting', () => {
     it('should format an entire stylesheet with extra spaces', () => {
@@ -30,7 +30,8 @@ describe('Formatting', () => {
         );
 
         expect(res).to.eql(
-            deindent(`/* PRESERVE INDENT */
+            deindent(`
+                /* PRESERVE INDENT */
                 .foo {
                     grid-template:
                         "icon  name name ."    16px
@@ -54,7 +55,8 @@ describe('Formatting', () => {
         );
 
         expect(res).to.eql(
-            deindent(`/* PRESERVE INDENT */
+            deindent(`
+                /* PRESERVE INDENT */
                 .foo {
                     grid:
                         "icon  name name ."    16px

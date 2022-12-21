@@ -3,7 +3,7 @@ import { Stylable } from '@stylable/core';
 import { safeParse } from '@stylable/core/dist/index-internal';
 import { StylableLanguageService } from '@stylable/language-service';
 import { expect } from 'chai';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 import { createDiagnostics } from '../test-kit/diagnostics-setup';
 
 describe('diagnostics', () => {
@@ -175,7 +175,7 @@ describe('diagnostics', () => {
 
             const diagnostics = createDiagnostics(
                 {
-                    [filePath]: deindent`
+                    [filePath]: deindent(`
                     @st-scope [div=rtl] {
                          .root {}
                     }
@@ -183,7 +183,7 @@ describe('diagnostics', () => {
                     @st-scope * {
                         .root {}
                     }
-                    `,
+                    `),
                 },
                 filePath
             );

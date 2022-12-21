@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { parse } from 'postcss';
 import { getAstNodeAt } from '@stylable/core/dist/helpers/ast';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 
 function setupWithCursor(source: string) {
     const deindented = deindent(source);

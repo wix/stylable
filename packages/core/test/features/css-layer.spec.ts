@@ -3,8 +3,8 @@ import {
     testStylableCore,
     shouldReportNoDiagnostics,
     diagnosticBankReportToStrings,
+    deindent,
 } from '@stylable/core-test-kit';
-import deindent from 'deindent';
 import { expect } from 'chai';
 
 const cssLayerDiagnostics = diagnosticBankReportToStrings(CSSLayer.diagnostics);
@@ -436,9 +436,11 @@ describe('features/css-layer', () => {
                     .entry__mix { id: mix-in-layer; }
                     .entry__after { id: after-in-layer; }
                 }
-                 .entry__into {
+
+                .entry__into {
                 }
-                 @layer entry__x {
+
+                @layer entry__x {
                     .entry__into { id: mix-in-layer; }
                 }
             `)
@@ -544,10 +546,10 @@ describe('features/css-layer', () => {
     describe('native css', () => {
         it('should not namespace', () => {
             const { stylable } = testStylableCore({
-                '/native.css': deindent`
+                '/native.css': deindent(`
                     @layer a, b;
                     @layer c {}
-                `,
+                `),
                 '/entry.st.css': `
                     @st-import [layer(a, b, c)] from './native.css';
 
@@ -563,10 +565,10 @@ describe('features/css-layer', () => {
             shouldReportNoDiagnostics(meta);
 
             expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
-                deindent`
+                deindent(`
                     @layer a, b;
                     @layer c {}
-                `.trim()
+                `)
             );
 
             // JS exports
@@ -578,19 +580,19 @@ describe('features/css-layer', () => {
         });
         it('should ignore stylable specific transformations', () => {
             const { stylable } = testStylableCore({
-                '/native.css': deindent`
+                '/native.css': deindent(`
                     @layer a, st-global(b);
                     @layer st-global(c) {}
-                `,
+                `),
             });
 
             const { meta: nativeMeta } = stylable.transform('/native.css');
 
             expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
-                deindent`
+                deindent(`
                     @layer a, st-global(b);
                     @layer st-global(c) {}
-            `.trim()
+                `)
             );
         });
     });
