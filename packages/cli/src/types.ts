@@ -21,7 +21,15 @@ export type Configuration<P extends string = string> =
 
 export type ConfigurationProvider<P extends string = string> = () => Configuration<P>;
 
+/**
+ * @deprecated use stcConfig() instead
+ */
 export function typedConfiguration<P extends string>(
+    configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>
+) {
+    return configOrConfigProvider;
+}
+export function stcConfig<P extends string>(
     configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>
 ) {
     return configOrConfigProvider;

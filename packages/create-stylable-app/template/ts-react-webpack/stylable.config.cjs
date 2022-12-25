@@ -1,8 +1,8 @@
 // @ts-check
 
-const { typedConfiguration } = require('@stylable/cli');
+const { stcConfig } = require('@stylable/cli');
 
-exports.stcConfig = typedConfiguration({
+exports.stcConfig = stcConfig({
     options: {
         srcDir: './src',
         outDir: './st-types',
