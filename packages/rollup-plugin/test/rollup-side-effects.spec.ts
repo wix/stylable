@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { rollupRunner } from './test-kit/rollup-runner';
 import { getProjectPath } from './test-kit/test-helpers';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 
 describe('StylableRollupPlugin - include all stylesheets with side-effects', function () {
     this.timeout(30000);
@@ -27,7 +27,7 @@ describe('StylableRollupPlugin - include all stylesheets with side-effects', fun
 
         await ready;
 
-        const expected = deindent`
+        const expected = deindent(`
         .native-css {
             color: green;
         }
@@ -46,7 +46,7 @@ describe('StylableRollupPlugin - include all stylesheets with side-effects', fun
             --globalselector-x: green;
         }
         .index__root {}
-        `;
+        `);
         const outputFiles = getOutputFiles();
         expect(outputFiles['stylable.css'].replace(/\s+/g, ''), 'css bundle').to.eql(
             expected.replace(/\s+/g, '')

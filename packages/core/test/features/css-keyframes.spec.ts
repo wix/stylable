@@ -3,10 +3,10 @@ import {
     testStylableCore,
     shouldReportNoDiagnostics,
     diagnosticBankReportToStrings,
+    deindent,
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
-import deindent from 'deindent';
 chai.use(chaiSubset);
 
 const mixinDiagnostics = diagnosticBankReportToStrings(STMixin.diagnostics);
@@ -619,12 +619,12 @@ describe(`features/css-keyframes`, () => {
     describe('native css', () => {
         it('should not namespace', () => {
             const { stylable } = testStylableCore({
-                '/native.css': deindent`
+                '/native.css': deindent(`
                     @keyframes jump {}
                     .x {
                         animation: jump;
                     }
-                `,
+                `),
                 '/entry.st.css': `
                     @st-import [keyframes(jump)] from './native.css';
 
@@ -642,12 +642,12 @@ describe(`features/css-keyframes`, () => {
             shouldReportNoDiagnostics(meta);
 
             expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
-                deindent`
+                deindent(`
                     @keyframes jump {}
                     .x {
                         animation: jump;
                     }
-            `.trim()
+                `)
             );
 
             // JS exports

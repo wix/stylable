@@ -27,7 +27,6 @@
     "@types/css-selector-tokenizer": "^0.7.1",
     "@types/cssesc": "^3.0.0",
     "@types/csso": "^5.0.0",
-    "@types/deindent": "^0.1.0",
     "@types/express": "^4.17.15",
     "@types/find-config": "^1.0.1",
     "@types/flat": "^5.0.2",

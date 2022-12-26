@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createDiagnostics } from '../../test-kit/diagnostics-setup';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 
 describe('keyframes', () => {
     it('should clear st-global from ident to allow css-lsp to function', () => {
@@ -8,9 +8,9 @@ describe('keyframes', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: deindent`
+                [filePath]: deindent(`
                     @keyframes st-global(abc) {}
-                `,
+                `),
             },
             filePath
         );
