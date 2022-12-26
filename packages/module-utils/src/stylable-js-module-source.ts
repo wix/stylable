@@ -10,6 +10,10 @@ interface InjectCSSOptions {
      */
     css: string;
     /**
+     * code to generate the css string to inject
+     */
+    cssCode?: string;
+    /**
      *  calculated style depth
      */
     depth: number | string;
@@ -73,7 +77,7 @@ export function generateStylableJSModuleSource(
         footer = '',
     } = moduleOptions;
 
-    const { classes, keyframes, layers, stVars, vars } = jsExports;
+    const { classes, keyframes, layers, containers, stVars, vars } = jsExports;
     const exportKind = moduleType === 'esm' ? `export ${varType} ` : 'module.exports.';
     return `
 ${imports.map(moduleRequest(moduleType)).join('\n')}
@@ -92,6 +96,7 @@ ${exportKind}namespace = _namespace_;
 ${exportKind}classes = ${JSON.stringify(classes)};
 ${exportKind}keyframes = ${JSON.stringify(keyframes)}; 
 ${exportKind}layers = ${JSON.stringify(layers)};
+${exportKind}containers = ${JSON.stringify(containers)};
 ${exportKind}stVars = ${JSON.stringify(stVars)}; 
 ${exportKind}vars = ${JSON.stringify(vars)}; 
 
@@ -118,8 +123,8 @@ function runtimeImport(
         runtimeRequest ??
             // TODO: we use direct requests here since we don't know how this will be resolved
             (moduleType === 'esm'
-                ? '@stylable/runtime/esm/runtime'
-                : '@stylable/runtime/dist/runtime')
+                ? '@stylable/runtime/esm/runtime.js'
+                : '@stylable/runtime/dist/runtime.js')
     );
     return moduleType === 'esm'
         ? `import { classesRuntime, statesRuntime${importInjectCSS} } from ${request};`
@@ -133,12 +138,12 @@ function runtimeExecuteInject(
     if (!injectOptions?.css) {
         return '';
     }
-    const { id, css, depthCode, depth, runtimeId } = injectOptions;
+    const { id, css, cssCode, depthCode, depth, runtimeId } = injectOptions;
 
     let out = 'injectCSS(';
     out += id ? JSON.stringify(id) : moduleType === 'esm' ? 'import.meta.url' : 'module.id';
     out += ', ';
-    out += JSON.stringify(css);
+    out += cssCode || JSON.stringify(css);
     out += ', ';
     out += depthCode || JSON.stringify(depth) || '-1';
     out += ', ';

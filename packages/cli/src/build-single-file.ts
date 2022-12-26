@@ -1,18 +1,21 @@
 import type { Stylable, StylableResults } from '@stylable/core';
-import { isAsset } from '@stylable/core/dist/index-internal';
+import { isAsset, isRelativeNativeCss } from '@stylable/core/dist/index-internal';
 import {
-    createModuleSource,
     generateDTSContent,
     generateDTSSourceMap,
+    generateStylableJSModuleSource,
 } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
+import type { IFileSystem } from '@file-services/types';
+import { hasImportedSideEffects, processUrlDependencies } from '@stylable/build-tools';
 import { ensureDirectory, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
 import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { CLIDiagnostic } from './report-diagnostics';
 import { errorMessages } from './messages';
-import type { IFileSystem } from '@file-services/types';
+import type { ModuleFormats } from './types';
+import { fileToDataUri } from './file-to-data-uri';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -20,7 +23,7 @@ export interface BuildCommonOptions {
     fullSrcDir: string;
     log: Log;
     fs: IFileSystem;
-    moduleFormats: string[];
+    moduleFormats: ModuleFormats;
     outputCSS?: boolean;
     outputCSSNameTemplate?: string;
     outputSources?: boolean;
@@ -32,6 +35,7 @@ export interface BuildCommonOptions {
 }
 
 export interface BuildFileOptions extends BuildCommonOptions {
+    resolveRuntimeRequest: (targetFilePath: string, moduleFormat: 'esm' | 'cjs') => string;
     identifier?: string;
     stylable: Stylable;
     diagnosticsManager: DiagnosticsManager;
@@ -60,13 +64,14 @@ export function buildSingleFile({
     stylable,
     includeCSSInJS = false,
     projectAssets,
-    useNamespaceReference = false,
+    useNamespaceReference = true,
     injectCSSRequest = false,
     optimize = false,
     minify = false,
     dts = false,
     dtsSourceMap,
     diagnosticsMode = 'loose',
+    resolveRuntimeRequest,
     diagnosticsManager = new DiagnosticsManager({ log }),
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve, isAbsolute } = fs;
@@ -96,7 +101,6 @@ export function buildSingleFile({
             {
                 removeComments: true,
                 removeEmptyNodes: true,
-                removeStylableDirectives: true,
                 classNameOptimizations: false,
                 removeUnusedComponents: false,
             },
@@ -134,23 +138,63 @@ export function buildSingleFile({
         );
     }
     // st.css.js
-    moduleFormats.forEach((format) => {
+
+    const ast = includeCSSInJS
+        ? tryRun(
+              () => inlineAssetsForJsModule(res, stylable, fs),
+              `Inline assets failed for: ${filePath}`
+          )
+        : res.meta.targetAst!;
+
+    moduleFormats.forEach(([format, ext]) => {
         outputLogs.push(`${format} module`);
-        const code = tryRun(
-            () =>
-                createModuleSource(
-                    res,
-                    format,
-                    includeCSSInJS,
-                    undefined,
-                    undefined,
-                    undefined,
-                    injectCSSRequest ? [`./${cssAssetFilename}`] : [],
-                    '@stylable/runtime'
-                ),
-            `Transform Error: ${filePath}`
+
+        const moduleCssImports = [];
+
+        const cssDepth = res.meta.transformCssDepth?.cssDepth ?? 0;
+
+        for (const imported of res.meta.getImportStatements()) {
+            let resolved = imported.request;
+            try {
+                resolved = stylable.resolver.resolvePath(imported.context, imported.request);
+            } catch {
+                // use the fallback
+            }
+
+            if (resolved.endsWith('.st.css')) {
+                if (hasImportedSideEffects(stylable, res.meta, imported)) {
+                    // TODO: solve issue where request must be resolved before we add the extension
+                    moduleCssImports.push({ from: imported.request + ext });
+                }
+            }
+            if (resolved.endsWith('.css')) {
+                moduleCssImports.push({ from: imported.request + ext });
+            }
+        }
+
+        if (injectCSSRequest) {
+            moduleCssImports.push({ from: './' + cssAssetFilename });
+        }
+
+        const code = generateStylableJSModuleSource(
+            {
+                jsExports: res.exports,
+                moduleType: format,
+                namespace: res.meta.namespace,
+                varType: 'var',
+                imports: moduleCssImports,
+                runtimeRequest: resolveRuntimeRequest(targetFilePath, format),
+            },
+            includeCSSInJS
+                ? {
+                      css: ast.toString(),
+                      depth: cssDepth,
+                      id: res.meta.namespace,
+                      runtimeId: format,
+                  }
+                : undefined
         );
-        const outFilePath = targetFilePath + (format === 'esm' ? '.mjs' : '.js');
+        const outFilePath = targetFilePath + ext;
         generated.add(outFilePath);
         tryRun(() => fs.writeFileSync(outFilePath, code), `Write File Error: ${outFilePath}`);
     });
@@ -213,10 +257,65 @@ export function buildSingleFile({
             projectAssets.add(resolve(fileDirectory, url));
         }
     }
+    // add native css imports as assets
+    for (const { request } of res.meta.getImportStatements()) {
+        try {
+            const resolvedRequest = stylable.resolver.resolvePath(fileDirectory, request);
+            if (isRelativeNativeCss(resolvedRequest)) {
+                projectAssets.add(resolvedRequest);
+                buildSingleFile({
+                    fullOutDir,
+                    filePath: resolvedRequest,
+                    fullSrcDir,
+                    log,
+                    fs,
+                    moduleFormats,
+                    outputCSS: false,
+                    outputSources: false,
+                    generated,
+                    mode,
+                    stylable,
+                    includeCSSInJS,
+                    projectAssets,
+                    useNamespaceReference,
+                    injectCSSRequest,
+                    optimize,
+                    minify,
+                    dts: false,
+                    dtsSourceMap: false,
+                    diagnosticsMode,
+                    diagnosticsManager,
+                    resolveRuntimeRequest,
+                });
+            }
+        } catch (_e) {
+            // resolve diagnostics reported by core
+        }
+    }
 
     return {
         targetFilePath,
     };
+}
+
+function inlineAssetsForJsModule(res: StylableResults, stylable: Stylable, fs: IFileSystem) {
+    const ast = res.meta.targetAst!.clone();
+    processUrlDependencies({
+        meta: { targetAst: ast, source: res.meta.source },
+        rootContext: stylable.projectRoot,
+        getReplacement: ({ absoluteRequest, url }) => {
+            if (isAsset(url)) {
+                let content = fs.readFileSync(absoluteRequest);
+                if (typeof content === 'string') {
+                    content = Buffer.from(content);
+                }
+                return fileToDataUri(absoluteRequest, content);
+            }
+            return url;
+        },
+        host: fs,
+    });
+    return ast;
 }
 
 export function removeBuildProducts({
@@ -253,9 +352,9 @@ export function removeBuildProducts({
         tryRun(() => fs.unlinkSync(targetFilePath), `Unlink File Error: ${targetFilePath}`);
     }
     // st.css.js
-    moduleFormats.forEach((format) => {
+    moduleFormats.forEach(([format, ext]) => {
         outputLogs.push(`${format} module`);
-        const outFilePath = targetFilePath + (format === 'esm' ? '.mjs' : '.js');
+        const outFilePath = targetFilePath + ext;
         generated.delete(outFilePath);
         tryRun(() => fs.unlinkSync(outFilePath), `Unlink File Error: ${outFilePath}`);
     });

@@ -5,18 +5,13 @@ import {
     expectTransformDiagnostics,
     findTestLocations,
 } from '@stylable/core-test-kit';
-import {
-    processorDiagnostics,
-    transformerDiagnostics,
-    nativePseudoElements,
-} from '@stylable/core/dist/index-internal';
+import { transformerDiagnostics, nativePseudoElements } from '@stylable/core/dist/index-internal';
 import { CSSClass, CSSType } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 const cssClassDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
-const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
 const generalStringDiagnostics = diagnosticBankReportToStrings(generalDiagnostics);
 
 describe('findTestLocations', () => {
@@ -225,9 +220,9 @@ describe('diagnostics: warnings and errors', () => {
             describe('elements', () => {
                 it('should return a warning for an unknown pseudo element', () => {
                     const config = {
-                        entry: '/main.css',
+                        entry: '/main.st.css',
                         files: {
-                            '/main.css': {
+                            '/main.st.css': {
                                 content: `
                                 |.root::$myBtn$|{
 
@@ -238,7 +233,7 @@ describe('diagnostics: warnings and errors', () => {
                     expectTransformDiagnostics(config, [
                         {
                             message: transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT('myBtn'),
-                            file: '/main.css',
+                            file: '/main.st.css',
                         },
                     ]);
                 });
@@ -333,10 +328,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         {
-                            message: processorStringDiagnostics.OVERRIDE_TYPED_RULE(
-                                `-st-extends`,
-                                'root'
-                            ),
+                            message: cssClassDiagnostics.OVERRIDE_TYPED_RULE(`-st-extends`, 'root'),
                             file: 'main.css',
                         },
                     ]

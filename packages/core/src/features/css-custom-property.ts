@@ -64,6 +64,7 @@ export const diagnostics = {
 
 const dataKey = plugableRecord.key<{
     stCustomGlobalProperty: Record<string, CSSVarSymbol>;
+    typedDefinitions: Record<string, postcss.AtRule[]>;
 }>('custom-property');
 
 // HOOKS
@@ -72,7 +73,10 @@ export const hooks = createFeature<{
     RESOLVED: Record<string, string>;
 }>({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, { stCustomGlobalProperty: {} });
+        plugableRecord.set(meta.data, dataKey, {
+            stCustomGlobalProperty: {},
+            typedDefinitions: {},
+        });
     },
     analyzeInit(context) {
         // ToDo: move to `STImport.ImportTypeHook`
@@ -99,17 +103,22 @@ export const hooks = createFeature<{
         }
     },
     analyzeAtRule({ context, atRule }) {
+        const isStylable = context.meta.type === 'stylable';
         if (atRule.name === `property`) {
             let name = atRule.params;
-            let global = false;
+            let global = !isStylable;
             // check global
-            const globalVarName = globalValue(name);
+            const globalVarName = isStylable ? globalValue(name) : undefined;
             if (globalVarName !== undefined) {
                 name = globalVarName.trim();
                 global = true;
             }
+            const { stCustomGlobalProperty, typedDefinitions } = plugableRecord.getUnsafe(
+                context.meta.data,
+                dataKey
+            );
             // handle conflict with deprecated `@st-global-custom-property`
-            if (plugableRecord.getUnsafe(context.meta.data, dataKey).stCustomGlobalProperty[name]) {
+            if (stCustomGlobalProperty[name]) {
                 global = true;
             }
             addCSSProperty({
@@ -120,7 +129,12 @@ export const hooks = createFeature<{
                 final: true,
             });
             validateAtProperty(atRule, context.diagnostics);
-        } else if (atRule.name === `st-global-custom-property`) {
+            // save reference to runtime definitions
+            if (atRule.nodes) {
+                typedDefinitions[name] ??= [];
+                typedDefinitions[name].push(atRule);
+            }
+        } else if (atRule.name === `st-global-custom-property` && isStylable) {
             analyzeDeprecatedStGlobalCustomProperty(context, atRule);
         }
     },
@@ -131,7 +145,7 @@ export const hooks = createFeature<{
                 context,
                 node: decl,
                 name: decl.prop,
-                global: false,
+                global: context.meta.type === 'css',
                 final: false,
             });
         }
@@ -140,8 +154,12 @@ export const hooks = createFeature<{
             analyzeDeclValueVarCalls(context, decl);
         }
     },
-    prepareAST({ node, toRemove }) {
-        if (node.type === `atrule` && node.name === 'st-global-custom-property') {
+    prepareAST({ context, node, toRemove }) {
+        if (
+            node.type === `atrule` &&
+            node.name === 'st-global-custom-property' &&
+            context.meta.type === 'stylable'
+        ) {
             toRemove.push(node);
         }
     },
@@ -162,7 +180,7 @@ export const hooks = createFeature<{
 
         return customPropsMapping;
     },
-    transformAtRuleNode({ atRule, resolved }) {
+    transformAtRuleNode({ context, atRule, resolved }) {
         if (atRule.name !== `property`) {
             return;
         }
@@ -172,7 +190,7 @@ export const hooks = createFeature<{
             if (resolved[propName]) {
                 atRule.params = resolved[propName] || atRule.params;
             }
-        } else {
+        } else if (context.meta.type === 'stylable') {
             // remove `@property` with no body
             atRule.remove();
         }
@@ -272,7 +290,7 @@ function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declara
                 context,
                 name: postcssValueParser.stringify(varName)?.trim() || ``,
                 node: decl,
-                global: false,
+                global: context.meta.type === 'css',
                 final: false,
             });
         }
@@ -321,6 +339,11 @@ function analyzeDeprecatedStGlobalCustomProperty(context: FeatureContext, atRule
             });
         }
     }
+}
+
+export function getRuntimeTypedDefinitionNames(meta: StylableMeta) {
+    const { typedDefinitions } = plugableRecord.getUnsafe(meta.data, dataKey);
+    return Object.keys(typedDefinitions);
 }
 export function getTransformedName({ symbol, meta }: CSSResolve<CSSVarSymbol>) {
     return symbol.global ? symbol.name : generateScopedCSSVar(meta.namespace, symbol.name.slice(2));

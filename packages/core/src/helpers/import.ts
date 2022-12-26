@@ -6,13 +6,13 @@ import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
 import { stripQuotation } from '../helpers/string';
 import { isCompRoot } from './selector';
 import type { ParsedValue } from '../types';
-import type { Stylable } from '../stylable';
 import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
 import postcssValueParser, {
     ParsedValue as PostCSSParsedValue,
     FunctionNode,
 } from 'postcss-value-parser';
+import type { StylableResolver } from '../stylable-resolver';
 
 export const parseImportMessages = {
     ST_IMPORT_STAR: createDiagnosticReporter(
@@ -268,14 +268,17 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
         }
         if (imports.tagged) {
             for (const [kind, namedTyped] of Object.entries(imports.tagged)) {
-                for (const [impName, impAsName] of Object.entries(namedTyped)) {
+                if (!namedTyped) {
+                    continue;
+                }
+                for (const [impName, impAsName] of namedTyped) {
                     importObj.typed[kind] ??= {};
                     importObj.typed[kind][impAsName] = impName;
                 }
             }
         }
         if (imports.named) {
-            for (const [impName, impAsName] of Object.entries(imports.named)) {
+            for (const [impName, impAsName] of imports.named) {
                 importObj.named[impAsName] = impName;
             }
         }
@@ -580,20 +583,36 @@ function isImportAs(space: ParsedValue, as: ParsedValue) {
     return space?.type === 'space' && as?.type === 'word' && as?.value === 'as';
 }
 
+type ImportEvent = {
+    context: string;
+    request: string;
+    resolved: string;
+    depth: number;
+};
+
 export function tryCollectImportsDeep(
-    stylable: Stylable,
+    resolver: StylableResolver,
     meta: StylableMeta,
-    imports = new Set<string>()
+    imports = new Set<string>(),
+    onImport: undefined | ((e: ImportEvent) => void) = undefined,
+    depth = 0
 ) {
     for (const { context, request } of meta.getImportStatements()) {
         try {
-            const resolved = stylable.resolver.resolvePath(context, request);
+            const resolved = resolver.resolvePath(context, request);
+            onImport?.({ context, request, resolved, depth });
 
             if (!imports.has(resolved)) {
                 imports.add(resolved);
-                tryCollectImportsDeep(stylable, stylable.analyze(resolved), imports);
+                tryCollectImportsDeep(
+                    resolver,
+                    resolver.analyze(resolved),
+                    imports,
+                    onImport,
+                    depth + 1
+                );
             }
-        } catch (e) {
+        } catch {
             /** */
         }
     }

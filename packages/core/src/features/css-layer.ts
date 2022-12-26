@@ -96,7 +96,12 @@ export const hooks = createFeature<{
         } else if (atRule.name === 'layer') {
             // layer atrule
             const analyzeMetaData = plugableRecord.getUnsafe(context.meta.data, dataKey);
-            const analyzedParams = parseLayerParams(atRule.params, context.diagnostics, atRule);
+            const analyzedParams = parseLayerParams(
+                atRule.params,
+                context.diagnostics,
+                atRule,
+                context.meta.type === 'stylable'
+            );
             if (analyzedParams.multiple && atRule.nodes) {
                 context.diagnostics.report(diagnostics.LAYER_SORT_STATEMENT_WITH_STYLE(), {
                     node: atRule,
@@ -110,7 +115,7 @@ export const hooks = createFeature<{
                     context,
                     name,
                     importName: name,
-                    global: !!analyzedParams.globals[name],
+                    global: !!analyzedParams.globals[name] || context.meta.type === 'css',
                     ast: atRule,
                 });
             }
@@ -178,7 +183,12 @@ export function getDefinition(
     return analyzeMetaData.layerDefs[name];
 }
 
-function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.AtRule) {
+function parseLayerParams(
+    params: string,
+    report: Diagnostics,
+    atRule: postcss.AtRule,
+    isStylable: boolean
+) {
     const names: string[] = [];
     const globals: Record<string, true> = {};
     let readyForName = true;
@@ -205,7 +215,7 @@ function parseLayerParams(params: string, report: Diagnostics, atRule: postcss.A
                 readyForName = false;
                 ast.splice(i, 1, ...layers);
             }
-        } else if (type === 'function' && value === GLOBAL_FUNC && readyForName) {
+        } else if (type === 'function' && value === GLOBAL_FUNC && readyForName && isStylable) {
             const globalName = globalValueFromFunctionNode(node);
             if (globalName) {
                 namedNodeRefs[globalName] ??= [];
@@ -265,7 +275,7 @@ function getDotSeparatedNames(value: string) {
             }
         }
     }
-    if (lastIndex < value.length - 1) {
+    if (lastIndex <= value.length - 1) {
         names.push(value.substring(lastIndex, value.length));
     }
     return names;

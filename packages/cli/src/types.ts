@@ -21,7 +21,15 @@ export type Configuration<P extends string = string> =
 
 export type ConfigurationProvider<P extends string = string> = () => Configuration<P>;
 
+/**
+ * @deprecated use stcConfig() instead
+ */
 export function typedConfiguration<P extends string>(
+    configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>
+) {
+    return configOrConfigProvider;
+}
+export function stcConfig<P extends string>(
     configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>
 ) {
     return configOrConfigProvider;
@@ -88,7 +96,10 @@ export interface CliArguments {
     cjs: boolean | undefined;
     css: boolean | undefined;
     stcss: boolean | undefined;
+    esmExt: string | undefined;
+    cjsExt: string | undefined;
     dts: boolean | undefined;
+    bundle: string | undefined;
     dtsSourceMap: boolean | undefined;
     useNamespaceReference: boolean | undefined;
     namespaceResolver: string;
@@ -108,6 +119,7 @@ export interface CliArguments {
     watch: boolean;
     preserveWatchOutput: boolean;
     config: string | undefined;
+    inlineRuntime: boolean | undefined;
 }
 
 export interface BuildOptions {
@@ -117,14 +129,20 @@ export interface BuildOptions {
     outDir: string;
     /** should the build need to output manifest file */
     manifest?: string;
+    /** output file path relative to the outDir for a css bundle file including all built files */
+    bundle?: string;
     /** generates Stylable index file for the given name, the index file will reference Stylable sources from the `srcDir` unless the `outputSources` option is `true` in which case it will reference the `outDir` */
     indexFile?: string;
     /** custom cli index generator class */
     IndexGenerator?: typeof IndexGenerator;
-    /** output commonjs module (.js) */
+    /** output commonjs module */
     cjs?: boolean;
+    /** commonjs module extension */
+    cjsExt?: '.cjs' | '.js';
     /** output esm module (.mjs) */
     esm?: boolean;
+    /** esm module extension */
+    esmExt?: '.mjs' | '.js';
     /** template of the css file emitted when using outputCSS */
     outputCSSNameTemplate?: string;
     /** should include the css in the generated JS module */
@@ -149,6 +167,12 @@ export interface BuildOptions {
     diagnostics?: boolean;
     /** determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions */
     diagnosticsMode?: DiagnosticsMode;
+    /** generate local copy of stylable runtime in outDir and reference it in generated JS modules */
+    inlineRuntime?: boolean;
+    /** request for the cjs runtime */
+    runtimeCjsRequest?: string;
+    /** request for the esm runtime */
+    runtimeEsmRequest?: string;
 }
 
 export interface BuildContext {
@@ -171,3 +195,5 @@ export interface BuildContext {
     /** stores and report diagnostics */
     diagnosticsManager?: DiagnosticsManager;
 }
+
+export type ModuleFormats = Array<['esm', '.js' | '.mjs'] | ['cjs', '.js' | '.cjs']>;

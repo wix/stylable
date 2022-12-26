@@ -55,7 +55,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
 
         await run({
             dirPath: tempDir.path,
-            args: ['-w'],
+            args: ['-w', '--unsr=false'],
             steps: [
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -372,7 +372,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
 
         await run({
             dirPath: tempDir.path,
-            args: ['-w'],
+            args: ['-w', '--unsr=false'],
             steps: [
                 {
                     msg: buildMessages.START_WATCHING(),

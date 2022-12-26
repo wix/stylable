@@ -84,6 +84,7 @@ const argv = yargs
     .option('require', {
         type: 'array',
         description: 'require hooks',
+        string: true,
         alias: 'r',
         default: [] as string[],
     })
@@ -122,9 +123,7 @@ if (debug) {
 
 // execute all require hooks before running the CLI build
 for (const request of requires) {
-    if (request) {
-        require(request);
-    }
+    require(request);
 }
 
 function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css', res = new Set<string>()) {

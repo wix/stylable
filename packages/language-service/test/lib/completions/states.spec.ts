@@ -487,6 +487,24 @@ describe('States', () => {
                 asserter.notSuggested(unExp);
             });
 
+            it('should complete template with enum parameter options from imported file', () => {
+                const rng = createRange(9, 19, 9, 20);
+                const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
+                    asserters.stateEnumCompletion(str, rng, path);
+
+                const asserter = asserters.getCompletions(
+                    'states/with-param/enum/imported-state-with-template-enum-middle.st.css'
+                );
+                const exp: Array<Partial<Completion>> = [];
+                const unExp: Array<Partial<Completion>> = [];
+                exp.push(createCompletion('eee', rng, './state-with-enum.st.css'));
+                exp.push(createCompletion('e22', rng, './state-with-enum.st.css'));
+                unExp.push(createCompletion('aaa', rng, './state-with-enum.st.css'));
+                unExp.push(createCompletion('bbb', rng, './state-with-enum.st.css'));
+                asserter.suggested(exp);
+                asserter.notSuggested(unExp);
+            });
+
             it('should not complete pseudo-states and pseudo-elements when inside an enum (from imported file)', () => {
                 const rng = createRange(9, 12, 9, 12);
                 const createEnumComp = (str: string, rng: ProviderRange, path?: string) =>

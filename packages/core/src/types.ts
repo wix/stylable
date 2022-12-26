@@ -10,22 +10,8 @@ export interface ParsedValue {
     url?: string;
 }
 
-export interface StateTypeValidator {
-    name: string;
-    args: string[];
-}
-
-export type StateArguments = Array<StateTypeValidator | string>;
-
-export interface StateParsedValue {
-    type: string;
-    defaultValue?: string;
-    arguments: StateArguments;
-}
-
 export interface OptimizeConfig {
     removeComments?: boolean;
-    removeStylableDirectives?: boolean;
     removeUnusedComponents?: boolean;
     classNameOptimizations?: boolean;
     removeEmptyNodes?: boolean;
@@ -48,7 +34,6 @@ export interface IStylableOptimizer {
         jsExports: StylableExports,
         globals: Record<string, boolean>
     ): void;
-    removeStylableDirectives(root: postcss.Root, shouldComment?: boolean): void;
 }
 
 export type ModuleResolver = (directoryPath: string, request: string) => string;

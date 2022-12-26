@@ -4,3 +4,4 @@ esm
 umd
 dist
 fixtures
+packages/create-stylable-app/template

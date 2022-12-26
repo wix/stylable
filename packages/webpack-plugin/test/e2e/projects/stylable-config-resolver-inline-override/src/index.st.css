@@ -1,0 +1,5 @@
+@st-import FromWebpack from "wp-alias/green.st.css";
+
+.root {
+    -st-mixin: FromWebpack;
+}

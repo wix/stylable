@@ -1,6 +1,6 @@
-// import { STScope } from '@stylable/core/dist/features';
+import { STGlobal } from '@stylable/core/dist/features';
 import type { StylableMeta } from '@stylable/core';
-import { testStylableCore } from '@stylable/core-test-kit';
+import { testStylableCore, collectAst } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 
@@ -28,7 +28,31 @@ const queryStScope = (meta: StylableMeta, params: string): postcss.AtRule | unde
 
 describe(`features/st-scope`, () => {
     // ToDo: move relevant tests here
+    describe('st-global', () => {
+        it('should collect global rules', () => {
+            const { sheets } = testStylableCore(`
+                @st-scope :global(*) {
+    
+                    /* global: both st-scope and selector  */
+                    :global(.in-global-st-scope) {}
+    
+                    /* local rule */
+                    .in-global-st-scope {}
+                }
+    
+                @st-scope .local {
+    
+                    /* st-scope adds locality */
+                    :global(.in-local-st-scope) {}
+                }
+            `);
 
+            const { meta } = sheets['/entry.st.css'];
+
+            const actualGlobalRules = collectAst(meta.sourceAst, ['global']);
+            expect(STGlobal.getGlobalRules(meta)).to.eql(actualGlobalRules['global']);
+        });
+    });
     describe('stylable API', () => {
         it(`should get @st-scope for rule`, () => {
             const { stylable, sheets } = testStylableCore(`

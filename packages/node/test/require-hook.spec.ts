@@ -4,7 +4,9 @@ import { murmurhash3_32_gc } from '@stylable/core/dist/index-internal';
 import { dirname, join } from 'path';
 import { attachHook } from '@stylable/node';
 
-const fixturesPath = dirname(require.resolve('@stylable/node/test/fixtures/package.json'));
+const fixturesPath = dirname(
+    require.resolve('@stylable/node/test/fixtures/base-project/package.json')
+);
 
 describe('require hook', () => {
     afterEach(() => {
@@ -64,5 +66,20 @@ describe('require hook', () => {
         const m = require(join(fixturesPath, 'has-js.st.css'));
         expect(m.test).equal(undefined);
         expect(m.namespace).to.match(/^hasjs/);
+    });
+
+    it('should throw on missing config file', () => {
+        let foundError = false;
+
+        try {
+            attachHook({
+                configPath: join(fixturesPath, 'MISSING'),
+            });
+        } catch (error: any) {
+            if (error.message.includes('MISSING')) {
+                foundError = true;
+            }
+        }
+        expect(foundError, 'expected to be unable to load config file').to.equal(true);
     });
 });

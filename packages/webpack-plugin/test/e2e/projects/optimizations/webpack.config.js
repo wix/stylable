@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
-    mode: 'development',
+    mode: 'production',
     context: __dirname,
     devtool: 'source-map',
     plugins: [
@@ -11,7 +11,6 @@ module.exports = {
             optimize: {
                 removeUnusedComponents: true,
                 removeComments: true,
-                removeStylableDirectives: true,
                 classNameOptimizations: true,
                 shortNamespaces: true,
                 removeEmptyNodes: true,
