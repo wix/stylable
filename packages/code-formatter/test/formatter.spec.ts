@@ -19,7 +19,6 @@ describe('Formatting', () => {
     it('should preserve grid-template declarations', () => {
         const res = getDocumentFormatting(
             deindent(`
-                /* PRESERVE INDENT */
                 .foo {
                     grid-template:
                         "icon  name name ."    16px
@@ -31,7 +30,6 @@ describe('Formatting', () => {
 
         expect(res).to.eql(
             deindent(`
-                /* PRESERVE INDENT */
                 .foo {
                     grid-template:
                         "icon  name name ."    16px
@@ -44,7 +42,6 @@ describe('Formatting', () => {
     it('should preserve grid declarations', () => {
         const res = getDocumentFormatting(
             deindent(`
-                /* PRESERVE INDENT */
                 .foo {
                     grid:
                         "icon  name name ."    16px
@@ -56,7 +53,6 @@ describe('Formatting', () => {
 
         expect(res).to.eql(
             deindent(`
-                /* PRESERVE INDENT */
                 .foo {
                     grid:
                         "icon  name name ."    16px
