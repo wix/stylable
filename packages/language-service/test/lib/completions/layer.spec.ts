@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createDiagnostics } from '../../test-kit/diagnostics-setup';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 
 describe('layer', () => {
     it('should clear st-global from ident to allow css-lsp to function', () => {
@@ -8,9 +8,9 @@ describe('layer', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: deindent`
+                [filePath]: deindent(`
                     @layer aaa, st-global(bbb), ccc, st-global(ddd);
-                `,
+                `),
             },
             filePath
         );

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createDiagnostics } from '../../test-kit/diagnostics-setup';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 
 describe('CSS contains', () => {
     it('should ignore native css lsp diagnostics unknown container at-rule and declarations', () => {
@@ -9,13 +9,13 @@ describe('CSS contains', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: deindent`
+                [filePath]: deindent(`
                     @container a (inline-size > 100px) {}
                     .root {
                         container-name: a;
                         container: a / normal;
                     }
-                `,
+                `),
             },
             filePath
         );

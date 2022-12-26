@@ -3,8 +3,8 @@ import {
     testStylableCore,
     shouldReportNoDiagnostics,
     diagnosticBankReportToStrings,
+    deindent,
 } from '@stylable/core-test-kit';
-import deindent from 'deindent';
 import { expect } from 'chai';
 
 const diagnostics = diagnosticBankReportToStrings(CSSContains.diagnostics);
@@ -559,9 +559,11 @@ describe('features/css-contains', () => {
                     .entry__mix { id: mix-in-container; }
                     .entry__after { id: after-in-container; }
                 }
-                 .entry__into {
+
+                .entry__into {
                 }
-                 @container (inline-size > 1px) {
+                
+                @container (inline-size > 1px) {
                     .entry__into { id: mix-in-container; }
                 }
             `)
@@ -571,12 +573,12 @@ describe('features/css-contains', () => {
     describe('native css', () => {
         it('should not namespace', () => {
             const { stylable } = testStylableCore({
-                '/native.css': deindent`
+                '/native.css': deindent(`
                     .x {
                         container-name: a;
                     }
                     @container a (inline-size > 100px) {}
-                `,
+                `),
                 '/entry.st.css': `
                     @st-import [container(a)] from './native.css';
 
@@ -592,12 +594,12 @@ describe('features/css-contains', () => {
             shouldReportNoDiagnostics(meta);
 
             expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
-                deindent`
+                deindent(`
                     .x {
                         container-name: a;
                     }
                     @container a (inline-size > 100px) {}
-            `.trim()
+                `)
             );
 
             // JS exports

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createDiagnostics } from '../../test-kit/diagnostics-setup';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 
 describe('custom property', () => {
     it('should ignore native css lsp diagnostics for @property body', () => {
@@ -8,9 +8,9 @@ describe('custom property', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: deindent`
+                [filePath]: deindent(`
                     @property --x;
-                `,
+                `),
             },
             filePath
         );
@@ -22,13 +22,13 @@ describe('custom property', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: deindent`
+                [filePath]: deindent(`
                     @property st-global(--y) {
                         syntax: '<color>';
                         inherits: true; 
                         initial-value: green;
                     }
-                `,
+                `),
             },
             filePath
         );
