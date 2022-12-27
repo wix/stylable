@@ -58,9 +58,9 @@ type OptimizeOptions = OptimizeConfig & {
     /**
      * @experimental
      * Remove modules with the same target css and same depth from output
-     * This can be beneficial when you have multiple versions of the same package in your project 
+     * This can be beneficial when you have multiple versions of the same package in your project
      */
-    dedupeSimilarStylesheets?: boolean;
+    experimentalDedupeSimilarStylesheets?: boolean;
 };
 
 export interface StylableWebpackPluginOptions {
@@ -145,7 +145,7 @@ const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
     shortNamespaces: isProd,
     removeEmptyNodes: isProd,
     minify: isProd,
-    dedupeSimilarStylesheets: false,
+    experimentalDedupeSimilarStylesheets: false,
 });
 
 const defaultOptions = (
@@ -453,7 +453,7 @@ export class StylableWebpackPlugin {
                 normalizeNamespaceCollisionOption(
                     this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE
                 ),
-                optimizeOptions.dedupeSimilarStylesheets
+                optimizeOptions.experimentalDedupeSimilarStylesheets
             );
 
             for (const module of sortedModules) {

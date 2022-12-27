@@ -373,7 +373,7 @@ export function handleNamespaceCollision(
     namespaceToFileMapping: Map<string, Set<NormalModule>>,
     compilation: Compilation,
     mode: 'ignore' | 'warnings' | 'errors',
-    dedupeSimilarStylesheets?: boolean
+    experimentalDedupeSimilarStylesheets?: boolean
 ) {
     if (mode === 'ignore') {
         return;
@@ -382,7 +382,7 @@ export function handleNamespaceCollision(
         if (resources.size > 1) {
             const modules = [...resources];
 
-            const shouldReport = dedupeSimilarStylesheets
+            const shouldReport = experimentalDedupeSimilarStylesheets
                 ? areAllModulesTheSameCssAndDepth(stylableModules, modules)
                 : true;
 
@@ -398,7 +398,7 @@ export function handleNamespaceCollision(
                 );
                 error.hideStack = true;
                 compilation[mode].push(error);
-            } else if (dedupeSimilarStylesheets) {
+            } else if (experimentalDedupeSimilarStylesheets) {
                 // we keep the first one start index from 1
                 for (let i = 1; i < modules.length; i++) {
                     getStylableBuildMeta(modules[i]).isDuplicate = true;

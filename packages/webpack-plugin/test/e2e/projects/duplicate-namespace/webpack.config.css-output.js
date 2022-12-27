@@ -10,7 +10,7 @@ module.exports = {
         new StylableWebpackPlugin({
             cssInjection: 'css',
             optimize: {
-                dedupeSimilarStylesheets: true,
+                experimentalDedupeSimilarStylesheets: true,
             },
         }),
         new HtmlWebpackPlugin(),
