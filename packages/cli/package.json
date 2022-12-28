@@ -20,7 +20,7 @@
     "@stylable/module-utils": "^5.6.0",
     "@stylable/node": "^5.6.0",
     "@stylable/optimizer": "^5.6.0",
-    "@wixc3/resolve-directory-context": "^3.0.1",
+    "@wixc3/resolve-directory-context": "^3.0.2",
     "decache": "^4.6.1",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
