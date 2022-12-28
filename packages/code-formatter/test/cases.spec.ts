@@ -1,439 +1,938 @@
 import { expect } from 'chai';
+import { deindent } from '@stylable/core-test-kit';
 import * as codeFormatter from '@stylable/code-formatter';
 
 const { formatCSS } = codeFormatter;
+function testFormatCss(config: {
+    source: string;
+    expect: string;
+    message?: string;
+    deindent?: boolean;
+    skipReformat?: boolean;
+    /* just to have an easy way of seeing 50 chars in expectation */
+    X?: '|----------------------50------------------------|';
+}) {
+    const input = config.deindent ? deindent(config.source) : config.source;
+    const preservedIntendedLastLine = config.expect.match(/\n\s*\n\s*$/) ? '\n' : '';
+    const expected = config.deindent
+        ? deindent(config.expect) + preservedIntendedLastLine
+        : config.expect;
+
+    const actual = formatCSS(input);
+
+    expect(actual, config.message).to.eql(expected);
+    // check reformat - shouldn't change
+    if (!config.skipReformat) {
+        const reformatMessage = 're-format' + config.message ? ' ' + config.message : '';
+        expect(formatCSS(actual), reformatMessage).to.eql(actual);
+    }
+}
 
 describe('Formatting - Top level', () => {
-    it('empty input stay empty', () => {
-        expect(formatCSS('')).to.equal('');
+    it('should preserve empty input', () => {
+        testFormatCss({
+            source: '',
+            expect: '',
+        });
     });
-    it('add new line at the end', () => {
-        expect(formatCSS(' ')).to.equal(' \n');
+    it('should add new line at the end for any content', () => {
+        testFormatCss({
+            source: ' ',
+            expect: ' \n',
+        });
     });
-    it('preserve new line type at the end', () => {
-        expect(formatCSS('/*\r\n*/')).to.equal('/*\r\n*/\r\n');
+    it('should pickup newline type from content and use on added newlines', () => {
+        testFormatCss({
+            source: '/*comment line 1\r\nline 2*/',
+            expect: '/*comment line 1\r\nline 2*/\r\n',
+        });
     });
-    it('one line separation after each node', () => {
-        expect(formatCSS('.root {}\n\n\n.root {}')).to.equal('.root {}\n\n.root {}\n');
-        expect(formatCSS('.root {}\n\n.root {}')).to.equal('.root {}\n\n.root {}\n');
-        expect(formatCSS('.root {}\n.root {}')).to.equal('.root {}\n\n.root {}\n');
-        expect(formatCSS('.root {}.root {}')).to.equal('.root {}\n\n.root {}\n');
-        expect(formatCSS('.root {}@media {}')).to.equal('.root {}\n\n@media {}\n');
-        expect(formatCSS('.root {}/*COMMENT*/')).to.equal('.root {}\n\n/*COMMENT*/\n');
-        expect(formatCSS('@media {.root {}/*COMMENT*/}')).to.equal(
-            '@media {\n    .root {}\n\n    /*COMMENT*/\n}\n'
-        );
+    it('should set one line between each node', () => {
+        testFormatCss({
+            source: '.root {}\n\n\n.root {}',
+            expect: '.root {}\n\n.root {}\n',
+        });
+        testFormatCss({
+            source: '.root {}\n\n.root {}',
+            expect: '.root {}\n\n.root {}\n',
+        });
+        testFormatCss({
+            source: '.root {}\n.root {}',
+            expect: '.root {}\n\n.root {}\n',
+        });
+        testFormatCss({
+            source: '.root {}.root {}',
+            expect: '.root {}\n\n.root {}\n',
+        });
+        testFormatCss({
+            source: '.root {}@media {}',
+            expect: '.root {}\n\n@media {}\n',
+        });
+        testFormatCss({
+            source: '.root {}/*COMMENT*/',
+            expect: '.root {}\n\n/*COMMENT*/\n',
+        });
+        testFormatCss({
+            source: '@media {.root {}/*COMMENT*/}',
+            expect: '@media {\n    .root {}\n\n    /*COMMENT*/\n}\n',
+        });
     });
-
-    it('no line separation after comment', () => {
-        expect(formatCSS('/*COMMENT*/.root {}')).to.equal('/*COMMENT*/\n.root {}\n');
-        expect(formatCSS('/*COMMENT*/\n\n\n.root {}')).to.equal('/*COMMENT*/\n.root {}\n');
+    it('should keep comment no line separation after comment', () => {
+        // ToDo(discuss): maybe user intent should be preserved
+        testFormatCss({
+            source: '/*COMMENT*/.root {}',
+            expect: '/*COMMENT*/\n.root {}\n',
+        });
+        testFormatCss({
+            source: '/*COMMENT*/\n\n\n.root {}',
+            expect: '/*COMMENT*/\n.root {}\n',
+        });
     });
-
-    it('no format between comments', () => {
-        expect(formatCSS('/*COMMENT*//*COMMENT*/')).to.equal('/*COMMENT*//*COMMENT*/\n');
-        expect(formatCSS('/*COMMENT*/\n/*COMMENT*/')).to.equal('/*COMMENT*/\n/*COMMENT*/\n');
-        expect(formatCSS('/*COMMENT*/\n\n/*COMMENT*/')).to.equal('/*COMMENT*/\n\n/*COMMENT*/\n');
+    it('should not format between comments', () => {
+        testFormatCss({
+            source: '/*COMMENT*//*COMMENT*/',
+            expect: '/*COMMENT*//*COMMENT*/\n',
+        });
+        testFormatCss({
+            source: '/*COMMENT*/\n/*COMMENT*/',
+            expect: '/*COMMENT*/\n/*COMMENT*/\n',
+        });
+        testFormatCss({
+            source: '/*COMMENT*/\n\n/*COMMENT*/',
+            expect: '/*COMMENT*/\n\n/*COMMENT*/\n',
+        });
     });
-
-    it('no spaces before level 1 selector', () => {
-        expect(formatCSS('   .root {}\n')).to.equal('.root {}\n');
+    it('should remove initial selector spaces (top level rule)', () => {
+        testFormatCss({
+            source: '   .root {}\n',
+            expect: '.root {}\n',
+        });
     });
 });
 
 describe('Formatting - Rule', () => {
-    it('one space after between selector and open block', () => {
-        expect(formatCSS('.root{}\n')).to.equal('.root {}\n');
-        expect(formatCSS('.root\n\n\n{}\n')).to.equal('.root {}\n');
-        expect(formatCSS('.root\r\n\r\n\r\n{}\n')).to.equal('.root {}\n');
+    it('should set one space between selector and open block', () => {
+        testFormatCss({
+            source: '.root{}\n',
+            expect: '.root {}\n',
+        });
+        testFormatCss({
+            source: '.root\n\n\n{}\n',
+            expect: '.root {}\n',
+        });
+        testFormatCss({
+            source: '.root\r\n\r\n\r\n{}\n',
+            expect: '.root {}\n',
+        });
     });
-
-    it('empty rule should have no spaces inside block', () => {
-        expect(formatCSS('.root {   }\n')).to.equal('.root {}\n');
-        expect(formatCSS('.root {\n\n\n}\n')).to.equal('.root {}\n');
+    it('should close empty rule immediately (no whitespace)', () => {
+        testFormatCss({
+            source: '.root {   }\n',
+            expect: '.root {}\n',
+        });
+        testFormatCss({
+            source: '.root {\n\n\n}\n',
+            expect: '.root {}\n',
+        });
     });
-
-    it('rule with comment before brace', () => {
-        expect(formatCSS('.root/*  */{}\n')).to.equal('.root /*  */ {}\n');
-        expect(formatCSS('.root /*  */ {}\n')).to.equal('.root /*  */ {}\n');
-        expect(formatCSS('.root   /*  */   {}\n')).to.equal('.root /*  */ {}\n');
-        expect(formatCSS('.root   /*  */ /*  */  /*  */   {}\n')).to.equal(
-            '.root /*  */ /*  */ /*  */ {}\n'
-        );
-        expect(formatCSS('.root   /*  */\n/*  */\n/*  */   {}\n')).to.equal(
-            '.root /*  */ /*  */ /*  */ {}\n'
-        );
-        expect(formatCSS('.root   /*  */\r\n/*  */\r\n/*  */   {}\n')).to.equal(
-            '.root /*  */ /*  */ /*  */ {}\n'
-        );
+    it('should minimize whitespace of comments after selector', () => {
+        // ToDo(discuss): maybe user intent should be preserved (maybe just for newlines?)
+        testFormatCss({
+            source: '.root/*  */{}\n',
+            expect: '.root /*  */ {}\n',
+        });
+        testFormatCss({
+            source: '.root /*  */ {}\n',
+            expect: '.root /*  */ {}\n',
+        });
+        testFormatCss({
+            source: '.root   /*  */   {}\n',
+            expect: '.root /*  */ {}\n',
+        });
+        testFormatCss({
+            source: '.root   /*  */ /*  */  /*  */   {}\n',
+            expect: '.root /*  */ /*  */ /*  */ {}\n',
+        });
+        testFormatCss({
+            source: '.root   /*  */\n/*  */\n/*  */   {}\n',
+            expect: '.root /*  */ /*  */ /*  */ {}\n',
+        });
+        testFormatCss({
+            source: '.root   /*  */\r\n/*  */\r\n/*  */   {}\n',
+            expect: '.root /*  */ /*  */ /*  */ {}\n',
+        });
     });
-
-    it('multiple selectors are separated with one comma and space between each selector', () => {
-        expect(formatCSS('h1,h2{}\n')).to.equal('h1, h2 {}\n');
+    it('should space multiple selectors with one comma and space', () => {
+        testFormatCss({
+            source: 'h1,h2{}\n',
+            expect: 'h1, h2 {}\n',
+        });
     });
-
-    it('multiple selectors sorted by length short to long', () => {
-        expect(formatCSS('ccc,bb,a{}\n')).to.equal('a, bb, ccc {}\n');
+    it('should sort selectors by length (short to long)', () => {
+        // ToDo: make this optional by flag
+        testFormatCss({
+            source: 'ccc,bb,a{}\n',
+            expect: 'a, bb, ccc {}\n',
+        });
     });
-
-    it('new line between long selector', () => {
-        expect(
-            formatCSS(
-                'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx{}\n'
-            )
-        ).to.equal(
-            'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx {}\n'
-        );
+    it('should add new line between long selector', () => {
+        testFormatCss({
+            source: 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx{}\n',
+            expect: 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx {}\n',
+        });
     });
-
     it('format groups that contains same amount of newlines should stay grouped', () => {
-        const res = `:global(p), :global(a), :global(q), :global(s), :global(b),
-:global(u), :global(i), :global(h1), :global(h2), :global(h3),
-:global(h4), :global(h5), :global(h6), :global(em), :global(tt),
-:global(dl), :global(dt), :global(dd), :global(ol), :global(ul),
-:global(li), :global(tr), :global(th), :global(td), :global(div),
-:global(pre), :global(big), :global(del), :global(dfn), :global(img),
-:global(ins), :global(kbd), :global(sub), :global(sup), :global(var),
-:global(nav), :global(html), :global(body), :global(span),
-:global(abbr), :global(cite), :global(code), :global(samp),
-:global(form), :global(menu), :global(ruby), :global(time),
-:global(mark), :global(small), :global(label), :global(table),
-:global(tbody), :global(tfoot), :global(thead), :global(aside),
-:global(embed), :global(audio), :global(video), :global(applet),
-:global(object), :global(iframe), :global(strike), :global(strong),
-:global(center), :global(legend), :global(canvas), :global(figure),
-:global(footer), :global(header), :global(hgroup), :global(output),
-:global(acronym), :global(address), :global(caption), :global(article),
-:global(details), :global(section), :global(summary), :global(fieldset),
-:global(blockquote), :global(figcaption) {}
-`;
-        expect(
-            formatCSS(
-                `:global(html), :global(body), :global(div), :global(span), :global(applet), :global(object), :global(iframe), :global(h1), :global(h2), :global(h3), :global(h4), :global(h5), :global(h6), :global(p), :global(blockquote), :global(pre), :global(a), :global(abbr), :global(acronym), :global(address), :global(big), :global(cite), :global(code), :global(del), :global(dfn), :global(em), :global(img), :global(ins), :global(kbd), :global(q), :global(s), :global(samp), :global(small), :global(strike), :global(strong), :global(sub), :global(sup), :global(tt), :global(var), :global(b), :global(u), :global(i), :global(center), :global(dl), :global(dt), :global(dd), :global(ol), :global(ul), :global(li), :global(fieldset), :global(form), :global(label), :global(legend), :global(table), :global(caption), :global(tbody), :global(tfoot), :global(thead), :global(tr), :global(th), :global(td), :global(article), :global(aside), :global(canvas), :global(details), :global(embed), :global(figure), :global(figcaption), :global(footer), :global(header), :global(hgroup), :global(menu), :global(nav), :global(output), :global(ruby), :global(section), :global(summary), :global(time), :global(mark), :global(audio), :global(video) {\n}`
-            )
-        ).to.equal(res);
-        expect(formatCSS(res)).to.equal(res);
+        // ToDo(discuss): what is the intent here? - test title is unclear
+        testFormatCss({
+            deindent: true,
+            source: ':global(html), :global(body), :global(div), :global(span), :global(applet), :global(object), :global(iframe), :global(h1), :global(h2), :global(h3), :global(h4), :global(h5), :global(h6), :global(p), :global(blockquote), :global(pre), :global(a), :global(abbr), :global(acronym), :global(address), :global(big), :global(cite), :global(code), :global(del), :global(dfn), :global(em), :global(img), :global(ins), :global(kbd), :global(q), :global(s), :global(samp), :global(small), :global(strike), :global(strong), :global(sub), :global(sup), :global(tt), :global(var), :global(b), :global(u), :global(i), :global(center), :global(dl), :global(dt), :global(dd), :global(ol), :global(ul), :global(li), :global(fieldset), :global(form), :global(label), :global(legend), :global(table), :global(caption), :global(tbody), :global(tfoot), :global(thead), :global(tr), :global(th), :global(td), :global(article), :global(aside), :global(canvas), :global(details), :global(embed), :global(figure), :global(figcaption), :global(footer), :global(header), :global(hgroup), :global(menu), :global(nav), :global(output), :global(ruby), :global(section), :global(summary), :global(time), :global(mark), :global(audio), :global(video) {}',
+            X: '|----------------------50------------------------|',
+            expect: `
+                :global(p), :global(a), :global(q), :global(s), :global(b),
+                :global(u), :global(i), :global(h1), :global(h2), :global(h3),
+                :global(h4), :global(h5), :global(h6), :global(em), :global(tt),
+                :global(dl), :global(dt), :global(dd), :global(ol), :global(ul),
+                :global(li), :global(tr), :global(th), :global(td), :global(div),
+                :global(pre), :global(big), :global(del), :global(dfn), :global(img),
+                :global(ins), :global(kbd), :global(sub), :global(sup), :global(var),
+                :global(nav), :global(html), :global(body), :global(span),
+                :global(abbr), :global(cite), :global(code), :global(samp),
+                :global(form), :global(menu), :global(ruby), :global(time),
+                :global(mark), :global(small), :global(label), :global(table),
+                :global(tbody), :global(tfoot), :global(thead), :global(aside),
+                :global(embed), :global(audio), :global(video), :global(applet),
+                :global(object), :global(iframe), :global(strike), :global(strong),
+                :global(center), :global(legend), :global(canvas), :global(figure),
+                :global(footer), :global(header), :global(hgroup), :global(output),
+                :global(acronym), :global(address), :global(caption), :global(article),
+                :global(details), :global(section), :global(summary), :global(fieldset),
+                :global(blockquote), :global(figcaption) {}
+                
+            `,
+        });
     });
-
-    it('multiple selectors should be sorted by length and grouped until reach max length each group has its own line', () => {
-        expect(
-            formatCSS(
-                'x,xx,xxx,xxxx,xxxxx,xxxxxx,xxxxxxx,xxxxxxxx,xxxxxxxxx,xxxxxxxxxx,xxxxxxxxxxx,xxxxxxxxxxxx,xxxxxxxxxxxxx,xxxxxxxxxxxxxx,xxxxxxxxxxxxxxx,xxxxxxxxxxxxxxxx {   }\n'
-            )
-        ).to.equal(
-            'x, xx, xxx, xxxx, xxxxx, xxxxxx, xxxxxxx, xxxxxxxx, xxxxxxxxx, xxxxxxxxxx,\nxxxxxxxxxxx, xxxxxxxxxxxx, xxxxxxxxxxxxx, xxxxxxxxxxxxxx,\nxxxxxxxxxxxxxxx, xxxxxxxxxxxxxxxx {}\n'
-        );
+    it('should sort and group selectors into separate lines in order to not reach max length', () => {
+        // ToDo: check why first line is longer then 50
+        testFormatCss({
+            deindent: true,
+            source: 'x,xx,xxx,xxxx,xxxxx,xxxxxx,xxxxxxx,xxxxxxxx,xxxxxxxxx,xxxxxxxxxx,xxxxxxxxxxx,xxxxxxxxxxxx,xxxxxxxxxxxxx,xxxxxxxxxxxxxx,xxxxxxxxxxxxxxx,xxxxxxxxxxxxxxxx {   }\n',
+            X: '|----------------------50------------------------|',
+            expect: `
+                x, xx, xxx, xxxx, xxxxx, xxxxxx, xxxxxxx, xxxxxxxx, xxxxxxxxx, xxxxxxxxxx,
+                xxxxxxxxxxx, xxxxxxxxxxxx, xxxxxxxxxxxxx, xxxxxxxxxxxxxx,
+                xxxxxxxxxxxxxxx, xxxxxxxxxxxxxxxx {}
+                
+            `,
+        });
     });
-
     it('selectors that included newline should preserve the newline', () => {
-        expect(formatCSS('.root,\n.part {}\n')).to.equal('.root,\n.part {}\n');
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root,
+                .part {}
+                
+            `,
+            expect: `
+                .root,
+                .part {}
+                
+            `,
+        });
     });
-
-    it('rule with declarations should have newline after open block declaration should be indented once then new line before closing block closing block should start at rule selector start', () => {
-        expect(formatCSS('.root {color: red;}\n')).to.equal('.root {\n    color: red;\n}\n');
+    it('should break declarations into separate lines and indent them accordingly', () => {
+        testFormatCss({
+            deindent: true,
+            source: `.root {color: red; background: green;}`,
+            expect: `
+                .root {
+                    color: red;
+                    background: green;
+                }
+                
+            `,
+        });
     });
+    it('should remove newlines between declarations', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    color: red;
+                    
+                    background: green;
 
-    it('multiple declarations separated by one new line each indented to same level', () => {
-        expect(formatCSS('.root {color: red;background: green;}\n')).to.equal(
-            '.root {\n    color: red;\n    background: green;\n}\n'
-        );
-        expect(
-            formatCSS('.root {color: red;\n\n\nbackground: green;}\n'),
-            'many lines separation'
-        ).to.equal('.root {\n    color: red;\n    background: green;\n}\n');
+
+                    border: 1px solid blue;
+                }
+            `,
+            expect: `
+                .root {
+                    color: red;
+                    background: green;
+                    border: 1px solid blue;
+                }
+                
+            `,
+        });
     });
 });
 
 describe('Formatting - Decl', () => {
-    it('add semicolon on last declaration', () => {
-        expect(formatCSS('.root {\n    color: red}\n')).to.equal('.root {\n    color: red;\n}\n');
-        expect(formatCSS('.root {\n    color: red/*!*/}\n'), 'comment variant').to.equal(
-            '.root {\n    color: red;/*!*/\n}\n'
-        );
-    });
+    it('should add semicolon to last declaration', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    color: red
+                }
 
-    it('one space after colon', () => {
-        expect(formatCSS('.root {color:\n\n\nred;}\n')).to.equal('.root {\n    color: red;\n}\n');
-        expect(formatCSS('.root {color:red;}\n')).to.equal('.root {\n    color: red;\n}\n');
-    });
+                .with-comment {
+                    color: red/*!*/
+                }
+            `,
+            expect: `
+                .root {
+                    color: red;
+                }
 
-    it('no space before colon', () => {
-        expect(formatCSS('.root {color   : red;}\n')).to.equal('.root {\n    color: red;\n}\n');
-        expect(formatCSS('.root {color\n\n\n: red;}\n')).to.equal('.root {\n    color: red;\n}\n');
-    });
+                .with-comment {
+                    color: red;/*!*/
+                }
 
-    it('no space before closing semi colon', () => {
-        expect(formatCSS('.root {\n    color: red    ;}\n')).to.equal(
-            '.root {\n    color: red;\n}\n'
-        );
+            `,
+        });
     });
+    it('should set space after colon', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    color:red;
+                    color:   green;
+                    color:
 
-    it('keep only one space between tokens in custom properties', () => {
-        expect(formatCSS('.root {\n    --x:   "a" 1  2 "b"  ;\n}\n')).to.equal(
-            '.root {\n    --x: "a" 1 2 "b" ;\n}\n'
-        );
+
+                    blue;
+                }
+            `,
+            expect: `
+                .root {
+                    color: red;
+                    color: green;
+                    color: blue;
+                }
+
+            `,
+        });
     });
+    it('should set no space before colon', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    color : red;
+                    color   : green;
+                    color
+                    
+                    
+                    : blue;
+                }
+            `,
+            expect: `
+                .root {
+                    color: red;
+                    color: green;
+                    color: blue;
+                }
 
-    it('keep broken custom properties', () => {
-        expect(formatCSS('.root {--x:;}')).to.equal(`.root {\n    --x:;\n}\n`);
+            `,
+        });
     });
+    it('should remove any whitespace before closing semicolon', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    color: red ;
+                    color: green   ;
+                    color: blue
+                    
+                    
+                    ;
+                }
+            `,
+            expect: `
+                .root {
+                    color: red;
+                    color: green;
+                    color: blue;
+                }
 
-    it('keep spaces in side strings', () => {
-        expect(formatCSS('.root {--x:"  ";}')).to.equal(`.root {\n    --x:"  ";\n}\n`);
+            `,
+        });
     });
-
-    it('css custom property with comments in raws preserve comments', () => {
-        expect(formatCSS('.root {--x/*a*/:/*b*/1;}')).to.equal(
-            `.root {\n    --x/*a*/:/*b*/1;\n}\n`
-        );
+    it('should preserve whitespace inside strings', () => {
+        testFormatCss({
+            deindent: true,
+            source: '.root {content: "   \t   ";}',
+            expect: `
+                .root {
+                    content: "   \t   ";
+                }
+                
+            `,
+        });
     });
+    describe('custom properties', () => {
+        it('should reduce value whitespace', () => {
+            // ToDo: check if whitespace between custom value should be preserved as-is
+            // ToDo(discuss):should whitespace around be more opinionated?
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {
+                        --x:red   1;
+                        --x:   green   2   ;
+                        --x:
+    
+    
+                        blue   3
+                        
+                        
+                        ;
+                    }
+                `,
+                expect: `
+                    .root {
+                        --x:red 1;
+                        --x: green 2 ;
+                        --x: blue 3 ;
+                    }
+    
+                `,
+            });
+        });
+        it('should preserve empty value', () => {
+            testFormatCss({
+                deindent: true,
+                source: '.root {--x:;}',
+                expect: `
+                    .root {
+                        --x:;
+                    }
+                    
+                `,
+            });
+        });
+        it('should preserve comments', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {
+                        --x/*a*/:/*b*/1;
+                        --y /*c*/ :   /*d*/   ;
+                    }
+                `,
+                expect: `
+                    .root {
+                        --x/*a*/:/*b*/1;
+                        --y/*c*/: /*d*/ ;
+                    }
+                    
+                `,
+            });
+        });
+        it('should reduce any whitespace after value until rule-end to a single whitespace', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {
+                        --x: 1   
+                        
 
-    it('css custom property with comments and spaces in raws preserve comments and space after colon comments', () => {
-        expect(formatCSS('.root {--x /*a*/ :   /*b*/   ;}')).to.equal(
-            `.root {\n    --x/*a*/: /*b*/ ;\n}\n`
-        );
+                    }
+                    .root {
+                        --y:    
+                        
+
+                    }
+                `,
+                expect: `
+                    .root {
+                        --x: 1 ;
+                    }
+
+                    .root {
+                        --y: ;
+                    }
+
+                `,
+            });
+        });
+        it('should reduce any whitespace after value until rule-end to a single whitespace (comment at end)', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {
+                        --a: /*a*/}
+                    .root {
+                        --b:/*b*/ }
+                    .root {
+                        --c:/*c*/  \t  }
+                `,
+                expect: `
+                    .root {
+                        --a: /*a*/;
+                    }
+                    
+                    .root {
+                        --b:/*b*/ ;
+                    }
+                    
+                    .root {
+                        --c:/*c*/ ;
+                    }
+
+                `,
+            });
+        });
+        it('should indent just like any other property', () => {
+            testFormatCss({
+                deindent: true,
+                source: `.root {--x    : "a" 1 2 "b";}`,
+                expect: `
+                    .root {
+                        --x: "a" 1 2 "b";
+                    }
+    
+                `,
+            });
+        });
     });
+    it('should separate (short) top level comma separated values with one comma and space between', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    font-family: A,B,C;
+                    font-family: D, E, F;
+                    font-family: G,   H   ,   I;
+                }
+            `,
+            expect: `
+                .root {
+                    font-family: A, B, C;
+                    font-family: D, E, F;
+                    font-family: G, H, I;
+                }
 
-    it('css custom property (no semi colon) and newline become one space', () => {
-        expect(formatCSS('.root {--x:\n}')).to.equal(`.root {\n    --x: ;\n}\n`);
+            `,
+        });
     });
+    it('should separate (long) top level comma separated values with one comma EACH OF ITS OWN LINE', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    prop1: ${'A'.repeat(50)},${'B'.repeat(50)},${'C'.repeat(50)};
 
-    it('css custom property (no semi colon) with space and comment after', () => {
-        expect(formatCSS('.root {--x: /*a*/}')).to.equal(`.root {\n    --x: /*a*/;\n}\n`);
-        expect(formatCSS('.root {--x:/*a*/ }')).to.equal(`.root {\n    --x:/*a*/ ;\n}\n`);
-        expect(formatCSS('.root {--x: /*a*/   }')).to.equal(`.root {\n    --x: /*a*/ ;\n}\n`);
+                    prop2:  \t  ${'D'.repeat(50)},${'E'.repeat(50)},${'F'.repeat(50)};
+                }
+            `,
+            expect: `
+                .root {
+                    prop1: ${'A'.repeat(50)},
+                           ${'B'.repeat(50)},
+                           ${'C'.repeat(50)};
+                    prop2: ${'D'.repeat(50)},
+                           ${'E'.repeat(50)},
+                           ${'F'.repeat(50)};
+                }
+
+            `,
+        });
     });
+    it('should separate (long) top level comma separated values with one comma EACH OF ITS OWN LINE', () => {
+        testFormatCss({
+            skipReformat: true, // ToDo(fix): reformat changes result
+            deindent: true,
+            source: `
+                .root {
+                    prop1: 1,2,3,${'A'.repeat(50)},${'B'.repeat(50)},${'C'.repeat(50)};
+                }
+            `,
+            expect: `
+                .root {
+                    prop1: 1, 2, 3, ${'A'.repeat(50)},
+                           ${'B'.repeat(50)},
+                           ${'C'.repeat(50)};
+                }
 
-    it('remove css variable space after decl props and place in new line', () => {
-        expect(formatCSS('.root {--x    : "a" 1 2 "b";\n}\n')).to.equal(
-            '.root {\n    --x: "a" 1 2 "b";\n}\n'
-        );
+            `,
+        });
     });
+    it('should preserve correct indent between value groups', () => {
+        // ToDo(discuss): correct?
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    prop1: 
+                        ${'A'.repeat(9)},
+                        ${'B'.repeat(60)},
+                        ${'C'.repeat(15)},
+                        ${'D'.repeat(35)};
+                }
+            `,
+            expect: `
+                .root {
+                    prop1:
+                        ${'A'.repeat(9)},
+                        ${'B'.repeat(60)},
+                        ${'C'.repeat(15)},
+                        ${'D'.repeat(35)};
+                }
 
-    it('multiple values are separated with one comma and space between each value (short line)', () => {
-        expect(formatCSS('.root {\n    font-family: A,B,C;\n}\n')).to.equal(
-            '.root {\n    font-family: A, B, C;\n}\n'
-        );
-        expect(formatCSS('.root {\n    font-family: A, B, C;\n}\n')).to.equal(
-            '.root {\n    font-family: A, B, C;\n}\n'
-        );
-        expect(formatCSS('.root {\n    font-family: A,   B   ,   C;\n}\n')).to.equal(
-            '.root {\n    font-family: A, B, C;\n}\n'
-        );
+            `,
+        });
     });
+    it('should preserve new line after colon and indent value +1', () => {
+        // ToDo(discuss): maybe just respect newline intent for `grid-template` and `grid-template-areas`
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    grid-template-areas:
+                    "A B"
+                    "C D";
+                }
+            `,
+            expect: `
+                .root {
+                    grid-template-areas:
+                        "A B"
+                        "C D";
+                }
 
-    it('multiple long values each placed in a new line and preserved original indent', () => {
-        const declWithIndent = `    font-family: `;
-        const declIndent = declWithIndent.length;
-        expect(
-            formatCSS(
-                `.root {\n${declWithIndent}${'A'.repeat(50)},${'B'.repeat(50)},${'C'.repeat(
-                    50
-                )};\n}\n`
-            )
-        ).to.equal(
-            `.root {\n    font-family: ${'A'.repeat(50)},\n${' '.repeat(declIndent)}${'B'.repeat(
-                50
-            )},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
-        );
-        // with spaces after decl
-        expect(
-            formatCSS(
-                `.root {\n${declWithIndent}${'    '}${'A'.repeat(50)},${'B'.repeat(
-                    50
-                )},${'C'.repeat(50)};\n}\n`
-            )
-        ).to.equal(
-            `.root {\n    font-family: ${'A'.repeat(50)},\n${' '.repeat(declIndent)}${'B'.repeat(
-                50
-            )},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
-        );
+            `,
+        });
     });
+    it('should preserve comments in values', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    left: calc(1em * 1.414 /* ~sqrt(2) */);
+                    color: /*!*/ red;
+                    background: /*!*/ red;
+                }
+            `,
+            expect: `
+                .root {
+                    left: calc(1em * 1.414 /* ~sqrt(2) */);
+                    color: /*!*/red;
+                    background: /*!*/red;
+                }
 
-    it('multiple values are grouped. each group is in new line and preserved original indent', () => {
-        const declWithIndent = `    font-family: `;
-        const declIndent = declWithIndent.length;
-        expect(
-            formatCSS(
-                `.root {\n${declWithIndent}${'1,2,3,'}${'A'.repeat(50)},${'B'.repeat(
-                    50
-                )},${'C'.repeat(50)};\n}\n`
-            )
-        ).to.equal(
-            `.root {\n    font-family: ${'1, 2, 3, '}${'A'.repeat(50)},\n${' '.repeat(
-                declIndent
-            )}${'B'.repeat(50)},\n${' '.repeat(declIndent)}${'C'.repeat(50)};\n}\n`
-        );
+            `,
+        });
     });
-
-    it('preserve/keep correct indent between value groups', () => {
-        const css = `.root {\n    -st-states:\n        ${'A'.repeat(9)},\n        ${'B'.repeat(
-            60
-        )},\n        ${'C'.repeat(15)},\n        ${'D'.repeat(35)};\n}\n`;
-        expect(formatCSS(css)).to.equal(css);
-    });
-
-    it('preserve new line after colon and indent value +1', () => {
-        expect(formatCSS('\ngrid-template-areas:\n    "A B"\n    "A B";\n')).to.equal(
-            '\ngrid-template-areas:\n    "A B"\n    "A B";\n'
-        );
-        expect(formatCSS(`\ngrid-template-areas:${'    '}\n    "A B"\n    "A B";\n`)).to.equal(
-            '\ngrid-template-areas:\n    "A B"\n    "A B";\n'
-        );
-    });
-
-    it('re-indent values contains newlines', () => {
-        expect(formatCSS(`\ngrid-template-areas:\n        "A B"\n        "A B";\n`)).to.equal(
-            '\ngrid-template-areas:\n    "A B"\n    "A B";\n'
-        );
-    });
-
-    it('preserve comments in values', () => {
-        expect(formatCSS('left: calc(1em * 1.414 /* ~sqrt(2) */);')).to.equal(
-            '\nleft: calc(1em * 1.414 /* ~sqrt(2) */);\n'
-        );
-    });
-
-    it('comments before and after colon', () => {
-        expect(formatCSS('.root {color /*!*/ : /*!*/ red;}\n')).to.equal(
-            '.root {\n    color/*!*/: /*!*/red;\n}\n'
-        );
-    });
-
-    it('comments with newline after colon and value does not contains newline with add single space', () => {
-        expect(formatCSS('.root {color /*!*/ :\n/*!*/ red;}\n')).to.equal(
-            '.root {\n    color/*!*/: /*!*/red;\n}\n'
-        );
-    });
-
-    it('multiline value and no newline after colon', () => {
-        expect(formatCSS('.root {border:1px \n solid \n red;}\n')).to.equal(
-            `.root {\n    border: 1px\n${' '.repeat(12)}solid\n${' '.repeat(12)}red;\n}\n`
-        );
+    it('should preserve newlines in value and and indent to value start', () => {
+        // ToDo(discuss): not sure short values should be preserved this way
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    border: 1px
+                solid
+                red;
+                }
+            `,
+            expect: `
+                .root {
+                    border: 1px
+                            solid
+                            red;
+                }
+                
+            `,
+        });
     });
     it('value with newlines each line get same indent', () => {
-        const indent = ' '.repeat('    box-shadow: '.length);
-
-        expect(
-            formatCSS(`.root {box-shadow:0px\n0px\n0px\nblack, 1px\n1px\n1px\nblack;\n}\n`)
-        ).to.equal(
-            `.root {\n    box-shadow: 0px\n${indent}0px\n${indent}0px\n${indent}black,\n${indent}1px\n${indent}1px\n${indent}1px\n${indent}black;\n}\n`
-        );
-    });
-    it('value with newlines and newline after colon each line get base indent', () => {
-        const indent = ' '.repeat(8);
-        expect(
-            formatCSS('.root {box-shadow:\n0px\n0px\n0px\nblack, 1px\n1px\n1px\nblack;\n}\n')
-        ).to.equal(
-            `.root {\n    box-shadow:\n${indent}0px\n${indent}0px\n${indent}0px\n${indent}black,\n${indent}1px\n${indent}1px\n${indent}1px\n${indent}black;\n}\n`
-        );
-    });
-    describe('nested functions', () => {
-        it('value function with a single value', () => {
-            const indent = ' '.repeat(4);
-            expect(formatCSS(`.root {background:someFunc(someValue);}\n`)).to.equal(
-                `.root {\n${indent}background: someFunc(someValue);\n}\n`
-            );
+        // ToDo(discuss): same as previous test?
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {box-shadow:0px
+                0px
+                0px
+                black, 1px
+                1px
+                1px
+                black;
+                }
+            `,
+            expect: `
+                .root {
+                    box-shadow: 0px
+                                0px
+                                0px
+                                black,
+                                1px
+                                1px
+                                1px
+                                black;
+                }
+                
+            `,
         });
-        it('value function with a single top level nested function', () => {
-            const indent = ' '.repeat(4);
-
-            expect(
-                formatCSS(
-                    `.root {background:someFunc(otherFunc(someValue1, someValue2, someValue3));}\n`
-                )
-            ).to.equal(
-                `.root {\nbackground: someFunc(\n${indent}otherFunc(\n${indent}${indent}someValue1,\n${indent}${indent}someValue2,\n${indent}${indent}someValue3\n${indent})\n);\n}\n`
-            );
+    });
+    it('should respect initial value newline and align to declaration indent+1', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {box-shadow:
+                0px
+                0px
+                0px
+                black, 1px
+                1px
+                1px
+                black;
+                }
+            `,
+            expect: `
+                .root {
+                    box-shadow:
+                        0px
+                        0px
+                        0px
+                        black,
+                        1px
+                        1px
+                        1px
+                        black;
+                }
+                
+            `,
         });
-        it('value with multiple top level nested functions', () => {
-            const indent = ' '.repeat(4);
-            expect(
-                formatCSS(
-                    `.root {background: filledBtn(bg-hover var(--background-hover-color, red), text-hover lighten(var(--color-accent-1),10%)),filledBtn(bg-hover var(--background-hover-color), text-hover var(--color-accent-1));}\n`
-                )
-            ).to.equal(
-                `${indent}${indent}filledBtn(\n${indent}${indent}${indent}bg-hover var(--background-hover-color, red),\n${indent}${indent}${indent}text-hover lighten(\n${indent}${indent}${indent}${indent}var(--color-accent-1),\n${indent}${indent}${indent}${indent}10%\n${indent}${indent}${indent})\n${indent}${indent}),\n${indent}${indent}filledBtn(\n${indent}${indent}${indent}bg-hover var(--background-hover-color),\n${indent}${indent}${indent}text-hover var(--color-accent-1)\n${indent}${indent});\n}\n`
-            );
+    });
+    describe('value functions', () => {
+        it('should set (short) single argument in one line', () => {
+            testFormatCss({
+                deindent: true,
+                source: `.root {background:someFunc(someValue);}`,
+                expect: `
+                    .root {
+                        background: someFunc(someValue);
+                    }
+    
+                `,
+            });
+        });
+        it.skip('should break long nested functions arguments into lines', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {background:someFunc(otherFunc(someValue1, someValue2, someValue3));}
+                `,
+                X: '|----------------------50------------------------|',
+                expect: `
+                    .root {
+                        background: someFunc(
+                            otherFunc(
+                                someValue1,
+                                someValue2,
+                                someValue3
+                            )
+                        );
+                    }
+    
+                `,
+            });
+        });
+        it.skip('value with multiple top level nested functions', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {background: filledBtn(bg-hover var(--background-hover-color, red), text-hover lighten(var(--color-accent-1),10%)),filledBtn(bg-hover var(--background-hover-color), text-hover var(--color-accent-1));}
+                `,
+                X: '|----------------------50------------------------|',
+                expect: `
+                    .root {
+                        background: filledBtn(
+                            bg-hover var(
+                                --background-hover-color,
+                                red
+                            ),
+                            text-hover lighten(
+                                var(--color-accent-1),
+                                10%
+                            )
+                        ),
+                        filledBtn(
+                            bg-hover var(
+                                --background-hover-color
+                            ),
+                            text-hover var(
+                                --color-accent-1
+                            )
+                        );
+                    }
+    
+                `,
+            });
         });
     });
 });
 
 describe('Formatting - AtRule', () => {
     it('no children only atRule (no semi colon)', () => {
-        expect(formatCSS(`@namespace "abc"`)).to.equal(`@namespace "abc"\n`);
-    });
+        testFormatCss({
+            deindent: true,
+            source: `@namespace "abc"`,
+            expect: `
+                @namespace "abc"
 
+            `,
+        });
+    });
     it('no children only atRule', () => {
-        expect(formatCSS(`@namespace "abc";`)).to.equal(`@namespace "abc";\n`);
-    });
+        testFormatCss({
+            deindent: true,
+            source: `@namespace "abc";`,
+            expect: `
+                @namespace "abc";
 
-    it('atRule with decelerations (no params)', () => {
-        expect(formatCSS(`@font-face { font-family: "Open Sans";}`)).to.equal(
-            `@font-face {\n    font-family: "Open Sans";\n}\n`
-        );
+            `,
+        });
     });
+    it('should set body into lines and indent accordingly', () => {
+        testFormatCss({
+            deindent: true,
+            source: `@font-face { font-family: "Open Sans";}`,
+            expect: `
+                @font-face {
+                    font-family: "Open Sans";
+                }
 
-    it('keep space around after name with comments', () => {
-        expect(formatCSS(`@namespace/**/"abc";`)).to.equal(`@namespace /**/ "abc";\n`);
-        expect(formatCSS(`@namespace /**/ "abc";`)).to.equal(`@namespace /**/ "abc";\n`);
-        expect(formatCSS(`@namespace   /**/   "abc";`)).to.equal(`@namespace /**/ "abc";\n`);
+            `,
+        });
     });
+    it('should set a single space around comment between name and params', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                @namespace/**/"abc";
+                @namespace /**/ "def";
+                @namespace   /**/   "ghi";
+                @namespace/*1*/;
+                @namespace   /*2*/  ;
+            `,
+            expect: `
+                @namespace /**/ "abc";
+                @namespace /**/ "def";
+                @namespace /**/ "ghi";
+                @namespace /*1*/;
+                @namespace /*2*/;
 
-    it('no params with comments should keep one space before comment', () => {
-        expect(formatCSS(`@namespace/**/;`)).to.equal(`@namespace /**/;\n`);
-        expect(formatCSS(`@namespace /**/;`)).to.equal(`@namespace /**/;\n`);
-        expect(formatCSS(`@namespace  /**/  ;`)).to.equal(`@namespace /**/;\n`);
+            `,
+        });
     });
+    it('should set a single space around comment after params', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                @namespace "abc"/**/;
+                @namespace "def"   /**/   ;
+            `,
+            expect: `
+                @namespace "abc" /**/;
+                @namespace "def" /**/;
 
-    it('comments after params ', () => {
-        expect(formatCSS(`@namespace "abc"/**/;`)).to.equal(`@namespace "abc" /**/;\n`);
-        expect(formatCSS(`@namespace "abc"  /**/  ;`)).to.equal(`@namespace "abc" /**/;\n`);
+            `,
+        });
     });
+    it('should set a single space after name and params', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                @media     screen     {};
+            `,
+            expect: `
+                @media screen {};
 
-    it('one space after name', () => {
-        expect(formatCSS(`@media${'    '}screen {}\n`)).to.equal(`@media screen {}\n`);
+            `,
+        });
     });
+    it('should indent body (no newline before first rule)', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                @media screen {.root {color: red;}}
+                @media scream {
+                    
+                    
+                    .root {color: red;}
+                
+                
+                }
+            `,
+            expect: `
+                @media screen {
+                    .root {
+                        color: red;
+                    }
+                }
 
-    it('one space after params', () => {
-        expect(formatCSS(`@media screen${'    '}{}\n`)).to.equal(`@media screen {}\n`);
+                @media scream {
+                    .root {
+                        color: red;
+                    }
+                }
+
+            `,
+        });
     });
+    it('should break and indent long selectors in nested rules', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                @media screen {.${'X'.repeat(50)},.${'Y'.repeat(50)} {}}
+            `,
+            expect: `
+                @media screen {
+                    .${'X'.repeat(50)},
+                    .${'Y'.repeat(50)} {}
+                }
 
-    it('format children with indent no separation before first rule', () => {
-        expect(formatCSS('@media screen {.root {color: red;}}\n')).to.equal(
-            '@media screen {\n    .root {\n        color: red;\n    }\n}\n'
-        );
-        expect(formatCSS('@media screen {\n\n\n\n.root {color: red;}}\n')).to.equal(
-            '@media screen {\n    .root {\n        color: red;\n    }\n}\n'
-        );
+            `,
+        });
     });
+    it('should set line separation between rule before at-rule with no children', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .a {}
+                @namespace "a";
 
-    it('selector group indentation', () => {
-        expect(formatCSS(`@media screen {.${'x'.repeat(50)},.${'y'.repeat(50)} {}}\n`)).to.equal(
-            `@media screen {\n    .${'x'.repeat(50)},\n    .${'y'.repeat(50)} {}\n}\n`
-        );
-    });
+                .b {}
 
-    it('rule before at rule with no children should have newline separation', () => {
-        expect(formatCSS(`.root {}\n@namespace "x";`)).to.equal(`.root {}\n\n@namespace "x";\n`);
-        expect(formatCSS(`.root {}\n\n@namespace "x";`)).to.equal(`.root {}\n\n@namespace "x";\n`);
-        expect(formatCSS(`.root {}\n\n\n\n\n@namespace "x";`)).to.equal(
-            `.root {}\n\n@namespace "x";\n`
-        );
+
+
+                @namespace "b";
+            `,
+            expect: `
+                .a {}
+
+                @namespace "a";
+
+                .b {}
+
+                @namespace "b";
+
+            `,
+        });
     });
 });
-
-// describe('Formatting From cases', () => {
-//     const casesDir = join(
-//         require.resolve('@stylable/code-formatter/package.json'),
-//         '../test',
-//         'cases'
-//     );
-//     const struct = loadDirStructureSync(casesDir);
-
-//     forEachTestCase(struct, ({ parent, input, out }: any) => {
-//         it(`${join(parent, input.name)} -> ${join(parent, out.name)}`, () => {
-//             expect(formatCSS(input.value)).to.equal(out.value);
-//         });
-//     });
-// });
