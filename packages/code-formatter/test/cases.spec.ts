@@ -10,7 +10,7 @@ function testFormatCss(config: {
     deindent?: boolean;
     skipReformat?: boolean;
     /* just to have an easy way of seeing 50 chars in expectation */
-    X?: '|----------------------50------------------------|';
+    X?: '|-------------------------------------80---------------------------------------|';
 }) {
     const input = config.deindent ? deindent(config.source) : config.source;
     const preservedIntendedLastLine = config.expect.match(/\n\s*\n\s*$/) ? '\n' : '';
@@ -23,7 +23,7 @@ function testFormatCss(config: {
     expect(actual, config.message).to.eql(expected);
     // check reformat - shouldn't change
     if (!config.skipReformat) {
-        const reformatMessage = 're-format' + config.message ? ' ' + config.message : '';
+        const reformatMessage = 're-format' + (config.message ? ' ' + config.message : '');
         expect(formatCSS(actual), reformatMessage).to.eql(actual);
     }
 }
@@ -186,7 +186,7 @@ describe('Formatting - Rule', () => {
         testFormatCss({
             deindent: true,
             source: ':global(html), :global(body), :global(div), :global(span), :global(applet), :global(object), :global(iframe), :global(h1), :global(h2), :global(h3), :global(h4), :global(h5), :global(h6), :global(p), :global(blockquote), :global(pre), :global(a), :global(abbr), :global(acronym), :global(address), :global(big), :global(cite), :global(code), :global(del), :global(dfn), :global(em), :global(img), :global(ins), :global(kbd), :global(q), :global(s), :global(samp), :global(small), :global(strike), :global(strong), :global(sub), :global(sup), :global(tt), :global(var), :global(b), :global(u), :global(i), :global(center), :global(dl), :global(dt), :global(dd), :global(ol), :global(ul), :global(li), :global(fieldset), :global(form), :global(label), :global(legend), :global(table), :global(caption), :global(tbody), :global(tfoot), :global(thead), :global(tr), :global(th), :global(td), :global(article), :global(aside), :global(canvas), :global(details), :global(embed), :global(figure), :global(figcaption), :global(footer), :global(header), :global(hgroup), :global(menu), :global(nav), :global(output), :global(ruby), :global(section), :global(summary), :global(time), :global(mark), :global(audio), :global(video) {}',
-            X: '|----------------------50------------------------|',
+            X: '|-------------------------------------80---------------------------------------|',
             expect: `
                 :global(p), :global(a), :global(q), :global(s), :global(b),
                 :global(u), :global(i), :global(h1), :global(h2), :global(h3),
@@ -216,7 +216,7 @@ describe('Formatting - Rule', () => {
         testFormatCss({
             deindent: true,
             source: 'x,xx,xxx,xxxx,xxxxx,xxxxxx,xxxxxxx,xxxxxxxx,xxxxxxxxx,xxxxxxxxxx,xxxxxxxxxxx,xxxxxxxxxxxx,xxxxxxxxxxxxx,xxxxxxxxxxxxxx,xxxxxxxxxxxxxxx,xxxxxxxxxxxxxxxx {   }\n',
-            X: '|----------------------50------------------------|',
+            X: '|-------------------------------------80---------------------------------------|',
             expect: `
                 x, xx, xxx, xxxx, xxxxx, xxxxxx, xxxxxxx, xxxxxxxx, xxxxxxxxx, xxxxxxxxxx,
                 xxxxxxxxxxx, xxxxxxxxxxxx, xxxxxxxxxxxxx, xxxxxxxxxxxxxx,
@@ -387,7 +387,6 @@ describe('Formatting - Decl', () => {
     describe('custom properties', () => {
         it('should reduce value whitespace', () => {
             // ToDo: check if whitespace between custom value should be preserved as-is
-            // ToDo(discuss):should whitespace around be more opinionated?
             testFormatCss({
                 deindent: true,
                 source: `
@@ -406,8 +405,8 @@ describe('Formatting - Decl', () => {
                 expect: `
                     .root {
                         --x:red 1;
-                        --x: green 2 ;
-                        --x: blue 3 ;
+                        --x: green 2;
+                        --x: blue 3;
                     }
     
                 `,
@@ -437,7 +436,7 @@ describe('Formatting - Decl', () => {
                 expect: `
                     .root {
                         --x/*a*/:/*b*/1;
-                        --y/*c*/: /*d*/ ;
+                        --y/*c*/: /*d*/;
                     }
                     
                 `,
@@ -460,7 +459,7 @@ describe('Formatting - Decl', () => {
                 `,
                 expect: `
                     .root {
-                        --x: 1 ;
+                        --x: 1;
                     }
 
                     .root {
@@ -487,11 +486,11 @@ describe('Formatting - Decl', () => {
                     }
                     
                     .root {
-                        --b:/*b*/ ;
+                        --b:/*b*/;
                     }
                     
                     .root {
-                        --c:/*c*/ ;
+                        --c:/*c*/;
                     }
 
                 `,
@@ -510,7 +509,7 @@ describe('Formatting - Decl', () => {
             });
         });
     });
-    it('should separate (short) top level comma separated values with one comma and space between', () => {
+    it('should separate inline top level comma separated values below "wrapLineLength"', () => {
         testFormatCss({
             deindent: true,
             source: `
@@ -530,75 +529,111 @@ describe('Formatting - Decl', () => {
             `,
         });
     });
-    it('should separate (long) top level comma separated values with one comma EACH OF ITS OWN LINE', () => {
+    it('should wrap long top level comma separated values according to "wrapLineLength"', () => {
         testFormatCss({
             deindent: true,
             source: `
                 .root {
-                    prop1: ${'A'.repeat(50)},${'B'.repeat(50)},${'C'.repeat(50)};
+                    prop1: ${'A'.repeat(69)},${'B'.repeat(69)},${'C'.repeat(69)};
 
-                    prop2:  \t  ${'D'.repeat(50)},${'E'.repeat(50)},${'F'.repeat(50)};
+                    prop2:  \t  ${'D'.repeat(69)},${'E'.repeat(69)},${'F'.repeat(69)};
                 }
             `,
+            X: '|-------------------------------------80---------------------------------------|',
             expect: `
                 .root {
-                    prop1: ${'A'.repeat(50)},
-                           ${'B'.repeat(50)},
-                           ${'C'.repeat(50)};
-                    prop2: ${'D'.repeat(50)},
-                           ${'E'.repeat(50)},
-                           ${'F'.repeat(50)};
+                    prop1: ${'A'.repeat(69)},
+                           ${'B'.repeat(69)},
+                           ${'C'.repeat(69)};
+                    prop2: ${'D'.repeat(69)},
+                           ${'E'.repeat(69)},
+                           ${'F'.repeat(69)};
                 }
 
             `,
         });
     });
-    it('should separate (long) top level comma separated values with one comma EACH OF ITS OWN LINE', () => {
+    it('should only wrap once "wrapLineLength" is reached (mix)', () => {
         testFormatCss({
-            skipReformat: true, // ToDo(fix): reformat changes result
             deindent: true,
             source: `
                 .root {
-                    prop1: 1,2,3,${'A'.repeat(50)},${'B'.repeat(50)},${'C'.repeat(50)};
+                    prop1: 1,2,3,${'A'.repeat(80)},${'B'.repeat(80)},${'C'.repeat(80)},4,5,6;
                 }
             `,
+            X: '|-------------------------------------80---------------------------------------|',
             expect: `
                 .root {
-                    prop1: 1, 2, 3, ${'A'.repeat(50)},
-                           ${'B'.repeat(50)},
-                           ${'C'.repeat(50)};
+                    prop1: 1, 2, 3,
+                           ${'A'.repeat(80)},
+                           ${'B'.repeat(80)},
+                           ${'C'.repeat(80)},
+                           4, 5, 6;
                 }
 
             `,
         });
     });
-    it('should preserve correct indent between value groups', () => {
-        // ToDo(discuss): correct?
+    it('should only wrap once "wrapLineLength" is reached (mix with no commas)', () => {
+        testFormatCss({
+            deindent: true,
+            source: `
+                .root {
+                    pppppppp: xxxx/${'a'.repeat(80)}/yyyy/${'b'.repeat(80)};
+                }
+            `,
+            X: '|-------------------------------------80---------------------------------------|',
+            expect: `
+                .root {
+                    pppppppp: xxxx/
+                              ${'a'.repeat(80)}
+                              /yyyy/
+                              ${'b'.repeat(80)};
+                }
+                
+            `,
+        });
+    });
+    it('should respect newlines for value starting in a line after the prop and indent between wrapping value groups', () => {
         testFormatCss({
             deindent: true,
             source: `
                 .root {
                     prop1: 
-                        ${'A'.repeat(9)},
-                        ${'B'.repeat(60)},
-                        ${'C'.repeat(15)},
-                        ${'D'.repeat(35)};
+                    AAA,
+                            BBB, CCC,
+                    DDD;
+
+                    box-shadow:
+                    0px
+                            0px
+                    0px
+                            black, 1px
+                    1px
+                            1px
+                    black;
                 }
             `,
             expect: `
                 .root {
                     prop1:
-                        ${'A'.repeat(9)},
-                        ${'B'.repeat(60)},
-                        ${'C'.repeat(15)},
-                        ${'D'.repeat(35)};
+                        AAA,
+                        BBB, CCC,
+                        DDD;
+                    box-shadow:
+                        0px
+                        0px
+                        0px
+                        black, 1px
+                        1px
+                        1px
+                        black;
                 }
 
             `,
         });
     });
-    it('should preserve new line after colon and indent value +1', () => {
-        // ToDo(discuss): maybe just respect newline intent for `grid-template` and `grid-template-areas`
+    it('should respect grid-template(-areas) newlines in any case', () => {
         testFormatCss({
             deindent: true,
             source: `
@@ -606,6 +641,13 @@ describe('Formatting - Decl', () => {
                     grid-template-areas:
                     "A B"
                     "C D";
+                    grid-template-areas: "E F" 
+                    "G H";
+                    grid-template:
+                    "I J" 40px / 1fr 1fr 1fr
+                    "K L" 50%;
+                    grid-template: "M N" 6ch
+                    "O P" 5em / 20% 30px;
                 }
             `,
             expect: `
@@ -613,6 +655,13 @@ describe('Formatting - Decl', () => {
                     grid-template-areas:
                         "A B"
                         "C D";
+                    grid-template-areas: "E F"
+                                         "G H";
+                    grid-template:
+                        "I J" 40px / 1fr 1fr 1fr
+                        "K L" 50%;
+                    grid-template: "M N" 6ch
+                                   "O P" 5em / 20% 30px;
                 }
 
             `,
@@ -638,8 +687,7 @@ describe('Formatting - Decl', () => {
             `,
         });
     });
-    it('should preserve newlines in value and and indent to value start', () => {
-        // ToDo(discuss): not sure short values should be preserved this way
+    it('should align values to the same line when length is shorter then maximum', () => {
         testFormatCss({
             deindent: true,
             source: `
@@ -647,24 +695,7 @@ describe('Formatting - Decl', () => {
                     border: 1px
                 solid
                 red;
-                }
-            `,
-            expect: `
-                .root {
-                    border: 1px
-                            solid
-                            red;
-                }
-                
-            `,
-        });
-    });
-    it('value with newlines each line get same indent', () => {
-        // ToDo(discuss): same as previous test?
-        testFormatCss({
-            deindent: true,
-            source: `
-                .root {box-shadow:0px
+                    box-shadow:0px
                 0px
                 0px
                 black, 1px
@@ -675,44 +706,30 @@ describe('Formatting - Decl', () => {
             `,
             expect: `
                 .root {
-                    box-shadow: 0px
-                                0px
-                                0px
-                                black,
-                                1px
-                                1px
-                                1px
-                                black;
+                    border: 1px solid red;
+                    box-shadow: 0px 0px 0px black, 1px 1px 1px black;
                 }
                 
             `,
         });
     });
-    it('should respect initial value newline and align to declaration indent+1', () => {
+    it('should prefer to wrap at current line previous comma', () => {
         testFormatCss({
             deindent: true,
             source: `
-                .root {box-shadow:
-                0px
-                0px
-                0px
-                black, 1px
-                1px
-                1px
-                black;
+                @st-scope LightTheme {
+                    Dialog::container {
+                        box-shadow: aaaaa bbbbb cccccccccccccccccccc, ddddd eeee ffffffffffffffffffffff;
+                    }
                 }
             `,
+            X: '|-------------------------------------80---------------------------------------|',
             expect: `
-                .root {
-                    box-shadow:
-                        0px
-                        0px
-                        0px
-                        black,
-                        1px
-                        1px
-                        1px
-                        black;
+                @st-scope LightTheme {
+                    Dialog::container {
+                        box-shadow: aaaaa bbbbb cccccccccccccccccccc,
+                                    ddddd eeee ffffffffffffffffffffff;
+                    }
                 }
                 
             `,
@@ -722,63 +739,158 @@ describe('Formatting - Decl', () => {
         it('should set (short) single argument in one line', () => {
             testFormatCss({
                 deindent: true,
-                source: `.root {background:someFunc(someValue);}`,
+                source: `.root {background:someFunc(aaa bbb, ccc);}`,
                 expect: `
                     .root {
-                        background: someFunc(someValue);
+                        background: someFunc(aaa bbb, ccc);
                     }
     
                 `,
             });
         });
-        it.skip('should break long nested functions arguments into lines', () => {
+        it('should not break function that can be inlined in 30 chars', () => {
+            /**
+             * rgba(255, 255, 255, 0.255) - 26 chars
+             */
             testFormatCss({
                 deindent: true,
-                source: `
-                    .root {background:someFunc(otherFunc(someValue1, someValue2, someValue3));}
-                `,
-                X: '|----------------------50------------------------|',
+                source: `.root {pppppppppppppppppppppppppppppppppppppppppppp:aaaaa(xxxxxxxxxxxxxxxxxxxxxxx);ssssssssssssssssssssssssssssssssssssssssssss:bbbbb aaaaa(xxxxxxxxxxxxxxxxxxxxxxx) ccccc;}`,
+                X: '|-------------------------------------80---------------------------------------|',
                 expect: `
                     .root {
-                        background: someFunc(
-                            otherFunc(
-                                someValue1,
-                                someValue2,
-                                someValue3
-                            )
-                        );
+                        pppppppppppppppppppppppppppppppppppppppppppp: aaaaa(xxxxxxxxxxxxxxxxxxxxxxx);
+                        ssssssssssssssssssssssssssssssssssssssssssss: bbbbb
+                                                                      aaaaa(xxxxxxxxxxxxxxxxxxxxxxx)
+                                                                      ccccc;
                     }
     
                 `,
             });
         });
-        it.skip('value with multiple top level nested functions', () => {
+        it('should break long nested functions arguments into lines', () => {
             testFormatCss({
                 deindent: true,
                 source: `
-                    .root {background: filledBtn(bg-hover var(--background-hover-color, red), text-hover lighten(var(--color-accent-1),10%)),filledBtn(bg-hover var(--background-hover-color), text-hover var(--color-accent-1));}
+                    .root {background:aaaaaaaa(bbbbbbbb(xxxxxxxxxxxxxxx, yyyyyyyyyyyyyyyy, zzzzzzzzzzzzzzzz));}
                 `,
-                X: '|----------------------50------------------------|',
+                X: '|-------------------------------------80---------------------------------------|',
+                expect: `
+                    .root {
+                        background: aaaaaaaa(
+                                        bbbbbbbb(
+                                            xxxxxxxxxxxxxxx,
+                                            yyyyyyyyyyyyyyyy,
+                                            zzzzzzzzzzzzzzzz
+                                        )
+                                    );
+                    }
+    
+                `,
+            });
+        });
+        it('should respect newlines inside argument when function is in a different line then the prop', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {
+                        background:
+                            aaaaaaaa(bbbbbbbb(xxxxxxxxxxxxxxx 
+                            ???, 
+                            yyyyyyyyyyyyyyy, zzzzzzzzzzzzzzz));}
+                `,
+                X: '|-------------------------------------80---------------------------------------|',
+                expect: `
+                    .root {
+                        background:
+                            aaaaaaaa(
+                                bbbbbbbb(
+                                    xxxxxxxxxxxxxxx
+                                    ???,
+                                    yyyyyyyyyyyyyyy,
+                                    zzzzzzzzzzzzzzz
+                                )
+                            );
+                    }
+    
+                `,
+            });
+        });
+        it('should keep function in a single line if its below the max range', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {background:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa(bbbbbbbbbbbbb(x, y, z));}
+                `,
+                X: '|-------------------------------------80---------------------------------------|',
+                expect: `
+                    .root {
+                        background: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa(
+                                        bbbbbbbbbbbbb(x, y, z)
+                                    );
+                    }
+    
+                `,
+            });
+        });
+        it('should force argument in newline for overflow function', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {background:aaaaaaaaaaaaa(bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb(xxx, yyy, zzz));}
+                `,
+                X: '|-------------------------------------80---------------------------------------|',
+                expect: `
+                    .root {
+                        background: aaaaaaaaaaaaa(
+                                        bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb(
+                                            xxx,
+                                            yyy,
+                                            zzz
+                                        )
+                                    );
+                    }
+    
+                `,
+            });
+        });
+        it('should wrap functions and arguments according to available space', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {background: aaaaa bbbbb(111111111111111111111111111111111111,222222222222222222) cccccc;}
+                `,
+                X: '|-------------------------------------80---------------------------------------|',
+                expect: `
+                    .root {
+                        background: aaaaa bbbbb(
+                                        111111111111111111111111111111111111,
+                                        222222222222222222
+                                    ) cccccc;
+                    }
+    
+                `,
+            });
+        });
+        it('should handle complex case', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {background: filledBtn(bg-hover var(--background-hover-color, red), text-hover lighten(var(--aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa),10%)),filledBtn(bg-hover var(--background-hover-color), text-hover var(--color-accent-1));}
+                `,
+                X: '|-------------------------------------80---------------------------------------|',
                 expect: `
                     .root {
                         background: filledBtn(
-                            bg-hover var(
-                                --background-hover-color,
-                                red
-                            ),
-                            text-hover lighten(
-                                var(--color-accent-1),
-                                10%
-                            )
-                        ),
-                        filledBtn(
-                            bg-hover var(
-                                --background-hover-color
-                            ),
-                            text-hover var(
-                                --color-accent-1
-                            )
-                        );
+                                        bg-hover var(--background-hover-color, red),
+                                        text-hover lighten(
+                                            var(--aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa),
+                                            10%
+                                        )
+                                    ),
+                                    filledBtn(
+                                        bg-hover var(--background-hover-color),
+                                        text-hover var(--color-accent-1)
+                                    );
                     }
     
                 `,
