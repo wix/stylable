@@ -6,7 +6,7 @@ import {
     space,
     Call,
 } from '@tokey/css-value-parser';
-import type { ParseResults } from '@tokey/css-value-parser/dist/value-parser';
+import type * as ValueParser from '@tokey/css-value-parser';
 
 // TODO: handle case where "raws" contains comments or newlines - done for decls, done  for rules
 // TODO: handle case where internal selector has newline (not the separation ,\n)
@@ -183,7 +183,6 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             ast.value ||= ' '; // minimal space
         }
     } else if (ast.type === 'atrule') {
-        // TODO: handle params
         const prevType = ast.prev()?.type;
         const hasCommentBefore = prevType === 'comment';
         const hasRuleBefore = prevType === 'rule';
@@ -203,6 +202,8 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             : '';
         const newBetween = enforceOneSpaceAround(ast.raws.between || '');
         ast.raws.between = childrenLen === -1 ? newBetween.trimEnd() : newBetween;
+
+        ast.params = new AtRuleParamFormatter(options).format(ast.params);
     } else if (ast.type === 'comment') {
         if (ast.prev()?.type !== 'decl' && ast.prev()?.type !== 'comment') {
             const isFirstChildInNested = index === 0 && indentLevel > 0;
@@ -225,6 +226,200 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 wrapLineLength,
             });
         }
+    }
+}
+
+type BlockStack =
+    | { type: ')' | ']'; isNewline: boolean }
+    | { type: 'func-end'; isNewline: boolean; node: ValueParser.Call };
+type OpenBrackets = '(' | '[';
+const blockCloserMap = { '(': ')', '[': ']' } as const;
+interface NodeContext {
+    index: number;
+    siblings: ValueParser.BaseAstNode[];
+    parents: ValueParser.BaseAstNode[];
+    nextNode: ValueParser.BaseAstNode;
+    prevNode: ValueParser.BaseAstNode;
+    currentBlock: BlockStack;
+}
+class AtRuleParamFormatter {
+    private blockCloserStack!: BlockStack[];
+    private currentNewlineIndent!: string;
+    constructor(private options: FormatOptions) {}
+    /**
+     * Iterate DFS over params value AST nodes:
+     *  - normalize spaces with preserved newline as value
+     *  - track stack of "function/block" structure with "newline-indent" flag for each
+     *  - trim spaces around "function/block" content
+     *  - set spaces around commas and for "function/block" open/close nodes
+     *    according to "newline-indent" of current stack state
+     */
+    public format(params: string): string {
+        const paramsAst = parseCSSValue(params);
+        this.blockCloserStack = [];
+        this.currentNewlineIndent = '';
+
+        walkValue(paramsAst, (node, parents, siblings) => {
+            const context = this.getContext(node, parents, siblings);
+            if (node.type === 'literal') {
+                if (node.value === ',') {
+                    this.formatAroundComma(node, context, this.options);
+                } else if (node.value === '(' || node.value === '[') {
+                    this.formatBlockOpen(node, context, this.options);
+                } else if (node.value === ')' || node.value === ']') {
+                    this.formatBlockClose(node, context, this.options);
+                }
+            } else if (node.type === 'space') {
+                this.formatWhitespace(node);
+            } else if (node.type === 'call') {
+                this.formatFunction(node, this.options);
+            }
+        });
+        return stringifyCSSValue(paramsAst);
+    }
+
+    private getContext(
+        node: ValueParser.BaseAstNode,
+        parents: NodeContext['parents'],
+        siblings: NodeContext['parents']
+    ): NodeContext {
+        const index = siblings.indexOf(node);
+        const prevNode = siblings[index - 1];
+        const nextNode = siblings[index + 1];
+        return {
+            index,
+            siblings,
+            parents,
+            nextNode,
+            prevNode,
+            currentBlock: this.getCurrentStackBlock(parents),
+        };
+    }
+    private formatWhitespace(node: ValueParser.Space) {
+        node.before = node.after = '';
+        if (node.value && !node.value.includes('\n')) {
+            node.value = ' ';
+        }
+    }
+    private formatAroundComma(
+        _node: ValueParser.Literal,
+        context: NodeContext,
+        options: FormatOptions
+    ) {
+        const { prevNode, nextNode } = context;
+        // argument delimiter
+        if (prevNode?.type === 'space') {
+            prevNode.value = '';
+        }
+        // set next inline/newline space
+        this.setNewlineOrInline(
+            {
+                spaceNode: nextNode,
+                placeBefore: false,
+                inlineSpace: ' ',
+            },
+            context,
+            options
+        );
+    }
+    private formatBlockOpen(
+        node: ValueParser.Literal,
+        { nextNode }: NodeContext,
+        { lineEndings: NL }: FormatOptions
+    ) {
+        const isSpaceAfter = nextNode?.type === 'space';
+        const isNewline = isSpaceAfter && stringifyCSSValue(nextNode).includes('\n');
+        if (isSpaceAfter) {
+            if (isNewline) {
+                this.increaseIndent();
+            }
+            nextNode.value = isNewline ? NL + this.currentNewlineIndent : '';
+        }
+        this.addToBlockStack(node, isNewline);
+    }
+    private formatBlockClose(
+        node: ValueParser.Literal,
+        context: NodeContext,
+        options: FormatOptions
+    ) {
+        const { prevNode, currentBlock } = context;
+        if (currentBlock.type === node.value) {
+            this.blockCloserStack.pop();
+            if (currentBlock.isNewline) {
+                this.currentNewlineIndent = this.currentNewlineIndent.slice(
+                    0,
+                    this.currentNewlineIndent.length - options.indent.length
+                );
+            }
+        }
+        this.setNewlineOrInline(
+            {
+                spaceNode: prevNode,
+                placeBefore: true,
+                inlineSpace: '',
+            },
+            context,
+            options
+        );
+    }
+    private formatFunction(node: ValueParser.Call, { lineEndings: NL }: FormatOptions) {
+        const isNewline = node.before.includes('\n');
+        this.addToBlockStack(node, isNewline);
+        if (isNewline) {
+            node.after = NL + this.currentNewlineIndent;
+            this.increaseIndent();
+            node.before = NL + this.currentNewlineIndent;
+        } else {
+            node.before = node.after = '';
+        }
+    }
+    private increaseIndent() {
+        this.currentNewlineIndent += this.options.indent;
+    }
+    private setNewlineOrInline(
+        {
+            spaceNode,
+            placeBefore,
+            inlineSpace,
+        }: {
+            spaceNode: ValueParser.BaseAstNode;
+            placeBefore: boolean;
+            inlineSpace: string;
+        },
+        { currentBlock, siblings, index }: NodeContext,
+        { lineEndings: NL }: FormatOptions
+    ) {
+        const spaceValue = currentBlock?.isNewline ? NL + this.currentNewlineIndent : inlineSpace;
+        if (spaceNode?.type === 'space') {
+            spaceNode.value = spaceValue;
+        } else if (spaceValue) {
+            siblings.splice(index + (placeBefore ? 0 : 1), 0, space({ value: spaceValue }));
+        }
+    }
+    private addToBlockStack(node: ValueParser.BaseAstNode, isNewline: boolean) {
+        if (node.type === 'call') {
+            this.blockCloserStack.push({ type: 'func-end', isNewline, node });
+        } else if (node.value in blockCloserMap) {
+            this.blockCloserStack.push({
+                type: blockCloserMap[node.value as OpenBrackets],
+                isNewline,
+            });
+        }
+    }
+    private getCurrentStackBlock(parents: BaseAstNode[]) {
+        let currentBlock = this.blockCloserStack[this.blockCloserStack.length - 1];
+        // pop closed function from indent stack
+        while (currentBlock?.type === 'func-end' && !parents.includes(currentBlock.node)) {
+            this.blockCloserStack.pop();
+            if (currentBlock.isNewline) {
+                this.currentNewlineIndent = this.currentNewlineIndent.slice(
+                    0,
+                    this.currentNewlineIndent.length - this.options.indent.length
+                );
+            }
+            currentBlock = this.blockCloserStack[this.blockCloserStack.length - 1];
+        }
+        return currentBlock;
     }
 }
 
@@ -407,7 +602,7 @@ function cleanValue(value: string, forceSpaceInSpaceNode = false) {
     return stringifyCSSValue(cleanValueAst(parseCSSValue(value), forceSpaceInSpaceNode));
 }
 
-function cleanValueAst(ast: ParseResults, forceSpaceInSpaceNode = false) {
+function cleanValueAst(ast: ReturnType<typeof parseCSSValue>, forceSpaceInSpaceNode = false) {
     for (const node of ast) {
         if ('before' in node) {
             node.before = node.before.replace(/[\s\S]+/gu, ' ');

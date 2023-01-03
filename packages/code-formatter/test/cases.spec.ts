@@ -978,6 +978,121 @@ describe('Formatting - AtRule', () => {
             `,
         });
     });
+    describe('params', () => {
+        it('should normalize comma space in params', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    @L1 a,b  ,  c,d {}
+    
+                    @L2 a,b(c,d  ,  e) , f {}
+                `,
+                expect: `
+                    @L1 a, b, c, d {}
+    
+                    @L2 a, b(c, d, e), f {}
+    
+                `,
+            });
+        });
+        it('should remove function and blocks args before/after spaces', () => {
+            // ToDo(fix): missing newline between function and square OR
+            //            unremoved newline between parens and function?
+            testFormatCss({
+                deindent: true,
+                source: `
+                    @parens (   a1: 1px, ( a2: 2px ) ( a3: 3px )  ) {}
+    
+                    @function f(   b1, b2, f-nest(  b3   )  ) {}
+
+                    @square [   c1, c2, c3[  c4   ]  ) {}
+                    
+                `,
+                expect: `
+                    @parens (a1: 1px, (a2: 2px) (a3: 3px)) {}
+    
+                    @function f(b1, b2, f-nest(b3)) {}
+                    @square [c1, c2, c3[c4]) {}
+    
+                `,
+            });
+        });
+        it('should force argument-like indented newlines when block open contains a newline', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    @parens (
+                        a1: 1px, ( a2-inline: 2px ), (
+                            a3: 3px, a4: 5px
+                        ) ) {}
+
+                    @square [
+                        b1: 1px, [ b2-inline: 2px ], [
+                            b3: 3px, b4: 5px
+                        ] ] {}
+
+                    @function f(
+                        c1: 1px, f-inline( c2: 2px ), f-indent(
+                            c3: 3px, c4: 5px
+                        ) ) {}
+
+                    @mix (
+                        d1: 1px, d2: 2px, func(
+                            d3: 3px, [
+                                d4: 4px, [
+                                    d5: 5px, d6: 6px
+                                ]
+                            ]
+                        )
+                    ) {}
+                `,
+                expect: `
+                    @parens (
+                        a1: 1px,
+                        (a2-inline: 2px),
+                        (
+                            a3: 3px,
+                            a4: 5px
+                        )
+                    ) {}
+
+                    @square [
+                        b1: 1px,
+                        [b2-inline: 2px],
+                        [
+                            b3: 3px,
+                            b4: 5px
+                        ]
+                    ] {}
+
+                    @function f(
+                        c1: 1px,
+                        f-inline(c2: 2px),
+                        f-indent(
+                            c3: 3px,
+                            c4: 5px
+                        )
+                    ) {}
+
+                    @mix (
+                        d1: 1px,
+                        d2: 2px,
+                        func(
+                            d3: 3px,
+                            [
+                                d4: 4px,
+                                [
+                                    d5: 5px,
+                                    d6: 6px
+                                ]
+                            ]
+                        )
+                    ) {}
+    
+                `,
+            });
+        });
+    });
     it('should indent body (no newline before first rule)', () => {
         testFormatCss({
             deindent: true,
