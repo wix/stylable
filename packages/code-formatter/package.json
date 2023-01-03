@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@stylable/core": "^5.5.0",
-    "@tokey/css-value-parser": "^0.1.0",
+    "@tokey/css-value-parser": "^0.1.2",
     "postcss": "^8.4.18",
     "js-beautify": "^1.14.7"
   },
