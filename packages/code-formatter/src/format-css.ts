@@ -588,10 +588,10 @@ function splitAndIndentDeclFuncArgs({
 function enforceOneSpaceAround(value: string) {
     let newBetween = cleanValue(value, true);
     const startWithSpace = newBetween.startsWith(' ');
-    const endWithSpace = newBetween.endsWith(' ');
     if (!startWithSpace) {
         newBetween = ' ' + newBetween;
     }
+    const endWithSpace = newBetween.endsWith(' ');
     if (!endWithSpace) {
         newBetween = newBetween + ' ';
     }

@@ -941,6 +941,7 @@ describe('Formatting - AtRule', () => {
                 @namespace   /**/   "ghi";
                 @namespace/*1*/;
                 @namespace   /*2*/  ;
+                @namespace["123"];
             `,
             expect: `
                 @namespace /**/ "abc";
@@ -948,6 +949,7 @@ describe('Formatting - AtRule', () => {
                 @namespace /**/ "ghi";
                 @namespace /*1*/;
                 @namespace /*2*/;
+                @namespace ["123"];
 
             `,
         });
