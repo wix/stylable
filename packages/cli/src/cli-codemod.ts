@@ -26,9 +26,7 @@ const argv = yargs
         string: true,
         description: 'array of builtin codemods to execute',
         default: [] as string[],
-        choices: [
-            ...registeredMods.keys(),
-        ] as never /* workaround yargs bug: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/63415 */,
+        choices: [...registeredMods.keys()],
     })
     .option('external', {
         alias: 'e',
