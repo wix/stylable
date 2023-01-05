@@ -30,7 +30,7 @@ function walkValue(
 }
 
 export interface FormatOptions {
-    lineEndings: string;
+    endOfLine: string;
     indent: string;
     indentLevel: number;
     linesBetween: number;
@@ -39,8 +39,9 @@ export interface FormatOptions {
 }
 
 export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
+    const endOfLine = options.endOfLine ?? getLineEnding(css);
+    css = css.replace(/\r?\n|\r/g, endOfLine);
     const ast = parse(css);
-    const lineEndings = options.lineEndings ?? getLineEnding(css);
     const indent = options.indent ?? ' '.repeat(4);
     const indentLevel = options.indentLevel ?? 0;
     const linesBetween = options.linesBetween ?? 1;
@@ -48,7 +49,7 @@ export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
     const wrapLineLength = options.wrapLineLength || 80;
     for (let i = 0; i < ast.nodes.length; i++) {
         formatAst(ast.nodes[i], i, {
-            lineEndings,
+            endOfLine,
             indent,
             indentLevel,
             linesBetween,
@@ -58,9 +59,9 @@ export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
     }
     const outputCSS = ast.toString();
     if (endWithNewLine) {
-        return outputCSS.endsWith('\n') || outputCSS.length === 0
+        return outputCSS.endsWith(endOfLine) || outputCSS.length === 0
             ? outputCSS
-            : outputCSS + lineEndings;
+            : outputCSS + endOfLine;
     } else {
         return outputCSS.replace(/\r?\n\s*$/, '');
     }
@@ -68,7 +69,7 @@ export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
 
 function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     const {
-        lineEndings: NL,
+        endOfLine: NL,
         indent,
         indentLevel,
         linesBetween,
@@ -235,7 +236,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
     if ('nodes' in ast) {
         for (let i = 0; i < ast.nodes.length; i++) {
             formatAst(ast.nodes[i], i, {
-                lineEndings: NL,
+                endOfLine: NL,
                 indent,
                 indentLevel: indentLevel + 1,
                 linesBetween,
@@ -342,7 +343,7 @@ class AtRuleParamFormatter {
     private formatBlockOpen(
         node: ValueParser.Literal,
         { nextNode }: NodeContext,
-        { lineEndings: NL }: FormatOptions
+        { endOfLine: NL }: FormatOptions
     ) {
         const isSpaceAfter = nextNode?.type === 'space';
         const isNewline = isSpaceAfter && stringifyCSSValue(nextNode).includes('\n');
@@ -379,7 +380,7 @@ class AtRuleParamFormatter {
             options
         );
     }
-    private formatFunction(node: ValueParser.Call, { lineEndings: NL }: FormatOptions) {
+    private formatFunction(node: ValueParser.Call, { endOfLine: NL }: FormatOptions) {
         const isNewline = node.before.includes('\n');
         this.addToBlockStack(node, isNewline);
         if (isNewline) {
@@ -404,7 +405,7 @@ class AtRuleParamFormatter {
             inlineSpace: string;
         },
         { currentBlock, siblings, index }: NodeContext,
-        { lineEndings: NL }: FormatOptions
+        { endOfLine: NL }: FormatOptions
     ) {
         const spaceValue = currentBlock?.isNewline ? NL + this.currentNewlineIndent : inlineSpace;
         if (spaceNode?.type === 'space') {
@@ -672,7 +673,7 @@ function parseDeclBetweenRaws(between: string) {
 function formatSelectors(
     rule: Rule,
     forceNL: boolean,
-    { lineEndings: NL, indent, indentLevel }: FormatOptions
+    { endOfLine: NL, indent, indentLevel }: FormatOptions
 ) {
     const selectors = rule.selectors;
     const newlines = rule.selector.match(/\n/gm)?.length ?? 0;

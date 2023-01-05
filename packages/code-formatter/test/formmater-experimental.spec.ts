@@ -55,10 +55,22 @@ describe('formatter - experimental', () => {
                 expect: ' ',
             });
         });
-        it('should pickup newline type from content and use on added newlines', () => {
+        it('should normalize and use newline type (configurable)', () => {
             testFormatCss({
+                message: 'default auto pick from source (\\r\\n)',
                 source: '/*comment line 1\r\nline 2*/',
                 expect: '/*comment line 1\r\nline 2*/\r\n',
+            });
+            testFormatCss({
+                message: 'default auto pick from source (\\n)',
+                source: '/*comment line 1\nline 2*/',
+                expect: '/*comment line 1\nline 2*/\n',
+            });
+            testFormatCss({
+                message: 'configured "\\r"',
+                options: { endOfLine: '\r' },
+                source: '/*comment line 1\nline 2*/',
+                expect: '/*comment line 1\rline 2*/\r',
             });
         });
         it('should set one line between each node', () => {
@@ -126,16 +138,19 @@ describe('formatter - experimental', () => {
     describe('rule', () => {
         it('should set one space between selector and open block', () => {
             testFormatCss({
+                message: 'no initial space',
                 source: '.root{}\n',
                 expect: '.root {}\n',
             });
             testFormatCss({
+                message: 'initial multi newlines space',
                 source: '.root\n\n\n{}\n',
                 expect: '.root {}\n',
             });
             testFormatCss({
-                source: '.root\r\n\r\n\r\n{}\n',
-                expect: '.root {}\n',
+                message: 'initial multi crlf space',
+                source: '.root\r\n\r\n\r\n{}\r\n',
+                expect: '.root {}\r\n',
             });
         });
         it('should close empty rule immediately (no whitespace)', () => {
@@ -172,7 +187,7 @@ describe('formatter - experimental', () => {
             });
             testFormatCss({
                 source: '.root   /*  */\r\n/*  */\r\n/*  */   {}\n',
-                expect: '.root /*  */ /*  */ /*  */ {}\n',
+                expect: '.root /*  */ /*  */ /*  */ {}\r\n',
             });
         });
         it('should space multiple selectors with one comma and space', () => {
