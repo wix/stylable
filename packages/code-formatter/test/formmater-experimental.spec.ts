@@ -44,13 +44,13 @@ describe('formatter - experimental', () => {
             });
             testFormatCss({
                 message: 'no last line config',
-                options: { endWithNewLine: false },
+                options: { endWithNewline: false },
                 source: ' ',
                 expect: ' ',
             });
             testFormatCss({
                 message: 'no last line config - remove source last line',
-                options: { endWithNewLine: false },
+                options: { endWithNewline: false },
                 source: ' \n',
                 expect: ' ',
             });

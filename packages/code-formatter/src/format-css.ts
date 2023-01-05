@@ -34,7 +34,7 @@ export interface FormatOptions {
     indent: string;
     indentLevel: number;
     linesBetween: number;
-    endWithNewLine: boolean;
+    endWithNewline: boolean;
     wrapLineLength: number;
 }
 
@@ -45,7 +45,7 @@ export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
     const indent = options.indent ?? ' '.repeat(4);
     const indentLevel = options.indentLevel ?? 0;
     const linesBetween = options.linesBetween ?? 1;
-    const endWithNewLine = options.endWithNewLine ?? true;
+    const endWithNewline = options.endWithNewline ?? true;
     const wrapLineLength = options.wrapLineLength || 80;
     for (let i = 0; i < ast.nodes.length; i++) {
         formatAst(ast.nodes[i], i, {
@@ -53,12 +53,12 @@ export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
             indent,
             indentLevel,
             linesBetween,
-            endWithNewLine,
+            endWithNewline,
             wrapLineLength,
         });
     }
     const outputCSS = ast.toString();
-    if (endWithNewLine) {
+    if (endWithNewline) {
         return outputCSS.endsWith(endOfLine) || outputCSS.length === 0
             ? outputCSS
             : outputCSS + endOfLine;
@@ -73,7 +73,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         indent,
         indentLevel,
         linesBetween,
-        endWithNewLine,
+        endWithNewline,
         wrapLineLength,
     } = options;
     if (ast.type === 'rule') {
@@ -240,7 +240,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 indent,
                 indentLevel: indentLevel + 1,
                 linesBetween,
-                endWithNewLine,
+                endWithNewline,
                 wrapLineLength,
             });
         }

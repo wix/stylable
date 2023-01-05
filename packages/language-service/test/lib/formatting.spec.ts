@@ -220,10 +220,10 @@ describe('Formatting', () => {
                     },
                 ]);
             });
-            it('should use "endWithNewLine" config', () => {
+            it('should use "endWithNewline" config', () => {
                 const res = getFormattingEdits('.root{color:red}', undefined, {
                     experimental: true,
-                    endWithNewLine: false,
+                    endWithNewline: false,
                     tabSize: 4,
                     insertSpaces: true,
                 });

@@ -5,7 +5,7 @@ import type { TextDocument } from 'vscode-languageserver-textdocument';
 
 export interface StylableLangServiceFormattingOptions extends FormattingOptions {
     experimental?: boolean;
-    endWithNewLine?: boolean;
+    endWithNewline?: boolean;
     wrapLineLength?: number;
 }
 
@@ -34,7 +34,7 @@ export function format(
         range = { start: doc.positionAt(0), end: doc.positionAt(sourceCss.length) };
         targetCss = formatDocumentExperimental(sourceCss, {
             indent: ' '.repeat(options.tabSize || 4),
-            endWithNewLine: options.endWithNewLine,
+            endWithNewline: options.endWithNewline,
             wrapLineLength: options.wrapLineLength,
         });
     } else {
