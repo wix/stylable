@@ -7,6 +7,7 @@ import {
     createTempDirectory,
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
+import { deindent } from '@stylable/core-test-kit';
 
 describe('Stylable Code Format Cli', function () {
     let tempDir: ITempDirectory;
@@ -132,6 +133,62 @@ describe('Stylable Code Format Cli', function () {
             const dirContent = loadDirSync(tempDir.path);
             expect(dirContent[stylesheetPath]).to.equal('.root {\n    color: red\n}');
             expect(stdout).to.include('[Stylable code formatter] All code formatting complete');
+        });
+    });
+
+    describe('experimental formatter', () => {
+        it('should format a directory with a single stylesheet (check indent diff)', () => {
+            const stylesheetPath = 'style.st.css';
+
+            populateDirectorySync(tempDir.path, {
+                [stylesheetPath]: `.a{prop:\ngreen,\nblue}`,
+            });
+
+            runFormatCliSync(['--target', tempDir.path, '--experimental']);
+
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent[stylesheetPath]).to.equal(
+                deindent(`
+                    .a {
+                        prop:
+                            green,
+                            blue;
+                    }
+                `)
+            );
+        });
+        it('should accept configuration', () => {
+            const stylesheetPath = 'style.st.css';
+
+            populateDirectorySync(tempDir.path, {
+                [stylesheetPath]: `.a{prop:\ngreen,\nblue;prop2:123456789 123456789}`,
+            });
+
+            runFormatCliSync([
+                '--target',
+                tempDir.path,
+                '--experimental',
+                '--indentSize',
+                '2',
+                '--endWithNewline',
+                'true',
+                '--wrapLineLength',
+                '25',
+            ]);
+
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent[stylesheetPath]).to.equal(
+                deindent(`
+                    .a {
+                      prop:
+                        green,
+                        blue;
+                      prop2: 123456789
+                             123456789;
+                    }
+                `) + '\n'
+            );
+            //
         });
     });
 

@@ -88,6 +88,12 @@ const argv = yargs
         alias: 'r',
         default: [] as string[],
     })
+    .option('wrapLineLength', {
+        type: 'number',
+        description: 'Length of line to be considered when wrapping',
+        alias: 'W',
+        default: 80,
+    })
 
     .alias('h', 'help')
     .alias('v', 'version')
@@ -110,6 +116,7 @@ const {
     target,
     silent,
     experimental,
+    wrapLineLength,
 } = argv;
 
 const log = createLogger(
@@ -146,7 +153,11 @@ function formatStylesheet(filePath: string) {
     const fileContent = nodeFs.readFileSync(filePath, 'utf-8');
 
     const newText = experimental
-        ? formatCSS(fileContent)
+        ? formatCSS(fileContent, {
+              indent: ' '.repeat(indentSize),
+              endWithNewline,
+              wrapLineLength,
+          })
         : getDocumentFormatting(
               fileContent,
               { start: 0, end: fileContent.length },
