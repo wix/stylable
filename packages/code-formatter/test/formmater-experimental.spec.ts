@@ -9,6 +9,7 @@ function testFormatCss(config: {
     message?: string;
     deindent?: boolean;
     skipReformat?: boolean;
+    options?: Partial<Parameters<typeof formatCSS>[1]>;
     /* just to have an easy way of seeing 50 chars in expectation */
     X?: '|-------------------------------------80---------------------------------------|';
 }) {
@@ -18,13 +19,13 @@ function testFormatCss(config: {
         ? deindent(config.expect) + preservedIntendedLastLine
         : config.expect;
 
-    const actual = formatCSS(input);
+    const actual = formatCSS(input, config.options);
 
     expect(actual, config.message).to.eql(expected);
     // check reformat - shouldn't change
     if (!config.skipReformat) {
         const reformatMessage = 're-format' + (config.message ? ' ' + config.message : '');
-        expect(formatCSS(actual), reformatMessage).to.eql(actual);
+        expect(formatCSS(actual, config.options), reformatMessage).to.eql(actual);
     }
 }
 describe('formatter - experimental', () => {
@@ -35,10 +36,23 @@ describe('formatter - experimental', () => {
                 expect: '',
             });
         });
-        it('should add new line at the end for any content', () => {
+        it('should add new line at the end for any content (configurable)', () => {
             testFormatCss({
+                message: 'default (add last line)',
                 source: ' ',
                 expect: ' \n',
+            });
+            testFormatCss({
+                message: 'no last line config',
+                options: { endWithNewLine: false },
+                source: ' ',
+                expect: ' ',
+            });
+            testFormatCss({
+                message: 'no last line config - remove source last line',
+                options: { endWithNewLine: false },
+                source: ' \n',
+                expect: ' ',
             });
         });
         it('should pickup newline type from content and use on added newlines', () => {

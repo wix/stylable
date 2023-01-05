@@ -34,6 +34,7 @@ export interface FormatOptions {
     indent: string;
     indentLevel: number;
     linesBetween: number;
+    endWithNewLine: boolean;
     wrapLineLength: number;
 }
 
@@ -43,6 +44,7 @@ export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
     const indent = options.indent ?? ' '.repeat(4);
     const indentLevel = options.indentLevel ?? 0;
     const linesBetween = options.linesBetween ?? 1;
+    const endWithNewLine = options.endWithNewLine ?? true;
     const wrapLineLength = options.wrapLineLength || 80;
     for (let i = 0; i < ast.nodes.length; i++) {
         formatAst(ast.nodes[i], i, {
@@ -50,15 +52,29 @@ export function formatCSS(css: string, options: Partial<FormatOptions> = {}) {
             indent,
             indentLevel,
             linesBetween,
+            endWithNewLine,
             wrapLineLength,
         });
     }
     const outputCSS = ast.toString();
-    return outputCSS.endsWith('\n') || outputCSS.length === 0 ? outputCSS : outputCSS + lineEndings;
+    if (endWithNewLine) {
+        return outputCSS.endsWith('\n') || outputCSS.length === 0
+            ? outputCSS
+            : outputCSS + lineEndings;
+    } else {
+        return outputCSS.replace(/\r?\n\s*$/, '');
+    }
 }
 
 function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
-    const { lineEndings: NL, indent, indentLevel, linesBetween, wrapLineLength } = options;
+    const {
+        lineEndings: NL,
+        indent,
+        indentLevel,
+        linesBetween,
+        endWithNewLine,
+        wrapLineLength,
+    } = options;
     if (ast.type === 'rule') {
         const hasCommentBefore = ast.prev()?.type === 'comment';
         const childrenLen = ast.nodes.length;
@@ -223,6 +239,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 indent,
                 indentLevel: indentLevel + 1,
                 linesBetween,
+                endWithNewLine,
                 wrapLineLength,
             });
         }
