@@ -13,7 +13,7 @@ export { STSymbol, STGlobal, STCustomSelector, STCustomState, CSSCustomProperty 
 export type { MappedStates, StateParsedValue, TemplateStateParsedValue } from './helpers/custom-state';
 export { murmurhash3_32_gc } from './murmurhash';
 export { cssParse } from './parser';
-export type { OptimizeConfig, IStylableOptimizer } from './types';
+export type { OptimizeConfig, IStylableOptimizer, ModuleResolver } from './types';
 export {
     nativePseudoClasses,
     nativePseudoElements,
