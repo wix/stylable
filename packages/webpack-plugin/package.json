@@ -1,7 +1,7 @@
 {
   "name": "@stylable/webpack-plugin",
   "description": "Webpack (5.x) plugin for Stylable modules",
-  "version": "5.6.0",
+  "version": "5.6.1",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
@@ -10,13 +10,13 @@
     "webpack": "^5.30.0"
   },
   "dependencies": {
-    "@stylable/build-tools": "^5.6.0",
-    "@stylable/cli": "^5.6.0",
-    "@stylable/core": "^5.6.0",
-    "@stylable/module-utils": "^5.6.0",
-    "@stylable/node": "^5.6.0",
-    "@stylable/optimizer": "^5.6.0",
-    "@stylable/runtime": "^5.6.0",
+    "@stylable/build-tools": "^5.6.1",
+    "@stylable/cli": "^5.6.1",
+    "@stylable/core": "^5.6.1",
+    "@stylable/module-utils": "^5.6.1",
+    "@stylable/node": "^5.6.1",
+    "@stylable/optimizer": "^5.6.1",
+    "@stylable/runtime": "^5.6.1",
     "decache": "^4.6.1",
     "lodash.clonedeep": "^4.5.0",
     "postcss": "^8.4.20"
