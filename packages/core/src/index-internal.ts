@@ -9,8 +9,25 @@ export {
     ResolvedElement,
 } from './stylable-transformer';
 export { validateDefaultConfig } from './stylable';
-export { STSymbol, STGlobal, STCustomSelector, STCustomState, CSSCustomProperty } from './features';
-export type { MappedStates, StateParsedValue, TemplateStateParsedValue } from './helpers/custom-state';
+export {
+    STSymbol,
+    STImport,
+    STGlobal,
+    STNamespace,
+    STCustomSelector,
+    STCustomState,
+    CSSClass,
+    CSSType,
+    CSSKeyframes,
+    CSSLayer,
+    CSSContains,
+    CSSCustomProperty,
+} from './features';
+export type {
+    MappedStates,
+    StateParsedValue,
+    TemplateStateParsedValue,
+} from './helpers/custom-state';
 export { murmurhash3_32_gc } from './murmurhash';
 export { cssParse } from './parser';
 export type { OptimizeConfig, IStylableOptimizer, ModuleResolver } from './types';
@@ -34,4 +51,6 @@ export { packageNamespaceFactory } from './resolve-namespace-factories';
 export { BoxedValueArray, BoxedValueMap, createCustomValue } from './custom-values';
 export { DiagnosticBase } from './diagnostics';
 export { getAstNodeAt } from './helpers/ast';
-export { tryCollectImportsDeep } from './helpers/import';
+export { tryCollectImportsDeep, parsePseudoImport, createAtImportProps } from './helpers/import';
+export { processDeclarationFunctions } from './process-declaration-functions';
+export { plugableRecord } from './helpers/plugable-record';

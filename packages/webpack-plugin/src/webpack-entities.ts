@@ -17,8 +17,8 @@ import type {
     StringSortableSet,
     StylableBuildMeta,
 } from './types';
-import { stylesheet } from '@stylable/runtime/dist/runtime';
-import { injectStyles } from '@stylable/runtime/dist/inject-styles';
+import { stylesheet } from '@stylable/runtime';
+import { injectStyles } from '@stylable/runtime/dist/index-internal';
 
 import { getStylableBuildData, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
 import { getReplacementToken } from './loader-utils';

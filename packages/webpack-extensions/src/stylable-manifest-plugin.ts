@@ -1,5 +1,5 @@
 import { Stylable, StylableMeta } from '@stylable/core';
-import { STSymbol } from '@stylable/core/dist/features';
+import { STSymbol } from '@stylable/core/dist/index-internal';
 import { resolveNamespace } from '@stylable/node';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
 import { hashContent } from './hash-content-util';
