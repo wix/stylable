@@ -621,7 +621,7 @@ describe('formatter - experimental', () => {
                 `,
             });
         });
-        it('should respect newlines for value starting in a line after the prop and indent between wrapping value groups', () => {
+        it('should respect newlines for value and wrap at "wrapLineLength"', () => {
             testFormatCss({
                 deindent: true,
                 source: `
@@ -655,6 +655,28 @@ describe('formatter - experimental', () => {
                             1px
                             1px
                             black;
+                    }
+
+                `,
+            });
+        });
+        it('should respect newline', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {
+                        prop1: 
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbb
+                        ccc ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd eee;
+                    }
+                `,
+                X: '|-------------------------------------80---------------------------------------|',
+                expect: `
+                    .root {
+                        prop1:
+                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbb
+                            ccc ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+                            eee;
                     }
 
                 `,
@@ -815,7 +837,7 @@ describe('formatter - experimental', () => {
                     `,
                 });
             });
-            it('should respect newlines inside argument when function is in a different line then the prop', () => {
+            it('should break long function with initial argument newline (respect breakable function)', () => {
                 testFormatCss({
                     deindent: true,
                     source: `
@@ -823,16 +845,19 @@ describe('formatter - experimental', () => {
                             background:
                                 aaaaaaaa(bbbbbbbb(xxxxxxxxxxxxxxx 
                                 ???, 
-                                yyyyyyyyyyyyyyy, zzzzzzzzzzzzzzz));}
+                                yyyyyyyyyyyyyyy, zzzzzzzzzzzzzzz), cccccccc(
+                                    xxxxxxxxxxxxxxx 
+                                    ???, 
+                                    yyyyyyyyyyyyyyy, zzzzzzzzzzzzzzz));}
                     `,
                     X: '|-------------------------------------80---------------------------------------|',
                     expect: `
                         .root {
                             background:
                                 aaaaaaaa(
-                                    bbbbbbbb(
-                                        xxxxxxxxxxxxxxx
-                                        ???,
+                                    bbbbbbbb(xxxxxxxxxxxxxxx ???, yyyyyyyyyyyyyyy, zzzzzzzzzzzzzzz),
+                                    cccccccc(
+                                        xxxxxxxxxxxxxxx ???,
                                         yyyyyyyyyyyyyyy,
                                         zzzzzzzzzzzzzzz
                                     )

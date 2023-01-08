@@ -140,23 +140,18 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                   ast.prop.length +
                   ast.raws.between.length;
             // collect node lengths & minimize spaces
-            const nodeLengthMap = new Map<BaseAstNode, number>();
+            const nodesInfo = new Map<BaseAstNode, { length: number; breakFuncArgs: boolean }>();
             const baseIndent = ' '.repeat(baseIndentSize);
             walkValue(
                 valueAst,
-                normalizeDeclValueAndCollectLength(
-                    preserveComponentNewLines,
-                    NL,
-                    baseIndent,
-                    nodeLengthMap
-                ),
+                normalizeDeclValueAndCollectLength(preserveComponentNewLines, NL, nodesInfo),
                 { insideOut: true }
             );
             // format each top level segment
             flowDeclValueSegment({
                 nodes: valueAst,
                 maxLength: wrapLineLength,
-                nodeLengthMap,
+                nodesInfo,
                 singleIndent: indent,
                 baseIndentSize,
                 NL,
@@ -419,26 +414,30 @@ class AtRuleParamFormatter {
 }
 
 function normalizeDeclValueAndCollectLength(
-    preserveComponentNewLines: boolean,
+    preserveTopLevelNewLines: boolean,
     NL: string,
-    baseIndent: string,
-    nodeLengthMap: Map<ValueParser.BaseAstNode, number>
+    nodesInfo: Map<ValueParser.BaseAstNode, { length: number; breakFuncArgs: boolean }>
 ): (
     node: ValueParser.BaseAstNode,
     parents: ValueParser.BaseAstNode[],
     siblings: ValueParser.BaseAstNode[]
 ) => void {
-    return (node, _parents, siblings) => {
+    return (node, parents, siblings) => {
+        const preserveNewLines = !parents.length
+            ? preserveTopLevelNewLines
+            : nodesInfo.get(parents[parents.length - 1])?.breakFuncArgs;
         if (node.type === 'space') {
             const isNewLine =
-                preserveComponentNewLines &&
+                preserveNewLines &&
                 (node.value.includes('\n') ||
                     node.before.includes('\n') ||
                     node.after.includes('\n'));
-            node.value = isNewLine ? NL + baseIndent : ' ';
+            node.value = isNewLine ? NL : ' ';
             node.before = node.after = '';
         }
+        let breakFuncArgs = false;
         if (node.type === 'call') {
+            breakFuncArgs = node.before.includes('\n');
             node.after = node.before = '';
         }
         if (node.type === 'literal' && node.value === ',') {
@@ -455,7 +454,7 @@ function normalizeDeclValueAndCollectLength(
                 siblings.splice(index - 1, 1);
             }
         }
-        nodeLengthMap.set(node, stringifyCSSValue(node).length);
+        nodesInfo.set(node, { length: stringifyCSSValue(node).length, breakFuncArgs });
     };
 }
 
@@ -466,7 +465,7 @@ function isDeclComponentPreservedNewLines({ prop }: Declaration) {
 function flowDeclValueSegment({
     nodes,
     maxLength,
-    nodeLengthMap,
+    nodesInfo,
     singleIndent,
     baseIndentSize,
     NL,
@@ -474,7 +473,7 @@ function flowDeclValueSegment({
 }: {
     nodes: BaseAstNode[];
     maxLength: number;
-    nodeLengthMap: Map<BaseAstNode, number>;
+    nodesInfo: Map<BaseAstNode, { length: number; breakFuncArgs: boolean }>;
     singleIndent: string;
     baseIndentSize: number;
     NL: string;
@@ -489,10 +488,11 @@ function flowDeclValueSegment({
     for (let index = 0; index <= originalNodes.length - 1; ++index) {
         currentNodeIndex++;
         let node = originalNodes[index];
-        const nodeLength = nodeLengthMap.get(node) || 0;
-        let isOverflow = nodeLength + currentColumn > maxLength;
+        const nodeInfo = nodesInfo.get(node) || { length: 0, breakFuncArgs: false };
+        let isOverflow = nodeInfo.length + currentColumn > maxLength;
         const isFunction = node.type === 'call';
-        const breakableFunction = isFunction && isFunctionBreakable(node as Call, nodeLengthMap);
+        const breakableFunction = isFunction && isFunctionBreakable(node as Call, nodesInfo);
+        const preferFunctionBreak = breakableFunction && nodeInfo.breakFuncArgs;
         const isComma = node.type === 'literal' && node.value === ',';
         const firstInLine = currentColumn === baseIndentSize;
         // force break after comma
@@ -520,12 +520,13 @@ function flowDeclValueSegment({
             currentColumn = baseIndentSize;
             lastInlineComma = undefined;
         } else if (
-            !isOverflow ||
-            (firstInLine && (!isFunction || !breakableFunction)) ||
-            (!breakOnComma && isComma)
+            !preferFunctionBreak &&
+            (!isOverflow ||
+                (firstInLine && (!isFunction || !breakableFunction)) ||
+                (!breakOnComma && isComma))
         ) {
             // add to current line
-            currentColumn += nodeLength;
+            currentColumn += nodeInfo.length;
             if (isComma) {
                 lastInlineComma = { node, column: currentColumn };
             }
@@ -534,7 +535,7 @@ function flowDeclValueSegment({
             splitAndIndentDeclFuncArgs({
                 funcNode: node,
                 maxLength,
-                nodeLengthMap,
+                nodesInfo,
                 singleIndent,
                 baseIndentSize,
                 NL,
@@ -550,7 +551,7 @@ function flowDeclValueSegment({
                 // mutate space to be newline and indent
                 node.value = NL + baseIndent;
             } else {
-                currentColumn += nodeLength;
+                currentColumn += nodeInfo.length;
                 if (prevNode?.type === 'space') {
                     // change prev space to be newline and indent
                     prevNode.value = NL + baseIndent;
@@ -564,8 +565,11 @@ function flowDeclValueSegment({
         prevNode = node;
     }
 }
-function isFunctionBreakable(funcNode: Call, nodeLengthMap: Map<BaseAstNode, number>) {
-    const totalSize = nodeLengthMap.get(funcNode) || funcNode.value.length + 2;
+function isFunctionBreakable(
+    funcNode: Call,
+    nodesInfo: Map<BaseAstNode, { length: number; breakFuncArgs: boolean }>
+) {
+    const totalSize = nodesInfo.get(funcNode)!.length;
     if (totalSize <= 30) {
         return false;
     }
@@ -583,14 +587,14 @@ function isFunctionBreakable(funcNode: Call, nodeLengthMap: Map<BaseAstNode, num
 function splitAndIndentDeclFuncArgs({
     funcNode,
     maxLength,
-    nodeLengthMap,
+    nodesInfo,
     singleIndent,
     baseIndentSize,
     NL,
 }: {
     funcNode: Call;
     maxLength: number;
-    nodeLengthMap: Map<BaseAstNode, number>;
+    nodesInfo: Map<BaseAstNode, { length: number; breakFuncArgs: boolean }>;
     singleIndent: string;
     baseIndentSize: number;
     NL: string;
@@ -604,7 +608,7 @@ function splitAndIndentDeclFuncArgs({
     flowDeclValueSegment({
         nodes: funcNode.args,
         maxLength,
-        nodeLengthMap,
+        nodesInfo,
         singleIndent,
         baseIndentSize: argsIndent.length,
         NL,
