@@ -13,7 +13,7 @@ import type {
 import { processProjects } from './process-projects';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 import { resolveNpmRequests } from './resolve-requests';
-import type { ModuleResolver } from '@stylable/core/src/types';
+import type { ModuleResolver } from '@stylable/core/dist/index-internal';
 import type { MinimalFS } from '@stylable/core';
 
 interface StylableRuntimeConfigs {
