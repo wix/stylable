@@ -144,35 +144,12 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             const baseIndent = ' '.repeat(baseIndentSize);
             walkValue(
                 valueAst,
-                (node, _parents, siblings) => {
-                    if (node.type === 'space') {
-                        const isNewLine =
-                            preserveComponentNewLines &&
-                            (node.value.includes('\n') ||
-                                node.before.includes('\n') ||
-                                node.after.includes('\n'));
-                        node.value = isNewLine ? NL + baseIndent : ' ';
-                        node.before = node.after = '';
-                    }
-                    if (node.type === 'call') {
-                        node.after = node.before = '';
-                    }
-                    if (node.type === 'literal' && node.value === ',') {
-                        // add space after , if not existing
-                        const index = siblings.indexOf(node);
-                        const prevNode = siblings[index - 1];
-                        const nextNode = siblings[index + 1];
-                        // ensure space after
-                        if (nextNode?.type !== 'space') {
-                            siblings.splice(index + 1, 0, space({ value: ' ' }));
-                        }
-                        // remove space before
-                        if (prevNode?.type === 'space') {
-                            siblings.splice(index - 1, 1);
-                        }
-                    }
-                    nodeLengthMap.set(node, stringifyCSSValue(node).length);
-                },
+                normalizeDeclValueAndCollectLength(
+                    preserveComponentNewLines,
+                    NL,
+                    baseIndent,
+                    nodeLengthMap
+                ),
                 { insideOut: true }
             );
             // format each top level segment
@@ -186,7 +163,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                 breakOnComma: false,
             });
 
-            // connect lines
+            // update formatted value
             const beforeValueIndent = hasNewLineBeforeValue ? baseIndent : '';
             ast.value = beforeValueIndent + stringifyCSSValue(valueAst);
             //
@@ -441,6 +418,47 @@ class AtRuleParamFormatter {
     }
 }
 
+function normalizeDeclValueAndCollectLength(
+    preserveComponentNewLines: boolean,
+    NL: string,
+    baseIndent: string,
+    nodeLengthMap: Map<ValueParser.BaseAstNode, number>
+): (
+    node: ValueParser.BaseAstNode,
+    parents: ValueParser.BaseAstNode[],
+    siblings: ValueParser.BaseAstNode[]
+) => void {
+    return (node, _parents, siblings) => {
+        if (node.type === 'space') {
+            const isNewLine =
+                preserveComponentNewLines &&
+                (node.value.includes('\n') ||
+                    node.before.includes('\n') ||
+                    node.after.includes('\n'));
+            node.value = isNewLine ? NL + baseIndent : ' ';
+            node.before = node.after = '';
+        }
+        if (node.type === 'call') {
+            node.after = node.before = '';
+        }
+        if (node.type === 'literal' && node.value === ',') {
+            // add space after , if not existing
+            const index = siblings.indexOf(node);
+            const prevNode = siblings[index - 1];
+            const nextNode = siblings[index + 1];
+            // ensure space after
+            if (nextNode?.type !== 'space') {
+                siblings.splice(index + 1, 0, space({ value: ' ' }));
+            }
+            // remove space before
+            if (prevNode?.type === 'space') {
+                siblings.splice(index - 1, 1);
+            }
+        }
+        nodeLengthMap.set(node, stringifyCSSValue(node).length);
+    };
+}
+
 function isDeclComponentPreservedNewLines({ prop }: Declaration) {
     return prop === 'grid-template-areas' || prop === 'grid-template';
 }
@@ -471,7 +489,7 @@ function flowDeclValueSegment({
     for (let index = 0; index <= originalNodes.length - 1; ++index) {
         currentNodeIndex++;
         let node = originalNodes[index];
-        const nodeLength = nodeLengthMap.get(node)! || 0;
+        const nodeLength = nodeLengthMap.get(node) || 0;
         let isOverflow = nodeLength + currentColumn > maxLength;
         const isFunction = node.type === 'call';
         const breakableFunction = isFunction && isFunctionBreakable(node as Call, nodeLengthMap);
