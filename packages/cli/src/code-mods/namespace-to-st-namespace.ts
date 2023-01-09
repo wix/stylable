@@ -1,4 +1,4 @@
-import { parseNamespace } from '@stylable/core/dist/features/st-namespace';
+import { STNamespace } from '@stylable/core/dist/index-internal';
 import type * as postcss from 'postcss';
 import type { CodeMod } from './types';
 
@@ -8,7 +8,7 @@ export const namespaceToStNamespace: CodeMod = ({ ast }) => {
     const nodesToMod: postcss.AtRule[] = [];
     ast.walkAtRules((atRule) => {
         if (atRule.name === 'namespace') {
-            const namespace = parseNamespace(atRule);
+            const namespace = STNamespace.parseNamespace(atRule);
             if (namespace) {
                 nodesToMod.push(atRule);
             }

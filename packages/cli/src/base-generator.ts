@@ -1,7 +1,7 @@
 import { nodeFs } from '@file-services/node';
 import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
-import { STSymbol } from '@stylable/core/dist/features';
+import { STSymbol } from '@stylable/core/dist/index-internal';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { normalizeRelative, ensureDirectory, tryRun } from './build-tools';

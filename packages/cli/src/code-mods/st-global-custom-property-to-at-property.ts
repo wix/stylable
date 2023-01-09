@@ -1,5 +1,5 @@
 import { CSSVarSymbol, Diagnostics, validateCustomPropertyName } from '@stylable/core';
-import { CSSCustomProperty } from '@stylable/core/dist/features';
+import { CSSCustomProperty } from '@stylable/core/dist/index-internal';
 import type { AtRule } from 'postcss';
 import type { CodeMod } from './types';
 

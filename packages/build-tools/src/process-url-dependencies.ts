@@ -1,7 +1,10 @@
 import type { UrlNode } from 'css-selector-tokenizer';
 import type { StylableMeta } from '@stylable/core';
-import { isAsset, makeAbsolute } from '@stylable/core/dist/index-internal';
-import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
+import {
+    isAsset,
+    makeAbsolute,
+    processDeclarationFunctions,
+} from '@stylable/core/dist/index-internal';
 import { dirname } from 'path';
 
 function defaultFilter() {
