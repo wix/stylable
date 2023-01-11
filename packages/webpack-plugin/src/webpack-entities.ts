@@ -35,7 +35,7 @@ export interface DependencyTemplateContext {
     dependencyTemplates: DependencyTemplates;
 }
 
-type DependencyTemplate = InstanceType<typeof dependencies.ModuleDependency['Template']>;
+type DependencyTemplate = InstanceType<(typeof dependencies.ModuleDependency)['Template']>;
 
 interface InjectDependencyTemplate {
     new (
