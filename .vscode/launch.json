@@ -7,13 +7,6 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
-      "program": "",
-      "args": ["${file}"]
-    },
-    {
-      "type": "pwa-node",
-      "request": "launch",
       "name": "Mocha Current",
       "program": "${workspaceFolder}/scripts/test-runner.js",
       "args": ["--glob", "packages/*/dist/**/${fileBasenameNoExtension}.js", "--timeout", "999999"],
