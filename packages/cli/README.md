@@ -303,6 +303,12 @@ After installing `@stylable/cli`, the `stc-format` command will be available, ru
 | `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
 | `--version`                   | `v`   | Show version number                                           | `boolean`     |                               |
 
+### Experimental formatter
+
+A new experimental formatter is available using the `--experimental` argument.
+
+Currently not all configuration is accepted by the new formatter, the supported formatting options arguments are `--endWithNewline`, `--indentSize`, and a new `--wrapLineLength`.
+
 ### Formatting the source directory
 
 ```sh

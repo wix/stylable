@@ -26,13 +26,11 @@ import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
 import { createDiagnosis } from './diagnosis';
 import { getColorPresentation, resolveDocumentColors } from './feature/color-provider';
-import { format, lspFormattingOptionsToJsBeautifyOptions } from './feature/formatting';
+import { format, StylableLangServiceFormattingOptions } from './feature/formatting';
 import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
 import { typescriptSupport } from './typescript-support';
 import type { ExtendedTsLanguageService } from './types';
-import type { CSSBeautifyOptions } from 'js-beautify';
-import type { FormattingOptions } from 'vscode-languageserver';
 
 export interface StylableLanguageServiceOptions {
     fs: IFileSystem;
@@ -239,34 +237,37 @@ export class StylableLanguageService {
         return null;
     }
 
-    public onDocumentFormatting(filePath: string, options: FormattingOptions): TextEdit[] {
+    public onDocumentFormatting(
+        filePath: string,
+        options: StylableLangServiceFormattingOptions
+    ): TextEdit[] {
         const srcText = this.fs.readFileSync(filePath, 'utf8');
 
         return this.getDocumentFormatting(
             TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, srcText),
             { start: 0, end: srcText.length },
-            lspFormattingOptionsToJsBeautifyOptions(options)
+            options
         );
     }
 
     public onDocumentRangeFormatting(
         filePath: string,
         offset: { start: number; end: number },
-        options: FormattingOptions
+        options: StylableLangServiceFormattingOptions
     ): TextEdit[] {
         const srcText = this.fs.readFileSync(filePath, 'utf8');
 
         return this.getDocumentFormatting(
             TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, srcText),
             offset,
-            lspFormattingOptionsToJsBeautifyOptions(options)
+            options
         );
     }
 
     public getDocumentFormatting(
         doc: TextDocument,
         offset: { start: number; end: number },
-        options: CSSBeautifyOptions
+        options: StylableLangServiceFormattingOptions
     ) {
         return format(doc, offset, options);
     }
