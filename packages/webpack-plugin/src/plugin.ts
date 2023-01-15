@@ -9,7 +9,7 @@ import { createNamespaceStrategyNode } from '@stylable/node';
 import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
-import type { Compilation, Compiler, NormalModule, WebpackError } from 'webpack';
+import type { Compilation, Compiler, Module, NormalModule, WebpackError } from 'webpack';
 
 import {
     getStaticPublicPath,
@@ -142,6 +142,11 @@ export interface StylableWebpackPluginOptions {
      * Defaults to true.
      */
     includeGlobalSideEffects?: boolean;
+    /**
+     * Experimental flag that attaches CSS bundle asset to every chunk that contains references to stylable stylesheets.
+     * The default off mode attaches the only to entry chunks.
+     */
+    experimentalAttachCssToContainingChunks?: boolean;
 }
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
@@ -175,6 +180,8 @@ const defaultOptions = (
     stcConfig: userOptions.stcConfig ?? false,
     depthStrategy: userOptions.depthStrategy ?? 'css+js',
     includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? true,
+    experimentalAttachCssToContainingChunks:
+        userOptions.experimentalAttachCssToContainingChunks ?? false,
 });
 
 export class StylableWebpackPlugin {
@@ -281,7 +288,8 @@ export class StylableWebpackPlugin {
                     compilation,
                     staticPublicPath,
                     stylableModules,
-                    assetsModules
+                    assetsModules,
+                    this.options.experimentalAttachCssToContainingChunks
                 );
 
                 /**
@@ -627,7 +635,8 @@ export class StylableWebpackPlugin {
         compilation: Compilation,
         staticPublicPath: string,
         stylableModules: Map<NormalModule, BuildData | null>,
-        assetsModules: Map<string, NormalModule>
+        assetsModules: Map<string, NormalModule>,
+        experimentalAttachCssToContainingChunks: boolean
     ) {
         /**
          * As a work around unknown behavior
@@ -707,8 +716,23 @@ export class StylableWebpackPlugin {
                                 webpack.util.createHash,
                                 chunk
                             );
-                            for (const entryPoint of compilation.entrypoints.values()) {
-                                entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+
+                            if (!experimentalAttachCssToContainingChunks) {
+                                for (const entryPoint of compilation.entrypoints.values()) {
+                                    entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+                                }
+                            } else {
+                                for (const chunk of compilation.chunks) {
+                                    for (const module of chunk.modulesIterable) {
+                                        if (
+                                            isNormalModule(module) &&
+                                            module.resource?.endsWith('.st.css')
+                                        ) {
+                                            chunk.files.add(cssBundleFilename);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
                     );
@@ -758,6 +782,10 @@ export class StylableWebpackPlugin {
         dependencyTemplates.set(UnusedDependency, new NoopTemplate());
     }
 }
+
+const isNormalModule = (module: Module): module is NormalModule => {
+    return (module as NormalModule).resource !== undefined;
+};
 
 function isWebpackConfigProcessor(config: any): config is {
     webpackPlugin: (
