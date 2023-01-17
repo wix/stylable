@@ -1,12 +1,11 @@
 import { create } from '@stylable/runtime';
+import type { PartialElement } from '@stylable/dom-test-kit';
 import { expect } from 'chai';
-import { JSDOM } from 'jsdom';
 
 export const contractTest =
-    (
+    <T extends PartialElement>(
         StylableUtilClass: any,
-        wrapEl: (el: HTMLElement) => any = (el) => el,
-        options: { scopeSelectorTest: boolean } = { scopeSelectorTest: true }
+        options: { scopeSelectorTest?: boolean; createElement: () => T }
     ) =>
     () => {
         const s = create(
@@ -66,24 +65,20 @@ export const contractTest =
         }
 
         describe('Style state', () => {
-            const { window } = new JSDOM();
             it('hasStyleState returns true if the requested style state exists', async () => {
-                const document = window.document;
-                const elem = document.createElement('a');
+                const elem = options.createElement();
                 elem.classList.add(s.cssStates({ loading: true }));
-                expect(await util.hasStyleState(wrapEl(elem), 'loading')).to.equal(true);
+                expect(await util.hasStyleState(elem, 'loading')).to.equal(true);
             });
             it('getStyleState returns the requested boolean style state value', async () => {
-                const document = window.document;
-                const elem = document.createElement('a');
+                const elem = options.createElement();
                 elem.classList.add(s.cssStates({ loading: true }));
-                expect(await util.getStyleState(wrapEl(elem), 'loading')).to.equal(true);
+                expect(await util.getStyleState(elem, 'loading')).to.equal(true);
             });
             it('getStyleState returns the requested string style state value', async () => {
-                const document = window.document;
-                const elem = document.createElement('a');
+                const elem = options.createElement();
                 elem.classList.add(s.cssStates({ loading: 'value' }));
-                expect(await util.getStyleState(wrapEl(elem), 'loading')).to.equal('value');
+                expect(await util.getStyleState(elem, 'loading')).to.equal('value');
             });
         });
     };
