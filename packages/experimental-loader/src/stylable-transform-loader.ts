@@ -5,7 +5,6 @@ import {
     DiagnosticsMode,
     tryCollectImportsDeep,
 } from '@stylable/core/dist/index-internal';
-import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
@@ -47,8 +46,6 @@ interface LoaderImport {
     url: string;
     index: number;
 }
-
-const optimizer = new StylableOptimizer();
 
 const stylableLoader: LoaderDefinition = function (content) {
     const callback = this.async();
@@ -123,10 +120,6 @@ const stylableLoader: LoaderDefinition = function (content) {
             urlHandler: (url: string) => JSON.stringify(this.utils.contextify(this.context, url)),
         }),
     ];
-
-    if (mode !== 'development') {
-        optimizer.removeStylableDirectives(meta.targetAst!);
-    }
 
     postcss(plugins)
         .process(meta.targetAst!, {

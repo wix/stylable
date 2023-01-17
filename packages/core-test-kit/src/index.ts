@@ -26,3 +26,4 @@ export { matchAllRulesAndDeclarations, matchRuleAndDeclaration } from './match-r
 export { collectAst } from './collect-ast';
 export { testInlineExpects, testInlineExpectsErrors } from './inline-expectation';
 export { testStylableCore } from './test-stylable-core';
+export { deindent } from './deindent';

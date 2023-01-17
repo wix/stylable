@@ -3,7 +3,7 @@ import { topLevelDirectives } from '@stylable/language-service/dist/lib/completi
 import * as asserters from '../../test-kit/completions-asserters';
 import { expect } from 'chai';
 import { createDiagnostics } from '../../test-kit/diagnostics-setup';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 
 describe('Namespace Directive', () => {
     describe('should complete @st-namespace at top level ', () => {
@@ -42,9 +42,9 @@ describe('Namespace Directive', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: deindent`
+                [filePath]: deindent(`
                     @st-namespace "comp";
-                `,
+                `),
             },
             filePath
         );

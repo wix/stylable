@@ -244,7 +244,7 @@ describe(`features/st-mixin`, () => {
                 color: green;
             }
 
-            /* @rule .entry__root { -st-mixin: "mixA" } */
+            /* @rule .entry__root { } */
             .root {
                 /* @transform-error ${mixinDiagnostics.VALUE_CANNOT_BE_STRING()} */
                 -st-mixin: "mixA";

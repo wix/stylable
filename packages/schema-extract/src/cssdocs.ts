@@ -1,6 +1,6 @@
 import { extract, parseWithComments } from 'jest-docblock';
 import type { StylableMeta, StylableSymbol } from '@stylable/core';
-import { plugableRecord } from '@stylable/core/dist/helpers/plugable-record';
+import { plugableRecord } from '@stylable/core/dist/index-internal';
 import type { Rule } from 'postcss';
 
 export interface CssDoc {

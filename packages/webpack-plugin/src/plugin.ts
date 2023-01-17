@@ -146,7 +146,6 @@ export interface StylableWebpackPluginOptions {
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
     removeUnusedComponents: true,
-    removeStylableDirectives: true,
     removeComments: isProd,
     classNameOptimizations: isProd,
     shortNamespaces: isProd,
@@ -429,7 +428,7 @@ export class StylableWebpackPlugin {
                          */
                         for (const resolvedAbsPath of stylableBuildMeta.unusedImports) {
                             module.addDependency(
-                                new this.entities.UnusedDependency(resolvedAbsPath)
+                                new this.entities.UnusedDependency(resolvedAbsPath, 0)
                             );
                         }
 
@@ -501,6 +500,11 @@ export class StylableWebpackPlugin {
                 if (isAssetModule(module)) {
                     assetsModules.set(module.resource, module);
                 }
+                module.dependencies.forEach((dep) => {
+                    if (dep instanceof this.entities.UnusedDependency) {
+                        compilation.moduleGraph.getConnection(dep)?.setActive(false);
+                    }
+                });
                 /**
                  * @remove
                  * This part supports old loaders and should be removed

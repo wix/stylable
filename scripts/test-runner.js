@@ -1,7 +1,6 @@
 //@ts-check
 const yargs = require('yargs');
 const { fork } = require('child_process');
-const { join, dirname } = require('path');
 const { once } = require('events');
 
 const integrationsList = [
@@ -83,7 +82,7 @@ async function run() {
     timeout = timeoutOverride !== null && timeoutOverride !== undefined ? timeoutOverride : timeout;
 
     const childProcess = fork(
-        getMochaRunner(),
+        require.resolve('mocha/bin/_mocha'),
         [
             globPath,
             ...(parallel ? ['--parallel'] : []),
@@ -97,9 +96,9 @@ async function run() {
 
 function createRunParameters({ integrations, packages, corePackages, all, glob }) {
     /**
-     * @type {{ glob: string; timeout?: number }}
+     * @type {{ glob: string; timeout?: number } | undefined}
      */
-    let runParameters;
+    let runParameters = undefined;
 
     if (integrations) {
         runParameters = {
@@ -138,13 +137,6 @@ function createRunParameters({ integrations, packages, corePackages, all, glob }
 
 function stripStylablePrefix(scopeName) {
     return scopeName.replace(/^@stylable\//, '');
-}
-
-function getMochaRunner() {
-    const topLevelDirectory = join(__dirname, '..');
-    const mochaFilePath = require.resolve('mocha', { paths: [topLevelDirectory] });
-
-    return join(dirname(mochaFilePath), 'bin', '_mocha');
 }
 
 function createTestFilesGlob(packagesPattern) {

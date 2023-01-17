@@ -1,7 +1,7 @@
 import { basename } from 'path';
 import type { ClassSymbol, StylableMeta } from '@stylable/core';
-import { STSymbol, CSSKeyframes, CSSLayer, CSSContains } from '@stylable/core/dist/features';
-import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
+import { STSymbol, CSSKeyframes, CSSLayer, CSSContains } from '@stylable/core/dist/index-internal';
+import { processDeclarationFunctions } from '@stylable/core/dist/index-internal';
 import { encode } from 'vlq';
 import {
     ClassesToken,

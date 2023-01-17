@@ -13,6 +13,7 @@ export {
     STCProjects,
     ResolveRequests,
     typedConfiguration,
+    stcConfig,
 } from './types';
 export { resolveConfig } from './config/projects-config';
 export type { WatchHandler } from './watch-handler';

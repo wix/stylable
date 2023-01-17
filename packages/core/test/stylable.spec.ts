@@ -1,6 +1,5 @@
-import { testStylableCore, generateStylableEnvironment } from '@stylable/core-test-kit';
+import { testStylableCore, generateStylableEnvironment, deindent } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import deindent from 'deindent';
 
 describe('Stylable', () => {
     describe(`analyze (generate meta) `, () => {

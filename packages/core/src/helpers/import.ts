@@ -268,14 +268,17 @@ export function parseStImport(atRule: AtRule, context: string, diagnostics: Diag
         }
         if (imports.tagged) {
             for (const [kind, namedTyped] of Object.entries(imports.tagged)) {
-                for (const [impName, impAsName] of Object.entries(namedTyped)) {
+                if (!namedTyped) {
+                    continue;
+                }
+                for (const [impName, impAsName] of namedTyped) {
                     importObj.typed[kind] ??= {};
                     importObj.typed[kind][impAsName] = impName;
                 }
             }
         }
         if (imports.named) {
-            for (const [impName, impAsName] of Object.entries(imports.named)) {
+            for (const [impName, impAsName] of imports.named) {
                 importObj.named[impAsName] = impName;
             }
         }

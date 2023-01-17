@@ -447,7 +447,7 @@ function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
     const isSimplePerSelector = isSimpleSelector(rule.selector);
     const type = isSimplePerSelector.reduce((accType, { type }) => {
         return !accType ? type : accType !== type ? `complex` : type;
-    }, `` as typeof isSimplePerSelector[number]['type']);
+    }, `` as (typeof isSimplePerSelector)[number]['type']);
     const isSimple = type !== `complex`;
     if (decl.prop === `-st-states`) {
         if (isSimple && type !== 'type') {

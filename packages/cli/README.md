@@ -65,10 +65,10 @@ The `stc` configuration should be located in the `stylable.config.js` file under
 The CLI provides a helper method and type definitions to provide a better configuration experience.
 
 ```js
-const { typedConfiguration } = require('@stylable/cli');
+const { stcConfig } = require('@stylable/cli');
 
 // This can be an object or a method that returns an object.
-exports.stcConfig = typedConfiguration({
+exports.stcConfig = stcConfig({
     options: {
         // BuildOptions
     }
@@ -186,9 +186,9 @@ export interface MultipleProjectsConfig<PRESET extends string> {
 
 > Example for simple monorepo with Stylable packages
 ```js
-const { typedConfiguration } = require('@stylable/cli');
+const { stcConfig } = require('@stylable/cli');
 
-exports.stcConfig = typedConfiguration({
+exports.stcConfig = stcConfig({
     options: {
         srcDir: './src',
         outDir: './dist',
@@ -302,6 +302,12 @@ After installing `@stylable/cli`, the `stc-format` command will be available, ru
 | `--require`                   | `r`   | require hooks                                                 | `array`       | `[]`                          |
 | `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
 | `--version`                   | `v`   | Show version number                                           | `boolean`     |                               |
+
+### Experimental formatter
+
+A new experimental formatter is available using the `--experimental` argument.
+
+Currently not all configuration is accepted by the new formatter, the supported formatting options arguments are `--endWithNewline`, `--indentSize`, and a new `--wrapLineLength`.
 
 ### Formatting the source directory
 

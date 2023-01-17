@@ -43,6 +43,29 @@ describe('Stylable Cli', function () {
         ).equal('test-ns-0');
     });
 
+    it('single file build with relative namespace-resolver path', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`,
+            'ns-resolver.js': `
+                let n = 0;
+                module.exports.resolveNamespace = function resolveNamespace() {
+                    return 'test-ns-' + n++;
+                }
+            `,
+        });
+
+        runCliSync(['--rootDir', tempDir.path, '--nsr', './ns-resolver.js', '--cjs']);
+
+        const dirContent = loadDirSync(tempDir.path);
+        expect(
+            evalStylableModule<{ namespace: string }>(
+                dirContent['style.st.css.js'],
+                'style.st.css.js'
+            ).namespace
+        ).equal('test-ns-0');
+    });
+
     it('single file build with outDir', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -163,7 +186,16 @@ describe('Stylable Cli', function () {
             'style.st.css': srcContent,
         });
 
-        runCliSync(['--rootDir', tempDir.path, '--outDir', 'dist', '--stcss', '--dts', '--unsr', 'false']);
+        runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            'dist',
+            '--stcss',
+            '--dts',
+            '--unsr',
+            'false',
+        ]);
 
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent['dist/style.st.css'];

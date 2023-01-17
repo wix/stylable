@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import deindent from 'deindent';
 import { generateStylableResult } from '@stylable/core-test-kit';
 import { removeCommentNodes, StylableOptimizer } from '@stylable/optimizer';
 
@@ -25,33 +24,6 @@ describe('StylableOptimizer', () => {
         removeCommentNodes(ast);
 
         expect(ast.toString().trim()).to.equal(`.a { color: red  green }`);
-    });
-
-    it('removeStylableDirectives', () => {
-        const ast = postcss.parse(deindent`
-                .a {
-                    -st-: 1;
-                    -st-states: 2;
-                }
-                @media (max-width) {
-                    .c {
-                        -st-: 1;
-                    }
-                }
-            `);
-
-        (ast as any).cleanRaws(false);
-
-        new StylableOptimizer().removeStylableDirectives(ast);
-
-        expect(ast.toString()).to.equal(
-            deindent`
-                .a {}
-                @media (max-width) {
-                    .c {}
-                }
-            `.trim()
-        );
     });
 
     it('removeUnusedComponents', () => {

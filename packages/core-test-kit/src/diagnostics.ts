@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import deindent from 'deindent';
 import type { Position } from 'postcss';
 import { Diagnostics, DiagnosticSeverity, StylableMeta, StylableResults } from '@stylable/core';
 import { DiagnosticBase, safeParse, StylableProcessor } from '@stylable/core/dist/index-internal';
+import { deindent } from './deindent';
 import { Config, generateStylableResult } from './generate-test-util';
 
 export interface Diagnostic {
@@ -266,7 +266,7 @@ export function expectTransformDiagnostics(
 
     const locations: Record<string, Location> = {};
     for (const path in config.files) {
-        const source = findTestLocations(deindent(config.files[path].content).trim());
+        const source = findTestLocations(deindent(config.files[path].content));
         config.files[path].content = source.css;
         locations[path] = source;
     }
