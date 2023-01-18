@@ -1,7 +1,7 @@
 import { fork, spawnSync, ChildProcess } from 'child_process';
 import { on } from 'events';
 import type { Readable } from 'stream';
-import { sleep } from 'promise-assist';
+import { sleep, timeout as timeoutPromise } from 'promise-assist';
 
 type ActionResponse = void | { sleep?: number };
 
@@ -42,16 +42,11 @@ export function createCliTester() {
         const found: { message: string; time: number }[] = [];
         const startTime = Date.now();
 
-        return Promise.race([
-            onTimeout(timeout, () => new Error(`${JSON.stringify(found, null, 3)}\n\n${output()}`)),
+        return timeoutPromise(
             runSteps(),
-        ]);
-
-        function onTimeout(ms: number, rejectWith?: () => unknown) {
-            return new Promise<{ output(): string }>((resolve, reject) =>
-                setTimeout(() => (rejectWith ? reject(rejectWith()) : resolve({ output })), ms)
-            );
-        }
+            timeout,
+            () => `${JSON.stringify(found, null, 3)}\n\n${output()}`
+        );
 
         async function runSteps() {
             for await (const line of readLines(process.stdout!)) {
