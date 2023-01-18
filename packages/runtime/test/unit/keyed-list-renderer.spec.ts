@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { JSDOM } from 'jsdom';
 import { createDOMListRenderer, DOMListRenderer, NodeRenderer } from '@stylable/runtime';
+import { MinimalDocument } from '@stylable/core-test-kit';
 
 interface TestNode {
     key: string;
@@ -31,13 +31,12 @@ describe('createDOMListRenderer', () => {
         },
     };
     beforeEach(() => {
-        const dom = new JSDOM(`
-            <body><div id="container"></div></body>
-        `);
+        document = new MinimalDocument() as unknown as Document;
+        container = document.createElement('div');
+        container.setAttribute('id', 'container');
+        document.body.append(container);
 
         const renderer = createDOMListRenderer(basicNodeRenderer);
-        document = dom.window.document;
-        container = document.getElementById('container')!;
         render = renderer.render;
     });
 

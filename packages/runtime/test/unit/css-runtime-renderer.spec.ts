@@ -1,10 +1,15 @@
 import { expect } from 'chai';
-import { JSDOM } from 'jsdom';
 import { RuntimeRenderer } from '@stylable/runtime';
+import { MinimalDocument, MinimalElement } from '@stylable/core-test-kit';
 
-function assertStyle(node: Element, { $css, key }: { $css: string; key: string }) {
+function assertStyle(node: MinimalElement, { $css, key }: { $css: string; key: string }) {
     expect(node.getAttribute('st-id')).to.equal(key);
     expect(node.textContent).to.equal($css);
+}
+function createMockWindow() {
+    return {
+        document: new MinimalDocument(),
+    };
 }
 
 describe('css-runtime-renderer', () => {
@@ -296,11 +301,10 @@ describe('css-runtime-renderer', () => {
 
     describe('init', () => {
         it('init with window context once', () => {
-            const { window } = new JSDOM(`
-              <body>
-                  <div id="container"></div>
-              </body>
-          `);
+            const window = createMockWindow();
+            const container = window.document.createElement('div');
+            container.setAttribute('id', 'container');
+            window.document.body.append(container);
 
             expect(api.renderer).to.equal(null);
             expect(api.window).to.equal(null);
@@ -314,11 +318,10 @@ describe('css-runtime-renderer', () => {
         }).timeout(25000);
 
         it('init should render once', () => {
-            const { window } = new JSDOM(`
-              <body>
-                  <div id="container"></div>
-              </body>
-          `);
+            const window = createMockWindow();
+            const container = window.document.createElement('div');
+            container.setAttribute('id', 'container');
+            window.document.body.append(container);
 
             const document = window.document;
 
@@ -345,11 +348,10 @@ describe('css-runtime-renderer', () => {
         });
 
         it('init should render theme', () => {
-            const { window } = new JSDOM(`
-              <body>
-                  <div id="container"></div>
-              </body>
-          `);
+            const window = createMockWindow();
+            const container = window.document.createElement('div');
+            container.setAttribute('id', 'container');
+            window.document.body.append(container);
 
             const document = window.document;
 
