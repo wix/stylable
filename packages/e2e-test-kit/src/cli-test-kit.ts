@@ -1,6 +1,7 @@
 import { fork, spawnSync, ChildProcess } from 'child_process';
 import { on } from 'events';
 import type { Readable } from 'stream';
+import { sleep } from 'promise-assist';
 
 type ActionResponse = void | { sleep?: number };
 
@@ -41,16 +42,11 @@ export function createCliTester() {
         const found: { message: string; time: number }[] = [];
         const startTime = Date.now();
 
-        return Promise.race([
-            onTimeout(timeout, () => new Error(`${JSON.stringify(found, null, 3)}\n\n${output()}`)),
+        return timeoutPromise(
             runSteps(),
-        ]);
-
-        function onTimeout(ms: number, rejectWith?: () => unknown) {
-            return new Promise<{ output(): string }>((resolve, reject) =>
-                setTimeout(() => (rejectWith ? reject(rejectWith()) : resolve({ output })), ms)
-            );
-        }
+            timeout,
+            () => `${JSON.stringify(found, null, 3)}\n\n${output()}`
+        );
 
         async function runSteps() {
             for await (const line of readLines(process.stdout!)) {
@@ -63,10 +59,10 @@ export function createCliTester() {
                     });
 
                     if (step.action) {
-                        const { sleep } = (await step.action()) || {};
+                        const { sleep: sleepMs } = (await step.action()) || {};
 
-                        if (typeof sleep === 'number') {
-                            await onTimeout(sleep);
+                        if (typeof sleepMs === 'number') {
+                            await sleep(sleepMs);
                         }
                     }
 
@@ -88,6 +84,35 @@ export function createCliTester() {
             processes.length = 0;
         },
     };
+}
+
+export function timeoutPromise<T>(
+    originalPromise: Promise<T>,
+    ms: number,
+    timeoutMessage: string | (() => string) = `timed out after ${ms}ms`
+): Promise<T> {
+    return new Promise((resolve, reject) => {
+        const timerId = setTimeout(
+            () =>
+                reject(
+                    new Error(
+                        typeof timeoutMessage === 'function' ? timeoutMessage() : timeoutMessage
+                    )
+                ),
+            ms
+        );
+
+        originalPromise.then(
+            (resolvedValue) => {
+                clearTimeout(timerId);
+                resolve(resolvedValue);
+            },
+            (rejectReason) => {
+                clearTimeout(timerId);
+                reject(rejectReason);
+            }
+        );
+    });
 }
 
 async function* readLines(readable: Readable) {
