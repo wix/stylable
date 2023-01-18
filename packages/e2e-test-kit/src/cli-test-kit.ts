@@ -1,6 +1,7 @@
 import { fork, spawnSync, ChildProcess } from 'child_process';
 import { on } from 'events';
 import type { Readable } from 'stream';
+import { sleep } from 'promise-assist';
 
 type ActionResponse = void | { sleep?: number };
 
@@ -63,10 +64,10 @@ export function createCliTester() {
                     });
 
                     if (step.action) {
-                        const { sleep } = (await step.action()) || {};
+                        const { sleep: sleepMs } = (await step.action()) || {};
 
-                        if (typeof sleep === 'number') {
-                            await onTimeout(sleep);
+                        if (typeof sleepMs === 'number') {
+                            await sleep(sleepMs);
                         }
                     }
 
