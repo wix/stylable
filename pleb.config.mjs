@@ -1,3 +1,3 @@
 export default {
-  // pinnedPackages: [{ name: 'name', reason: 'reason' }],
+  pinnedPackages: [{ name: 'rimraf', reason: 'drop support for glob' }],
 };

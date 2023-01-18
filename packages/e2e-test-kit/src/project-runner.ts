@@ -105,7 +105,7 @@ export class ProjectRunner {
         const compiler = webpack(this.loadWebpackConfig());
         this.compiler = compiler;
 
-        const firstCompile = deferred<webpack.Stats>();
+        const firstCompile = deferred<webpack.Stats|undefined>();
         this.watchingHandle = compiler.watch(
             {
                 aggregateTimeout: 1,
