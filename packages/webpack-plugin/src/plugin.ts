@@ -144,7 +144,7 @@ export interface StylableWebpackPluginOptions {
     includeGlobalSideEffects?: boolean;
     /**
      * Experimental flag that attaches CSS bundle asset to every chunk that contains references to stylable stylesheets.
-     * The default off mode attaches the only to entry chunks.
+     * The default off mode attaches only to entry chunks.
      */
     experimentalAttachCssToContainingChunks?: boolean;
 }
