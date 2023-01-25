@@ -197,6 +197,7 @@ describe('edit-time-parser', () => {
                 prop:xxx:val;
                 "xxx" prop:val;
                 prop xxx:val;
+                :
             }
         `);
 
@@ -205,6 +206,7 @@ describe('edit-time-parser', () => {
                 prop:xxx:val;
                 "xxx" prop:val;
                 prop xxx:val;
+                :
             }
         `);
         expect(ast.toString(), 'stringify').to.equal(expected);
@@ -235,6 +237,15 @@ describe('edit-time-parser', () => {
                 value: 'val',
             });
             expect(decl.raws.between).to.eql(' xxx:');
+            expect(errorNodes.get(decl), 'errors').to.eql(undefined); // ToDo: error?
+        }
+        {
+            const decl = assertDecl(rule.nodes[3]);
+            expect(decl).to.contain({
+                prop: '',
+                value: '',
+            });
+            expect(decl.raws.between).to.eql(':');
             expect(errorNodes.get(decl), 'errors').to.eql(undefined); // ToDo: error?
         }
     });

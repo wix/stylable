@@ -223,6 +223,10 @@ class EditTimeParser extends Parser {
                     this.tokenizer.back(tokens.pop()!);
                 }
             }
+            if (!wordBeforeColon) {
+                const colonToken = tokens[colonIndex];
+                tokens.splice(colonIndex, 0, ['word', '', colonToken[2], colonToken[2]]);
+            }
             this.decl(tokens, customProperty);
             node = this.current.nodes[this.current.nodes.length - 1] as postcss.Declaration;
             this.reportNode(node, 'ambiguity', AMBIGUITY.POSSIBLE_UNOPENED_RULE);
