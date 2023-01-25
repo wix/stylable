@@ -54,10 +54,12 @@ import {
 import type { ExtendedTsLanguageService } from './types';
 import { getAtRuleByPosition, isComment, isDeclaration } from './utils/postcss-ast-utils';
 import type { CursorPosition, SelectorChunk } from './utils/selector-analyzer';
+import type { LangServiceContext } from '../lib-new/lang-service-context';
 
 const { hasOwnProperty } = Object.prototype;
 
 export interface ProviderOptions {
+    context: LangServiceContext;
     meta: StylableMeta;
     fs: IFileSystem;
     stylable: Stylable;

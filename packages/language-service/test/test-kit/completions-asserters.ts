@@ -1,12 +1,10 @@
 import path from 'path';
 import fs from 'fs';
 import { expect } from 'chai';
-import { TextDocument } from 'vscode-languageserver-textdocument';
-import { URI } from 'vscode-uri';
 import type { ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
 import { Completion, Snippet } from '@stylable/language-service/dist/lib/completion-types';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
-import { getCaretPosition } from './asserters';
+import { LangServiceContext } from '@stylable/language-service/dist/lib-new/lang-service-context';
 
 function assertPresent(
     actualCompletions: Completion[],
@@ -69,15 +67,19 @@ function assertNotPresent(
 export function getCompletions(fileName: string, prefix = '') {
     const fullPath = path.join(CASES_PATH, fileName);
     const src: string = fs.readFileSync(fullPath).toString();
-
-    const pos = getCaretPosition(src);
-    pos.character += prefix.length;
-
-    const completions = stylableLSP.provideCompletionItemsFromSrc(
-        src.replace('|', prefix),
-        pos,
-        fullPath
+    const stat = fs.statSync(fullPath);
+    const offset = src.indexOf('|') + prefix.length;
+    const context = new LangServiceContext(
+        stylableLSP.getStylable(),
+        {
+            path: fullPath,
+            stat,
+            content: src.replace('|', prefix),
+        },
+        offset
     );
+
+    const completions = stylableLSP.provideCompletionItemsFromSrc(context);
 
     return {
         completions,
@@ -93,17 +95,18 @@ export function getCompletions(fileName: string, prefix = '') {
 export function getStylableAndCssCompletions(fileName: string) {
     const fullPath = path.join(CASES_PATH, fileName);
     const src: string = fs.readFileSync(fullPath).toString();
-
-    const pos = getCaretPosition(src);
-
-    const document = TextDocument.create(
-        URI.file(fullPath).toString(),
-        'stylable',
-        1,
-        src.replace('|', '')
+    const stat = fs.statSync(fullPath);
+    const offset = src.indexOf('|');
+    const context = new LangServiceContext(
+        stylableLSP.getStylable(),
+        {
+            path: fullPath,
+            stat,
+            content: src.replace('|', ''),
+        },
+        offset
     );
-
-    return stylableLSP.getCompletions(document, fullPath, pos);
+    return stylableLSP.getCompletions(context);
 }
 
 // syntactic

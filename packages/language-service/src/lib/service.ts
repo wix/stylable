@@ -31,6 +31,7 @@ import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
 import { typescriptSupport } from './typescript-support';
 import type { ExtendedTsLanguageService } from './types';
+import { LangServiceContext } from '../lib-new/lang-service-context';
 
 export interface StylableLanguageServiceOptions {
     fs: IFileSystem;
@@ -65,15 +66,8 @@ export class StylableLanguageService {
         const stylableFile = this.readStylableFile(filePath);
 
         if (stylableFile && stylableFile.stat.isFile()) {
-            const document = TextDocument.create(
-                URI.file(filePath).toString(),
-                'stylable',
-                stylableFile.stat.mtime.getTime(),
-                stylableFile.content
-            );
-            const position = document.positionAt(offset);
-
-            return this.getCompletions(document, filePath, position);
+            const context = new LangServiceContext(this.stylable, stylableFile, offset);
+            return this.getCompletions(context);
         } else {
             return [];
         }
@@ -272,28 +266,22 @@ export class StylableLanguageService {
         return format(doc, offset, options);
     }
 
-    public provideCompletionItemsFromSrc(src: string, pos: Position, fileName: string) {
-        return this.provider.provideCompletionItemsFromSrc(src, pos, fileName, this.fs);
+    public provideCompletionItemsFromSrc(context: LangServiceContext) {
+        return this.provider.provideCompletionItemsFromSrc(context, this.fs);
     }
 
-    public getCompletions(document: TextDocument, filePath: string, position: Position) {
-        const content = document.getText();
+    public getCompletions(context: LangServiceContext) {
+        const content = context.document.getText();
+        const filePath = context.meta.source;
+        const position = context.getPosition();
 
-        const stCompletions = this.provider.provideCompletionItemsFromSrc(
-            content,
-            {
-                line: position.line,
-                character: position.character,
-            },
-            filePath,
-            this.fs
-        );
+        const stCompletions = this.provider.provideCompletionItemsFromSrc(context, this.fs);
 
         const ast = safeParse(content, { from: filePath });
         const cleanDocument = this.cssService.createSanitizedDocument(
             ast,
             filePath,
-            document.version
+            context.document.version
         );
 
         const groupedCompletions = new Map<string, CompletionItem>();
@@ -416,6 +404,7 @@ export class StylableLanguageService {
             if (stat.isFile()) {
                 const content = this.fs.readFileSync(filePath, 'utf8');
                 return {
+                    path: filePath,
                     content,
                     stat,
                 };
@@ -428,7 +417,8 @@ export class StylableLanguageService {
     }
 }
 
-interface StylableFile {
+export interface StylableFile {
+    path: string;
     stat: IFileSystemStats;
     content: string;
 }
