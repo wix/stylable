@@ -604,13 +604,15 @@ export function tryCollectImportsDeep(
 
             if (!imports.has(resolved)) {
                 imports.add(resolved);
-                tryCollectImportsDeep(
-                    resolver,
-                    resolver.analyze(resolved),
-                    imports,
-                    onImport,
-                    depth + 1
-                );
+                if (resolved.endsWith('.st.css')) {
+                    tryCollectImportsDeep(
+                        resolver,
+                        resolver.analyze(resolved),
+                        imports,
+                        onImport,
+                        depth + 1
+                    );
+                }
             }
         } catch {
             /** */
