@@ -203,6 +203,7 @@ export const hooks = createFeature<{
             { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name: node.value } },
         ];
         selectorContext.setCurrentAnchor({ name: node.value, type: 'class', resolved });
+        selectorContext.setNodeResolve(node, resolved);
         const { symbol, meta } = getOriginDefinition(resolved);
         if (selectorContext.originMeta === meta && symbol[`-st-states`]) {
             // ToDo: refactor out to transformer validation phase
@@ -213,7 +214,9 @@ export const hooks = createFeature<{
                 context.diagnostics
             );
         }
-        namespaceClass(meta, symbol, node, originMeta);
+        if (selectorContext.transform) {
+            namespaceClass(meta, symbol, node, originMeta);
+        }
     },
     transformJSExports({ exports, resolved }) {
         Object.assign(exports.classes, resolved);

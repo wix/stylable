@@ -13,6 +13,7 @@ import {
     groupCompoundSelectors,
     CompoundSelector,
     splitCompoundSelectors,
+    ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
 import { isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
@@ -361,12 +362,10 @@ export class StylableTransformer {
         topNestClassName?: string,
         unwrapGlobals = false
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
-        const context = new ScopeContext(
+        const context = this.createSelectorContext(
             originMeta,
-            this.resolver,
             parseSelectorWithCache(selector, { clone: true }),
             rule || postcss.rule({ selector }),
-            this.scopeSelectorAst.bind(this),
             topNestClassName
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
@@ -378,6 +377,21 @@ export class StylableTransformer {
             selector: stringifySelector(targetSelectorAst),
             elements: context.elements,
         };
+    }
+    public createSelectorContext(
+        meta: StylableMeta,
+        selectorAst: SelectorList,
+        rule: postcss.Rule,
+        topNestClassName?: string
+    ) {
+        return new ScopeContext(
+            meta,
+            this.resolver,
+            selectorAst,
+            rule,
+            this.scopeSelectorAst.bind(this),
+            topNestClassName
+        );
     }
     public scopeSelectorAst(context: ScopeContext): SelectorList {
         const { originMeta, selectorAst } = context;
@@ -497,14 +511,22 @@ export class StylableTransformer {
                     type: 'pseudo-element',
                     resolved,
                 });
+                context.setNodeResolve(node, resolved);
 
                 const resolvedPart = getOriginDefinition(resolved);
 
-                if (!resolvedPart.symbol[`-st-root`] && !isFirstInSelector) {
-                    // insert nested combinator before internal custom element
-                    context.insertDescendantCombinatorBeforePseudoElement();
+                if (context.transform) {
+                    if (!resolvedPart.symbol[`-st-root`] && !isFirstInSelector) {
+                        // insert nested combinator before internal custom element
+                        context.insertDescendantCombinatorBeforePseudoElement();
+                    }
+                    CSSClass.namespaceClass(
+                        resolvedPart.meta,
+                        resolvedPart.symbol,
+                        node,
+                        originMeta
+                    );
                 }
-                CSSClass.namespaceClass(resolvedPart.meta, resolvedPart.symbol, node, originMeta);
                 break;
             }
 
@@ -515,6 +537,7 @@ export class StylableTransformer {
                     type: 'pseudo-element',
                     resolved: [],
                 });
+                context.setNodeResolve(node, []);
 
                 if (
                     !nativePseudoElements.includes(node.value) &&
@@ -550,6 +573,7 @@ export class StylableTransformer {
                 type: origin._kind,
                 resolved: resolvedSymbols[origin._kind][origin.name],
             });
+            context.setNodeResolve(node, resolvedSymbols[origin._kind][origin.name]);
         }
     }
     private handleCustomSelector(
@@ -579,6 +603,7 @@ export class StylableTransformer {
                 type: 'pseudo-element',
                 resolved: internalContext.currentAnchor.resolved,
             });
+            context.setNodeResolve(node, internalContext.currentAnchor.resolved);
         } else {
             // unknown context due to multiple selectors
             context.setCurrentAnchor({
@@ -586,8 +611,11 @@ export class StylableTransformer {
                 type: 'pseudo-element',
                 resolved: anyElementAnchor(meta).resolved,
             });
+            context.setNodeResolve(node, anyElementAnchor(meta).resolved);
         }
-        Object.assign(node, customAstSelectors[0]);
+        if (context.transform) {
+            Object.assign(node, customAstSelectors[0]);
+        }
         // first one handled inline above
         for (let i = 1; i < customAstSelectors.length; i++) {
             const selectorNode = context.selectorAst[context.selectorIndex];
@@ -702,9 +730,11 @@ interface ScopeAnchor {
 }
 
 export class ScopeContext {
+    public transform = true;
     public additionalSelectors: Array<() => Selector> = [];
     public selectorIndex = -1;
     public elements: any[] = [];
+    public selectorAstResolveMap = new Map<ImmutableSelectorNode, CSSResolve[]>();
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
@@ -719,6 +749,9 @@ export class ScopeContext {
     ) {}
     public initRootAnchor(anchor: ScopeAnchor) {
         this.currentAnchor = anchor;
+    }
+    public setNodeResolve(node: SelectorNode, resolve: CSSResolve[]) {
+        this.selectorAstResolveMap.set(node, resolve);
     }
     public setCurrentAnchor(anchor: ScopeAnchor) {
         if (this.selectorIndex !== undefined && this.selectorIndex !== -1) {
