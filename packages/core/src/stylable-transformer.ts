@@ -161,8 +161,6 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
-            replaceValueHook: this.replaceValueHook,
-            path: undefined,
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
