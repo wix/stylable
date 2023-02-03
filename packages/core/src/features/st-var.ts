@@ -174,11 +174,11 @@ export class StylablePublicApi {
 
     public getComputed(meta: StylableMeta) {
         const topLevelDiagnostics = new Diagnostics();
-        const evaluator = new StylableEvaluator();
         const getResolvedSymbols = createSymbolResolverWithCache(
             this.stylable.resolver,
             topLevelDiagnostics
         );
+        const evaluator = new StylableEvaluator({ getResolvedSymbols });
 
         const { var: stVars } = getResolvedSymbols(meta);
 
@@ -188,7 +188,6 @@ export class StylablePublicApi {
             const diagnostics = new Diagnostics();
             const { outputValue, topLevelType, runtimeValue } = evaluator.evaluateValue(
                 {
-                    getResolvedSymbols,
                     resolver: this.stylable.resolver,
                     evaluator,
                     meta,
@@ -394,8 +393,8 @@ function evaluateValueCall(
                 }
             }
 
-            parsedNode.resolvedValue = data.valueHook
-                ? data.valueHook(outputValue, varName, true, passedThrough)
+            parsedNode.resolvedValue = context.evaluator.valueHook
+                ? context.evaluator.valueHook(outputValue, varName, true, passedThrough)
                 : outputValue;
         } else if (possibleNonSTVarSymbol) {
             const type = resolvedSymbols.mainNamespace[varName];
@@ -403,8 +402,8 @@ function evaluateValueCall(
                 const deepResolve = resolvedSymbols.js[varName];
                 const importedType = typeof deepResolve.symbol;
                 if (importedType === 'string') {
-                    parsedNode.resolvedValue = data.valueHook
-                        ? data.valueHook(deepResolve.symbol, varName, false, passedThrough)
+                    parsedNode.resolvedValue = context.evaluator.valueHook
+                        ? context.evaluator.valueHook(deepResolve.symbol, varName, false, passedThrough)
                         : deepResolve.symbol;
                 } else if (node) {
                     // unsupported Javascript value

@@ -19,6 +19,7 @@ import { getOriginDefinition } from './helpers/resolve';
 import {
     ClassSymbol,
     CSSContains,
+    CSSMedia,
     ElementSymbol,
     FeatureTransformContext,
     STNamespace,
@@ -120,7 +121,7 @@ export class StylableTransformer {
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
     private defaultStVarOverride: Record<string, string>;
-    private evaluator: StylableEvaluator = new StylableEvaluator();
+    private evaluator: StylableEvaluator;
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
     private directiveNodes: postcss.Declaration[] = [];
     constructor(options: TransformerOptions) {
@@ -138,6 +139,10 @@ export class StylableTransformer {
         this.mode = options.mode || 'production';
         this.defaultStVarOverride = options.stVarOverride || {};
         this.getResolvedSymbols = createSymbolResolverWithCache(this.resolver, this.diagnostics);
+        this.evaluator = new StylableEvaluator({
+            valueHook: this.replaceValueHook,
+            getResolvedSymbols: this.getResolvedSymbols,
+        });
     }
     public transform(meta: StylableMeta): StylableResults {
         const metaExports: StylableExports = {
@@ -156,6 +161,8 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            replaceValueHook: this.replaceValueHook,
+            path: undefined,
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
@@ -178,19 +185,24 @@ export class StylableTransformer {
         if (meta.type !== 'stylable') {
             return;
         }
-        const prevStVarOverride = this.evaluator.stVarOverride;
-        this.evaluator.stVarOverride = stVarOverride;
+        const { evaluator } = this;
+
+        const prevStVarOverride = evaluator.stVarOverride;
+        evaluator.stVarOverride = stVarOverride;
+
         const transformContext = {
             meta,
             diagnostics: this.diagnostics,
             resolver: this.resolver,
-            evaluator: this.evaluator,
+            evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            passedThrough: path,
         };
         const transformResolveOptions = {
             context: transformContext,
         };
         prepareAST(transformContext, ast);
+
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
         const keyframesResolve = CSSKeyframes.hooks.transformResolve(transformResolveOptions);
@@ -198,24 +210,14 @@ export class StylableTransformer {
         const containsResolve = CSSContains.hooks.transformResolve(transformResolveOptions);
         const cssVarsMapping = CSSCustomProperty.hooks.transformResolve(transformResolveOptions);
 
-        ast.walkRules((rule) => {
-            if (isChildOfAtRule(rule, 'keyframes')) {
-                return;
-            }
-            rule.selector = this.scopeRule(meta, rule, topNestClassName);
-        });
-
-        ast.walkAtRules((atRule) => {
+        const handleAtRule = (atRule: postcss.AtRule) => {
             const { name } = atRule;
             if (name === 'media') {
-                atRule.params = this.evaluator.evaluateValue(transformContext, {
-                    value: atRule.params,
-                    meta,
-                    node: atRule,
-                    valueHook: this.replaceValueHook,
-                    passedThrough: path.slice(),
-                    initialNode: atRule,
-                }).outputValue;
+                CSSMedia.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: {},
+                });
             } else if (name === 'property') {
                 CSSCustomProperty.hooks.transformAtRuleNode({
                     context: transformContext,
@@ -247,9 +249,8 @@ export class StylableTransformer {
                     resolved: containsResolve,
                 });
             }
-        });
-
-        ast.walkDecls((decl) => {
+        };
+        const handleDeclaration = (decl: postcss.Declaration) => {
             if (validateCustomPropertyName(decl.prop)) {
                 CSSCustomProperty.hooks.transformDeclaration({
                     context: transformContext,
@@ -286,10 +287,22 @@ export class StylableTransformer {
                         value: decl.value,
                         meta,
                         node: decl,
-                        valueHook: this.replaceValueHook,
                         passedThrough: path.slice(),
                         cssVarsMapping,
                     }).outputValue;
+            }
+        };
+
+        ast.walk((node) => {
+            if (node.type === 'rule') {
+                if (isChildOfAtRule(node, 'keyframes')) {
+                    return;
+                }
+                node.selector = this.scopeRule(meta, node, topNestClassName);
+            } else if (node.type === 'atrule') {
+                handleAtRule(node);
+            } else if (node.type === 'decl') {
+                handleDeclaration(node);
             }
         });
 
@@ -438,6 +451,8 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
+            replaceValueHook: this.replaceValueHook,
+            path: undefined,
         };
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({
