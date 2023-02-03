@@ -22,7 +22,6 @@ export interface EvalValueData {
     value: string;
     passedThrough: string[];
     node?: postcss.Node;
-    // valueHook?: replaceValueHook;
     meta: StylableMeta;
     stVarOverride?: Record<string, string> | null;
     cssVarsMapping?: Record<string, string>;

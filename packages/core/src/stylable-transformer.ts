@@ -451,8 +451,6 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
-            replaceValueHook: this.replaceValueHook,
-            path: undefined,
         };
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({
