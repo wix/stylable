@@ -41,3 +41,5 @@ export type { LayerSymbol } from './css-layer';
 
 export * as CSSContains from './css-contains';
 export type { ContainerSymbol } from './css-contains';
+
+export * as CSSMedia from './css-media';

@@ -20,9 +20,7 @@ import { unbox, CustomValueError } from './custom-values';
 
 export interface EvalValueData {
     value: string;
-    passedThrough: string[];
     node?: postcss.Node;
-    valueHook?: replaceValueHook;
     meta: StylableMeta;
     stVarOverride?: Record<string, string> | null;
     cssVarsMapping?: Record<string, string>;
@@ -40,23 +38,31 @@ export interface EvalValueResult {
 
 export class StylableEvaluator {
     public stVarOverride: Record<string, string> | null | undefined;
-    constructor(options: { stVarOverride?: Record<string, string> | null } = {}) {
+    public getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols;
+    public valueHook?: replaceValueHook;
+    constructor(options: {
+        stVarOverride?: Record<string, string> | null;
+        valueHook?: replaceValueHook;
+        getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols;
+    }) {
+        this.valueHook = options.valueHook;
         this.stVarOverride = options.stVarOverride;
+        this.getResolvedSymbols = options.getResolvedSymbols;
     }
     evaluateValue(
-        context: FeatureTransformContext,
-        data: Omit<EvalValueData, 'passedThrough'> & { passedThrough?: string[] }
+        context: Omit<FeatureTransformContext, 'getResolvedSymbols'>,
+        data: Omit<EvalValueData, 'passedThrough' | 'valueHook'>
     ) {
         return processDeclarationValue(
             context.resolver,
-            context.getResolvedSymbols,
+            this.getResolvedSymbols,
             data.value,
             data.meta,
             data.node,
             data.stVarOverride || this.stVarOverride,
-            data.valueHook,
+            this.valueHook,
             context.diagnostics,
-            data.passedThrough,
+            context.passedThrough,
             data.cssVarsMapping,
             data.args,
             data.rootArgument,
@@ -124,7 +130,11 @@ export function processDeclarationValue(
     rootArgument?: string,
     initialNode?: postcss.Node
 ): EvalValueResult {
-    const evaluator = new StylableEvaluator({ stVarOverride: variableOverride });
+    const evaluator = new StylableEvaluator({
+        stVarOverride: variableOverride,
+        valueHook,
+        getResolvedSymbols,
+    });
     const resolvedSymbols = getResolvedSymbols(meta);
     const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -138,12 +148,11 @@ export function processDeclarationValue(
                         resolver,
                         evaluator,
                         getResolvedSymbols,
+                        passedThrough,
                     },
                     data: {
                         value,
-                        passedThrough,
                         node,
-                        valueHook,
                         meta,
                         stVarOverride: variableOverride,
                         cssVarsMapping,
@@ -178,8 +187,8 @@ export function processDeclarationValue(
                 const formatterArgs = getFormatterArgs(parsedNode);
                 try {
                     parsedNode.resolvedValue = formatter.symbol.apply(null, formatterArgs);
-                    if (valueHook && typeof parsedNode.resolvedValue === 'string') {
-                        parsedNode.resolvedValue = valueHook(
+                    if (evaluator.valueHook && typeof parsedNode.resolvedValue === 'string') {
+                        parsedNode.resolvedValue = evaluator.valueHook(
                             parsedNode.resolvedValue,
                             { name: parsedNode.value, args: formatterArgs },
                             true,
@@ -209,12 +218,11 @@ export function processDeclarationValue(
                         resolver,
                         evaluator,
                         getResolvedSymbols,
+                        passedThrough,
                     },
                     data: {
                         value,
-                        passedThrough,
                         node,
-                        valueHook,
                         meta,
                         stVarOverride: variableOverride,
                         cssVarsMapping,
