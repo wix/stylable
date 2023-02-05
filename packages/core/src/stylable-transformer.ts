@@ -194,7 +194,7 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
-            passedThrough: path,
+            passedThrough: path.slice(),
         };
         const transformResolveOptions = {
             context: transformContext,
@@ -285,7 +285,6 @@ export class StylableTransformer {
                         value: decl.value,
                         meta,
                         node: decl,
-                        passedThrough: path.slice(),
                         cssVarsMapping,
                     }).outputValue;
             }

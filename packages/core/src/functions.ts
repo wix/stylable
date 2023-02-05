@@ -20,7 +20,6 @@ import { unbox, CustomValueError } from './custom-values';
 
 export interface EvalValueData {
     value: string;
-    passedThrough: string[];
     node?: postcss.Node;
     meta: StylableMeta;
     stVarOverride?: Record<string, string> | null;
@@ -52,7 +51,7 @@ export class StylableEvaluator {
     }
     evaluateValue(
         context: Omit<FeatureTransformContext, 'getResolvedSymbols'>,
-        data: Omit<EvalValueData, 'passedThrough' | 'valueHook'> & { passedThrough?: string[] }
+        data: Omit<EvalValueData, 'passedThrough' | 'valueHook'>
     ) {
         return processDeclarationValue(
             context.resolver,
@@ -63,7 +62,7 @@ export class StylableEvaluator {
             data.stVarOverride || this.stVarOverride,
             this.valueHook,
             context.diagnostics,
-            data.passedThrough,
+            context.passedThrough,
             data.cssVarsMapping,
             data.args,
             data.rootArgument,
@@ -149,10 +148,10 @@ export function processDeclarationValue(
                         resolver,
                         evaluator,
                         getResolvedSymbols,
+                        passedThrough,
                     },
                     data: {
                         value,
-                        passedThrough,
                         node,
                         meta,
                         stVarOverride: variableOverride,
@@ -219,10 +218,10 @@ export function processDeclarationValue(
                         resolver,
                         evaluator,
                         getResolvedSymbols,
+                        passedThrough,
                     },
                     data: {
                         value,
-                        passedThrough,
                         node,
                         meta,
                         stVarOverride: variableOverride,

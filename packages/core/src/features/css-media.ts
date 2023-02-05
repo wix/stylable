@@ -11,7 +11,6 @@ export const hooks = createFeature({
             value: atRule.params,
             meta: context.meta,
             node: atRule,
-            passedThrough: context.passedThrough?.slice() || [],
             initialNode: atRule,
         }).outputValue;
     },
