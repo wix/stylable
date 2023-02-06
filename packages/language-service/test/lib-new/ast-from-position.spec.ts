@@ -151,7 +151,7 @@ describe('ast-from-position', () => {
         it(`should find selector (deep)`, () => {
             const { position, parseResult } = setupWithCursor(`
                 .before {}
-                :is(.targ|et.a).b {
+                .before:is(.targ|et.a).after {
                     decl: declValue;
                 }
                 .after {}
@@ -168,14 +168,14 @@ describe('ast-from-position', () => {
                 {
                     desc: 'rule node',
                     str: deindent(`
-                        :is(.target.a).b {
+                        .before:is(.target.a).after {
                             decl: declValue;
                         }
                     `),
                 },
                 {
                     desc: 'top selector node',
-                    str: ':is(.target.a).b',
+                    str: '.before:is(.target.a).after',
                 },
                 {
                     desc: 'is() selector node',
@@ -223,6 +223,39 @@ describe('ast-from-position', () => {
                 {
                     desc: 'top selector node',
                     str: '.before.bookmark',
+                },
+            ]);
+            //
+            expect(declValue, 'declValue').to.eql(undefined);
+            expect(atRuleParams, 'atRuleParams').to.eql(undefined);
+        });
+        it(`should find empty selector`, () => {
+            const { position, parseResult } = setupWithCursor(`
+                .before {}
+                | {
+                    prop: val;
+                }
+                .after {}
+            `);
+
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+
+            // base level
+            expect(base.node.toString(), 'base target class node').to.eql('{\n    prop: val;\n}');
+            expect(base.offsetInNode, 'base offset').to.eql(-1);
+            assertNodes(base.parents, []);
+            // selector level
+            expect(stringifySelectorAst(selector!.node as ImmutableSelectorNode), '').to.eql('');
+            expect(selector!.afterSelector, 'after selector').to.eql(false);
+            expect(selector!.offsetInNode).to.eql(0);
+            assertNodes(selector!.parents, [
+                {
+                    desc: 'rule node',
+                    str: deindent(`
+                        {
+                            prop: val;
+                        }
+                    `),
                 },
             ]);
             //
@@ -846,6 +879,52 @@ describe('ast-from-position', () => {
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
+        });
+        it(`should find selector in st-scope as selector`, () => {
+            const { position, parseResult } = setupWithCursor(`
+                .before {}
+                @st-scope .before.book|mark.after {}
+                .after {}
+            `);
+
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+
+            // base level
+            expect(base.node.toString(), 'base target at-rule node').to.eql(
+                '@st-scope .before.bookmark.after {}'
+            );
+            expect(base.offsetInNode, 'base offset').to.eql(22);
+            assertNodes(base.parents, []);
+            // atrule-params level
+            expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql(
+                'bookmark'
+            );
+            expect(atRuleParams!.offsetInNode).to.eql(4);
+            assertNodes(atRuleParams!.parents, [
+                {
+                    desc: 'rule node',
+                    str: '@st-scope .before.bookmark.after {}',
+                },
+            ]);
+            // selector level
+            expect(
+                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
+                'target class node'
+            ).to.eql('.bookmark');
+            expect(selector!.afterSelector, 'after selector').to.eql(false);
+            expect(selector!.offsetInNode).to.eql(5);
+            assertNodes(selector!.parents, [
+                {
+                    desc: 'st-scope atrule node',
+                    str: '@st-scope .before.bookmark.after {}',
+                },
+                {
+                    desc: 'top selector node',
+                    str: '.before.bookmark.after',
+                },
+            ]);
+            //
+            expect(declValue, 'declValue').to.eql(undefined);
         });
     });
     describe('partial source', () => {

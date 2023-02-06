@@ -1,5 +1,5 @@
 import type * as postcss from 'postcss';
-import { walk, type ImmutableSelectorNode } from '@tokey/css-selector-parser';
+import { walk, type ImmutableSelectorNode, ImmutableSelector } from '@tokey/css-selector-parser';
 import * as CSSValue from '@tokey/css-value-parser';
 import { parseSelectorWithCache } from '@stylable/core/dist/index-internal';
 import type { Invalid } from './invalid-node';
@@ -125,19 +125,24 @@ function checkRuleSelector(
         (isDeclaration(node) &&
             parseData.ambiguousNodes
                 .get(node)
-                ?.find((type) => type === AMBIGUITY.POSSIBLE_UNOPENED_RULE))
+                ?.find((type) => type === AMBIGUITY.POSSIBLE_UNOPENED_RULE)) ||
+        (isAtRule(node) && node.name === 'st-scope')
     ) {
-        let selector = ''; // = node.type === 'rule' ? node.selector : node.value;
+        let selector = '';
         let selectorAfterWhiteSpaceLength = 0;
+        let selectorStartOffset = baseNodeOffset;
         if (node.type === 'rule') {
             selector = node.selector;
             selectorAfterWhiteSpaceLength = node.raws.between?.length || 0;
         } else if (isDeclaration(node)) {
             selector = node.prop + node.raws.between + node.value; // + node.important;
+        } else if (isAtRule(node)) {
+            selector = node.params;
+            selectorStartOffset += '@st-scope'.length + 1;
         } else {
             selector = node.value;
         }
-        const selectorEnd = baseNodeOffset + selector.length;
+        const selectorEnd = selectorStartOffset + selector.length;
         const afterSelector = selectorEnd < targetOffset;
         const beforeBody =
             afterSelector && selectorEnd + selectorAfterWhiteSpaceLength >= targetOffset;
@@ -149,25 +154,30 @@ function checkRuleSelector(
         const selectors = parseSelectorWithCache(selector);
         result.selector = {
             type: 'selector',
-            node: selectors
-                ? selectors[selectors.length - 1]
-                : ([] as unknown as ImmutableSelectorNode),
+            node:
+                selectors && selectors.length
+                    ? selectors[selectors.length - 1]
+                    : ({
+                          type: 'selector',
+                          after: '',
+                          before: '',
+                          nodes: [],
+                          start: 0,
+                          end: 0,
+                      } as ImmutableSelector),
             offsetInNode: !afterSelector ? 0 : selector.length + targetOffset - selectorEnd,
             afterSelector,
             parents: [...result.base.parents],
         };
         if (selectors.length && !afterSelector) {
-            let selectorOffset = targetOffset - baseNodeOffset;
-            walk(selectors, (selectorNode, _index, _nodes, parents) => {
-                if (parents.length === 0) {
-                    selectorOffset = targetOffset - baseNodeOffset - selectorNode.start;
-                }
-                const isTargetAfterStart = baseNodeOffset + selectorNode.start < targetOffset;
-                const isTargetBeforeEnd = baseNodeOffset + selectorNode.end >= targetOffset;
+            const selectorTargetOffset = targetOffset - selectorStartOffset;
+            walk(selectors, (selectorNode, _index, _nodes) => {
+                const isTargetAfterStart = selectorStartOffset + selectorNode.start < targetOffset;
+                const isTargetBeforeEnd = selectorStartOffset + selectorNode.end >= targetOffset;
                 const isSelector = selectorNode.type === 'selector';
                 if (!isTargetAfterStart) {
                     // selector is after the target offset
-                    if (isSelector && baseNodeOffset + selectorNode.start === targetOffset) {
+                    if (isSelector && selectorStartOffset + selectorNode.start === targetOffset) {
                         // start of selector
                         result.selector!.node = selectorNode;
                     }
@@ -177,15 +187,13 @@ function checkRuleSelector(
                     return walk.skipNested;
                 }
                 result.selector!.node = selectorNode;
+                result.selector!.offsetInNode = selectorTargetOffset - selectorNode.start;
                 if (!isSelector) {
-                    selectorOffset -= selectorNode.start;
-                    result.selector!.offsetInNode = selectorOffset;
                     result.selector!.afterSelector = false;
                 } else if (
-                    baseNodeOffset + selectorNode.start - selectorNode.after.length <
+                    selectorStartOffset + selectorNode.start - selectorNode.after.length <
                     targetOffset
                 ) {
-                    result.selector!.offsetInNode = selectorOffset;
                     result.selector!.afterSelector = true;
                 }
                 result.selector!.parents.push(selectorNode);
@@ -283,7 +291,8 @@ function isPostcssNodeInRange(node: postcss.AnyNode | postcss.Container, target:
         isAfter: false,
     };
     if (node.source?.start && node.source?.end) {
-        result.isBefore = node.source.start.offset <= target;
+        const beforeSize = node.type === 'rule' ? node.raws.before.length : 0;
+        result.isBefore = node.source.start.offset - beforeSize <= target;
         result.isAfter = node.source.end.offset + 1 >= target;
         result.isInRange = result.isBefore && result.isAfter;
     }
