@@ -47,9 +47,9 @@ export type AstLocation =
       };
 export interface AstLocationResult {
     base: AstLocation & { type: 'base' };
-    selector?: AstLocation & { type: 'selector' };
-    declValue?: AstLocation & { type: 'declValue' };
-    atRuleParams?: AstLocation & { type: 'atRuleParams' };
+    selector: (AstLocation & { type: 'selector' }) | undefined;
+    declValue: (AstLocation & { type: 'declValue' }) | undefined;
+    atRuleParams: (AstLocation & { type: 'atRuleParams' }) | undefined;
 }
 function isClosed(node: postcss.AnyNode) {
     const isLast = node.parent && node.parent.nodes[node.parent.nodes.length - 1] === node;
@@ -66,26 +66,35 @@ export function getAstNodeAt(parseData: ParseForEditingResult, targetOffset: num
             offsetInNode: targetOffset,
             parents: [],
         },
+        selector: undefined,
+        declValue: undefined,
+        atRuleParams: undefined,
     };
 
     parseData.ast.walk((node) => {
-        const { isInRange: inNode, isAfter: isAfterNode } = isPostcssNodeInRange(
-            node,
-            targetOffset
-        );
+        const {
+            isInRange: inNode,
+            nodeEndsAfterCaret,
+            nodeStartBeforeCaret,
+        } = isPostcssNodeInRange(node, targetOffset);
         // check for space after unclosed node
         let afterNodeContent = false;
-        if (!inNode && !isAfterNode && !isClosed(node)) {
+        if (!inNode && !nodeEndsAfterCaret && !isClosed(node)) {
             afterNodeContent = isPostcssNodeInRange(node.parent!, targetOffset).isInRange;
         }
         if (!inNode && !afterNodeContent) {
-            // not part of node: bailout
-            return;
+            // not part of node: bailout completely if node is after caret
+            return nodeStartBeforeCaret ? undefined : false;
         }
         const baseNodeOffset = node.source!.start!.offset;
+        if (result.base.node.type !== 'root') {
+            result.base.parents.push(result.base.node);
+        }
         result.base.node = node;
         result.base.offsetInNode = targetOffset - baseNodeOffset;
-        result.base.parents.push(node);
+        if (node.type === 'comment') {
+            return false;
+        }
         const checkContext: CheckContext = {
             baseNodeOffset,
             targetOffset,
@@ -96,13 +105,14 @@ export function getAstNodeAt(parseData: ParseForEditingResult, targetOffset: num
         checkRuleSelector(node, checkContext, parseData);
         checkDeclValue(node, checkContext);
         checkAtRuleParams(node, checkContext);
+        return;
     });
     // remove closest parent node
-    for (const location of Object.values(result)) {
-        if (location.node === location.parents[location.parents.length - 1]) {
-            location.parents.pop();
-        }
-    }
+    // for (const location of Object.values(result)) {
+    //     if (location && location.node === location.parents[location.parents.length - 1]) {
+    //         location.parents.pop();
+    //     }
+    // }
     //
     return result;
 }
@@ -154,6 +164,10 @@ function checkRuleSelector(
         const selectors = parseSelectorWithCache(selector);
         result.selector = {
             type: 'selector',
+            /* If there are actual selectors then Initiate with last selector that is either overridden 
+                by actual selector at caret, or used in case caret is in the whitespace after the selector.
+               Else if there is no selector then set an empty selector to show a zero size selector.
+            */
             node:
                 selectors && selectors.length
                     ? selectors[selectors.length - 1]
@@ -167,11 +181,11 @@ function checkRuleSelector(
                       } as ImmutableSelector),
             offsetInNode: !afterSelector ? 0 : selector.length + targetOffset - selectorEnd,
             afterSelector,
-            parents: [...result.base.parents],
+            parents: [],
         };
         if (selectors.length && !afterSelector) {
             const selectorTargetOffset = targetOffset - selectorStartOffset;
-            walk(selectors, (selectorNode, _index, _nodes) => {
+            walk(selectors, (selectorNode, _index, _nodes, parents) => {
                 const isTargetAfterStart = selectorStartOffset + selectorNode.start < targetOffset;
                 const isTargetBeforeEnd = selectorStartOffset + selectorNode.end >= targetOffset;
                 const isSelector = selectorNode.type === 'selector';
@@ -186,6 +200,7 @@ function checkRuleSelector(
                     // selector ends before target offset
                     return walk.skipNested;
                 }
+                result.selector!.parents = [...parents];
                 result.selector!.node = selectorNode;
                 result.selector!.offsetInNode = selectorTargetOffset - selectorNode.start;
                 if (!isSelector) {
@@ -196,10 +211,10 @@ function checkRuleSelector(
                 ) {
                     result.selector!.afterSelector = true;
                 }
-                result.selector!.parents.push(selectorNode);
                 return;
             });
         }
+        result.selector.parents = [...result.base.parents, node, ...result.selector.parents];
     }
 }
 function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
@@ -210,6 +225,7 @@ function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
         checkValue({
             type: 'declValue',
             value: node.value,
+            node,
             valueStart,
             valueEnd,
             afterSpace: 0, // ToDo: check cases
@@ -225,6 +241,7 @@ function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
         checkValue({
             type: 'atRuleParams',
             value: node.params,
+            node,
             valueStart,
             valueEnd,
             afterSpace: node.raws.between!.length,
@@ -234,6 +251,7 @@ function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
 }
 function checkValue({
     value,
+    node,
     type,
     valueStart,
     valueEnd,
@@ -241,6 +259,7 @@ function checkValue({
     checkContext: { targetOffset, result, afterNodeContent },
 }: {
     value: string;
+    node: postcss.AnyNode;
     type: 'atRuleParams' | 'declValue';
     valueStart: number;
     valueEnd: number;
@@ -259,7 +278,7 @@ function checkValue({
         type,
         node: ast,
         offsetInNode: !isInIncludedSpace ? 0 : value.length + targetOffset - valueEnd,
-        parents: [...result.base.parents],
+        parents: [...result.base.parents, node],
         afterValue: isInIncludedSpace,
     };
     if (!isInIncludedSpace) {
@@ -276,9 +295,11 @@ function checkValue({
                 return walk.skipNested;
             }
             // update
+            if (!Array.isArray(valueLocation.node)) {
+                valueLocation.parents.push(valueLocation.node);
+            }
             valueLocation.node = node;
             valueLocation.offsetInNode = targetOffset - valueStart - node.start;
-            valueLocation.parents.push(node);
             return;
         });
     }
@@ -287,14 +308,14 @@ function checkValue({
 function isPostcssNodeInRange(node: postcss.AnyNode | postcss.Container, target: number) {
     const result = {
         isInRange: false,
-        isBefore: false,
-        isAfter: false,
+        nodeStartBeforeCaret: false,
+        nodeEndsAfterCaret: false,
     };
     if (node.source?.start && node.source?.end) {
         const beforeSize = node.type === 'rule' ? node.raws.before.length : 0;
-        result.isBefore = node.source.start.offset - beforeSize <= target;
-        result.isAfter = node.source.end.offset + 1 >= target;
-        result.isInRange = result.isBefore && result.isAfter;
+        result.nodeStartBeforeCaret = node.source.start.offset - beforeSize <= target;
+        result.nodeEndsAfterCaret = node.source.end.offset + 1 >= target;
+        result.isInRange = result.nodeStartBeforeCaret && result.nodeEndsAfterCaret;
     }
     return result;
 }
