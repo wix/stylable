@@ -130,13 +130,24 @@ export class LangServiceContext {
         const collectBack = (node: ImmutableSelectorNode, parents: ImmutableSelectorNode[]) => {
             addToItem(node);
             if (!parents.length) {
-                return;
-            } // ToDo(pr): check for nesting parent selectors
+                const upperNestingSelectors = getLastWhile(
+                    nestingSelectors,
+                    (last) => !!last.length
+                );
+                if (upperNestingSelectors) {
+                    // ToDo: handle multiple selector intersection type
+                    const firstSelector = upperNestingSelectors[0];
+                    parents.push(firstSelector);
+                } else {
+                    return;
+                }
+            }
             const parent = parents.pop()!;
             if ('nodes' in parent && parent.nodes) {
                 const nodes = parent.nodes;
-                const index = nodes.indexOf(node as any);
-                for (let i = index - 1; i >= 0; i--) {
+                let fromIndex = nodes.indexOf(node as any);
+                fromIndex = fromIndex === -1 ? nodes.length : fromIndex;
+                for (let i = fromIndex - 1; i >= 0; i--) {
                     addToItem(nodes[i]);
                 }
             }
@@ -163,9 +174,11 @@ export class LangServiceContext {
         return null;
     }
     private collectSelector() {
-        const results: ImmutableSelectorList[] = this.location.base.parents.map((node) => {
-            return parseSelectorWithCache(this.getSelectorString(node) || '');
-        });
+        const results: ImmutableSelectorList[] = this.location.base.parents
+            .map((node) => {
+                return parseSelectorWithCache(this.getSelectorString(node) || '');
+            })
+            .filter((selectors) => selectors.length !== 0);
         let selectorWithCaret = this.location.selector!.parents.find(
             (node) => node.type === 'selector'
         ) as ImmutableSelector | undefined;
@@ -175,4 +188,15 @@ export class LangServiceContext {
         results.push([selectorWithCaret!]);
         return results;
     }
+}
+
+function getLastWhile<T>(list: T[], check: (current: T) => boolean) {
+    let validLast: T | undefined;
+    while (!validLast && list.length) {
+        const current = list.pop()!;
+        if (check(current)) {
+            validLast = current;
+        }
+    }
+    return validLast;
 }

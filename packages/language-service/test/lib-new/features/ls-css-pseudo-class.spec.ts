@@ -48,7 +48,7 @@ describe('LS: css-pseudo-class', () => {
                 expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
             });
         });
-        it.skip('should suggest class custom states (nested)', () => {
+        it('should suggest class custom states (nested)', () => {
             const { service, carets, assertCompletions } = testLangService(`
                 .x {
                     -st-states: aaa,bbb;
@@ -56,13 +56,26 @@ describe('LS: css-pseudo-class', () => {
 
 
                 @st-scope .x {
-                    /*^nested*/
+                    :/*^afterColon*/
+                }
+
+                @st-scope .x {
+                    @media (max-width<500) {
+                        :/*^afterColonInMedia*/
+                    }
                 }
             `);
             const entryCarets = carets['/entry.st.css'];
 
             assertCompletions({
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nested),
+                message: 'after colon',
+                actualList: service.onCompletion('/entry.st.css', entryCarets.afterColon),
+                expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+            });
+
+            assertCompletions({
+                message: 'after colon in media',
+                actualList: service.onCompletion('/entry.st.css', entryCarets.afterColonInMedia),
                 expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
             });
         });
