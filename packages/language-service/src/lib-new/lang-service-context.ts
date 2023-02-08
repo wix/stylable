@@ -104,7 +104,7 @@ export class LangServiceContext {
         };
     }
     /**
-     * Find selector not which caret is at and traverse back to collect
+     * Find the selector that the caret is at and traverse back to collect
      * resolved elements with any selector information after them.
      */
     private aggregateResolvedChain(

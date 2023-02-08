@@ -31,6 +31,7 @@ export function getCompletions(context: LangServiceContext): Completion[] {
     } = isInSelector ? context.getSelectorContext() : {};
 
     if (selectorAtCursor === '::') {
+        // No state completion directly after pseudo_element opener: bailout
         return completions;
     }
 
