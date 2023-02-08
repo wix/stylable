@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import {
     getAstNodeAt,
-    type AstLocation,
+    type NodeType,
 } from '@stylable/language-service/dist/lib-new/ast-from-position';
 import { parseForEditing } from '@stylable/language-service/dist/lib-new/edit-time-parser';
 import { ImmutableSelectorNode, stringifySelectorAst } from '@tokey/css-selector-parser';
@@ -21,7 +21,7 @@ function setupWithCursor(source: string, options: { deindent?: boolean } = {}) {
     };
 }
 function assertNodes(
-    nodes: AstLocation['parents'],
+    nodes: NodeType[],
     expectedNodes: { str: string; desc?: string; type?: string }[]
 ) {
     expect(nodes.length, 'expected amount').to.eql(expectedNodes.length);
@@ -49,7 +49,6 @@ describe('ast-from-position', () => {
 
             expect(base.node, 'node').to.equal(parseResult.ast);
             expect(base.offsetInNode, 'offset').to.eql(0);
-            expect(base.parents, 'parents').to.eql([]);
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -61,7 +60,6 @@ describe('ast-from-position', () => {
 
             expect(base.node, 'node').to.equal(parseResult.ast);
             expect(base.offsetInNode, 'offset').to.eql(3);
-            expect(base.parents, 'parents').to.eql([]);
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -84,7 +82,6 @@ describe('ast-from-position', () => {
                 '.bookmark.after {\n    prop: val;\n}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(0);
-            assertNodes(base.parents, []);
             // selector level
             expect(
                 stringifySelectorAst(selector!.node as ImmutableSelectorNode),
@@ -122,7 +119,6 @@ describe('ast-from-position', () => {
                 '.before.bookmark.after {\n    prop: val;\n}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(12);
-            assertNodes(base.parents, []);
             // selector level
             expect(
                 stringifySelectorAst(selector!.node as ImmutableSelectorNode),
@@ -203,7 +199,6 @@ describe('ast-from-position', () => {
                 '.before.bookmark {\n    prop: val;\n}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(16);
-            assertNodes(base.parents, []);
             // selector level
             expect(
                 stringifySelectorAst(selector!.node as ImmutableSelectorNode),
@@ -243,7 +238,6 @@ describe('ast-from-position', () => {
             // base level
             expect(base.node.toString(), 'base target class node').to.eql('{\n    prop: val;\n}');
             expect(base.offsetInNode, 'base offset').to.eql(-1);
-            assertNodes(base.parents, []);
             // selector level
             expect(stringifySelectorAst(selector!.node as ImmutableSelectorNode), '').to.eql('');
             expect(selector!.afterSelector, 'after selector').to.eql(false);
@@ -278,7 +272,6 @@ describe('ast-from-position', () => {
                 '.bookmark      {\n    prop: val;\n}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(12);
-            assertNodes(base.parents, []);
             // selector-after level
             expect(
                 stringifySelectorAst(selector!.node as ImmutableSelectorNode),
@@ -316,7 +309,6 @@ describe('ast-from-position', () => {
                 '.before, .bookmark , .after   {\n    prop: val;\n}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(19);
-            assertNodes(base.parents, []);
             // selector-after level
             expect(
                 stringifySelectorAst(selector!.node as ImmutableSelectorNode),
@@ -447,15 +439,6 @@ describe('ast-from-position', () => {
             expect(declValue!.offsetInNode).to.eql(0);
             assertNodes(declValue!.parents, [
                 {
-                    desc: 'rule node',
-                    str: deindent(`
-                        .selector {
-                            decl1: bookmark after;
-                            decl2: other;
-                        }
-                    `),
-                },
-                {
                     desc: 'value node',
                     str: 'decl1: bookmark after',
                 },
@@ -483,15 +466,6 @@ describe('ast-from-position', () => {
             expect(declValue!.offsetInNode).to.eql(4);
             assertNodes(declValue!.parents, [
                 {
-                    desc: 'rule node',
-                    str: deindent(`
-                        .selector {
-                            decl1: before bookmark after;
-                            decl2: other;
-                        }
-                    `),
-                },
-                {
                     desc: 'value node',
                     str: 'decl1: before bookmark after',
                 },
@@ -517,14 +491,6 @@ describe('ast-from-position', () => {
             );
             expect(declValue!.offsetInNode).to.eql(4);
             assertNodes(declValue!.parents, [
-                {
-                    desc: 'rule node',
-                    str: deindent(`
-                        .x {
-                            decl: before nest(bookmark) after;
-                        }
-                    `),
-                },
                 {
                     desc: 'value node',
                     str: 'decl: before nest(bookmark) after',
@@ -557,16 +523,7 @@ describe('ast-from-position', () => {
             expect(declValue!.offsetInNode).to.eql(8);
             assertNodes(declValue!.parents, [
                 {
-                    desc: 'rule node',
-                    str: deindent(`
-                        .selector {
-                            decl1: before bookmark;
-                            decl2: other;
-                        }
-                    `),
-                },
-                {
-                    desc: 'value node',
+                    desc: 'decl node',
                     str: 'decl1: before bookmark',
                 },
             ]);
@@ -591,15 +548,7 @@ describe('ast-from-position', () => {
             expect(declValue!.offsetInNode).to.eql(9);
             assertNodes(declValue!.parents, [
                 {
-                    desc: 'rule node',
-                    str: deindent(`
-                        .selector {
-                            decl1: before      \t
-                        }
-                    `),
-                },
-                {
-                    desc: 'value node',
+                    desc: 'decl node',
                     str: 'decl1: before',
                 },
             ]);
@@ -621,7 +570,6 @@ describe('ast-from-position', () => {
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql('@bookmark params {}');
             expect(base.offsetInNode, 'base offset').to.eql(1);
-            assertNodes(base.parents, []);
             //
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -639,7 +587,6 @@ describe('ast-from-position', () => {
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql('@bookmark params {}');
             expect(base.offsetInNode, 'base offset').to.eql(9);
-            assertNodes(base.parents, []);
             //
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -659,7 +606,6 @@ describe('ast-from-position', () => {
                 '@name bookmark after {}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(6);
-            assertNodes(base.parents, []);
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql(
                 'bookmark'
@@ -689,7 +635,6 @@ describe('ast-from-position', () => {
                 '@name before bookmark after {}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(17);
-            assertNodes(base.parents, []);
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql(
                 'bookmark'
@@ -719,7 +664,6 @@ describe('ast-from-position', () => {
                 '@name before nest(bookmark) after {}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(22);
-            assertNodes(base.parents, []);
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql(
                 'bookmark'
@@ -753,7 +697,6 @@ describe('ast-from-position', () => {
                 '@name start bookmark {}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(20);
-            assertNodes(base.parents, []);
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql(
                 'bookmark'
@@ -781,7 +724,6 @@ describe('ast-from-position', () => {
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql('@name params      {}');
             expect(base.offsetInNode, 'base offset').to.eql(15);
-            assertNodes(base.parents, []);
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql(
                 'params'
@@ -812,7 +754,6 @@ describe('ast-from-position', () => {
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql('@name params      ');
             expect(base.offsetInNode, 'base offset').to.eql(15);
-            assertNodes(base.parents, []);
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql(
                 'params'
@@ -894,7 +835,6 @@ describe('ast-from-position', () => {
                 '@st-scope .before.bookmark.after {}'
             );
             expect(base.offsetInNode, 'base offset').to.eql(22);
-            assertNodes(base.parents, []);
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql(
                 'bookmark'
@@ -939,7 +879,6 @@ describe('ast-from-position', () => {
             // base level
             expect(base.node.toString(), 'base target class node').to.eql('.before.bookmark.after');
             expect(base.offsetInNode, 'base offset').to.eql(12);
-            assertNodes(base.parents, []);
             // selector level
             expect(
                 stringifySelectorAst(selector!.node as ImmutableSelectorNode),
@@ -986,14 +925,6 @@ describe('ast-from-position', () => {
             expect(selector!.offsetInNode).to.eql(4);
             assertNodes(selector!.parents, [
                 {
-                    desc: 'rule node',
-                    str: deindent(`
-                        .nest {
-                            bookmark
-                        }
-                    `),
-                },
-                {
                     desc: 'potential invalid rule',
                     type: 'invalid',
                     str: 'bookmark\n',
@@ -1024,14 +955,6 @@ describe('ast-from-position', () => {
             expect(declValue!.offsetInNode).to.eql(3);
             assertNodes(declValue!.parents, [
                 {
-                    desc: 'rule node',
-                    str: deindent(`
-                        .nest {
-                            color: green
-                        }
-                    `),
-                },
-                {
                     desc: 'decl node',
                     type: 'decl',
                     str: 'color: green',
@@ -1045,14 +968,6 @@ describe('ast-from-position', () => {
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(3);
             assertNodes(selector!.parents, [
-                {
-                    desc: 'rule node',
-                    str: deindent(`
-                        .nest {
-                            color: green
-                        }
-                    `),
-                },
                 {
                     desc: 'decl node',
                     type: 'decl',
@@ -1076,7 +991,6 @@ describe('ast-from-position', () => {
             // base level
             expect(base.node.toString(), 'base target invalid node').to.eql('.before      \t');
             expect(base.offsetInNode, 'base offset').to.eql(10);
-            assertNodes(base.parents, []);
             // selector level
             expect(
                 stringifySelectorAst(selector!.node as ImmutableSelectorNode),

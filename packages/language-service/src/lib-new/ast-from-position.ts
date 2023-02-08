@@ -22,7 +22,6 @@ export type AstLocation =
           type: 'base';
           node: postcss.AnyNode;
           offsetInNode: number;
-          parents: postcss.AnyNode[];
       }
     | {
           type: 'selector';
@@ -64,7 +63,7 @@ export function getAstNodeAt(parseData: ParseForEditingResult, targetOffset: num
             type: 'base',
             node: parseData.ast,
             offsetInNode: targetOffset,
-            parents: [],
+            // parents: [],
         },
         selector: undefined,
         declValue: undefined,
@@ -87,9 +86,6 @@ export function getAstNodeAt(parseData: ParseForEditingResult, targetOffset: num
             return nodeStartBeforeCaret ? undefined : false;
         }
         const baseNodeOffset = node.source!.start!.offset;
-        if (result.base.node.type !== 'root') {
-            result.base.parents.push(result.base.node);
-        }
         result.base.node = node;
         result.base.offsetInNode = targetOffset - baseNodeOffset;
         if (node.type === 'comment') {
@@ -214,7 +210,7 @@ function checkRuleSelector(
                 return;
             });
         }
-        result.selector.parents = [...result.base.parents, node, ...result.selector.parents];
+        result.selector.parents = [node, ...result.selector.parents];
     }
 }
 function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
@@ -278,7 +274,7 @@ function checkValue({
         type,
         node: ast,
         offsetInNode: !isInIncludedSpace ? 0 : value.length + targetOffset - valueEnd,
-        parents: [...result.base.parents, node],
+        parents: [node],
         afterValue: isInIncludedSpace,
     };
     if (!isInIncludedSpace) {

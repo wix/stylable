@@ -175,7 +175,8 @@ export class LangServiceContext {
         return null;
     }
     private collectSelector() {
-        const results: ImmutableSelectorList[] = this.location.base.parents
+        const parents = collectPostcssParents(this.location.base.node);
+        const results: ImmutableSelectorList[] = parents
             .map((node) => {
                 return parseSelectorWithCache(this.getSelectorString(node) || '');
             })
@@ -191,6 +192,15 @@ export class LangServiceContext {
     }
 }
 
+function collectPostcssParents(node: postcss.AnyNode) {
+    const parents: Array<postcss.AnyNode | postcss.Document> = [];
+    let current = node.parent;
+    while (current) {
+        parents.push(current as postcss.AnyNode);
+        current = current.parent;
+    }
+    return parents;
+}
 function getLastWhile<T>(list: T[], check: (current: T) => boolean) {
     let validLast: T | undefined;
     while (!validLast && list.length) {
