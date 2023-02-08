@@ -18,6 +18,14 @@ declare module 'node-eval' {
     export = nodeEval;
 }
 
+declare module 'rimraf' {
+    function rimraf(path: string, callback: (error: Error | null | undefined) => void): void;
+    namespace rimraf {
+        function sync(path: string, options?: any): void;
+    }
+    export = rimraf;
+}
+
 // declare module '!!stylable-metadata?exposeNamespaceMapping=true!*.st.css' {
 //     const stylesheetMetadata: {
 //         entry: string;
