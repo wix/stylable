@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { expect } from 'chai';
 import {
     getAstNodeAt,
     type NodeType,
 } from '@stylable/language-service/dist/lib-new/ast-from-position';
 import { parseForEditing } from '@stylable/language-service/dist/lib-new/edit-time-parser';
-import { ImmutableSelectorNode, stringifySelectorAst } from '@tokey/css-selector-parser';
+import { stringifySelectorAst } from '@tokey/css-selector-parser';
 import { stringifyCSSValue } from '@tokey/css-value-parser';
 import { deindent } from '@stylable/core-test-kit';
 import { assertRule, assertAtRule } from '../test-kit/postcss-node-asserts';
@@ -14,10 +13,10 @@ function setupWithCursor(source: string, options: { deindent?: boolean } = {}) {
     const deindented = options.deindent === false ? source : deindent(source);
 
     const position = deindented.indexOf(`|`);
-    const parseResult = parseForEditing(deindented.split(`|`).join(``));
+    const parsed = parseForEditing(deindented.split(`|`).join(``));
     return {
         position,
-        parseResult,
+        parsed,
     };
 }
 function assertNodes(
@@ -39,26 +38,29 @@ function assertNodes(
         expect(actualStr, 'string compare ' + desc).to.eql(expected.str);
     });
 }
-
+/**
+ * these tests sometimes have before/after the actual source that is being tested
+ * in order to verify that offsets are being calculated correctly.
+ */
 describe('ast-from-position', () => {
     describe('top level', () => {
         it(`should find root (empty)`, () => {
-            const { position, parseResult } = setupWithCursor(`|`);
+            const { position, parsed } = setupWithCursor(`|`);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
-            expect(base.node, 'node').to.equal(parseResult.ast);
+            expect(base.node, 'node').to.equal(parsed.ast);
             expect(base.offsetInNode, 'offset').to.eql(0);
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find root (whitespace)`, () => {
-            const { position, parseResult } = setupWithCursor(` \t\n|\n\t `, { deindent: false });
+            const { position, parsed } = setupWithCursor(` \t\n|\n\t `, { deindent: false });
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
-            expect(base.node, 'node').to.equal(parseResult.ast);
+            expect(base.node, 'node').to.equal(parsed.ast);
             expect(base.offsetInNode, 'offset').to.eql(3);
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -67,7 +69,7 @@ describe('ast-from-position', () => {
     });
     describe('rule', () => {
         it(`should find selector start`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 |.bookmark.after {
                     prop: val;
@@ -75,7 +77,7 @@ describe('ast-from-position', () => {
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target class node').to.eql(
@@ -83,10 +85,9 @@ describe('ast-from-position', () => {
             );
             expect(base.offsetInNode, 'base offset').to.eql(0);
             // selector level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target selector'
-            ).to.eql('.bookmark.after');
+            expect(stringifySelectorAst(selector!.node), 'target selector').to.eql(
+                '.bookmark.after'
+            );
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(0);
             assertNodes(selector!.parents, [
@@ -104,7 +105,7 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find selector middle`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .before.book|mark.after {
                     prop: val;
@@ -112,7 +113,7 @@ describe('ast-from-position', () => {
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target class node').to.eql(
@@ -120,10 +121,7 @@ describe('ast-from-position', () => {
             );
             expect(base.offsetInNode, 'base offset').to.eql(12);
             // selector level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target class node'
-            ).to.eql('.bookmark');
+            expect(stringifySelectorAst(selector!.node), 'target class node').to.eql('.bookmark');
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(5);
             assertNodes(selector!.parents, [
@@ -145,7 +143,7 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find selector (deep)`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .before:is(.targ|et.a).after {
                     decl: declValue;
@@ -153,12 +151,9 @@ describe('ast-from-position', () => {
                 .after {}
             `);
 
-            const { selector } = getAstNodeAt(parseResult, position);
+            const { selector } = getAstNodeAt(parsed, position);
 
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target class node'
-            ).to.eql('.target');
+            expect(stringifySelectorAst(selector!.node), 'target class node').to.eql('.target');
             expect(selector!.offsetInNode).to.eql(5);
             assertNodes(selector!.parents, [
                 {
@@ -184,7 +179,7 @@ describe('ast-from-position', () => {
             ]);
         });
         it(`should find selector end`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .before.bookmark| {
                     prop: val;
@@ -192,7 +187,7 @@ describe('ast-from-position', () => {
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target class node').to.eql(
@@ -200,10 +195,7 @@ describe('ast-from-position', () => {
             );
             expect(base.offsetInNode, 'base offset').to.eql(16);
             // selector level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target class node'
-            ).to.eql('.bookmark');
+            expect(stringifySelectorAst(selector!.node), 'target class node').to.eql('.bookmark');
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(9);
             assertNodes(selector!.parents, [
@@ -225,7 +217,7 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find empty selector`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 | {
                     prop: val;
@@ -233,13 +225,13 @@ describe('ast-from-position', () => {
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target class node').to.eql('{\n    prop: val;\n}');
             expect(base.offsetInNode, 'base offset').to.eql(-1);
             // selector level
-            expect(stringifySelectorAst(selector!.node as ImmutableSelectorNode), '').to.eql('');
+            expect(stringifySelectorAst(selector!.node), '').to.eql('');
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(0);
             assertNodes(selector!.parents, [
@@ -257,7 +249,7 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find between selector and body`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .bookmark   |   {
                     prop: val;
@@ -265,7 +257,7 @@ describe('ast-from-position', () => {
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target class node').to.eql(
@@ -273,10 +265,7 @@ describe('ast-from-position', () => {
             );
             expect(base.offsetInNode, 'base offset').to.eql(12);
             // selector-after level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target selector'
-            ).to.eql('.bookmark');
+            expect(stringifySelectorAst(selector!.node), 'target selector').to.eql('.bookmark');
             expect(selector!.afterSelector, 'after selector').to.eql(true);
             expect(selector!.offsetInNode).to.eql(12);
             assertNodes(selector!.parents, [
@@ -294,7 +283,7 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find whitespace after selector with another selector following`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .before, .bookmark |, .after   {
                     prop: val;
@@ -302,7 +291,7 @@ describe('ast-from-position', () => {
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target class node').to.eql(
@@ -310,10 +299,7 @@ describe('ast-from-position', () => {
             );
             expect(base.offsetInNode, 'base offset').to.eql(19);
             // selector-after level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target selector'
-            ).to.eql(' .bookmark ');
+            expect(stringifySelectorAst(selector!.node), 'target selector').to.eql(' .bookmark ');
             expect(selector!.afterSelector, 'after selector').to.eql(true);
             expect(selector!.offsetInNode).to.eql(11);
             assertNodes(selector!.parents, [
@@ -331,15 +317,15 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find before declaration`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .x { | decl: declValue; }
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
-            const rule = assertRule(parseResult.ast.nodes[1]);
+            const rule = assertRule(parsed.ast.nodes[1]);
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(5);
             // ToDo: maybe offer before/after nodes
@@ -351,15 +337,15 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find between declaration`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .x { decl1: before; | decl2: after }
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
-            const rule = assertRule(parseResult.ast.nodes[1]);
+            const rule = assertRule(parsed.ast.nodes[1]);
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(20);
             //
@@ -368,15 +354,15 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find after declaration`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .x { decl: before; | }
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
-            const rule = assertRule(parseResult.ast.nodes[1]);
+            const rule = assertRule(parsed.ast.nodes[1]);
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(19);
             //
@@ -388,16 +374,16 @@ describe('ast-from-position', () => {
     });
     describe('declaration', () => {
         it(`should find property start`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .selector {
                     |decl: declValue;
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(0);
             //
             expect(selector, 'selector').to.eql(undefined);
@@ -405,32 +391,49 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find property end`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .selector {
                     decl|: declValue;
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(4);
             //
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
+        it(`should find position between property and colon`, () => {
+            // ToDo: might be nice to add location info to tell that the caret is after the prop
+            const { position, parsed } = setupWithCursor(`
+                .selector {
+                    decl | : declValue;
+                }
+            `);
+
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
+            // base level
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
+            expect(base.offsetInNode, 'offset').to.equal(5);
+            //
+            expect(selector, 'selector').to.eql(undefined);
+            expect(declValue, 'declValue').to.eql(undefined);
+            expect(atRuleParams, 'atRuleParams').to.eql(undefined);
+        });
         it(`should find value start`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .selector {
                     decl1: |bookmark after;
                     decl2: other;
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(7);
             // decl-value level
             expect(stringifyCSSValue(declValue!.node as any), 'target value node').to.eql(
@@ -448,16 +451,16 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find value middle`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .selector {
                     decl1: before book|mark after;
                     decl2: other;
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(18);
             // decl-value level
             expect(stringifyCSSValue(declValue!.node as any), 'target value node').to.eql(
@@ -475,15 +478,15 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find value (deep)`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .x {
                     decl: before nest(book|mark) after;
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(22);
             // decl-value level
             expect(stringifyCSSValue(declValue!.node as any), 'target value node').to.eql(
@@ -505,16 +508,16 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find value end`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .selector {
                     decl1: before bookmark|;
                     decl2: other;
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(22);
             // decl-value level
             expect(stringifyCSSValue(declValue!.node as any), 'target value node').to.eql(
@@ -532,15 +535,15 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find after value (no ending semicolon)`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .selector {
                     decl1: before   |   \t
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(16);
             // decl-value level
             expect(stringifyCSSValue(declValue!.node as any), 'target value node').to.eql('before');
@@ -559,13 +562,13 @@ describe('ast-from-position', () => {
     });
     describe('at-rule', () => {
         it(`should find name start`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @|bookmark params {}
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql('@bookmark params {}');
@@ -576,13 +579,13 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find name end`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @bookmark| params {}
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql('@bookmark params {}');
@@ -593,13 +596,13 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find params start`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @name |bookmark after {}
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql(
@@ -622,13 +625,13 @@ describe('ast-from-position', () => {
             expect(declValue, 'declValue').to.eql(undefined);
         });
         it(`should find params middle`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @name before book|mark after {}
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql(
@@ -651,13 +654,13 @@ describe('ast-from-position', () => {
             expect(declValue, 'declValue').to.eql(undefined);
         });
         it(`should find params (deep)`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @name before nest(book|mark) after {}
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql(
@@ -684,13 +687,13 @@ describe('ast-from-position', () => {
             expect(declValue, 'declValue').to.eql(undefined);
         });
         it(`should find params end`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @name start bookmark| {}
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql(
@@ -713,13 +716,13 @@ describe('ast-from-position', () => {
             expect(declValue, 'declValue').to.eql(undefined);
         });
         it(`should find between params and body`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @name params   |   {}
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql('@name params      {}');
@@ -743,13 +746,13 @@ describe('ast-from-position', () => {
         it(`should find between params and semicolon`, () => {
             // Notice: postcss not renders semicolon when printing atrule node.
             //         It is printed correctly as part of the AST.
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @name params   |   ;
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql('@name params      ');
@@ -771,15 +774,15 @@ describe('ast-from-position', () => {
             expect(declValue, 'declValue').to.eql(undefined);
         });
         it(`should find before declaration`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @x params{ | decl: declValue; }
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
-            const rule = assertAtRule(parseResult.ast.nodes[1]);
+            const rule = assertAtRule(parsed.ast.nodes[1]);
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(11);
             //
@@ -788,15 +791,15 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find between declaration`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @x params { decl1: before; | decl2: after }
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
-            const rule = assertAtRule(parseResult.ast.nodes[1]);
+            const rule = assertAtRule(parsed.ast.nodes[1]);
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(27);
             //
@@ -805,15 +808,15 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find after declaration`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @x params { decl: before; | }
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
-            const rule = assertAtRule(parseResult.ast.nodes[1]);
+            const rule = assertAtRule(parsed.ast.nodes[1]);
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(26);
             //
@@ -822,13 +825,13 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find selector in st-scope as selector`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 @st-scope .before.book|mark.after {}
                 .after {}
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target at-rule node').to.eql(
@@ -847,10 +850,7 @@ describe('ast-from-position', () => {
                 },
             ]);
             // selector level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target class node'
-            ).to.eql('.bookmark');
+            expect(stringifySelectorAst(selector!.node), 'target class node').to.eql('.bookmark');
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(5);
             assertNodes(selector!.parents, [
@@ -869,21 +869,18 @@ describe('ast-from-position', () => {
     });
     describe('partial source', () => {
         it(`should provide potential selector for top level invalid node`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .before {}
                 .before.book|mark.after
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target class node').to.eql('.before.bookmark.after');
             expect(base.offsetInNode, 'base offset').to.eql(12);
             // selector level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target class node'
-            ).to.eql('.bookmark');
+            expect(stringifySelectorAst(selector!.node), 'target class node').to.eql('.bookmark');
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(5);
             assertNodes(selector!.parents, [
@@ -905,22 +902,19 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should provide potential selector for nested invalid node`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .nest {
                     book|mark
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.node.type, 'base node type').to.equal('invalid');
             expect(base.offsetInNode, 'offset').to.equal(4);
             // selector level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target selector node'
-            ).to.eql('bookmark');
+            expect(stringifySelectorAst(selector!.node), 'target selector node').to.eql('bookmark');
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(4);
             assertNodes(selector!.parents, [
@@ -940,15 +934,15 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should offer potential selector for unclosed declaration`, () => {
-            const { position, parseResult } = setupWithCursor(`
+            const { position, parsed } = setupWithCursor(`
                 .nest {
                     color: gre|en
                 }
             `);
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
             // base level
-            expect(base.node, 'node').to.equal((parseResult.ast as any).nodes[0].nodes[0]);
+            expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(10);
             // decl-value level
             expect(stringifyCSSValue(declValue!.node as any), 'target value node').to.eql('green');
@@ -961,10 +955,7 @@ describe('ast-from-position', () => {
                 },
             ]);
             // selector level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target class node'
-            ).to.eql('green');
+            expect(stringifySelectorAst(selector!.node), 'target class node').to.eql('green');
             expect(selector!.afterSelector, 'after selector').to.eql(false);
             expect(selector!.offsetInNode).to.eql(3);
             assertNodes(selector!.parents, [
@@ -982,20 +973,19 @@ describe('ast-from-position', () => {
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should provide potential selector for last invalid node (after whitespace)`, () => {
-            const { position, parseResult } = setupWithCursor(`.before   |   \t`, {
+            const { position, parsed } = setupWithCursor(`.before   |   \t`, {
                 deindent: false,
             });
 
-            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parseResult, position);
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
 
             // base level
             expect(base.node.toString(), 'base target invalid node').to.eql('.before      \t');
             expect(base.offsetInNode, 'base offset').to.eql(10);
             // selector level
-            expect(
-                stringifySelectorAst(selector!.node as ImmutableSelectorNode),
-                'target selector'
-            ).to.eql('.before      \t');
+            expect(stringifySelectorAst(selector!.node), 'target selector').to.eql(
+                '.before      \t'
+            );
             expect(selector!.afterSelector, 'after selector').to.eql(true);
             expect(selector!.offsetInNode).to.eql(10);
             assertNodes(selector!.parents, [
