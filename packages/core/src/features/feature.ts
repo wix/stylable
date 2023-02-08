@@ -1,9 +1,5 @@
 import type { StylableMeta } from '../stylable-meta';
-import type {
-    ScopeContext,
-    StylableExports,
-    StylableTransformer,
-} from '../stylable-transformer';
+import type { ScopeContext, StylableExports, StylableTransformer } from '../stylable-transformer';
 import type { StylableResolver, MetaResolvedSymbols } from '../stylable-resolver';
 import type { StylableEvaluator, EvalValueData } from '../functions';
 import type * as postcss from 'postcss';
