@@ -74,6 +74,7 @@ export class LangServiceContext {
             );
             if (currentAnchor) {
                 selectorContext.currentAnchor = currentAnchor;
+                selectorContext.nestingSelectorAnchor = currentAnchor;
             }
             selectorContext.transform = false;
             selectorContext.selectorAstResolveMap = selectorAstResolveMap;

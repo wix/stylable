@@ -560,20 +560,25 @@ export class StylableTransformer {
                 node,
             });
         } else if (node.type === `nesting`) {
-            /**
-             * although it is always assumed to be class symbol, the get is done from
-             * the general `st-symbol` feature because the actual symbol can
-             * be a type-element symbol that is actually an imported root in a mixin
-             */
-            const origin = STSymbol.get(originMeta, topNestClassName || originMeta.root) as
-                | ClassSymbol
-                | ElementSymbol; // ToDo: handle other cases
-            context.setCurrentAnchor({
-                name: origin.name,
-                type: origin._kind,
-                resolved: resolvedSymbols[origin._kind][origin.name],
-            });
-            context.setNodeResolve(node, resolvedSymbols[origin._kind][origin.name]);
+            if (context.nestingSelectorAnchor) {
+                context.setCurrentAnchor(context.nestingSelectorAnchor);
+                context.setNodeResolve(node, context.nestingSelectorAnchor.resolved);
+            } else {
+                /**
+                 * although it is always assumed to be class symbol, the get is done from
+                 * the general `st-symbol` feature because the actual symbol can
+                 * be a type-element symbol that is actually an imported root in a mixin
+                 */
+                const origin = STSymbol.get(originMeta, topNestClassName || originMeta.root) as
+                    | ClassSymbol
+                    | ElementSymbol; // ToDo: handle other cases
+                context.setCurrentAnchor({
+                    name: origin.name,
+                    type: origin._kind,
+                    resolved: resolvedSymbols[origin._kind][origin.name],
+                });
+                context.setNodeResolve(node, resolvedSymbols[origin._kind][origin.name]);
+            }
         }
     }
     private handleCustomSelector(
@@ -739,6 +744,7 @@ export class ScopeContext {
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
     public currentAnchor?: ScopeAnchor;
+    public nestingSelectorAnchor?: ScopeAnchor;
     constructor(
         public originMeta: StylableMeta,
         public resolver: StylableResolver,
