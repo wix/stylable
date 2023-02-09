@@ -25,3 +25,9 @@ export function assertInvalid(node: any, msg?: string): Invalid {
     }
     return node;
 }
+export function assertComment(node: any, msg?: string): postcss.Comment {
+    if (node?.type !== 'comment') {
+        throw new Error('expected comment node' + (msg ? ` (${msg})` : ''));
+    }
+    return node;
+}

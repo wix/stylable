@@ -8,6 +8,7 @@ import {
     assertAtRule,
     assertDecl,
     assertInvalid,
+    assertComment,
 } from '../test-kit/postcss-node-asserts';
 import { expect } from 'chai';
 import { deindent } from '@stylable/core-test-kit';
@@ -319,5 +320,44 @@ describe('edit-time-parser', () => {
         expect(atrule.source!.end!, 'atrule').to.eql(ast.source!.end);
         expect(rule.source!.end!, 'rule').to.eql(ast.source!.end);
         expect(invalid.source!.end!, 'decl').to.eql(ast.source!.end);
+    });
+    it('should handle unclosed comment', () => {
+        const { ast, errorNodes, ambiguousNodes } = safeParse(`
+            /*c1
+            .selector1 {}
+            /*c2*/
+            .selector2 {}
+        `);
+
+        const expected = deindent(`
+            /*c1
+            .selector1 {}
+            /*c2*/
+            .selector2 {}
+        `);
+        expect(ast.toString()).to.equal(expected.toString());
+        const overflowComment = assertComment(ast.nodes[0]);
+        const afterRule = assertRule(ast.nodes[1]);
+        expect(overflowComment.text, 'comment').to.eql('c1\n.selector1 {}\n/*c2');
+        expect(afterRule.selector, 'rule').to.eql('.selector2');
+        expect(errorNodes.size, 'errors').to.eql(0);
+        expect(ambiguousNodes.size, 'ambiguous').to.eql(0);
+    });
+    it('should handle unclosed string', () => {
+        // Probably not a real case, but just checking
+        const { ast, errorNodes, ambiguousNodes } = safeParse(`
+            "string...
+            .selector {}
+        `);
+
+        const expected = deindent(`
+            "string...
+            .selector {}
+        `);
+        expect(ast.toString()).to.equal(expected.toString());
+        const weirdRule = assertRule(ast.nodes[0]);
+        expect(weirdRule.selector, 'selector').to.eql('"string...\n.selector');
+        expect(errorNodes.size, 'errors').to.eql(0);
+        expect(ambiguousNodes.size, 'ambiguous').to.eql(0);
     });
 });
