@@ -19,16 +19,19 @@ import type { LangServiceContext } from '../lang-service-context';
 
 export function getCompletions(context: LangServiceContext): Completion[] {
     const completions: Completion[] = [];
-    const isInSelector = context.isInSelector();
-    if (!isInSelector && !context.isInRoot()) {
+
+    const selectorContext = context.getSelectorContext();
+
+    if (!selectorContext) {
         return completions;
     }
+
     const {
         resolvedSelectorChain = [],
         nodeAtCursor = null,
         fullSelectorAtCursor = '',
         selectorAtCursor = '',
-    } = isInSelector ? context.getSelectorContext() : {};
+    } = selectorContext;
 
     if (selectorAtCursor === '::') {
         // No state completion directly after pseudo_element opener: bailout

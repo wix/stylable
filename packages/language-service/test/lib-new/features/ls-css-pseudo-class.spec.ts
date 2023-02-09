@@ -79,6 +79,37 @@ describe('LS: css-pseudo-class', () => {
                 expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
             });
         });
+        it('should suggest class custom states with nesting selector (empty)', () => {
+            const { service, carets, assertCompletions } = testLangService(`
+                .x {
+                    -st-states: aaa,bbb;
+                }
+
+
+                @st-scope .x {
+                    /*^afterColon*/
+                }
+
+                @st-scope .x {
+                    @media (max-width<500) {
+                        /*^afterColonInMedia*/
+                    }
+                }
+            `);
+            const entryCarets = carets['/entry.st.css'];
+
+            assertCompletions({
+                message: 'after colon',
+                actualList: service.onCompletion('/entry.st.css', entryCarets.afterColon),
+                expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+            });
+
+            assertCompletions({
+                message: 'after colon in media',
+                actualList: service.onCompletion('/entry.st.css', entryCarets.afterColonInMedia),
+                expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+            });
+        });
         it('should suggest class custom states after colon (no nesting selector)', () => {
             // Notice: this is a (design?) quirk in the transformer atm. The final state selector is not
             // in the same compound selector as the nesting selector and it's a bit weird to

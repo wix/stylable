@@ -56,10 +56,22 @@ export class LangServiceContext {
     public isInRoot() {
         return this.location.base.node.type === 'root';
     }
+    public isInSelectorAllowedSpace() {
+        const where = this.location.base.where;
+        return (
+            this.isInSelector() ||
+            where === 'root' ||
+            where === 'ruleBody' ||
+            where === 'atRuleBody'
+        );
+    }
     public isInSelector() {
         return !!this.location.selector;
     }
     public getSelectorContext() {
+        if (!this.isInSelectorAllowedSpace()) {
+            return null;
+        }
         const nestedSelectors = this.collectSelector();
         // collect the CSS resolve chain for each selector node
         const selectorAstResolveMap = new Map<ImmutableSelectorNode, CSSResolve[]>();
@@ -83,21 +95,23 @@ export class LangServiceContext {
             currentAnchor = selectorContext.currentAnchor;
         }
         // reference interest points
-        const locationSelector = this.location.selector!;
-        const nodeAtCursor = locationSelector.node;
+        const locationSelector = this.location.selector;
+        const nodeAtCursor = locationSelector?.node;
         const resolvedSelectorChain = this.aggregateResolvedChain(
             nestedSelectors,
             selectorAstResolveMap
         );
         return {
-            nodeAtCursor: locationSelector.node,
-            selectorAtCursor: stringifySelectorAst(nodeAtCursor).slice(
-                0,
-                this.location.selector!.offsetInNode
-            ),
-            fullSelectorAtCursor: stringifySelectorAst(
-                nestedSelectors[nestedSelectors.length - 1]
-            ).slice(0, nodeAtCursor.start + locationSelector.offsetInNode),
+            nodeAtCursor,
+            selectorAtCursor: nodeAtCursor
+                ? stringifySelectorAst(nodeAtCursor).slice(0, this.location.selector!.offsetInNode)
+                : '',
+            fullSelectorAtCursor: nodeAtCursor
+                ? stringifySelectorAst(nestedSelectors[nestedSelectors.length - 1]).slice(
+                      0,
+                      nodeAtCursor.start + locationSelector.offsetInNode
+                  )
+                : '',
             selectorAstResolveMap,
             nestedSelectors,
             resolvedSelectorChain,
@@ -115,7 +129,6 @@ export class LangServiceContext {
 
         let item: ResolveChainItem = {};
         const nestingSelectors = [...nestedSelectors];
-        const caretSelector = nestingSelectors.pop()!;
         const addToItem = (node: ImmutableSelectorNode) => {
             const resolved = selectorAstResolveMap.get(node);
             if (resolved) {
@@ -128,8 +141,13 @@ export class LangServiceContext {
                 item[node.type]!.push(node as any);
             }
         };
-        const collectBack = (node: ImmutableSelectorNode, parents: ImmutableSelectorNode[]) => {
-            addToItem(node);
+        const collectBack = (
+            node: ImmutableSelectorNode | undefined,
+            parents: ImmutableSelectorNode[]
+        ) => {
+            if (node) {
+                addToItem(node);
+            }
             if (!parents.length) {
                 const upperNestingSelectors = getLastWhile(
                     nestingSelectors,
@@ -155,14 +173,20 @@ export class LangServiceContext {
             collectBack(parent, parents);
         };
         // find node at cursor and collect back resolved location
-        const targetSelectorNode = this.location.selector!.node;
-        walkSelector(caretSelector, (node, _index, _nodes, parents) => {
-            if (node === targetSelectorNode) {
-                collectBack(node, parents);
-                return walkSelector.stopAll;
-            }
-            return;
-        });
+        if (this.location.selector) {
+            const caretSelector = nestingSelectors.pop()!;
+            const targetSelectorNode = this.location.selector?.node;
+            walkSelector(caretSelector, (node, _index, _nodes, parents) => {
+                if (node === targetSelectorNode) {
+                    collectBack(node, parents);
+                    return walkSelector.stopAll;
+                }
+                return;
+            });
+        } else {
+            // caret is not at selector (probably nested): complete from end
+            collectBack(undefined, []);
+        }
         return resolvedChain;
     }
     private getSelectorString(node: postcss.AnyNode = this.location.base.node): string | null {
@@ -181,13 +205,20 @@ export class LangServiceContext {
                 return parseSelectorWithCache(this.getSelectorString(node) || '');
             })
             .filter((selectors) => selectors.length !== 0);
-        let selectorWithCaret = this.location.selector!.parents.find(
-            (node) => node.type === 'selector'
-        ) as ImmutableSelector | undefined;
-        if (!selectorWithCaret && this.location.selector!.node.type === 'selector') {
-            selectorWithCaret = this.location.selector!.node;
+        if (this.location.selector) {
+            let selectorWithCaret = this.location.selector.parents.find(
+                (node) => node.type === 'selector'
+            ) as ImmutableSelector | undefined;
+            if (!selectorWithCaret && this.location.selector.node.type === 'selector') {
+                selectorWithCaret = this.location.selector.node;
+            }
+            results.push([selectorWithCaret!]);
+        } else {
+            const selector = this.getSelectorString(this.location.base.node);
+            if (selector) {
+                results.push(parseSelectorWithCache(selector));
+            }
         }
-        results.push([selectorWithCaret!]);
         return results;
     }
 }
