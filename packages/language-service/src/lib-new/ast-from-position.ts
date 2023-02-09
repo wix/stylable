@@ -6,10 +6,16 @@ import type { Invalid } from './invalid-node';
 import { AMBIGUITY, ParseForEditingResult } from './edit-time-parser';
 
 // ToDo: move to tokey
-function walkValue(valueList: CSSValue.BaseAstNode[], visit: (node: CSSValue.BaseAstNode) => void) {
+function walkValue(
+    valueList: CSSValue.BaseAstNode[],
+    visit: (node: CSSValue.BaseAstNode) => number | undefined
+) {
     for (const node of valueList) {
-        visit(node);
-        if (node.type === 'call') {
+        const changeWalk = visit(node);
+        if (changeWalk === walk.stopAll) {
+            return;
+        }
+        if (node.type === 'call' && changeWalk !== walk.skipNested) {
             walkValue(node.args, visit);
         }
     }
