@@ -82,7 +82,7 @@ export function assertCompletions({
     unexpectedList?: Array<Partial<CompletionItem>>;
     message?: string;
 }) {
-    const messagePrefix = message ? `(${message} )` : '';
+    const messagePrefix = message ? `(${message}) ` : '';
     for (const expected of expectedList) {
         const actual = actualList.find(({ label }) => label === expected.label);
         if (!actual) {

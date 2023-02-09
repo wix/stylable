@@ -69,7 +69,6 @@ export function getAstNodeAt(parseData: ParseForEditingResult, targetOffset: num
             type: 'base',
             node: parseData.ast,
             offsetInNode: targetOffset,
-            // parents: [],
         },
         selector: undefined,
         declValue: undefined,
@@ -109,13 +108,6 @@ export function getAstNodeAt(parseData: ParseForEditingResult, targetOffset: num
         checkAtRuleParams(node, checkContext);
         return;
     });
-    // remove closest parent node
-    // for (const location of Object.values(result)) {
-    //     if (location && location.node === location.parents[location.parents.length - 1]) {
-    //         location.parents.pop();
-    //     }
-    // }
-    //
     return result;
 }
 
@@ -230,7 +222,7 @@ function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
             node,
             valueStart,
             valueEnd,
-            afterSpace: 0, // ToDo: check cases
+            afterSpace: 0,
             checkContext,
         });
     }
