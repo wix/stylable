@@ -28,6 +28,20 @@ export type AstLocation =
           type: 'base';
           node: postcss.AnyNode;
           offsetInNode: number;
+          where:
+              | 'root'
+              | 'comment'
+              | 'ruleSelector'
+              | 'ruleBetweenSelectorAndBody'
+              | 'ruleBody'
+              | 'atRuleName'
+              | 'atRuleParams'
+              | 'atRuleBody'
+              | 'declProp'
+              | 'declBetweenPropAndColon'
+              | 'declBetweenColonAndValue'
+              | 'declValue'
+              | 'invalid';
       }
     | {
           type: 'selector';
@@ -69,6 +83,7 @@ export function getAstNodeAt(parseData: ParseForEditingResult, targetOffset: num
             type: 'base',
             node: parseData.ast,
             offsetInNode: targetOffset,
+            where: 'root',
         },
         selector: undefined,
         declValue: undefined,
@@ -94,7 +109,10 @@ export function getAstNodeAt(parseData: ParseForEditingResult, targetOffset: num
         result.base.node = node;
         result.base.offsetInNode = targetOffset - baseNodeOffset;
         if (node.type === 'comment') {
+            result.base.where = 'comment';
             return false;
+        } else if (isInvalid(node)) {
+            result.base.where = 'invalid';
         }
         const checkContext: CheckContext = {
             baseNodeOffset,
@@ -123,8 +141,9 @@ function checkRuleSelector(
     { baseNodeOffset, targetOffset, result }: CheckContext,
     parseData: ParseForEditingResult
 ) {
+    const isInRule = isRule(node);
     if (
-        isRule(node) ||
+        isInRule ||
         isInvalid(node) ||
         (isDeclaration(node) &&
             parseData.ambiguousNodes
@@ -153,6 +172,7 @@ function checkRuleSelector(
 
         if (afterSelector && !beforeBody) {
             // not in selector
+            isInRule && (result.base.where = 'ruleBody');
             return;
         }
         const selectors = parseSelectorWithCache(selector);
@@ -177,7 +197,9 @@ function checkRuleSelector(
             afterSelector,
             parents: [],
         };
+        isInRule && (result.base.where = 'ruleBetweenSelectorAndBody');
         if (selectors.length && !afterSelector) {
+            isInRule && (result.base.where = 'ruleSelector');
             const selectorTargetOffset = targetOffset - selectorStartOffset;
             walk(selectors, (selectorNode, _index, _nodes, parents) => {
                 const isTargetAfterStart = selectorStartOffset + selectorNode.start < targetOffset;
@@ -213,10 +235,10 @@ function checkRuleSelector(
 }
 function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
     if (isDeclaration(node)) {
-        const valueStart =
-            checkContext.baseNodeOffset + node.prop.length + node.raws.between!.length;
+        const between = node.raws.between!;
+        const valueStart = checkContext.baseNodeOffset + node.prop.length + between.length;
         const valueEnd = valueStart + node.value.length;
-        checkValue({
+        const isInValue = checkValue({
             type: 'declValue',
             value: node.value,
             node,
@@ -225,6 +247,21 @@ function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
             afterSpace: 0,
             checkContext,
         });
+        let where: typeof base['where'] = 'declValue';
+        const base = checkContext.result.base;
+        if (isInValue) {
+            where = 'declValue';
+        } else if (base.offsetInNode > node.prop.length) {
+            const spaceAfterColon = between.length - between.indexOf(':');
+            if (valueStart - spaceAfterColon >= checkContext.targetOffset) {
+                where = 'declBetweenPropAndColon';
+            } else {
+                where = 'declBetweenColonAndValue';
+            }
+        } else {
+            where = 'declProp';
+        }
+        base.where = where;
     }
 }
 function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
@@ -232,7 +269,7 @@ function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
         const valueStart =
             checkContext.baseNodeOffset + 1 + node.name.length + node.raws.afterName!.length;
         const valueEnd = valueStart + node.params.length;
-        checkValue({
+        const isInParams = checkValue({
             type: 'atRuleParams',
             value: node.params,
             node,
@@ -241,6 +278,19 @@ function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
             afterSpace: node.raws.between!.length,
             checkContext,
         });
+        let where: typeof base['where'] = 'declValue';
+        const base = checkContext.result.base;
+        if (isInParams) {
+            where = 'atRuleParams';
+        } else if (
+            checkContext.baseNodeOffset + node.name.length + 1 >=
+            checkContext.targetOffset
+        ) {
+            where = 'atRuleName';
+        } else {
+            where = 'atRuleBody';
+        }
+        base.where = where;
     }
 }
 function checkValue({
@@ -265,7 +315,7 @@ function checkValue({
         afterNodeContent || (isAfterValue && valueEnd + afterSpace >= targetOffset);
     if (valueStart > targetOffset || (isAfterValue && !isInIncludedSpace)) {
         // not in value
-        return;
+        return false;
     }
     const ast = CSSValue.parseCSSValue(value);
     const valueLocation: Extract<AstLocation, { type: 'atRuleParams' | 'declValue' }> = {
@@ -298,6 +348,7 @@ function checkValue({
         });
     }
     result[type] = valueLocation as any; // ToDo: figure out type issue
+    return true;
 }
 function isPostcssNodeInRange(node: postcss.AnyNode | postcss.Container, target: number) {
     const result = {
