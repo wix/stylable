@@ -13,8 +13,6 @@ import type {
     VarSymbol,
 } from '@stylable/core';
 import {
-    MappedStates,
-    nativePseudoClasses,
     nativePseudoElements,
     ResolvedElement,
     STCustomSelector,
@@ -34,8 +32,6 @@ import {
     pseudoElementCompletion,
     rulesetDirectives,
     rulesetInternalDirective,
-    stateCompletion,
-    stateEnumCompletion,
     stateTypeCompletion,
     topLevelDirective,
     topLevelDirectives,
@@ -53,11 +49,12 @@ import {
 } from './provider';
 import type { ExtendedTsLanguageService } from './types';
 import { getAtRuleByPosition, isComment, isDeclaration } from './utils/postcss-ast-utils';
-import type { CursorPosition, SelectorChunk } from './utils/selector-analyzer';
-
-const { hasOwnProperty } = Object.prototype;
+import type { CursorPosition } from './utils/selector-analyzer';
+import type { LangServiceContext } from '../lib-new/lang-service-context';
+import * as cssPseudoClass from '../lib-new/features/ls-css-pseudo-class';
 
 export interface ProviderOptions {
+    context: LangServiceContext;
     meta: StylableMeta;
     fs: IFileSystem;
     stylable: Stylable;
@@ -1267,201 +1264,8 @@ export const StateTypeCompletionProvider: CompletionProvider = {
 };
 
 export const StateSelectorCompletionProvider: CompletionProvider = {
-    provide({
-        parentSelector,
-        lineChunkAtCursor,
-        resolvedElements,
-        resolvedRoot,
-        target,
-        lastSelectoid,
-        meta,
-        position,
-        fullLineText,
-    }: ProviderOptions): Completion[] {
-        if (
-            !parentSelector &&
-            !lineChunkAtCursor.endsWith('::') &&
-            !isBetweenChars(fullLineText, position, '(', ')')
-        ) {
-            let lastNode = resolvedElements[0][resolvedElements[0].length - 1] || resolvedRoot;
-            if (
-                lastNode?.type === 'pseudo-element' &&
-                nativePseudoElements.includes(lastNode.name)
-            ) {
-                lastNode = resolvedElements[0][resolvedElements[0].length - 2];
-            }
-            const chunk = Array.isArray(target.focusChunk)
-                ? target.focusChunk[target.focusChunk.length - 1]
-                : target.focusChunk;
-            const chunkyStates =
-                chunk && (chunk as SelectorChunk).states ? (chunk as SelectorChunk).states : [];
-
-            const allStates = collectStates(lastNode);
-
-            const newStates = lastNode.resolved.reduce((acc, cur) => {
-                let relPath = path.relative(path.dirname(meta.source), cur.meta.source);
-                if (!relPath.startsWith('.')) {
-                    relPath = './' + relPath;
-                }
-                const symbol = cur.symbol;
-                if (symbol._kind === 'class') {
-                    const symbolStates = symbol[`-st-states`];
-
-                    if (symbolStates) {
-                        Object.keys(symbolStates).forEach((k) => {
-                            if (
-                                !acc[k] &&
-                                // selectoid is a substring of current state
-                                (k.slice(0, -1).startsWith(lastSelectoid.replace(':', '')) ||
-                                    // selectoid is a CSS native pseudo-sclass
-                                    nativePseudoClasses.includes(lastSelectoid.replace(':', '')) ||
-                                    hasOwnProperty.call(
-                                        allStates,
-                                        lastSelectoid.replace(':', '')
-                                    )) &&
-                                chunkyStates.every((cs) => cs !== k)
-                            ) {
-                                const symbolStates = symbol[`-st-states`];
-                                const stateDef = symbolStates && symbolStates[k];
-
-                                // if (stateDef) {
-                                const stateType =
-                                    stateDef && typeof stateDef === 'object' ? stateDef.type : null;
-                                acc[k] = {
-                                    path: meta.source === cur.meta.source ? 'Local file' : relPath,
-                                    hasParam: !!stateDef,
-                                    type: stateType,
-                                };
-                                // }
-                            }
-                        });
-                    }
-                }
-                return acc;
-            }, {} as { [k: string]: { path: string; hasParam: boolean; type: string | null } });
-
-            const states = Object.keys(newStates).map((k) => {
-                return { name: k, state: newStates[k] };
-            });
-
-            if (states.length === 0) {
-                return [];
-            }
-
-            const lastState = lastSelectoid.replace(':', '');
-            const realState =
-                hasOwnProperty.call(allStates, lastState) ||
-                nativePseudoClasses.includes(lastState);
-
-            return states.reduce((acc: Completion[], st) => {
-                acc.push(
-                    stateCompletion(
-                        st.name,
-                        st.state.path,
-                        new ProviderRange(
-                            new ProviderPosition(
-                                position.line,
-                                lastState
-                                    ? realState
-                                        ? position.character -
-                                          (lineChunkAtCursor.endsWith(':') ? 1 : 0)
-                                        : position.character -
-                                          (lastState.length + 1) -
-                                          (lineChunkAtCursor.endsWith(':') ? 1 : 0)
-                                    : position.character - (lineChunkAtCursor.endsWith(':') ? 1 : 0)
-                            ),
-                            position
-                        ),
-                        st.state.type,
-                        st.state.hasParam
-                    )
-                );
-                return acc;
-            }, []);
-        } else {
-            return [];
-        }
-    },
-};
-
-export const StateEnumCompletionProvider: CompletionProvider = {
-    provide({
-        meta,
-        astAtCursor,
-        fullLineText,
-        lineChunkAtCursor,
-        position,
-        lastSelectoid,
-        resolvedElements,
-        resolvedRoot,
-    }: ProviderOptions): Completion[] {
-        let acc: Completion[] = [];
-        const ast = astAtCursor;
-
-        if (!lineChunkAtCursor.endsWith('::') && (ast.type === 'root' || ast.type === 'atrule')) {
-            if (lastSelectoid.startsWith(':')) {
-                const stateName = lastSelectoid.slice(1);
-                const lastNode =
-                    resolvedElements[0][resolvedElements[0].length - 1] || resolvedRoot;
-
-                const resolvedStates: MappedStates = collectStates(lastNode);
-                const resolvedState = resolvedStates[stateName];
-                if (
-                    resolvedState &&
-                    typeof resolvedState !== 'string' &&
-                    (resolvedState.type === 'enum' ||
-                        (STCustomState.isTemplateState(resolvedState) &&
-                            resolvedState.params[0].type === 'enum'))
-                ) {
-                    const resolvedStateNode = lastNode.resolved.find(({ symbol }: any) => {
-                        const states = symbol['-st-states'];
-                        return states?.[stateName] === resolvedState;
-                    });
-                    if (resolvedStateNode) {
-                        const enumStateParam = STCustomState.isTemplateState(resolvedState)
-                            ? resolvedState.params[0]
-                            : resolvedState;
-                        let existingInput = fullLineText.slice(0, position.character);
-                        existingInput = existingInput.slice(existingInput.lastIndexOf('(') + 1);
-
-                        if (enumStateParam?.arguments.every((opt) => typeof opt === 'string')) {
-                            const options = enumStateParam.arguments as string[];
-                            let filteredOptions = options.filter((opt: string) =>
-                                opt.startsWith(existingInput)
-                            );
-                            filteredOptions = filteredOptions.length ? filteredOptions : options;
-
-                            let from = 'Local file';
-                            if (meta.source !== resolvedStateNode.meta.source) {
-                                from = path.relative(
-                                    path.dirname(meta.source),
-                                    resolvedStateNode.meta.source
-                                );
-                                if (!from.startsWith('.')) {
-                                    from = './' + from;
-                                }
-                            }
-
-                            acc = filteredOptions.map((opt: string) =>
-                                stateEnumCompletion(
-                                    opt,
-                                    from,
-                                    new ProviderRange(
-                                        new ProviderPosition(
-                                            position.line,
-                                            position.character - existingInput.length
-                                        ),
-                                        position
-                                    )
-                                )
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        return acc;
+    provide({ context }: ProviderOptions) {
+        return cssPseudoClass.getCompletions(context);
     },
 };
 
@@ -1549,25 +1353,6 @@ export const ValueCompletionProvider: CompletionProvider = {
         }
     },
 };
-
-function collectStates(lastNode: ResolvedElement) {
-    return lastNode.resolved.reduce<MappedStates>((acc, cur) => {
-        const symbol = cur.symbol;
-        if (symbol._kind === 'class') {
-            const symbolStates = symbol[`-st-states`];
-
-            if (symbolStates) {
-                Object.keys(symbolStates).forEach((k) => {
-                    const symbolStates = symbol[`-st-states`];
-                    if (symbolStates && symbolStates[k] !== undefined) {
-                        acc[k] = symbolStates[k];
-                    }
-                });
-            }
-        }
-        return acc;
-    }, {});
-}
 
 function isBetweenChars(text: string, position: ProviderPosition, char1: string, char2: string) {
     const posChar = position.character;

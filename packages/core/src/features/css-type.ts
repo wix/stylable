@@ -48,19 +48,32 @@ export const hooks = createFeature<{
     },
     transformSelectorNode({ context, node, selectorContext }): void {
         const resolvedSymbols = context.getResolvedSymbols(context.meta);
-        const resolved = resolvedSymbols.element[node.value] || [
-            // provides resolution for native elements
-            // that are not collected by parts
-            // or elements that are added by js mixin
-            {
-                _kind: 'css',
-                meta: context.meta,
-                symbol: { _kind: 'element', name: node.value },
-            },
-        ];
+        let resolved = resolvedSymbols.element[node.value];
+        if (!resolved) {
+            const resolvedClass = resolvedSymbols.class[node.value];
+            if (resolvedClass?.length > 1 && resolvedClass[0].symbol.alias) {
+                // fallback to imported class alias for case that no actual
+                // type selector was found in the source rules, but transform is
+                // called with such selector externally (this happens for invalid selectors
+                // during language service completions)
+                resolved = resolvedSymbols.class[node.value];
+            } else {
+                // provides resolution for native elements
+                // that are not collected by parts
+                // or elements that are added by js mixin
+                resolved = [
+                    {
+                        _kind: 'css',
+                        meta: context.meta,
+                        symbol: { _kind: 'element', name: node.value },
+                    },
+                ];
+            }
+        }
         selectorContext.setCurrentAnchor({ name: node.value, type: 'element', resolved });
+        selectorContext.setNodeResolve(node, resolved);
         // native node does not resolve e.g. div
-        if (resolved && resolved.length > 1) {
+        if (selectorContext.transform && resolved && resolved.length > 1) {
             const { symbol, meta } = getOriginDefinition(resolved);
             if (symbol._kind === 'class') {
                 CSSClass.namespaceClass(meta, symbol, node, selectorContext.originMeta);

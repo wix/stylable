@@ -16,6 +16,16 @@ export class Snippet {
     constructor(public source: string) {}
 }
 
+export function range(
+    pos: { line: number; character: number },
+    { deltaStart = 0, deltaEnd = 0 }: { deltaStart?: number; deltaEnd?: number } = {}
+) {
+    return {
+        start: { line: pos.line, character: pos.character + deltaStart },
+        end: { line: pos.line, character: pos.character + deltaEnd },
+    };
+}
+
 export const importDirectives = {
     from: `-st-from`,
     default: `-st-default`,

@@ -44,7 +44,6 @@ import {
     PseudoElementCompletionProvider,
     RulesetInternalDirectivesProvider,
     SelectorCompletionProvider,
-    StateEnumCompletionProvider,
     StateSelectorCompletionProvider,
     StateTypeCompletionProvider,
     TopLevelDirectiveProvider,
@@ -68,6 +67,7 @@ import {
     SelectorInternalChunk,
     SelectorQuery,
 } from './utils/selector-analyzer';
+import type { LangServiceContext } from '../lib-new/lang-service-context';
 
 function findLast<T>(
     arr: T[],
@@ -99,7 +99,6 @@ export class Provider {
         NamedCompletionProvider,
         StateTypeCompletionProvider,
         StateSelectorCompletionProvider,
-        StateEnumCompletionProvider,
         PseudoElementCompletionProvider,
         ValueCompletionProvider,
         StImportNamedCompletionProvider,
@@ -107,12 +106,13 @@ export class Provider {
     constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
 
     public provideCompletionItemsFromSrc(
-        src: string,
-        pos: Position,
-        fileName: string,
+        context: LangServiceContext,
         fs: IFileSystem
     ): Completion[] {
-        const res = fixAndProcess(src, pos, fileName);
+        const src = context.document.getText();
+        const filePath = context.meta.source;
+        const pos = context.getPosition();
+        const res = fixAndProcess(src, pos, filePath);
         const completions: Completion[] = [];
 
         if (!res.processed.meta) {
@@ -120,6 +120,7 @@ export class Provider {
         }
 
         const options = this.createProviderOptions(
+            context,
             src,
             pos,
             res.processed.meta,
@@ -719,6 +720,7 @@ export class Provider {
     }
 
     private createProviderOptions(
+        context: LangServiceContext,
         src: string,
         position: ProviderPosition,
         meta: StylableMeta,
@@ -780,6 +782,7 @@ export class Provider {
         }
 
         return {
+            context,
             meta,
             fs,
             stylable: this.stylable,

@@ -38,6 +38,7 @@ export {
 } from './native-reserved-lists';
 export { isAsset, makeAbsolute, isRelativeNativeCss, fixRelativeUrls } from './stylable-assets';
 export { namespace, namespaceDelimiter } from './helpers/namespace';
+export { parseSelectorWithCache } from './helpers/selector';
 export {
     emitDiagnostics,
     DiagnosticsMode,
@@ -50,7 +51,6 @@ export { createStylableFileProcessor } from './create-stylable-processor';
 export { packageNamespaceFactory } from './resolve-namespace-factories';
 export { BoxedValueArray, BoxedValueMap, createCustomValue } from './custom-values';
 export { DiagnosticBase } from './diagnostics';
-export { getAstNodeAt } from './helpers/ast';
 export { tryCollectImportsDeep, parsePseudoImport, createAtImportProps } from './helpers/import';
 export { processDeclarationFunctions } from './process-declaration-functions';
 export { plugableRecord } from './helpers/plugable-record';
