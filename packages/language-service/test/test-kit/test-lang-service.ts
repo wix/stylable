@@ -3,7 +3,6 @@ import type { IDirectoryContents, IFileSystem } from '@file-services/types';
 import { Stylable, StylableConfig } from '@stylable/core';
 import { deindent } from '@stylable/core-test-kit';
 import { StylableLanguageService } from '@stylable/language-service';
-// import type { Completion } from '@stylable/language-service/dist/lib/completion-types';
 import type { CompletionItem } from 'vscode-languageserver';
 import { expect } from 'chai';
 

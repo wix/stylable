@@ -115,7 +115,7 @@ describe('ast-from-position', () => {
                     `),
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -154,7 +154,7 @@ describe('ast-from-position', () => {
                     str: '.before.bookmark.after',
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -231,7 +231,7 @@ describe('ast-from-position', () => {
                     str: '.before.bookmark',
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -264,7 +264,7 @@ describe('ast-from-position', () => {
                     `),
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -299,7 +299,7 @@ describe('ast-from-position', () => {
                     `),
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -334,7 +334,7 @@ describe('ast-from-position', () => {
                     `),
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -354,7 +354,7 @@ describe('ast-from-position', () => {
             // ToDo: maybe offer before/after nodes
             // expect(base.beforeNode, 'beforeNode').to.eql(undefined);
             // expect(base.afterNode, 'afterNode').to.eql(rule.nodes[0]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -372,7 +372,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(20);
             expect(base.where, 'where').to.eql('ruleBody');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -390,7 +390,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(19);
             expect(base.where, 'where').to.eql('ruleBody');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -411,7 +411,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(0);
             expect(base.where, 'where').to.eql('declProp');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -428,7 +428,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(4);
             expect(base.where, 'where').to.eql('declProp');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -445,7 +445,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(5);
             expect(base.where, 'where').to.eql('declBetweenPropAndColon');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -462,7 +462,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal((parsed.ast as any).nodes[0].nodes[0]);
             expect(base.offsetInNode, 'offset').to.equal(6);
             expect(base.where, 'where').to.eql('declBetweenColonAndValue');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -491,7 +491,7 @@ describe('ast-from-position', () => {
                     str: 'decl1: bookmark after',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -519,7 +519,7 @@ describe('ast-from-position', () => {
                     str: 'decl1: before bookmark after',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -550,7 +550,7 @@ describe('ast-from-position', () => {
                     str: 'nest(bookmark)',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -578,7 +578,7 @@ describe('ast-from-position', () => {
                     str: 'decl1: before bookmark',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -604,7 +604,7 @@ describe('ast-from-position', () => {
                     str: 'decl1: before',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -623,7 +623,7 @@ describe('ast-from-position', () => {
             expect(base.node.toString(), 'base target at-rule node').to.eql('@bookmark params {}');
             expect(base.offsetInNode, 'base offset').to.eql(1);
             expect(base.where, 'where').to.eql('atRuleName');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -641,7 +641,7 @@ describe('ast-from-position', () => {
             expect(base.node.toString(), 'base target at-rule node').to.eql('@bookmark params {}');
             expect(base.offsetInNode, 'base offset').to.eql(9);
             expect(base.where, 'where').to.eql('atRuleName');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -672,7 +672,7 @@ describe('ast-from-position', () => {
                     str: '@name bookmark after {}',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
         });
@@ -702,7 +702,7 @@ describe('ast-from-position', () => {
                     str: '@name before bookmark after {}',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
         });
@@ -736,7 +736,7 @@ describe('ast-from-position', () => {
                     str: 'nest(bookmark)',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
         });
@@ -766,7 +766,7 @@ describe('ast-from-position', () => {
                     str: '@name start bookmark {}',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
         });
@@ -795,7 +795,7 @@ describe('ast-from-position', () => {
                     str: '@name params      {}',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
         });
@@ -826,7 +826,7 @@ describe('ast-from-position', () => {
                     str: '@name params      ',
                 },
             ]);
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
         });
@@ -843,7 +843,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(11);
             expect(base.where, 'where').to.eql('atRuleBody');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -861,7 +861,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(27);
             expect(base.where, 'where').to.eql('atRuleBody');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -879,7 +879,7 @@ describe('ast-from-position', () => {
             expect(base.node, 'node').to.equal(rule);
             expect(base.offsetInNode, 'offset').to.eql(26);
             expect(base.where, 'where').to.eql('atRuleBody');
-            //
+            // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -924,7 +924,7 @@ describe('ast-from-position', () => {
                     str: '.before.bookmark.after',
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
         });
     });
@@ -959,7 +959,7 @@ describe('ast-from-position', () => {
                     str: '.before.bookmark.after',
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -992,7 +992,7 @@ describe('ast-from-position', () => {
                     str: 'bookmark\n',
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
@@ -1033,7 +1033,7 @@ describe('ast-from-position', () => {
                     str: 'color: green',
                 },
             ]);
-            //
+            // unresolved levels
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should provide potential selector for last invalid node (after whitespace)`, () => {
@@ -1060,7 +1060,7 @@ describe('ast-from-position', () => {
                     str: '.before      \t',
                 },
             ]);
-            //
+            // unresolved levels
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
