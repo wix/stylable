@@ -1,13 +1,13 @@
 {
   "name": "@stylable/code-formatter",
-  "version": "5.6.1",
+  "version": "5.7.0",
   "description": "A code formatting utility for Stylable stylesheets",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "^5.6.1",
+    "@stylable/core": "^5.7.0",
     "@tokey/css-value-parser": "^0.1.2",
     "js-beautify": "^1.14.7",
     "postcss": "^8.4.21"

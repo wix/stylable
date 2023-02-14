@@ -1,6 +1,6 @@
 {
   "name": "create-stylable-app",
-  "version": "5.6.1",
+  "version": "5.7.0",
   "description": "Quickly create a Stylable application",
   "main": "dist/index.js",
   "bin": {
