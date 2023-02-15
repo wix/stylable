@@ -8,7 +8,7 @@ import {
     TemplateStateParsedValue,
 } from '@stylable/core/dist/index-internal';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
-import path from 'node:path';
+import path from 'path';
 import {
     Completion,
     stateCompletion,
