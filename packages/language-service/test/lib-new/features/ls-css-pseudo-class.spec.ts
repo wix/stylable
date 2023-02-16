@@ -115,7 +115,7 @@ describe('LS: css-pseudo-class', () => {
             // in the same compound selector as the nesting selector and it's a bit weird to
             // keep the context after the nesting descendant combinator, but that's the way the transformer
             // work currently - ToDo: think about changing this behavior.
-            const { service, carets, assertCompletions } = testLangService(`
+            const { service, carets, assertCompletions, textEditContext } = testLangService(`
                 .x {
                     -st-states: aaa,bbb;
                 }
@@ -132,17 +132,40 @@ describe('LS: css-pseudo-class', () => {
                 }
             `);
             const entryCarets = carets['/entry.st.css'];
+            const { replaceText } = textEditContext('/entry.st.css');
 
             assertCompletions({
                 message: 'after colon',
                 actualList: service.onCompletion('/entry.st.css', entryCarets.afterColon),
-                expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                expectedList: [
+                    {
+                        label: ':aaa',
+                        textEdit: replaceText(entryCarets.afterColon, ':aaa', { deltaStart: -1 }),
+                    },
+                    {
+                        label: ':bbb',
+                        textEdit: replaceText(entryCarets.afterColon, ':bbb', { deltaStart: -1 }),
+                    },
+                ],
             });
 
             assertCompletions({
                 message: 'after colon in media',
                 actualList: service.onCompletion('/entry.st.css', entryCarets.afterColonInMedia),
-                expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                expectedList: [
+                    {
+                        label: ':aaa',
+                        textEdit: replaceText(entryCarets.afterColonInMedia, ':aaa', {
+                            deltaStart: -1,
+                        }),
+                    },
+                    {
+                        label: ':bbb',
+                        textEdit: replaceText(entryCarets.afterColonInMedia, ':bbb', {
+                            deltaStart: -1,
+                        }),
+                    },
+                ],
             });
         });
     });

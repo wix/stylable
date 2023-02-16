@@ -3,7 +3,10 @@ import type { IDirectoryContents, IFileSystem } from '@file-services/types';
 import { Stylable, StylableConfig } from '@stylable/core';
 import { deindent } from '@stylable/core-test-kit';
 import { StylableLanguageService } from '@stylable/language-service';
-import type { CompletionItem } from 'vscode-languageserver';
+import { range } from '@stylable/language-service/dist/lib/completion-types';
+import { CompletionItem, TextEdit } from 'vscode-languageserver';
+import { TextDocument } from 'vscode-css-languageservice';
+import { URI } from 'vscode-uri';
 import { expect } from 'chai';
 
 export interface TestOptions {
@@ -67,6 +70,24 @@ export function testLangService(
         service,
         carets,
         assertCompletions,
+        textEditContext(filePath: string) {
+            const document = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                1,
+                fs.readFileSync(filePath, { encoding: 'utf-8' })
+            );
+            return {
+                replaceText(
+                    offset: number,
+                    text: string,
+                    replaceOffsets?: Parameters<typeof range>[1]
+                ) {
+                    const position = document.positionAt(offset);
+                    return TextEdit.replace(range(position, replaceOffsets), text);
+                },
+            };
+        },
     };
 }
 
