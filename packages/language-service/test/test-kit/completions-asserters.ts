@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs';
+import fs from '@file-services/node';
 import { expect } from 'chai';
 import type { ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
 import { Completion, Snippet } from '@stylable/language-service/dist/lib/completion-types';
@@ -70,6 +70,7 @@ export function getCompletions(fileName: string, prefix = '') {
     const stat = fs.statSync(fullPath);
     const offset = src.indexOf('|') + prefix.length;
     const context = new LangServiceContext(
+        fs,
         stylableLSP.getStylable(),
         {
             path: fullPath,
@@ -98,6 +99,7 @@ export function getStylableAndCssCompletions(fileName: string) {
     const stat = fs.statSync(fullPath);
     const offset = src.indexOf('|');
     const context = new LangServiceContext(
+        fs,
         stylableLSP.getStylable(),
         {
             path: fullPath,
