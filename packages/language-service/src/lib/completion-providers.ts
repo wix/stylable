@@ -52,6 +52,7 @@ import { getAtRuleByPosition, isComment, isDeclaration } from './utils/postcss-a
 import type { CursorPosition } from './utils/selector-analyzer';
 import type { LangServiceContext } from '../lib-new/lang-service-context';
 import * as cssPseudoClass from '../lib-new/features/ls-css-pseudo-class';
+import * as stImport from '../lib-new/features/ls-st-import';
 
 export interface ProviderOptions {
     context: LangServiceContext;
@@ -846,6 +847,12 @@ function maybeResolveImport(
     }
     return resolvedImport;
 }
+
+export const newStImportCompletionProvider: CompletionProvider = {
+    provide({ context }) {
+        return stImport.getCompletions(context);
+    },
+};
 
 export const StImportNamedCompletionProvider: CompletionProvider & {
     resolveImport: (

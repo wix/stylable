@@ -50,6 +50,7 @@ import {
     ValueCompletionProvider,
     ValueDirectiveProvider,
     StImportNamedCompletionProvider,
+    newStImportCompletionProvider,
 } from './completion-providers';
 import { topLevelDirectives } from './completion-types';
 import type { Completion } from './completion-types';
@@ -86,6 +87,7 @@ function findLast<T>(
 
 export class Provider {
     private providers: CompletionProvider[] = [
+        newStImportCompletionProvider,
         RulesetInternalDirectivesProvider,
         ImportInternalDirectivesProvider,
         TopLevelDirectiveProvider,
