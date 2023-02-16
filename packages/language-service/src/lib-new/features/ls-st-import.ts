@@ -62,27 +62,31 @@ function addSpecifierCompletions({
         const packages = getNodeModules({ context, originDirPath });
         const [packageName, internalPath] = parsePackageSpecifier(specifier);
         if (internalPath !== undefined) {
-            let packageJsonPath = context.fs.join(packageName, 'package.json');
-            try {
-                packageJsonPath = context.stylable.resolver.resolvePath(
-                    originDirPath,
-                    packageJsonPath
-                );
-            } catch (e) {
-                /**/
+            if (!packages[packageName]) {
+                // package not found: bailout
+                return;
             }
+            const packageJsonPath = context.fs.join(packages[packageName], 'package.json');
             const packageJsonStat = context.fs.statSync(packageJsonPath, {
                 throwIfNoEntry: false,
             });
             if (packageJsonStat) {
                 const packageJson = context.fs.readJsonFileSync(packageJsonPath)!;
-                if (!isValidPackageJson(packageJson)) {
+                if (!isObject(packageJson)) {
+                    // issue with package.json: bailout
                     return;
                 }
-                if ('exports' in packageJson) {
-                    // ToDo: deal with exports
+                if ('exports' in packageJson && isObject(packageJson['exports'])) {
+                    // according to exports field
+                    addPackageExportsCompletions({
+                        completions,
+                        context,
+                        exportsField: packageJson['exports'],
+                        originFilePath,
+                        internalPath,
+                    });
                 } else {
-                    // const packagePath = context.fs.dirname(packageJsonPath);
+                    // relative from package
                     addPathRelativeCompletions({
                         completions,
                         context,
@@ -95,7 +99,7 @@ function addSpecifierCompletions({
         } else {
             // package names completions
             const allowFullCompletions = pathBeforeCaret === '';
-            for (const packageName of packages) {
+            for (const packageName of Object.keys(packages)) {
                 let deltaStart = 0;
                 if (packageName.startsWith(pathBeforeCaret)) {
                     deltaStart = -pathBeforeCaret.length;
@@ -119,7 +123,7 @@ function addSpecifierCompletions({
     }
 }
 // naive check for an actual object
-function isValidPackageJson(obj: any): obj is JSON {
+function isObject(obj: any): obj is JSON {
     return !!obj && !Array.isArray(obj) && typeof obj === 'object';
 }
 function getNodeModules({
@@ -129,7 +133,7 @@ function getNodeModules({
     context: LangServiceContext;
     originDirPath: string;
 }) {
-    const packages = new Set<string>();
+    const packages: Record<string, string> = {};
     let dirPath = originDirPath;
     let searching = true;
     while (searching) {
@@ -140,17 +144,19 @@ function getNodeModules({
             const items = fs.readdirSync(nodeModulesPath, { withFileTypes: true });
             for (const item of items) {
                 if (item.isDirectory()) {
+                    const packagePath = fs.join(nodeModulesPath, item.name);
                     if (item.name[0] === '@') {
-                        const scopedItems = fs.readdirSync(fs.join(nodeModulesPath, item.name), {
+                        const scopedItems = fs.readdirSync(packagePath, {
                             withFileTypes: true,
                         });
                         for (const scopedItem of scopedItems) {
-                            if (scopedItem.isDirectory()) {
-                                packages.add(item.name + '/' + scopedItem.name);
+                            const scopedPackageName = item.name + '/' + scopedItem.name;
+                            if (scopedItem.isDirectory() && !packages[scopedPackageName]) {
+                                packages[scopedPackageName] = fs.join(packagePath, scopedItem.name);
                             }
                         }
-                    } else {
-                        packages.add(item.name);
+                    } else if (!packages[item.name]) {
+                        packages[item.name] = packagePath;
                     }
                 }
             }
@@ -241,6 +247,47 @@ function addDirRelativeCompletions({
                 )
             );
         }
+    }
+}
+function addPackageExportsCompletions({
+    completions,
+    context,
+    exportsField,
+    // originFilePath,
+    internalPath,
+}: {
+    completions: Completion[];
+    context: LangServiceContext;
+    exportsField: JSON;
+    originFilePath: string;
+    internalPath: string;
+}) {
+    // ToDo: handle type check
+    const exportsRules = exportsField; // ToDo: handle conditional
+    for (const [from] of Object.entries(exportsRules)) {
+        if (!from.startsWith('./') || from.length < 3) {
+            continue;
+        }
+        // ToDo: handle wild card mapping
+        const internalFrom = from.slice(2);
+        let deltaStart = 0;
+        if (internalFrom.startsWith(internalPath)) {
+            deltaStart = -internalPath.length;
+        } else {
+            continue;
+        }
+        const label = internalFrom;
+        const detail = '';
+        const snippet = new Snippet(label);
+        completions.push(
+            new Completion(
+                label,
+                detail,
+                'a',
+                snippet,
+                range(context.getPosition(), { deltaStart })
+            )
+        );
     }
 }
 /**

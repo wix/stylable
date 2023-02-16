@@ -261,7 +261,32 @@ describe('LS: st-import', () => {
                     unexpectedList: [{ label: 'red.js' }],
                 });
             });
-            // ToDo: map to exports field
+            it('should suggest package exports', () => {
+                const { service, carets, assertCompletions } = testLangService({
+                    node_modules: {
+                        x: {
+                            'private.js': '',
+                            'package.json': `{
+                                "exports": {
+                                    "./inner-a": "./src/inner-a.js",
+                                    "./inner-b": "./src/inner-b.js"
+                                }
+                            }`,
+                        },
+                    },
+                    'entry.st.css': `
+                        @st-import from 'x//*^*/';
+                    `,
+                });
+                const entryCarets = carets['/entry.st.css'];
+
+                assertCompletions({
+                    message: 'scoped root',
+                    actualList: service.onCompletion('/entry.st.css', entryCarets[0]),
+                    expectedList: [{ label: 'inner-a' }, { label: 'inner-b' }],
+                    unexpectedList: [{ label: 'private.js' }, { label: 'package.json' }],
+                });
+            });
         });
         describe('custom resolve', () => {
             it('should suggest from custom mapped', () => {
