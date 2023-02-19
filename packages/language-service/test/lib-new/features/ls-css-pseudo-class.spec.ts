@@ -7,9 +7,9 @@ describe('LS: css-pseudo-class', () => {
                 -st-states: aaa,bbb;
             }
 
-            .root/*^afterRoot*/ {}
+            .root^afterRoot^ {}
 
-            /*^empty*/ {}
+            ^empty^ {}
 
         `);
         const entryCarets = carets['/entry.st.css'];
@@ -32,8 +32,8 @@ describe('LS: css-pseudo-class', () => {
                 }
 
 
-                @st-scope .root/*^afterRoot*/ {}
-                @st-scope /*^empty*/ {}
+                @st-scope .root^afterRoot^ {}
+                @st-scope ^empty^ {}
 
             `);
             const entryCarets = carets['/entry.st.css'];
@@ -56,12 +56,12 @@ describe('LS: css-pseudo-class', () => {
 
 
                 @st-scope .x {
-                    &/*^afterColon*/
+                    &^afterColon^
                 }
 
                 @st-scope .x {
                     @media (max-width<500) {
-                        &/*^afterColonInMedia*/
+                        &^afterColonInMedia^
                     }
                 }
             `);
@@ -87,12 +87,12 @@ describe('LS: css-pseudo-class', () => {
 
 
                 @st-scope .x {
-                    /*^afterColon*/
+                    ^afterColon^
                 }
 
                 @st-scope .x {
                     @media (max-width<500) {
-                        /*^afterColonInMedia*/
+                        ^afterColonInMedia^
                     }
                 }
             `);
@@ -122,12 +122,12 @@ describe('LS: css-pseudo-class', () => {
 
 
                 @st-scope .x {
-                    :/*^afterColon*/
+                    :^afterColon^
                 }
 
                 @st-scope .x {
                     @media (max-width<500) {
-                        :/*^afterColonInMedia*/
+                        :^afterColonInMedia^
                     }
                 }
             `);

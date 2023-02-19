@@ -13,9 +13,9 @@ describe('LS: st-import', () => {
                         'd.st.css': ``,
                     },
                     'entry.st.css': `
-                        @st-import from './/*^sameDir*/';
-                        @st-import from '..//*^upDir*/';
-                        @st-import from './inner//*^nestedDir*/';
+                        @st-import from './^sameDir^';
+                        @st-import from '../^upDir^';
+                        @st-import from './inner/^nestedDir^';
                     `,
                 },
             });
@@ -56,7 +56,7 @@ describe('LS: st-import', () => {
                 },
                 'not-start-with-fil.st.css': ``,
                 'entry.st.css': `
-                    @st-import from './fil/*^*/';
+                    @st-import from './fil^^';
                 `,
             });
             const entryCarets = carets['/entry.st.css'];
@@ -82,7 +82,6 @@ describe('LS: st-import', () => {
                 unexpectedList: [{ label: 'entry.st.css' }, { label: 'not-start-with-fil.st.css' }],
             });
         });
-        // ToDo: support project root path
         describe('node_modules', () => {
             it('should suggest picked up node_modules package names', () => {
                 const { service, carets, assertCompletions, textEditContext } = testLangService({
@@ -100,9 +99,9 @@ describe('LS: st-import', () => {
                             },
                         },
                         'entry.st.css': `
-                            @st-import from '/*^empty*/';
-                            @st-import from 'p/*^startWithP*/';
-                            @st-import from '@/*^startWithAt*/';
+                            @st-import from '^empty^';
+                            @st-import from 'p^startWithP^';
+                            @st-import from '@^startWithAt^';
                         `,
                     },
                 });
@@ -181,10 +180,10 @@ describe('LS: st-import', () => {
                         },
                     },
                     'entry.st.css': `
-                        @st-import from '@scoped/package//*^scopedRoot*/';
-                        @st-import from 'flat-package//*^flatRoot*/';
-                        @st-import from '@scoped/package/dist/fi/*^scopedInternal*/';
-                        @st-import from 'flat-package/esm/fi/*^flatInternal*/';
+                        @st-import from '@scoped/package/^scopedRoot^';
+                        @st-import from 'flat-package/^flatRoot^';
+                        @st-import from '@scoped/package/dist/fi^scopedInternal^';
+                        @st-import from 'flat-package/esm/fi^flatInternal^';
                     `,
                 });
                 const entryCarets = carets['/entry.st.css'];
@@ -248,7 +247,7 @@ describe('LS: st-import', () => {
                             },
                         },
                         'entry.st.css': `
-                            @st-import from 'x//*^*/';
+                            @st-import from 'x/^^';
                         `,
                     },
                 });
@@ -289,10 +288,10 @@ describe('LS: st-import', () => {
                         },
                     },
                     'entry.st.css': `
-                        @st-import from 'x//*^packageRoot*/';
-                        @st-import from 'x/wild//*^wildCardAtEnd*/';
-                        @st-import from 'x/wild/c/*^wildCardAtEndPartial*/';
-                        @st-import from 'x/wild/internal/*^internal*/';
+                        @st-import from 'x/^packageRoot^';
+                        @st-import from 'x/wild/^wildCardAtEnd^';
+                        @st-import from 'x/wild/c^wildCardAtEndPartial^';
+                        @st-import from 'x/wild/internal^internal^';
                     `,
                 });
                 const entryCarets = carets['/entry.st.css'];
@@ -396,9 +395,9 @@ describe('LS: st-import', () => {
                         },
                     },
                     'entry.st.css': `
-                        @st-import from 'topLevelConditions//*^topLevelConditions*/';
-                        @st-import from 'nestedConditions//*^nestedConditions*/';
-                        @st-import from 'nestedConditions/give-me//*^nestedSubpathConditions*/';
+                        @st-import from 'topLevelConditions/^topLevelConditions^';
+                        @st-import from 'nestedConditions/^nestedConditions^';
+                        @st-import from 'nestedConditions/give-me/^nestedSubpathConditions^';
                     `,
                 });
                 const entryCarets = carets['/entry.st.css'];
@@ -449,7 +448,7 @@ describe('LS: st-import', () => {
                                 },
                             },
                             'entry.st.css': `
-                                @st-import from 'x//*^*/';
+                                @st-import from 'x/^^';
                             `,
                         },
                     },

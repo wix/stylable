@@ -42,7 +42,7 @@ export function testLangService(
     const allSheets = fs.findFilesSync(`/`, { filterFile: ({ path }) => path.endsWith(`.st.css`) });
     for (const path of allSheets) {
         let source = deindent(fs.readFileSync(path, { encoding: 'utf-8' }));
-        const posComments = source.match(/\/\*\^([^*]*)\*\//g);
+        const posComments = source.match(/\^([^^]*)\^/g);
         if (posComments) {
             const sheetPositions: Record<string | number, number> = {};
             let unNamedCounter = 0;
@@ -50,8 +50,8 @@ export function testLangService(
                 const offset = source.indexOf(comment);
                 source = source.slice(0, offset) + source.slice(offset + comment.length);
                 const positionName =
-                    comment.length > 5
-                        ? comment.substring(3, comment.length - 2).trim()
+                    comment.length > 2
+                        ? comment.substring(1, comment.length - 1).trim()
                         : unNamedCounter++;
                 if (sheetPositions[positionName] !== undefined) {
                     throw new Error(`debug position "${positionName}" override in ${path}`);
