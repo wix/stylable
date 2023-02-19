@@ -273,13 +273,18 @@ function addPackageExportsCompletions({
             continue;
         }
         const internalFrom = from.slice(2);
+        const fromWildCardIndex = internalFrom.indexOf('*');
         let deltaStart = 0;
-        if (internalFrom.startsWith(internalPath)) {
+        const isCurrentPathIncludedInFrom =
+            fromWildCardIndex !== -1 && internalPath.length > internalFrom.length - 1
+                ? internalPath.startsWith(internalFrom.slice(0, internalFrom.length - 2))
+                : internalFrom.startsWith(internalPath);
+        if (isCurrentPathIncludedInFrom) {
             deltaStart = internalPath.length;
         } else {
             continue;
         }
-        const fromWildCardIndex = internalFrom.indexOf('*');
+
         if (fromWildCardIndex !== -1) {
             const resultTo = getExportsRules(to);
             if (typeof resultTo !== 'string') {
@@ -312,7 +317,7 @@ function addPackageExportsCompletions({
                 );
             } else {
                 // internal path completions
-                const wildCardInput = internalPath.slice(deltaStart);
+                const wildCardInput = internalPath.slice(fromWildCardIndex, deltaStart);
                 const toBasePath = resultTo.slice(0, toWildCardIndex);
                 // const fromAfterWildCard = internalFrom.slice(fromWildCardIndex);
                 // const toAfterWildCard = to.slice(toWildCardIndex+1);

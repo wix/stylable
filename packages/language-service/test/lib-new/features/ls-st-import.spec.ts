@@ -267,10 +267,10 @@ describe('LS: st-import', () => {
                             'private.js': '',
                             src: {
                                 anyof: {
-                                    'c.js': '',
-                                    'd.js': '',
+                                    'c-file.js': '',
+                                    'd-file.js': '',
                                     internal: {
-                                        'x.js': '',
+                                        'x-file.js': '',
                                     },
                                 },
                             },
@@ -313,7 +313,7 @@ describe('LS: st-import', () => {
                 assertCompletions({
                     message: 'wild card at end',
                     actualList: service.onCompletion('/entry.st.css', entryCarets.wildCardAtEnd),
-                    expectedList: [{ label: 'c.js' }, { label: 'd.js' }],
+                    expectedList: [{ label: 'c-file.js' }, { label: 'd-file.js' }],
                     unexpectedList: [
                         // { label: 'internal' }, // ToDo: handle exclude patterns
                         { label: 'inner-a' },
@@ -329,9 +329,9 @@ describe('LS: st-import', () => {
                         '/entry.st.css',
                         entryCarets.wildCardAtEndPartial
                     ),
-                    expectedList: [{ label: 'c.js' }],
+                    expectedList: [{ label: 'c-file.js' }],
                     unexpectedList: [
-                        { label: 'd.js' },
+                        { label: 'd-file.js' },
                         // { label: 'internal' }, // ToDo: handle exclude patterns
                         { label: 'inner-a' },
                         { label: 'inner-b' },
@@ -343,7 +343,7 @@ describe('LS: st-import', () => {
                 assertCompletions({
                     message: 'internal',
                     actualList: service.onCompletion('/entry.st.css', entryCarets.internal),
-                    unexpectedList: [{ label: 'x.js' }],
+                    unexpectedList: [{ label: 'x-file.js' }],
                 });
             });
             it('should handle conditional exports', () => {
