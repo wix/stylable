@@ -81,8 +81,8 @@ function addSpecifierCompletions({
                     addPackageExportsCompletions({
                         completions,
                         context,
+                        packagePath: packages[packageName],
                         exportsField: packageJson['exports'],
-                        originFilePath,
                         internalPath,
                     });
                 } else {
@@ -180,11 +180,13 @@ function addPathRelativeCompletions({
     completions: Completion[];
     context: LangServiceContext;
     contextDirPath: string;
-    originFilePath: string;
+    originFilePath?: string;
     specifierPath: string;
 }) {
-    const targetPath = context.fs.resolve(contextDirPath, specifierPath);
-    const { dir, name } = specifierPath.endsWith('/')
+    const targetPath = specifierPath
+        ? context.fs.resolve(contextDirPath, specifierPath)
+        : contextDirPath;
+    const { dir, name } = targetPath.endsWith('/')
         ? { dir: targetPath, name: '' }
         : context.fs.parse(targetPath);
     addDirRelativeCompletions({
@@ -215,7 +217,7 @@ function addDirRelativeCompletions({
     completions: Completion[];
     context: LangServiceContext;
     targetPath: string;
-    originFilePath: string;
+    originFilePath?: string;
     startWith?: string;
     prefix?: string;
 }) {
@@ -224,7 +226,7 @@ function addDirRelativeCompletions({
         const files = context.fs.readdirSync(targetPath, { withFileTypes: true });
         for (const item of files) {
             const itemPath = context.fs.join(targetPath, item.name);
-            if (itemPath === originFilePath) {
+            if (originFilePath && itemPath === originFilePath) {
                 continue;
             }
             let deltaStart = 0;
@@ -252,42 +254,85 @@ function addDirRelativeCompletions({
 function addPackageExportsCompletions({
     completions,
     context,
+    packagePath,
     exportsField,
-    // originFilePath,
     internalPath,
 }: {
     completions: Completion[];
     context: LangServiceContext;
+    packagePath: string;
     exportsField: JSON;
-    originFilePath: string;
     internalPath: string;
 }) {
     // ToDo: handle type check
     const exportsRules = exportsField; // ToDo: handle conditional
-    for (const [from] of Object.entries(exportsRules)) {
+    for (const [from, to] of Object.entries(exportsRules)) {
         if (!from.startsWith('./') || from.length < 3) {
             continue;
         }
-        // ToDo: handle wild card mapping
         const internalFrom = from.slice(2);
         let deltaStart = 0;
         if (internalFrom.startsWith(internalPath)) {
-            deltaStart = -internalPath.length;
+            deltaStart = internalPath.length;
         } else {
             continue;
         }
-        const label = internalFrom;
-        const detail = '';
-        const snippet = new Snippet(label);
-        completions.push(
-            new Completion(
-                label,
-                detail,
-                'a',
-                snippet,
-                range(context.getPosition(), { deltaStart })
-            )
-        );
+        const fromWildCardIndex = internalFrom.indexOf('*');
+        if (fromWildCardIndex !== -1) {
+            // wildcard mapping
+            const toWildCardIndex = to.indexOf('*');
+            // validate
+            if (
+                internalFrom.lastIndexOf('*') !== fromWildCardIndex ||
+                (toWildCardIndex !== -1 && to.lastIndexOf('*') !== toWildCardIndex)
+            ) {
+                // mapping not valid: bailout
+                continue; // ToDo: test
+            }
+            if (deltaStart < fromWildCardIndex) {
+                // from path completion
+                const label = internalFrom.slice(0, fromWildCardIndex);
+                const detail = '';
+                const snippet = new Snippet(label);
+                completions.push(
+                    new Completion(
+                        label,
+                        detail,
+                        'a',
+                        snippet,
+                        range(context.getPosition(), { deltaStart: -deltaStart })
+                    )
+                );
+            } else {
+                // internal path completions
+                const wildCardInput = internalPath.slice(deltaStart);
+                const toBasePath = to.slice(0, toWildCardIndex);
+                // const fromAfterWildCard = internalFrom.slice(fromWildCardIndex);
+                // const toAfterWildCard = to.slice(toWildCardIndex+1);
+                addPathRelativeCompletions({
+                    completions,
+                    context,
+                    contextDirPath:
+                        context.fs.resolve(packagePath, toBasePath) +
+                        (toBasePath.endsWith('/') ? '/' : ''),
+                    specifierPath: wildCardInput,
+                });
+            }
+        } else {
+            // explicit single mapping
+            const label = internalFrom;
+            const detail = '';
+            const snippet = new Snippet(label);
+            completions.push(
+                new Completion(
+                    label,
+                    detail,
+                    'a',
+                    snippet,
+                    range(context.getPosition(), { deltaStart: -deltaStart })
+                )
+            );
+        }
     }
 }
 /**

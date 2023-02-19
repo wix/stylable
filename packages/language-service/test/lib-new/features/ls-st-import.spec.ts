@@ -266,25 +266,62 @@ describe('LS: st-import', () => {
                     node_modules: {
                         x: {
                             'private.js': '',
+                            src: {
+                                anyof: {
+                                    'c.js': '',
+                                    'd.js': '',
+                                },
+                            },
                             'package.json': `{
                                 "exports": {
                                     "./inner-a": "./src/inner-a.js",
-                                    "./inner-b": "./src/inner-b.js"
+                                    "./inner-b": "./src/inner-b.js",
+                                    "./wild/*": "./src/anyof/*"
                                 }
                             }`,
                         },
                     },
                     'entry.st.css': `
-                        @st-import from 'x//*^*/';
+                        @st-import from 'x//*^packageRoot*/';
+                        @st-import from 'x/wild//*^wildCardAtEnd*/';
+                        @st-import from 'x/wild/c/*^wildCardAtEndPartial*/';
                     `,
                 });
                 const entryCarets = carets['/entry.st.css'];
 
                 assertCompletions({
-                    message: 'scoped root',
-                    actualList: service.onCompletion('/entry.st.css', entryCarets[0]),
-                    expectedList: [{ label: 'inner-a' }, { label: 'inner-b' }],
+                    message: 'package root',
+                    actualList: service.onCompletion('/entry.st.css', entryCarets.packageRoot),
+                    expectedList: [{ label: 'inner-a' }, { label: 'inner-b' }, { label: 'wild/' }],
                     unexpectedList: [{ label: 'private.js' }, { label: 'package.json' }],
+                });
+
+                assertCompletions({
+                    message: 'wild card at end',
+                    actualList: service.onCompletion('/entry.st.css', entryCarets.wildCardAtEnd),
+                    expectedList: [{ label: 'c.js' }, { label: 'd.js' }],
+                    unexpectedList: [
+                        { label: 'inner-a' },
+                        { label: 'inner-b' },
+                        { label: 'private.js' },
+                        { label: 'package.json' },
+                    ],
+                });
+
+                assertCompletions({
+                    message: 'wild card at end with partial file name',
+                    actualList: service.onCompletion(
+                        '/entry.st.css',
+                        entryCarets.wildCardAtEndPartial
+                    ),
+                    expectedList: [{ label: 'c.js' }],
+                    unexpectedList: [
+                        { label: 'd.js' },
+                        { label: 'inner-a' },
+                        { label: 'inner-b' },
+                        { label: 'private.js' },
+                        { label: 'package.json' },
+                    ],
                 });
             });
         });
