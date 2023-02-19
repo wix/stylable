@@ -291,7 +291,7 @@ function addPackageExportsCompletions({
                 (toWildCardIndex !== -1 && to.lastIndexOf('*') !== toWildCardIndex)
             ) {
                 // mapping not valid: bailout
-                continue; // ToDo: test
+                continue;
             }
             if (deltaStart < fromWildCardIndex) {
                 // from path completion

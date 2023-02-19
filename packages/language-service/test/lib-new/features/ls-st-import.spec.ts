@@ -281,7 +281,9 @@ describe('LS: st-import', () => {
                                     "./inner-b": "./src/inner-b.js",
                                     "./wild/*": "./src/anyof/*",
                                     "./wild/internal/*": null,
-                                    "./internal": null
+                                    "./internal": null,
+                                    "./invalid-1/*/*": "./src/anyof/*",
+                                    "./invalid-2/*": "./src/anyof/*/*"
                                 }
                             }`,
                         },
@@ -304,6 +306,8 @@ describe('LS: st-import', () => {
                         { label: 'wild/internal' },
                         { label: 'internal' },
                         { label: 'package.json' },
+                        { label: 'invalid-1/' },
+                        { label: 'invalid-2/' },
                     ],
                 });
 
