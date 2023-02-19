@@ -270,13 +270,18 @@ describe('LS: st-import', () => {
                                 anyof: {
                                     'c.js': '',
                                     'd.js': '',
+                                    internal: {
+                                        'x.js': '',
+                                    },
                                 },
                             },
                             'package.json': `{
                                 "exports": {
                                     "./inner-a": "./src/inner-a.js",
                                     "./inner-b": "./src/inner-b.js",
-                                    "./wild/*": "./src/anyof/*"
+                                    "./wild/*": "./src/anyof/*",
+                                    "./wild/internal/*": null,
+                                    "./internal": null
                                 }
                             }`,
                         },
@@ -285,6 +290,7 @@ describe('LS: st-import', () => {
                         @st-import from 'x//*^packageRoot*/';
                         @st-import from 'x/wild//*^wildCardAtEnd*/';
                         @st-import from 'x/wild/c/*^wildCardAtEndPartial*/';
+                        @st-import from 'x/wild/internal/*^internal*/';
                     `,
                 });
                 const entryCarets = carets['/entry.st.css'];
@@ -293,7 +299,12 @@ describe('LS: st-import', () => {
                     message: 'package root',
                     actualList: service.onCompletion('/entry.st.css', entryCarets.packageRoot),
                     expectedList: [{ label: 'inner-a' }, { label: 'inner-b' }, { label: 'wild/' }],
-                    unexpectedList: [{ label: 'private.js' }, { label: 'package.json' }],
+                    unexpectedList: [
+                        { label: 'private.js' },
+                        { label: 'wild/internal' },
+                        { label: 'internal' },
+                        { label: 'package.json' },
+                    ],
                 });
 
                 assertCompletions({
@@ -301,6 +312,7 @@ describe('LS: st-import', () => {
                     actualList: service.onCompletion('/entry.st.css', entryCarets.wildCardAtEnd),
                     expectedList: [{ label: 'c.js' }, { label: 'd.js' }],
                     unexpectedList: [
+                        // { label: 'internal' }, // ToDo: handle exclude patterns
                         { label: 'inner-a' },
                         { label: 'inner-b' },
                         { label: 'private.js' },
@@ -317,11 +329,18 @@ describe('LS: st-import', () => {
                     expectedList: [{ label: 'c.js' }],
                     unexpectedList: [
                         { label: 'd.js' },
+                        // { label: 'internal' }, // ToDo: handle exclude patterns
                         { label: 'inner-a' },
                         { label: 'inner-b' },
                         { label: 'private.js' },
                         { label: 'package.json' },
                     ],
+                });
+
+                assertCompletions({
+                    message: 'internal',
+                    actualList: service.onCompletion('/entry.st.css', entryCarets.internal),
+                    unexpectedList: [{ label: 'x.js' }],
                 });
             });
         });

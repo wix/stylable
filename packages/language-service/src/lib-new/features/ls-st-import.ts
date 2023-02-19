@@ -279,6 +279,10 @@ function addPackageExportsCompletions({
         }
         const fromWildCardIndex = internalFrom.indexOf('*');
         if (fromWildCardIndex !== -1) {
+            if (typeof to !== 'string') {
+                // ignore null and unsupported values
+                continue;
+            }
             // wildcard mapping
             const toWildCardIndex = to.indexOf('*');
             // validate
@@ -318,7 +322,7 @@ function addPackageExportsCompletions({
                     specifierPath: wildCardInput,
                 });
             }
-        } else {
+        } else if (to !== null) {
             // explicit single mapping
             const label = internalFrom;
             const detail = '';
