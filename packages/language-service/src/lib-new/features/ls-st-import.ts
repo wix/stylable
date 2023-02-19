@@ -264,8 +264,10 @@ function addPackageExportsCompletions({
     exportsField: JSON;
     internalPath: string;
 }) {
-    // ToDo: handle type check
-    const exportsRules = exportsField; // ToDo: handle conditional
+    if (!isObject(exportsField)) {
+        return;
+    }
+    const exportsRules = getExportsRules(exportsField);
     for (const [from, to] of Object.entries(exportsRules)) {
         if (!from.startsWith('./') || from.length < 3) {
             continue;
@@ -279,16 +281,17 @@ function addPackageExportsCompletions({
         }
         const fromWildCardIndex = internalFrom.indexOf('*');
         if (fromWildCardIndex !== -1) {
-            if (typeof to !== 'string') {
-                // ignore null and unsupported values
+            const resultTo = getExportsRules(to);
+            if (typeof resultTo !== 'string') {
+                // bailout
                 continue;
             }
             // wildcard mapping
-            const toWildCardIndex = to.indexOf('*');
+            const toWildCardIndex = resultTo.indexOf('*');
             // validate
             if (
                 internalFrom.lastIndexOf('*') !== fromWildCardIndex ||
-                (toWildCardIndex !== -1 && to.lastIndexOf('*') !== toWildCardIndex)
+                (toWildCardIndex !== -1 && resultTo.lastIndexOf('*') !== toWildCardIndex)
             ) {
                 // mapping not valid: bailout
                 continue;
@@ -310,7 +313,7 @@ function addPackageExportsCompletions({
             } else {
                 // internal path completions
                 const wildCardInput = internalPath.slice(deltaStart);
-                const toBasePath = to.slice(0, toWildCardIndex);
+                const toBasePath = resultTo.slice(0, toWildCardIndex);
                 // const fromAfterWildCard = internalFrom.slice(fromWildCardIndex);
                 // const toAfterWildCard = to.slice(toWildCardIndex+1);
                 addPathRelativeCompletions({
@@ -338,6 +341,22 @@ function addPackageExportsCompletions({
             );
         }
     }
+}
+const knownConditionals = new Set(['node', 'import', 'require', 'default', 'browser']);
+function getExportsRules(exportsField: any): any {
+    if (!isObject(exportsField)) {
+        return exportsField;
+    }
+    for (const [key, value] of Object.entries(exportsField)) {
+        if (key.startsWith('.')) {
+            // not nested - return rules
+            return exportsField;
+        } else if (knownConditionals.has(key)) {
+            // check nested conditions
+            return getExportsRules(value);
+        }
+    }
+    return {};
 }
 /**
  * @example parsePackageSpecifier('react-dom') === ['react-dom']

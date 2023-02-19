@@ -347,6 +347,89 @@ describe('LS: st-import', () => {
                     unexpectedList: [{ label: 'x.js' }],
                 });
             });
+            it('should handle conditional exports', () => {
+                /**
+                 * very naive first find-first-known-conditional (dfs) implementation
+                 * will only get hard-coded known conditions:
+                 * node, import, require, default, browse
+                 */
+                const { service, carets, assertCompletions } = testLangService({
+                    node_modules: {
+                        topLevelConditions: {
+                            'package.json': `{
+                                "exports": {
+                                    "unknown": {
+                                        "./unknown.js": "./unknown.js"
+                                    },
+                                    "import": {
+                                        "./import.js": "./import.js"
+                                    },
+                                    "default": {
+                                        "./default.js": "./default.js"
+                                    }
+                                }
+                            }`,
+                        },
+                        nestedConditions: {
+                            node: {
+                                'a.js': '',
+                                'b.js': '',
+                            },
+                            whatever: {
+                                'x.js': '',
+                            },
+                            'package.json': `{
+                                "exports": {
+                                    "default": {
+                                        "require": {
+                                            "./give-me/*": {
+                                                "node": "./node/*",
+                                                "default": "./whatever/*"
+                                            }
+                                        },
+                                        "import": {
+                                            "./import.js": "./import.js"
+                                        }
+                                    }
+                                }
+                            }`,
+                        },
+                    },
+                    'entry.st.css': `
+                        @st-import from 'topLevelConditions//*^topLevelConditions*/';
+                        @st-import from 'nestedConditions//*^nestedConditions*/';
+                        @st-import from 'nestedConditions/give-me//*^nestedSubpathConditions*/';
+                    `,
+                });
+                const entryCarets = carets['/entry.st.css'];
+
+                assertCompletions({
+                    message: 'known conditions',
+                    actualList: service.onCompletion(
+                        '/entry.st.css',
+                        entryCarets.topLevelConditions
+                    ),
+                    expectedList: [{ label: 'import.js' }],
+                    unexpectedList: [{ label: 'require.js' }, { label: 'default.js' }],
+                });
+
+                assertCompletions({
+                    message: 'nested conditions',
+                    actualList: service.onCompletion('/entry.st.css', entryCarets.nestedConditions),
+                    expectedList: [{ label: 'give-me/' }],
+                    unexpectedList: [{ label: 'import.js' }],
+                });
+
+                assertCompletions({
+                    message: 'nested subpath conditions',
+                    actualList: service.onCompletion(
+                        '/entry.st.css',
+                        entryCarets.nestedSubpathConditions
+                    ),
+                    expectedList: [{ label: 'a.js' }, { label: 'b.js' }],
+                    unexpectedList: [{ label: 'x.js' }],
+                });
+            });
         });
         describe('custom resolve', () => {
             it('should suggest from custom mapped', () => {
