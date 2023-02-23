@@ -27,7 +27,6 @@ import {
 } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
-    STSymbol,
     STImport,
     STGlobal,
     STScope,
@@ -179,7 +178,7 @@ export class StylableTransformer {
         stVarOverride: Record<string, string> = this.defaultStVarOverride,
         path: string[] = [],
         mixinTransform = false,
-        topNestClassName = ``
+        selectorContext?: InferredSelector
     ) {
         if (meta.type !== 'stylable') {
             return;
@@ -296,7 +295,7 @@ export class StylableTransformer {
                 if (isChildOfAtRule(node, 'keyframes')) {
                     return;
                 }
-                node.selector = this.scopeRule(meta, node, topNestClassName);
+                node.selector = this.scopeRule(meta, node, selectorContext);
             } else if (node.type === 'atrule') {
                 handleAtRule(node);
             } else if (node.type === 'decl') {
@@ -359,24 +358,24 @@ export class StylableTransformer {
     public scopeRule(
         meta: StylableMeta,
         rule: postcss.Rule,
-        topNestClassName?: string,
+        selectorContext?: InferredSelector,
         unwrapGlobals?: boolean
     ): string {
-        return this.scopeSelector(meta, rule.selector, rule, topNestClassName, unwrapGlobals)
+        return this.scopeSelector(meta, rule.selector, rule, selectorContext, unwrapGlobals)
             .selector;
     }
     public scopeSelector(
         originMeta: StylableMeta,
         selector: string,
         rule?: postcss.Rule,
-        topNestClassName?: string,
+        selectorContext?: InferredSelector,
         unwrapGlobals = false
     ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
         const context = this.createSelectorContext(
             originMeta,
             parseSelectorWithCache(selector, { clone: true }),
             rule || postcss.rule({ selector }),
-            topNestClassName
+            selectorContext
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
         if (unwrapGlobals) {
@@ -392,7 +391,10 @@ export class StylableTransformer {
         meta: StylableMeta,
         selectorAst: SelectorList,
         rule: postcss.Rule,
-        topNestClassName?: string
+        selectorContext: InferredSelector = this.createInferredSelector(meta, {
+            name: meta.root,
+            type: 'class',
+        })
     ) {
         return new ScopeContext(
             meta,
@@ -400,25 +402,20 @@ export class StylableTransformer {
             selectorAst,
             rule,
             this.scopeSelectorAst.bind(this),
-            topNestClassName
+            selectorContext
         );
     }
+    public createInferredSelector(
+        meta: StylableMeta,
+        { name, type }: { name: string; type: 'class' | 'element' }
+    ) {
+        const resolvedSymbols = this.getResolvedSymbols(meta);
+        const resolved = resolvedSymbols[type][name];
+        return new InferredSelector(resolved);
+    }
     public scopeSelectorAst(context: ScopeContext): SelectorList {
-        const { originMeta, selectorAst } = context;
-
         // group compound selectors: .a.b .c:hover, a .c:hover -> [[[.a.b], [.c:hover]], [[.a], [.c:hover]]]
-        const selectorList = groupCompoundSelectors(selectorAst);
-        // resolve meta classes and elements
-        const resolvedSymbols = this.getResolvedSymbols(originMeta);
-        // set stylesheet root as the global anchor
-        if (!context.currentAnchor) {
-            context.initRootAnchor({
-                name: originMeta.root,
-                type: 'class',
-                resolved: resolvedSymbols.class[originMeta.root],
-            });
-        }
-        const startedAnchor = context.currentAnchor!;
+        const selectorList = groupCompoundSelectors(context.selectorAst);
         // loop over selectors
         for (const selector of selectorList) {
             context.elements.push([]);
@@ -438,8 +435,8 @@ export class StylableTransformer {
                 }
             }
             if (selectorList.length - 1 > context.selectorIndex) {
-                // reset current anchor
-                context.initRootAnchor(startedAnchor);
+                // reset current anchor for all except last selector
+                context.initNewSelector(context.inferredSelectorContext);
             }
         }
         // backwards compatibility for elements - empty selector still have an empty first target
@@ -449,13 +446,12 @@ export class StylableTransformer {
         const targetAst = splitCompoundSelectors(selectorList);
         context.additionalSelectors.forEach((addSelector) => targetAst.push(addSelector()));
         for (let i = 0; i < targetAst.length; i++) {
-            selectorAst[i] = targetAst[i];
+            context.selectorAst[i] = targetAst[i];
         }
         return targetAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
-        const { currentAnchor, node, originMeta, topNestClassName } = context;
-        const resolvedSymbols = this.getResolvedSymbols(originMeta);
+        const { inferredSelector: selectorScope, node, originMeta } = context;
         const transformerContext = {
             meta: originMeta,
             diagnostics: this.diagnostics,
@@ -482,13 +478,14 @@ export class StylableTransformer {
                 // should stylable warn?
                 return;
             }
-            const len = currentAnchor.resolved.length;
+            const resolvedSelector = selectorScope.getSingleResolve();
+            const len = resolvedSelector.length;
             const lookupStartingPoint = len === 1 /* no extends */ ? 0 : 1;
 
             let resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>> | undefined;
             for (let i = lookupStartingPoint; i < len; i++) {
-                const { symbol, meta } = currentAnchor.resolved[i];
-                if (!symbol[`-st-root`]) {
+                const { symbol, meta } = resolvedSelector[i];
+                if (!symbol['-st-root']) {
                     continue;
                 }
                 const isFirstInSelector =
@@ -516,12 +513,7 @@ export class StylableTransformer {
                 resolved = this.getResolvedSymbols(meta).class[node.value];
 
                 // first definition of a part in the extends/alias chain
-                context.setCurrentAnchor({
-                    name: node.value,
-                    type: 'pseudo-element',
-                    resolved,
-                });
-                context.setNodeResolve(node, resolved);
+                context.setNextSelectorScope(resolved, node, node.value);
 
                 const resolvedPart = getOriginDefinition(resolved);
 
@@ -537,12 +529,7 @@ export class StylableTransformer {
 
             if (!resolved) {
                 // first definition of a part in the extends/alias chain
-                context.setCurrentAnchor({
-                    name: node.value,
-                    type: 'pseudo-element',
-                    resolved: [],
-                });
-                context.setNodeResolve(node, []);
+                context.setNextSelectorScope([], node, node.value);
 
                 if (
                     !nativePseudoElements.includes(node.value) &&
@@ -565,25 +552,7 @@ export class StylableTransformer {
                 node,
             });
         } else if (node.type === `nesting`) {
-            if (context.nestingSelectorAnchor) {
-                context.setCurrentAnchor(context.nestingSelectorAnchor);
-                context.setNodeResolve(node, context.nestingSelectorAnchor.resolved);
-            } else {
-                /**
-                 * although it is always assumed to be class symbol, the get is done from
-                 * the general `st-symbol` feature because the actual symbol can
-                 * be a type-element symbol that is actually an imported root in a mixin
-                 */
-                const origin = STSymbol.get(originMeta, topNestClassName || originMeta.root) as
-                    | ClassSymbol
-                    | ElementSymbol; // ToDo: handle other cases
-                context.setCurrentAnchor({
-                    name: origin.name,
-                    type: origin._kind,
-                    resolved: resolvedSymbols[origin._kind][origin.name],
-                });
-                context.setNodeResolve(node, resolvedSymbols[origin._kind][origin.name]);
-            }
+            context.setNextSelectorScope(context.inferredSelectorContext, node, node.value);
         }
     }
     private handleCustomSelector(
@@ -596,32 +565,21 @@ export class StylableTransformer {
     ) {
         const selectorList = parseSelectorWithCache(customSelector, { clone: true });
         const hasSingleSelector = selectorList.length === 1;
-        const internalContext = new ScopeContext(
+        const internalContext = this.createSelectorContext(
             meta,
-            this.resolver,
             removeFirstRootInFirstCompound(selectorList, meta),
-            context.rule,
-            this.scopeSelectorAst.bind(this)
+            context.rule
         );
         const customAstSelectors = this.scopeSelectorAst(internalContext);
         if (!isFirstInSelector) {
             customAstSelectors.forEach(setSingleSpaceOnSelectorLeft);
         }
-        if (hasSingleSelector && internalContext.currentAnchor) {
-            context.setCurrentAnchor({
-                name,
-                type: 'pseudo-element',
-                resolved: internalContext.currentAnchor.resolved,
-            });
-            context.setNodeResolve(node, internalContext.currentAnchor.resolved);
+        if (hasSingleSelector && !internalContext.inferredSelector.isEmpty()) {
+            // ToDo: support multi selector with: "internalContext.multiSelectorScope"
+            context.setNextSelectorScope(internalContext.inferredSelector, node, name);
         } else {
             // unknown context due to multiple selectors
-            context.setCurrentAnchor({
-                name,
-                type: 'pseudo-element',
-                resolved: anyElementAnchor(meta).resolved,
-            });
-            context.setNodeResolve(node, anyElementAnchor(meta).resolved);
+            context.setNextSelectorScope(anyElementAnchor(meta).resolved, node, name);
         }
         if (context.transform) {
             Object.assign(node, customAstSelectors[0]);
@@ -643,12 +601,10 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         const len = transformer.diagnostics.reports.length;
         const rule = postcss.rule({ selector: scope.params });
 
-        const context = new ScopeContext(
+        const context = transformer.createSelectorContext(
             meta,
-            transformer.resolver,
             parseSelectorWithCache(rule.selector, { clone: true }),
-            rule,
-            transformer.scopeSelectorAst.bind(transformer)
+            rule
         );
         transformedScopes[rule.selector] = groupCompoundSelectors(
             transformer.scopeSelectorAst(context)
@@ -733,10 +689,41 @@ function lazyCreateSelector(
     };
 }
 
-interface ScopeAnchor {
-    type: 'class' | 'element' | 'pseudo-element';
-    name: string;
-    resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
+type SelectorSymbol = ClassSymbol | ElementSymbol;
+type InferredResolve = CSSResolve<SelectorSymbol>;
+class InferredSelector {
+    protected resolveSet = new Set<InferredResolve[]>();
+    constructor(resolve?: InferredResolve[] | InferredSelector) {
+        if (resolve) {
+            this.add(resolve);
+        }
+    }
+    public isEmpty() {
+        return this.resolveSet.size === 0;
+    }
+    public set(resolve: InferredResolve[] | InferredSelector) {
+        if (resolve === this) {
+            return;
+        }
+        this.resolveSet.clear();
+        this.add(resolve);
+    }
+    public add(resolve: InferredResolve[] | InferredSelector) {
+        if (resolve instanceof InferredSelector) {
+            resolve.resolveSet.forEach((resolve) => this.add(resolve));
+        } else {
+            // ToDo: check uniqueness
+            this.resolveSet.add(resolve);
+        }
+    }
+    // function to temporarily handle single resolved selector type while refactoring
+    //      ToDo: remove temporarily single resolve
+    getSingleResolve(): InferredResolve[] {
+        if (this.resolveSet.size !== 1) {
+            return [];
+        }
+        return this.resolveSet.values().next().value;
+    }
 }
 
 export class ScopeContext {
@@ -748,28 +735,52 @@ export class ScopeContext {
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
-    public currentAnchor?: ScopeAnchor;
-    public nestingSelectorAnchor?: ScopeAnchor;
+    // used for nesting or after combinators
+    public inferredSelectorContext: InferredSelector;
+    // current type while traversing a selector
+    public inferredSelector: InferredSelector;
+    // combined type of the multiple selectors
+    public inferredMultipleSelectors: InferredSelector = new InferredSelector();
     constructor(
         public originMeta: StylableMeta,
         public resolver: StylableResolver,
         public selectorAst: SelectorList,
         public rule: postcss.Rule,
         public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
-        public topNestClassName: string = ``
-    ) {}
-    public initRootAnchor(anchor: ScopeAnchor) {
-        this.currentAnchor = anchor;
+        parentSelectorScope: InferredSelector
+    ) {
+        this.inferredSelectorContext = new InferredSelector(parentSelectorScope);
+        this.inferredSelector = new InferredSelector(this.inferredSelectorContext);
     }
-    public setNodeResolve(node: SelectorNode, resolve: CSSResolve[]) {
-        this.selectorAstResolveMap.set(node, resolve);
+    public resetSelectorScope(initialResolve: InferredResolve[]) {
+        this.inferredMultipleSelectors = new InferredSelector();
+        this.inferredSelector = new InferredSelector(initialResolve);
     }
-    public setCurrentAnchor(anchor: ScopeAnchor) {
-        if (this.selectorIndex !== undefined && this.selectorIndex !== -1) {
-            this.elements[this.selectorIndex].push(anchor);
+    public initNewSelector(initialResolve?: InferredResolve[] | InferredSelector) {
+        this.inferredMultipleSelectors.add(this.inferredSelector);
+        this.inferredSelector = new InferredSelector(initialResolve);
+    }
+    static legacyElementsTypesMapping: Record<string, string> = {
+        pseudo_element: 'pseudo-element',
+        class: 'class',
+        type: 'element',
+    };
+    public setNextSelectorScope(
+        resolved: InferredResolve[] | InferredSelector,
+        node: SelectorNode,
+        name?: string
+    ) {
+        if (name && this.selectorIndex !== undefined && this.selectorIndex !== -1) {
+            this.elements[this.selectorIndex].push({
+                type: ScopeContext.legacyElementsTypesMapping[node.type] || 'unknown',
+                name,
+                resolved: Array.isArray(resolved) ? resolved : resolved.getSingleResolve(),
+            });
         }
-        this.currentAnchor = anchor;
+        this.inferredSelector.set(resolved);
+        this.selectorAstResolveMap.set(node, this.inferredSelector.getSingleResolve());
     }
+
     public insertDescendantCombinatorBeforePseudoElement() {
         if (
             this.selector &&
@@ -792,17 +803,20 @@ export class ScopeContext {
             }
         }
     }
-    public createNestedContext(selectorAst: SelectorList) {
+    public createNestedContext(selectorAst: SelectorList, selectorContext?: InferredSelector) {
         const ctx = new ScopeContext(
             this.originMeta,
             this.resolver,
             selectorAst,
             this.rule,
             this.scopeSelectorAst,
-            this.topNestClassName
+            selectorContext || this.inferredSelectorContext
         );
         Object.assign(ctx, this);
         ctx.selectorAst = selectorAst;
+        if (selectorContext) {
+            ctx.inferredSelectorContext.set(selectorContext);
+        }
 
         ctx.selectorIndex = -1;
         ctx.elements = [];

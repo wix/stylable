@@ -70,8 +70,7 @@ export const hooks = createFeature<{
                 ];
             }
         }
-        selectorContext.setCurrentAnchor({ name: node.value, type: 'element', resolved });
-        selectorContext.setNodeResolve(node, resolved);
+        selectorContext.setNextSelectorScope(resolved, node, node.value);
         // native node does not resolve e.g. div
         if (selectorContext.transform && resolved && resolved.length > 1) {
             const { symbol, meta } = getOriginDefinition(resolved);

@@ -202,8 +202,7 @@ export const hooks = createFeature<{
             // which might not have a definition for the mixed-in class
             { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name: node.value } },
         ];
-        selectorContext.setCurrentAnchor({ name: node.value, type: 'class', resolved });
-        selectorContext.setNodeResolve(node, resolved);
+        selectorContext.setNextSelectorScope(resolved, node, node.value);
         const { symbol, meta } = getOriginDefinition(resolved);
         if (selectorContext.originMeta === meta && symbol[`-st-states`]) {
             // ToDo: refactor out to transformer validation phase

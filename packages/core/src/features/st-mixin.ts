@@ -441,7 +441,7 @@ function handleCSSMixin(
     const roots = getCSSMixinRoots(
         context.meta,
         resolveChain,
-        ({ mixinRoot, resolvedClass, isRootMixin }) => {
+        ({ mixinRoot, resolved, isRootMixin }) => {
             const stVarOverride = context.evaluator.stVarOverride || {};
             const mixDef = config.mixDef;
             const namedArgs = mixDef.data.options as Record<string, string>;
@@ -462,14 +462,14 @@ function handleCSSMixin(
                 config.cssPropertyMapping
             );
             collectOptionalArgs(
-                { meta: resolvedClass.meta, resolver: context.resolver },
+                { meta: resolved.meta, resolver: context.resolver },
                 mixinRoot,
                 optionalArgs
             );
             // transform mixin
-            const mixinMeta: StylableMeta = resolvedClass.meta;
+            const mixinMeta: StylableMeta = resolved.meta;
             const symbolName =
-                isRootMixin && resolvedClass.meta !== context.meta ? 'default' : mixDef.data.type;
+                isRootMixin && resolved.meta !== context.meta ? 'default' : mixDef.data.type;
             config.transformer.transformAst(
                 mixinRoot,
                 mixinMeta,
@@ -477,9 +477,12 @@ function handleCSSMixin(
                 resolvedArgs,
                 config.path.concat(symbolName + ' from ' + context.meta.source),
                 true,
-                resolvedClass.symbol.name
+                config.transformer.createInferredSelector(mixinMeta, {
+                    name: resolved.symbol.name,
+                    type: resolved.symbol._kind,
+                })
             );
-            fixRelativeUrls(mixinRoot, resolvedClass.meta.source, context.meta.source);
+            fixRelativeUrls(mixinRoot, resolved.meta.source, context.meta.source);
         }
     );
 
@@ -521,7 +524,7 @@ function getCSSMixinRoots(
     resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[],
     processMixinRoot: (data: {
         mixinRoot: postcss.Root;
-        resolvedClass: CSSResolve;
+        resolved: CSSResolve<ClassSymbol | ElementSymbol>;
         isRootMixin: boolean;
     }) => void
 ) {
@@ -535,7 +538,7 @@ function getCSSMixinRoots(
             isRootMixin,
             (name) => STCustomSelector.getCustomSelector(contextMeta, name)
         );
-        processMixinRoot({ mixinRoot, resolvedClass: resolved, isRootMixin });
+        processMixinRoot({ mixinRoot, resolved, isRootMixin });
         roots.push(mixinRoot);
         if (resolved.symbol[`-st-extends`]) {
             break;

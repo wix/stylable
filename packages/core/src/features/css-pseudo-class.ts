@@ -19,13 +19,14 @@ export const diagnostics = {
 
 export const hooks = createFeature({
     transformSelectorNode({ context, selectorContext }) {
-        const { currentAnchor, node, rule, scopeSelectorAst } = selectorContext;
+        const { inferredSelector, node, rule, scopeSelectorAst } = selectorContext;
         if (node.type !== 'pseudo_class') {
             return;
         }
         // find matching custom state
+        const resolved = inferredSelector.getSingleResolve();
         let foundCustomState = false;
-        for (const { symbol, meta } of currentAnchor.resolved) {
+        for (const { symbol, meta } of resolved) {
             // Handle node resolve mapping for custom-selector.
             // Currently custom selectors cannot get to this point in the process,
             // due to them being replaced at the beginning of the transform process.
@@ -42,8 +43,9 @@ export const hooks = createFeature({
                 const mappedContext = selectorContext.createNestedContext(mappedSelectorAst);
                 // ToDo: wrap in :is() to get intersection of selectors
                 scopeSelectorAst(mappedContext);
-                if (mappedContext.currentAnchor) {
-                    selectorContext.setNodeResolve(node, mappedContext.currentAnchor.resolved);
+                if (!mappedContext.inferredSelector.isEmpty()) {
+                    // ToDo: support multi selector with: "selectorContext.multiSelectorScope"
+                    selectorContext.setNextSelectorScope(mappedContext.inferredSelector, node); // doesn't add to the resolved elements
                 }
                 return; // this is not a state
             }
@@ -77,7 +79,10 @@ export const hooks = createFeature({
                 const innerSelectors = (
                     node.nodes[0] && node.nodes[0].type === `nth` ? node.nodes.slice(1) : node.nodes
                 ) as Selector[];
-                const nestedContext = selectorContext.createNestedContext(innerSelectors);
+                const nestedContext = selectorContext.createNestedContext(
+                    innerSelectors,
+                    selectorContext.inferredSelector
+                );
                 scopeSelectorAst(nestedContext);
                 /**
                  * ToDo: remove once elements is deprecated!

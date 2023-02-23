@@ -91,14 +91,14 @@ export class LangServiceContext {
                 postcss.rule({ selector: stringifySelectorAst(selector) })
             );
             if (currentAnchor) {
-                selectorContext.currentAnchor = currentAnchor;
-                selectorContext.nestingSelectorAnchor = currentAnchor;
+                selectorContext.inferredSelector.set(currentAnchor);
+                selectorContext.inferredSelectorContext.set(currentAnchor);
             }
             selectorContext.transform = false;
             selectorContext.selectorAstResolveMap = selectorAstResolveMap;
             transformer.scopeSelectorAst(selectorContext);
-            // ToDo: handle multiple selectors intersection
-            currentAnchor = selectorContext.currentAnchor;
+            // ToDo: handle multiple selectors intersection with "multiSelectorScope"
+            currentAnchor = selectorContext.inferredSelector;
         }
         // reference interest points
         const locationSelector = this.location.selector;
