@@ -8,8 +8,30 @@ import { CompletionItem, TextEdit } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-css-languageservice';
 import { URI } from 'vscode-uri';
 import { expect } from 'chai';
+import { tmpdir } from 'os';
+import { mkdtempSync } from 'fs';
+import nodeFs from '@file-services/node';
+
+export function createTempDirectorySync(prefix = 'temp-') {
+    const path = nodeFs.realpathSync.native(mkdtempSync(nodeFs.join(tmpdir(), prefix)));
+    const remove = () => nodeFs.rmSync(path, { recursive: true, force: true });
+
+    return { path, remove };
+}
+function copyDirectory(fs: IFileSystem, targetPath: string, content: IDirectoryContents) {
+    fs.ensureDirectorySync(targetPath);
+    for (const [name, value] of Object.entries(content)) {
+        const itemPath = fs.join(targetPath, name);
+        if (typeof value === 'string') {
+            fs.writeFileSync(itemPath, value, { encoding: 'utf-8' });
+        } else {
+            copyDirectory(fs, itemPath, value);
+        }
+    }
+}
 
 export interface TestOptions {
+    testOnNativeFileSystem: string;
     stylableConfig: TestStylableConfig;
 }
 export type TestStylableConfig = Omit<
@@ -26,9 +48,8 @@ export function testLangService(
     options: Partial<TestOptions> = {}
 ) {
     // infra
-    const fs =
-        options.stylableConfig?.filesystem ||
-        createMemoryFs(typeof input === `string` ? { '/entry.st.css': input } : input);
+    const fs = setupFileSystem(input, options);
+
     const stylable = new Stylable({
         fileSystem: fs,
         projectRoot: '/',
@@ -39,7 +60,9 @@ export function testLangService(
 
     // collect cursor positions
     const carets: Record<string, Record<string | number, number>> = {};
-    const allSheets = fs.findFilesSync(`/`, { filterFile: ({ path }) => path.endsWith(`.st.css`) });
+    const allSheets = fs.findFilesSync(stylable.projectRoot, {
+        filterFile: ({ path }) => path.endsWith(`.st.css`),
+    });
     for (const path of allSheets) {
         let source = deindent(fs.readFileSync(path, { encoding: 'utf-8' }));
         const posComments = source.match(/\^([^^]*)\^/g);
@@ -89,6 +112,19 @@ export function testLangService(
             };
         },
     };
+}
+
+function setupFileSystem(input: string | IDirectoryContents, options: Partial<TestOptions>) {
+    const content = typeof input === `string` ? { '/entry.st.css': input } : input;
+    if (options.testOnNativeFileSystem) {
+        options.stylableConfig ||= {};
+        options.stylableConfig.filesystem = nodeFs;
+        options.stylableConfig.projectRoot = options.testOnNativeFileSystem;
+        copyDirectory(nodeFs, options.testOnNativeFileSystem, content);
+        return nodeFs;
+    } else {
+        return createMemoryFs(content);
+    }
 }
 
 export function assertCompletions({

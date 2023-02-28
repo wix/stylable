@@ -150,7 +150,8 @@ function getNodeModules({
                             withFileTypes: true,
                         });
                         for (const scopedItem of scopedItems) {
-                            const scopedPackageName = item.name + '/' + scopedItem.name;
+                            // use posix for specifier
+                            const scopedPackageName = fs.posix.join(item.name, scopedItem.name);
                             if (scopedItem.isDirectory() && !packages[scopedPackageName]) {
                                 packages[scopedPackageName] = fs.join(packagePath, scopedItem.name);
                             }
@@ -161,7 +162,8 @@ function getNodeModules({
                 }
             }
         }
-        if (dirPath === '/') {
+        if (fs.dirname(dirPath) === dirPath) {
+            // top level: bailout
             searching = false;
         } else {
             // search up
@@ -183,10 +185,14 @@ function addPathRelativeCompletions({
     originFilePath?: string;
     specifierPath: string;
 }) {
-    const targetPath = specifierPath
-        ? context.fs.resolve(contextDirPath, specifierPath)
-        : contextDirPath;
-    const { dir, name } = targetPath.endsWith('/')
+    const isSpecifierEmpty = !specifierPath;
+    const targetPath = isSpecifierEmpty
+        ? contextDirPath
+        : context.fs.resolve(contextDirPath, specifierPath);
+    const isExplicitDirectory = isSpecifierEmpty
+        ? contextDirPath.endsWith(context.fs.sep)
+        : specifierPath.endsWith('/') || specifierPath.endsWith(context.fs.sep);
+    const { dir, name } = isExplicitDirectory
         ? { dir: targetPath, name: '' }
         : context.fs.parse(targetPath);
     addDirRelativeCompletions({
@@ -326,7 +332,7 @@ function addPackageExportsCompletions({
                     context,
                     contextDirPath:
                         context.fs.resolve(packagePath, toBasePath) +
-                        (toBasePath.endsWith('/') ? '/' : ''),
+                        (toBasePath.endsWith('/') ? context.fs.sep : ''),
                     specifierPath: wildCardInput,
                 });
             }
