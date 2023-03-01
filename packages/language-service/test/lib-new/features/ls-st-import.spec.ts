@@ -1,5 +1,8 @@
 import { createDefaultResolver } from '@stylable/core';
 import { testLangService, createTempDirectorySync } from '../../test-kit/test-lang-service';
+import { Command } from 'vscode-languageserver';
+
+const triggerCompletion = Command.create('additional', 'editor.action.triggerSuggest');
 
 describe('LS: st-import', () => {
     let tempDir: ReturnType<typeof createTempDirectorySync>;
@@ -40,9 +43,10 @@ describe('LS: st-import', () => {
                 message: 'same dir',
                 actualList: service.onCompletion(entryPath, entryCarets.sameDir),
                 expectedList: [
-                    { label: 'c.st.css' },
+                    { label: 'c.st.css', command: undefined },
                     {
                         label: 'inner/',
+                        command: triggerCompletion,
                     },
                 ],
                 unexpectedList: [{ label: 'entry.st.css' }],
@@ -329,6 +333,9 @@ describe('LS: st-import', () => {
                                     anyof: {
                                         'c-file.js': '',
                                         'd-file.js': '',
+                                        inner: {
+                                            'e-file.js': '',
+                                        },
                                         internal: {
                                             'x-file.js': '',
                                         },
@@ -368,7 +375,9 @@ describe('LS: st-import', () => {
                         { label: 'wild/internal' },
                         { label: 'internal' },
                         { label: 'package.json' },
-                        { label: 'invalid-1/' },
+                        {
+                            label: 'invalid-1/',
+                        },
                         { label: 'invalid-2/' },
                     ],
                 });
@@ -376,7 +385,11 @@ describe('LS: st-import', () => {
                 assertCompletions({
                     message: 'wild card at end',
                     actualList: service.onCompletion(entryPath, entryCarets.wildCardAtEnd),
-                    expectedList: [{ label: 'c-file.js' }, { label: 'd-file.js' }],
+                    expectedList: [
+                        { label: 'c-file.js', command: undefined },
+                        { label: 'd-file.js', command: undefined },
+                        { label: 'inner/', command: triggerCompletion },
+                    ],
                     unexpectedList: [
                         // { label: 'internal' }, // ToDo: handle exclude patterns
                         { label: 'inner-a' },
@@ -392,6 +405,7 @@ describe('LS: st-import', () => {
                     expectedList: [{ label: 'c-file.js' }],
                     unexpectedList: [
                         { label: 'd-file.js' },
+                        { label: 'inner/' },
                         // { label: 'internal' }, // ToDo: handle exclude patterns
                         { label: 'inner-a' },
                         { label: 'inner-b' },

@@ -275,7 +275,8 @@ function addDirRelativeCompletions({
                     detail,
                     'a',
                     snippet,
-                    range(context.getPosition(), { deltaStart })
+                    range(context.getPosition(), { deltaStart }),
+                    !!directorySlash // trigger completion
                 )
             );
         }
@@ -342,7 +343,8 @@ function addPackageExportsCompletions({
                         detail,
                         'a',
                         snippet,
-                        range(context.getPosition(), { deltaStart: -deltaStart })
+                        range(context.getPosition(), { deltaStart: -deltaStart }),
+                        true // trigger completion
                     )
                 );
             } else {
