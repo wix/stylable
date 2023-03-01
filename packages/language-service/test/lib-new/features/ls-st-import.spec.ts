@@ -21,8 +21,10 @@ describe('LS: st-import', () => {
                             'd.st.css': ``,
                         },
                         'entry.st.css': `
+                            @st-import from '.^justDot^';
                             @st-import from './^sameDir^';
                             @st-import from '../^upDir^';
+                            @st-import from '..^upDirNoSlash^';
                             @st-import from './inner/^nestedDir^';
                         `,
                     },
@@ -56,6 +58,28 @@ describe('LS: st-import', () => {
                 message: 'nested dir',
                 actualList: service.onCompletion(entryPath, entryCarets.nestedDir),
                 expectedList: [{ label: 'd.st.css' }],
+            });
+
+            assertCompletions({
+                message: 'just dot without slash',
+                actualList: service.onCompletion(entryPath, entryCarets.justDot),
+                unexpectedList: [
+                    { label: '/c.st.css' },
+                    { label: '/inner/' },
+                    { label: '/entry.st.css' },
+                ],
+            });
+
+            assertCompletions({
+                message: 'up dir without slash',
+                actualList: service.onCompletion(entryPath, entryCarets.upDirNoSlash),
+                unexpectedList: [
+                    { label: '/a.st.css' },
+                    { label: '/b.js' },
+                    { label: '/c.st.css' },
+                    { label: '/inner/' },
+                    { label: '/entry.st.css' },
+                ],
             });
         });
         it('should suggest from both relative directory and base', () => {

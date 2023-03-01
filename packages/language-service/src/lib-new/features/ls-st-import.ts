@@ -185,6 +185,10 @@ function addPathRelativeCompletions({
     originFilePath?: string;
     specifierPath: string;
 }) {
+    if (specifierPath.match(/(^\.+$)|(\/\.+$)/)) {
+        // filter out specifier that only contains dots or ends with slash and dots
+        return;
+    }
     const isSpecifierEmpty = !specifierPath;
     const targetPath = isSpecifierEmpty
         ? contextDirPath
