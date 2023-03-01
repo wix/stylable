@@ -218,13 +218,17 @@ describe('LS: st-import', () => {
                                 package: {
                                     dist: { 'file.js': `` },
                                     src: { 'file.ts': `` },
-                                    'package.json': `{}`,
+                                    'package.json': `{
+                                        "main": "./dist/file.js"
+                                    }`,
                                 },
                             },
                             'flat-package': {
                                 esm: { 'file.js': `` },
                                 lib: { 'file.ts': `` },
-                                'package.json': `{}`,
+                                'package.json': `{
+                                    "main": "./esm/file.js"
+                                }`,
                             },
                         },
                         'entry.st.css': `
@@ -493,7 +497,7 @@ describe('LS: st-import', () => {
                     {
                         node_modules: {
                             x: {
-                                'red.js': `{}`,
+                                'yellow.js': `{}`,
                                 'package.json': `{}`,
                             },
                         },
@@ -530,11 +534,17 @@ describe('LS: st-import', () => {
                 const defaultResolveModule = createDefaultResolver(fs, {});
                 const entryPath = fs.join(tempDir.path, 'src', 'entry.st.css');
                 const entryCarets = carets[entryPath];
-
+                /**
+                 * mapping like this cannot override the original resolved package
+                 * and combine suggestions from both locations.
+                 */
                 assertCompletions({
                     actualList: service.onCompletion(entryPath, entryCarets[0]),
-                    expectedList: [{ label: 'green.js' }, { label: 'package.json' }],
-                    unexpectedList: [{ label: 'red.js' }],
+                    expectedList: [
+                        { label: 'green.js' },
+                        { label: 'yellow.js' },
+                        { label: 'package.json' },
+                    ],
                 });
             });
         });

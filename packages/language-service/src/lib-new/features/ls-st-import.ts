@@ -18,12 +18,38 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
             // ToDo: check context better - should come after "from" ?
             const pathBeforeCaret = node.value.slice(1, offsetInNode);
             const originFilePath = context.meta.source;
+            const originDirPath = path.dirname(originFilePath);
+            // add specifier completions
             addSpecifierCompletions({
                 completions,
                 context,
                 originFilePath,
+                originDirPath,
                 pathBeforeCaret,
             });
+            /* 
+                Attempt to get mapped specifier for things like Typescript paths or Webpack alias.
+                This is a best effort to get mapped paths completions and relies on the provided resolver 
+                to provide path resolving to partial paths and not throw.
+                This type of mapping should be done with package.json imports field.
+            */
+            try {
+                const resolvedPath = context.stylable.resolver.resolvePath(
+                    originDirPath,
+                    pathBeforeCaret
+                );
+                if (resolvedPath !== pathBeforeCaret) {
+                    addSpecifierCompletions({
+                        completions,
+                        context,
+                        originFilePath,
+                        originDirPath,
+                        pathBeforeCaret: resolvedPath,
+                    });
+                }
+            } catch (e) {
+                // mapping failed - cannot get mapped completions
+            }
         }
     }
     return completions;
@@ -32,22 +58,16 @@ function addSpecifierCompletions({
     completions,
     context,
     originFilePath,
+    originDirPath,
     pathBeforeCaret,
 }: {
     completions: Completion[];
     context: LangServiceContext;
     originFilePath: string;
+    originDirPath: string;
     pathBeforeCaret: string;
 }) {
-    const originDirPath = path.dirname(originFilePath);
-    let specifier = pathBeforeCaret;
-    // attempt to get mapped specifier
-    try {
-        specifier = context.stylable.resolver.resolvePath(originDirPath, specifier);
-    } catch (e) {
-        /*continue with original specifier*/
-    }
-
+    const specifier = pathBeforeCaret;
     if (specifier.startsWith('.') || context.fs.isAbsolute(specifier)) {
         // relative completions
         addPathRelativeCompletions({
