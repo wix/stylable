@@ -1,6 +1,6 @@
 {
   "name": "@stylable/runtime",
-  "version": "5.7.1",
+  "version": "5.8.0",
   "description": "Stylable runtime DOM integration",
   "main": "dist/index.js",
   "scripts": {
