@@ -8,12 +8,7 @@ import {
     isCompRoot,
 } from '../helpers/selector';
 import type { StylableMeta } from '../stylable-meta';
-import type {
-    SelectorNode,
-    ImmutableSelectorNode,
-    SelectorList,
-    PseudoClass,
-} from '@tokey/css-selector-parser';
+import type { ImmutableSelectorNode, SelectorList, PseudoClass } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter } from '../diagnostics';
 import type * as postcss from 'postcss';
 
@@ -109,7 +104,13 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutableSelectorNode }
             }
             const selectorAst = parseSelectorWithCache(r.selector, { clone: true });
             const globals = unwrapPseudoGlobals(selectorAst);
-            addGlobals(meta, globals);
+            for (const ast of globals) {
+                walkSelector(ast, (inner) => {
+                    if (inner.type === 'class') {
+                        meta.globals[inner.value] = true;
+                    }
+                });
+            }
             r.selector = stringifySelector(selectorAst);
         });
     },
@@ -141,15 +142,4 @@ export function unwrapPseudoGlobals(selectorAst: SelectorList) {
         return;
     });
     return collectedGlobals;
-}
-
-export function addGlobals(meta: StylableMeta, selectorAst: SelectorNode[]) {
-    for (const ast of selectorAst) {
-        walkSelector(ast, (inner) => {
-            if (inner.type === 'class') {
-                // ToDo: consider if to move to css-class feature.
-                meta.globals[inner.value] = true;
-            }
-        });
-    }
 }

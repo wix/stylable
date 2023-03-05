@@ -39,7 +39,9 @@ export const hooks = createFeature({
                 STCustomSelector.getCustomSelectorExpended(meta, node.value.slice(2));
             if (customSelector) {
                 const mappedSelectorAst = parseSelectorWithCache(customSelector, { clone: true });
-                const mappedContext = selectorContext.createNestedContext(mappedSelectorAst);
+                const mappedContext = selectorContext.createNestedContext(mappedSelectorAst, {
+                    shareGlobalClasses: true,
+                });
                 // ToDo: wrap in :is() to get intersection of selectors
                 scopeSelectorAst(mappedContext);
                 if (mappedContext.currentAnchor) {
@@ -77,7 +79,9 @@ export const hooks = createFeature({
                 const innerSelectors = (
                     node.nodes[0] && node.nodes[0].type === `nth` ? node.nodes.slice(1) : node.nodes
                 ) as Selector[];
-                const nestedContext = selectorContext.createNestedContext(innerSelectors);
+                const nestedContext = selectorContext.createNestedContext(innerSelectors, {
+                    shareGlobalClasses: true,
+                });
                 scopeSelectorAst(nestedContext);
                 /**
                  * ToDo: remove once elements is deprecated!

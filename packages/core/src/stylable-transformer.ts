@@ -379,6 +379,10 @@ export class StylableTransformer {
             topNestClassName
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
+        // collect global classes
+        for (const globalClass of context.globalClasses) {
+            originMeta.globals[globalClass] = true;
+        }
         if (unwrapGlobals) {
             STGlobal.unwrapPseudoGlobals(targetSelectorAst);
         }
@@ -534,7 +538,7 @@ export class StylableTransformer {
                         resolvedPart.meta,
                         resolvedPart.symbol,
                         node,
-                        originMeta
+                        context.globalClasses
                     );
                 }
                 break;
@@ -755,6 +759,7 @@ export class ScopeContext {
     public node?: CompoundSelector['nodes'][number];
     public currentAnchor?: ScopeAnchor;
     public nestingSelectorAnchor?: ScopeAnchor;
+    public globalClasses = new Set<string>();
     constructor(
         public originMeta: StylableMeta,
         public resolver: StylableResolver,
@@ -797,7 +802,10 @@ export class ScopeContext {
             }
         }
     }
-    public createNestedContext(selectorAst: SelectorList) {
+    public createNestedContext(
+        selectorAst: SelectorList,
+        share: { shareGlobalClasses?: boolean } = {}
+    ) {
         const ctx = new ScopeContext(
             this.originMeta,
             this.resolver,
@@ -812,6 +820,9 @@ export class ScopeContext {
         ctx.selectorIndex = -1;
         ctx.elements = [];
         ctx.additionalSelectors = [];
+        if (!share.shareGlobalClasses) {
+            ctx.globalClasses = new Set<string>();
+        }
 
         return ctx;
     }

@@ -4,7 +4,6 @@ import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import type { ElementSymbol } from './css-type';
-import * as STGlobal from './st-global';
 import * as STCustomState from './st-custom-state';
 import { getOriginDefinition } from '../helpers/resolve';
 import { namespace } from '../helpers/namespace';
@@ -16,6 +15,7 @@ import {
     stringifySelector,
     isSimpleSelector,
     parseSelectorWithCache,
+    walkSelector,
 } from '../helpers/selector';
 import { getAlias } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
@@ -215,7 +215,7 @@ export const hooks = createFeature<{
             );
         }
         if (selectorContext.transform) {
-            namespaceClass(meta, symbol, node, originMeta);
+            namespaceClass(meta, symbol, node, selectorContext.globalClasses);
         }
     },
     transformJSExports({ exports, resolved }) {
@@ -245,7 +245,7 @@ export class StylablePublicApi {
             end: 0,
             dotComments: [],
         };
-        namespaceClass(resolved.meta, resolved.symbol, node, meta);
+        namespaceClass(resolved.meta, resolved.symbol, node);
         return stringifySelectorAst(node);
     }
 }
@@ -295,15 +295,22 @@ export function namespaceClass(
     meta: StylableMeta,
     symbol: StylableSymbol,
     node: SelectorNode, // ToDo: check this is the correct type, should this be inline selector?
-    originMeta: StylableMeta
+    globalClasses?: Set<string>
 ) {
     if (`-st-global` in symbol && symbol[`-st-global`]) {
         // change node to `-st-global` value
         const flatNode = convertToSelector(node);
         const globalMappedNodes = symbol[`-st-global`]!;
         flatNode.nodes = globalMappedNodes;
-        // ToDo: check if this is causes an issue with globals from an imported alias
-        STGlobal.addGlobals(originMeta, globalMappedNodes);
+        if (globalClasses) {
+            for (const ast of globalMappedNodes) {
+                walkSelector(ast, (inner) => {
+                    if (inner.type === 'class') {
+                        globalClasses.add(inner.value);
+                    }
+                });
+            }
+        }
     } else {
         node = convertToClass(node);
         node.value = namespaceEscape(symbol.name, meta.namespace);
@@ -450,7 +457,7 @@ function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
     const isSimplePerSelector = isSimpleSelector(rule.selector);
     const type = isSimplePerSelector.reduce((accType, { type }) => {
         return !accType ? type : accType !== type ? `complex` : type;
-    }, `` as (typeof isSimplePerSelector)[number]['type']);
+    }, `` as typeof isSimplePerSelector[number]['type']);
     const isSimple = type !== `complex`;
     if (decl.prop === `-st-states`) {
         if (isSimple && type !== 'type') {
