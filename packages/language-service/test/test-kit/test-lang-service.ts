@@ -3,10 +3,35 @@ import type { IDirectoryContents, IFileSystem } from '@file-services/types';
 import { Stylable, StylableConfig } from '@stylable/core';
 import { deindent } from '@stylable/core-test-kit';
 import { StylableLanguageService } from '@stylable/language-service';
-import type { CompletionItem } from 'vscode-languageserver';
+import { range } from '@stylable/language-service/dist/lib/completion-types';
+import { CompletionItem, TextEdit } from 'vscode-languageserver';
+import { TextDocument } from 'vscode-css-languageservice';
+import { URI } from 'vscode-uri';
 import { expect } from 'chai';
+import { tmpdir } from 'os';
+import { mkdtempSync } from 'fs';
+import nodeFs from '@file-services/node';
+
+export function createTempDirectorySync(prefix = 'temp-') {
+    const path = nodeFs.realpathSync.native(mkdtempSync(nodeFs.join(tmpdir(), prefix)));
+    const remove = () => nodeFs.rmSync(path, { recursive: true, force: true });
+
+    return { path, remove };
+}
+function copyDirectory(fs: IFileSystem, targetPath: string, content: IDirectoryContents) {
+    fs.ensureDirectorySync(targetPath);
+    for (const [name, value] of Object.entries(content)) {
+        const itemPath = fs.join(targetPath, name);
+        if (typeof value === 'string') {
+            fs.writeFileSync(itemPath, value, { encoding: 'utf-8' });
+        } else {
+            copyDirectory(fs, itemPath, value);
+        }
+    }
+}
 
 export interface TestOptions {
+    testOnNativeFileSystem: string;
     stylableConfig: TestStylableConfig;
 }
 export type TestStylableConfig = Omit<
@@ -23,9 +48,8 @@ export function testLangService(
     options: Partial<TestOptions> = {}
 ) {
     // infra
-    const fs =
-        options.stylableConfig?.filesystem ||
-        createMemoryFs(typeof input === `string` ? { '/entry.st.css': input } : input);
+    const fs = setupFileSystem(input, options);
+
     const stylable = new Stylable({
         fileSystem: fs,
         projectRoot: '/',
@@ -36,10 +60,12 @@ export function testLangService(
 
     // collect cursor positions
     const carets: Record<string, Record<string | number, number>> = {};
-    const allSheets = fs.findFilesSync(`/`, { filterFile: ({ path }) => path.endsWith(`.st.css`) });
+    const allSheets = fs.findFilesSync(stylable.projectRoot, {
+        filterFile: ({ path }) => path.endsWith(`.st.css`),
+    });
     for (const path of allSheets) {
         let source = deindent(fs.readFileSync(path, { encoding: 'utf-8' }));
-        const posComments = source.match(/\/\*\^([^*]*)\*\//g);
+        const posComments = source.match(/\^([^^]*)\^/g);
         if (posComments) {
             const sheetPositions: Record<string | number, number> = {};
             let unNamedCounter = 0;
@@ -47,8 +73,8 @@ export function testLangService(
                 const offset = source.indexOf(comment);
                 source = source.slice(0, offset) + source.slice(offset + comment.length);
                 const positionName =
-                    comment.length > 5
-                        ? comment.substring(3, comment.length - 2).trim()
+                    comment.length > 2
+                        ? comment.substring(1, comment.length - 1).trim()
                         : unNamedCounter++;
                 if (sheetPositions[positionName] !== undefined) {
                     throw new Error(`debug position "${positionName}" override in ${path}`);
@@ -67,7 +93,38 @@ export function testLangService(
         service,
         carets,
         assertCompletions,
+        textEditContext(filePath: string) {
+            const document = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                1,
+                fs.readFileSync(filePath, { encoding: 'utf-8' })
+            );
+            return {
+                replaceText(
+                    offset: number,
+                    text: string,
+                    replaceOffsets?: Parameters<typeof range>[1]
+                ) {
+                    const position = document.positionAt(offset);
+                    return TextEdit.replace(range(position, replaceOffsets), text);
+                },
+            };
+        },
     };
+}
+
+function setupFileSystem(input: string | IDirectoryContents, options: Partial<TestOptions>) {
+    const content = typeof input === `string` ? { '/entry.st.css': input } : input;
+    if (options.testOnNativeFileSystem) {
+        options.stylableConfig ||= {};
+        options.stylableConfig.filesystem = nodeFs;
+        options.stylableConfig.projectRoot = options.testOnNativeFileSystem;
+        copyDirectory(nodeFs, options.testOnNativeFileSystem, content);
+        return nodeFs;
+    } else {
+        return createMemoryFs(content);
+    }
 }
 
 export function assertCompletions({

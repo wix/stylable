@@ -66,7 +66,7 @@ export class StylableLanguageService {
         const stylableFile = this.readStylableFile(filePath);
 
         if (stylableFile && stylableFile.stat.isFile()) {
-            const context = new LangServiceContext(this.stylable, stylableFile, offset);
+            const context = new LangServiceContext(this.fs, this.stylable, stylableFile, offset);
             return this.getCompletions(context);
         } else {
             return [];

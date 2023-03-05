@@ -17,6 +17,7 @@ import {
     stringifySelectorAst,
     walk as walkSelector,
 } from '@tokey/css-selector-parser';
+import type { IFileSystem } from '@file-services/types';
 import * as postcss from 'postcss';
 
 type ResolveChainItem = {
@@ -32,7 +33,12 @@ export class LangServiceContext {
     public ambiguousNodes: Map<any, ParseReport[]>;
     public location: ReturnType<typeof getAstNodeAt>;
     public document: TextDocument;
-    constructor(public stylable: Stylable, private fileData: StylableFile, private offset: number) {
+    constructor(
+        public fs: IFileSystem,
+        public stylable: Stylable,
+        private fileData: StylableFile,
+        private offset: number
+    ) {
         const parseResult = parseForEditing(fileData.content, {
             from: fileData.path,
         });
