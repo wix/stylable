@@ -5,7 +5,6 @@ import type { ImportSymbol } from './st-import';
 import * as CSSClass from './css-class';
 import type { StylableMeta } from '../stylable-meta';
 import { isCompRoot, stringifySelector } from '../helpers/selector';
-import { getOriginDefinition } from '../helpers/resolve';
 import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
 import { createDiagnosticReporter } from '../diagnostics';
@@ -74,7 +73,8 @@ export const hooks = createFeature<{
         selectorContext.setNodeResolve(node, resolved);
         // native node does not resolve e.g. div
         if (selectorContext.transform && resolved && resolved.length > 1) {
-            const { symbol, meta } = getOriginDefinition(resolved);
+            const { symbol, meta } =
+                resolvedSymbols.selectorTransformOrigin[node.value] || resolved[0];
             if (symbol._kind === 'class') {
                 CSSClass.namespaceClass(meta, symbol, node, selectorContext.originMeta);
             } else {

@@ -16,7 +16,6 @@ import {
     ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
 import { isChildOfAtRule } from './helpers/rule';
-import { getOriginDefinition } from './helpers/resolve';
 import {
     ClassSymbol,
     CSSContains,
@@ -512,8 +511,8 @@ export class StylableTransformer {
                     // skip alias since they cannot add parts
                     continue;
                 }
-
-                resolved = this.getResolvedSymbols(meta).class[node.value];
+                const resolvedSymbols = this.getResolvedSymbols(meta);
+                resolved = resolvedSymbols.class[node.value];
 
                 // first definition of a part in the extends/alias chain
                 context.setCurrentAnchor({
@@ -523,7 +522,8 @@ export class StylableTransformer {
                 });
                 context.setNodeResolve(node, resolved);
 
-                const resolvedPart = getOriginDefinition(resolved);
+                const resolvedPart =
+                    resolvedSymbols.selectorTransformOrigin[node.value] || resolved[0];
 
                 if (context.transform) {
                     if (!resolvedPart.symbol[`-st-root`] && !isFirstInSelector) {

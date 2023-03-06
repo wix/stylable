@@ -6,7 +6,6 @@ import type { ImportSymbol } from './st-import';
 import type { ElementSymbol } from './css-type';
 import * as STGlobal from './st-global';
 import * as STCustomState from './st-custom-state';
-import { getOriginDefinition } from '../helpers/resolve';
 import { namespace } from '../helpers/namespace';
 import { namespaceEscape, unescapeCSS } from '../helpers/escape';
 import { getNamedArgs } from '../helpers/value';
@@ -204,7 +203,7 @@ export const hooks = createFeature<{
         ];
         selectorContext.setCurrentAnchor({ name: node.value, type: 'class', resolved });
         selectorContext.setNodeResolve(node, resolved);
-        const { symbol, meta } = getOriginDefinition(resolved);
+        const { symbol, meta } = resolvedSymbols.selectorTransformOrigin[node.value] || resolved[0];
         if (selectorContext.originMeta === meta && symbol[`-st-states`]) {
             // ToDo: refactor out to transformer validation phase
             validateRuleStateDefinition(
@@ -450,7 +449,7 @@ function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
     const isSimplePerSelector = isSimpleSelector(rule.selector);
     const type = isSimplePerSelector.reduce((accType, { type }) => {
         return !accType ? type : accType !== type ? `complex` : type;
-    }, `` as (typeof isSimplePerSelector)[number]['type']);
+    }, `` as typeof isSimplePerSelector[number]['type']);
     const isSimple = type !== `complex`;
     if (decl.prop === `-st-states`) {
         if (isSimple && type !== 'type') {
