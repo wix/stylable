@@ -89,6 +89,8 @@ export interface MetaResolvedSymbols {
     layer: Record<string, CSSResolve<LayerSymbol>>;
     container: Record<string, CSSResolve<ContainerSymbol>>;
     import: Record<string, CSSResolve<ImportSymbol>>;
+    // reference to the resolved first symbol/meta that is used for transformation
+    selectorTransformOrigin: Record<string, CSSResolve<ClassSymbol | ElementSymbol>>;
 }
 
 export type ReportError = (
@@ -329,6 +331,7 @@ export class StylableResolver {
             container: {},
             cssVar: {},
             import: {},
+            selectorTransformOrigin: {},
         };
         // resolve main namespace
         for (const [name, symbol] of Object.entries(meta.getAllSymbols())) {
@@ -369,18 +372,32 @@ export class StylableResolver {
                 deepResolved = { _kind: `css`, meta, symbol };
             }
             switch (deepResolved.symbol._kind) {
-                case `class`:
-                    resolvedSymbols.class[name] = this.resolveExtends(
+                case `class`: {
+                    const { chain, selectorTransformOrigin } = this.getClassOrElementResolveChain(
                         meta,
                         deepResolved.symbol,
                         false,
                         undefined,
                         validateClassResolveExtends(meta, name, diagnostics, deepResolved)
                     );
+                    resolvedSymbols.class[name] = chain;
+                    if (selectorTransformOrigin) {
+                        resolvedSymbols.selectorTransformOrigin[name] = selectorTransformOrigin;
+                    }
                     break;
-                case `element`:
-                    resolvedSymbols.element[name] = this.resolveExtends(meta, name, true);
+                }
+                case `element`: {
+                    const { chain, selectorTransformOrigin } = this.getClassOrElementResolveChain(
+                        meta,
+                        name,
+                        true
+                    );
+                    resolvedSymbols.element[name] = chain;
+                    if (selectorTransformOrigin) {
+                        resolvedSymbols.selectorTransformOrigin[name] = selectorTransformOrigin;
+                    }
                     break;
+                }
                 case `var`:
                     resolvedSymbols.var[name] = deepResolved as CSSResolve<VarSymbol>;
                     break;
@@ -432,6 +449,25 @@ export class StylableResolver {
         transformer?: StylableTransformer,
         reportError?: ReportError
     ): CSSResolvePath {
+        return this.getClassOrElementResolveChain(
+            meta,
+            nameOrSymbol,
+            isElement,
+            transformer,
+            reportError
+        ).chain;
+    }
+    private getClassOrElementResolveChain(
+        meta: StylableMeta,
+        nameOrSymbol: string | ClassSymbol | ElementSymbol,
+        isElement = false,
+        transformer?: StylableTransformer,
+        reportError?: ReportError
+    ) {
+        const result: {
+            chain: CSSResolvePath;
+            selectorTransformOrigin?: CSSResolve<ClassSymbol | ElementSymbol>;
+        } = { chain: [] };
         const name = typeof nameOrSymbol === `string` ? nameOrSymbol : nameOrSymbol.name;
         const symbol =
             typeof nameOrSymbol === `string`
@@ -445,20 +481,21 @@ export class StylableResolver {
             : STCustomSelector.getCustomSelectorExpended(meta, name);
 
         if (!symbol && !customSelector) {
-            return [];
+            return result;
         }
-
+        // ToDo(major): remove custom-selector option
         if (customSelector && transformer) {
             const parsed = transformer.resolveSelectorElements(meta, customSelector);
             if (parsed.length === 1) {
-                return parsed[0][parsed[0].length - 1].resolved;
-            } else {
-                return [];
+                // ToDo: handle multiple selectors
+                result.chain = parsed[0][parsed[0].length - 1].resolved;
+                result.selectorTransformOrigin = getOriginDefinition(result.chain);
             }
+            return result;
         }
 
         if (!symbol) {
-            return [];
+            return result;
         }
 
         let current = {
@@ -466,16 +503,21 @@ export class StylableResolver {
             symbol,
             meta,
         };
-        const extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>> = [];
 
         while (current?.symbol) {
-            if (isInPath(extendPath, current)) {
+            if (isInPath(result.chain, current)) {
                 break;
             }
 
-            extendPath.push(current);
+            result.chain.push(current);
 
             const parent = current.symbol[`-st-extends`] || current.symbol.alias;
+            if (
+                !result.selectorTransformOrigin &&
+                (!current.symbol.alias || !!current.symbol[`-st-extends`])
+            ) {
+                result.selectorTransformOrigin = current;
+            }
 
             if (parent) {
                 if (parent._kind === 'import') {
@@ -494,7 +536,7 @@ export class StylableResolver {
                         };
                     } else {
                         if (reportError) {
-                            reportError(res, parent, extendPath, meta, name, isElement);
+                            reportError(res, parent, result.chain, meta, name, isElement);
                         }
                         break;
                     }
@@ -505,13 +547,29 @@ export class StylableResolver {
                 break;
             }
         }
-
-        return extendPath;
+        if (!result.selectorTransformOrigin) {
+            result.selectorTransformOrigin = result.chain[0];
+        }
+        return result;
     }
 }
 
 function cacheKey(context: string, request: string) {
     return `${context}${safePathDelimiter}${request}`;
+}
+
+function getOriginDefinition(resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>) {
+    for (const r of resolved) {
+        const { symbol } = r;
+        if (symbol._kind === 'class' || symbol._kind === 'element') {
+            if (symbol.alias && !symbol[`-st-extends`]) {
+                continue;
+            } else {
+                return r;
+            }
+        }
+    }
+    return resolved[0];
 }
 
 function validateClassResolveExtends(
