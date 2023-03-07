@@ -10,12 +10,12 @@ import { namespace } from '../helpers/namespace';
 import { namespaceEscape, unescapeCSS } from '../helpers/escape';
 import { getNamedArgs } from '../helpers/value';
 import {
-    convertToSelector,
     convertToClass,
     stringifySelector,
     isSimpleSelector,
     parseSelectorWithCache,
-    walkSelector,
+    convertToPseudoClass,
+    convertToSelector,
 } from '../helpers/selector';
 import { getAlias } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
@@ -215,7 +215,7 @@ export const hooks = createFeature<{
             );
         }
         if (selectorContext.transform) {
-            namespaceClass(meta, symbol, node, selectorContext.globalClasses);
+            namespaceClass(meta, symbol, node);
         }
     },
     transformJSExports({ exports, resolved }) {
@@ -245,7 +245,7 @@ export class StylablePublicApi {
             end: 0,
             dotComments: [],
         };
-        namespaceClass(resolved.meta, resolved.symbol, node);
+        namespaceClass(resolved.meta, resolved.symbol, node, false);
         return stringifySelectorAst(node);
     }
 }
@@ -295,21 +295,26 @@ export function namespaceClass(
     meta: StylableMeta,
     symbol: StylableSymbol,
     node: SelectorNode, // ToDo: check this is the correct type, should this be inline selector?
-    globalClasses?: Set<string>
+    wrapInGlobal = true
 ) {
     if (`-st-global` in symbol && symbol[`-st-global`]) {
         // change node to `-st-global` value
-        const flatNode = convertToSelector(node);
-        const globalMappedNodes = symbol[`-st-global`]!;
-        flatNode.nodes = globalMappedNodes;
-        if (globalClasses) {
-            for (const ast of globalMappedNodes) {
-                walkSelector(ast, (inner) => {
-                    if (inner.type === 'class') {
-                        globalClasses.add(inner.value);
-                    }
-                });
-            }
+        if (wrapInGlobal) {
+            const globalMappedNodes = symbol[`-st-global`]!;
+            convertToPseudoClass(node, 'global', [
+                {
+                    type: 'selector',
+                    nodes: globalMappedNodes,
+                    after: '',
+                    before: '',
+                    end: 0,
+                    start: 0,
+                },
+            ]);
+        } else {
+            const flatNode = convertToSelector(node);
+            const globalMappedNodes = symbol[`-st-global`]!;
+            flatNode.nodes = globalMappedNodes;
         }
     } else {
         node = convertToClass(node);

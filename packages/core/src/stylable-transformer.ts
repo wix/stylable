@@ -379,10 +379,8 @@ export class StylableTransformer {
             topNestClassName
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
-        // collect global classes
-        for (const globalClass of context.globalClasses) {
-            originMeta.globals[globalClass] = true;
-        }
+        // ToDo(major): remove functionality, globals are stripped in transformLastPass
+        // and this api is not used by anyone.
         if (unwrapGlobals) {
             STGlobal.unwrapPseudoGlobals(targetSelectorAst);
         }
@@ -534,12 +532,7 @@ export class StylableTransformer {
                         // insert nested combinator before internal custom element
                         context.insertDescendantCombinatorBeforePseudoElement();
                     }
-                    CSSClass.namespaceClass(
-                        resolvedPart.meta,
-                        resolvedPart.symbol,
-                        node,
-                        context.globalClasses
-                    );
+                    CSSClass.namespaceClass(resolvedPart.meta, resolvedPart.symbol, node);
                 }
                 break;
             }
@@ -759,7 +752,6 @@ export class ScopeContext {
     public node?: CompoundSelector['nodes'][number];
     public currentAnchor?: ScopeAnchor;
     public nestingSelectorAnchor?: ScopeAnchor;
-    public globalClasses = new Set<string>();
     constructor(
         public originMeta: StylableMeta,
         public resolver: StylableResolver,
@@ -802,10 +794,7 @@ export class ScopeContext {
             }
         }
     }
-    public createNestedContext(
-        selectorAst: SelectorList,
-        share: { shareGlobalClasses?: boolean } = {}
-    ) {
+    public createNestedContext(selectorAst: SelectorList) {
         const ctx = new ScopeContext(
             this.originMeta,
             this.resolver,
@@ -820,9 +809,6 @@ export class ScopeContext {
         ctx.selectorIndex = -1;
         ctx.elements = [];
         ctx.additionalSelectors = [];
-        if (!share.shareGlobalClasses) {
-            ctx.globalClasses = new Set<string>();
-        }
 
         return ctx;
     }
