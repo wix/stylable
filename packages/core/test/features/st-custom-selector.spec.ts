@@ -13,7 +13,7 @@ const customSelectorDiagnostics = diagnosticBankReportToStrings(STCustomSelector
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 
 describe('features/st-custom-selector', () => {
-    // ToDo: migrate to @st-custom-selector
+    // ToDo: migrate to @st-part
     it('should define selector symbols', () => {
         const { sheets } = testStylableCore(`
             /* @transform-remove */
