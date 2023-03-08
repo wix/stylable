@@ -379,8 +379,6 @@ export class StylableTransformer {
             topNestClassName
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
-        // ToDo(major): remove functionality, globals are stripped in transformLastPass
-        // and this api is not used by anyone.
         if (unwrapGlobals) {
             STGlobal.unwrapPseudoGlobals(targetSelectorAst);
         }
