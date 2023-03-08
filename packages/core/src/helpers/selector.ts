@@ -3,6 +3,7 @@ import {
     stringifySelectorAst,
     walk,
     SelectorNode,
+    PseudoClass,
     Selector,
     SelectorList,
     FunctionalSelector,
@@ -108,6 +109,22 @@ export function convertToSelector(node: SelectorNode): Selector {
     castedNode.before ||= ``;
     castedNode.after ||= ``;
     // ToDo: should this fix castedNode.end?
+    return castedNode;
+}
+export function convertToPseudoClass(
+    node: SelectorNode,
+    name: string,
+    nestedSelectors?: SelectorList
+): PseudoClass {
+    const castedNode = node as PseudoClass;
+    castedNode.type = 'pseudo_class';
+    castedNode.value = name;
+    castedNode.colonComments = [];
+    if (nestedSelectors) {
+        castedNode.nodes = nestedSelectors;
+    } else {
+        delete castedNode.nodes;
+    }
     return castedNode;
 }
 

@@ -530,12 +530,7 @@ export class StylableTransformer {
                         // insert nested combinator before internal custom element
                         context.insertDescendantCombinatorBeforePseudoElement();
                     }
-                    CSSClass.namespaceClass(
-                        resolvedPart.meta,
-                        resolvedPart.symbol,
-                        node,
-                        originMeta
-                    );
+                    CSSClass.namespaceClass(resolvedPart.meta, resolvedPart.symbol, node);
                 }
                 break;
             }

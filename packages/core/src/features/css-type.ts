@@ -76,7 +76,7 @@ export const hooks = createFeature<{
         if (selectorContext.transform && resolved && resolved.length > 1) {
             const { symbol, meta } = getOriginDefinition(resolved);
             if (symbol._kind === 'class') {
-                CSSClass.namespaceClass(meta, symbol, node, selectorContext.originMeta);
+                CSSClass.namespaceClass(meta, symbol, node);
             } else {
                 node.value = symbol.name;
             }
