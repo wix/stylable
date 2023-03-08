@@ -52,28 +52,6 @@ describe('Stylable postcss transform (Scoping)', () => {
                 `,
             });
         });
-        it('should transform custom element with multiple selector inside nested pseudo-classes', () => {
-            testStylableCore(`
-                @custom-selector :--part .partA, .partB;
-                @custom-selector :--nestedPart ::part, .partC;
-
-                /* @rule(1 level) .entry__root:not(.entry__partA,.entry__partB) */
-                .root:not(::part) {}
-
-                /* 
-                    notice: partB is pushed at the end because of how custom selectors are
-                    processed atm.
-
-                    @rule(2 levels) .entry__root:not(.entry__partA,.entry__partC,.entry__partB) 
-                */
-                .root:not(::nestedPart) {}
-
-                /* @rule(custom-selector syntax) 
-                        .entry__root:not(.entry__partA),.entry__root:not(.entry__partB)
-                */
-                .root:not(:--part) {}
-            `);
-        });
     });
 
     describe('scoped pseudo-elements', () => {
@@ -457,86 +435,6 @@ describe('Stylable postcss transform (Scoping)', () => {
 
             testInlineExpects(result);
         });
-
-        it('resolve aliased pseudo-element (with @custom-selector )', () => {
-            const result = generateStylableRoot({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :import {
-                                -st-from: "./inner.st.css";
-                                -st-default: Inner;
-                            }
-                            .root {
-                                -st-extends: Inner;
-                            }
-                            /* @check .entry__root .Deep__x.Comp--hovered */
-                            .root::option:hovered {
-                                z-index: 1;
-                            }
-                            /* @check .entry__root .Deep__x .Comp__y.Y--hovered */
-                            .root::optionY:hovered {
-                                z-index: 2;
-                            }
-                        `,
-                    },
-                    '/inner.st.css': {
-                        namespace: 'Inner',
-                        content: `
-                            @custom-selector :--option .root::x;
-                            @custom-selector :--optionY .root::x::y;
-                            :import {
-                                -st-from: "./deep.st.css";
-                                -st-default: Deep;
-                            }
-                            .root {
-                                -st-extends: Deep;
-                            }
-                        `,
-                    },
-                    '/deep.st.css': {
-                        namespace: 'Deep',
-                        content: `
-                        :import {
-                            -st-from: "./comp.st.css";
-                            -st-default: Comp;
-                        }
-                        .x{
-                            -st-extends: Comp;
-                        }
-                    `,
-                    },
-                    '/comp.st.css': {
-                        namespace: 'Comp',
-                        content: `
-                        :import {
-                            -st-from: "./y.st.css";
-                            -st-default: Y;
-                        }
-                        .root {
-                            -st-states:hovered;
-                        }
-                        .y {
-                            -st-extends: Y;
-                        }
-                        `,
-                    },
-                    '/y.st.css': {
-                        namespace: 'Y',
-                        content: `
-                        .root {
-                            -st-states:hovered;
-                        }
-                        `,
-                    },
-                },
-            });
-
-            testInlineExpects(result);
-        });
-
         it('should only lookup in the extedns chain', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,

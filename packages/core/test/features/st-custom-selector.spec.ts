@@ -13,8 +13,7 @@ const customSelectorDiagnostics = diagnosticBankReportToStrings(STCustomSelector
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 
 describe('features/st-custom-selector', () => {
-    // ToDo: move and add tests when extracting feature
-    // ToDo: migrate to @st-custom-selector
+    // ToDo: migrate to @st-part
     it('should define selector symbols', () => {
         const { sheets } = testStylableCore(`
             /* @transform-remove */
@@ -24,6 +23,9 @@ describe('features/st-custom-selector', () => {
         const { meta, exports } = sheets['/entry.st.css'];
 
         shouldReportNoDiagnostics(meta);
+
+        const nodeSelector = STCustomSelector.getCustomSelectorExpended(meta, 'node');
+        expect(nodeSelector, 'programmatic get selector').to.equal('.root > .node');
 
         // JS exports
         expect(exports.classes.node, 'JS export').to.eql('entry__node');
@@ -37,6 +39,19 @@ describe('features/st-custom-selector', () => {
 
             /* @rule(complex) .entry__x.entry__a > .entry__b ~ .entry__c.entry__y */
             .x:--node.y {}
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it('should expand into into nested selector', () => {
+        const { sheets } = testStylableCore(`
+            @custom-selector :--A .a;
+            @custom-selector :--B .b;
+
+            /* @rule(simple) .entry__root:has(.entry__a, .entry__z, .entry__b) */
+            .root:has(:--A, .z, :--B) {}
         `);
 
         const { meta } = sheets['/entry.st.css'];
@@ -82,18 +97,5 @@ describe('features/st-custom-selector', () => {
             meta.diagnostics.reports.length,
             'only a single unscoped diagnostic for span'
         ).to.eql(1);
-    });
-    describe('css-pseudo-element', () => {
-        //
-        it.skip('should handle circular reference', () => {
-            // ToDo: refactor handleCustomSelector transformer flow to handle circularity
-            testStylableCore(`
-                @custom-selector :--x ::y;
-                @custom-selector :--y ::x;
-    
-                /* @rule :--y */
-                :--y {}
-            `);
-        });
     });
 });
