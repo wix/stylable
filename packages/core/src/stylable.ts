@@ -36,6 +36,7 @@ export interface StylableConfig {
     cssParser?: CssParser;
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
+    experimentalSelectorResolve?: boolean;
 }
 
 // This defines and validates known configs for the defaultConfig in 'stylable.config.js
@@ -83,7 +84,9 @@ export class Stylable {
     protected resolverCache?: StylableResolverCache;
     // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
     protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
+    private experimentalSelectorResolve: boolean;
     constructor(config: StylableConfig) {
+        this.experimentalSelectorResolve = !!config.experimentalSelectorResolve;
         this.projectRoot = config.projectRoot;
         this.fileSystem = config.fileSystem;
         this.requireModule =
@@ -159,6 +162,7 @@ export class Stylable {
             replaceValueHook: this.hooks.replaceValueHook,
             resolverCache: this.resolverCache,
             mode: this.mode,
+            experimentalSelectorResolve: this.experimentalSelectorResolve,
             ...options,
         });
     }

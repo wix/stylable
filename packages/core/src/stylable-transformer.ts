@@ -102,6 +102,7 @@ export interface TransformerOptions {
     mode?: EnvMode;
     resolverCache?: StylableResolverCache;
     stVarOverride?: Record<string, string>;
+    experimentalSelectorResolve?: boolean;
 }
 
 export const transformerDiagnostics = {
@@ -124,12 +125,14 @@ export class StylableTransformer {
     private evaluator: StylableEvaluator;
     private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
     private directiveNodes: postcss.Declaration[] = [];
+    private experimentalSelectorResolve: boolean;
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
+        this.experimentalSelectorResolve = options.experimentalSelectorResolve === true;
         this.resolver = new StylableResolver(
             options.fileProcessor,
             options.requireModule,
