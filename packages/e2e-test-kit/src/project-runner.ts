@@ -1,7 +1,7 @@
 // if you move this file change #1.
 import { join, normalize } from 'path';
 import playwright from 'playwright-core';
-import rimrafCallback from 'rimraf';
+import rimraf from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
@@ -29,7 +29,6 @@ export interface Options {
 
 type MochaHook = import('mocha').HookFunction;
 type Assets = Record<string, { source(): string; emitted: boolean; distPath: string }>;
-const rimraf = promisify(rimrafCallback);
 
 export class ProjectRunner {
     public static mochaSetup(
@@ -369,7 +368,7 @@ export class ProjectRunner {
         const { useTempDir, tempDirPath, projectDir } = this.options;
 
         if (tempDirPath && existsSync(tempDirPath)) {
-            rimrafCallback.sync(tempDirPath);
+            rimraf.sync(tempDirPath);
         }
 
         if (useTempDir) {
