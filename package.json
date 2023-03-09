@@ -78,7 +78,7 @@
     "tsconfig-paths-webpack-plugin": "^4.0.0",
     "typescript": "~4.9.5",
     "url-loader": "^4.1.1",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.0",
     "yargs": "^17.7.1"
   },
   "engines": {
