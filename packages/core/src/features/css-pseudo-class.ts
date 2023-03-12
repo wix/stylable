@@ -1,9 +1,9 @@
 import { createFeature } from './feature';
 import { nativePseudoClasses } from '../native-reserved-lists';
 import * as STCustomState from './st-custom-state';
-import * as STCustomSelector from './st-custom-selector';
 import { createDiagnosticReporter } from '../diagnostics';
-import { parseSelectorWithCache } from '../helpers/selector';
+// import * as STCustomSelector from './st-custom-selector';
+// import { parseSelectorWithCache } from '../helpers/selector';
 import type { Selector } from '@tokey/css-selector-parser';
 import isVendorPrefixed from 'is-vendor-prefixed';
 
@@ -24,51 +24,24 @@ export const hooks = createFeature({
             return;
         }
         // find matching custom state
-        const resolved = inferredSelector.getSingleResolve();
-        let foundCustomState = false;
-        for (const { symbol, meta } of resolved) {
-            // Handle node resolve mapping for custom-selector.
-            // Currently custom selectors cannot get to this point in the process,
-            // due to them being replaced at the beginning of the transform process.
-            // However by using an internal process to analyze the context of selectors for
-            // the language service, a source selector can reach this point without the initial
-            // transform. This code keeps the custom selector untouched, but registers the AST it resolves to.
-            // ToDo: in the future we want to move the custom selector transformation inline, or remove it all together.
-            const customSelector =
-                node.value.startsWith('--') &&
-                symbol['-st-root'] &&
-                STCustomSelector.getCustomSelectorExpended(meta, node.value.slice(2));
-            if (customSelector) {
-                const mappedSelectorAst = parseSelectorWithCache(customSelector, { clone: true });
-                const mappedContext = selectorContext.createNestedContext(mappedSelectorAst);
-                // ToDo: wrap in :is() to get intersection of selectors
-                scopeSelectorAst(mappedContext);
-                if (!mappedContext.inferredSelector.isEmpty()) {
-                    // ToDo: support multi selector with: "selectorContext.multiSelectorScope"
-                    selectorContext.setNextSelectorScope(mappedContext.inferredSelector, node); // doesn't add to the resolved elements
-                }
-                return; // this is not a state
-            }
-            //
-            const states = symbol[`-st-states`];
-            if (states && Object.hasOwnProperty.call(states, node.value)) {
-                foundCustomState = true;
-                // transform custom state
-                if (selectorContext.transform) {
-                    STCustomState.transformPseudoClassToCustomState(
-                        states,
-                        meta,
-                        node.value,
-                        node,
-                        meta.namespace,
-                        context.resolver,
-                        context.diagnostics,
-                        rule
-                    );
-                }
-                break;
+        const name = node.value;
+        const inferredState = inferredSelector.getPseudoClasses({ name })[name];
+        const foundCustomState = !!inferredState;
+        if (inferredState) {
+            if (selectorContext.transform) {
+                STCustomState.transformPseudoClassToCustomState(
+                    inferredState.state,
+                    inferredState.meta,
+                    node.value,
+                    node,
+                    inferredState.meta.namespace,
+                    context.resolver,
+                    context.diagnostics,
+                    rule
+                );
             }
         }
+
         // handle nested pseudo classes
         if (node.nodes && !foundCustomState) {
             if (node.value === 'global') {

@@ -653,6 +653,103 @@ describe('features/css-pseudo-class', () => {
             shouldReportNoDiagnostics(meta); // ToDo: `target invalid` should report
         });
     });
+    describe('st-custom-selector', () => {
+        describe('experimentalSelectorResolve', () => {
+            it('should transform shared state', () => {
+                const { sheets } = testStylableCore(
+                    {
+                        'base.st.css': `
+                        .root {
+                            -st-states: shared;
+                        }
+                        .x { -st-extends: root; }
+                        .y { -st-extends: root; }
+                        @custom-selector :--innerMulti .x, .y;
+                    `,
+                        'a.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root { -st-extends: Base }
+                    `,
+                        'b.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root { -st-extends: Base }
+                    `,
+                        'entry.st.css': `
+                            @st-import A from './a.st.css';
+                            @st-import B from './b.st.css';
+                            @custom-selector :--multi A, B;
+                
+                            /* @rule(shared) .entry__root .a__root.base--shared,.entry__root .b__root.base--shared */
+                            .root::multi:shared {}
+
+                            /* @rule(2 levels) .entry__root .a__root .base__x.base--shared,.entry__root .b__root .base__x.base--shared,.entry__root .a__root .base__y.base--shared,.entry__root .b__root .base__y.base--shared */
+                            .root::multi::innerMulti:shared {}
+                    `,
+                    },
+                    {
+                        stylableConfig: {
+                            experimentalSelectorResolve: true,
+                        },
+                    }
+                );
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
+            it('should filter out states that do not exist or match', () => {
+                testStylableCore(
+                    {
+                        'base.st.css': `
+                        .root {
+                            -st-states: shared;
+                        }
+                    `,
+                        'a.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root { 
+                            -st-extends: Base;
+                            -st-states: unique, onlyInA;
+                        }
+                    `,
+                        'b.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root { 
+                            -st-extends: Base;
+                            -st-states: unique;
+                        }
+                    `,
+                        'entry.st.css': `
+                            @st-import A from './a.st.css';
+                            @st-import B from './b.st.css';
+                            @custom-selector :--multi A, B;
+                
+                            /* 
+                                @transform-error(unique) word(unique) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                    'unique'
+                                )} 
+                                @rule(unique) .entry__root .a__root:unique,.entry__root .b__root:unique 
+                            */
+                            .root::multi:unique {}
+
+                            /* 
+                                @transform-error(only in 1) word(onlyInA) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                    'onlyInA'
+                                )} 
+                                @rule(only in 1) .entry__root .a__root:onlyInA,.entry__root .b__root:onlyInA 
+                            */
+                            .root::multi:onlyInA {}
+                    `,
+                    },
+                    {
+                        stylableConfig: {
+                            experimentalSelectorResolve: true,
+                        },
+                    }
+                );
+            });
+        });
+    });
     describe(`st-mixin`, () => {
         it.skip('should override value() within var definition / call', () => {
             // mixins could be able to gain more power by overriding st-var in state definitions and selectors

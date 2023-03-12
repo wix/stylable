@@ -790,7 +790,7 @@ export function validateStateArgument(
 // transform
 
 export function transformPseudoClassToCustomState(
-    states: MappedStates,
+    stateDef: MappedStates[string],
     meta: StylableMeta,
     name: string,
     node: PseudoClass,
@@ -799,8 +799,6 @@ export function transformPseudoClassToCustomState(
     diagnostics: Diagnostics,
     rule?: postcss.Rule
 ) {
-    const stateDef = states[name];
-
     if (stateDef === null) {
         convertToClass(node).value = createBooleanStateClassName(name, namespace);
         delete node.nodes;

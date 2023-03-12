@@ -52,6 +52,7 @@ import {
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
+import type { MappedStates } from './helpers/custom-state';
 
 export interface ResolvedElement {
     name: string;
@@ -530,11 +531,18 @@ export class StylableTransformer {
                 }
             }
         } else if (node.type === 'pseudo_class') {
-            CSSPseudoClass.hooks.transformSelectorNode({
+            const isCustomSelector = STCustomSelector.hooks.transformSelectorNode({
                 context: transformerContext,
                 selectorContext: context,
                 node,
             });
+            if (!isCustomSelector) {
+                CSSPseudoClass.hooks.transformSelectorNode({
+                    context: transformerContext,
+                    selectorContext: context,
+                    node,
+                });
+            }
         } else if (node.type === `nesting`) {
             context.setNextSelectorScope(context.inferredSelectorContext, node, node.value);
         }
@@ -599,6 +607,10 @@ type InferredPseudoElement = {
     inferred: InferredSelector;
     selectors: SelectorList;
 };
+type InferredPseudoClass = {
+    meta: StylableMeta;
+    state: MappedStates[string];
+};
 class InferredSelector {
     protected resolveSet = new Set<InferredResolve[]>();
     constructor(
@@ -629,6 +641,57 @@ class InferredSelector {
             // ToDo: check uniqueness
             this.resolveSet.add(resolve);
         }
+    }
+    public getPseudoClasses({ name }: { name: string }) {
+        const resolvedStates: Record<string, InferredPseudoClass> = {};
+        const resolvedCount: Record<string, number> = {};
+        const expectedIntersectionCount = this.resolveSet.size; // ToDo: dec for any types
+        const addInferredState = (
+            name: string,
+            meta: StylableMeta,
+            state: MappedStates[string]
+        ) => {
+            const existing = resolvedStates[name];
+            if (!existing) {
+                resolvedStates[name] = { meta, state };
+                resolvedCount[name] = 1;
+            } else if (
+                meta === existing.meta &&
+                state === existing.state
+                /* ToDo: should this be duck-typed? */
+            ) {
+                resolvedCount[name]++;
+            }
+        };
+        // infer states from  multiple resolved selectors
+        for (const resolvedContext of this.resolveSet.values()) {
+            resolved: for (const { symbol, meta } of resolvedContext) {
+                if (name) {
+                    // custom-selector of the same name overrides a state
+                    const customSelector =
+                        name.startsWith('--') &&
+                        symbol['-st-root'] &&
+                        STCustomSelector.getCustomSelectorExpended(meta, name.slice(2));
+                    const states = symbol[`-st-states`];
+                    if (!customSelector && states && Object.hasOwnProperty.call(states, name)) {
+                        // track state
+                        addInferredState(name, meta, states[name]);
+                        break resolved;
+                    }
+                } else {
+                    // ToDo: implement get all states
+                }
+            }
+        }
+        // strict: remove states that do not exist on ALL resolved selectors
+        if (expectedIntersectionCount > 1) {
+            for (const name of Object.keys(resolvedStates)) {
+                if (resolvedCount[name] < expectedIntersectionCount) {
+                    delete resolvedStates[name];
+                }
+            }
+        }
+        return resolvedStates;
     }
     public getPseudoElements({
         isFirstInSelector,

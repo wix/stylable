@@ -1,5 +1,6 @@
 import { plugableRecord } from '../helpers/plugable-record';
 import { createFeature } from './feature';
+import * as STCustomSelector from './st-custom-selector';
 import {
     transformCustomSelectorMap,
     transformCustomSelectors,
@@ -84,6 +85,29 @@ export const hooks = createFeature({
         } else if (node.type === 'atrule' && node.name === 'custom-selector') {
             toRemove.push(node);
         }
+    },
+    transformSelectorNode({ context, selectorContext, node }) {
+        // Handle node resolve mapping for custom-selector.
+        //      Currently custom selectors cannot get to this point in the process,
+        //      due to them being replaced at the beginning of the transform process (prepareAST).
+        //      However by using an internal process to analyze the context of selectors for
+        //      the language service, a source selector can reach this point without the initial
+        //      transform. This code keeps the custom selector untouched, but registers the AST it resolves to.
+        // ToDo: in the future we want to move the custom selector transformation inline, or remove it all together.
+        const customSelector =
+            node.value.startsWith('--') &&
+            STCustomSelector.getCustomSelectorExpended(context.meta, node.value.slice(2));
+        if (customSelector) {
+            const mappedSelectorAst = parseSelectorWithCache(customSelector, { clone: true });
+            const mappedContext = selectorContext.createNestedContext(mappedSelectorAst);
+            // ToDo: wrap in :is() to get intersection of selectors
+            selectorContext.scopeSelectorAst(mappedContext);
+            if (!mappedContext.inferredSelector.isEmpty()) {
+                // ToDo: support multi selector with: "selectorContext.multiSelectorScope"
+                selectorContext.setNextSelectorScope(mappedContext.inferredSelector, node); // doesn't add to the resolved elements
+            }
+        }
+        return !!customSelector;
     },
 });
 

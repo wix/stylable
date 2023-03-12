@@ -74,7 +74,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         context: FeatureTransformContext;
         node: T['SELECTOR'];
         selectorContext: Required<ScopeContext>;
-    }) => void;
+    }) => boolean | void;
     transformDeclaration: (options: {
         context: FeatureTransformContext;
         decl: postcss.Declaration;
