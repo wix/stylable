@@ -168,5 +168,30 @@ describe('LS: css-pseudo-class', () => {
                 ],
             });
         });
+        describe('experimentalSelectorResolve', () => {
+            it('should suggest matching intersection states', () => {
+                const { service, carets, assertCompletions } = testLangService(`
+                    .a {
+                        -st-states: shared, onlyA;
+                    }
+                    .b {
+                        -st-states: shared, onlyB;
+                    }
+
+
+                    @st-scope .a, .b {
+                        :^^
+                    }
+
+                `);
+                const entryCarets = carets['/entry.st.css'];
+
+                assertCompletions({
+                    actualList: service.onCompletion('/entry.st.css', entryCarets[0]),
+                    expectedList: [{ label: ':shared' }],
+                    unexpectedList: [{ label: ':onlyA' }, { label: ':onlyB' }],
+                });
+            });
+        });
     });
 });

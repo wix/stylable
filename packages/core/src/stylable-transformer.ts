@@ -611,7 +611,7 @@ type InferredPseudoClass = {
     meta: StylableMeta;
     state: MappedStates[string];
 };
-class InferredSelector {
+export class InferredSelector {
     protected resolveSet = new Set<InferredResolve[]>();
     constructor(
         private api: Pick<
@@ -634,6 +634,9 @@ class InferredSelector {
         this.resolveSet.clear();
         this.add(resolve);
     }
+    public clone() {
+        return new InferredSelector(this.api, this);
+    }
     public add(resolve: InferredResolve[] | InferredSelector) {
         if (resolve instanceof InferredSelector) {
             resolve.resolveSet.forEach((resolve) => this.add(resolve));
@@ -642,7 +645,7 @@ class InferredSelector {
             this.resolveSet.add(resolve);
         }
     }
-    public getPseudoClasses({ name }: { name: string }) {
+    public getPseudoClasses({ name: searchedName }: { name?: string } = {}) {
         const resolvedStates: Record<string, InferredPseudoClass> = {};
         const resolvedCount: Record<string, number> = {};
         const expectedIntersectionCount = this.resolveSet.size; // ToDo: dec for any types
@@ -666,20 +669,22 @@ class InferredSelector {
         // infer states from  multiple resolved selectors
         for (const resolvedContext of this.resolveSet.values()) {
             resolved: for (const { symbol, meta } of resolvedContext) {
-                if (name) {
-                    // custom-selector of the same name overrides a state
-                    const customSelector =
-                        name.startsWith('--') &&
-                        symbol['-st-root'] &&
-                        STCustomSelector.getCustomSelectorExpended(meta, name.slice(2));
-                    const states = symbol[`-st-states`];
-                    if (!customSelector && states && Object.hasOwnProperty.call(states, name)) {
+                const states = symbol[`-st-states`];
+                if (!states) {
+                    continue;
+                }
+                if (searchedName) {
+                    if (Object.hasOwnProperty.call(states, searchedName)) {
                         // track state
-                        addInferredState(name, meta, states[name]);
+                        addInferredState(searchedName, meta, states[searchedName]);
                         break resolved;
                     }
                 } else {
-                    // ToDo: implement get all states
+                    // get all states
+                    for (const [name, state] of Object.entries(states)) {
+                        // track state
+                        addInferredState(name, meta, state);
+                    }
                 }
             }
         }
@@ -876,7 +881,7 @@ export class ScopeContext {
     public transform = true;
     public selectorIndex = -1;
     public elements: any[] = [];
-    public selectorAstResolveMap = new Map<ImmutableSelectorNode, CSSResolve[]>();
+    public selectorAstResolveMap = new Map<ImmutableSelectorNode, InferredSelector>();
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
@@ -931,7 +936,7 @@ export class ScopeContext {
             });
         }
         this.inferredSelector.set(resolved);
-        this.selectorAstResolveMap.set(node, this.inferredSelector.getSingleResolve());
+        this.selectorAstResolveMap.set(node, this.inferredSelector.clone());
     }
     public isFirstInSelector(node: SelectorNode) {
         const isFirstNode = this.selectorAst[this.selectorIndex].nodes[0] === node;

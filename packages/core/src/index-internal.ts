@@ -7,6 +7,7 @@ export {
     StylableExports,
     transformerDiagnostics,
     ResolvedElement,
+    InferredSelector,
 } from './stylable-transformer';
 export { validateDefaultConfig } from './stylable';
 export {
