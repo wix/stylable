@@ -410,7 +410,8 @@ export class StylableTransformer {
             rule,
             this.scopeSelectorAst.bind(this),
             this,
-            selectorContext
+            selectorContext,
+            this.experimentalSelectorResolve
         );
     }
     public createInferredSelector(
@@ -432,6 +433,9 @@ export class StylableTransformer {
             // loop over nodes
             for (const node of [...selector.nodes]) {
                 if (node.type !== `compound_selector`) {
+                    if (node.type === 'combinator') {
+                        context.setCurrentInferredSelectorNode(node);
+                    }
                     continue;
                 }
                 context.compoundSelector = node;
@@ -887,6 +891,7 @@ export class ScopeContext {
     public node?: CompoundSelector['nodes'][number];
     // store selector duplication points
     public splitSelectors = new SelectorMultiplier();
+    public lastInferredSelectorNode: SelectorNode | undefined;
     // selector is not a continuation of another selector
     public isStandaloneSelector = true;
     // used for nesting or after combinators
@@ -902,7 +907,8 @@ export class ScopeContext {
         public rule: postcss.Rule,
         public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
         private transformer: StylableTransformer,
-        parentSelectorScope: InferredSelector
+        parentSelectorScope: InferredSelector,
+        public experimentalSelectorResolve: boolean
     ) {
         this.inferredSelectorContext = new InferredSelector(this.transformer, parentSelectorScope);
         this.inferredSelector = new InferredSelector(
@@ -937,6 +943,10 @@ export class ScopeContext {
         }
         this.inferredSelector.set(resolved);
         this.selectorAstResolveMap.set(node, this.inferredSelector.clone());
+        this.setCurrentInferredSelectorNode(node);
+    }
+    public setCurrentInferredSelectorNode(node: SelectorNode) {
+        this.lastInferredSelectorNode = node;
     }
     public isFirstInSelector(node: SelectorNode) {
         const isFirstNode = this.selectorAst[this.selectorIndex].nodes[0] === node;
@@ -954,7 +964,8 @@ export class ScopeContext {
             this.rule,
             this.scopeSelectorAst,
             this.transformer,
-            selectorContext || this.inferredSelectorContext
+            selectorContext || this.inferredSelectorContext,
+            this.experimentalSelectorResolve
         );
         ctx.transform = this.transform;
         ctx.selectorAstResolveMap = this.selectorAstResolveMap;

@@ -46,8 +46,12 @@ export const hooks = createFeature({
         if (node.nodes && !foundCustomState) {
             if (node.value === 'global') {
                 // ignore `:st-global` since it is handled after the mixin transformation
+                // ToDo: reset inferred selector
                 return;
             } else {
+                const hasSubSelectors = node.value.match(
+                    /not|any|-\w+?-any|matches|is|where|has|local|nth-child|nth-last-child/
+                );
                 // pickup all nested selectors except nth initial selector
                 const innerSelectors = (
                     node.nodes[0] && node.nodes[0].type === `nth` ? node.nodes.slice(1) : node.nodes
@@ -57,13 +61,25 @@ export const hooks = createFeature({
                     selectorContext.inferredSelector
                 );
                 scopeSelectorAst(nestedContext);
-                /**
-                 * ToDo: remove once elements is deprecated!
-                 * support deprecated elements.
-                 * used to flatten nested elements for some native pseudo classes.
-                 */
-                if (node.value.match(/not|any|-\w+?-any|matches|is|where|has|local/)) {
-                    // delegate elements of first selector
+                // change selector inference
+                if (hasSubSelectors && innerSelectors.length) {
+                    if (
+                        selectorContext.experimentalSelectorResolve &&
+                        !node.value.match(/not|has/)
+                    ) {
+                        // set inferred to subject of nested selectors + prev compound
+                        const prevNode = selectorContext.lastInferredSelectorNode;
+                        if (prevNode && prevNode.type !== 'combinator') {
+                            nestedContext.inferredMultipleSelectors.add(
+                                selectorContext.inferredSelector
+                            );
+                        }
+                        selectorContext.setNextSelectorScope(
+                            nestedContext.inferredMultipleSelectors,
+                            node
+                        );
+                    }
+                    // legacy: delegate elements of first selector
                     selectorContext.elements[selectorContext.selectorIndex].push(
                         ...nestedContext.elements[0]
                     );
