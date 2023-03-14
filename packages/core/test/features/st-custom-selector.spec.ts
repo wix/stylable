@@ -100,4 +100,71 @@ describe('features/st-custom-selector', () => {
             'only a single unscoped diagnostic for span'
         ).to.eql(1);
     });
+    describe('experimentalSelectorResolve', () => {
+        it('should transform multiple selector intersection', () => {
+            const { sheets } = testStylableCore(
+                {
+                    'base.st.css': `
+                    .shared {}
+                    @custom-selector :--xy .x, .y;
+                `,
+                    'a.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                    'b.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                    'entry.st.css': `
+                        @st-import A from './a.st.css';
+                        @st-import B from './b.st.css';
+                        @custom-selector :--ab A, B;
+
+                        /* @rule(shared-multi) .a__root .base__x, .b__root .base__x,.a__root .base__y, .b__root .base__y */
+                        :--ab::xy {}
+                `,
+                },
+                {
+                    stylableConfig: {
+                        experimentalSelectorResolve: true,
+                    },
+                }
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should filter out elements that do not exist or match', () => {
+            testStylableCore(
+                {
+                    'base.st.css': `
+                `,
+                    'a.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                    .onlyInA {}
+                `,
+                    'b.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                    'entry.st.css': `
+                        @st-import A from './a.st.css';
+                        @st-import B from './b.st.css';
+                        @custom-selector :--ab A, B;
+            
+                        /* @rule(exist in 1) .a__root::onlyInA, .b__root::onlyInA */
+                        :--ab::onlyInA {}
+                `,
+                },
+                {
+                    stylableConfig: {
+                        experimentalSelectorResolve: true,
+                    },
+                }
+            );
+        });
+    });
 });

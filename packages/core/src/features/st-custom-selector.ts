@@ -95,12 +95,11 @@ export const hooks = createFeature({
         if (customSelector) {
             const mappedSelectorAst = parseSelectorWithCache(customSelector, { clone: true });
             const mappedContext = selectorContext.createNestedContext(mappedSelectorAst);
-            // ToDo: wrap in :is() to get intersection of selectors
             selectorContext.scopeSelectorAst(mappedContext);
-            if (!mappedContext.inferredSelector.isEmpty()) {
-                // ToDo: support multi selector with: "selectorContext.multiSelectorScope"
-                selectorContext.setNextSelectorScope(mappedContext.inferredSelector, node); // doesn't add to the resolved elements
-            }
+            const inferredSelector = selectorContext.experimentalSelectorResolve
+                ? mappedContext.inferredMultipleSelectors
+                : mappedContext.inferredSelector;
+            selectorContext.setNextSelectorScope(inferredSelector, node); // doesn't add to the resolved elements
             if (selectorContext.transform) {
                 selectorContext.transformIntoMultiSelector(node, mappedSelectorAst);
             }
