@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { generateStylableRoot } from '@stylable/core-test-kit';
+import { generateStylableRoot, testStylableCore } from '@stylable/core-test-kit';
 
 describe('Stylable postcss transform (General)', () => {
     it('should output empty on empty input', () => {
@@ -42,5 +42,77 @@ describe('Stylable postcss transform (General)', () => {
         const rule2 = result.nodes[1] as postcss.Rule;
         expect(rule2.nodes[0].toString(), 'color1').to.equal('color: red');
         expect(rule2.nodes[1].toString(), 'color1').to.equal('color: blue');
+    });
+    it('should continue inferred selector after combinator', () => {
+        // ToDo: remove once experimentalSelectorResolve is the default
+        testStylableCore({
+            'comp.st.css': `.part {} `,
+            'entry.st.css': `
+                @st-import Comp from './comp.st.css';
+                .class { -st-states: state; }
+
+                /* @rule(state) .entry__class .entry--state */
+                .class :state {}
+                
+                /* @rule(pseudo-element) .comp__root  .comp__part */
+                Comp ::part {}
+        
+                /* @rule(unknown pseudo-element) .comp__root ::class */
+                Comp ::class {}
+            `,
+        });
+    });
+    it('should continue inferred selector after universal', () => {
+        // ToDo: remove once experimentalSelectorResolve is the default
+        testStylableCore(`
+            .root { -st-states: state; }
+            .part {}
+
+            /* @rule(state) *.entry--state */
+            *:state {}
+            
+            /* @rule(element) * .entry__part */
+            *::part {}
+        `);
+    });
+
+    describe('experimentalSelectorResolve', () => {
+        it('should reset inferred selector after combinator', () => {
+            // ToDo: fix extra space before ".entry__class"
+            testStylableCore(
+                {
+                    'comp.st.css': ` .part {} `,
+                    'entry.st.css': `
+                        @st-import Comp from './comp.st.css';
+                        .class { -st-states: state; }
+                    
+                        /* @rule(unknown state) .entry__class :state */
+                        .class :state {}
+            
+                        /* @rule(unknown pseudo-element) .comp__root ::part */
+                        Comp ::part {}
+            
+                        /* @rule(standalone pseudo-element) .comp__root  .entry__class */
+                        Comp ::class {}
+                    `,
+                },
+                { stylableConfig: { experimentalSelectorResolve: true } }
+            );
+        });
+        it('should set inferred selector after universal (to universal)', () => {
+            testStylableCore(
+                `
+                    .root { -st-states: state; }
+                    .part {}
+        
+                    /* @rule(state) *:state */
+                    *:state {}
+                    
+                    /* @rule(element) *::part */
+                    *::part {}
+                `,
+                { stylableConfig: { experimentalSelectorResolve: true } }
+            );
+        });
     });
 });

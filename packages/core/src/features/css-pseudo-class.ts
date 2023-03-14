@@ -46,7 +46,18 @@ export const hooks = createFeature({
         if (node.nodes && !foundCustomState) {
             if (node.value === 'global') {
                 // ignore `:st-global` since it is handled after the mixin transformation
-                // ToDo: reset inferred selector
+                if (selectorContext.experimentalSelectorResolve) {
+                    selectorContext.setNextSelectorScope(
+                        [
+                            {
+                                _kind: 'css',
+                                meta: context.meta,
+                                symbol: { _kind: 'element', name: '*' },
+                            },
+                        ],
+                        node
+                    );
+                }
                 return;
             } else {
                 const hasSubSelectors = node.value.match(

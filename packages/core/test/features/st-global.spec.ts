@@ -89,4 +89,48 @@ describe(`features/st-global`, () => {
         const expectedGlobalRules = collectAst(meta.sourceAst, ['global']);
         expect(actualGlobalRules).to.eql(expectedGlobalRules['global']);
     });
+    it('should continue inferred selector after :global()', () => {
+        // ToDo: remove once experimentalSelectorResolve is the default
+        testStylableCore({
+            'comp.st.css': `.part {} `,
+            'entry.st.css': `
+                @st-import Comp from './comp.st.css';
+                .class { -st-states: state; }
+                /* @rule(state) .entry__class.g.entry--state */
+                .class:global(.g):state {}
+                
+                /* @rule(pseudo-element) .comp__root.g .comp__part */
+                Comp:global(.g)::part {}
+        
+                /* @rule(unknown pseudo-element) .comp__root.g::class */
+                Comp:global(.g)::class {}
+            `,
+        });
+    });
+    describe('experimentalSelectorResolve', () => {
+        it('should set wildcard inferred selector to context after :global()', () => {
+            testStylableCore(
+                {
+                    'comp.st.css': ` .part {} `,
+                    'entry.st.css': `
+                        @st-import Comp from './comp.st.css';
+                        .class { -st-states: state('.class-state'); }
+                    
+                        /* @rule(root state) .entry__class.g:state */
+                        .class:global(.g):state {}
+            
+                        /* @rule(unknown comp pseudo-element) .comp__root.g::part */
+                        Comp:global(.g)::part {}
+            
+                        /* @rule(unknown standalone pseudo-element) .comp__root.g::class */
+                        Comp:global(.g)::class {}
+
+                        /* @rule(standalone pseudo-element) .comp__root.g  .entry__class */
+                        Comp:global(.g) ::class {}
+                    `,
+                },
+                { stylableConfig: { experimentalSelectorResolve: true } }
+            );
+        });
+    });
 });

@@ -477,13 +477,29 @@ export class StylableTransformer {
             for (const node of [...selector.nodes]) {
                 if (node.type !== `compound_selector`) {
                     if (node.type === 'combinator') {
-                        context.setCurrentInferredSelectorNode(node);
+                        if (this.experimentalSelectorResolve) {
+                            context.setNextSelectorScope(context.inferredSelectorContext, node);
+                        } else {
+                            context.setCurrentInferredSelectorNode(node);
+                        }
                     }
                     continue;
                 }
                 context.compoundSelector = node;
                 // loop over each node in a compound selector
                 for (const compoundNode of node.nodes) {
+                    if (compoundNode.type === 'universal' && this.experimentalSelectorResolve) {
+                        context.setNextSelectorScope(
+                            [
+                                {
+                                    _kind: 'css',
+                                    meta: context.originMeta,
+                                    symbol: { _kind: 'element', name: '*' },
+                                },
+                            ],
+                            node
+                        );
+                    }
                     context.node = compoundNode;
                     // transform node
                     this.handleCompoundNode(context as Required<ScopeContext>);

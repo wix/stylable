@@ -73,6 +73,24 @@ describe(`features/css-type`, () => {
 
         expect(meta.diagnostics.reports.length, `only unscoped diagnostic`).to.equal(1);
     });
+    it('should set element inferred selector to context after native element', () => {
+        testStylableCore({
+            'comp.st.css': ` .part {} `,
+            'entry.st.css': `
+                @st-import Comp from './comp.st.css';
+                .class { -st-states: state('.class-state'); }
+            
+                /* @rule(root state) .entry__class input:state */
+                .class input:state {}
+    
+                /* @rule(unknown comp pseudo-element) .comp__root input::part */
+                Comp input::part {}
+    
+                /* @rule(unknown standalone pseudo-element) .comp__root input::class */
+                Comp input::class {}
+            `,
+        });
+    });
     describe(`st-import`, () => {
         it(`should resolve imported root (default) as element type`, () => {
             const { sheets } = testStylableCore({
