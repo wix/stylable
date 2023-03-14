@@ -117,6 +117,8 @@ export const transformerDiagnostics = {
     ),
 };
 
+type PostcssContainer = postcss.Container<postcss.ChildNode> | postcss.Document;
+
 export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
     public diagnostics: Diagnostics;
@@ -130,6 +132,7 @@ export class StylableTransformer {
     public getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
     private directiveNodes: postcss.Declaration[] = [];
     private experimentalSelectorResolve: boolean;
+    public containerInferredSelectorMap = new Map<PostcssContainer, InferredSelector>();
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;
@@ -171,7 +174,9 @@ export class StylableTransformer {
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
-        meta.transformedScopes = validateScopes(this, meta);
+        if (!this.experimentalSelectorResolve) {
+            meta.transformedScopes = validateScopes(this, meta);
+        }
         this.transformAst(meta.targetAst, meta, metaExports);
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
@@ -206,7 +211,7 @@ export class StylableTransformer {
         const transformResolveOptions = {
             context: transformContext,
         };
-        prepareAST(transformContext, ast);
+        prepareAST(transformContext, ast, this.experimentalSelectorResolve);
 
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
@@ -222,36 +227,49 @@ export class StylableTransformer {
                     context: transformContext,
                     atRule,
                     resolved: {},
+                    transformer: this,
                 });
             } else if (name === 'property') {
                 CSSCustomProperty.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: cssVarsMapping,
+                    transformer: this,
                 });
             } else if (name === 'keyframes') {
                 CSSKeyframes.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: keyframesResolve,
+                    transformer: this,
                 });
             } else if (name === 'layer') {
                 CSSLayer.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: layerResolve,
+                    transformer: this,
                 });
             } else if (name === 'import') {
                 CSSLayer.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: layerResolve,
+                    transformer: this,
                 });
             } else if (name === 'container') {
                 CSSContains.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: containsResolve,
+                    transformer: this,
+                });
+            } else if (name === 'st-scope') {
+                STScope.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: containsResolve,
+                    transformer: this,
                 });
             }
         };
@@ -302,7 +320,24 @@ export class StylableTransformer {
                 if (isChildOfAtRule(node, 'keyframes')) {
                     return;
                 }
-                node.selector = this.scopeRule(meta, node, selectorContext);
+                // get context inferred selector
+                let currentParent: PostcssContainer | undefined = node.parent;
+                while (currentParent && !this.containerInferredSelectorMap.has(currentParent)) {
+                    currentParent = currentParent.parent;
+                }
+                const inferredNestSelector =
+                    (currentParent && this.containerInferredSelectorMap.get(currentParent)) ||
+                    selectorContext;
+                // transform selector
+                const { selector, inferredSelector } = this.scopeSelector(
+                    meta,
+                    node.selector,
+                    node,
+                    inferredNestSelector
+                );
+                // save results
+                this.containerInferredSelectorMap.set(node, inferredSelector);
+                node.selector = selector;
             } else if (node.type === 'atrule') {
                 handleAtRule(node);
             } else if (node.type === 'decl') {
@@ -321,6 +356,9 @@ export class StylableTransformer {
             cssVarsMapping,
             path,
         };
+        if (this.experimentalSelectorResolve) {
+            STScope.hooks.transformLastPass(lastPassParams);
+        }
         STMixin.hooks.transformLastPass(lastPassParams);
         if (!mixinTransform) {
             STGlobal.hooks.transformLastPass(lastPassParams);
@@ -362,27 +400,24 @@ export class StylableTransformer {
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
-    public scopeRule(
-        meta: StylableMeta,
-        rule: postcss.Rule,
-        selectorContext?: InferredSelector,
-        unwrapGlobals?: boolean
-    ): string {
-        return this.scopeSelector(meta, rule.selector, rule, selectorContext, unwrapGlobals)
-            .selector;
-    }
     public scopeSelector(
         originMeta: StylableMeta,
         selector: string,
-        rule?: postcss.Rule,
-        selectorContext?: InferredSelector,
+        rule?: postcss.Rule | postcss.AtRule,
+        inferredNestSelector?: InferredSelector,
         unwrapGlobals = false
-    ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
+    ): {
+        selector: string;
+        elements: ResolvedElement[][];
+        targetSelectorAst: SelectorList;
+        inferredSelector: InferredSelector;
+    } {
         const context = this.createSelectorContext(
             originMeta,
             parseSelectorWithCache(selector, { clone: true }),
             rule || postcss.rule({ selector }),
-            selectorContext
+            selector,
+            inferredNestSelector
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
         if (unwrapGlobals) {
@@ -392,12 +427,18 @@ export class StylableTransformer {
             targetSelectorAst,
             selector: stringifySelector(targetSelectorAst),
             elements: context.elements,
+            inferredSelector: context.inferredMultipleSelectors,
         };
     }
     public createSelectorContext(
         meta: StylableMeta,
         selectorAst: SelectorList,
-        rule: postcss.Rule,
+        rule: postcss.Rule | postcss.AtRule,
+        selectorStr?: string,
+        selectorNest: InferredSelector = this.createInferredSelector(meta, {
+            name: meta.root,
+            type: 'class',
+        }),
         selectorContext: InferredSelector = this.createInferredSelector(meta, {
             name: meta.root,
             type: 'class',
@@ -410,8 +451,10 @@ export class StylableTransformer {
             rule,
             this.scopeSelectorAst.bind(this),
             this,
+            selectorNest,
             selectorContext,
-            this.experimentalSelectorResolve
+            this.experimentalSelectorResolve,
+            selectorStr
         );
     }
     public createInferredSelector(
@@ -548,7 +591,7 @@ export class StylableTransformer {
                 });
             }
         } else if (node.type === `nesting`) {
-            context.setNextSelectorScope(context.inferredSelectorContext, node, node.value);
+            context.setNextSelectorScope(context.inferredSelectorNest, node, node.value);
         }
     }
 }
@@ -562,7 +605,8 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         const context = transformer.createSelectorContext(
             meta,
             parseSelectorWithCache(rule.selector, { clone: true }),
-            rule
+            rule,
+            rule.selector
         );
         transformedScopes[rule.selector] = groupCompoundSelectors(
             transformer.scopeSelectorAst(context)
@@ -775,7 +819,8 @@ export class InferredSelector {
                         const internalContext = this.api.createSelectorContext(
                             meta,
                             selectorList,
-                            postcss.rule({ selector: customSelector })
+                            postcss.rule({ selector: customSelector }),
+                            customSelector
                         );
                         internalContext.isStandaloneSelector = isFirstInSelector;
                         const customAstSelectors = this.api.scopeSelectorAst(internalContext);
@@ -883,6 +928,8 @@ class SelectorMultiplier {
 
 export class ScopeContext {
     public transform = true;
+    // source multi-selector input
+    public selectorStr = '';
     public selectorIndex = -1;
     public elements: any[] = [];
     public selectorAstResolveMap = new Map<ImmutableSelectorNode, InferredSelector>();
@@ -904,13 +951,16 @@ export class ScopeContext {
         public originMeta: StylableMeta,
         public resolver: StylableResolver,
         public selectorAst: SelectorList,
-        public rule: postcss.Rule,
+        public rule: postcss.Rule | postcss.AtRule,
         public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
         private transformer: StylableTransformer,
-        parentSelectorScope: InferredSelector,
-        public experimentalSelectorResolve: boolean
+        public inferredSelectorNest: InferredSelector,
+        selectorContext: InferredSelector,
+        public experimentalSelectorResolve: boolean,
+        selectorStr?: string
     ) {
-        this.inferredSelectorContext = new InferredSelector(this.transformer, parentSelectorScope);
+        this.selectorStr = selectorStr || stringifySelector(selectorAst);
+        this.inferredSelectorContext = new InferredSelector(this.transformer, selectorContext);
         this.inferredSelector = new InferredSelector(
             this.transformer,
             this.inferredSelectorContext
@@ -964,6 +1014,7 @@ export class ScopeContext {
             this.rule,
             this.scopeSelectorAst,
             this.transformer,
+            this.inferredSelectorNest,
             selectorContext || this.inferredSelectorContext,
             this.experimentalSelectorResolve
         );
@@ -973,6 +1024,12 @@ export class ScopeContext {
         return ctx;
     }
     public isDuplicateStScopeDiagnostic() {
+        if (this.experimentalSelectorResolve || this.rule.type !== 'rule') {
+            // this check is not required when experimentalSelectorResolve is on
+            // as @st-scope is not flatten at the beginning of the transformation
+            // and diagnostics on it's selector is only checked once.
+            return false;
+        }
         // ToDo: should be removed once st-scope transformation moves to the end of the transform process
         const transformedScope =
             this.originMeta.transformedScopes?.[getRuleScopeSelector(this.rule) || ``];
@@ -1001,14 +1058,20 @@ export class ScopeContext {
  * all changes were moved here to be called at the beginning of the transformer,
  * and should be inlined in the process in the future.
  */
-function prepareAST(context: FeatureTransformContext, ast: postcss.Root) {
+function prepareAST(
+    context: FeatureTransformContext,
+    ast: postcss.Root,
+    experimentalSelectorResolve: boolean
+) {
     // ToDo: inline transformations
     const toRemove: Array<postcss.Node | (() => void)> = [];
     ast.walk((node) => {
         const input = { context, node, toRemove };
         STNamespace.hooks.prepareAST(input);
         STImport.hooks.prepareAST(input);
-        STScope.hooks.prepareAST(input);
+        if (!experimentalSelectorResolve) {
+            STScope.hooks.prepareAST(input);
+        }
         STVar.hooks.prepareAST(input);
         STCustomSelector.hooks.prepareAST(input);
         CSSCustomProperty.hooks.prepareAST(input);

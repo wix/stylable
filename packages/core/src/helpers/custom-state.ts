@@ -692,13 +692,14 @@ export const systemValidators: Record<string, StateParamType> = {
 };
 
 export function validateRuleStateDefinition(
-    rule: postcss.Rule,
+    selector: string,
+    rule: postcss.Rule | postcss.AtRule,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics
 ) {
     const parentRule = rule;
-    const selectorAst = parseSelectorWithCache(parentRule.selector);
+    const selectorAst = parseSelectorWithCache(selector);
     if (selectorAst.length && selectorAst.length === 1) {
         const singleSelectorAst = selectorAst[0];
         const selectorChunk = singleSelectorAst.nodes;
@@ -757,7 +758,7 @@ export function validateStateArgument(
     value: string,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule?: postcss.Rule,
+    rule?: postcss.Node,
     validateDefinition?: boolean,
     validateValue = true
 ) {
@@ -797,7 +798,7 @@ export function transformPseudoClassToCustomState(
     namespace: string,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule?: postcss.Rule
+    rule?: postcss.Node
 ) {
     if (stateDef === null) {
         convertToClass(node).value = createBooleanStateClassName(name, namespace);
@@ -843,7 +844,7 @@ function convertTemplateState(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule: postcss.Rule | undefined,
+    rule: postcss.Node | undefined,
     node: PseudoClass,
     stateParamDef: TemplateStateParsedValue,
     name: string
@@ -875,7 +876,7 @@ function getParamInput(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule: postcss.Rule | undefined,
+    rule: postcss.Node | undefined,
     node: PseudoClass,
     stateParamDef: StateParsedValue,
     name: string
@@ -901,7 +902,7 @@ function validateParam(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule: postcss.Rule | undefined,
+    rule: postcss.Node | undefined,
     stateParamDef: StateParsedValue,
     resolvedParam: string,
     name: string
@@ -945,7 +946,7 @@ function resolveStateValue(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule: postcss.Rule | undefined,
+    rule: postcss.Node | undefined,
     node: PseudoClass,
     stateParamDef: StateParsedValue,
     name: string,
@@ -980,7 +981,7 @@ function transformMappedStateWithParam({
     template: string;
     param: string;
     node: PseudoClass;
-    rule?: postcss.Rule;
+    rule?: postcss.Node;
     diagnostics: Diagnostics;
 }) {
     const targetSelectorStr = template.replace(/\$0/g, param);
@@ -1049,7 +1050,7 @@ function resolveParam(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule?: postcss.Rule,
+    rule?: postcss.Node,
     nodeContent?: string
 ) {
     const defaultStringValue = '';

@@ -83,23 +83,22 @@ export class LangServiceContext {
         const selectorAstResolveMap = new Map<ImmutableSelectorNode, InferredSelector>();
         const selectorNestResolveMap = new Map<SelectorList, InferredSelector>();
         const transformer = (this.stylable as any).createTransformer() as StylableTransformer;
-        let currentAnchor = undefined;
+        let inferredSelectorNest = undefined;
         for (const selector of nestedSelectors) {
             // ToDo(tech-debt): provide an internal selector resolve without the transformer
+            const selectorStr = stringifySelectorAst(selector);
             const selectorContext = transformer.createSelectorContext(
                 this.meta,
                 selector as SelectorList, // doesn't mutate due to `selectorContext.transform = false`
-                postcss.rule({ selector: stringifySelectorAst(selector) })
+                postcss.rule({ selector: selectorStr }),
+                selectorStr,
+                inferredSelectorNest
             );
-            if (currentAnchor) {
-                selectorContext.inferredSelector.set(currentAnchor);
-                selectorContext.inferredSelectorContext.set(currentAnchor);
-            }
             selectorContext.transform = false;
             selectorContext.selectorAstResolveMap = selectorAstResolveMap;
             transformer.scopeSelectorAst(selectorContext);
-            currentAnchor = selectorContext.inferredMultipleSelectors;
-            selectorNestResolveMap.set(selector as SelectorList, currentAnchor);
+            inferredSelectorNest = selectorContext.inferredMultipleSelectors;
+            selectorNestResolveMap.set(selector as SelectorList, inferredSelectorNest);
         }
         // reference interest points
         const locationSelector = this.location.selector;
@@ -111,7 +110,7 @@ export class LangServiceContext {
         );
         return {
             lastInferredSelector:
-                currentAnchor /* fallback to root */ ||
+                inferredSelectorNest /* fallback to root */ ||
                 new InferredSelector(
                     transformer,
                     this.stylable.resolver.resolveExtends(this.meta, 'root')

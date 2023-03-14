@@ -207,6 +207,7 @@ export const hooks = createFeature<{
         if (selectorContext.originMeta === meta && symbol[`-st-states`]) {
             // ToDo: refactor out to transformer validation phase
             validateRuleStateDefinition(
+                selectorContext.selectorStr,
                 selectorContext.rule,
                 context.meta,
                 resolver,
