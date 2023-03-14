@@ -131,7 +131,7 @@ export class StylableTransformer {
     private evaluator: StylableEvaluator;
     public getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
     private directiveNodes: postcss.Declaration[] = [];
-    private experimentalSelectorResolve: boolean;
+    public experimentalSelectorResolve: boolean;
     public containerInferredSelectorMap = new Map<PostcssContainer, InferredSelector>();
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
@@ -460,7 +460,6 @@ export class StylableTransformer {
             this,
             selectorNest,
             selectorContext,
-            this.experimentalSelectorResolve,
             selectorStr
         );
     }
@@ -697,11 +696,15 @@ export class InferredSelector {
     public clone() {
         return new InferredSelector(this.api, this);
     }
+    /**
+     * Adds to the set of inferred resolved CSS
+     * Assumes passes CSSResolved from the same meta/symbol are
+     * the same from the same cached transform process to dedupe them.
+     */
     public add(resolve: InferredResolve[] | InferredSelector) {
         if (resolve instanceof InferredSelector) {
             resolve.resolveSet.forEach((resolve) => this.add(resolve));
         } else {
-            // ToDo: check uniqueness
             this.resolveSet.add(resolve);
         }
     }
@@ -968,7 +971,7 @@ export class ScopeContext {
         private transformer: StylableTransformer,
         public inferredSelectorNest: InferredSelector,
         selectorContext: InferredSelector,
-        public experimentalSelectorResolve: boolean,
+        // public experimentalSelectorResolve: boolean,
         selectorStr?: string
     ) {
         this.selectorStr = selectorStr || stringifySelector(selectorAst);
@@ -978,13 +981,8 @@ export class ScopeContext {
             this.inferredSelectorContext
         );
     }
-    public resetSelectorScope(initialResolve: InferredResolve[]) {
-        this.inferredMultipleSelectors = new InferredSelector(this.transformer);
-        this.inferredSelector = new InferredSelector(this.transformer, initialResolve);
-    }
-    public initNewSelector(initialResolve?: InferredResolve[] | InferredSelector) {
-        this.inferredMultipleSelectors.add(this.inferredSelector);
-        this.inferredSelector = new InferredSelector(this.transformer, initialResolve);
+    get experimentalSelectorResolve() {
+        return this.transformer.experimentalSelectorResolve;
     }
     static legacyElementsTypesMapping: Record<string, string> = {
         pseudo_element: 'pseudo-element',
@@ -1027,8 +1025,7 @@ export class ScopeContext {
             this.scopeSelectorAst,
             this.transformer,
             this.inferredSelectorNest,
-            selectorContext || this.inferredSelectorContext,
-            this.experimentalSelectorResolve
+            selectorContext || this.inferredSelectorContext
         );
         ctx.transform = this.transform;
         ctx.selectorAstResolveMap = this.selectorAstResolveMap;

@@ -781,6 +781,9 @@ describe('features/css-pseudo-class', () => {
 
                             /* @rule(not - no infer) .entry__a:not(.entry__x).entry--shared */
                             .a:not(.x):shared {}
+
+                            /* @rule(not - no infer 2) .entry__a:not(.entry__b).entry--shared */
+                            .a:not(.b):shared {}
                     `,
                     },
                     {
