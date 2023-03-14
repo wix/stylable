@@ -114,6 +114,7 @@ describe('features/css-pseudo-element', () => {
             shouldReportNoDiagnostics(meta);
         });
         it('should transform custom element with multiple selector inside nested pseudo-classes', () => {
+            // ToDo: with experimentalSelectorResolve=true, the nested selector will be transformed inlined
             testStylableCore(`
                 @custom-selector :--part .partA, .partB;
                 @custom-selector :--nestedPart ::part, .partC;

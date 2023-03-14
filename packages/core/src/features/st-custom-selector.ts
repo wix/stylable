@@ -77,6 +77,8 @@ export const hooks = createFeature({
         }
     },
     prepareAST({ context, node, toRemove }) {
+        // called without experimentalSelectorResolve
+        // split selectors & remove definitions
         if (node.type === 'rule' && node.selector.match(CUSTOM_SELECTOR_RE)) {
             node.selector = transformCustomSelectorInline(context.meta, node.selector, {
                 diagnostics: context.diagnostics,
@@ -87,13 +89,6 @@ export const hooks = createFeature({
         }
     },
     transformSelectorNode({ context, selectorContext, node }) {
-        // Handle node resolve mapping for custom-selector.
-        //      Currently custom selectors cannot get to this point in the process,
-        //      due to them being replaced at the beginning of the transform process (prepareAST).
-        //      However by using an internal process to analyze the context of selectors for
-        //      the language service, a source selector can reach this point without the initial
-        //      transform. This code keeps the custom selector untouched, but registers the AST it resolves to.
-        // ToDo: in the future we want to move the custom selector transformation inline, or remove it all together.
         const customSelector =
             node.value.startsWith('--') &&
             STCustomSelector.getCustomSelectorExpended(context.meta, node.value.slice(2));
@@ -106,8 +101,16 @@ export const hooks = createFeature({
                 // ToDo: support multi selector with: "selectorContext.multiSelectorScope"
                 selectorContext.setNextSelectorScope(mappedContext.inferredSelector, node); // doesn't add to the resolved elements
             }
+            if (selectorContext.transform) {
+                selectorContext.transformIntoMultiSelector(node, mappedSelectorAst);
+            }
         }
         return !!customSelector;
+    },
+    transformAtRuleNode({ atRule }) {
+        if (atRule.name === 'custom-selector') {
+            atRule.remove();
+        }
     },
 });
 

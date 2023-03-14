@@ -271,6 +271,13 @@ export class StylableTransformer {
                     resolved: containsResolve,
                     transformer: this,
                 });
+            } else if (name === 'custom-selector') {
+                STCustomSelector.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: containsResolve,
+                    transformer: this,
+                });
             }
         };
         const handleDeclaration = (decl: postcss.Declaration) => {
@@ -562,18 +569,7 @@ export class StylableTransformer {
             if (inferredElement) {
                 context.setNextSelectorScope(inferredElement.inferred, node, node.value);
                 if (context.transform) {
-                    // transform into the first selector
-                    Object.assign(node, inferredElement.selectors[0]);
-                    // keep track of additional selectors for
-                    // duplication at the end of the selector transform
-                    inferredElement.selectors.shift();
-                    const selectorNode = context.selectorAst[context.selectorIndex];
-                    const nodeIndex = selectorNode.nodes.indexOf(node);
-                    context.splitSelectors.addSplitPoint(
-                        context.selectorIndex,
-                        nodeIndex,
-                        inferredElement.selectors
-                    );
+                    context.transformIntoMultiSelector(node, inferredElement.selectors);
                 }
             } else {
                 // first definition of a part in the extends/alias chain
@@ -1039,6 +1035,16 @@ export class ScopeContext {
 
         return ctx;
     }
+    public transformIntoMultiSelector(node: SelectorNode, selectors: SelectorList) {
+        // transform into the first selector
+        Object.assign(node, selectors[0]);
+        // keep track of additional selectors for
+        // duplication at the end of the selector transform
+        selectors.shift();
+        const selectorNode = this.selectorAst[this.selectorIndex];
+        const nodeIndex = selectorNode.nodes.indexOf(node);
+        this.splitSelectors.addSplitPoint(this.selectorIndex, nodeIndex, selectors);
+    }
     public isDuplicateStScopeDiagnostic() {
         if (this.experimentalSelectorResolve || this.rule.type !== 'rule') {
             // this check is not required when experimentalSelectorResolve is on
@@ -1089,7 +1095,9 @@ function prepareAST(
             STScope.hooks.prepareAST(input);
         }
         STVar.hooks.prepareAST(input);
-        STCustomSelector.hooks.prepareAST(input);
+        if (!experimentalSelectorResolve) {
+            STCustomSelector.hooks.prepareAST(input);
+        }
         CSSCustomProperty.hooks.prepareAST(input);
     });
     for (const removeOrNode of toRemove) {

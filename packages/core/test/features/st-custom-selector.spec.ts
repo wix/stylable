@@ -59,6 +59,8 @@ describe('features/st-custom-selector', () => {
         shouldReportNoDiagnostics(meta);
     });
     it('should handle unknown custom selector', () => {
+        // ToDo: remove diagnostic once experimentalSelectorResolve is the default
+        // it will fallback to pseudo-class transform and then to unknown pseudo-class
         testStylableCore(`
             /* @analyze-error(in custom) word(:--unknown) ${customSelectorDiagnostics.UNKNOWN_CUSTOM_SELECTOR(
                 ':--unknown'
