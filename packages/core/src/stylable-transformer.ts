@@ -724,6 +724,7 @@ export class InferredSelector {
         };
         // infer states from  multiple resolved selectors
         for (const resolvedContext of this.resolveSet.values()) {
+            const resolvedFoundNames = new Set<string>();
             resolved: for (const { symbol, meta } of resolvedContext) {
                 const states = symbol[`-st-states`];
                 if (!states) {
@@ -738,8 +739,11 @@ export class InferredSelector {
                 } else {
                     // get all states
                     for (const [name, state] of Object.entries(states)) {
-                        // track state
-                        addInferredState(name, meta, state);
+                        if (!resolvedFoundNames.has(name)) {
+                            // track state
+                            resolvedFoundNames.add(name);
+                            addInferredState(name, meta, state);
+                        }
                     }
                 }
             }
