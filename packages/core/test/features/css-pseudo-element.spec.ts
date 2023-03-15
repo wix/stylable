@@ -14,12 +14,16 @@ describe('features/css-pseudo-element', () => {
             const { sheets } = testStylableCore({
                 'comp.st.css': `
                     @custom-selector :--root-icon .root > .icon;
+                    @custom-selector :--root-with-class .root.icon;
                 `,
                 'entry.st.css': `
                     @st-import Comp from './comp.st.css';
 
                     /* @rule .entry__root .comp__root > .comp__icon */
                     .root Comp::root-icon {}
+
+                    /* @rule .entry__root .comp__root.comp__icon */
+                    .root Comp::root-with-class {}
                 `,
             });
 
@@ -73,6 +77,7 @@ describe('features/css-pseudo-element', () => {
             const { sheets } = testStylableCore({
                 'comp.st.css': `
                     @custom-selector :--multi .a, .b;
+                    @custom-selector :--compound-root .root.a, .root.b;
                 `,
                 'entry.st.css': `
                     @st-import Comp from './comp.st.css';
@@ -82,6 +87,9 @@ describe('features/css-pseudo-element', () => {
 
                     /* @rule(nested) .entry__root .comp__root:has(.comp__a,.comp__b) */
                     .root Comp:has(::multi) {}
+
+                    /* @rule(simple) .entry__root .comp__root.comp__a,.entry__root .comp__root.comp__b */
+                    .root Comp::compound-root {}
                 `,
             });
 
