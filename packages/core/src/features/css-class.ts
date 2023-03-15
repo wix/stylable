@@ -208,7 +208,7 @@ export const hooks = createFeature<{
             // ToDo: refactor out to transformer validation phase
             validateRuleStateDefinition(
                 selectorContext.selectorStr,
-                selectorContext.rule,
+                selectorContext.ruleOrAtRule,
                 context.meta,
                 resolver,
                 context.diagnostics

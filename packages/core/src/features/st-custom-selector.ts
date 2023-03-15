@@ -1,6 +1,5 @@
 import { plugableRecord } from '../helpers/plugable-record';
 import { createFeature } from './feature';
-import * as STCustomSelector from './st-custom-selector';
 import {
     transformCustomSelectorMap,
     transformCustomSelectors,
@@ -91,7 +90,7 @@ export const hooks = createFeature({
     transformSelectorNode({ context, selectorContext, node }) {
         const customSelector =
             node.value.startsWith('--') &&
-            STCustomSelector.getCustomSelectorExpended(context.meta, node.value.slice(2));
+            getCustomSelectorExpended(context.meta, node.value.slice(2));
         if (customSelector) {
             const mappedSelectorAst = parseSelectorWithCache(customSelector, { clone: true });
             const mappedContext = selectorContext.createNestedContext(mappedSelectorAst);

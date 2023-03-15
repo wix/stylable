@@ -190,7 +190,7 @@ export class StylableTransformer {
         stVarOverride: Record<string, string> = this.defaultStVarOverride,
         path: string[] = [],
         mixinTransform = false,
-        selectorContext?: InferredSelector
+        inferredNestSelector?: InferredSelector
     ) {
         if (meta.type !== 'stylable') {
             return;
@@ -332,15 +332,13 @@ export class StylableTransformer {
                 while (currentParent && !this.containerInferredSelectorMap.has(currentParent)) {
                     currentParent = currentParent.parent;
                 }
-                const inferredNestSelector =
-                    (currentParent && this.containerInferredSelectorMap.get(currentParent)) ||
-                    selectorContext;
                 // transform selector
                 const { selector, inferredSelector } = this.scopeSelector(
                     meta,
                     node.selector,
                     node,
-                    inferredNestSelector
+                    (currentParent && this.containerInferredSelectorMap.get(currentParent)) ||
+                        inferredNestSelector
                 );
                 // save results
                 this.containerInferredSelectorMap.set(node, inferredSelector);
@@ -410,7 +408,7 @@ export class StylableTransformer {
     public scopeSelector(
         originMeta: StylableMeta,
         selector: string,
-        rule?: postcss.Rule | postcss.AtRule,
+        selectorNode?: postcss.Rule | postcss.AtRule,
         inferredNestSelector?: InferredSelector,
         unwrapGlobals = false
     ): {
@@ -422,7 +420,7 @@ export class StylableTransformer {
         const context = this.createSelectorContext(
             originMeta,
             parseSelectorWithCache(selector, { clone: true }),
-            rule || postcss.rule({ selector }),
+            selectorNode || postcss.rule({ selector }),
             selector,
             inferredNestSelector
         );
@@ -440,26 +438,23 @@ export class StylableTransformer {
     public createSelectorContext(
         meta: StylableMeta,
         selectorAst: SelectorList,
-        rule: postcss.Rule | postcss.AtRule,
+        selectorNode: postcss.Rule | postcss.AtRule,
         selectorStr?: string,
-        selectorNest: InferredSelector = this.createInferredSelector(meta, {
-            name: meta.root,
-            type: 'class',
-        }),
-        selectorContext: InferredSelector = this.createInferredSelector(meta, {
-            name: meta.root,
-            type: 'class',
-        })
+        selectorNest?: InferredSelector
     ) {
+        const inferredContext = this.createInferredSelector(meta, {
+            name: meta.root,
+            type: 'class',
+        });
         return new ScopeContext(
             meta,
             this.resolver,
             selectorAst,
-            rule,
+            selectorNode,
             this.scopeSelectorAst.bind(this),
             this,
-            selectorNest,
-            selectorContext,
+            selectorNest || inferredContext.clone(),
+            inferredContext,
             selectorStr
         );
     }
@@ -485,8 +480,6 @@ export class StylableTransformer {
                     if (node.type === 'combinator') {
                         if (this.experimentalSelectorResolve) {
                             context.setNextSelectorScope(context.inferredSelectorContext, node);
-                        } else {
-                            context.setCurrentInferredSelectorNode(node);
                         }
                     }
                     continue;
@@ -582,7 +575,7 @@ export class StylableTransformer {
                     this.diagnostics.report(
                         transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT(node.value),
                         {
-                            node: context.rule,
+                            node: context.ruleOrAtRule,
                             word: node.value,
                         }
                     );
@@ -923,19 +916,29 @@ class SelectorMultiplier {
         }
     }
     public duplicateSelectors(targetSelectors: SelectorList) {
-        for (const [selectorIndex, dupIndices] of Object.entries(this.dupIndicesPerSelector)) {
-            const dupOriginList = [targetSelectors[Number(selectorIndex)]];
-            for (const [nodeIndex, selectors] of dupIndices) {
+        // iterate top level selector
+        for (const [selectorIndex, insertionPoints] of Object.entries(this.dupIndicesPerSelector)) {
+            const duplicationList = [targetSelectors[Number(selectorIndex)]];
+            // iterate insertion points
+            for (const [nodeIndex, selectors] of insertionPoints) {
+                // collect the duplicate selectors to be multiplied by following insertion points
                 const added: SelectorList = [];
+                // iterate selectors for insertion point
                 for (const replaceSelector of selectors) {
-                    for (const originSelector of dupOriginList) {
+                    // duplicate selectors and replace selector at insertion point
+                    for (const originSelector of duplicationList) {
                         const dupSelector = { ...originSelector, nodes: [...originSelector.nodes] };
                         dupSelector.nodes[nodeIndex] = replaceSelector;
                         added.push(dupSelector);
                     }
                 }
-                dupOriginList.push(...added);
-                targetSelectors.push(...added);
+                // add the duplicated selectors from insertion point to
+                // the list of selector to be duplicated for following insertion
+                // points and to the target selector list
+                for (const addedSelector of added) {
+                    duplicationList.push(addedSelector);
+                    targetSelectors.push(addedSelector);
+                }
             }
         }
     }
@@ -966,12 +969,11 @@ export class ScopeContext {
         public originMeta: StylableMeta,
         public resolver: StylableResolver,
         public selectorAst: SelectorList,
-        public rule: postcss.Rule | postcss.AtRule,
+        public ruleOrAtRule: postcss.Rule | postcss.AtRule,
         public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
         private transformer: StylableTransformer,
         public inferredSelectorNest: InferredSelector,
         selectorContext: InferredSelector,
-        // public experimentalSelectorResolve: boolean,
         selectorStr?: string
     ) {
         this.selectorStr = selectorStr || stringifySelector(selectorAst);
@@ -1003,9 +1005,6 @@ export class ScopeContext {
         }
         this.inferredSelector.set(resolved);
         this.selectorAstResolveMap.set(node, this.inferredSelector.clone());
-        this.setCurrentInferredSelectorNode(node);
-    }
-    public setCurrentInferredSelectorNode(node: SelectorNode) {
         this.lastInferredSelectorNode = node;
     }
     public isFirstInSelector(node: SelectorNode) {
@@ -1021,7 +1020,7 @@ export class ScopeContext {
             this.originMeta,
             this.resolver,
             selectorAst,
-            this.rule,
+            this.ruleOrAtRule,
             this.scopeSelectorAst,
             this.transformer,
             this.inferredSelectorNest,
@@ -1043,7 +1042,7 @@ export class ScopeContext {
         this.splitSelectors.addSplitPoint(this.selectorIndex, nodeIndex, selectors);
     }
     public isDuplicateStScopeDiagnostic() {
-        if (this.experimentalSelectorResolve || this.rule.type !== 'rule') {
+        if (this.experimentalSelectorResolve || this.ruleOrAtRule.type !== 'rule') {
             // this check is not required when experimentalSelectorResolve is on
             // as @st-scope is not flatten at the beginning of the transformation
             // and diagnostics on it's selector is only checked once.
@@ -1051,7 +1050,7 @@ export class ScopeContext {
         }
         // ToDo: should be removed once st-scope transformation moves to the end of the transform process
         const transformedScope =
-            this.originMeta.transformedScopes?.[getRuleScopeSelector(this.rule) || ``];
+            this.originMeta.transformedScopes?.[getRuleScopeSelector(this.ruleOrAtRule) || ``];
         if (transformedScope && this.selector && this.compoundSelector) {
             const currentCompoundSelector = stringifySelector(this.compoundSelector);
             const i = this.selector.nodes.indexOf(this.compoundSelector);

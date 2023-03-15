@@ -2,8 +2,6 @@ import { createFeature } from './feature';
 import { nativePseudoClasses } from '../native-reserved-lists';
 import * as STCustomState from './st-custom-state';
 import { createDiagnosticReporter } from '../diagnostics';
-// import * as STCustomSelector from './st-custom-selector';
-// import { parseSelectorWithCache } from '../helpers/selector';
 import type { Selector } from '@tokey/css-selector-parser';
 import isVendorPrefixed from 'is-vendor-prefixed';
 
@@ -19,7 +17,7 @@ export const diagnostics = {
 
 export const hooks = createFeature({
     transformSelectorNode({ context, selectorContext }) {
-        const { inferredSelector, node, rule, scopeSelectorAst } = selectorContext;
+        const { inferredSelector, node, ruleOrAtRule, scopeSelectorAst } = selectorContext;
         if (node.type !== 'pseudo_class') {
             return;
         }
@@ -37,7 +35,7 @@ export const hooks = createFeature({
                     inferredState.meta.namespace,
                     context.resolver,
                     context.diagnostics,
-                    rule
+                    ruleOrAtRule
                 );
             }
         }
@@ -105,7 +103,7 @@ export const hooks = createFeature({
             !selectorContext.isDuplicateStScopeDiagnostic()
         ) {
             context.diagnostics.report(diagnostics.UNKNOWN_STATE_USAGE(node.value), {
-                node: rule,
+                node: ruleOrAtRule,
                 word: node.value,
             });
         }
