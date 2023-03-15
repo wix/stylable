@@ -31,7 +31,7 @@ export function getCompletions(context: LangServiceContext): Completion[] {
         nodeAtCursor = null,
         fullSelectorAtCursor = '',
         selectorAtCursor = '',
-        lastInferredSelector,
+        inferredSelectorContext,
     } = selectorContext;
 
     if (selectorAtCursor === '::') {
@@ -40,7 +40,7 @@ export function getCompletions(context: LangServiceContext): Completion[] {
     }
 
     const current = resolvedSelectorChain[resolvedSelectorChain.length - 1] || {
-        inferred: lastInferredSelector,
+        inferred: inferredSelectorContext,
     };
     if (current?.inferred) {
         const pos = context.getPosition();
