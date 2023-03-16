@@ -90,7 +90,7 @@ describe(`features/st-global`, () => {
         expect(actualGlobalRules).to.eql(expectedGlobalRules['global']);
     });
     it('should continue inferred selector after :global()', () => {
-        // ToDo: remove once experimentalSelectorResolve is the default
+        // ToDo: remove once experimentalSelectorInference is the default
         testStylableCore({
             'comp.st.css': `.part {} `,
             'entry.st.css': `
@@ -107,7 +107,7 @@ describe(`features/st-global`, () => {
             `,
         });
     });
-    describe('experimentalSelectorResolve', () => {
+    describe('experimentalSelectorInference', () => {
         it('should set wildcard inferred selector to context after :global()', () => {
             testStylableCore(
                 {
@@ -129,7 +129,7 @@ describe(`features/st-global`, () => {
                         Comp:global(.g) ::class {}
                     `,
                 },
-                { stylableConfig: { experimentalSelectorResolve: true } }
+                { stylableConfig: { experimentalSelectorInference: true } }
             );
         });
     });

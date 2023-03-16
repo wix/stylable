@@ -44,7 +44,7 @@ describe('Stylable postcss transform (General)', () => {
         expect(rule2.nodes[1].toString(), 'color1').to.equal('color: blue');
     });
     it('should continue inferred selector after combinator', () => {
-        // ToDo: remove once experimentalSelectorResolve is the default
+        // ToDo: remove once experimentalSelectorInference is the default
         testStylableCore({
             'comp.st.css': `.part {} `,
             'entry.st.css': `
@@ -63,7 +63,7 @@ describe('Stylable postcss transform (General)', () => {
         });
     });
     it('should continue inferred selector after universal', () => {
-        // ToDo: remove once experimentalSelectorResolve is the default
+        // ToDo: remove once experimentalSelectorInference is the default
         testStylableCore(`
             .root { -st-states: state; }
             .part {}
@@ -76,7 +76,7 @@ describe('Stylable postcss transform (General)', () => {
         `);
     });
 
-    describe('experimentalSelectorResolve', () => {
+    describe('experimentalSelectorInference', () => {
         it('should reset inferred selector after combinator', () => {
             // ToDo: fix extra space before ".entry__class"
             testStylableCore(
@@ -96,7 +96,7 @@ describe('Stylable postcss transform (General)', () => {
                         Comp ::class {}
                     `,
                 },
-                { stylableConfig: { experimentalSelectorResolve: true } }
+                { stylableConfig: { experimentalSelectorInference: true } }
             );
         });
         it('should set inferred selector after universal (to universal)', () => {
@@ -111,7 +111,7 @@ describe('Stylable postcss transform (General)', () => {
                     /* @rule(element) *::part */
                     *::part {}
                 `,
-                { stylableConfig: { experimentalSelectorResolve: true } }
+                { stylableConfig: { experimentalSelectorInference: true } }
             );
         });
     });

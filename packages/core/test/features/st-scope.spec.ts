@@ -53,7 +53,7 @@ describe(`features/st-scope`, () => {
             expect(STGlobal.getGlobalRules(meta)).to.eql(actualGlobalRules['global']);
         });
     });
-    describe('experimentalSelectorResolve', () => {
+    describe('experimentalSelectorInference', () => {
         it('should infer nested selector', () => {
             const { sheets } = testStylableCore(
                 `
@@ -71,7 +71,7 @@ describe(`features/st-scope`, () => {
                         ::b {}
                     }
                 `,
-                { stylableConfig: { experimentalSelectorResolve: true } }
+                { stylableConfig: { experimentalSelectorInference: true } }
             );
 
             const { meta } = sheets['/entry.st.css'];

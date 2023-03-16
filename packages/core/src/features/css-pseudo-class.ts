@@ -44,7 +44,7 @@ export const hooks = createFeature({
         if (node.nodes && !foundCustomState) {
             if (node.value === 'global') {
                 // ignore `:st-global` since it is handled after the mixin transformation
-                if (selectorContext.experimentalSelectorResolve) {
+                if (selectorContext.experimentalSelectorInference) {
                     selectorContext.setNextSelectorScope(
                         [
                             {
@@ -73,7 +73,7 @@ export const hooks = createFeature({
                 // change selector inference
                 if (hasSubSelectors && innerSelectors.length) {
                     if (
-                        selectorContext.experimentalSelectorResolve &&
+                        selectorContext.experimentalSelectorInference &&
                         !node.value.match(/not|has/)
                     ) {
                         // set inferred to subject of nested selectors + prev compound

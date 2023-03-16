@@ -59,7 +59,7 @@ describe('features/st-custom-selector', () => {
         shouldReportNoDiagnostics(meta);
     });
     it('should handle unknown custom selector', () => {
-        // ToDo: remove diagnostic once experimentalSelectorResolve is the default
+        // ToDo: remove diagnostic once experimentalSelectorInference is the default
         // it will fallback to pseudo-class transform and then to unknown pseudo-class
         testStylableCore(`
             /* @analyze-error(in custom) word(:--unknown) ${customSelectorDiagnostics.UNKNOWN_CUSTOM_SELECTOR(
@@ -100,7 +100,7 @@ describe('features/st-custom-selector', () => {
             'only a single unscoped diagnostic for span'
         ).to.eql(1);
     });
-    describe('experimentalSelectorResolve', () => {
+    describe('experimentalSelectorInference', () => {
         it('should transform multiple selector intersection', () => {
             const { sheets } = testStylableCore(
                 {
@@ -127,7 +127,7 @@ describe('features/st-custom-selector', () => {
                 },
                 {
                     stylableConfig: {
-                        experimentalSelectorResolve: true,
+                        experimentalSelectorInference: true,
                     },
                 }
             );
@@ -161,7 +161,7 @@ describe('features/st-custom-selector', () => {
                 },
                 {
                     stylableConfig: {
-                        experimentalSelectorResolve: true,
+                        experimentalSelectorInference: true,
                     },
                 }
             );

@@ -655,7 +655,7 @@ describe('features/css-pseudo-class', () => {
         });
     });
     describe('st-custom-selector', () => {
-        describe('experimentalSelectorResolve', () => {
+        describe('experimentalSelectorInference', () => {
             it('should transform shared state', () => {
                 const { sheets } = testStylableCore(
                     {
@@ -689,7 +689,7 @@ describe('features/css-pseudo-class', () => {
                     },
                     {
                         stylableConfig: {
-                            experimentalSelectorResolve: true,
+                            experimentalSelectorInference: true,
                         },
                     }
                 );
@@ -744,7 +744,7 @@ describe('features/css-pseudo-class', () => {
                     },
                     {
                         stylableConfig: {
-                            experimentalSelectorResolve: true,
+                            experimentalSelectorInference: true,
                         },
                     }
                 );
@@ -788,7 +788,7 @@ describe('features/css-pseudo-class', () => {
                     },
                     {
                         stylableConfig: {
-                            experimentalSelectorResolve: true,
+                            experimentalSelectorInference: true,
                         },
                     }
                 );
@@ -828,7 +828,7 @@ describe('features/css-pseudo-class', () => {
                     },
                     {
                         stylableConfig: {
-                            experimentalSelectorResolve: true,
+                            experimentalSelectorInference: true,
                         },
                     }
                 );

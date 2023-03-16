@@ -106,7 +106,7 @@ export interface TransformerOptions {
     mode?: EnvMode;
     resolverCache?: StylableResolverCache;
     stVarOverride?: Record<string, string>;
-    experimentalSelectorResolve?: boolean;
+    experimentalSelectorInference?: boolean;
 }
 
 export const transformerDiagnostics = {
@@ -131,7 +131,7 @@ export class StylableTransformer {
     private evaluator: StylableEvaluator;
     public getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
     private directiveNodes: postcss.Declaration[] = [];
-    public experimentalSelectorResolve: boolean;
+    public experimentalSelectorInference: boolean;
     public containerInferredSelectorMap = new Map<PostcssContainer, InferredSelector>();
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
@@ -139,7 +139,7 @@ export class StylableTransformer {
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
-        this.experimentalSelectorResolve = options.experimentalSelectorResolve === true;
+        this.experimentalSelectorInference = options.experimentalSelectorInference === true;
         this.resolver = new StylableResolver(
             options.fileProcessor,
             options.requireModule,
@@ -174,7 +174,7 @@ export class StylableTransformer {
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
-        if (!this.experimentalSelectorResolve) {
+        if (!this.experimentalSelectorInference) {
             meta.transformedScopes = validateScopes(this, meta);
         }
         this.transformAst(meta.targetAst, meta, metaExports);
@@ -211,7 +211,7 @@ export class StylableTransformer {
         const transformResolveOptions = {
             context: transformContext,
         };
-        prepareAST(transformContext, ast, this.experimentalSelectorResolve);
+        prepareAST(transformContext, ast, this.experimentalSelectorInference);
 
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
@@ -361,7 +361,7 @@ export class StylableTransformer {
             cssVarsMapping,
             path,
         };
-        if (this.experimentalSelectorResolve) {
+        if (this.experimentalSelectorInference) {
             STScope.hooks.transformLastPass(lastPassParams);
         }
         STMixin.hooks.transformLastPass(lastPassParams);
@@ -478,7 +478,7 @@ export class StylableTransformer {
             for (const node of [...selector.nodes]) {
                 if (node.type !== `compound_selector`) {
                     if (node.type === 'combinator') {
-                        if (this.experimentalSelectorResolve) {
+                        if (this.experimentalSelectorInference) {
                             context.setNextSelectorScope(context.inferredSelectorContext, node);
                         }
                     }
@@ -487,7 +487,7 @@ export class StylableTransformer {
                 context.compoundSelector = node;
                 // loop over each node in a compound selector
                 for (const compoundNode of node.nodes) {
-                    if (compoundNode.type === 'universal' && this.experimentalSelectorResolve) {
+                    if (compoundNode.type === 'universal' && this.experimentalSelectorInference) {
                         context.setNextSelectorScope(
                             [
                                 {
@@ -556,7 +556,7 @@ export class StylableTransformer {
             const inferredElement = inferredSelector.getPseudoElements({
                 isFirstInSelector: context.isFirstInSelector(node),
                 name: node.value,
-                experimentalSelectorResolve: this.experimentalSelectorResolve,
+                experimentalSelectorInference: this.experimentalSelectorInference,
             })[node.value];
             if (inferredElement) {
                 context.setNextSelectorScope(inferredElement.inferred, node, node.value);
@@ -760,11 +760,11 @@ export class InferredSelector {
     }
     public getPseudoElements({
         isFirstInSelector,
-        experimentalSelectorResolve,
+        experimentalSelectorInference,
         name,
     }: {
         isFirstInSelector: boolean;
-        experimentalSelectorResolve: boolean;
+        experimentalSelectorInference: boolean;
         name?: string;
     }) {
         const collectedElements: Record<string, InferredPseudoElement> = {};
@@ -837,7 +837,7 @@ export class InferredSelector {
                         internalContext.isStandaloneSelector = isFirstInSelector;
                         const customAstSelectors = this.api.scopeSelectorAst(internalContext);
                         const inferred =
-                            customAstSelectors.length === 1 || experimentalSelectorResolve
+                            customAstSelectors.length === 1 || experimentalSelectorInference
                                 ? internalContext.inferredMultipleSelectors
                                 : new InferredSelector(this.api, [
                                       {
@@ -990,8 +990,8 @@ export class ScopeContext {
             this.inferredSelectorContext
         );
     }
-    get experimentalSelectorResolve() {
-        return this.transformer.experimentalSelectorResolve;
+    get experimentalSelectorInference() {
+        return this.transformer.experimentalSelectorInference;
     }
     static legacyElementsTypesMapping: Record<string, string> = {
         pseudo_element: 'pseudo-element',
@@ -1049,8 +1049,8 @@ export class ScopeContext {
         this.splitSelectors.addSplitPoint(this.selectorIndex, nodeIndex, selectors);
     }
     public isDuplicateStScopeDiagnostic() {
-        if (this.experimentalSelectorResolve || this.ruleOrAtRule.type !== 'rule') {
-            // this check is not required when experimentalSelectorResolve is on
+        if (this.experimentalSelectorInference || this.ruleOrAtRule.type !== 'rule') {
+            // this check is not required when experimentalSelectorInference is on
             // as @st-scope is not flatten at the beginning of the transformation
             // and diagnostics on it's selector is only checked once.
             return false;
@@ -1086,7 +1086,7 @@ export class ScopeContext {
 function prepareAST(
     context: FeatureTransformContext,
     ast: postcss.Root,
-    experimentalSelectorResolve: boolean
+    experimentalSelectorInference: boolean
 ) {
     // ToDo: inline transformations
     const toRemove: Array<postcss.Node | (() => void)> = [];
@@ -1094,11 +1094,11 @@ function prepareAST(
         const input = { context, node, toRemove };
         STNamespace.hooks.prepareAST(input);
         STImport.hooks.prepareAST(input);
-        if (!experimentalSelectorResolve) {
+        if (!experimentalSelectorInference) {
             STScope.hooks.prepareAST(input);
         }
         STVar.hooks.prepareAST(input);
-        if (!experimentalSelectorResolve) {
+        if (!experimentalSelectorInference) {
             STCustomSelector.hooks.prepareAST(input);
         }
         CSSCustomProperty.hooks.prepareAST(input);

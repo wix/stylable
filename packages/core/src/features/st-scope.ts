@@ -37,7 +37,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         context.meta.scopes.push(atRule);
     },
     prepareAST({ node, toRemove }) {
-        // called without experimentalSelectorResolve
+        // called without experimentalSelectorInference
         // flatten @st-scope before transformation
         if (isStScopeStatement(node)) {
             flattenScope(node);
@@ -58,7 +58,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         }
     },
     transformLastPass({ ast }) {
-        // called with experimentalSelectorResolve=true
+        // called with experimentalSelectorInference=true
         // flatten @st-scope after transformation
         const toRemove = [];
         for (const node of ast.nodes) {

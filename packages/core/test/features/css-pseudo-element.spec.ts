@@ -122,7 +122,7 @@ describe('features/css-pseudo-element', () => {
             shouldReportNoDiagnostics(meta);
         });
         it('should transform custom element with multiple selector inside nested pseudo-classes', () => {
-            // ToDo: with experimentalSelectorResolve=true, the nested selector will be transformed inlined
+            // ToDo: with experimentalSelectorInference=true, the nested selector will be transformed inlined
             testStylableCore(`
                 @custom-selector :--part .partA, .partB;
                 @custom-selector :--nestedPart ::part, .partC;
@@ -226,7 +226,7 @@ describe('features/css-pseudo-element', () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        describe('experimentalSelectorResolve', () => {
+        describe('experimentalSelectorInference', () => {
             it('should transform multiple selector intersection', () => {
                 const { sheets } = testStylableCore(
                     {
@@ -256,7 +256,7 @@ describe('features/css-pseudo-element', () => {
                     },
                     {
                         stylableConfig: {
-                            experimentalSelectorResolve: true,
+                            experimentalSelectorInference: true,
                         },
                     }
                 );
@@ -295,7 +295,7 @@ describe('features/css-pseudo-element', () => {
                     },
                     {
                         stylableConfig: {
-                            experimentalSelectorResolve: true,
+                            experimentalSelectorInference: true,
                         },
                     }
                 );

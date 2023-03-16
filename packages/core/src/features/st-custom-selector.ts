@@ -76,7 +76,7 @@ export const hooks = createFeature({
         }
     },
     prepareAST({ context, node, toRemove }) {
-        // called without experimentalSelectorResolve
+        // called without experimentalSelectorInference
         // split selectors & remove definitions
         if (node.type === 'rule' && node.selector.match(CUSTOM_SELECTOR_RE)) {
             node.selector = transformCustomSelectorInline(context.meta, node.selector, {
@@ -95,7 +95,7 @@ export const hooks = createFeature({
             const mappedSelectorAst = parseSelectorWithCache(customSelector, { clone: true });
             const mappedContext = selectorContext.createNestedContext(mappedSelectorAst);
             selectorContext.scopeSelectorAst(mappedContext);
-            const inferredSelector = selectorContext.experimentalSelectorResolve
+            const inferredSelector = selectorContext.experimentalSelectorInference
                 ? mappedContext.inferredMultipleSelectors
                 : mappedContext.inferredSelector;
             selectorContext.setNextSelectorScope(inferredSelector, node); // doesn't add to the resolved elements
