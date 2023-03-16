@@ -702,7 +702,7 @@ export class InferredSelector {
         }
     }
     public getPseudoClasses({ name: searchedName }: { name?: string } = {}) {
-        const resolvedStates: Record<string, InferredPseudoClass> = {};
+        const collectedStates: Record<string, InferredPseudoClass> = {};
         const resolvedCount: Record<string, number> = {};
         const expectedIntersectionCount = this.resolveSet.size; // ToDo: dec for any types
         const addInferredState = (
@@ -710,9 +710,9 @@ export class InferredSelector {
             meta: StylableMeta,
             state: MappedStates[string]
         ) => {
-            const existing = resolvedStates[name];
+            const existing = collectedStates[name];
             if (!existing) {
-                resolvedStates[name] = { meta, state };
+                collectedStates[name] = { meta, state };
                 resolvedCount[name] = 1;
             } else if (
                 meta === existing.meta &&
@@ -749,14 +749,14 @@ export class InferredSelector {
             }
         }
         // strict: remove states that do not exist on ALL resolved selectors
-        if (expectedIntersectionCount > 1) {
-            for (const name of Object.keys(resolvedStates)) {
-                if (resolvedCount[name] < expectedIntersectionCount) {
-                    delete resolvedStates[name];
-                }
-            }
-        }
-        return resolvedStates;
+        return expectedIntersectionCount > 1
+            ? Object.entries(collectedStates).reduce((resultStates, [name, InferredState]) => {
+                  if (resolvedCount[name] >= expectedIntersectionCount) {
+                      resultStates[name] = InferredState;
+                  }
+                  return resultStates;
+              }, {} as typeof collectedStates)
+            : collectedStates;
     }
     public getPseudoElements({
         isFirstInSelector,
@@ -767,7 +767,7 @@ export class InferredSelector {
         experimentalSelectorResolve: boolean;
         name?: string;
     }) {
-        const resolvedElements: Record<string, InferredPseudoElement> = {};
+        const collectedElements: Record<string, InferredPseudoElement> = {};
         const resolvedCount: Record<string, number> = {};
         const checked: Record<string, Set<string>> = {};
         const expectedIntersectionCount = this.resolveSet.size; // ToDo: dec for any types
@@ -776,7 +776,7 @@ export class InferredSelector {
             inferred: InferredSelector,
             selectors: SelectorList
         ) => {
-            const item = (resolvedElements[name] ||= {
+            const item = (collectedElements[name] ||= {
                 inferred: new InferredSelector(this.api),
                 selectors: [],
             });
@@ -880,14 +880,17 @@ export class InferredSelector {
             }
         }
         // strict: remove elements that do not exist on ALL resolved selectors
-        if (expectedIntersectionCount > 1) {
-            for (const name of Object.keys(resolvedElements)) {
-                if (resolvedCount[name] < expectedIntersectionCount) {
-                    delete resolvedElements[name];
-                }
-            }
-        }
-        return resolvedElements;
+        return expectedIntersectionCount > 1
+            ? Object.entries(collectedElements).reduce(
+                  (resultElements, [name, InferredElement]) => {
+                      if (resolvedCount[name] >= expectedIntersectionCount) {
+                          resultElements[name] = InferredElement;
+                      }
+                      return resultElements;
+                  },
+                  {} as typeof collectedElements
+              )
+            : collectedElements;
     }
     private matchedElement(inferred: InferredSelector): boolean {
         for (const target of this.resolveSet) {
