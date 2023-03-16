@@ -24,6 +24,54 @@ describe('LS: css-pseudo-class', () => {
             expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
         });
     });
+    it('should provide nested context', () => {
+        const { service, carets, assertCompletions } = testLangService(`
+            .root {
+                -st-states: rrr;
+            }
+            .a {
+                -st-states: aaa;
+            }
+            .b {
+                -st-states: bbb;
+            }
+
+            .root {
+                &^nestRoot^ {
+                    .a {
+                        &^nestA^ {
+                            .b {
+                                &^nestB^ {}
+                            }
+                        }
+                    }
+                }
+            }
+
+        `);
+        const entryCarets = carets['/entry.st.css'];
+
+        assertCompletions({
+            message: 'nestRoot',
+            actualList: service.onCompletion('/entry.st.css', entryCarets.nestRoot),
+            expectedList: [{ label: ':rrr' }],
+            unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+        });
+
+        assertCompletions({
+            message: 'nestA',
+            actualList: service.onCompletion('/entry.st.css', entryCarets.nestA),
+            expectedList: [{ label: ':aaa' }],
+            unexpectedList: [{ label: ':rrr' }, { label: ':bbb' }],
+        });
+
+        assertCompletions({
+            message: 'nestB',
+            actualList: service.onCompletion('/entry.st.css', entryCarets.nestB),
+            expectedList: [{ label: ':bbb' }],
+            unexpectedList: [{ label: ':rrr' }, { label: ':aaa' }],
+        });
+    });
     describe('st-scope', () => {
         it('should suggest class custom states (in st-scope params)', () => {
             const { service, carets, assertCompletions } = testLangService(`

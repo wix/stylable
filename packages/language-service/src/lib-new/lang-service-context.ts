@@ -196,7 +196,7 @@ export class LangServiceContext {
         const parents = collectPostcssParents(this.location.base.node);
         const results: ImmutableSelectorList[] = parents
             .map((node) => {
-                return parseSelectorWithCache(this.getSelectorString(node) || '');
+                return parseSelectorWithCache(this.getSelectorString(node) || '', { clone: true });
             })
             .filter((selectors) => selectors.length !== 0);
         if (this.location.selector) {
@@ -212,7 +212,7 @@ export class LangServiceContext {
             // caret is not on a selector: resolve selector from base node
             const selector = this.getSelectorString(this.location.base.node);
             if (selector) {
-                results.push(parseSelectorWithCache(selector));
+                results.push(parseSelectorWithCache(selector, { clone: true }));
             }
             if (this.isInPotentialEmptySelector()) {
                 // caret is on an empty selector
@@ -227,7 +227,7 @@ function collectPostcssParents(node: postcss.AnyNode) {
     const parents: Array<postcss.AnyNode | postcss.Document> = [];
     let current = node.parent;
     while (current) {
-        parents.push(current as postcss.AnyNode);
+        parents.unshift(current as postcss.AnyNode);
         current = current.parent;
     }
     return parents;
