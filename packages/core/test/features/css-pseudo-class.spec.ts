@@ -642,6 +642,7 @@ describe('features/css-pseudo-class', () => {
                     {
                         'entry.st.css': `
                             .x {}
+                            .y { -st-states: shared(string) }
                             .a { -st-states: shared }
                             .b { -st-states: shared }
 
@@ -659,6 +660,14 @@ describe('features/css-pseudo-class', () => {
                                 )} 
                             */
                             .x/**/:is(.a, .b):shared {}
+
+                            /* 
+                                @transform-error(state type differ) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                    'shared'
+                                )} 
+                                @rule(compound missing) .entry__y:is(.entry__a, .entry__b):shared 
+                            */
+                            .y:is(.a, .b):shared {}
                     `,
                     },
                     {
@@ -670,10 +679,76 @@ describe('features/css-pseudo-class', () => {
 
                 const { meta } = sheets['/entry.st.css'];
 
-                const ruleWithComment = meta.targetAst?.nodes[6] as postcss.Rule;
+                const ruleWithComment = meta.targetAst?.nodes[7] as postcss.Rule;
                 expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
                     '.entry__x/**/:is(.entry__a, .entry__b):shared'
                 );
+            });
+            it('should infer complex states', () => {
+                testStylableCore(
+                    {
+                        'entry.st.css': `
+                            .a { -st-states: shared(string(contains(123))) }
+                            .b { -st-states: shared(string(contains(123))) }
+                            .cx { -st-states: shared(string(contains(456))) }
+
+                            /* @rule(match) .entry__a:is(.entry__b).entry---shared-5-x123x */
+                            .a:is(.b):shared(x123x) {}
+
+                            /* 
+                                @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                    'shared'
+                                )} 
+                                @rule(match) .entry__a:is(.entry__x):shared(x123x)
+                            */
+                            .a:is(.x):shared(x123x) {}
+                    `,
+                    },
+                    {
+                        stylableConfig: {
+                            experimentalSelectorInference: true,
+                        },
+                    }
+                );
+            });
+            it('should infer identical global states', () => {
+                const { sheets } = testStylableCore(
+                    {
+                        'a.st.css': `
+                            .root {
+                                -st-states: 
+                                    same('[shared]'),
+                                    sameWithParam('[$0]', enum(one, two));
+                            }
+                        `,
+                        'b.st.css': `
+                            .root {
+                                -st-states: 
+                                    same('[shared]'),
+                                    sameWithParam('[$0]', enum(one, two));
+                            }
+                        `,
+                        'entry.st.css': `
+                            @st-import A from './a.st.css';
+                            @st-import B from './b.st.css';
+
+                            /* @rule(global template) .entry__root :is(.a__root, .b__root)[shared] */
+                            .root :is(A, B):same {}
+
+                            /* @rule(global template+param) .entry__root :is(.a__root, .b__root)[two] */
+                            .root :is(A, B):sameWithParam(two) {}
+                    `,
+                    },
+                    {
+                        stylableConfig: {
+                            experimentalSelectorInference: true,
+                        },
+                    }
+                );
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
             });
         });
     });

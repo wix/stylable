@@ -9,6 +9,7 @@ import {
     parseSelectorWithCache,
     stringifySelector,
 } from './helpers/selector';
+import { isEqual } from './helpers/eql';
 import {
     SelectorNode,
     Selector,
@@ -714,12 +715,18 @@ export class InferredSelector {
             if (!existing) {
                 collectedStates[name] = { meta, state };
                 resolvedCount[name] = 1;
-            } else if (
-                meta === existing.meta &&
-                state === existing.state
-                /* ToDo: should this be duck-typed? */
-            ) {
-                resolvedCount[name]++;
+            } else {
+                const isStatesEql = isEqual(existing.state, state);
+                if (
+                    isStatesEql &&
+                    // states from same meta
+                    (existing.meta === meta ||
+                        // global states
+                        typeof state === 'string' ||
+                        state?.type === 'template')
+                ) {
+                    resolvedCount[name]++;
+                }
             }
         };
         // infer states from  multiple resolved selectors
