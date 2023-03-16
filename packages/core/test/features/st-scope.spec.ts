@@ -1,6 +1,6 @@
 import { STGlobal } from '@stylable/core/dist/features';
 import type { StylableMeta } from '@stylable/core';
-import { testStylableCore, collectAst } from '@stylable/core-test-kit';
+import { testStylableCore, collectAst, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 
@@ -51,6 +51,32 @@ describe(`features/st-scope`, () => {
 
             const actualGlobalRules = collectAst(meta.sourceAst, ['global']);
             expect(STGlobal.getGlobalRules(meta)).to.eql(actualGlobalRules['global']);
+        });
+    });
+    describe('experimentalSelectorInference', () => {
+        it('should infer nested selector', () => {
+            const { sheets } = testStylableCore(
+                `
+                    .a {
+                        -st-states: shared;
+                    }
+                    .b {
+                        -st-states: shared;
+                    }
+                    @st-scope .a, .b {
+                        /* @rule(nest) .entry__a.entry--shared, .entry__b.entry--shared */
+                        &:shared {}
+
+                        /* @rule(context) .entry__a .entry__b, .entry__b .entry__b */
+                        ::b {}
+                    }
+                `,
+                { stylableConfig: { experimentalSelectorInference: true } }
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
         });
     });
     describe('stylable API', () => {

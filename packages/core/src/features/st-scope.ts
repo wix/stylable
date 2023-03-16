@@ -37,10 +37,37 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         context.meta.scopes.push(atRule);
     },
     prepareAST({ node, toRemove }) {
+        // called without experimentalSelectorInference
+        // flatten @st-scope before transformation
         if (isStScopeStatement(node)) {
             flattenScope(node);
             toRemove.push(() => node.replaceWith(node.nodes || []));
         }
+    },
+    transformAtRuleNode({ context: { meta }, atRule, transformer }) {
+        if (isStScopeStatement(atRule)) {
+            const { selector, inferredSelector } = transformer.scopeSelector(
+                meta,
+                atRule.params,
+                atRule
+            );
+            // transform selector in params
+            atRule.params = selector;
+            // track selector context for nested selector nodes
+            transformer.containerInferredSelectorMap.set(atRule, inferredSelector);
+        }
+    },
+    transformLastPass({ ast }) {
+        // called with experimentalSelectorInference=true
+        // flatten @st-scope after transformation
+        const toRemove = [];
+        for (const node of ast.nodes) {
+            if (isStScopeStatement(node)) {
+                flattenScope(node);
+                toRemove.push(() => node.replaceWith(node.nodes || []));
+            }
+        }
+        toRemove.forEach((remove) => remove());
     },
 });
 

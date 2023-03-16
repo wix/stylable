@@ -36,10 +36,15 @@ export interface StylableConfig {
     cssParser?: CssParser;
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
+    experimentalSelectorInference?: boolean;
 }
 
 // This defines and validates known configs for the defaultConfig in 'stylable.config.js
-const globalDefaultSupportedConfigs = new Set(['resolveModule', 'resolveNamespace']);
+const globalDefaultSupportedConfigs = new Set([
+    'resolveModule',
+    'resolveNamespace',
+    'experimentalSelectorInference',
+]);
 export function validateDefaultConfig(defaultConfigObj: any) {
     if (typeof defaultConfigObj === 'object') {
         for (const configName of Object.keys(defaultConfigObj)) {
@@ -83,7 +88,9 @@ export class Stylable {
     protected resolverCache?: StylableResolverCache;
     // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
     protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
+    private experimentalSelectorInference: boolean;
     constructor(config: StylableConfig) {
+        this.experimentalSelectorInference = !!config.experimentalSelectorInference;
         this.projectRoot = config.projectRoot;
         this.fileSystem = config.fileSystem;
         this.requireModule =
@@ -159,6 +166,7 @@ export class Stylable {
             replaceValueHook: this.hooks.replaceValueHook,
             resolverCache: this.resolverCache,
             mode: this.mode,
+            experimentalSelectorInference: this.experimentalSelectorInference,
             ...options,
         });
     }

@@ -1,4 +1,4 @@
-import type { CSSResolve, StylableMeta } from '@stylable/core';
+import type { StylableMeta } from '@stylable/core';
 import {
     MappedStates,
     nativePseudoClasses,
@@ -31,6 +31,7 @@ export function getCompletions(context: LangServiceContext): Completion[] {
         nodeAtCursor = null,
         fullSelectorAtCursor = '',
         selectorAtCursor = '',
+        inferredSelectorContext,
     } = selectorContext;
 
     if (selectorAtCursor === '::') {
@@ -39,15 +40,14 @@ export function getCompletions(context: LangServiceContext): Completion[] {
     }
 
     const current = resolvedSelectorChain[resolvedSelectorChain.length - 1] || {
-        // default to root
-        resolved: context.stylable.resolver.resolveExtends(context.meta, 'root'),
+        inferred: inferredSelectorContext,
     };
-    if (current?.resolved) {
+    if (current?.inferred) {
         const pos = context.getPosition();
-        const states = collectStates(current.resolved);
+        const states = current.inferred.getPseudoClasses();
         const isInStateParen = fullSelectorAtCursor.match(/:(.+)\((\w*)$/);
         const inStateParenDef = isInStateParen && states[isInStateParen?.[1]];
-        const enumParamDef = getEnumParamDef(inStateParenDef?.def);
+        const enumParamDef = getEnumParamDef(inStateParenDef?.state);
         if (enumParamDef) {
             // complete enum options
             const currentParam = isInStateParen![2];
@@ -66,6 +66,7 @@ export function getCompletions(context: LangServiceContext): Completion[] {
                 completions.push(
                     stateEnumCompletion(
                         option,
+                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                         normalizeDefinitionSheetLocation(context.meta, inStateParenDef!.meta),
                         range(pos, { deltaStart: -startDelta })
                     )
@@ -77,9 +78,9 @@ export function getCompletions(context: LangServiceContext): Completion[] {
                 nodeAtCursor,
                 selectorAtCursor,
                 states,
-                current.resolved
+                context.meta
             );
-            for (const [name, { def, meta }] of Object.entries(states)) {
+            for (const [name, { state, meta }] of Object.entries(states)) {
                 const isAlreadyUsed = current['pseudo_class']?.find(
                     (exist) => exist.value === name
                 );
@@ -94,8 +95,8 @@ export function getCompletions(context: LangServiceContext): Completion[] {
                 } else if (!completeFullSelector) {
                     continue;
                 }
-                const stateWithParam = !!(def && typeof def === 'object');
-                const stateType = stateWithParam ? def.type : null;
+                const stateWithParam = !!(state && typeof state === 'object');
+                const stateType = stateWithParam ? state.type : null;
                 const originFile = normalizeDefinitionSheetLocation(context.meta, meta);
                 completions.push(
                     stateCompletion(
@@ -129,7 +130,7 @@ function suggestCompleteStates(
     nodeAtCursor: ImmutableSelectorNode | null,
     selectorAtCursor: string,
     states: StatesDefs,
-    resolveElement: CSSResolve[]
+    contextMeta: StylableMeta
 ) {
     return (
         // prev is not a pseudo class
@@ -139,10 +140,7 @@ function suggestCompleteStates(
         // prev is a known custom state
         !!states[selectorAtCursor.slice(1)] ||
         // prev is a known custom selector
-        !!(
-            resolveElement[0] &&
-            STCustomSelector.getCustomSelector(resolveElement[0].meta, selectorAtCursor.slice(3))
-        )
+        !!STCustomSelector.getCustomSelector(contextMeta, selectorAtCursor.slice(3))
     );
 }
 
@@ -157,26 +155,4 @@ function normalizeDefinitionSheetLocation(originMeta: StylableMeta, defMeta: Sty
     return relPath;
 }
 
-type StatesDefs = Record<string, { def: MappedStates['string']; meta: StylableMeta }>;
-
-function collectStates(resolveChain: CSSResolve[]) {
-    return resolveChain.reduce<StatesDefs>((acc, cur) => {
-        const symbol = cur.symbol;
-        if (symbol._kind === 'class') {
-            const symbolStates = symbol[`-st-states`];
-
-            if (symbolStates) {
-                Object.keys(symbolStates).forEach((k) => {
-                    const symbolStates = symbol[`-st-states`];
-                    if (symbolStates && symbolStates[k] !== undefined) {
-                        acc[k] = {
-                            def: symbolStates[k],
-                            meta: cur.meta,
-                        };
-                    }
-                });
-            }
-        }
-        return acc;
-    }, {});
-}
+type StatesDefs = Record<string, { state: MappedStates['string']; meta: StylableMeta }>;

@@ -69,12 +69,14 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         context: FeatureTransformContext;
         atRule: postcss.AtRule;
         resolved: T['RESOLVED'];
+        // ToDo: move to FeatureTransformContext
+        transformer: StylableTransformer;
     }) => void;
     transformSelectorNode: (options: {
         context: FeatureTransformContext;
         node: T['SELECTOR'];
         selectorContext: Required<ScopeContext>;
-    }) => void;
+    }) => boolean | void;
     transformDeclaration: (options: {
         context: FeatureTransformContext;
         decl: postcss.Declaration;

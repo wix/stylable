@@ -1,4 +1,11 @@
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
+import { transformerDiagnostics } from '@stylable/core/dist/index-internal';
+
+const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 describe('features/css-pseudo-element', () => {
     // ToDo: move rest of tests here once the feature is extracted
@@ -7,12 +14,16 @@ describe('features/css-pseudo-element', () => {
             const { sheets } = testStylableCore({
                 'comp.st.css': `
                     @custom-selector :--root-icon .root > .icon;
+                    @custom-selector :--root-with-class .root.icon;
                 `,
                 'entry.st.css': `
                     @st-import Comp from './comp.st.css';
 
                     /* @rule .entry__root .comp__root > .comp__icon */
                     .root Comp::root-icon {}
+
+                    /* @rule .entry__root .comp__root.comp__icon */
+                    .root Comp::root-with-class {}
                 `,
             });
 
@@ -66,6 +77,7 @@ describe('features/css-pseudo-element', () => {
             const { sheets } = testStylableCore({
                 'comp.st.css': `
                     @custom-selector :--multi .a, .b;
+                    @custom-selector :--compound-root .root.a, .root.b;
                 `,
                 'entry.st.css': `
                     @st-import Comp from './comp.st.css';
@@ -75,6 +87,9 @@ describe('features/css-pseudo-element', () => {
 
                     /* @rule(nested) .entry__root .comp__root:has(.comp__a,.comp__b) */
                     .root Comp:has(::multi) {}
+
+                    /* @rule(simple) .entry__root .comp__root.comp__a,.entry__root .comp__root.comp__b */
+                    .root Comp::compound-root {}
                 `,
             });
 
@@ -107,6 +122,7 @@ describe('features/css-pseudo-element', () => {
             shouldReportNoDiagnostics(meta);
         });
         it('should transform custom element with multiple selector inside nested pseudo-classes', () => {
+            // ToDo: with experimentalSelectorInference=true, the nested selector will be transformed inlined
             testStylableCore(`
                 @custom-selector :--part .partA, .partB;
                 @custom-selector :--nestedPart ::part, .partC;
@@ -209,6 +225,81 @@ describe('features/css-pseudo-element', () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        describe('experimentalSelectorInference', () => {
+            it('should transform multiple selector intersection', () => {
+                const { sheets } = testStylableCore(
+                    {
+                        'base.st.css': `
+                        .shared {}
+                        @custom-selector :--sharedMulti .x, .y;
+                    `,
+                        'a.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root { -st-extends: Base }
+                    `,
+                        'b.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root { -st-extends: Base }
+                    `,
+                        'entry.st.css': `
+                            @st-import A from './a.st.css';
+                            @st-import B from './b.st.css';
+                            @custom-selector :--multi A, B;
+                
+                            /* @rule(shared) .entry__root .a__root .base__shared,.entry__root .b__root .base__shared */
+                            .root::multi::shared {}
+
+                            /* @rule(shared-multi) .entry__root .a__root .base__x,.entry__root .b__root .base__x,.entry__root .a__root .base__y,.entry__root .b__root .base__y */
+                            .root::multi::sharedMulti {}
+                    `,
+                    },
+                    {
+                        stylableConfig: {
+                            experimentalSelectorInference: true,
+                        },
+                    }
+                );
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
+            it('should filter out elements that do not exist or match', () => {
+                testStylableCore(
+                    {
+                        'base.st.css': `
+                    `,
+                        'a.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root { -st-extends: Base }
+                        .onlyInA {}
+                    `,
+                        'b.st.css': `
+                        @st-import Base from './base.st.css';
+                        .root { -st-extends: Base }
+                    `,
+                        'entry.st.css': `
+                            @st-import A from './a.st.css';
+                            @st-import B from './b.st.css';
+                            @custom-selector :--multi A, B;
+                
+                            /* 
+                                @transform-error(exist in 1) word(onlyInA) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                                    `onlyInA`
+                                )}
+                                @rule(exist in 1) .entry__root .a__root::onlyInA,.entry__root .b__root::onlyInA 
+                            */
+                            .root::multi::onlyInA {}
+                    `,
+                    },
+                    {
+                        stylableConfig: {
+                            experimentalSelectorInference: true,
+                        },
+                    }
+                );
+            });
         });
     });
 });

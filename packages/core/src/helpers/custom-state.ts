@@ -692,13 +692,13 @@ export const systemValidators: Record<string, StateParamType> = {
 };
 
 export function validateRuleStateDefinition(
-    rule: postcss.Rule,
+    selector: string,
+    selectorNode: postcss.Rule | postcss.AtRule,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics
 ) {
-    const parentRule = rule;
-    const selectorAst = parseSelectorWithCache(parentRule.selector);
+    const selectorAst = parseSelectorWithCache(selector);
     if (selectorAst.length && selectorAst.length === 1) {
         const singleSelectorAst = selectorAst[0];
         const selectorChunk = singleSelectorAst.nodes;
@@ -719,12 +719,12 @@ export function validateRuleStateDefinition(
                             stateParam.defaultValue || '',
                             resolver,
                             diagnostics,
-                            parentRule,
+                            selectorNode,
                             true,
                             !!stateParam.defaultValue
                         );
                         if (errors) {
-                            rule.walkDecls((decl) => {
+                            selectorNode.walkDecls((decl) => {
                                 if (decl.prop === `-st-states`) {
                                     diagnostics.report(
                                         stateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
@@ -757,12 +757,18 @@ export function validateStateArgument(
     value: string,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule?: postcss.Rule,
+    selectorNode?: postcss.Node,
     validateDefinition?: boolean,
     validateValue = true
 ) {
     const resolvedValidations: StateResult = {
-        res: resolveParam(meta, resolver, diagnostics, rule, value || stateAst.defaultValue),
+        res: resolveParam(
+            meta,
+            resolver,
+            diagnostics,
+            selectorNode,
+            value || stateAst.defaultValue
+        ),
         errors: null,
     };
 
@@ -774,7 +780,7 @@ export function validateStateArgument(
             const { errors } = validator.validate(
                 resolvedValidations.res,
                 stateAst.arguments,
-                resolveParam.bind(null, meta, resolver, diagnostics, rule),
+                resolveParam.bind(null, meta, resolver, diagnostics, selectorNode),
                 !!validateDefinition,
                 validateValue
             );
@@ -790,29 +796,44 @@ export function validateStateArgument(
 // transform
 
 export function transformPseudoClassToCustomState(
-    states: MappedStates,
+    stateDef: MappedStates[string],
     meta: StylableMeta,
     name: string,
-    node: PseudoClass,
+    stateNode: PseudoClass,
     namespace: string,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule?: postcss.Rule
+    selectorNode?: postcss.Node
 ) {
-    const stateDef = states[name];
-
     if (stateDef === null) {
-        convertToClass(node).value = createBooleanStateClassName(name, namespace);
-        delete node.nodes;
+        convertToClass(stateNode).value = createBooleanStateClassName(name, namespace);
+        delete stateNode.nodes;
     } else if (typeof stateDef === 'string') {
         // simply concat global mapped selector - ToDo: maybe change to 'selector'
-        convertToInvalid(node).value = stateDef;
-        delete node.nodes;
+        convertToInvalid(stateNode).value = stateDef;
+        delete stateNode.nodes;
     } else if (typeof stateDef === 'object') {
         if (isTemplateState(stateDef)) {
-            convertTemplateState(meta, resolver, diagnostics, rule, node, stateDef, name);
+            convertTemplateState(
+                meta,
+                resolver,
+                diagnostics,
+                selectorNode,
+                stateNode,
+                stateDef,
+                name
+            );
         } else {
-            resolveStateValue(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
+            resolveStateValue(
+                meta,
+                resolver,
+                diagnostics,
+                selectorNode,
+                stateNode,
+                stateDef,
+                name,
+                namespace
+            );
         }
     }
 }
@@ -845,8 +866,8 @@ function convertTemplateState(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule: postcss.Rule | undefined,
-    node: PseudoClass,
+    selectorNode: postcss.Node | undefined,
+    stateNode: PseudoClass,
     stateParamDef: TemplateStateParsedValue,
     name: string
 ) {
@@ -855,21 +876,21 @@ function convertTemplateState(
         meta,
         resolver,
         diagnostics,
-        rule,
-        node,
+        selectorNode,
+        stateNode,
         paramStateDef,
         name
     );
 
-    validateParam(meta, resolver, diagnostics, rule, paramStateDef, resolvedParam, name);
+    validateParam(meta, resolver, diagnostics, selectorNode, paramStateDef, resolvedParam, name);
 
     const strippedParam = stripQuotation(resolvedParam);
     transformMappedStateWithParam({
         stateName: name,
         template: stateParamDef.template,
         param: strippedParam,
-        node,
-        rule,
+        node: stateNode,
+        selectorNode: selectorNode,
         diagnostics,
     });
 }
@@ -877,23 +898,24 @@ function getParamInput(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule: postcss.Rule | undefined,
-    node: PseudoClass,
+    selectorNode: postcss.Node | undefined,
+    stateNode: PseudoClass,
     stateParamDef: StateParsedValue,
     name: string
 ) {
-    const inputValue = node.nodes && node.nodes.length ? stringifySelector(node.nodes) : ``;
+    const inputValue =
+        stateNode.nodes && stateNode.nodes.length ? stringifySelector(stateNode.nodes) : ``;
     const resolvedParam = resolveParam(
         meta,
         resolver,
         diagnostics,
-        rule,
+        selectorNode,
         inputValue ? inputValue : stateParamDef.defaultValue
     );
 
-    if (rule && !inputValue && !stateParamDef.defaultValue) {
+    if (selectorNode && !inputValue && !stateParamDef.defaultValue) {
         diagnostics.report(stateDiagnostics.NO_STATE_ARGUMENT_GIVEN(name, stateParamDef.type), {
-            node: rule,
+            node: selectorNode,
             word: name,
         });
     }
@@ -903,7 +925,7 @@ function validateParam(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule: postcss.Rule | undefined,
+    selectorNode: postcss.Node | undefined,
     stateParamDef: StateParsedValue,
     resolvedParam: string,
     name: string
@@ -915,7 +937,7 @@ function validateParam(
         stateParamOutput = validator.validate(
             resolvedParam,
             stateParamDef.arguments,
-            resolveParam.bind(null, meta, resolver, diagnostics, rule),
+            resolveParam.bind(null, meta, resolver, diagnostics, selectorNode),
             false,
             true
         );
@@ -928,7 +950,7 @@ function validateParam(
             resolvedParam = stateParamOutput.res;
         }
 
-        if (rule && stateParamOutput.errors) {
+        if (selectorNode && stateParamOutput.errors) {
             diagnostics.report(
                 stateDiagnostics.FAILED_STATE_VALIDATION(
                     name,
@@ -936,7 +958,7 @@ function validateParam(
                     stateParamOutput.errors
                 ),
                 {
-                    node: rule,
+                    node: selectorNode,
                     word: resolvedParam,
                 }
             );
@@ -947,8 +969,8 @@ function resolveStateValue(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule: postcss.Rule | undefined,
-    node: PseudoClass,
+    selectorNode: postcss.Node | undefined,
+    stateNode: PseudoClass,
     stateParamDef: StateParsedValue,
     name: string,
     namespace: string
@@ -957,17 +979,17 @@ function resolveStateValue(
         meta,
         resolver,
         diagnostics,
-        rule,
-        node,
+        selectorNode,
+        stateNode,
         stateParamDef,
         name
     );
 
-    validateParam(meta, resolver, diagnostics, rule, stateParamDef, resolvedParam, name);
+    validateParam(meta, resolver, diagnostics, selectorNode, stateParamDef, resolvedParam, name);
 
     const strippedParam = stripQuotation(resolvedParam);
-    convertToClass(node).value = createStateWithParamClassName(name, namespace, strippedParam);
-    delete node.nodes;
+    convertToClass(stateNode).value = createStateWithParamClassName(name, namespace, strippedParam);
+    delete stateNode.nodes;
 }
 
 function transformMappedStateWithParam({
@@ -975,24 +997,24 @@ function transformMappedStateWithParam({
     template,
     param,
     node,
-    rule,
+    selectorNode,
     diagnostics,
 }: {
     stateName: string;
     template: string;
     param: string;
     node: PseudoClass;
-    rule?: postcss.Rule;
+    selectorNode?: postcss.Node;
     diagnostics: Diagnostics;
 }) {
     const targetSelectorStr = template.replace(/\$0/g, param);
     const selectorAst = parseSelectorWithCache(targetSelectorStr, { clone: true });
     if (selectorAst.length > 1) {
-        if (rule) {
+        if (selectorNode) {
             diagnostics.report(
                 stateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(stateName, targetSelectorStr),
                 {
-                    node: rule,
+                    node: selectorNode,
                 }
             );
         }
@@ -1000,11 +1022,11 @@ function transformMappedStateWithParam({
     } else {
         const firstSelector = selectorAst[0].nodes.find(({ type }) => type !== 'comment');
         if (firstSelector?.type === 'type' || firstSelector?.type === 'universal') {
-            if (rule) {
+            if (selectorNode) {
                 diagnostics.report(
                     stateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(stateName, targetSelectorStr),
                     {
-                        node: rule,
+                        node: selectorNode,
                     }
                 );
             }
@@ -1018,7 +1040,7 @@ function transformMappedStateWithParam({
             }
         }
         if (unexpectedSelector) {
-            if (rule) {
+            if (selectorNode) {
                 switch (unexpectedSelector.type) {
                     case 'combinator':
                         diagnostics.report(
@@ -1027,7 +1049,7 @@ function transformMappedStateWithParam({
                                 targetSelectorStr
                             ),
                             {
-                                node: rule,
+                                node: selectorNode,
                             }
                         );
                         break;
@@ -1035,7 +1057,7 @@ function transformMappedStateWithParam({
                         diagnostics.report(
                             stateDiagnostics.INVALID_SELECTOR(stateName, targetSelectorStr),
                             {
-                                node: rule,
+                                node: selectorNode,
                             }
                         );
                         break;
@@ -1051,10 +1073,10 @@ function resolveParam(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule?: postcss.Rule,
+    node?: postcss.Node,
     nodeContent?: string
 ) {
     const defaultStringValue = '';
     const param = nodeContent || defaultStringValue;
-    return evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics);
+    return evalDeclarationValue(resolver, param, meta, node, undefined, undefined, diagnostics);
 }

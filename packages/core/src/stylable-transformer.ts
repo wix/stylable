@@ -1,11 +1,15 @@
 import isVendorPrefixed from 'is-vendor-prefixed';
-import cloneDeep from 'lodash.clonedeep';
 import * as postcss from 'postcss';
 import type { FileProcessor } from './cached-process-file';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoElements } from './native-reserved-lists';
-import { parseSelectorWithCache, stringifySelector } from './helpers/selector';
+import {
+    createCombinatorSelector,
+    parseSelectorWithCache,
+    stringifySelector,
+} from './helpers/selector';
+import { isEqual } from './helpers/eql';
 import {
     SelectorNode,
     Selector,
@@ -27,7 +31,6 @@ import {
 } from './features';
 import type { StylableMeta } from './stylable-meta';
 import {
-    STSymbol,
     STImport,
     STGlobal,
     STScope,
@@ -50,6 +53,7 @@ import {
 import { validateCustomPropertyName } from './helpers/css-custom-property';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
+import type { MappedStates } from './helpers/custom-state';
 
 export interface ResolvedElement {
     name: string;
@@ -103,6 +107,7 @@ export interface TransformerOptions {
     mode?: EnvMode;
     resolverCache?: StylableResolverCache;
     stVarOverride?: Record<string, string>;
+    experimentalSelectorInference?: boolean;
 }
 
 export const transformerDiagnostics = {
@@ -112,6 +117,8 @@ export const transformerDiagnostics = {
         (name: string) => `unknown pseudo element "${name}"`
     ),
 };
+
+type PostcssContainer = postcss.Container<postcss.ChildNode> | postcss.Document;
 
 export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -123,14 +130,17 @@ export class StylableTransformer {
     public mode: EnvMode;
     private defaultStVarOverride: Record<string, string>;
     private evaluator: StylableEvaluator;
-    private getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
+    public getResolvedSymbols: ReturnType<typeof createSymbolResolverWithCache>;
     private directiveNodes: postcss.Declaration[] = [];
+    public experimentalSelectorInference: boolean;
+    public containerInferredSelectorMap = new Map<PostcssContainer, InferredSelector>();
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
+        this.experimentalSelectorInference = options.experimentalSelectorInference === true;
         this.resolver = new StylableResolver(
             options.fileProcessor,
             options.requireModule,
@@ -165,7 +175,9 @@ export class StylableTransformer {
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
-        meta.transformedScopes = validateScopes(this, meta);
+        if (!this.experimentalSelectorInference) {
+            meta.transformedScopes = validateScopes(this, meta);
+        }
         this.transformAst(meta.targetAst, meta, metaExports);
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
@@ -179,7 +191,7 @@ export class StylableTransformer {
         stVarOverride: Record<string, string> = this.defaultStVarOverride,
         path: string[] = [],
         mixinTransform = false,
-        topNestClassName = ``
+        inferredNestSelector?: InferredSelector
     ) {
         if (meta.type !== 'stylable') {
             return;
@@ -200,7 +212,7 @@ export class StylableTransformer {
         const transformResolveOptions = {
             context: transformContext,
         };
-        prepareAST(transformContext, ast);
+        prepareAST(transformContext, ast, this.experimentalSelectorInference);
 
         const cssClassResolve = CSSClass.hooks.transformResolve(transformResolveOptions);
         const stVarResolve = STVar.hooks.transformResolve(transformResolveOptions);
@@ -216,36 +228,56 @@ export class StylableTransformer {
                     context: transformContext,
                     atRule,
                     resolved: {},
+                    transformer: this,
                 });
             } else if (name === 'property') {
                 CSSCustomProperty.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: cssVarsMapping,
+                    transformer: this,
                 });
             } else if (name === 'keyframes') {
                 CSSKeyframes.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: keyframesResolve,
+                    transformer: this,
                 });
             } else if (name === 'layer') {
                 CSSLayer.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: layerResolve,
+                    transformer: this,
                 });
             } else if (name === 'import') {
                 CSSLayer.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: layerResolve,
+                    transformer: this,
                 });
             } else if (name === 'container') {
                 CSSContains.hooks.transformAtRuleNode({
                     context: transformContext,
                     atRule,
                     resolved: containsResolve,
+                    transformer: this,
+                });
+            } else if (name === 'st-scope') {
+                STScope.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: containsResolve,
+                    transformer: this,
+                });
+            } else if (name === 'custom-selector') {
+                STCustomSelector.hooks.transformAtRuleNode({
+                    context: transformContext,
+                    atRule,
+                    resolved: containsResolve,
+                    transformer: this,
                 });
             }
         };
@@ -296,7 +328,22 @@ export class StylableTransformer {
                 if (isChildOfAtRule(node, 'keyframes')) {
                     return;
                 }
-                node.selector = this.scopeRule(meta, node, topNestClassName);
+                // get context inferred selector
+                let currentParent: PostcssContainer | undefined = node.parent;
+                while (currentParent && !this.containerInferredSelectorMap.has(currentParent)) {
+                    currentParent = currentParent.parent;
+                }
+                // transform selector
+                const { selector, inferredSelector } = this.scopeSelector(
+                    meta,
+                    node.selector,
+                    node,
+                    (currentParent && this.containerInferredSelectorMap.get(currentParent)) ||
+                        inferredNestSelector
+                );
+                // save results
+                this.containerInferredSelectorMap.set(node, inferredSelector);
+                node.selector = selector;
             } else if (node.type === 'atrule') {
                 handleAtRule(node);
             } else if (node.type === 'decl') {
@@ -315,6 +362,9 @@ export class StylableTransformer {
             cssVarsMapping,
             path,
         };
+        if (this.experimentalSelectorInference) {
+            STScope.hooks.transformLastPass(lastPassParams);
+        }
         STMixin.hooks.transformLastPass(lastPassParams);
         if (!mixinTransform) {
             STGlobal.hooks.transformLastPass(lastPassParams);
@@ -356,27 +406,24 @@ export class StylableTransformer {
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector).elements;
     }
-    public scopeRule(
-        meta: StylableMeta,
-        rule: postcss.Rule,
-        topNestClassName?: string,
-        unwrapGlobals?: boolean
-    ): string {
-        return this.scopeSelector(meta, rule.selector, rule, topNestClassName, unwrapGlobals)
-            .selector;
-    }
     public scopeSelector(
         originMeta: StylableMeta,
         selector: string,
-        rule?: postcss.Rule,
-        topNestClassName?: string,
+        selectorNode?: postcss.Rule | postcss.AtRule,
+        inferredNestSelector?: InferredSelector,
         unwrapGlobals = false
-    ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorList } {
+    ): {
+        selector: string;
+        elements: ResolvedElement[][];
+        targetSelectorAst: SelectorList;
+        inferredSelector: InferredSelector;
+    } {
         const context = this.createSelectorContext(
             originMeta,
             parseSelectorWithCache(selector, { clone: true }),
-            rule || postcss.rule({ selector }),
-            topNestClassName
+            selectorNode || postcss.rule({ selector }),
+            selector,
+            inferredNestSelector
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
         if (unwrapGlobals) {
@@ -386,39 +433,43 @@ export class StylableTransformer {
             targetSelectorAst,
             selector: stringifySelector(targetSelectorAst),
             elements: context.elements,
+            inferredSelector: context.inferredMultipleSelectors,
         };
     }
     public createSelectorContext(
         meta: StylableMeta,
         selectorAst: SelectorList,
-        rule: postcss.Rule,
-        topNestClassName?: string
+        selectorNode: postcss.Rule | postcss.AtRule,
+        selectorStr?: string,
+        selectorNest?: InferredSelector
     ) {
+        const inferredContext = this.createInferredSelector(meta, {
+            name: meta.root,
+            type: 'class',
+        });
         return new ScopeContext(
             meta,
             this.resolver,
             selectorAst,
-            rule,
+            selectorNode,
             this.scopeSelectorAst.bind(this),
-            topNestClassName
+            this,
+            selectorNest || inferredContext.clone(),
+            inferredContext,
+            selectorStr
         );
     }
+    public createInferredSelector(
+        meta: StylableMeta,
+        { name, type }: { name: string; type: 'class' | 'element' }
+    ) {
+        const resolvedSymbols = this.getResolvedSymbols(meta);
+        const resolved = resolvedSymbols[type][name];
+        return new InferredSelector(this, resolved);
+    }
     public scopeSelectorAst(context: ScopeContext): SelectorList {
-        const { originMeta, selectorAst } = context;
-
         // group compound selectors: .a.b .c:hover, a .c:hover -> [[[.a.b], [.c:hover]], [[.a], [.c:hover]]]
-        const selectorList = groupCompoundSelectors(selectorAst);
-        // resolve meta classes and elements
-        const resolvedSymbols = this.getResolvedSymbols(originMeta);
-        // set stylesheet root as the global anchor
-        if (!context.currentAnchor) {
-            context.initRootAnchor({
-                name: originMeta.root,
-                type: 'class',
-                resolved: resolvedSymbols.class[originMeta.root],
-            });
-        }
-        const startedAnchor = context.currentAnchor!;
+        const selectorList = groupCompoundSelectors(context.selectorAst);
         // loop over selectors
         for (const selector of selectorList) {
             context.elements.push([]);
@@ -427,19 +478,41 @@ export class StylableTransformer {
             // loop over nodes
             for (const node of [...selector.nodes]) {
                 if (node.type !== `compound_selector`) {
+                    if (node.type === 'combinator') {
+                        if (this.experimentalSelectorInference) {
+                            context.setNextSelectorScope(context.inferredSelectorContext, node);
+                        }
+                    }
                     continue;
                 }
                 context.compoundSelector = node;
                 // loop over each node in a compound selector
                 for (const compoundNode of node.nodes) {
+                    if (compoundNode.type === 'universal' && this.experimentalSelectorInference) {
+                        context.setNextSelectorScope(
+                            [
+                                {
+                                    _kind: 'css',
+                                    meta: context.originMeta,
+                                    symbol: { _kind: 'element', name: '*' },
+                                },
+                            ],
+                            node
+                        );
+                    }
                     context.node = compoundNode;
                     // transform node
                     this.handleCompoundNode(context as Required<ScopeContext>);
                 }
             }
+            // add inferred selector end to multiple selector
+            context.inferredMultipleSelectors.add(context.inferredSelector);
             if (selectorList.length - 1 > context.selectorIndex) {
-                // reset current anchor
-                context.initRootAnchor(startedAnchor);
+                // reset current anchor for all except last selector
+                context.inferredSelector = new InferredSelector(
+                    this,
+                    context.inferredSelectorContext
+                );
             }
         }
         // backwards compatibility for elements - empty selector still have an empty first target
@@ -447,15 +520,14 @@ export class StylableTransformer {
             context.elements.push([]);
         }
         const targetAst = splitCompoundSelectors(selectorList);
-        context.additionalSelectors.forEach((addSelector) => targetAst.push(addSelector()));
+        context.splitSelectors.duplicateSelectors(targetAst);
         for (let i = 0; i < targetAst.length; i++) {
-            selectorAst[i] = targetAst[i];
+            context.selectorAst[i] = targetAst[i];
         }
         return targetAst;
     }
     private handleCompoundNode(context: Required<ScopeContext>) {
-        const { currentAnchor, node, originMeta, topNestClassName } = context;
-        const resolvedSymbols = this.getResolvedSymbols(originMeta);
+        const { inferredSelector, node, originMeta } = context;
         const transformerContext = {
             meta: originMeta,
             diagnostics: this.diagnostics,
@@ -482,67 +554,19 @@ export class StylableTransformer {
                 // should stylable warn?
                 return;
             }
-            const len = currentAnchor.resolved.length;
-            const lookupStartingPoint = len === 1 /* no extends */ ? 0 : 1;
-
-            let resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>> | undefined;
-            for (let i = lookupStartingPoint; i < len; i++) {
-                const { symbol, meta } = currentAnchor.resolved[i];
-                if (!symbol[`-st-root`]) {
-                    continue;
-                }
-                const isFirstInSelector =
-                    context.selectorAst[context.selectorIndex].nodes[0] === node;
-                const customSelector = STCustomSelector.getCustomSelectorExpended(meta, node.value);
-                if (customSelector) {
-                    this.handleCustomSelector(
-                        customSelector,
-                        meta,
-                        context,
-                        node.value,
-                        node,
-                        isFirstInSelector
-                    );
-                    return;
-                }
-
-                const requestedPart = CSSClass.get(meta, node.value);
-
-                if (symbol.alias || !requestedPart) {
-                    // skip alias since they cannot add parts
-                    continue;
-                }
-
-                resolved = this.getResolvedSymbols(meta).class[node.value];
-
-                // first definition of a part in the extends/alias chain
-                context.setCurrentAnchor({
-                    name: node.value,
-                    type: 'pseudo-element',
-                    resolved,
-                });
-                context.setNodeResolve(node, resolved);
-
-                const resolvedPart = getOriginDefinition(resolved);
-
+            const inferredElement = inferredSelector.getPseudoElements({
+                isFirstInSelector: context.isFirstInSelector(node),
+                name: node.value,
+                experimentalSelectorInference: this.experimentalSelectorInference,
+            })[node.value];
+            if (inferredElement) {
+                context.setNextSelectorScope(inferredElement.inferred, node, node.value);
                 if (context.transform) {
-                    if (!resolvedPart.symbol[`-st-root`] && !isFirstInSelector) {
-                        // insert nested combinator before internal custom element
-                        context.insertDescendantCombinatorBeforePseudoElement();
-                    }
-                    CSSClass.namespaceClass(resolvedPart.meta, resolvedPart.symbol, node);
+                    context.transformIntoMultiSelector(node, inferredElement.selectors);
                 }
-                break;
-            }
-
-            if (!resolved) {
+            } else {
                 // first definition of a part in the extends/alias chain
-                context.setCurrentAnchor({
-                    name: node.value,
-                    type: 'pseudo-element',
-                    resolved: [],
-                });
-                context.setNodeResolve(node, []);
+                context.setNextSelectorScope([], node, node.value);
 
                 if (
                     !nativePseudoElements.includes(node.value) &&
@@ -552,87 +576,27 @@ export class StylableTransformer {
                     this.diagnostics.report(
                         transformerDiagnostics.UNKNOWN_PSEUDO_ELEMENT(node.value),
                         {
-                            node: context.rule,
+                            node: context.ruleOrAtRule,
                             word: node.value,
                         }
                     );
                 }
             }
         } else if (node.type === 'pseudo_class') {
-            CSSPseudoClass.hooks.transformSelectorNode({
+            const isCustomSelector = STCustomSelector.hooks.transformSelectorNode({
                 context: transformerContext,
                 selectorContext: context,
                 node,
             });
-        } else if (node.type === `nesting`) {
-            if (context.nestingSelectorAnchor) {
-                context.setCurrentAnchor(context.nestingSelectorAnchor);
-                context.setNodeResolve(node, context.nestingSelectorAnchor.resolved);
-            } else {
-                /**
-                 * although it is always assumed to be class symbol, the get is done from
-                 * the general `st-symbol` feature because the actual symbol can
-                 * be a type-element symbol that is actually an imported root in a mixin
-                 */
-                const origin = STSymbol.get(originMeta, topNestClassName || originMeta.root) as
-                    | ClassSymbol
-                    | ElementSymbol; // ToDo: handle other cases
-                context.setCurrentAnchor({
-                    name: origin.name,
-                    type: origin._kind,
-                    resolved: resolvedSymbols[origin._kind][origin.name],
+            if (!isCustomSelector) {
+                CSSPseudoClass.hooks.transformSelectorNode({
+                    context: transformerContext,
+                    selectorContext: context,
+                    node,
                 });
-                context.setNodeResolve(node, resolvedSymbols[origin._kind][origin.name]);
             }
-        }
-    }
-    private handleCustomSelector(
-        customSelector: string,
-        meta: StylableMeta,
-        context: ScopeContext,
-        name: string,
-        node: SelectorNode,
-        isFirstInSelector: boolean
-    ) {
-        const selectorList = parseSelectorWithCache(customSelector, { clone: true });
-        const hasSingleSelector = selectorList.length === 1;
-        const internalContext = new ScopeContext(
-            meta,
-            this.resolver,
-            removeFirstRootInFirstCompound(selectorList, meta),
-            context.rule,
-            this.scopeSelectorAst.bind(this)
-        );
-        const customAstSelectors = this.scopeSelectorAst(internalContext);
-        if (!isFirstInSelector) {
-            customAstSelectors.forEach(setSingleSpaceOnSelectorLeft);
-        }
-        if (hasSingleSelector && internalContext.currentAnchor) {
-            context.setCurrentAnchor({
-                name,
-                type: 'pseudo-element',
-                resolved: internalContext.currentAnchor.resolved,
-            });
-            context.setNodeResolve(node, internalContext.currentAnchor.resolved);
-        } else {
-            // unknown context due to multiple selectors
-            context.setCurrentAnchor({
-                name,
-                type: 'pseudo-element',
-                resolved: anyElementAnchor(meta).resolved,
-            });
-            context.setNodeResolve(node, anyElementAnchor(meta).resolved);
-        }
-        if (context.transform) {
-            Object.assign(node, customAstSelectors[0]);
-        }
-        // first one handled inline above
-        for (let i = 1; i < customAstSelectors.length; i++) {
-            const selectorNode = context.selectorAst[context.selectorIndex];
-            const nodeIndex = selectorNode.nodes.indexOf(node);
-            context.additionalSelectors.push(
-                lazyCreateSelector(customAstSelectors[i], selectorNode, nodeIndex)
-            );
+        } else if (node.type === `nesting`) {
+            context.setNextSelectorScope(context.inferredSelectorNest, node, node.value);
         }
     }
 }
@@ -643,12 +607,11 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         const len = transformer.diagnostics.reports.length;
         const rule = postcss.rule({ selector: scope.params });
 
-        const context = new ScopeContext(
+        const context = transformer.createSelectorContext(
             meta,
-            transformer.resolver,
             parseSelectorWithCache(rule.selector, { clone: true }),
             rule,
-            transformer.scopeSelectorAst.bind(transformer)
+            rule.selector
         );
         transformedScopes[rule.selector] = groupCompoundSelectors(
             transformer.scopeSelectorAst(context)
@@ -673,147 +636,435 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
     return transformedScopes;
 }
 
-function removeFirstRootInFirstCompound(selectorList: SelectorList, meta: StylableMeta) {
-    const compounded = groupCompoundSelectors(selectorList);
-    for (const selector of compounded) {
-        const first = selector.nodes.find(({ type }) => type === `compound_selector`);
-        if (first && first.type === `compound_selector`) {
-            first.nodes = first.nodes.filter((node) => {
-                return !(node.type === 'class' && node.value === meta.root);
-            });
-        }
+function removeFirstRootInFirstCompound(selector: Selector, meta: StylableMeta) {
+    let hadRoot = false;
+    const compoundedSelector = groupCompoundSelectors(selector);
+    const first = compoundedSelector.nodes.find(
+        ({ type }) => type === `compound_selector`
+    ) as CompoundSelector;
+    if (first) {
+        first.nodes = first.nodes.filter((node) => {
+            if (node.type === 'class' && node.value === meta.root) {
+                hadRoot = true;
+                return false;
+            }
+            return true;
+        });
     }
-    return splitCompoundSelectors(compounded);
+    return { selector: splitCompoundSelectors(compoundedSelector), hadRoot };
 }
 
-function setSingleSpaceOnSelectorLeft(n: Selector) {
-    n.before = ` `;
-    let parent: Selector = n;
-    let nextLeft: SelectorNode | undefined = n.nodes[0];
-    while (nextLeft) {
-        if (`before` in nextLeft) {
-            nextLeft.before = ``;
+type SelectorSymbol = ClassSymbol | ElementSymbol;
+type InferredResolve = CSSResolve<SelectorSymbol>;
+type InferredPseudoElement = {
+    inferred: InferredSelector;
+    selectors: SelectorList;
+};
+type InferredPseudoClass = {
+    meta: StylableMeta;
+    state: MappedStates[string];
+};
+export class InferredSelector {
+    protected resolveSet = new Set<InferredResolve[]>();
+    constructor(
+        private api: Pick<
+            StylableTransformer,
+            'getResolvedSymbols' | 'createSelectorContext' | 'scopeSelectorAst'
+        >,
+        resolve?: InferredResolve[] | InferredSelector
+    ) {
+        if (resolve) {
+            this.add(resolve);
         }
-        if (nextLeft.type === `selector`) {
-            nextLeft = nextLeft.nodes[0];
-            parent = nextLeft as Selector;
-        } else if (nextLeft.type === `combinator` && nextLeft.combinator === `space`) {
-            parent.nodes.shift();
-            nextLeft = parent.nodes[0];
-        } else {
+    }
+    public isEmpty() {
+        return this.resolveSet.size === 0;
+    }
+    public set(resolve: InferredResolve[] | InferredSelector) {
+        if (resolve === this) {
             return;
         }
+        this.resolveSet.clear();
+        this.add(resolve);
+    }
+    public clone() {
+        return new InferredSelector(this.api, this);
+    }
+    /**
+     * Adds to the set of inferred resolved CSS
+     * Assumes passes CSSResolved from the same meta/symbol are
+     * the same from the same cached transform process to dedupe them.
+     */
+    public add(resolve: InferredResolve[] | InferredSelector) {
+        if (resolve instanceof InferredSelector) {
+            resolve.resolveSet.forEach((resolve) => this.add(resolve));
+        } else {
+            this.resolveSet.add(resolve);
+        }
+    }
+    public getPseudoClasses({ name: searchedName }: { name?: string } = {}) {
+        const collectedStates: Record<string, InferredPseudoClass> = {};
+        const resolvedCount: Record<string, number> = {};
+        const expectedIntersectionCount = this.resolveSet.size; // ToDo: dec for any types
+        const addInferredState = (
+            name: string,
+            meta: StylableMeta,
+            state: MappedStates[string]
+        ) => {
+            const existing = collectedStates[name];
+            if (!existing) {
+                collectedStates[name] = { meta, state };
+                resolvedCount[name] = 1;
+            } else {
+                const isStatesEql = isEqual(existing.state, state);
+                if (
+                    isStatesEql &&
+                    // states from same meta
+                    (existing.meta === meta ||
+                        // global states
+                        typeof state === 'string' ||
+                        state?.type === 'template')
+                ) {
+                    resolvedCount[name]++;
+                }
+            }
+        };
+        // infer states from  multiple resolved selectors
+        for (const resolvedContext of this.resolveSet.values()) {
+            const resolvedFoundNames = new Set<string>();
+            resolved: for (const { symbol, meta } of resolvedContext) {
+                const states = symbol[`-st-states`];
+                if (!states) {
+                    continue;
+                }
+                if (searchedName) {
+                    if (Object.hasOwnProperty.call(states, searchedName)) {
+                        // track state
+                        addInferredState(searchedName, meta, states[searchedName]);
+                        break resolved;
+                    }
+                } else {
+                    // get all states
+                    for (const [name, state] of Object.entries(states)) {
+                        if (!resolvedFoundNames.has(name)) {
+                            // track state
+                            resolvedFoundNames.add(name);
+                            addInferredState(name, meta, state);
+                        }
+                    }
+                }
+            }
+        }
+        // strict: remove states that do not exist on ALL resolved selectors
+        return expectedIntersectionCount > 1
+            ? Object.entries(collectedStates).reduce((resultStates, [name, InferredState]) => {
+                  if (resolvedCount[name] >= expectedIntersectionCount) {
+                      resultStates[name] = InferredState;
+                  }
+                  return resultStates;
+              }, {} as typeof collectedStates)
+            : collectedStates;
+    }
+    public getPseudoElements({
+        isFirstInSelector,
+        experimentalSelectorInference,
+        name,
+    }: {
+        isFirstInSelector: boolean;
+        experimentalSelectorInference: boolean;
+        name?: string;
+    }) {
+        const collectedElements: Record<string, InferredPseudoElement> = {};
+        const resolvedCount: Record<string, number> = {};
+        const checked: Record<string, Set<string>> = {};
+        const expectedIntersectionCount = this.resolveSet.size; // ToDo: dec for any types
+        const addInferredElement = (
+            name: string,
+            inferred: InferredSelector,
+            selectors: SelectorList
+        ) => {
+            const item = (collectedElements[name] ||= {
+                inferred: new InferredSelector(this.api),
+                selectors: [],
+            });
+            // check inferred matching
+            if (!item.inferred.matchedElement(inferred)) {
+                // ToDo: bailout fast
+                return;
+            }
+            // add match
+            resolvedCount[name]++;
+            item.inferred.add(inferred);
+            item.selectors.push(...selectors);
+        };
+        // infer elements from  multiple resolved selectors
+        for (const resolvedContext of this.resolveSet.values()) {
+            /**
+             * search for elements in each resolved selector.
+             * start at 1 for extended symbols to prefer inherited elements over local
+             */
+            const startIndex = resolvedContext.length === 1 ? 0 : 1;
+            resolved: for (let i = startIndex; i < resolvedContext.length; i++) {
+                const { symbol, meta } = resolvedContext[i];
+                if (!symbol['-st-root'] || symbol.alias) {
+                    // non-root & alias classes don't have parts: bailout
+                    continue;
+                }
+                if (name) {
+                    resolvedCount[name] ??= 0;
+                    checked[name] ||= new Set();
+                    const uniqueId = meta.source + '::' + name;
+                    if (checked[name].has(uniqueId)) {
+                        resolvedCount[name]++;
+                        continue;
+                    }
+                    checked[name].add(uniqueId);
+                    // prefer custom selector
+                    const customSelector = STCustomSelector.getCustomSelectorExpended(meta, name);
+                    if (customSelector) {
+                        const selectorList = parseSelectorWithCache(customSelector, {
+                            clone: true,
+                        });
+                        selectorList.forEach((selector) => {
+                            const r = removeFirstRootInFirstCompound(selector, meta);
+                            selector.nodes = r.selector.nodes;
+                            selector.before = '';
+                            if (!r.hadRoot && !isFirstInSelector) {
+                                selector.nodes.unshift(
+                                    createCombinatorSelector({ combinator: 'space' })
+                                );
+                            }
+                        });
+                        const internalContext = this.api.createSelectorContext(
+                            meta,
+                            selectorList,
+                            postcss.rule({ selector: customSelector }),
+                            customSelector
+                        );
+                        internalContext.isStandaloneSelector = isFirstInSelector;
+                        const customAstSelectors = this.api.scopeSelectorAst(internalContext);
+                        const inferred =
+                            customAstSelectors.length === 1 || experimentalSelectorInference
+                                ? internalContext.inferredMultipleSelectors
+                                : new InferredSelector(this.api, [
+                                      {
+                                          _kind: 'css',
+                                          meta,
+                                          symbol: { _kind: 'element', name: '*' },
+                                      },
+                                  ]);
+
+                        addInferredElement(name, inferred, customAstSelectors);
+                        break resolved;
+                    }
+                    // matching class part
+                    const classSymbol = CSSClass.get(meta, name);
+                    if (classSymbol) {
+                        const resolvedPart = this.api.getResolvedSymbols(meta).class[name];
+                        const resolvedBaseSymbol = getOriginDefinition(resolvedPart);
+                        const nodes: SelectorNode[] = [];
+                        // insert descendant combinator before internal custom element
+                        if (!resolvedBaseSymbol.symbol[`-st-root`] && !isFirstInSelector) {
+                            nodes.push(createCombinatorSelector({ combinator: 'space' }));
+                        }
+                        // create part class
+                        const classNode = {} as SelectorNode;
+                        CSSClass.namespaceClass(
+                            resolvedBaseSymbol.meta,
+                            resolvedBaseSymbol.symbol,
+                            classNode
+                        );
+                        nodes.push(classNode);
+
+                        addInferredElement(name, new InferredSelector(this.api, resolvedPart), [
+                            { type: 'selector', after: '', before: '', end: 0, start: 0, nodes },
+                        ]);
+                        break resolved;
+                    }
+                } else {
+                    // ToDo: implement get all elements
+                }
+            }
+        }
+        // strict: remove elements that do not exist on ALL resolved selectors
+        return expectedIntersectionCount > 1
+            ? Object.entries(collectedElements).reduce(
+                  (resultElements, [name, InferredElement]) => {
+                      if (resolvedCount[name] >= expectedIntersectionCount) {
+                          resultElements[name] = InferredElement;
+                      }
+                      return resultElements;
+                  },
+                  {} as typeof collectedElements
+              )
+            : collectedElements;
+    }
+    private matchedElement(inferred: InferredSelector): boolean {
+        for (const target of this.resolveSet) {
+            const targetBaseElementSymbol = getOriginDefinition(target);
+            for (const tested of inferred.resolveSet) {
+                const testedBaseElementSymbol = getOriginDefinition(tested);
+                if (targetBaseElementSymbol !== testedBaseElementSymbol) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    // function to temporarily handle single resolved selector type while refactoring
+    //      ToDo: remove temporarily single resolve
+    getSingleResolve(): InferredResolve[] {
+        if (this.resolveSet.size !== 1) {
+            return [];
+        }
+        return this.resolveSet.values().next().value;
     }
 }
 
-function anyElementAnchor(meta: StylableMeta): {
-    type: 'class' | 'element';
-    name: string;
-    resolved: Array<CSSResolve<ElementSymbol>>;
-} {
-    return {
-        type: 'element',
-        name: '*',
-        resolved: [{ _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } }],
-    };
-}
-
-function lazyCreateSelector(
-    customElementChunk: Selector,
-    selectorNode: Selector,
-    nodeIndex: number
-): () => Selector {
-    if (nodeIndex === -1) {
-        throw new Error('not supported inside nested classes');
+class SelectorMultiplier {
+    private dupIndicesPerSelector: [nodeIndex: number, selectors: SelectorList][][] = [];
+    public addSplitPoint(selectorIndex: number, nodeIndex: number, selectors: SelectorList) {
+        if (selectors.length) {
+            this.dupIndicesPerSelector[selectorIndex] ||= [];
+            this.dupIndicesPerSelector[selectorIndex].push([nodeIndex, selectors]);
+        }
     }
-    return (): Selector => {
-        const clone = cloneDeep(selectorNode);
-        (clone.nodes[nodeIndex] as any).nodes = customElementChunk.nodes;
-        return clone;
-    };
-}
-
-interface ScopeAnchor {
-    type: 'class' | 'element' | 'pseudo-element';
-    name: string;
-    resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
+    public duplicateSelectors(targetSelectors: SelectorList) {
+        // iterate top level selector
+        for (const [selectorIndex, insertionPoints] of Object.entries(this.dupIndicesPerSelector)) {
+            const duplicationList = [targetSelectors[Number(selectorIndex)]];
+            // iterate insertion points
+            for (const [nodeIndex, selectors] of insertionPoints) {
+                // collect the duplicate selectors to be multiplied by following insertion points
+                const added: SelectorList = [];
+                // iterate selectors for insertion point
+                for (const replaceSelector of selectors) {
+                    // duplicate selectors and replace selector at insertion point
+                    for (const originSelector of duplicationList) {
+                        const dupSelector = { ...originSelector, nodes: [...originSelector.nodes] };
+                        dupSelector.nodes[nodeIndex] = replaceSelector;
+                        added.push(dupSelector);
+                    }
+                }
+                // add the duplicated selectors from insertion point to
+                // the list of selector to be duplicated for following insertion
+                // points and to the target selector list
+                for (const addedSelector of added) {
+                    duplicationList.push(addedSelector);
+                    targetSelectors.push(addedSelector);
+                }
+            }
+        }
+    }
 }
 
 export class ScopeContext {
     public transform = true;
-    public additionalSelectors: Array<() => Selector> = [];
+    // source multi-selector input
+    public selectorStr = '';
     public selectorIndex = -1;
     public elements: any[] = [];
-    public selectorAstResolveMap = new Map<ImmutableSelectorNode, CSSResolve[]>();
+    public selectorAstResolveMap = new Map<ImmutableSelectorNode, InferredSelector>();
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
-    public currentAnchor?: ScopeAnchor;
-    public nestingSelectorAnchor?: ScopeAnchor;
+    // store selector duplication points
+    public splitSelectors = new SelectorMultiplier();
+    public lastInferredSelectorNode: SelectorNode | undefined;
+    // selector is not a continuation of another selector
+    public isStandaloneSelector = true;
+    // used for nesting or after combinators
+    public inferredSelectorContext: InferredSelector;
+    // current type while traversing a selector
+    public inferredSelector: InferredSelector;
+    // combined type of the multiple selectors
+    public inferredMultipleSelectors: InferredSelector = new InferredSelector(this.transformer);
     constructor(
         public originMeta: StylableMeta,
         public resolver: StylableResolver,
         public selectorAst: SelectorList,
-        public rule: postcss.Rule,
+        public ruleOrAtRule: postcss.Rule | postcss.AtRule,
         public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
-        public topNestClassName: string = ``
-    ) {}
-    public initRootAnchor(anchor: ScopeAnchor) {
-        this.currentAnchor = anchor;
+        private transformer: StylableTransformer,
+        public inferredSelectorNest: InferredSelector,
+        selectorContext: InferredSelector,
+        selectorStr?: string
+    ) {
+        this.selectorStr = selectorStr || stringifySelector(selectorAst);
+        this.inferredSelectorContext = new InferredSelector(this.transformer, selectorContext);
+        this.inferredSelector = new InferredSelector(
+            this.transformer,
+            this.inferredSelectorContext
+        );
     }
-    public setNodeResolve(node: SelectorNode, resolve: CSSResolve[]) {
-        this.selectorAstResolveMap.set(node, resolve);
+    get experimentalSelectorInference() {
+        return this.transformer.experimentalSelectorInference;
     }
-    public setCurrentAnchor(anchor: ScopeAnchor) {
-        if (this.selectorIndex !== undefined && this.selectorIndex !== -1) {
-            this.elements[this.selectorIndex].push(anchor);
+    static legacyElementsTypesMapping: Record<string, string> = {
+        pseudo_element: 'pseudo-element',
+        class: 'class',
+        type: 'element',
+    };
+    public setNextSelectorScope(
+        resolved: InferredResolve[] | InferredSelector,
+        node: SelectorNode,
+        name?: string
+    ) {
+        if (name && this.selectorIndex !== undefined && this.selectorIndex !== -1) {
+            this.elements[this.selectorIndex].push({
+                type: ScopeContext.legacyElementsTypesMapping[node.type] || 'unknown',
+                name,
+                resolved: Array.isArray(resolved) ? resolved : resolved.getSingleResolve(),
+            });
         }
-        this.currentAnchor = anchor;
+        this.inferredSelector.set(resolved);
+        this.selectorAstResolveMap.set(node, this.inferredSelector.clone());
+        this.lastInferredSelectorNode = node;
     }
-    public insertDescendantCombinatorBeforePseudoElement() {
-        if (
-            this.selector &&
-            this.compoundSelector &&
-            this.node &&
-            this.node.type === `pseudo_element`
-        ) {
-            if (this.compoundSelector.nodes[0] === this.node) {
-                const compoundIndex = this.selector.nodes.indexOf(this.compoundSelector);
-                this.selector.nodes.splice(compoundIndex, 0, {
-                    type: `combinator`,
-                    combinator: `space`,
-                    value: ` `,
-                    before: ``,
-                    after: ``,
-                    start: this.node.start,
-                    end: this.node.start,
-                    invalid: false,
-                });
-            }
+    public isFirstInSelector(node: SelectorNode) {
+        const isFirstNode = this.selectorAst[this.selectorIndex].nodes[0] === node;
+        if (isFirstNode && this.selectorIndex === 0 && !this.isStandaloneSelector) {
+            // force false incase a this context is a splitted part from another selector
+            return false;
         }
+        return isFirstNode;
     }
-    public createNestedContext(selectorAst: SelectorList) {
+    public createNestedContext(selectorAst: SelectorList, selectorContext?: InferredSelector) {
         const ctx = new ScopeContext(
             this.originMeta,
             this.resolver,
             selectorAst,
-            this.rule,
+            this.ruleOrAtRule,
             this.scopeSelectorAst,
-            this.topNestClassName
+            this.transformer,
+            this.inferredSelectorNest,
+            selectorContext || this.inferredSelectorContext
         );
-        Object.assign(ctx, this);
-        ctx.selectorAst = selectorAst;
-
-        ctx.selectorIndex = -1;
-        ctx.elements = [];
-        ctx.additionalSelectors = [];
+        ctx.transform = this.transform;
+        ctx.selectorAstResolveMap = this.selectorAstResolveMap;
 
         return ctx;
     }
+    public transformIntoMultiSelector(node: SelectorNode, selectors: SelectorList) {
+        // transform into the first selector
+        Object.assign(node, selectors[0]);
+        // keep track of additional selectors for
+        // duplication at the end of the selector transform
+        selectors.shift();
+        const selectorNode = this.selectorAst[this.selectorIndex];
+        const nodeIndex = selectorNode.nodes.indexOf(node);
+        this.splitSelectors.addSplitPoint(this.selectorIndex, nodeIndex, selectors);
+    }
     public isDuplicateStScopeDiagnostic() {
+        if (this.experimentalSelectorInference || this.ruleOrAtRule.type !== 'rule') {
+            // this check is not required when experimentalSelectorInference is on
+            // as @st-scope is not flatten at the beginning of the transformation
+            // and diagnostics on it's selector is only checked once.
+            return false;
+        }
         // ToDo: should be removed once st-scope transformation moves to the end of the transform process
         const transformedScope =
-            this.originMeta.transformedScopes?.[getRuleScopeSelector(this.rule) || ``];
+            this.originMeta.transformedScopes?.[getRuleScopeSelector(this.ruleOrAtRule) || ``];
         if (transformedScope && this.selector && this.compoundSelector) {
             const currentCompoundSelector = stringifySelector(this.compoundSelector);
             const i = this.selector.nodes.indexOf(this.compoundSelector);
@@ -839,16 +1090,24 @@ export class ScopeContext {
  * all changes were moved here to be called at the beginning of the transformer,
  * and should be inlined in the process in the future.
  */
-function prepareAST(context: FeatureTransformContext, ast: postcss.Root) {
+function prepareAST(
+    context: FeatureTransformContext,
+    ast: postcss.Root,
+    experimentalSelectorInference: boolean
+) {
     // ToDo: inline transformations
     const toRemove: Array<postcss.Node | (() => void)> = [];
     ast.walk((node) => {
         const input = { context, node, toRemove };
         STNamespace.hooks.prepareAST(input);
         STImport.hooks.prepareAST(input);
-        STScope.hooks.prepareAST(input);
+        if (!experimentalSelectorInference) {
+            STScope.hooks.prepareAST(input);
+        }
         STVar.hooks.prepareAST(input);
-        STCustomSelector.hooks.prepareAST(input);
+        if (!experimentalSelectorInference) {
+            STCustomSelector.hooks.prepareAST(input);
+        }
         CSSCustomProperty.hooks.prepareAST(input);
     });
     for (const removeOrNode of toRemove) {

@@ -12,6 +12,7 @@ import {
     Invalid,
     ImmutableSelectorList,
     ImmutableSelectorNode,
+    Combinator,
 } from '@tokey/css-selector-parser';
 import cloneDeep from 'lodash.clonedeep';
 
@@ -126,6 +127,20 @@ export function convertToPseudoClass(
         delete castedNode.nodes;
     }
     return castedNode;
+}
+
+export function createCombinatorSelector(partial: Partial<Combinator>): Combinator {
+    const type = partial.combinator || 'space';
+    return {
+        type: `combinator`,
+        combinator: type,
+        value: partial.value ?? (type === 'space' ? ` ` : type),
+        before: partial.before ?? ``,
+        after: partial.after ?? ``,
+        start: partial.start ?? 0,
+        end: partial.end ?? 0,
+        invalid: partial.invalid ?? false,
+    };
 }
 
 export function isInPseudoClassContext(parents: ReadonlyArray<ImmutableSelectorNode>) {

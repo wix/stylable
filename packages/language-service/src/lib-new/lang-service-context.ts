@@ -1,5 +1,5 @@
 import { TextDocument } from 'vscode-css-languageservice';
-import { CSSResolve, Diagnostics, Stylable, StylableMeta } from '@stylable/core';
+import { Diagnostics, Stylable, StylableMeta } from '@stylable/core';
 import type { StylableFile } from '../lib/service';
 import { getAstNodeAt } from './ast-from-position';
 import { parseForEditing, ParseReport } from './edit-time-parser';
@@ -7,6 +7,7 @@ import {
     parseSelectorWithCache,
     StylableProcessor,
     StylableTransformer,
+    InferredSelector,
 } from '@stylable/core/dist/index-internal';
 import { URI } from 'vscode-uri';
 import {
@@ -23,8 +24,7 @@ import * as postcss from 'postcss';
 type ResolveChainItem = {
     [Type in ImmutableSelectorNode['type']]?: Extract<ImmutableSelectorNode, { type: Type }>[];
 } & {
-    resolved?: CSSResolve[];
-    resolvedNode?: ImmutableSelectorNode;
+    inferred?: InferredSelector;
 };
 
 export class LangServiceContext {
@@ -63,16 +63,14 @@ export class LangServiceContext {
         return this.location.base.node.type === 'root';
     }
     public isInSelectorAllowedSpace() {
-        const where = this.location.base.where;
-        return (
-            this.isInSelector() ||
-            where === 'root' ||
-            where === 'ruleBody' ||
-            where === 'atRuleBody'
-        );
+        return this.isInSelector() || this.isInPotentialEmptySelector();
     }
     public isInSelector() {
         return !!this.location.selector;
+    }
+    public isInPotentialEmptySelector() {
+        const where = this.location.base.where;
+        return where === 'root' || where === 'ruleBody' || where === 'atRuleBody';
     }
     public getSelectorContext() {
         if (!this.isInSelectorAllowedSpace()) {
@@ -80,34 +78,38 @@ export class LangServiceContext {
         }
         const nestedSelectors = this.collectSelector();
         // collect the CSS resolve chain for each selector node
-        const selectorAstResolveMap = new Map<ImmutableSelectorNode, CSSResolve[]>();
-        let currentAnchor = undefined;
+        const selectorAstResolveMap = new Map<ImmutableSelectorNode, InferredSelector>();
+        const transformer = (this.stylable as any).createTransformer() as StylableTransformer;
+        let inferredSelectorNest = undefined;
         for (const selector of nestedSelectors) {
             // ToDo(tech-debt): provide an internal selector resolve without the transformer
-            const transformer = (this.stylable as any).createTransformer() as StylableTransformer;
+            const selectorStr = stringifySelectorAst(selector);
             const selectorContext = transformer.createSelectorContext(
                 this.meta,
                 selector as SelectorList, // doesn't mutate due to `selectorContext.transform = false`
-                postcss.rule({ selector: stringifySelectorAst(selector) })
+                postcss.rule({ selector: selectorStr }),
+                selectorStr,
+                inferredSelectorNest
             );
-            if (currentAnchor) {
-                selectorContext.currentAnchor = currentAnchor;
-                selectorContext.nestingSelectorAnchor = currentAnchor;
-            }
             selectorContext.transform = false;
             selectorContext.selectorAstResolveMap = selectorAstResolveMap;
             transformer.scopeSelectorAst(selectorContext);
-            // ToDo: handle multiple selectors intersection
-            currentAnchor = selectorContext.currentAnchor;
+            inferredSelectorNest = selectorContext.inferredMultipleSelectors;
         }
+        const inferredSelectorContext = new InferredSelector(
+            transformer,
+            this.stylable.resolver.resolveExtends(this.meta, 'root')
+        );
         // reference interest points
         const locationSelector = this.location.selector;
         const nodeAtCursor = locationSelector?.node;
         const resolvedSelectorChain = this.aggregateResolvedChain(
             nestedSelectors,
-            selectorAstResolveMap
+            selectorAstResolveMap,
+            inferredSelectorContext
         );
         return {
+            inferredSelectorContext,
             nodeAtCursor,
             selectorAtCursor: nodeAtCursor
                 ? stringifySelectorAst(nodeAtCursor).slice(0, this.location.selector!.offsetInNode)
@@ -129,44 +131,26 @@ export class LangServiceContext {
      */
     private aggregateResolvedChain(
         nestedSelectors: ImmutableSelectorList[],
-        selectorAstResolveMap: Map<ImmutableSelectorNode, CSSResolve[]>
+        selectorAstResolveMap: Map<ImmutableSelectorNode, InferredSelector>,
+        inferredSelectorContext: InferredSelector
     ) {
         const resolvedChain: ResolveChainItem[] = [];
 
         let item: ResolveChainItem = {};
         const nestingSelectors = [...nestedSelectors];
-        const addToItem = (node: ImmutableSelectorNode) => {
-            const resolved = selectorAstResolveMap.get(node);
-            if (resolved) {
-                item.resolved = resolved;
-                item.resolvedNode = node;
+        const addToItem = (node?: ImmutableSelectorNode) => {
+            const inferred = node ? selectorAstResolveMap.get(node) : inferredSelectorContext;
+            if (inferred) {
+                item.inferred = inferred;
                 resolvedChain.unshift(item);
                 item = {};
-            } else if (node.type) {
+            } else if (node?.type) {
                 item[node.type] ??= [];
                 item[node.type]!.push(node as any);
             }
         };
-        const collectBack = (
-            node: ImmutableSelectorNode | undefined,
-            parents: ImmutableSelectorNode[]
-        ) => {
-            if (node) {
-                addToItem(node);
-            }
-            if (!parents.length) {
-                const upperNestingSelectors = getLastWhile(
-                    nestingSelectors,
-                    (last) => !!last.length
-                );
-                if (upperNestingSelectors) {
-                    // ToDo: handle multiple selector intersection type
-                    const firstSelector = upperNestingSelectors[0];
-                    parents.push(firstSelector);
-                } else {
-                    return;
-                }
-            }
+        const collectBack = (node: ImmutableSelectorNode, parents: ImmutableSelectorNode[]) => {
+            addToItem(node);
             const parent = parents.pop()!;
             if ('nodes' in parent && parent.nodes) {
                 const nodes = parent.nodes;
@@ -176,7 +160,11 @@ export class LangServiceContext {
                     addToItem(nodes[i]);
                 }
             }
-            collectBack(parent, parents);
+            if (parents.length) {
+                collectBack(parent, parents);
+            } else {
+                addToItem();
+            }
         };
         // find node at cursor and collect back resolved location
         if (this.location.selector) {
@@ -190,8 +178,8 @@ export class LangServiceContext {
                 return;
             });
         } else {
-            // caret is not at selector (probably nested): complete from end
-            collectBack(undefined, []);
+            // caret is not at selector (probably nested)
+            addToItem(/* default to context */);
         }
         return resolvedChain;
     }
@@ -208,10 +196,11 @@ export class LangServiceContext {
         const parents = collectPostcssParents(this.location.base.node);
         const results: ImmutableSelectorList[] = parents
             .map((node) => {
-                return parseSelectorWithCache(this.getSelectorString(node) || '');
+                return parseSelectorWithCache(this.getSelectorString(node) || '', { clone: true });
             })
             .filter((selectors) => selectors.length !== 0);
         if (this.location.selector) {
+            // caret is on an existing selector
             let selectorWithCaret = this.location.selector.parents.find(
                 (node) => node.type === 'selector'
             ) as ImmutableSelector | undefined;
@@ -220,9 +209,14 @@ export class LangServiceContext {
             }
             results.push([selectorWithCaret!]);
         } else {
+            // caret is not on a selector: resolve selector from base node
             const selector = this.getSelectorString(this.location.base.node);
             if (selector) {
-                results.push(parseSelectorWithCache(selector));
+                results.push(parseSelectorWithCache(selector, { clone: true }));
+            }
+            if (this.isInPotentialEmptySelector()) {
+                // caret is on an empty selector
+                results.push([]);
             }
         }
         return results;
@@ -233,18 +227,8 @@ function collectPostcssParents(node: postcss.AnyNode) {
     const parents: Array<postcss.AnyNode | postcss.Document> = [];
     let current = node.parent;
     while (current) {
-        parents.push(current as postcss.AnyNode);
+        parents.unshift(current as postcss.AnyNode);
         current = current.parent;
     }
     return parents;
-}
-function getLastWhile<T>(list: T[], check: (current: T) => boolean) {
-    let validLast: T | undefined;
-    while (!validLast && list.length) {
-        const current = list.pop()!;
-        if (check(current)) {
-            validLast = current;
-        }
-    }
-    return validLast;
 }

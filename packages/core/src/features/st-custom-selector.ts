@@ -76,6 +76,8 @@ export const hooks = createFeature({
         }
     },
     prepareAST({ context, node, toRemove }) {
+        // called without experimentalSelectorInference
+        // split selectors & remove definitions
         if (node.type === 'rule' && node.selector.match(CUSTOM_SELECTOR_RE)) {
             node.selector = transformCustomSelectorInline(context.meta, node.selector, {
                 diagnostics: context.diagnostics,
@@ -83,6 +85,29 @@ export const hooks = createFeature({
             });
         } else if (node.type === 'atrule' && node.name === 'custom-selector') {
             toRemove.push(node);
+        }
+    },
+    transformSelectorNode({ context, selectorContext, node }) {
+        const customSelector =
+            node.value.startsWith('--') &&
+            getCustomSelectorExpended(context.meta, node.value.slice(2));
+        if (customSelector) {
+            const mappedSelectorAst = parseSelectorWithCache(customSelector, { clone: true });
+            const mappedContext = selectorContext.createNestedContext(mappedSelectorAst);
+            selectorContext.scopeSelectorAst(mappedContext);
+            const inferredSelector = selectorContext.experimentalSelectorInference
+                ? mappedContext.inferredMultipleSelectors
+                : mappedContext.inferredSelector;
+            selectorContext.setNextSelectorScope(inferredSelector, node); // doesn't add to the resolved elements
+            if (selectorContext.transform) {
+                selectorContext.transformIntoMultiSelector(node, mappedSelectorAst);
+            }
+        }
+        return !!customSelector;
+    },
+    transformAtRuleNode({ atRule }) {
+        if (atRule.name === 'custom-selector') {
+            atRule.remove();
         }
     },
 });
