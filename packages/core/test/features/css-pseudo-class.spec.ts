@@ -582,6 +582,101 @@ describe('features/css-pseudo-class', () => {
             shouldReportNoDiagnostics(meta);
         });
     });
+    describe('native selector nesting classes', () => {
+        describe('experimentalSelectorInference', () => {
+            it('should infer native selector nesting classes', () => {
+                const { sheets } = testStylableCore(
+                    {
+                        'entry.st.css': `
+                            .x {/*no states*/}
+                            .a { -st-states: shared }
+                            .b { -st-states: shared }
+                            .c { -st-states: shared }
+
+                            /* @rule(compound+nested) .entry__a:is(.entry__b).entry--shared */
+                            .a:is(.b):shared {}
+
+                            /* @rule(compound+nested) .entry__a:is(.entry__b, .entry__c).entry--shared */
+                            .a:is(.b, .c):shared {}
+
+                            /* @compound+nested+comment- tested outside because of comment*/
+                            .a/**/:is(.b, .c):shared {}
+
+                            /* @rule(just nested) .entry__x :is(.entry__a, .entry__b).entry--shared */
+                            .x :is(.a, .b):shared {}
+
+                            /* @rule(where) :where(.entry__a,.entry__b).entry--shared */
+                            :where(.a,.b):shared {}
+
+                            /* @rule(nth) :nth-child(2n + 1 of .entry__a,.entry__b).entry--shared */
+                            :nth-child(2n + 1 of .a,.b):shared {}
+
+                            /* @rule(has - no infer) .entry__a:has(.entry__x).entry--shared */
+                            .a:has(.x):shared {}
+
+                            /* @rule(not - no infer) .entry__a:not(.entry__x).entry--shared */
+                            .a:not(.x):shared {}
+
+                            /* @rule(not - no infer 2) .entry__a:not(.entry__b).entry--shared */
+                            .a:not(.b):shared {}
+                    `,
+                    },
+                    {
+                        stylableConfig: {
+                            experimentalSelectorInference: true,
+                        },
+                    }
+                );
+
+                const { meta } = sheets['/entry.st.css'];
+
+                const ruleWithComment = meta.targetAst?.nodes[9] as postcss.Rule;
+                expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
+                    '.entry__a/**/:is(.entry__b, .entry__c).entry--shared'
+                );
+
+                shouldReportNoDiagnostics(meta);
+            });
+            it('should filter out states after native selector nesting classes', () => {
+                const { sheets } = testStylableCore(
+                    {
+                        'entry.st.css': `
+                            .x {}
+                            .a { -st-states: shared }
+                            .b { -st-states: shared }
+
+                            /* 
+                                @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                    'shared'
+                                )} 
+                                @rule(compound missing) .entry__x:is(.entry__a, .entry__b):shared 
+                            */
+                            .x:is(.a, .b):shared {}
+
+                            /* 
+                                @transform-error(compound+nested+comment) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                    'shared'
+                                )} 
+                            */
+                            .x/**/:is(.a, .b):shared {}
+                    `,
+                    },
+                    {
+                        stylableConfig: {
+                            experimentalSelectorInference: true,
+                        },
+                    }
+                );
+
+                const { meta } = sheets['/entry.st.css'];
+
+                const ruleWithComment = meta.targetAst?.nodes[6] as postcss.Rule;
+                expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
+                    '.entry__x/**/:is(.entry__a, .entry__b):shared'
+                );
+            });
+        });
+    });
     describe(`st-var`, () => {
         /* ToDo: consider dropping support for this */
         it('should support value() concatenate value into default', () => {
@@ -747,97 +842,6 @@ describe('features/css-pseudo-class', () => {
                             experimentalSelectorInference: true,
                         },
                     }
-                );
-            });
-            it('should infer native selector nesting classes', () => {
-                const { sheets } = testStylableCore(
-                    {
-                        'entry.st.css': `
-                            .x {/*no states*/}
-                            .a { -st-states: shared }
-                            .b { -st-states: shared }
-                            .c { -st-states: shared }
-
-                            /* @rule(compound+nested) .entry__a:is(.entry__b).entry--shared */
-                            .a:is(.b):shared {}
-
-                            /* @rule(compound+nested) .entry__a:is(.entry__b, .entry__c).entry--shared */
-                            .a:is(.b, .c):shared {}
-
-                            /* @compound+nested+comment- tested outside because of comment*/
-                            .a/**/:is(.b, .c):shared {}
-
-                            /* @rule(just nested) .entry__x :is(.entry__a, .entry__b).entry--shared */
-                            .x :is(.a, .b):shared {}
-
-                            /* @rule(where) :where(.entry__a,.entry__b).entry--shared */
-                            :where(.a,.b):shared {}
-
-                            /* @rule(nth) :nth-child(2n + 1 of .entry__a,.entry__b).entry--shared */
-                            :nth-child(2n + 1 of .a,.b):shared {}
-
-                            /* @rule(has - no infer) .entry__a:has(.entry__x).entry--shared */
-                            .a:has(.x):shared {}
-
-                            /* @rule(not - no infer) .entry__a:not(.entry__x).entry--shared */
-                            .a:not(.x):shared {}
-
-                            /* @rule(not - no infer 2) .entry__a:not(.entry__b).entry--shared */
-                            .a:not(.b):shared {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
-
-                const { meta } = sheets['/entry.st.css'];
-
-                const ruleWithComment = meta.targetAst?.nodes[9] as postcss.Rule;
-                expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
-                    '.entry__a/**/:is(.entry__b, .entry__c).entry--shared'
-                );
-
-                shouldReportNoDiagnostics(meta);
-            });
-            it('should filter out states after native selector nesting classes', () => {
-                const { sheets } = testStylableCore(
-                    {
-                        'entry.st.css': `
-                            .x {}
-                            .a { -st-states: shared }
-                            .b { -st-states: shared }
-
-                            /* 
-                                @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                    'shared'
-                                )} 
-                                @rule(compound missing) .entry__x:is(.entry__a, .entry__b):shared 
-                            */
-                            .x:is(.a, .b):shared {}
-
-                            /* 
-                                @transform-error(compound+nested+comment) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                    'shared'
-                                )} 
-                            */
-                            .x/**/:is(.a, .b):shared {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
-
-                const { meta } = sheets['/entry.st.css'];
-
-                const ruleWithComment = meta.targetAst?.nodes[6] as postcss.Rule;
-                expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
-                    '.entry__x/**/:is(.entry__a, .entry__b):shared'
                 );
             });
         });
