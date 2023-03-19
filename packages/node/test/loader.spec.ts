@@ -12,7 +12,9 @@ function runTest(fixturePath: string) {
 const stylableRuntimePath = join(__dirname, '../../../runtime');
 const stylableRuntimeDepPath = '"file:' + JSON.stringify(stylableRuntimePath).substring(1);
 
-describe('node loader', () => {
+// ToDo(major): remove conditional once node 14 support is dropped
+const nodeMajorVersion = Number(process.versions.node.split('.')[0]);
+(nodeMajorVersion > 14 ? describe : describe.skip)('node loader', () => {
     let tempDir: ReturnType<typeof createTempDirectorySync>;
     beforeEach('crate temp dir', () => {
         tempDir = createTempDirectorySync('st-node-loader-');
@@ -20,6 +22,7 @@ describe('node loader', () => {
     afterEach('remove temp dir', () => {
         tempDir.remove();
     });
+
     it('should load stylable modules', () => {
         tempDir.setContent({
             'index.st.css': `
