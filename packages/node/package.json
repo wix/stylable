@@ -16,6 +16,7 @@
     "!dist/test",
     "src",
     "register.js",
+    "loader.js",
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
