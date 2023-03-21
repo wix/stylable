@@ -11,7 +11,7 @@ import { mixinHelperDiagnostics, parseStMixin, parseStPartialMixin } from '../he
 import { resolveArgumentsValue } from '../functions';
 import { cssObjectToAst } from '../parser';
 import * as postcss from 'postcss';
-import { FunctionNode, WordNode, stringify } from 'postcss-value-parser';
+import postcssValueParser, { FunctionNode, WordNode } from 'postcss-value-parser';
 import { fixRelativeUrls } from '../stylable-assets';
 import { isValidDeclaration, mergeRules, utilDiagnostics } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
@@ -182,7 +182,9 @@ export class StylablePublicApi {
                     name,
                     kind: 'invalid',
                     args:
-                        data.valueNode?.type === 'function' ? stringify(data.valueNode.nodes) : '',
+                        data.valueNode?.type === 'function'
+                            ? postcssValueParser.stringify(data.valueNode.nodes)
+                            : '',
                 });
             }
         }

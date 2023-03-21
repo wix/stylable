@@ -1,4 +1,4 @@
-declare module 'enhanced-resolve/lib/ResolverFactory' {
+declare module 'enhanced-resolve/lib/ResolverFactory.js' {
     const ResolverFactory: typeof import('enhanced-resolve').ResolverFactory;
     export = ResolverFactory;
 }
