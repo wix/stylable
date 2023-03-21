@@ -9,6 +9,7 @@
   "dependencies": {
     "@stylable/core": "^5.8.0",
     "@stylable/module-utils": "^5.8.0",
+    "@stylable/build-tools": "^5.8.0",
     "find-config": "^1.0.0"
   },
   "files": [

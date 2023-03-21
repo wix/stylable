@@ -58,4 +58,79 @@ const nodeMajorVersion = Number(process.versions.node.split('.')[0]);
 
         expect(result.stdout).to.eql(`{ classes: [ 'root', 'part' ] }\n`);
     });
+    it('should use stylable.config (esm project)', () => {
+        tempDir.setContent({
+            'index.st.css': `
+                .root {}
+                .part {}
+            `,
+            'index.js': `
+                import { classes } from './index.st.css';
+                console.log(classes);
+            `,
+            'stylable.config.js': `
+                export function defaultConfig(fs) {
+                    return {
+                        resolveNamespace(namespace, path) {
+                            return 'x-' + namespace;
+                        }
+                    };
+                };
+            `,
+            'package.json': `
+                {
+                    "name": "test",
+                    "version": "0.0.1",
+                    "type": "module",
+                    "dependencies": {
+                        "@stylable/runtime": ${stylableRuntimeDepPath},
+                        "@stylable/node": ${stylableNodeDepPath}
+                    }
+                }
+            `,
+        });
+        const fixturePath = join(tempDir.path, 'index.js');
+
+        const result = runTest(fixturePath);
+
+        expect(result.stdout).to.eql(`{ root: 'x-index__root', part: 'x-index__part' }\n`);
+    });
+    it('should use stylable.config (cjs project)', () => {
+        tempDir.setContent({
+            'index.st.css': `
+                .root {}
+                .part {}
+            `,
+            'index.mjs': `
+                import { classes } from './index.st.css';
+                console.log(classes);
+            `,
+            'stylable.config.js': `
+                module.exports = {
+                    defaultConfig(fs) {
+                        return {
+                            resolveNamespace(namespace, path) {
+                                return 'x-' + namespace;
+                            }
+                        };
+                    }
+                };
+            `,
+            'package.json': `
+                {
+                    "name": "test",
+                    "version": "0.0.1",
+                    "dependencies": {
+                        "@stylable/runtime": ${stylableRuntimeDepPath},
+                        "@stylable/node": ${stylableNodeDepPath}
+                    }
+                }
+            `,
+        });
+        const fixturePath = join(tempDir.path, 'index.mjs');
+
+        const result = runTest(fixturePath);
+
+        expect(result.stdout).to.eql(`{ root: 'x-index__root', part: 'x-index__part' }\n`);
+    });
 });

@@ -1,24 +1,38 @@
 import { defaultStylableMatcher } from './common';
 import nodeFs from '@file-services/node';
 import { stylableModuleFactory } from '@stylable/module-utils';
+import { loadStylableConfigEsm } from '@stylable/build-tools';
 import { resolveNamespace } from './resolve-namespace';
 import { fileURLToPath } from 'url';
 
-const stylableToModule = stylableModuleFactory(
-    {
-        projectRoot: 'root',
-        fileSystem: nodeFs,
-        resolveNamespace,
-        resolverCache: new Map(),
-    },
-    {
-        moduleType: 'esm',
-        // point to cjs - the esm runtime isn't published with mjs
-        // and causes issues. currently it's problematic for direct esm
-        // usage and only works for bundlers.
-        runtimePath: '@stylable/runtime/dist/pure.js',
+let createModule: ReturnType<typeof stylableModuleFactory>;
+async function generateJsModule(sheetSource: string, filePath: string) {
+    if (!createModule) {
+        createModule = await initiateModuleFactory();
     }
-);
+    return createModule(sheetSource, filePath);
+}
+async function initiateModuleFactory() {
+    const defaultConfig = await loadStylableConfigEsm(process.cwd(), (potentialConfigModule: any) =>
+        potentialConfigModule.defaultConfig?.(nodeFs)
+    );
+    return stylableModuleFactory(
+        {
+            resolveNamespace,
+            ...(defaultConfig?.config || {}),
+            projectRoot: 'root',
+            fileSystem: nodeFs,
+            resolverCache: new Map(),
+        },
+        {
+            moduleType: 'esm',
+            // point to cjs - the esm runtime isn't published with mjs
+            // and causes issues. currently it's problematic for direct esm
+            // usage and only works for bundlers.
+            runtimePath: '@stylable/runtime/dist/pure.js',
+        }
+    );
+}
 
 export interface LoaderContext {
     conditions: string[];
@@ -40,7 +54,7 @@ export async function load(
     if (defaultStylableMatcher(url)) {
         const filePath = fileURLToPath(url);
         const sheetSource = nodeFs.readFileSync(filePath, { encoding: 'utf-8' });
-        const moduleSource = stylableToModule(sheetSource, filePath);
+        const moduleSource = await generateJsModule(sheetSource, filePath);
         return {
             shortCircuit: true,
             format: 'module',
