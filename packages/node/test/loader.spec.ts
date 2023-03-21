@@ -4,13 +4,18 @@ import { createTempDirectorySync } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 function runTest(fixturePath: string) {
-    execSync('npm install', { cwd: dirname(fixturePath) });
+    const fixtureDirPath = dirname(fixturePath);
+    execSync('npm install', { cwd: fixtureDirPath });
     return spawnSync('node', ['--experimental-loader', '@stylable/node/loader.mjs', fixturePath], {
         encoding: 'utf8',
+        cwd: fixtureDirPath,
     });
 }
-const stylableRuntimePath = join(__dirname, '../../../runtime');
-const stylableRuntimeDepPath = '"file:' + JSON.stringify(stylableRuntimePath).substring(1);
+
+const stylableRuntimeDepPath =
+    '"file:' + JSON.stringify(join(__dirname, '../../../runtime')).substring(1);
+const stylableNodeDepPath =
+    '"file:' + JSON.stringify(join(__dirname, '../../../node')).substring(1);
 
 // ToDo(major): remove conditional once node 14 support is dropped
 const nodeMajorVersion = Number(process.versions.node.split('.')[0]);
@@ -41,7 +46,8 @@ const nodeMajorVersion = Number(process.versions.node.split('.')[0]);
                     "version": "0.0.1",
                     "type": "module",
                     "dependencies": {
-                        "@stylable/runtime": ${stylableRuntimeDepPath}
+                        "@stylable/runtime": ${stylableRuntimeDepPath},
+                        "@stylable/node": ${stylableNodeDepPath}
                     }
                 }
             `,
