@@ -20,7 +20,7 @@ async function initiateModuleFactory() {
         {
             resolveNamespace,
             ...(defaultConfig?.config || {}),
-            projectRoot: 'root',
+            projectRoot: '/',
             fileSystem: nodeFs,
             resolverCache: new Map(),
         },
