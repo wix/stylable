@@ -247,7 +247,7 @@ function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
             afterSpace: 0,
             checkContext,
         });
-        let where: typeof base['where'] = 'declValue';
+        let where: (typeof base)['where'] = 'declValue';
         const base = checkContext.result.base;
         if (isInValue) {
             where = 'declValue';
@@ -278,7 +278,7 @@ function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
             afterSpace: node.raws.between!.length,
             checkContext,
         });
-        let where: typeof base['where'] = 'declValue';
+        let where: (typeof base)['where'] = 'declValue';
         const base = checkContext.result.base;
         if (isInParams) {
             where = 'atRuleParams';
