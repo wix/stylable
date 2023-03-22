@@ -1,34 +1,14 @@
 import { createMemoryFs } from '@file-services/memory';
 import type { IDirectoryContents, IFileSystem } from '@file-services/types';
 import { Stylable, StylableConfig } from '@stylable/core';
-import { deindent } from '@stylable/core-test-kit';
+import { deindent, copyDirectory } from '@stylable/core-test-kit';
 import { StylableLanguageService } from '@stylable/language-service';
 import { range } from '@stylable/language-service/dist/lib/completion-types';
 import { CompletionItem, TextEdit } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-css-languageservice';
 import { URI } from 'vscode-uri';
 import { expect } from 'chai';
-import { tmpdir } from 'os';
-import { mkdtempSync } from 'fs';
 import nodeFs from '@file-services/node';
-
-export function createTempDirectorySync(prefix = 'temp-') {
-    const path = nodeFs.realpathSync.native(mkdtempSync(nodeFs.join(tmpdir(), prefix)));
-    const remove = () => nodeFs.rmSync(path, { recursive: true, force: true });
-
-    return { path, remove };
-}
-function copyDirectory(fs: IFileSystem, targetPath: string, content: IDirectoryContents) {
-    fs.ensureDirectorySync(targetPath);
-    for (const [name, value] of Object.entries(content)) {
-        const itemPath = fs.join(targetPath, name);
-        if (typeof value === 'string') {
-            fs.writeFileSync(itemPath, value, { encoding: 'utf-8' });
-        } else {
-            copyDirectory(fs, itemPath, value);
-        }
-    }
-}
 
 export interface TestOptions {
     testOnNativeFileSystem: string;

@@ -28,3 +28,4 @@ export { testInlineExpects, testInlineExpectsErrors } from './inline-expectation
 export { testStylableCore } from './test-stylable-core';
 export { deindent } from './deindent';
 export { MinimalDocument, MinimalElement } from './minimal-dom';
+export { createTempDirectorySync, copyDirectory } from './native-temp-dir';

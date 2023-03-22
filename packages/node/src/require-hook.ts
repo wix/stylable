@@ -2,6 +2,7 @@ import type { StylableConfig } from '@stylable/core';
 import { validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { stylableModuleFactory } from '@stylable/module-utils';
 import fs from 'fs';
+import { defaultStylableMatcher } from './common';
 import { resolveNamespace } from './resolve-namespace';
 
 export interface Options {
@@ -14,8 +15,6 @@ export interface Options {
 }
 
 const HOOK_EXTENSION = '.css';
-
-const defaultStylableMatcher = (filename: string) => !!filename.match(/\.st\.css$/);
 
 export function attachHook({
     matcher,

@@ -1,5 +1,6 @@
 import { createDefaultResolver } from '@stylable/core';
-import { testLangService, createTempDirectorySync } from '../../test-kit/test-lang-service';
+import { createTempDirectorySync } from '@stylable/core-test-kit';
+import { testLangService } from '../../test-kit/test-lang-service';
 import { Command } from 'vscode-languageserver';
 
 const triggerCompletion = Command.create('additional', 'editor.action.triggerSuggest');
