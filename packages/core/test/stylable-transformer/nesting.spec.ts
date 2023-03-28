@@ -91,4 +91,30 @@ describe('transformer/nesting', () => {
             { stylableConfig: { experimentalSelectorInference: true } }
         );
     });
+    it('should infer to universal selector without nesting selector', () => {
+        testStylableCore(`
+            .root {
+                -st-states: x;
+            }
+            .part {
+                -st-states: x;
+            }
+
+            .part {
+                /* 
+                    @transform-error(first) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE('x')}
+                    @rule(first) :x 
+                */
+                :x {}
+
+                /* 
+                    @transform-error(after combinator) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                        'x'
+                    )}
+                    @rule(after combinator) .entry__root :x 
+                */
+                .root :x {}
+            }
+        `);
+    });
 });

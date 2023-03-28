@@ -443,10 +443,6 @@ export class StylableTransformer {
         selectorStr?: string,
         selectorNest?: InferredSelector
     ) {
-        const inferredContext = this.createInferredSelector(meta, {
-            name: meta.root,
-            type: 'class',
-        });
         return new ScopeContext(
             meta,
             this.resolver,
@@ -454,8 +450,8 @@ export class StylableTransformer {
             selectorNode,
             this.scopeSelectorAst.bind(this),
             this,
-            selectorNest || inferredContext.clone(),
-            inferredContext,
+            selectorNest,
+            undefined,
             selectorStr
         );
     }
@@ -479,7 +475,7 @@ export class StylableTransformer {
             for (const node of [...selector.nodes]) {
                 if (node.type !== `compound_selector`) {
                     if (node.type === 'combinator') {
-                        if (this.experimentalSelectorInference) {
+                        if (this.experimentalSelectorInference || context.isNested) {
                             context.setNextSelectorScope(context.inferredSelectorContext, node);
                         }
                     }
@@ -968,13 +964,17 @@ export class ScopeContext {
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
+    // true for nested selector
+    public isNested: boolean;
     // store selector duplication points
     public splitSelectors = new SelectorMultiplier();
     public lastInferredSelectorNode: SelectorNode | undefined;
     // selector is not a continuation of another selector
     public isStandaloneSelector = true;
-    // used for nesting or after combinators
+    // used as initial selector or after combinators
     public inferredSelectorContext: InferredSelector;
+    // used for nesting selector
+    public inferredSelectorNest: InferredSelector;
     // current type while traversing a selector
     public inferredSelector: InferredSelector;
     // combined type of the multiple selectors
@@ -986,12 +986,42 @@ export class ScopeContext {
         public ruleOrAtRule: postcss.Rule | postcss.AtRule,
         public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
         private transformer: StylableTransformer,
-        public inferredSelectorNest: InferredSelector,
-        selectorContext: InferredSelector,
+        inferredSelectorNest?: InferredSelector,
+        inferredSelectorContext?: InferredSelector,
         selectorStr?: string
     ) {
+        this.isNested = !!(
+            ruleOrAtRule.parent &&
+            // top level
+            ruleOrAtRule.parent.type !== 'root' &&
+            // directly in @st-scope
+            !STScope.isStScopeStatement(ruleOrAtRule.parent)
+        );
+        /* 
+            resolve default selector context for initial selector and selector
+            following a combinator.
+            
+            Currently set to stylesheet root for top level selectors and selectors
+            directly nested under @st-scope. But will change in the future to a universal selector. 
+        */
+        const inferredContext =
+            inferredSelectorContext ||
+            (this.isNested
+                ? new InferredSelector(transformer, [
+                      {
+                          _kind: 'css',
+                          meta: originMeta,
+                          symbol: { _kind: 'element', name: '*' },
+                      },
+                  ])
+                : transformer.createInferredSelector(originMeta, {
+                      name: originMeta.root,
+                      type: 'class',
+                  }));
+        // set selector data
         this.selectorStr = selectorStr || stringifySelector(selectorAst);
-        this.inferredSelectorContext = new InferredSelector(this.transformer, selectorContext);
+        this.inferredSelectorContext = new InferredSelector(this.transformer, inferredContext);
+        this.inferredSelectorNest = inferredSelectorNest || this.inferredSelectorContext.clone();
         this.inferredSelector = new InferredSelector(
             this.transformer,
             this.inferredSelectorContext
