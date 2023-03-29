@@ -1,6 +1,15 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { generateStylableRoot, testStylableCore } from '@stylable/core-test-kit';
+import {
+    diagnosticBankReportToStrings,
+    generateStylableRoot,
+    testStylableCore,
+} from '@stylable/core-test-kit';
+import { CSSPseudoClass } from '@stylable/core/dist/features';
+import { transformerDiagnostics } from '@stylable/core/dist/index-internal';
+
+const cssPseudoClassDiagnostics = diagnosticBankReportToStrings(CSSPseudoClass.diagnostics);
+const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 describe('Stylable postcss transform (General)', () => {
     it('should output empty on empty input', () => {
@@ -83,10 +92,20 @@ describe('Stylable postcss transform (General)', () => {
                     .root { -st-states: state; }
                     .class { -st-states: state; }
                 
-                    /* @rule(unknown state) :state */
+                    /* 
+                        @transform-error(unknown state) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                            'state'
+                        )}
+                        @rule(unknown state) :state 
+                    */
                     :state {}
         
-                    /* @rule(unknown pseudo-element) ::class */
+                    /* 
+                        @transform-error(unknown pseudo-element) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                            `class`
+                        )}
+                        @rule(unknown pseudo-element) ::class 
+                    */
                     ::class {}
                 `,
                 { stylableConfig: { experimentalSelectorInference: true } }
