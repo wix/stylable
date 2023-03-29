@@ -122,10 +122,10 @@ describe(`features/st-global`, () => {
                         /* @rule(unknown comp pseudo-element) .comp__root.g::part */
                         Comp:global(.g)::part {}
             
-                        /* @rule(unknown standalone pseudo-element) .comp__root.g::class */
+                        /* @rule(unknown pseudo-element) .comp__root.g::class */
                         Comp:global(.g)::class {}
 
-                        /* @rule(standalone pseudo-element) .comp__root.g  .entry__class */
+                        /* @rule(universal pseudo-element) .comp__root.g ::class */
                         Comp:global(.g) ::class {}
                     `,
                 },

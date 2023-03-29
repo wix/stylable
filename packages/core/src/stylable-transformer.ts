@@ -1002,11 +1002,12 @@ export class ScopeContext {
             following a combinator.
             
             Currently set to stylesheet root for top level selectors and selectors
-            directly nested under @st-scope. But will change in the future to a universal selector. 
+            directly nested under @st-scope. But will change in the future to a universal selector
+            once experimentalSelectorInference will be the default behavior
         */
         const inferredContext =
             inferredSelectorContext ||
-            (this.isNested
+            (this.isNested || transformer.experimentalSelectorInference
                 ? new InferredSelector(transformer, [
                       {
                           _kind: 'css',

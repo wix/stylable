@@ -66,9 +66,6 @@ describe(`features/st-scope`, () => {
                     @st-scope .a, .b {
                         /* @rule(nest) .entry__a.entry--shared, .entry__b.entry--shared */
                         &:shared {}
-
-                        /* @rule(context) .entry__a .entry__b, .entry__b .entry__b */
-                        ::b {}
                     }
                 `,
                 { stylableConfig: { experimentalSelectorInference: true } }
@@ -77,6 +74,23 @@ describe(`features/st-scope`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        it('should infer default context as universal selector', () => {
+            testStylableCore(
+                `
+                    .a {
+                        -st-states: shared;
+                    }
+                    .b {
+                        -st-states: shared;
+                    }
+                    @st-scope .a, .b {
+                        /* @rule(universal context) .entry__a ::b, .entry__b ::b */
+                        ::b {}
+                    }
+                `,
+                { stylableConfig: { experimentalSelectorInference: true } }
+            );
         });
     });
     describe('stylable API', () => {

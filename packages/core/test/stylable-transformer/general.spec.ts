@@ -1,6 +1,15 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { generateStylableRoot, testStylableCore } from '@stylable/core-test-kit';
+import {
+    diagnosticBankReportToStrings,
+    generateStylableRoot,
+    testStylableCore,
+} from '@stylable/core-test-kit';
+import { CSSPseudoClass } from '@stylable/core/dist/features';
+import { transformerDiagnostics } from '@stylable/core/dist/index-internal';
+
+const cssPseudoClassDiagnostics = diagnosticBankReportToStrings(CSSPseudoClass.diagnostics);
+const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 describe('Stylable postcss transform (General)', () => {
     it('should output empty on empty input', () => {
@@ -77,8 +86,32 @@ describe('Stylable postcss transform (General)', () => {
     });
 
     describe('experimentalSelectorInference', () => {
+        it('should set default inferred selector context to universal selector', () => {
+            testStylableCore(
+                `
+                    .root { -st-states: state; }
+                    .class { -st-states: state; }
+                
+                    /* 
+                        @transform-error(unknown state) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                            'state'
+                        )}
+                        @rule(unknown state) :state 
+                    */
+                    :state {}
+        
+                    /* 
+                        @transform-error(unknown pseudo-element) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                            `class`
+                        )}
+                        @rule(unknown pseudo-element) ::class 
+                    */
+                    ::class {}
+                `,
+                { stylableConfig: { experimentalSelectorInference: true } }
+            );
+        });
         it('should reset inferred selector after combinator', () => {
-            // ToDo: fix extra space before ".entry__class"
             testStylableCore(
                 {
                     'comp.st.css': ` .part {} `,
@@ -92,7 +125,7 @@ describe('Stylable postcss transform (General)', () => {
                         /* @rule(unknown pseudo-element) .comp__root ::part */
                         Comp ::part {}
             
-                        /* @rule(standalone pseudo-element) .comp__root  .entry__class */
+                        /* @rule(standalone pseudo-element) .comp__root ::class */
                         Comp ::class {}
                     `,
                 },
