@@ -1,5 +1,5 @@
 import type * as postcss from 'postcss';
-import { createDiagnosticReporter, Diagnostics } from './diagnostics';
+import { Diagnostics } from './diagnostics';
 import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
 import { StylableMeta } from './stylable-meta';
 import { CSSCustomProperty, STVar, STCustomSelector } from './features';
@@ -26,15 +26,6 @@ import {
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
 
-export const processorDiagnostics = {
-    INVALID_NESTING: createDiagnosticReporter(
-        '11011',
-        'error',
-        (child: string, parent: string) =>
-            `nesting of rules within rules is not supported, found: "${child}" inside "${parent}"`
-    ),
-};
-
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
     constructor(
@@ -55,16 +46,6 @@ export class StylableProcessor implements FeatureContext {
                     isScoped: isChildOfAtRule(rule, `st-scope`),
                     reportUnscoped: true,
                 });
-            }
-            const parent = rule.parent;
-            if (parent?.type === 'rule') {
-                this.diagnostics.report(
-                    processorDiagnostics.INVALID_NESTING(
-                        rule.selector,
-                        (parent as postcss.Rule).selector
-                    ),
-                    { node: rule }
-                );
             }
         });
 

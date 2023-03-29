@@ -297,4 +297,53 @@ describe('LS: css-pseudo-class', () => {
             });
         });
     });
+    describe('nesting', () => {
+        it('should infer nest from parent nesting selector', () => {
+            const { service, carets, assertCompletions } = testLangService(`
+                .root {
+                    -st-states: root-state;
+                }
+                .part {
+                    -st-states: part-state;
+                }
+
+                .part {
+                    &^nest^
+                }
+
+                .part {
+                    & {
+                        &^doubleNest^
+                    }
+                }
+
+                /* currently nesting in non-& reset to root - this behavior might change */
+                .part {
+                    :hover {
+                        &^nestUnderNonAmp^
+                    }
+                }
+            `);
+            const entryCarets = carets['/entry.st.css'];
+
+            assertCompletions({
+                message: 'nest',
+                actualList: service.onCompletion('/entry.st.css', entryCarets.nest),
+                expectedList: [{ label: ':part-state' }],
+                unexpectedList: [{ label: ':root-state' }],
+            });
+            assertCompletions({
+                message: 'doubleNest',
+                actualList: service.onCompletion('/entry.st.css', entryCarets.doubleNest),
+                expectedList: [{ label: ':part-state' }],
+                unexpectedList: [{ label: ':root-state' }],
+            });
+            assertCompletions({
+                message: 'nestUnderNonAmp',
+                actualList: service.onCompletion('/entry.st.css', entryCarets.nestUnderNonAmp),
+                expectedList: [{ label: ':root-state' }],
+                unexpectedList: [{ label: ':part-state' }],
+            });
+        });
+    });
 });
