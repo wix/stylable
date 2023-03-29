@@ -77,8 +77,22 @@ describe('Stylable postcss transform (General)', () => {
     });
 
     describe('experimentalSelectorInference', () => {
+        it('should set default inferred selector context to universal selector', () => {
+            testStylableCore(
+                `
+                    .root { -st-states: state; }
+                    .class { -st-states: state; }
+                
+                    /* @rule(unknown state) :state */
+                    :state {}
+        
+                    /* @rule(unknown pseudo-element) ::class */
+                    ::class {}
+                `,
+                { stylableConfig: { experimentalSelectorInference: true } }
+            );
+        });
         it('should reset inferred selector after combinator', () => {
-            // ToDo: fix extra space before ".entry__class"
             testStylableCore(
                 {
                     'comp.st.css': ` .part {} `,
@@ -92,7 +106,7 @@ describe('Stylable postcss transform (General)', () => {
                         /* @rule(unknown pseudo-element) .comp__root ::part */
                         Comp ::part {}
             
-                        /* @rule(standalone pseudo-element) .comp__root  .entry__class */
+                        /* @rule(standalone pseudo-element) .comp__root ::class */
                         Comp ::class {}
                     `,
                 },
