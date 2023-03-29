@@ -57,8 +57,10 @@ describe('transformer/nesting', () => {
 
             .x {
                 @media {
-                    /* @rule &.entry--xxx */
-                    &:xxx {}
+                    @media {
+                        /* @rule &.entry--xxx */
+                        &:xxx {}
+                    }
                 }
             }
         `);
@@ -115,6 +117,12 @@ describe('transformer/nesting', () => {
                 */
                 .root :x {}
             }
+
+            /* 
+                legacy behavior without "experimentalSelectorInference"
+                @rule(after combinator) .entry__root .entry--x  
+            */
+            .root :x {}
         `);
     });
 });
