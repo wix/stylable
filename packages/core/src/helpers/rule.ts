@@ -61,6 +61,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
                 : selectorAst;
             if (getCustomSelector) {
+                // transforms inline custom selectors (e.g. ":--custom" -> ".x .y")
                 ast = transformCustomSelectors(ast, getCustomSelector, () => {
                     /*don't report*/
                 });

@@ -22,6 +22,7 @@ import {
 import { isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import {
+    STPart,
     ClassSymbol,
     CSSContains,
     CSSMedia,
@@ -54,6 +55,7 @@ import { validateCustomPropertyName } from './helpers/css-custom-property';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
 import type { MappedStates } from './helpers/custom-state';
+import cloneDeep from 'lodash.clonedeep';
 
 export interface ResolvedElement {
     name: string;
@@ -815,12 +817,15 @@ export class InferredSelector {
                         continue;
                     }
                     checked[name].add(uniqueId);
-                    // prefer custom selector
-                    const customSelector = STCustomSelector.getCustomSelectorExpended(meta, name);
-                    if (customSelector) {
-                        const selectorList = parseSelectorWithCache(customSelector, {
-                            clone: true,
-                        });
+                    //
+                    const partDef = STPart.getPart(meta, name);
+                    if (!partDef) {
+                        continue;
+                    }
+                    if (Array.isArray(partDef.mapTo)) {
+                        // prefer custom selector
+                        const selectorList = cloneDeep(partDef.mapTo);
+                        const selectorStr = stringifySelector(partDef.mapTo);
                         selectorList.forEach((selector) => {
                             const r = removeFirstRootInFirstCompound(selector, meta);
                             selector.nodes = r.selector.nodes;
@@ -834,8 +839,8 @@ export class InferredSelector {
                         const internalContext = this.api.createSelectorContext(
                             meta,
                             selectorList,
-                            postcss.rule({ selector: customSelector }),
-                            customSelector
+                            postcss.rule({ selector: selectorStr }),
+                            selectorStr
                         );
                         internalContext.isStandaloneSelector = isFirstInSelector;
                         const customAstSelectors = this.api.scopeSelectorAst(internalContext);
@@ -852,10 +857,8 @@ export class InferredSelector {
 
                         addInferredElement(name, inferred, customAstSelectors);
                         break resolved;
-                    }
-                    // matching class part
-                    const classSymbol = CSSClass.get(meta, name);
-                    if (classSymbol) {
+                    } else {
+                        // matching class part
                         const resolvedPart = this.api.getResolvedSymbols(meta).class[name];
                         const resolvedBaseSymbol = getOriginDefinition(resolvedPart);
                         const nodes: SelectorNode[] = [];

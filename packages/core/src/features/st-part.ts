@@ -38,3 +38,7 @@ export function registerLegacyPart(
         // report?
     }
 }
+export function getPart(meta: StylableMeta, name: string): PartData | undefined {
+    const { legacyParts } = plugableRecord.getUnsafe(meta.data, dataKey);
+    return legacyParts[name];
+}
