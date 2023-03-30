@@ -187,6 +187,7 @@ export function addSymbol({
     byNS[nsName].push({ name, symbol, ast: node, safeRedeclare });
     byNSFlat[nsName][name] = symbol;
     typeTable[name] = symbol;
+    return symbol;
 }
 
 export function reportRedeclare(context: FeatureContext) {

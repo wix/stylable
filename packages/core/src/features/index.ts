@@ -15,6 +15,8 @@ export * as STScope from './st-scope';
 export * as STVar from './st-var';
 export type { VarSymbol, ComputedStVar, FlatComputedStVar } from './st-var';
 
+export * as STPart from './st-part';
+
 export * as STCustomSelector from './st-custom-selector';
 
 export * as STCustomState from './st-custom-state';

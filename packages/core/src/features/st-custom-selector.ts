@@ -6,6 +6,7 @@ import {
     CustomSelectorMap,
 } from '../helpers/custom-selector';
 import { parseSelectorWithCache } from '../helpers/selector';
+import * as STPart from './st-part';
 import * as postcss from 'postcss';
 import { SelectorList, stringifySelectorAst } from '@tokey/css-selector-parser';
 import type { StylableMeta } from '../stylable-meta';
@@ -48,6 +49,7 @@ export const hooks = createFeature({
             const analyzed = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const name = customSelector.slice(3);
             analyzed[name] = { selector, ast, isScoped, def: atRule };
+            STPart.registerLegacyPart(context.meta, name, { mapTo: ast });
         } else {
             // TODO: add warn there are two types one is not valid name and the other is empty name.
         }
