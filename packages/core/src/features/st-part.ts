@@ -42,3 +42,8 @@ export function getPart(meta: StylableMeta, name: string): PartData | undefined 
     const { legacyParts } = plugableRecord.getUnsafe(meta.data, dataKey);
     return legacyParts[name];
 }
+
+export function getPartNames(meta: StylableMeta) {
+    const { legacyParts } = plugableRecord.getUnsafe(meta.data, dataKey);
+    return Object.keys(legacyParts);
+}

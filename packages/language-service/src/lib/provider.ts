@@ -298,6 +298,9 @@ export class Provider {
                 );
             }
         } else if (STCustomSelector.getCustomSelector(meta, word)) {
+            // ToDo: figure out if this is necessary.
+            // seems to point to local custom selector definition.
+            // see local-custom-selector.st.css for example.
             defs.push(
                 new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
             );
@@ -766,6 +769,7 @@ export class Provider {
             (ps.selector[0] as SelectorChunk).classes[0] ||
             (ps.selector[0] as SelectorChunk).customSelectors[0] ||
             chunkStrings[0];
+        // transforms inline custom selectors (e.g. ":--custom" -> ".x .y")
         const expandedLine: string = STCustomSelector.transformCustomSelectorInline(
             meta,
             lineChunkAtCursor
@@ -1826,7 +1830,7 @@ export function getDefSymbol(
             return { word, meta: null };
         }
     }
-
+    // transforms inline custom selectors (e.g. ":--custom" -> ".x .y")
     const expandedLine: string = STCustomSelector.transformCustomSelectorInline(
         meta,
         lineChunkAtCursor
