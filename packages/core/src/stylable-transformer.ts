@@ -5,6 +5,7 @@ import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoElements } from './native-reserved-lists';
 import {
+    cloneSelector,
     createCombinatorSelector,
     parseSelectorWithCache,
     stringifySelector,
@@ -55,7 +56,6 @@ import { validateCustomPropertyName } from './helpers/css-custom-property';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
 import type { MappedStates } from './helpers/custom-state';
-import cloneDeep from 'lodash.clonedeep';
 
 export interface ResolvedElement {
     name: string;
@@ -824,7 +824,7 @@ export class InferredSelector {
                     }
                     if (Array.isArray(partDef.mapTo)) {
                         // prefer custom selector
-                        const selectorList = cloneDeep(partDef.mapTo);
+                        const selectorList = cloneSelector(partDef.mapTo);
                         const selectorStr = stringifySelector(partDef.mapTo);
                         selectorList.forEach((selector) => {
                             const r = removeFirstRootInFirstCompound(selector, meta);
