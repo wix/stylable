@@ -45,6 +45,10 @@ export function parseSelectorWithCache(
         : (cachedValue as ImmutableSelectorList);
 }
 
+export function cloneSelector<T extends Selector | SelectorList>(s: T): T {
+    return cloneDeep(s);
+}
+
 /**
  * returns for each selector if it contains only
  * a single class or an element selector.

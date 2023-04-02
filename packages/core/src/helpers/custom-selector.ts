@@ -14,7 +14,7 @@ type UnknownReport = { type: 'unknown'; origin: string; unknown: string };
 type CircularReport = { type: 'circular'; path: readonly string[] };
 export type TransformCustomSelectorReport = UnknownReport | CircularReport;
 
-export function transformCustomSelectorMap(
+export function transformInlineCustomSelectorMap(
     customSelectors: CustomSelectorMap,
     report: (data: TransformCustomSelectorReport) => void
 ) {
@@ -24,7 +24,7 @@ export function transformCustomSelectorMap(
         if (!ast) {
             return;
         }
-        result[name] = transformCustomSelectors(
+        result[name] = transformInlineCustomSelectors(
             ast,
             (nestedName) => {
                 const selector = `:--${nestedName}`;
@@ -51,19 +51,26 @@ function isCustomSelectorNode(node: SelectorNode): node is PseudoClass {
     return node.type === 'pseudo_class' && node.value.startsWith('--');
 }
 
-export function transformCustomSelectors(
+/**
+ * Takes a list of selectors and a function that returns a selector
+ * against a custom selector name.
+ *
+ * Then search for inline custom selectors (e.g. ":--custom") and
+ * replaces them with the retrieved selectors it receives
+ */
+export function transformInlineCustomSelectors(
     inputSelectors: SelectorList,
     getCustomSelector: (name: string) => SelectorList | undefined,
     report: (data: UnknownReport) => void
 ): SelectorList {
     const result: SelectorList = [];
     for (const selector of inputSelectors) {
-        result.push(...transformCustomSelector(selector, getCustomSelector, report));
+        result.push(...transformInlineCustomSelector(selector, getCustomSelector, report));
     }
     return result;
 }
 
-function transformCustomSelector(
+function transformInlineCustomSelector(
     inputSelector: Selector,
     getCustomSelector: (name: string) => SelectorList | undefined,
     report: (data: UnknownReport) => void

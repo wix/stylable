@@ -49,6 +49,30 @@ describe('features/css-pseudo-element', () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it('should prefer a custom selector to a class with the same name', () => {
+            const { sheets } = testStylableCore({
+                'comp.st.css': `
+                    /* at-rule class registration */
+                    @st-scope .red {}
+
+                    /* should use for custom-element */
+                    @custom-selector :--red .green;
+
+                    /* normal class registration */
+                    .red {}
+                `,
+                'entry.st.css': `
+                    @st-import Comp from './comp.st.css';
+
+                    /* @rule .entry__root .comp__root .comp__green */
+                    .root Comp::red {}
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
         it('should expand custom selector through 2 levels (with -st-extends)', () => {
             const { sheets } = testStylableCore({
                 'base.st.css': `

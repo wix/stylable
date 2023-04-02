@@ -15,6 +15,7 @@ export {
     STImport,
     STGlobal,
     STNamespace,
+    STPart,
     STCustomSelector,
     STCustomState,
     CSSClass,
