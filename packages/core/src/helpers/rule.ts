@@ -14,7 +14,7 @@ import {
     SelectorList,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
-import { transformCustomSelectors } from './custom-selector';
+import { transformInlineCustomSelectors } from './custom-selector';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return !!(
@@ -61,8 +61,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
                 : selectorAst;
             if (getCustomSelector) {
-                // transforms inline custom selectors (e.g. ":--custom" -> ".x .y")
-                ast = transformCustomSelectors(ast, getCustomSelector, () => {
+                ast = transformInlineCustomSelectors(ast, getCustomSelector, () => {
                     /*don't report*/
                 });
             }

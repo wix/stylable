@@ -1,8 +1,8 @@
 import { plugableRecord } from '../helpers/plugable-record';
 import { createFeature } from './feature';
 import {
-    transformCustomSelectorMap,
-    transformCustomSelectors,
+    transformInlineCustomSelectorMap,
+    transformInlineCustomSelectors,
     CustomSelectorMap,
 } from '../helpers/custom-selector';
 import { parseSelectorWithCache } from '../helpers/selector';
@@ -60,7 +60,7 @@ export const hooks = createFeature({
         for (const [name, data] of Object.entries(analyzed)) {
             customSelectors[name] = data.ast;
         }
-        const inlined = transformCustomSelectorMap(customSelectors, (report) => {
+        const inlined = transformInlineCustomSelectorMap(customSelectors, (report) => {
             if (report.type === 'unknown' && analyzed[report.origin]) {
                 const unknownSelector = `:--${report.unknown}`;
                 context.diagnostics.report(diagnostics.UNKNOWN_CUSTOM_SELECTOR(unknownSelector), {
@@ -143,7 +143,7 @@ export function transformCustomSelectorInline(
 ) {
     const ast = parseSelectorWithCache(selector, { clone: true });
     const analyzed = plugableRecord.getUnsafe(meta.data, dataKey);
-    const inlined = transformCustomSelectors(
+    const inlined = transformInlineCustomSelectors(
         ast,
         (name) => analyzed[name]?.ast,
         (report) => {
