@@ -837,7 +837,7 @@ function maybeResolveImport(
     meta: StylableMeta
 ): StylableMeta | null {
     let resolvedImport: StylableMeta | null = null;
-    if (importName && importName.endsWith('.st.css')) {
+    if (importName && importName.endsWith('.css')) {
         try {
             const imported = meta.getImportStatements().find((i) => i.request === importName)!;
             resolvedImport = stylable.fileProcessor.process(
@@ -886,7 +886,7 @@ export const StImportNamedCompletionProvider: CompletionProvider & {
                     }
                 });
 
-                if (importName.endsWith('.st.css')) {
+                if (importName.endsWith('.css')) {
                     const resolvedImport: StylableMeta | null = this.resolveImport(
                         importName,
                         stylable,
