@@ -14,22 +14,30 @@ describe('LS: st-import', () => {
         tempDir.remove();
     });
     it('should suggest symbols from native css', () => {
-        const { service, carets, assertCompletions } = testLangService({
-            'native.css': `
-                .classA {}
-                .classB {
-                    --propA: 1;
-                }
-                :vars {
-                    varA: green;
-                }
-                @property --propB;
-            `,
-            'entry.st.css': `
-                @st-import [^top^] from './native.css';
-            `,
-        });
-        const entryPath = '/entry.st.css';
+        const { service, carets, assertCompletions, fs } = testLangService(
+            {
+                'native.css': `
+                    .classA {}
+                    .classB {
+                        --propA: 1;
+                    }
+                    :vars {
+                        varA: green;
+                    }
+                    @property --propB;
+                `,
+                'entry.st.css': `
+                    @st-import [^top^] from './native.css';
+                `,
+            },
+            {
+                // ToDo: this part of the completion provider still relays on old code
+                // that cannot run in memory-fs on windows. once the code is refactor this test
+                // should remove the "testOnNativeFileSystem" flag
+                testOnNativeFileSystem: tempDir.path,
+            }
+        );
+        const entryPath = fs.join(tempDir.path, 'entry.st.css');
         const entryCarets = carets[entryPath];
 
         assertCompletions({
