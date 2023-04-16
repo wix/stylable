@@ -7,18 +7,22 @@ import * as postcss from 'postcss';
 // ToDo: model single char tokens
 type PostcssToken = [string, string, number, number];
 
-type AnyNode =
+export type AnyNode =
     | Invalid
     | postcss.AnyNode
     | postcss.Container
     | postcss.Document
     | postcss.Declaration;
+
 export interface ParseForEditingResult {
-    ast: EditTimeParser['root'];
-    errorNodes: EditTimeParser['errorNodes'];
-    ambiguousNodes: EditTimeParser['ambiguousNodes'];
+    ast: postcss.Root;
+    errorNodes: Map<AnyNode, string[]>;
+    ambiguousNodes: Map<AnyNode, string[]>;
 }
-export function parseForEditing(source: string, { from = '' }: { from?: string } = {}) {
+export function parseForEditing(
+    source: string,
+    { from = '' }: { from?: string } = {}
+): ParseForEditingResult {
     const input = new postcss.Input(source, { from }); // ToDo: check why stringifier option doesn't work
     const parser = new EditTimeParser(input);
     parser.parse();
