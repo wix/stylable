@@ -1,7 +1,7 @@
 // if you move this file change #1.
 import { join, normalize } from 'path';
 import playwright from 'playwright-core';
-import rimraf from 'rimraf';
+import { rimraf } from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';

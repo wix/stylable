@@ -9,7 +9,7 @@ import {
     promises,
 } from 'fs';
 import { join, relative } from 'path';
-import rimraf from 'rimraf';
+import { sync as rimrafSync, rimraf } from 'rimraf';
 
 const { writeFile, mkdir } = promises;
 
@@ -122,7 +122,7 @@ export function createTempDirectorySync(prefix = 'temp-'): ITempDirectorySync {
     mkdirSync(tempDir, { recursive: true });
     return {
         path: tempDir,
-        remove: () => rimraf.sync(tempDir),
+        remove: () => rimrafSync(tempDir),
     };
 }
 
