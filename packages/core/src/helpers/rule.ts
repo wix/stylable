@@ -40,23 +40,19 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     mixinTarget?: T,
     isRoot = false,
     getCustomSelector?: (name: string) => SelectorList | undefined,
-    scopeSelector = ''
+    isNestedInMixin = false
 ): T {
     // keyframes on class mixin?
     const prefixSelectorList = parseSelectorWithCache(selectorPrefix);
     const prefixType = prefixSelectorList[0].nodes[0];
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
-    const scopeSelectorAST = parseSelectorWithCache(scopeSelector);
     root.nodes.forEach((node) => {
         if (node.type === `rule` && (node.selector === ':vars' || node.selector === ':import')) {
             // nodes that don't mix
             return;
         } else if (node.type === `rule`) {
-            let selectorAst = parseSelectorWithCache(node.selector, { clone: true });
-            if (scopeSelector) {
-                selectorAst = scopeNestedSelector(scopeSelectorAST, selectorAst, isRoot).ast;
-            }
+            const selectorAst = parseSelectorWithCache(node.selector, { clone: true });
             let ast = isRoot
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
                 : selectorAst;
@@ -65,7 +61,8 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                     /*don't report*/
                 });
             }
-            const matchesSelectors = isRoot ? ast : ast.filter((node) => containsPrefix(node));
+            const matchesSelectors =
+                isRoot || isNestedInMixin ? ast : ast.filter((node) => containsPrefix(node));
 
             if (matchesSelectors.length) {
                 const selector = stringifySelector(
@@ -88,17 +85,36 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 node.name === 'layer' ||
                 node.name === 'container'
             ) {
-                const scopeSelector = node.name === 'st-scope' ? node.params : '';
+                let scopeSelector = node.name === 'st-scope' ? node.params : '';
+                let isNestedInMixin = false;
+                if (scopeSelector) {
+                    const ast = parseSelectorWithCache(scopeSelector, { clone: true });
+                    const matchesSelectors = isRoot
+                        ? ast
+                        : ast.filter((node) => containsPrefix(node));
+                    if (matchesSelectors.length) {
+                        isNestedInMixin = true;
+                        scopeSelector = stringifySelector(
+                            matchesSelectors.map((selectorNode) => {
+                                if (!isRoot) {
+                                    selectorNode = fixChunkOrdering(selectorNode, prefixType);
+                                }
+                                replaceTargetWithNesting(selectorNode, prefixType);
+                                return selectorNode;
+                            })
+                        );
+                    }
+                }
                 const atRuleSubset = createSubsetAst(
                     node,
                     selectorPrefix,
                     postcss.atRule({
-                        params: node.params,
+                        params: scopeSelector || node.params,
                         name: node.name,
                     }),
                     isRoot,
                     getCustomSelector,
-                    scopeSelector
+                    isNestedInMixin
                 );
                 if (atRuleSubset.nodes) {
                     mixinRoot.append(atRuleSubset);

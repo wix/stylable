@@ -1629,6 +1629,42 @@ describe(`features/st-mixin`, () => {
             shouldReportNoDiagnostics(meta);
         });
     });
+    describe('st-scope', () => {
+        it('should collect mixin from st-sope selector', () => {
+            const { sheets } = testStylableCore({
+                '/mix.st.css': `
+                    @st-scope .mix {
+                        .part { color: green; }
+                        .part2 { color: purple; }
+                    }
+                    @st-scope .mix.compoundAfter {
+                        .part { color: blue; }
+                    }
+                    @st-scope .compoundBefore.mix {
+                        .part { color: pink; }
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [mix] from './mix.st.css';
+
+                    /* 
+                        @rule[1] .entry__into .mix__part {color: green;} 
+                        @rule[2] .entry__into .mix__part2 {color: purple;} 
+                        @rule[3] .entry__into.mix__compoundAfter .mix__part {color: blue;} 
+                        @rule[4] .entry__into.mix__compoundBefore .mix__part {color: pink;} 
+                        
+                    */
+                    .into {
+                        -st-mixin: mix;
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
     describe(`higher-level feature integrations`, () => {
         // ToDo: move to their higher level feature spec when created
         describe(`css-asset`, () => {
