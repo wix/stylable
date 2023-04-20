@@ -1636,6 +1636,7 @@ describe(`features/st-mixin`, () => {
                     @st-scope .mix {
                         .part { color: green; }
                         .part2 { color: purple; }
+                        &:state { color: gold; }
                     }
                     @st-scope .mix.compoundAfter {
                         .part { color: blue; }
@@ -1643,16 +1644,23 @@ describe(`features/st-mixin`, () => {
                     @st-scope .compoundBefore.mix {
                         .part { color: pink; }
                     }
+                    @st-scope .mix, .notMix, .mix[extra] {
+                        .part { color: white; }
+                    }
+                    .mix {
+                        -st-states: state;
+                    }
                 `,
                 '/entry.st.css': `
                     @st-import [mix] from './mix.st.css';
 
                     /* 
-                        @rule[1] .entry__into .mix__part {color: green;} 
-                        @rule[2] .entry__into .mix__part2 {color: purple;} 
-                        @rule[3] .entry__into.mix__compoundAfter .mix__part {color: blue;} 
-                        @rule[4] .entry__into.mix__compoundBefore .mix__part {color: pink;} 
-                        
+                        @rule(descendant)[1] .entry__into .mix__part {color: green;} 
+                        @rule(descendant2)[2] .entry__into .mix__part2 {color: purple;} 
+                        @rule(state)[3] .entry__into.mix--state {color: gold;} 
+                        @rule(+after)[4] .entry__into.mix__compoundAfter .mix__part {color: blue;} 
+                        @rule(+before)[5] .entry__into.mix__compoundBefore .mix__part {color: pink;} 
+                        @rule(multi selector)[6] .entry__into .mix__part, .entry__into[extra] .mix__part {color: white;}
                     */
                     .into {
                         -st-mixin: mix;
