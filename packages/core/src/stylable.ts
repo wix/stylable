@@ -185,7 +185,7 @@ export class Stylable {
     ): { selector: string; resolved: ResolvedElement[][] } {
         const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
         const transformer = this.createTransformer(options);
-        const r = transformer.scopeSelector(meta, selector, undefined, undefined, true);
+        const r = transformer.scopeSelector(meta, selector, undefined, undefined, undefined, true);
         return {
             selector: r.selector,
             resolved: r.elements,

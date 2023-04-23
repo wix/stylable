@@ -5,7 +5,7 @@ import * as STCustomSelector from './st-custom-selector';
 import * as STVar from './st-var';
 import type { ElementSymbol } from './css-type';
 import type { ClassSymbol } from './css-class';
-import { createSubsetAst } from '../helpers/rule';
+import { createSubsetAst, isStMixinMarker } from '../helpers/rule';
 import { scopeNestedSelector } from '../helpers/selector';
 import { mixinHelperDiagnostics, parseStMixin, parseStPartialMixin } from '../helpers/mixin';
 import { resolveArgumentsValue } from '../functions';
@@ -110,6 +110,17 @@ export const diagnostics = {
 // HOOKS
 
 export const hooks = createFeature({
+    transformSelectorNode({ selectorContext, node }) {
+        const isMarker = isStMixinMarker(node);
+        if (isMarker) {
+            selectorContext.setNextSelectorScope(
+                selectorContext.inferredSelectorMixin,
+                node,
+                node.value
+            );
+        }
+        return isMarker;
+    },
     transformLastPass({ context, ast, transformer, cssVarsMapping, path }) {
         ast.walkRules((rule) => appendMixins(context, transformer, rule, cssVarsMapping, path));
     },
