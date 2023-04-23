@@ -49,6 +49,9 @@ interface StylableWebpackPluginOptions {
     cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
     /**
      * Determine the runtime stylesheet id kind used by the cssInjection js mode
+     * This sets the value of the st_id attribute on the stylesheet element
+     * default for dev - 'module'
+     * default for prod - 'namespace'
      */
     runtimeStylesheetId?: 'module' | 'namespace';
     /**
