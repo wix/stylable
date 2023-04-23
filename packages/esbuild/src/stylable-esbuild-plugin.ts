@@ -1,13 +1,14 @@
+import fs, { readFileSync, writeFileSync } from 'fs';
+import { relative, join } from 'path';
+import decache from 'decache';
 import type { Plugin, PluginBuild } from 'esbuild';
 import { Stylable, StylableConfig, StylableResults } from '@stylable/core';
+import { StylableOptimizer } from '@stylable/optimizer';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
-import decache from 'decache';
-import fs, { readFileSync, writeFileSync } from 'fs';
 import { generateStylableJSModuleSource } from '@stylable/module-utils';
 import { sortModulesByDepth, collectImportsWithSideEffects } from '@stylable/build-tools';
-import { relative, join } from 'path';
-import { DiagnosticsMode, emitDiagnostics } from '@stylable/core/dist/index-internal';
 import { resolveConfig } from '@stylable/cli';
+import { DiagnosticsMode, emitDiagnostics } from '@stylable/core/dist/index-internal';
 
 const namespaces = {
     jsModule: 'stylable-js-module',
@@ -43,13 +44,26 @@ interface ESBuildOptions {
      * Stylable build mode
      */
     mode?: 'production' | 'development';
+    /**
+     * Determine the runtime stylesheet id kind used by the cssInjection js mode
+     * This sets the value of the st_id attribute on the stylesheet element
+     * default for dev - 'module+namespace'
+     * default for prod - 'namespace'
+     */
+    runtimeStylesheetId?: 'module' | 'namespace' | 'module+namespace';
 }
 
 export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugin => ({
     name: 'esbuild-stylable-plugin',
     setup(build: PluginBuild) {
-        const { cssInjection, diagnosticsMode, mode, stylableConfig, configFile } =
-            applyDefaultOptions(initialPluginOptions);
+        const {
+            cssInjection,
+            diagnosticsMode,
+            mode,
+            stylableConfig,
+            configFile,
+            runtimeStylesheetId,
+        } = applyDefaultOptions(initialPluginOptions);
         let stylable: Stylable;
         build.initialOptions.metafile = true;
 
@@ -68,7 +82,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                         mode,
                         projectRoot,
                         fileSystem: fs,
-                        // optimizer: new StylableOptimizer(),
+                        optimizer: new StylableOptimizer(),
                         resolverCache: new Map(),
                         requireModule,
                         resolveNamespace: resolveNamespaceNode,
@@ -145,6 +159,19 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 });
             }
 
+            const getModuleId = () => {
+                switch (runtimeStylesheetId) {
+                    case 'module':
+                        return relative(stylable.projectRoot, args.path);
+                    case 'namespace':
+                        return res.meta.namespace;
+                    case 'module+namespace':
+                        return `${relative(stylable.projectRoot, args.path)}|${res.meta.namespace}`;
+                    default:
+                        throw new Error(`Unknown runtimeStylesheetId: ${runtimeStylesheetId}`);
+                }
+            };
+
             const moduleCode = generateStylableJSModuleSource(
                 {
                     imports,
@@ -158,7 +185,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                           css: res.meta.targetAst!.toString(),
                           depth: cssDepth,
                           runtimeId: 'esbuild-stylable-plugin',
-                          id: relative(stylable.projectRoot, args.path),
+                          id: getModuleId(),
                       }
                     : undefined
             );
@@ -232,6 +259,7 @@ function applyDefaultOptions(options: ESBuildOptions): Required<ESBuildOptions> 
         stylableConfig: (config) => config,
         configFile: false,
         mode: 'production',
+        runtimeStylesheetId: 'module+namespace',
         ...options,
     };
 }
@@ -268,7 +296,7 @@ function extractMarkers(css: string) {
     const sorted = sortModulesByDepth(
         extracted,
         (m) => m.depth,
-        () => /*TODO*/ '',
+        () => /*TODO: should we sort by id like in webpack? */ '',
         -1
     );
 

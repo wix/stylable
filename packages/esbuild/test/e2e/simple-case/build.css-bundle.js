@@ -1,4 +1,5 @@
 const { stylablePlugin } = require('@stylable/esbuild');
+const { createNamespaceStrategyNode } = require('@stylable/node');
 
 module.exports.run = function run(build, options) {
     return build({
@@ -7,6 +8,15 @@ module.exports.run = function run(build, options) {
             plugins: [
                 stylablePlugin({
                     cssInjection: 'css',
+                    stylableConfig(config) {
+                        return {
+                            ...config,
+                            resolveNamespace: createNamespaceStrategyNode({
+                                hashFragment: 'minimal',
+                                strict: true,
+                            }),
+                        };
+                    },
                 }),
             ],
         }),
