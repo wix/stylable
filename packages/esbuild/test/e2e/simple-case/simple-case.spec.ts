@@ -11,10 +11,10 @@ describe('Stylable ESBuild plugin ', () => {
         const { open } = await tk.build('simple-case', 'build.css-in-js.js');
         await contract(await open({ headless: false }), [
             {
-                st_id: 'reset.css',
+                st_id: 'a.st.css',
             },
             {
-                st_id: 'a.st.css',
+                st_id: 'reset.css',
             },
             {
                 st_id: 'side-effects.st.css',

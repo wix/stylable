@@ -79,7 +79,7 @@ export const stylablePlugin = (options: ESBuildOptions = {}): Plugin => ({
             const res = stylable.transform(args.path);
             const { cssDepth = 0, deepDependencies } = res.meta.transformCssDepth!;
             const imports = [];
-
+            const unusedImports = [];
             collectImportsWithSideEffects(
                 stylable,
                 res.meta,
@@ -91,8 +91,7 @@ export const stylablePlugin = (options: ESBuildOptions = {}): Plugin => ({
                             imports.push({ from: absPath });
                         }
                     } else if (contextMeta === res.meta) {
-                        // TODO
-                        // unusedImports.push(absPath);
+                        unusedImports.push(absPath);
                     }
                 }
             );
