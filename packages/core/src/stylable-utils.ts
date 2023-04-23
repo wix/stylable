@@ -2,7 +2,7 @@ import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import type { ImportSymbol, StylableSymbol } from './features';
-import { isChildOfAtRule } from './helpers/rule';
+import { isChildOfAtRule, stMixinMarker, isStMixinMarker } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
 
 export function isValidDeclaration(decl: postcss.Declaration) {
@@ -22,21 +22,26 @@ export function mergeRules(
     mixinAst: postcss.Root,
     rule: postcss.Rule,
     mixinDecl: postcss.Declaration,
-    report?: Diagnostics
+    report: Diagnostics,
+    useNestingAsAnchor: boolean
 ) {
     let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
     const nestedInKeyframes = isChildOfAtRule(rule, `keyframes`);
+    const anchorSelector = useNestingAsAnchor ? '&' : ':' + stMixinMarker;
+    const anchorNodeCheck = useNestingAsAnchor ? undefined : isStMixinMarker;
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
         if (isChildOfAtRule(mixinRule, 'keyframes')) {
             return;
         }
-        if (mixinRule.selector === '&' && !mixinRoot) {
+        if (mixinRule.selector === anchorSelector && !mixinRoot) {
             if (mixinRule.parent === mixinAst) {
                 mixinRoot = mixinRule;
             } else {
                 const { selector } = scopeNestedSelector(
                     parseSelectorWithCache(rule.selector),
-                    parseSelectorWithCache(mixinRule.selector)
+                    parseSelectorWithCache(mixinRule.selector),
+                    false,
+                    anchorNodeCheck
                 );
                 mixinRoot = 'NoRoot';
                 mixinRule.selector = selector;
@@ -44,7 +49,9 @@ export function mergeRules(
         } else {
             const { selector } = scopeNestedSelector(
                 parseSelectorWithCache(rule.selector),
-                parseSelectorWithCache(mixinRule.selector)
+                parseSelectorWithCache(mixinRule.selector),
+                false,
+                anchorNodeCheck
             );
             mixinRule.selector = selector;
         }

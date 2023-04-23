@@ -132,6 +132,8 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
 }
 
 export const stMixinMarker = 'st-mixin-marker';
+export const isStMixinMarker = (node: SelectorNode) =>
+    node.type === 'pseudo_class' && node.value === stMixinMarker;
 function replaceTargetWithMixinAnchor(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
     walkSelector(selectorNode, (node) => {
         if (matchTypeAndValue(node, prefixType)) {

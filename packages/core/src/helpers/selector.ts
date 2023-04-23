@@ -175,7 +175,8 @@ export function isCompRoot(name: string) {
 export function scopeNestedSelector(
     scopeSelectorAst: ImmutableSelectorList,
     nestedSelectorAst: ImmutableSelectorList,
-    rootScopeLevel = false
+    rootScopeLevel = false,
+    isAnchor?: (node: SelectorNode) => boolean
 ): { selector: string; ast: SelectorList } {
     const resultSelectors: SelectorList = [];
     nestedSelectorAst.forEach((targetAst) => {
@@ -203,7 +204,7 @@ export function scopeNestedSelector(
                 : false;
             let nestedMixRoot = false;
             walkSelector(outputAst, (node, i, nodes) => {
-                if (node.type === 'nesting') {
+                if (isAnchor ? isAnchor(node) : node.type === 'nesting') {
                     nestedMixRoot = true;
                     nodes.splice(i, 1, {
                         type: `selector`,

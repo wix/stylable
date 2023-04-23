@@ -422,7 +422,7 @@ function handleJSMixin(
         meta.source
     );
 
-    mergeRules(mixinRoot, config.rule, mixDef.data.originDecl, context.diagnostics);
+    mergeRules(mixinRoot, config.rule, mixDef.data.originDecl, context.diagnostics, true);
 }
 
 function handleCSSMixin(
@@ -498,11 +498,23 @@ function handleCSSMixin(
     }
 
     if (roots.length === 1) {
-        mergeRules(roots[0], config.rule, mixDef.data.originDecl, config.transformer.diagnostics);
+        mergeRules(
+            roots[0],
+            config.rule,
+            mixDef.data.originDecl,
+            config.transformer.diagnostics,
+            false
+        );
     } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
         roots.forEach((root) => mixinRoot.prepend(...root.nodes));
-        mergeRules(mixinRoot, config.rule, mixDef.data.originDecl, config.transformer.diagnostics);
+        mergeRules(
+            mixinRoot,
+            config.rule,
+            mixDef.data.originDecl,
+            config.transformer.diagnostics,
+            false
+        );
     }
 }
 
