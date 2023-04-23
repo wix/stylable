@@ -585,23 +585,26 @@ export class StylableTransformer {
                 }
             }
         } else if (node.type === 'pseudo_class') {
-            STMixin.hooks.transformSelectorNode({
+            const isCustomSelector = STCustomSelector.hooks.transformSelectorNode({
                 context: transformerContext,
                 selectorContext: context,
                 node,
-            }) ||
-                STCustomSelector.hooks.transformSelectorNode({
-                    context: transformerContext,
-                    selectorContext: context,
-                    node,
-                }) ||
+            });
+            if (!isCustomSelector) {
                 CSSPseudoClass.hooks.transformSelectorNode({
                     context: transformerContext,
                     selectorContext: context,
                     node,
                 });
+            }
         } else if (node.type === `nesting`) {
             context.setNextSelectorScope(context.inferredSelectorNest, node, node.value);
+        } else if (node.type === 'attribute') {
+            STMixin.hooks.transformSelectorNode({
+                context: transformerContext,
+                selectorContext: context,
+                node,
+            });
         }
     }
 }

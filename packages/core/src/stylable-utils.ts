@@ -27,7 +27,7 @@ export function mergeRules(
 ) {
     let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
     const nestedInKeyframes = isChildOfAtRule(rule, `keyframes`);
-    const anchorSelector = useNestingAsAnchor ? '&' : ':' + stMixinMarker;
+    const anchorSelector = useNestingAsAnchor ? '&' : '[' + stMixinMarker + ']';
     const anchorNodeCheck = useNestingAsAnchor ? undefined : isStMixinMarker;
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
         if (isChildOfAtRule(mixinRule, 'keyframes')) {

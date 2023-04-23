@@ -57,29 +57,29 @@ describe(`helpers/rule`, () => {
             );
 
             const expected = [
-                { selector: ':st-mixin-marker .x' },
-                { selector: ':st-mixin-marker::x' },
-                { selector: ':st-mixin-marker[data]' },
-                { selector: ':st-mixin-marker:hover' },
-                { selector: ':st-mixin-marker' },
-                { selector: ':st-mixin-marker' },
-                { selector: ':st-mixin-marker.x' },
-                { selector: ':st-mixin-marker.x' },
-                { selector: ':st-mixin-marker.x.y::i.z:hover' },
-                { selector: ':st-mixin-marker:hover .y' },
-                { selector: ':st-mixin-marker .y' },
-                { selector: ':st-mixin-marker:not(.x)' },
-                { selector: ':st-mixin-marker :st-mixin-marker.x:hover' },
-                { selector: ':st-mixin-marker.y.x' },
-                { selector: ':st-mixin-marker:st-mixin-marker' }, // TODO: check if possible
-                { selector: ':not(:st-mixin-marker) :st-mixin-marker' },
-                { selector: ':nth-child(5n - 1 of :st-mixin-marker)' },
-                { selector: ':nth-child(5n - 2 of :st-mixin-marker, :st-mixin-marker)' },
-                { selector: ':nth-child(5n - 3 of :st-mixin-marker, .x, :st-mixin-marker)' }, // ToDo: check if to remove unrelated nested selectors
-                { selector: ':st-mixin-marker' },
+                { selector: '[st-mixin-marker] .x' },
+                { selector: '[st-mixin-marker]::x' },
+                { selector: '[st-mixin-marker][data]' },
+                { selector: '[st-mixin-marker]:hover' },
+                { selector: '[st-mixin-marker]' },
+                { selector: '[st-mixin-marker]' },
+                { selector: '[st-mixin-marker].x' },
+                { selector: '[st-mixin-marker].x' },
+                { selector: '[st-mixin-marker].x.y::i.z:hover' },
+                { selector: '[st-mixin-marker]:hover .y' },
+                { selector: '[st-mixin-marker] .y' },
+                { selector: '[st-mixin-marker]:not(.x)' },
+                { selector: '[st-mixin-marker] [st-mixin-marker].x:hover' },
+                { selector: '[st-mixin-marker].y.x' },
+                { selector: '[st-mixin-marker][st-mixin-marker]' }, // TODO: check if possible
+                { selector: ':not([st-mixin-marker]) [st-mixin-marker]' },
+                { selector: ':nth-child(5n - 1 of [st-mixin-marker])' },
+                { selector: ':nth-child(5n - 2 of [st-mixin-marker], [st-mixin-marker])' },
+                { selector: ':nth-child(5n - 3 of [st-mixin-marker], .x, [st-mixin-marker])' }, // ToDo: check if to remove unrelated nested selectors
+                { selector: '[st-mixin-marker]' },
                 {
-                    selector: ':st-mixin-marker[out]',
-                    nodes: [{ selector: ':st-mixin-marker[in]' }],
+                    selector: '[st-mixin-marker][out]',
+                    nodes: [{ selector: '[st-mixin-marker][in]' }],
                 },
             ];
 
@@ -99,7 +99,7 @@ describe(`helpers/rule`, () => {
 
             const expected = [
                 { selector: ':global(.x)' },
-                { selector: ':global(.x) :st-mixin-marker' },
+                { selector: ':global(.x) [st-mixin-marker]' },
             ];
 
             testMatcher(expected, res.nodes);
@@ -119,14 +119,14 @@ describe(`helpers/rule`, () => {
             );
 
             const expected = [
-                { selector: ':st-mixin-marker' },
-                { selector: ':st-mixin-marker:hover' },
+                { selector: '[st-mixin-marker]' },
+                { selector: '[st-mixin-marker]:hover' },
                 {
                     type: 'atrule',
                     params: '(max-width: 300px)',
                     nodes: [
-                        { selector: ':st-mixin-marker' },
-                        { selector: ':st-mixin-marker:hover' },
+                        { selector: '[st-mixin-marker]' },
+                        { selector: '[st-mixin-marker]:hover' },
                     ],
                 },
             ];
@@ -145,7 +145,7 @@ describe(`helpers/rule`, () => {
                 '.i'
             );
 
-            const expected = [{ selector: ':st-mixin-marker' }];
+            const expected = [{ selector: '[st-mixin-marker]' }];
 
             testMatcher(expected, res.nodes);
         });
