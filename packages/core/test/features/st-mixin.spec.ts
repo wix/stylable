@@ -6,6 +6,9 @@ import {
     shouldReportNoDiagnostics,
     matchRuleAndDeclaration,
     diagnosticBankReportToStrings,
+    assertRule,
+    assertDecl,
+    assertAtRule,
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import type * as postcss from 'postcss';
@@ -307,13 +310,15 @@ describe(`features/st-mixin`, () => {
             }
         );
     });
-    it.skip('should support CSS nesting as part of a mixin', () => {
-        // ToDo: support mixin of CSS nesting (support in "mergeRules")
+    it('should support CSS nesting as part of a mixin', () => {
         const { sheets } = testStylableCore(`
             .mix {
                 id: mix;
                 &:hover {
                     id: hover;
+                }
+                @any-atrule {
+                    id: atrule;
                 }
             }
 
@@ -325,6 +330,17 @@ describe(`features/st-mixin`, () => {
         const { meta } = sheets['/entry.st.css'];
 
         shouldReportNoDiagnostics(meta);
+        const mixedIntoRule = assertRule(meta.targetAst!.nodes[1], 'mixed into');
+        expect(mixedIntoRule.selector).to.eql('.entry__root');
+        const firstMixedDecl = assertDecl(mixedIntoRule.nodes[0], 'id: mix');
+        expect(firstMixedDecl.prop).to.eql('id');
+        expect(firstMixedDecl.value).to.eql('mix');
+        const nestHoverRule = assertRule(mixedIntoRule.nodes[1], '&:hover');
+        expect(nestHoverRule.selector).to.eql('&:hover');
+        const nestAtRule = assertAtRule(mixedIntoRule.nodes[2], '@any-atrule');
+        const nestInAtRule = assertDecl(nestAtRule.nodes[0], 'id: atrule');
+        expect(nestInAtRule.prop).to.eql('id');
+        expect(nestInAtRule.value).to.eql('atrule');
     });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {

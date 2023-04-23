@@ -62,9 +62,9 @@ export function mergeRules(
         // TODO: handle rules before and after decl on entry
         mixinAst.nodes.slice().forEach((node) => {
             if (node === mixinRoot) {
-                node.walkDecls((node) => {
-                    rule.insertBefore(mixinDecl, node);
-                });
+                for (const nested of [...node.nodes]) {
+                    rule.insertBefore(mixinDecl, nested);
+                }
             } else if (node.type === 'decl') {
                 rule.insertBefore(mixinDecl, node);
             } else if (node.type === 'rule' || node.type === 'atrule') {
