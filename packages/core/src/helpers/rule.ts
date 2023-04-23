@@ -12,6 +12,7 @@ import {
     ImmutableSelectorNode,
     groupCompoundSelectors,
     SelectorList,
+    SelectorNode,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
 import { transformInlineCustomSelectors } from './custom-selector';
@@ -70,7 +71,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                         if (!isRoot) {
                             selectorNode = fixChunkOrdering(selectorNode, prefixType);
                         }
-                        replaceTargetWithNesting(selectorNode, prefixType);
+                        replaceTargetWithMixinAnchor(selectorNode, prefixType);
                         return selectorNode;
                     })
                 );
@@ -99,7 +100,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                                 if (!isRoot) {
                                     selectorNode = fixChunkOrdering(selectorNode, prefixType);
                                 }
-                                replaceTargetWithNesting(selectorNode, prefixType);
+                                replaceTargetWithMixinAnchor(selectorNode, prefixType);
                                 return selectorNode;
                             })
                         );
@@ -130,13 +131,15 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     return mixinRoot as T;
 }
 
-function replaceTargetWithNesting(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
+export const stMixinMarker = 'st-mixin-marker';
+function replaceTargetWithMixinAnchor(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
     walkSelector(selectorNode, (node) => {
         if (matchTypeAndValue(node, prefixType)) {
             convertToSelector(node).nodes = [
                 {
-                    type: `nesting`,
-                    value: `&`,
+                    type: `pseudo_class`,
+                    colonComments: [],
+                    value: stMixinMarker,
                     start: node.start,
                     end: node.end,
                 },
