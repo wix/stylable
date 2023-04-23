@@ -42,7 +42,11 @@ export class ESBuildTestKit {
             console.log(project, 'Served at ', serverUrl);
             return (openServerUrl = serverUrl);
         };
-        const open = async (launchOptions?: playwright.LaunchOptions, pathname?: string) => {
+        const open = async (
+            launchOptions?: playwright.LaunchOptions,
+            pathname?: string,
+            captureResponses?: boolean
+        ) => {
             if (!openServerUrl) {
                 await serve();
                 if (!openServerUrl) {
@@ -57,12 +61,18 @@ export class ESBuildTestKit {
             const browserContext = await browser.newContext();
             const page = await browserContext.newPage();
 
-            await page.goto(url, { waitUntil: 'networkidle' });
+            let responses: Array<playwright.Response> | undefined;
+            if (captureResponses) {
+                responses = [];
+                page.on('response', (response) => responses!.push(response));
+            }
+
+            await page.goto(url, { waitUntil: captureResponses ? 'networkidle' : 'load' });
 
             this.disposables.push(() => {
                 return browser.close();
             });
-            return page;
+            return { page, responses };
         };
         return {
             result: buildResult,

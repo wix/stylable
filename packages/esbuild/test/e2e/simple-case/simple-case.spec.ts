@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { ESBuildTestKit } from '../esbuild-testkit';
-import type { Page } from 'playwright-core';
+import type { Page, Response } from 'playwright-core';
 
 describe('Stylable ESBuild plugin ', () => {
     const tk = new ESBuildTestKit();
@@ -8,7 +8,7 @@ describe('Stylable ESBuild plugin ', () => {
 
     it('should build a project in dev mode', async () => {
         const { open } = await tk.build('simple-case', 'build.css-in-js.js');
-        await contract(await open({ headless: true }), [
+        await contract(await open({ headless: true }, 'index.html', true), [
             {
                 st_id: 'a.st.css|a',
             },
@@ -26,11 +26,14 @@ describe('Stylable ESBuild plugin ', () => {
 
     it('should build a project in dev mode', async () => {
         const { open } = await tk.build('simple-case', 'build.css-bundle.js');
-        await contract(await open({ headless: true }, 'index.bundle.html'), []);
+        await contract(await open({ headless: true }, 'index.bundle.html', true), []);
     });
 });
 
-async function contract(page: Page, stylesheets: Array<Record<string, string>>) {
+async function contract(
+    { page, responses }: { page: Page; responses?: Array<Response> },
+    stylesheets: Array<Record<string, string>>
+) {
     const { reset, sideEffects, bodyColor, styles } = await page.evaluate(() => {
         return {
             styles: Array.from(document.querySelectorAll('[st_id]')).map((el) => {
@@ -44,6 +47,9 @@ async function contract(page: Page, stylesheets: Array<Record<string, string>>) 
         };
     });
 
+    const assetLoaded = Boolean(responses?.find((r) => r.url().match(/asset.*?\.png$/)));
+
+    expect(assetLoaded, 'asset loaded').to.eql(true);
     expect(reset, 'reset applied').to.eql(' true');
     expect(sideEffects, 'side effects loaded').to.eql(' true');
     expect(bodyColor, 'simple override').to.eql('rgb(0, 128, 0)');
