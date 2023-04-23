@@ -138,7 +138,6 @@ export function buildSingleFile({
         );
     }
     // st.css.js
-
     const ast = includeCSSInJS
         ? tryRun(
               () => inlineAssetsForJsModule(res, stylable, fs),
@@ -149,29 +148,8 @@ export function buildSingleFile({
     moduleFormats.forEach(([format, ext]) => {
         outputLogs.push(`${format} module`);
 
-        const moduleCssImports = [];
-
+        const moduleCssImports = collectImportsWithSideEffects(res, stylable, ext);
         const cssDepth = res.meta.transformCssDepth?.cssDepth ?? 0;
-
-        for (const imported of res.meta.getImportStatements()) {
-            let resolved = imported.request;
-            try {
-                resolved = stylable.resolver.resolvePath(imported.context, imported.request);
-            } catch {
-                // use the fallback
-            }
-
-            if (resolved.endsWith('.st.css')) {
-                if (hasImportedSideEffects(stylable, res.meta, imported)) {
-                    // TODO: solve issue where request must be resolved before we add the extension
-                    moduleCssImports.push({ from: imported.request + ext });
-                }
-            }
-            if (resolved.endsWith('.css')) {
-                moduleCssImports.push({ from: imported.request + ext });
-            }
-        }
-
         if (injectCSSRequest) {
             moduleCssImports.push({ from: './' + cssAssetFilename });
         }
@@ -296,6 +274,30 @@ export function buildSingleFile({
     return {
         targetFilePath,
     };
+}
+
+function collectImportsWithSideEffects(res: StylableResults, stylable: Stylable, ext: string) {
+    const moduleCssImports = [];
+
+    for (const imported of res.meta.getImportStatements()) {
+        let resolved = imported.request;
+        try {
+            resolved = stylable.resolver.resolvePath(imported.context, imported.request);
+        } catch {
+            // use the fallback
+        }
+
+        if (resolved.endsWith('.st.css')) {
+            if (hasImportedSideEffects(stylable, res.meta, imported)) {
+                // TODO: solve issue where request must be resolved before we add the extension
+                moduleCssImports.push({ from: imported.request + ext });
+            }
+        }
+        if (resolved.endsWith('.css')) {
+            moduleCssImports.push({ from: imported.request + ext });
+        }
+    }
+    return moduleCssImports;
 }
 
 function inlineAssetsForJsModule(res: StylableResults, stylable: Stylable, fs: IFileSystem) {

@@ -1,5 +1,7 @@
-import { dirname } from 'path';
+import { dirname } from 'node:path';
 import { build as esbuild, BuildOptions, BuildResult } from 'esbuild';
+import { runServer } from '@stylable/e2e-test-kit';
+import playwright from 'playwright-core';
 
 interface ProjectBuild {
     run: (
@@ -9,17 +11,18 @@ interface ProjectBuild {
 }
 
 export class ESBuildTestKit {
-    buildFile: string;
-    buildResult!: BuildResult;
-    constructor(public project: string) {
-        this.buildFile = require.resolve(`@stylable/esbuild/test/e2e/${this.project}/build.js`);
-    }
-    async build() {
-        const { run }: ProjectBuild = await import(this.buildFile);
-        this.buildResult = await run(esbuild, (options: BuildOptions) => ({
+    disposables: Array<() => void> = [];
+    async build(project: string, buildFileName?: string) {
+        let openServerUrl: string | undefined;
+        const buildFile = require.resolve(
+            `@stylable/esbuild/test/e2e/${project}/${buildFileName ?? 'build'}`
+        );
+        const cwd = dirname(buildFile);
+        const { run }: ProjectBuild = await import(buildFile);
+        const buildResult = await run(esbuild, (options: BuildOptions) => ({
             ...options,
             plugins: [...(options.plugins ?? [])],
-            absWorkingDir: dirname(this.buildFile),
+            absWorkingDir: cwd,
             loader: {
                 '.png': 'file',
             },
@@ -29,12 +32,47 @@ export class ESBuildTestKit {
             target: ['es2020'],
             bundle: true,
         }));
-        this.log('build done!');
-    }
-    log(...args: unknown[]) {
-        console.log(`${this.project}`, ...args);
+        console.log(project, 'Build done!');
+        const serve = async () => {
+            if (openServerUrl) return openServerUrl;
+            const { server, serverUrl } = await runServer(cwd, 3000, (...args) =>
+                console.log(project, ...args)
+            );
+            this.disposables.push(() => server.close());
+            console.log(project, 'Served at ', serverUrl);
+            return (openServerUrl = serverUrl);
+        };
+        const open = async (launchOptions?: playwright.LaunchOptions, pathname?: string) => {
+            if (!openServerUrl) {
+                await serve();
+                if (!openServerUrl) {
+                    throw new Error('failed to automatically serve project');
+                }
+            }
+            const url = openServerUrl + (pathname ? '/' + pathname : '');
+            const browser = process.env.PLAYWRIGHT_SERVER
+                ? await playwright.chromium.connect(process.env.PLAYWRIGHT_SERVER, launchOptions)
+                : await playwright.chromium.launch(launchOptions);
+
+            const browserContext = await browser.newContext();
+            const page = await browserContext.newPage();
+
+            await page.goto(url, { waitUntil: 'networkidle' });
+
+            this.disposables.push(() => {
+                return browser.close();
+            });
+            return page;
+        };
+        return {
+            result: buildResult,
+            serve,
+            open,
+        };
     }
     dispose() {
-        /** */
+        for (const dispose of this.disposables) {
+            dispose();
+        }
     }
 }

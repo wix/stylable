@@ -4,7 +4,11 @@ module.exports.run = function run(build, options) {
     return build(
         options({
             entryPoints: ['./index'],
-            plugins: [stylablePlugin()],
+            plugins: [
+                stylablePlugin({
+                    cssInjection: 'js',
+                }),
+            ],
         })
     );
 };

@@ -9,7 +9,7 @@ import { STSymbol, STGlobal, CSSCustomProperty } from '@stylable/core/dist/index
 export function collectImportsWithSideEffects(
     stylable: Stylable,
     meta: StylableMeta,
-    visit: (contextMeta: StylableMeta, absPath: string, isUsed: boolean) => void,
+    visit: (contextMeta: StylableMeta, absPath: string, hasSideEffects: boolean) => void,
     visited: Set<string> = new Set()
 ) {
     for (const importData of meta.getImportStatements()) {

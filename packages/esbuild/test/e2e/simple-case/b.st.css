@@ -1,0 +1,7 @@
+@st-import Deep from "./deep.st.css";
+@st-import "./side-effects.st.css";
+
+.root {
+  -st-extends: Deep;
+  color: green;
+}

@@ -13,6 +13,7 @@
     "@stylable/core": "^5.9.0",
     "@stylable/module-utils": "^5.9.0",
     "@stylable/node": "^5.9.0",
+    "@stylable/build-tools": "^5.9.0",
     "@stylable/optimizer": "^5.9.0",
     "decache": "^4.6.1"
   },

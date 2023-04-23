@@ -1,0 +1,9 @@
+@property st-global(--side-effects);
+@property st-global(--side-effects);
+@property st-global(--side-effects);
+
+:global(body) {
+  font-size: 100px;
+  --side-effects: true;
+  background: url(./asset.png);
+}
