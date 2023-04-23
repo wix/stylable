@@ -135,6 +135,137 @@ describe(`helpers/selector`, () => {
             });
         }
     });
+    describe(`scopeNestedSelector with custom anchor`, () => {
+        const tests: Array<{
+            label: string;
+            scope: string;
+            nested: string;
+            expected: string;
+            only?: boolean;
+        }> = [
+            {
+                label: '+ no anchor selector',
+                scope: '.a',
+                nested: '.x',
+                expected: '.a .x',
+            },
+            {
+                label: '+ complex selector with no anchor selector',
+                scope: '.a',
+                nested: '.x:hover',
+                expected: '.a .x:hover',
+            },
+            {
+                label: '+ anchor selector',
+                scope: '.a',
+                nested: ':xxx',
+                expected: '.a',
+            },
+            {
+                label: 'compound scope + anchor selector',
+                scope: '.a:hover',
+                nested: ':xxx',
+                expected: '.a:hover',
+            },
+            {
+                label: 'compound scope + anchor selector (2)',
+                scope: '.a.x',
+                nested: ':xxx',
+                expected: '.a.x',
+            },
+            {
+                label: 'complex scope + anchor selector',
+                scope: '.a.x .b:hover',
+                nested: ':xxx',
+                expected: '.a.x .b:hover',
+            },
+            {
+                label: '+ anchor selector with compound class',
+                scope: '.a',
+                nested: ':xxx.x',
+                expected: '.a.x',
+            },
+            {
+                label: '+ anchor selector with complex class',
+                scope: '.a',
+                nested: ':xxx.x .y',
+                expected: '.a.x .y',
+            },
+            {
+                label: 'complex scope + anchor selector with complex class',
+                scope: '.a .b',
+                nested: ':xxx.x .y',
+                expected: '.a .b.x .y',
+            },
+            {
+                label: '+ multiple anchor selector',
+                scope: '.a',
+                nested: ':xxx :xxx',
+                expected: '.a .a',
+            },
+            {
+                label: 'multi scopes + multiple anchor selectors',
+                scope: '.a, .b',
+                nested: ':xxx :xxx :xxx',
+                expected: '.a .a .a, .b .b .b',
+            },
+            {
+                label: 'multi compound scopes + multi anchor selector',
+                scope: '.a:hover, .b:focus',
+                nested: ':xxx :xxx :xxx',
+                expected: '.a:hover .a:hover .a:hover, .b:focus .b:focus .b:focus',
+            },
+            {
+                label: '+ global before',
+                scope: '.a',
+                nested: ':global(.x) :xxx',
+                expected: ':global(.x) .a',
+            },
+            {
+                label: '+ nested anchor selector',
+                scope: '.a',
+                nested: ':not(:xxx)',
+                expected: ':not(.a)',
+            },
+            {
+                label: 'multi scopes + nested anchor selector',
+                scope: '.a, .b',
+                nested: ':not(:xxx)',
+                expected: ':not(.a), :not(.b)',
+            },
+            {
+                label: '+ nested deep anchor selector',
+                scope: '.a',
+                nested: ':not(:xxx, :not(:xxx))',
+                expected: ':not(.a, :not(.a))',
+            },
+            {
+                label: '+ nested nth of anchor selector',
+                scope: '.a',
+                nested: ':nth-child(5n+2 of :xxx)',
+                expected: ':nth-child(5n+2 of .a)',
+            },
+            {
+                label: 'nesting scope persists',
+                scope: '&',
+                nested: '.no-parent-re-scoping',
+                expected: '& .no-parent-re-scoping',
+            },
+        ];
+
+        for (const { only, scope, expected, nested } of tests) {
+            const test = only ? it.only : it;
+            test(`apply "${scope}" on "${nested}" should output "${expected}"`, () => {
+                const { selector } = scopeNestedSelector(
+                    parseSelector(scope),
+                    parseSelector(nested),
+                    false,
+                    (node) => node.type === 'pseudo_class' && node.value === 'xxx'
+                );
+                expect(selector).to.equal(expected);
+            });
+        }
+    });
     describe(`isSimpleSelector`, () => {
         it(`should return simple for class selector`, () => {
             const result = isSimpleSelector(`.a`);

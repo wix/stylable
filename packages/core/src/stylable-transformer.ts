@@ -193,7 +193,7 @@ export class StylableTransformer {
         stVarOverride: Record<string, string> = this.defaultStVarOverride,
         path: string[] = [],
         mixinTransform = false,
-        inferredNestSelector?: InferredSelector
+        inferredSelectorMixin?: InferredSelector
     ) {
         if (meta.type !== 'stylable') {
             return;
@@ -340,8 +340,8 @@ export class StylableTransformer {
                     meta,
                     node.selector,
                     node,
-                    (currentParent && this.containerInferredSelectorMap.get(currentParent)) ||
-                        inferredNestSelector
+                    currentParent && this.containerInferredSelectorMap.get(currentParent),
+                    inferredSelectorMixin
                 );
                 // save results
                 this.containerInferredSelectorMap.set(node, inferredSelector);
@@ -413,6 +413,7 @@ export class StylableTransformer {
         selector: string,
         selectorNode?: postcss.Rule | postcss.AtRule,
         inferredNestSelector?: InferredSelector,
+        inferredMixinSelector?: InferredSelector,
         unwrapGlobals = false
     ): {
         selector: string;
@@ -425,7 +426,8 @@ export class StylableTransformer {
             parseSelectorWithCache(selector, { clone: true }),
             selectorNode || postcss.rule({ selector }),
             selector,
-            inferredNestSelector
+            inferredNestSelector,
+            inferredMixinSelector
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
         if (unwrapGlobals) {
@@ -443,7 +445,8 @@ export class StylableTransformer {
         selectorAst: SelectorList,
         selectorNode: postcss.Rule | postcss.AtRule,
         selectorStr?: string,
-        selectorNest?: InferredSelector
+        selectorNest?: InferredSelector,
+        selectorMixin?: InferredSelector
     ) {
         return new ScopeContext(
             meta,
@@ -453,6 +456,7 @@ export class StylableTransformer {
             this.scopeSelectorAst.bind(this),
             this,
             selectorNest,
+            selectorMixin,
             undefined,
             selectorStr
         );
@@ -595,6 +599,12 @@ export class StylableTransformer {
             }
         } else if (node.type === `nesting`) {
             context.setNextSelectorScope(context.inferredSelectorNest, node, node.value);
+        } else if (node.type === 'attribute') {
+            STMixin.hooks.transformSelectorNode({
+                context: transformerContext,
+                selectorContext: context,
+                node,
+            });
         }
     }
 }
@@ -990,6 +1000,7 @@ export class ScopeContext {
         public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
         private transformer: StylableTransformer,
         inferredSelectorNest?: InferredSelector,
+        public inferredSelectorMixin?: InferredSelector,
         inferredSelectorContext?: InferredSelector,
         selectorStr?: string
     ) {
@@ -1072,6 +1083,7 @@ export class ScopeContext {
             this.scopeSelectorAst,
             this.transformer,
             this.inferredSelectorNest,
+            this.inferredSelectorMixin,
             selectorContext || this.inferredSelectorContext
         );
         ctx.transform = this.transform;

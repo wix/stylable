@@ -5,7 +5,7 @@ import * as STCustomSelector from './st-custom-selector';
 import * as STVar from './st-var';
 import type { ElementSymbol } from './css-type';
 import type { ClassSymbol } from './css-class';
-import { createSubsetAst } from '../helpers/rule';
+import { createSubsetAst, isStMixinMarker } from '../helpers/rule';
 import { scopeNestedSelector } from '../helpers/selector';
 import { mixinHelperDiagnostics, parseStMixin, parseStPartialMixin } from '../helpers/mixin';
 import { resolveArgumentsValue } from '../functions';
@@ -110,6 +110,17 @@ export const diagnostics = {
 // HOOKS
 
 export const hooks = createFeature({
+    transformSelectorNode({ selectorContext, node }) {
+        const isMarker = isStMixinMarker(node);
+        if (isMarker) {
+            selectorContext.setNextSelectorScope(
+                selectorContext.inferredSelectorMixin,
+                node,
+                node.value
+            );
+        }
+        return isMarker;
+    },
     transformLastPass({ context, ast, transformer, cssVarsMapping, path }) {
         ast.walkRules((rule) => appendMixins(context, transformer, rule, cssVarsMapping, path));
     },
@@ -422,7 +433,7 @@ function handleJSMixin(
         meta.source
     );
 
-    mergeRules(mixinRoot, config.rule, mixDef.data.originDecl, context.diagnostics);
+    mergeRules(mixinRoot, config.rule, mixDef.data.originDecl, context.diagnostics, true);
 }
 
 function handleCSSMixin(
@@ -498,11 +509,23 @@ function handleCSSMixin(
     }
 
     if (roots.length === 1) {
-        mergeRules(roots[0], config.rule, mixDef.data.originDecl, config.transformer.diagnostics);
+        mergeRules(
+            roots[0],
+            config.rule,
+            mixDef.data.originDecl,
+            config.transformer.diagnostics,
+            false
+        );
     } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
         roots.forEach((root) => mixinRoot.prepend(...root.nodes));
-        mergeRules(mixinRoot, config.rule, mixDef.data.originDecl, config.transformer.diagnostics);
+        mergeRules(
+            mixinRoot,
+            config.rule,
+            mixDef.data.originDecl,
+            config.transformer.diagnostics,
+            false
+        );
     }
 }
 
