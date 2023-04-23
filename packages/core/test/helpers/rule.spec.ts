@@ -49,6 +49,9 @@ describe(`helpers/rule`, () => {
 
                 /*not extracted*/
                 .x .i{}
+
+                /*nesting*/
+                .i[out] { .i[in] {} }
             `),
                 '.i'
             );
@@ -74,6 +77,10 @@ describe(`helpers/rule`, () => {
                 { selector: ':nth-child(5n - 2 of :st-mixin-marker, :st-mixin-marker)' },
                 { selector: ':nth-child(5n - 3 of :st-mixin-marker, .x, :st-mixin-marker)' }, // ToDo: check if to remove unrelated nested selectors
                 { selector: ':st-mixin-marker' },
+                {
+                    selector: ':st-mixin-marker[out]',
+                    nodes: [{ selector: ':st-mixin-marker[in]' }],
+                },
             ];
 
             testMatcher(expected, res.nodes);

@@ -314,10 +314,10 @@ describe(`features/st-mixin`, () => {
         const { sheets } = testStylableCore(`
             .mix {
                 id: mix;
-                &:hover {
+                &:hover.mix {
                     id: hover;
                 }
-                @any-atrule {
+                @media {
                     id: atrule;
                 }
             }
@@ -335,9 +335,9 @@ describe(`features/st-mixin`, () => {
         const firstMixedDecl = assertDecl(mixedIntoRule.nodes[0], 'id: mix');
         expect(firstMixedDecl.prop).to.eql('id');
         expect(firstMixedDecl.value).to.eql('mix');
-        const nestHoverRule = assertRule(mixedIntoRule.nodes[1], '&:hover');
-        expect(nestHoverRule.selector).to.eql('&:hover');
-        const nestAtRule = assertAtRule(mixedIntoRule.nodes[2], '@any-atrule');
+        const nestHoverRule = assertRule(mixedIntoRule.nodes[1], '&:hover.mix');
+        expect(nestHoverRule.selector).to.eql('.entry__root&:hover');
+        const nestAtRule = assertAtRule(mixedIntoRule.nodes[2], '@media');
         const nestInAtRule = assertDecl(nestAtRule.nodes[0], 'id: atrule');
         expect(nestInAtRule.prop).to.eql('id');
         expect(nestInAtRule.value).to.eql('atrule');

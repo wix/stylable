@@ -35,8 +35,8 @@ export function isInConditionalGroup(node: postcss.Rule | postcss.AtRule, includ
     );
 }
 
-export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
-    root: postcss.Root | postcss.AtRule,
+export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcss.Rule>(
+    root: postcss.Root | postcss.AtRule | postcss.Rule,
     selectorPrefix: string,
     mixinTarget?: T,
     isRoot = false,
@@ -48,8 +48,13 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     const prefixType = prefixSelectorList[0].nodes[0];
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
-    root.nodes.forEach((node) => {
-        if (node.type === `rule` && (node.selector === ':vars' || node.selector === ':import')) {
+    [...root.nodes].forEach((node) => {
+        if (node.type === 'decl') {
+            mixinTarget?.append(node.clone());
+        } else if (
+            node.type === `rule` &&
+            (node.selector === ':vars' || node.selector === ':import')
+        ) {
             // nodes that don't mix
             return;
         } else if (node.type === `rule`) {
@@ -76,7 +81,15 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                     })
                 );
 
-                mixinRoot.append(node.clone({ selector }));
+                const clonedRule = createSubsetAst(
+                    node,
+                    selectorPrefix,
+                    node.clone({ selector, nodes: [] }),
+                    isRoot,
+                    getCustomSelector,
+                    true /*isNestedInMixin*/
+                );
+                mixinRoot.append(clonedRule);
             }
         } else if (node.type === `atrule`) {
             if (
