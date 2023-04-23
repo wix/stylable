@@ -3,13 +3,12 @@ import { ESBuildTestKit } from '../esbuild-testkit';
 import type { Page } from 'playwright-core';
 
 describe('Stylable ESBuild plugin ', () => {
-    let tk!: ESBuildTestKit;
-    beforeEach(() => (tk = new ESBuildTestKit()));
-    afterEach(() => tk.dispose());
+    const tk = new ESBuildTestKit();
+    after(() => tk.dispose());
 
     it('should build a project in dev mode', async () => {
         const { open } = await tk.build('simple-case', 'build.css-in-js.js');
-        await contract(await open({ headless: false }), [
+        await contract(await open({ headless: true }), [
             {
                 st_id: 'a.st.css',
             },
@@ -27,7 +26,7 @@ describe('Stylable ESBuild plugin ', () => {
 
     it('should build a project in dev mode', async () => {
         const { open } = await tk.build('simple-case', 'build.css-bundle.js');
-        await contract(await open({ headless: false }, 'index.bundle.html'), []);
+        await contract(await open({ headless: true }, 'index.bundle.html'), []);
     });
 });
 

@@ -32,7 +32,7 @@ interface ESBuildOptions {
     /**
      * A function to override Stylable instance default configuration options
      */
-    stylableConfig?: (config: StylableConfig, build: unknown) => StylableConfig;
+    stylableConfig?: (config: StylableConfig, build: PluginBuild) => StylableConfig;
     /**
      * Use to load stylable config file.
      * true - it will automatically detect the closest "stylable.config.js" file and use it.
