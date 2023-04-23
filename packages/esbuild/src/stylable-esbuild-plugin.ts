@@ -110,7 +110,6 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             };
         });
 
-        /** NATIVE CSS */
         build.onResolve({ filter: /\.css$/, namespace: namespaces.jsModule }, (args) => {
             return {
                 path: stylable.resolvePath(
@@ -130,7 +129,6 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 loader: 'css',
             };
         });
-        /** NATIVE CSS END */
 
         build.onLoad({ filter: /.*/, namespace: namespaces.jsModule }, (args) => {
             const res = stylable.transform(args.path);

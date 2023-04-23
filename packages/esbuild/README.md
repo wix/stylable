@@ -42,7 +42,7 @@ interface ESBuildOptions {
     /**
      * A function to override Stylable instance default configuration options
      */
-    stylableConfig?: (config: StylableConfig, build: unknown) => StylableConfig;
+    stylableConfig?: (config: StylableConfig, build: PluginBuild) => StylableConfig;
     /**
      * Use to load stylable config file.
      * true - it will automatically detect the closest "stylable.config.js" file and use it.
@@ -50,9 +50,16 @@ interface ESBuildOptions {
      */
     configFile?: boolean | string;
     /**
-     * Stylable build mode - used to determine the if dev rules should be applied
+     * Stylable build mode
      */
     mode?: 'production' | 'development';
+    /**
+     * Determine the runtime stylesheet id kind used by the cssInjection js mode
+     * This sets the value of the st_id attribute on the stylesheet element
+     * default for dev - 'module+namespace'
+     * default for prod - 'namespace'
+     */
+    runtimeStylesheetId?: 'module' | 'namespace' | 'module+namespace';
 }
 ```
 
