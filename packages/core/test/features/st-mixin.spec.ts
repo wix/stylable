@@ -307,6 +307,25 @@ describe(`features/st-mixin`, () => {
             }
         );
     });
+    it.skip('should support CSS nesting as part of a mixin', () => {
+        // ToDo: support mixin of CSS nesting (support in "mergeRules")
+        const { sheets } = testStylableCore(`
+            .mix {
+                id: mix;
+                &:hover {
+                    id: hover;
+                }
+            }
+
+            .root {
+                -st-mixin: mix;
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {
             const { sheets } = testStylableCore({
