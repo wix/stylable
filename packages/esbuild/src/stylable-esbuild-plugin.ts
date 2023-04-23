@@ -64,35 +64,33 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             configFile,
             runtimeStylesheetId,
         } = applyDefaultOptions(initialPluginOptions);
-        let stylable: Stylable;
         build.initialOptions.metafile = true;
 
         const requireModule = createDecacheRequire(build);
+        const projectRoot = build.initialOptions.absWorkingDir || process.cwd();
+        const configFromFile = resolveConfig(
+            projectRoot,
+            typeof configFile === 'string' ? configFile : undefined,
+            fs
+        );
+        const stConfig = stylableConfig(
+            {
+                mode,
+                projectRoot,
+                fileSystem: fs,
+                optimizer: new StylableOptimizer(),
+                resolverCache: new Map(),
+                requireModule,
+                resolveNamespace: resolveNamespaceNode,
+                resolveModule: configFromFile?.config?.defaultConfig?.resolveModule,
+            },
+            build
+        );
+
+        const stylable = new Stylable(stConfig);
 
         build.onStart(() => {
-            if (!stylable) {
-                const projectRoot = build.initialOptions.absWorkingDir || process.cwd();
-                const configFromFile = resolveConfig(
-                    projectRoot,
-                    typeof configFile === 'string' ? configFile : undefined,
-                    fs
-                );
-                const stConfig = stylableConfig(
-                    {
-                        mode,
-                        projectRoot,
-                        fileSystem: fs,
-                        optimizer: new StylableOptimizer(),
-                        resolverCache: new Map(),
-                        requireModule,
-                        resolveNamespace: resolveNamespaceNode,
-                        resolveModule: configFromFile?.config?.defaultConfig?.resolveModule,
-                    },
-                    build
-                );
-
-                stylable = new Stylable(stConfig);
-            }
+            stylable.initCache();
         });
 
         build.onResolve({ filter: /\.st\.css$/ }, (args) => {
