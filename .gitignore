@@ -12,6 +12,7 @@ cjs
 **/test/**/dist2
 **/test/**/dist3
 **/test/**/dist-prod
+**/test/**/dist-bundle
 
 # Dependency directories
 node_modules/
