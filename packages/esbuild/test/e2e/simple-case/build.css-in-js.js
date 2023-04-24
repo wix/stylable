@@ -7,6 +7,7 @@ module.exports.run = function run(build, options) {
             entryPoints: ['./index'],
             plugins: [
                 stylablePlugin({
+                    mode: 'development',
                     cssInjection: 'js',
                     stylableConfig(config) {
                         return {

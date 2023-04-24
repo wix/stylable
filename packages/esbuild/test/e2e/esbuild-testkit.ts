@@ -1,4 +1,5 @@
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { build as esbuild, BuildOptions, BuildResult } from 'esbuild';
 import { runServer } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
@@ -78,6 +79,9 @@ export class ESBuildTestKit {
             result: buildResult,
             serve,
             open,
+            read(pathInCwd: string) {
+                return readFileSync(join(cwd, pathInCwd), 'utf8');
+            },
         };
     }
     dispose() {

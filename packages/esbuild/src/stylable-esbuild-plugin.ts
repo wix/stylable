@@ -1,12 +1,16 @@
 import fs, { readFileSync, writeFileSync } from 'fs';
-import { relative, join } from 'path';
+import { relative, join, isAbsolute } from 'path';
 import decache from 'decache';
 import type { Plugin, PluginBuild } from 'esbuild';
 import { Stylable, StylableConfig, StylableResults } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { generateStylableJSModuleSource } from '@stylable/module-utils';
-import { sortModulesByDepth, collectImportsWithSideEffects } from '@stylable/build-tools';
+import {
+    sortModulesByDepth,
+    collectImportsWithSideEffects,
+    processUrlDependencies,
+} from '@stylable/build-tools';
 import { resolveConfig } from '@stylable/cli';
 import { DiagnosticsMode, emitDiagnostics } from '@stylable/core/dist/index-internal';
 
@@ -24,10 +28,10 @@ interface ESBuildOptions {
      */
     cssInjection?: 'js' | 'css';
     /**
-     * Config how error and warning reported to webpack by stylable
-     * auto - Stylable warning will emit Webpack warning and Stylable error will emit Webpack error
-     * strict - Stylable error and warning will emit Webpack error
-     * loose - Stylable error and warning will emit Webpack warning
+     * Config how error and warning reported to esbuild by stylable
+     * auto - Stylable warning will emit esbuild warning and Stylable error will emit esbuild error
+     * strict - Stylable error and warning will emit esbuild error
+     * loose - Stylable error and warning will emit esbuild warning
      */
     diagnosticsMode?: DiagnosticsMode;
     /**
@@ -37,6 +41,7 @@ interface ESBuildOptions {
     /**
      * Use to load stylable config file.
      * true - it will automatically detect the closest "stylable.config.js" file and use it.
+     * false - it will not load any "stylable.config.js" file.
      * string - it will use the provided string as the "configFile" file path.
      */
     configFile?: boolean | string;
@@ -51,6 +56,13 @@ interface ESBuildOptions {
      * default for prod - 'namespace'
      */
     runtimeStylesheetId?: 'module' | 'namespace' | 'module+namespace';
+    /**
+     * Optimization options
+     */
+    optimize?: {
+        removeUnusedComponents?: boolean;
+        minify?: boolean;
+    };
 }
 
 export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugin => ({
@@ -63,6 +75,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             stylableConfig,
             configFile,
             runtimeStylesheetId,
+            // optimize,
         } = applyDefaultOptions(initialPluginOptions);
         build.initialOptions.metafile = true;
 
@@ -168,8 +181,22 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 }
             };
 
+            const assetsHeader =
+                cssInjection === 'js'
+                    ? processUrlDependencies({
+                          meta: res.meta,
+                          rootContext: stylable.projectRoot,
+                          host: {
+                              isAbsolute,
+                              join,
+                          },
+                          getReplacement: ({ index }) => `http://__stylable_url_asset_${index}__`,
+                      }).map((url, i) => `import __css_asset_${i}__ from ${JSON.stringify(url)};`)
+                    : [];
+
             const moduleCode = generateStylableJSModuleSource(
                 {
+                    header: assetsHeader.join('\n'),
                     imports,
                     namespace: res.meta.namespace,
                     jsExports: res.exports,
@@ -180,41 +207,28 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     ? {
                           css: res.meta.targetAst!.toString(),
                           depth: cssDepth,
-                          runtimeId: 'esbuild-stylable-plugin',
+                          runtimeId: 'esbuild',
                           id: getModuleId(),
                       }
                     : undefined
             );
 
-            const errors: { pluginName: string; text: string }[] = [];
-            const warnings: { pluginName: string; text: string }[] = [];
+            const finalCode =
+                cssInjection === 'js'
+                    ? moduleCode.replace(
+                          /\\"http:\/\/__stylable_url_asset_(.*?)__\\"/g,
+                          (_$0, $1) => `" + JSON.stringify(__css_asset_${Number($1)}__) + "`
+                      )
+                    : moduleCode;
 
-            emitDiagnostics(
-                {
-                    emitError(e) {
-                        errors.push({
-                            pluginName: 'stylable',
-                            text: e.message,
-                        });
-                    },
-                    emitWarning(e) {
-                        warnings.push({
-                            pluginName: 'stylable',
-                            text: e.message,
-                        });
-                    },
-                },
-                res.meta,
-                diagnosticsMode,
-                res.meta.source
-            );
+            const { errors, warnings } = esbuildEmitDiagnostics(res, diagnosticsMode);
 
             return {
                 errors,
                 warnings,
                 watchFiles: [...deepDependencies],
                 resolveDir: '.',
-                contents: moduleCode,
+                contents: finalCode,
                 pluginData: { stylableResults: res },
             };
         });
@@ -234,9 +248,46 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 if (!metafile) {
                     throw new Error('metafile is required for css injection');
                 }
+                // if (false && optimize) {
+                //     // find all stylable files in the metafile
+                //     const usageMapping: Record<string, boolean> = {};
+                //     for (const [key] of Object.entries(metafile.inputs)) {
+                //         if (key.startsWith(namespaces.jsModule)) {
+                //             const meta =
+                //                 stylable.fileProcessor.cache[
+                //                     key.replace(namespaces.jsModule + ':', '')
+                //                 ].value;
+                //             if (!meta) {
+                //                 throw new Error('meta not found');
+                //             }
+                //             usageMapping[meta.source] = true;
+                //         }
+                //     }
+                //     debugger;
+                //     // optimize.
+
+                //     //stylable.fileProcessor.cache
+
+                //     stylable.optimizer?.optimizeAst(
+                //         optimize,
+                //         {} as any,
+                //         usageMapping,
+                //         {
+                //             classes: {},
+                //             containers: {},
+                //             keyframes: {},
+                //             vars: {},
+                //             layers: {},
+                //             stVars: {},
+                //         },
+                //         { global: true }
+                //     );
+                // }
+
                 for (const distFile of Object.keys(metafile.outputs)) {
                     if (distFile.endsWith('.css')) {
                         const distFilePath = join(stylable.projectRoot, distFile);
+
                         writeFileSync(
                             distFilePath,
                             extractMarkers(readFileSync(distFilePath, 'utf8'))
@@ -248,15 +299,47 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
     },
 });
 
-function applyDefaultOptions(options: ESBuildOptions): Required<ESBuildOptions> {
+function esbuildEmitDiagnostics(res: StylableResults, diagnosticsMode: DiagnosticsMode) {
+    const errors: { pluginName: string; text: string }[] = [];
+    const warnings: { pluginName: string; text: string }[] = [];
+
+    emitDiagnostics(
+        {
+            emitError(e) {
+                errors.push({
+                    pluginName: 'stylable',
+                    text: e.message,
+                });
+            },
+            emitWarning(e) {
+                warnings.push({
+                    pluginName: 'stylable',
+                    text: e.message,
+                });
+            },
+        },
+        res.meta,
+        diagnosticsMode,
+        res.meta.source
+    );
+    return { errors, warnings };
+}
+
+function applyDefaultOptions(options: ESBuildOptions, prod = true): Required<ESBuildOptions> {
+    const mode = options.mode ?? (prod ? 'production' : 'development');
     return {
+        mode,
         cssInjection: 'css',
         diagnosticsMode: 'auto',
         stylableConfig: (config) => config,
         configFile: false,
-        mode: 'production',
-        runtimeStylesheetId: 'module+namespace',
+        runtimeStylesheetId: mode === 'production' ? 'namespace' : 'module+namespace',
         ...options,
+        optimize: {
+            minify: prod,
+            removeUnusedComponents: prod,
+            ...options.optimize,
+        },
     };
 }
 
