@@ -274,6 +274,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
 
 function buildUsageMapping(metafile: Metafile, stylable: Stylable) {
     const usageMapping: Record<string, boolean> = {};
+    const usages: Record<string, Set<string>> = {};
     for (const [key] of Object.entries(metafile.inputs)) {
         if (key.startsWith(namespaces.jsModule)) {
             const meta =
@@ -281,7 +282,14 @@ function buildUsageMapping(metafile: Metafile, stylable: Stylable) {
             if (!meta) {
                 throw new Error('meta not found');
             }
-            usageMapping[meta.source] = true;
+            usages[meta.namespace] ||= new Set();
+            usages[meta.namespace].add(key);
+            usageMapping[meta.namespace] = true;
+        }
+    }
+    for (const [namespace, usage] of Object.entries(usages)) {
+        if (usage.size > 1) {
+            console.warn(`namespace: ${namespace} used in:\n${[...usage].join('\n')}`);
         }
     }
     return usageMapping;
@@ -385,6 +393,7 @@ function removeUnusedComponents(
     stylable: Stylable,
     usageMapping: Record<string, boolean>
 ) {
+    usageMapping['deep'] = false;
     const ast = parse(css);
     stylable.optimizer?.optimizeAst(
         { removeUnusedComponents: true },

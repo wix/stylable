@@ -17,22 +17,28 @@ const stylesInOrder = [
     },
 ];
 
-describe('Stylable ESBuild plugin ', () => {
+describe('Stylable ESBuild plugin', () => {
     const tk = new ESBuildTestKit();
     afterEach(() => tk.dispose());
 
     it('should build a project in dev mode', async () => {
         const { open } = await tk.build('simple-case', 'cssInJsDev');
         await contract(
-            await open({ headless: true }, 'index.html', true),
+            await open({ headless: false }, 'index.html', true),
             stylesInOrder,
-            `"class extending component '.root => .b__root' in stylesheet 'b.st.css' was set on a node that does not extend '.root => .deep__root' from stylesheet 'deep.st.css'"`
+            `"class extending component '.root => .b__root' in stylesheet 'b.st.css' was set on a node that does not extend '.root => .deep__root' from stylesheet 'deep.st.css'"`,
+            ' override-active'
         );
     });
 
     it('should build a project with a bundle', async () => {
         const { open, read } = await tk.build('simple-case', 'cssBundleProd');
-        await contract(await open({ headless: true }, 'index.bundle.html', true), [], 'none');
+        await contract(
+            await open({ headless: true }, 'index.bundle.html', true),
+            [],
+            'none',
+            ' override-removed'
+        );
         const css = read('dist-bundle/index.css');
 
         const matchOrder = new RegExp(
@@ -50,21 +56,26 @@ function escapeRegExp(string: string) {
 async function contract(
     { page, responses }: { page: Page; responses?: Array<Response> },
     stylesheets: Array<Record<string, string>>,
-    devRuleMatch: string
+    devRuleMatch: string,
+    unusedComponent: string
 ) {
-    const { reset, sideEffects, simpleOrderOverride, styles, devRule } = await page.evaluate(() => {
-        return {
-            devRule: window.getComputedStyle(document.body, '::before').content,
-            styles: Array.from(document.querySelectorAll('[st_id]')).map((el) => {
-                return {
-                    st_id: el.getAttribute('st_id'),
-                };
-            }),
-            simpleOrderOverride: getComputedStyle(document.body).color,
-            sideEffects: getComputedStyle(document.body).getPropertyValue('--side-effects'),
-            reset: getComputedStyle(document.body).getPropertyValue('--reset'),
-        };
-    });
+    const { unusedComponentValue, reset, sideEffects, simpleOrderOverride, styles, devRule } =
+        await page.evaluate(() => {
+            return {
+                devRule: window.getComputedStyle(document.body, '::before').content,
+                styles: Array.from(document.querySelectorAll('[st_id]')).map((el) => {
+                    return {
+                        st_id: el.getAttribute('st_id'),
+                    };
+                }),
+                simpleOrderOverride: getComputedStyle(document.body).color,
+                sideEffects: getComputedStyle(document.body).getPropertyValue('--side-effects'),
+                reset: getComputedStyle(document.body).getPropertyValue('--reset'),
+                unusedComponentValue: getComputedStyle(
+                    document.querySelector('.deep__root')!
+                ).getPropertyValue('--unused-deep'),
+            };
+        });
 
     const assetLoaded = Boolean(responses?.find((r) => r.url().match(/asset-.*?\.png$/)));
 
@@ -74,4 +85,5 @@ async function contract(
     expect(simpleOrderOverride, 'simple override').to.eql('rgb(0, 128, 0)');
     expect(styles, 'loaded stylesheets').to.eql(stylesheets);
     expect(devRule, 'dev rule applied').to.eql(devRuleMatch);
+    expect(unusedComponentValue, 'unused component').to.eql(unusedComponent);
 }

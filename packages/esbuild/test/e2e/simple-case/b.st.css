@@ -1,7 +1,14 @@
 @st-import Deep from "./deep.st.css";
 @st-import "./side-effects.st.css";
 
+@property st-global(--unused-deep);
+
 .root {
   -st-extends: Deep;
   color: green;
+  --unused-deep: override-removed;
+}
+
+.root Deep {
+  --unused-deep: override-active;
 }
