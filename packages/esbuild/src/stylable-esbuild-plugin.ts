@@ -1,7 +1,7 @@
 import fs, { readFileSync, writeFileSync } from 'fs';
 import { relative, join, isAbsolute } from 'path';
 import decache from 'decache';
-import type { Plugin, PluginBuild } from 'esbuild';
+import type { Plugin, PluginBuild, Metafile } from 'esbuild';
 import { Stylable, StylableConfig, StylableResults } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
@@ -13,6 +13,7 @@ import {
 } from '@stylable/build-tools';
 import { resolveConfig } from '@stylable/cli';
 import { DiagnosticsMode, emitDiagnostics } from '@stylable/core/dist/index-internal';
+import { parse } from 'postcss';
 
 const namespaces = {
     jsModule: 'stylable-js-module',
@@ -61,7 +62,6 @@ interface ESBuildOptions {
      */
     optimize?: {
         removeUnusedComponents?: boolean;
-        minify?: boolean;
     };
 }
 
@@ -75,7 +75,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             stylableConfig,
             configFile,
             runtimeStylesheetId,
-            // optimize,
+            optimize,
         } = applyDefaultOptions(initialPluginOptions);
         build.initialOptions.metafile = true;
 
@@ -248,41 +248,10 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 if (!metafile) {
                     throw new Error('metafile is required for css injection');
                 }
-                // if (false && optimize) {
-                //     // find all stylable files in the metafile
-                //     const usageMapping: Record<string, boolean> = {};
-                //     for (const [key] of Object.entries(metafile.inputs)) {
-                //         if (key.startsWith(namespaces.jsModule)) {
-                //             const meta =
-                //                 stylable.fileProcessor.cache[
-                //                     key.replace(namespaces.jsModule + ':', '')
-                //                 ].value;
-                //             if (!meta) {
-                //                 throw new Error('meta not found');
-                //             }
-                //             usageMapping[meta.source] = true;
-                //         }
-                //     }
-                //     debugger;
-                //     // optimize.
 
-                //     //stylable.fileProcessor.cache
-
-                //     stylable.optimizer?.optimizeAst(
-                //         optimize,
-                //         {} as any,
-                //         usageMapping,
-                //         {
-                //             classes: {},
-                //             containers: {},
-                //             keyframes: {},
-                //             vars: {},
-                //             layers: {},
-                //             stVars: {},
-                //         },
-                //         { global: true }
-                //     );
-                // }
+                const usageMapping = optimize.removeUnusedComponents
+                    ? buildUsageMapping(metafile, stylable)
+                    : {};
 
                 for (const distFile of Object.keys(metafile.outputs)) {
                     if (distFile.endsWith('.css')) {
@@ -290,7 +259,11 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
 
                         writeFileSync(
                             distFilePath,
-                            extractMarkers(readFileSync(distFilePath, 'utf8'))
+                            sortMarkersByDepth(
+                                readFileSync(distFilePath, 'utf8'),
+                                stylable,
+                                usageMapping
+                            )
                         );
                     }
                 }
@@ -298,6 +271,21 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
         });
     },
 });
+
+function buildUsageMapping(metafile: Metafile, stylable: Stylable) {
+    const usageMapping: Record<string, boolean> = {};
+    for (const [key] of Object.entries(metafile.inputs)) {
+        if (key.startsWith(namespaces.jsModule)) {
+            const meta =
+                stylable.fileProcessor.cache[key.replace(namespaces.jsModule + ':', '')].value;
+            if (!meta) {
+                throw new Error('meta not found');
+            }
+            usageMapping[meta.source] = true;
+        }
+    }
+    return usageMapping;
+}
 
 function esbuildEmitDiagnostics(res: StylableResults, diagnosticsMode: DiagnosticsMode) {
     const errors: { pluginName: string; text: string }[] = [];
@@ -336,7 +324,6 @@ function applyDefaultOptions(options: ESBuildOptions, prod = true): Required<ESB
         runtimeStylesheetId: mode === 'production' ? 'namespace' : 'module+namespace',
         ...options,
         optimize: {
-            minify: prod,
             removeUnusedComponents: prod,
             ...options.optimize,
         },
@@ -361,7 +348,11 @@ function wrapWithDepthMarkers(css: string, depth: number | string) {
     return `[stylable-depth]{--depth:${depth}}${css}[stylable-depth]{--end:${depth}}`;
 }
 
-function extractMarkers(css: string) {
+function sortMarkersByDepth(
+    css: string,
+    stylable: Stylable,
+    usageMapping?: Record<string, boolean>
+) {
     const extracted: { depth: number; css: string }[] = [];
     const leftOverCss = css.replace(
         /(\/\* stylable-?\w*?-css:[\s\S]*?\*\/[\s\S]*?)?\[stylable-depth\][\s\S]*?\{[\s\S]*?--depth:[\s\S]*?(\d+)[\s\S]*?\}([\s\S]*?)\[stylable-depth\][\s\S]*?\{[\s\S]*?--end:[\s\S]*?\d+[\s\S]*?\}/g,
@@ -379,5 +370,35 @@ function extractMarkers(css: string) {
         -1
     );
 
-    return leftOverCss.trimStart() + sorted.map((m) => m.css).join('');
+    return (
+        leftOverCss.trimStart() +
+        sorted
+            .map((m) =>
+                usageMapping ? removeUnusedComponents(m.css, stylable, usageMapping) : m.css
+            )
+            .join('')
+    );
+}
+
+function removeUnusedComponents(
+    css: string,
+    stylable: Stylable,
+    usageMapping: Record<string, boolean>
+) {
+    const ast = parse(css);
+    stylable.optimizer?.optimizeAst(
+        { removeUnusedComponents: true },
+        ast,
+        usageMapping,
+        {
+            classes: {},
+            containers: {},
+            keyframes: {},
+            vars: {},
+            layers: {},
+            stVars: {},
+        },
+        { global: true } // TODO: handle globals!!!!! get usage from meta
+    );
+    return ast.toString();
 }
