@@ -64,7 +64,7 @@
     "node-eval": "^2.0.0",
     "npm-run-all": "^4.1.5",
     "playwright-chromium": "^1.32.3",
-    "postcss": "^8.4.22",
+    "postcss": "^8.4.23",
     "promise-assist": "^2.0.1",
     "raw-loader": "^4.0.2",
     "react": "^18.2.0",
