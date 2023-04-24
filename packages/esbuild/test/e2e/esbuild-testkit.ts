@@ -4,22 +4,22 @@ import { build as esbuild, BuildOptions, BuildResult } from 'esbuild';
 import { runServer } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
 
-interface ProjectBuild {
-    run: (
-        build: typeof esbuild,
-        options: (options: BuildOptions) => BuildOptions
-    ) => Promise<BuildResult>;
-}
+type BuildFn = (
+    build: typeof esbuild,
+    options: (options: BuildOptions) => BuildOptions
+) => Promise<BuildResult>;
 
 export class ESBuildTestKit {
     disposables: Array<() => void> = [];
-    async build(project: string, buildFileName?: string) {
+    async build(project: string, buildExport?: string) {
         let openServerUrl: string | undefined;
-        const buildFile = require.resolve(
-            `@stylable/esbuild/test/e2e/${project}/${buildFileName ?? 'build'}`
-        );
+        const buildFile = require.resolve(`@stylable/esbuild/test/e2e/${project}/build`);
         const cwd = dirname(buildFile);
-        const { run }: ProjectBuild = await import(buildFile);
+        const moduleExports = await import(buildFile);
+        const run = moduleExports[buildExport || 'run'] as BuildFn;
+        if (!run) {
+            throw new Error(`could not find ${buildExport || 'run'} export in ${buildFile}`);
+        }
         const buildResult = await run(esbuild, (options: BuildOptions) => ({
             ...options,
             plugins: [...(options.plugins ?? [])],

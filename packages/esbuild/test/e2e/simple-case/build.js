@@ -1,13 +1,22 @@
 const { stylablePlugin } = require('@stylable/esbuild');
 const { createNamespaceStrategyNode } = require('@stylable/node');
 
-module.exports.run = function run(build, options) {
+module.exports.cssInJsDev = (build, options) => {
+    run('js', build, options);
+};
+
+module.exports.cssBundleProd = (build, options) => {
+    run('css', build, options);
+};
+
+function run(cssInjection, build, options) {
     return build({
         ...options({
             entryPoints: ['./index'],
             plugins: [
                 stylablePlugin({
-                    cssInjection: 'css',
+                    mode: cssInjection === 'css' ? 'production' : 'development',
+                    cssInjection,
                     stylableConfig(config) {
                         return {
                             ...config,
@@ -20,6 +29,6 @@ module.exports.run = function run(build, options) {
                 }),
             ],
         }),
-        outdir: './dist-bundle',
+        outdir: cssInjection === 'css' ? './dist-bundle' : 'dist',
     });
-};
+}
