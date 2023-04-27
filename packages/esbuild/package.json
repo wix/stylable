@@ -10,12 +10,12 @@
     "esbuild": "^0.11.23"
   },
   "dependencies": {
-    "@stylable/core": "^5.9.0",
-    "@stylable/cli": "^5.9.0",
-    "@stylable/module-utils": "^5.9.0",
-    "@stylable/node": "^5.9.0",
-    "@stylable/build-tools": "^5.9.0",
-    "@stylable/optimizer": "^5.9.0",
+    "@stylable/core": "^5.10.0",
+    "@stylable/cli": "^5.10.0",
+    "@stylable/module-utils": "^5.10.0",
+    "@stylable/node": "^5.10.0",
+    "@stylable/build-tools": "^5.10.0",
+    "@stylable/optimizer": "^5.10.0",
     "decache": "^4.6.1"
   },
   "files": [
