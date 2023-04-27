@@ -2,6 +2,10 @@ import { expect } from 'chai';
 import { ESBuildTestKit } from '../esbuild-testkit';
 import type { Page, Response } from 'playwright-core';
 
+/**
+ * This is the expected order of the stylesheets in the DOM
+ * the file imported-only-from-css.st.css is not included because it is not imported from JS
+ */
 const stylesInOrder = [
     {
         st_id: 'reset.css|reset',
