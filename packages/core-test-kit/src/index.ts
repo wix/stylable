@@ -29,3 +29,4 @@ export { testStylableCore } from './test-stylable-core';
 export { deindent } from './deindent';
 export { MinimalDocument, MinimalElement } from './minimal-dom';
 export { createTempDirectorySync, copyDirectory } from './native-temp-dir';
+export { assertAtRule, assertComment, assertDecl, assertRule } from './postcss-node-asserts';

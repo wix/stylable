@@ -80,7 +80,7 @@ export class StylablePublicApi {
     }
 }
 
-function isStScopeStatement(node: any): node is postcss.AtRule {
+export function isStScopeStatement(node: any): node is postcss.AtRule {
     return node.type === 'atrule' && node.name === 'st-scope';
 }
 

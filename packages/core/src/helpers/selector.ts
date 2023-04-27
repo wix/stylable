@@ -45,6 +45,10 @@ export function parseSelectorWithCache(
         : (cachedValue as ImmutableSelectorList);
 }
 
+export function cloneSelector<T extends Selector | SelectorList>(s: T): T {
+    return cloneDeep(s);
+}
+
 /**
  * returns for each selector if it contains only
  * a single class or an element selector.
@@ -163,6 +167,7 @@ export function isCompRoot(name: string) {
     return name.charAt(0).match(/[A-Z]/);
 }
 
+const isNestedNode = (node: SelectorNode) => node.type === 'nesting';
 /**
  * combine 2 selector lists.
  * - add each scoping selector at the begging of each nested selector
@@ -171,7 +176,8 @@ export function isCompRoot(name: string) {
 export function scopeNestedSelector(
     scopeSelectorAst: ImmutableSelectorList,
     nestedSelectorAst: ImmutableSelectorList,
-    rootScopeLevel = false
+    rootScopeLevel = false,
+    isAnchor: (node: SelectorNode) => boolean = isNestedNode
 ): { selector: string; ast: SelectorList } {
     const resultSelectors: SelectorList = [];
     nestedSelectorAst.forEach((targetAst) => {
@@ -199,7 +205,7 @@ export function scopeNestedSelector(
                 : false;
             let nestedMixRoot = false;
             walkSelector(outputAst, (node, i, nodes) => {
-                if (node.type === 'nesting') {
+                if (isAnchor(node)) {
                     nestedMixRoot = true;
                     nodes.splice(i, 1, {
                         type: `selector`,

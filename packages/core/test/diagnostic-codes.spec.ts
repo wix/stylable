@@ -22,7 +22,6 @@ import { parseImportMessages, ensureImportsMessages } from '@stylable/core/dist/
 import { mixinHelperDiagnostics } from '@stylable/core/dist/helpers/mixin';
 import { valueDiagnostics } from '@stylable/core/dist/helpers/value';
 import { functionDiagnostics } from '@stylable/core/dist/functions';
-import { processorDiagnostics } from '@stylable/core/dist/stylable-processor';
 import { transformerDiagnostics } from '@stylable/core/dist/stylable-transformer';
 import { utilDiagnostics, sourcePathDiagnostics } from '@stylable/core/dist/stylable-utils';
 
@@ -53,7 +52,6 @@ describe('diagnostics error codes', () => {
             ...valueDiagnostics,
             ...functionDiagnostics,
             ...STCustomState.diagnostics,
-            ...processorDiagnostics,
             ...transformerDiagnostics,
             ...utilDiagnostics,
             ...sourcePathDiagnostics,

@@ -4,6 +4,7 @@ import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import type { ElementSymbol } from './css-type';
+import * as STPart from './st-part';
 import * as STCustomState from './st-custom-state';
 import { getOriginDefinition } from '../helpers/resolve';
 import { namespace } from '../helpers/namespace';
@@ -259,12 +260,13 @@ export function getAll(meta: StylableMeta): Record<string, ClassSymbol> {
 }
 
 export function addClass(context: FeatureContext, name: string, rule?: postcss.Rule): ClassSymbol {
-    if (!STSymbol.get(context.meta, name, `class`)) {
+    let symbol = STSymbol.get(context.meta, name, `class`);
+    if (!symbol) {
         let alias = STSymbol.get(context.meta, name);
         if (alias && alias._kind !== 'import') {
             alias = undefined;
         }
-        STSymbol.addSymbol({
+        symbol = STSymbol.addSymbol({
             context,
             symbol: {
                 _kind: 'class',
@@ -273,9 +275,9 @@ export function addClass(context: FeatureContext, name: string, rule?: postcss.R
             },
             node: rule,
             safeRedeclare: !!alias,
-        });
+        }) as ClassSymbol;
+        STPart.registerLegacyPart(context.meta, name, { mapTo: symbol });
     }
-    const symbol = STSymbol.get(context.meta, name, `class`)!;
     // mark native css as global
     if (context.meta.type === 'css' && !symbol['-st-global']) {
         symbol['-st-global'] = [

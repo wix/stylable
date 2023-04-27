@@ -1,6 +1,6 @@
 import {
-    transformCustomSelectors,
-    transformCustomSelectorMap,
+    transformInlineCustomSelectors,
+    transformInlineCustomSelectorMap,
     CustomSelectorMap,
     TransformCustomSelectorReport,
 } from '@stylable/core/dist/helpers/custom-selector';
@@ -16,7 +16,7 @@ describe('helpers/custom-selector', () => {
         it('should inline references', () => {
             const reports: TransformCustomSelectorReport[] = [];
 
-            const selectors = transformCustomSelectorMap(
+            const selectors = transformInlineCustomSelectorMap(
                 {
                     x: parseCssSelector(':is(target)'),
                     y: parseCssSelector(':--x.y'),
@@ -33,7 +33,7 @@ describe('helpers/custom-selector', () => {
         it('should handle unknown custom selector', () => {
             const reports: TransformCustomSelectorReport[] = [];
 
-            const selectors = transformCustomSelectorMap(
+            const selectors = transformInlineCustomSelectorMap(
                 {
                     x: parseCssSelector(':--unknown'),
                 },
@@ -48,7 +48,7 @@ describe('helpers/custom-selector', () => {
         it('should report circular self reference', () => {
             const reports: TransformCustomSelectorReport[] = [];
 
-            const selectors = transformCustomSelectorMap(
+            const selectors = transformInlineCustomSelectorMap(
                 {
                     x: parseCssSelector(':--x, :is(:--x, :--y)'),
                     y: parseCssSelector('.A'),
@@ -66,7 +66,7 @@ describe('helpers/custom-selector', () => {
         it('should report circular deep reference', () => {
             const reports: TransformCustomSelectorReport[] = [];
 
-            const selectors = transformCustomSelectorMap(
+            const selectors = transformInlineCustomSelectorMap(
                 {
                     x: parseCssSelector(':is(:--z):--a'),
                     y: parseCssSelector(':--x.y'),
@@ -89,7 +89,7 @@ describe('helpers/custom-selector', () => {
             const input = parseCssSelector('.a:is(.b, :not(.c))');
             const selectors: CustomSelectorMap = {};
 
-            const output = transformCustomSelectors(
+            const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
                 noopReport
@@ -103,7 +103,7 @@ describe('helpers/custom-selector', () => {
                 x: parseCssSelector('.A, .B'),
             };
 
-            const output = transformCustomSelectors(
+            const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
                 noopReport
@@ -118,7 +118,7 @@ describe('helpers/custom-selector', () => {
                 y: parseCssSelector('.C, .D'),
             };
 
-            const output = transformCustomSelectors(
+            const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
                 noopReport
@@ -134,7 +134,7 @@ describe('helpers/custom-selector', () => {
                 z: parseCssSelector('.E, .F'),
             };
 
-            const output = transformCustomSelectors(
+            const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
                 noopReport
@@ -160,7 +160,7 @@ describe('helpers/custom-selector', () => {
                 y: parseCssSelector('.CC, .DD'),
             };
 
-            const output = transformCustomSelectors(
+            const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
                 noopReport
@@ -182,7 +182,7 @@ describe('helpers/custom-selector', () => {
                 y: parseCssSelector('.C, .D'),
             };
 
-            const output = transformCustomSelectors(
+            const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
                 noopReport
@@ -192,7 +192,7 @@ describe('helpers/custom-selector', () => {
         });
         it('should deep replace custom selectors', () => {
             const input = parseCssSelector(':--y');
-            const selectors = transformCustomSelectorMap(
+            const selectors = transformInlineCustomSelectorMap(
                 {
                     x: parseCssSelector('.A'),
                     y: parseCssSelector(':--x'),
@@ -200,7 +200,7 @@ describe('helpers/custom-selector', () => {
                 noopReport
             );
 
-            const output = transformCustomSelectors(
+            const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
                 noopReport
@@ -212,7 +212,7 @@ describe('helpers/custom-selector', () => {
             const input = parseCssSelector(':--x');
             const reports: TransformCustomSelectorReport[] = [];
 
-            const output = transformCustomSelectors(
+            const output = transformInlineCustomSelectors(
                 input,
                 (_name: string) => undefined,
                 (data) => reports.push(data)
@@ -224,7 +224,7 @@ describe('helpers/custom-selector', () => {
         it('should handle circular reference', () => {
             const inputX = parseCssSelector(':--x');
             const inputY = parseCssSelector(':--y');
-            const selectors = transformCustomSelectorMap(
+            const selectors = transformInlineCustomSelectorMap(
                 {
                     x: parseCssSelector(':--y'),
                     y: parseCssSelector(':--x'),
@@ -234,12 +234,12 @@ describe('helpers/custom-selector', () => {
                 }
             );
 
-            const outputX = transformCustomSelectors(
+            const outputX = transformInlineCustomSelectors(
                 inputX,
                 (name: string) => selectors[name],
                 noopReport
             );
-            const outputY = transformCustomSelectors(
+            const outputY = transformInlineCustomSelectors(
                 inputY,
                 (name: string) => selectors[name],
                 noopReport

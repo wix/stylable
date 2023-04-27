@@ -1,5 +1,5 @@
 export { safeParse } from './parser';
-export { processorDiagnostics, StylableProcessor } from './stylable-processor';
+export { StylableProcessor } from './stylable-processor';
 export {
     StylableTransformer,
     postProcessor,
@@ -15,6 +15,7 @@ export {
     STImport,
     STGlobal,
     STNamespace,
+    STPart,
     STCustomSelector,
     STCustomState,
     CSSClass,

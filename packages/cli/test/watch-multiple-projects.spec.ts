@@ -379,7 +379,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
-                            '.root{ color:yellow; {} }'
+                            '.x.y{ -st-states: z; }'
                         );
                     },
                 },
@@ -390,7 +390,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     ),
                 },
                 {
-                    msg: '[error: 11011]: nesting of rules within rules is not supported',
+                    msg: '[error: 11003]: cannot define pseudo states inside complex selectors',
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),

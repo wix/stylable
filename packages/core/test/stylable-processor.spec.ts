@@ -1,15 +1,10 @@
 import { resolve } from 'path';
 import chai, { expect } from 'chai';
-import { flatMatch, processSource, diagnosticBankReportToStrings } from '@stylable/core-test-kit';
+import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { processNamespace } from '@stylable/core';
-import {
-    knownPseudoClassesWithNestedSelectors,
-    processorDiagnostics,
-} from '@stylable/core/dist/index-internal';
+import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/index-internal';
 
 chai.use(flatMatch);
-
-const processorStringDiagnostics = diagnosticBankReportToStrings(processorDiagnostics);
 
 describe('Stylable postcss process', () => {
     it('report if missing filename', () => {
@@ -18,23 +13,6 @@ describe('Stylable postcss process', () => {
         expect(diagnostics.reports[0]).to.include({
             severity: 'error',
             message: 'missing source filename',
-        });
-    });
-
-    it('error on invalid rule nesting', () => {
-        const { diagnostics } = processSource(
-            `
-            .x{
-                .y{}
-            }
-        
-        `,
-            { from: '/path/to/source.st.css' }
-        );
-
-        expect(diagnostics.reports[0]).to.include({
-            severity: 'error',
-            message: processorStringDiagnostics.INVALID_NESTING('.y', '.x'),
         });
     });
 

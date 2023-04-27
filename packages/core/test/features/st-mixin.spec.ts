@@ -6,6 +6,9 @@ import {
     shouldReportNoDiagnostics,
     matchRuleAndDeclaration,
     diagnosticBankReportToStrings,
+    assertRule,
+    assertDecl,
+    assertAtRule,
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import type * as postcss from 'postcss';
@@ -306,6 +309,38 @@ describe(`features/st-mixin`, () => {
                 },
             }
         );
+    });
+    it('should support CSS nesting as part of a mixin', () => {
+        const { sheets } = testStylableCore(`
+            .mix {
+                id: mix;
+                &:hover.mix {
+                    id: hover;
+                }
+                @media {
+                    id: atrule;
+                }
+            }
+
+            .root {
+                -st-mixin: mix;
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+        const mixedIntoRule = assertRule(meta.targetAst!.nodes[1], 'mixed into');
+        expect(mixedIntoRule.selector).to.eql('.entry__root');
+        const firstMixedDecl = assertDecl(mixedIntoRule.nodes[0], 'id: mix');
+        expect(firstMixedDecl.prop).to.eql('id');
+        expect(firstMixedDecl.value).to.eql('mix');
+        const nestHoverRule = assertRule(mixedIntoRule.nodes[1], '&:hover.mix');
+        expect(nestHoverRule.selector).to.eql('.entry__root&:hover');
+        const nestAtRule = assertAtRule(mixedIntoRule.nodes[2], '@media');
+        const nestInAtRule = assertDecl(nestAtRule.nodes[0], 'id: atrule');
+        expect(nestInAtRule.prop).to.eql('id');
+        expect(nestInAtRule.value).to.eql('atrule');
     });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {
@@ -1623,6 +1658,50 @@ describe(`features/st-mixin`, () => {
                     -st-mixin: mix;
                 }
             `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
+    describe('st-scope', () => {
+        it('should collect mixin from st-sope selector', () => {
+            const { sheets } = testStylableCore({
+                '/mix.st.css': `
+                    @st-scope .mix {
+                        .part { color: green; }
+                        .part2 { color: purple; }
+                        &:state { color: gold; }
+                    }
+                    @st-scope .mix.compoundAfter {
+                        .part { color: blue; }
+                    }
+                    @st-scope .compoundBefore.mix {
+                        .part { color: pink; }
+                    }
+                    @st-scope .mix, .notMix, .mix[extra] {
+                        .part { color: white; }
+                    }
+                    .mix {
+                        -st-states: state;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [mix] from './mix.st.css';
+
+                    /* 
+                        @rule(descendant)[1] .entry__into .mix__part {color: green;} 
+                        @rule(descendant2)[2] .entry__into .mix__part2 {color: purple;} 
+                        @rule(state)[3] .entry__into.mix--state {color: gold;} 
+                        @rule(+after)[4] .entry__into.mix__compoundAfter .mix__part {color: blue;} 
+                        @rule(+before)[5] .entry__into.mix__compoundBefore .mix__part {color: pink;} 
+                        @rule(multi selector)[6] .entry__into .mix__part, .entry__into[extra] .mix__part {color: white;}
+                    */
+                    .into {
+                        -st-mixin: mix;
+                    }
+                `,
+            });
 
             const { meta } = sheets['/entry.st.css'];
 

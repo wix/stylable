@@ -15,6 +15,7 @@ import type {
 import {
     nativePseudoElements,
     ResolvedElement,
+    STPart,
     STCustomSelector,
     STCustomState,
 } from '@stylable/core/dist/index-internal';
@@ -472,6 +473,7 @@ export const SelectorCompletionProvider: CompletionProvider = {
                         )
                     )
             );
+            // adds inline custom selector (e.g. ":--custom")
             comps.push(
                 ...STCustomSelector.getCustomSelectorNames(meta).map((c) =>
                     classCompletion(
@@ -835,7 +837,7 @@ function maybeResolveImport(
     meta: StylableMeta
 ): StylableMeta | null {
     let resolvedImport: StylableMeta | null = null;
-    if (importName && importName.endsWith('.st.css')) {
+    if (importName && importName.endsWith('.css')) {
         try {
             const imported = meta.getImportStatements().find((i) => i.request === importName)!;
             resolvedImport = stylable.fileProcessor.process(
@@ -884,7 +886,7 @@ export const StImportNamedCompletionProvider: CompletionProvider & {
                     }
                 });
 
-                if (importName.endsWith('.st.css')) {
+                if (importName.endsWith('.css')) {
                     const resolvedImport: StylableMeta | null = this.resolveImport(
                         importName,
                         stylable,
@@ -1023,12 +1025,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                 }
 
                 comps = comps.concat(
-                    Object.keys(res.meta.getAllClasses())
-                        .concat(
-                            STCustomSelector.getCustomSelectorNames(res.meta).map((s) =>
-                                s.slice(':--'.length)
-                            )
-                        )
+                    STPart.getPartNames(res.meta)
                         .filter((e) => e.startsWith(filter) && e !== 'root')
                         .map((c) => {
                             let relPath = path.relative(path.dirname(meta.source), res.meta.source);
@@ -1068,12 +1065,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                     }
 
                     comps = comps.concat(
-                        Object.keys(res.meta.getAllClasses())
-                            .concat(
-                                STCustomSelector.getCustomSelectorNames(res.meta).map((s) =>
-                                    s.slice(':--'.length)
-                                )
-                            )
+                        STPart.getPartNames(res.meta)
                             .filter((e) => e.startsWith(filter) && e !== 'root')
                             .map((c) => {
                                 let relPath = path.relative(

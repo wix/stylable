@@ -12,9 +12,10 @@ import {
     ImmutableSelectorNode,
     groupCompoundSelectors,
     SelectorList,
+    SelectorNode,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
-import { transformCustomSelectors } from './custom-selector';
+import { transformInlineCustomSelectors } from './custom-selector';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return !!(
@@ -34,38 +35,40 @@ export function isInConditionalGroup(node: postcss.Rule | postcss.AtRule, includ
     );
 }
 
-export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
-    root: postcss.Root | postcss.AtRule,
+export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcss.Rule>(
+    root: postcss.Root | postcss.AtRule | postcss.Rule,
     selectorPrefix: string,
     mixinTarget?: T,
     isRoot = false,
     getCustomSelector?: (name: string) => SelectorList | undefined,
-    scopeSelector = ''
+    isNestedInMixin = false
 ): T {
     // keyframes on class mixin?
     const prefixSelectorList = parseSelectorWithCache(selectorPrefix);
     const prefixType = prefixSelectorList[0].nodes[0];
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
-    const scopeSelectorAST = parseSelectorWithCache(scopeSelector);
     root.nodes.forEach((node) => {
-        if (node.type === `rule` && (node.selector === ':vars' || node.selector === ':import')) {
+        if (node.type === 'decl') {
+            mixinTarget?.append(node.clone());
+        } else if (
+            node.type === `rule` &&
+            (node.selector === ':vars' || node.selector === ':import')
+        ) {
             // nodes that don't mix
             return;
         } else if (node.type === `rule`) {
-            let selectorAst = parseSelectorWithCache(node.selector, { clone: true });
-            if (scopeSelector) {
-                selectorAst = scopeNestedSelector(scopeSelectorAST, selectorAst, isRoot).ast;
-            }
+            const selectorAst = parseSelectorWithCache(node.selector, { clone: true });
             let ast = isRoot
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
                 : selectorAst;
             if (getCustomSelector) {
-                ast = transformCustomSelectors(ast, getCustomSelector, () => {
+                ast = transformInlineCustomSelectors(ast, getCustomSelector, () => {
                     /*don't report*/
                 });
             }
-            const matchesSelectors = isRoot ? ast : ast.filter((node) => containsPrefix(node));
+            const matchesSelectors =
+                isRoot || isNestedInMixin ? ast : ast.filter((node) => containsPrefix(node));
 
             if (matchesSelectors.length) {
                 const selector = stringifySelector(
@@ -73,12 +76,20 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                         if (!isRoot) {
                             selectorNode = fixChunkOrdering(selectorNode, prefixType);
                         }
-                        replaceTargetWithNesting(selectorNode, prefixType);
+                        replaceTargetWithMixinAnchor(selectorNode, prefixType);
                         return selectorNode;
                     })
                 );
 
-                mixinRoot.append(node.clone({ selector }));
+                const clonedRule = createSubsetAst(
+                    node,
+                    selectorPrefix,
+                    node.clone({ selector, nodes: [] }),
+                    isRoot,
+                    getCustomSelector,
+                    true /*isNestedInMixin*/
+                );
+                mixinRoot.append(clonedRule);
             }
         } else if (node.type === `atrule`) {
             if (
@@ -88,17 +99,36 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 node.name === 'layer' ||
                 node.name === 'container'
             ) {
-                const scopeSelector = node.name === 'st-scope' ? node.params : '';
+                let scopeSelector = node.name === 'st-scope' ? node.params : '';
+                let isNestedInMixin = false;
+                if (scopeSelector) {
+                    const ast = parseSelectorWithCache(scopeSelector, { clone: true });
+                    const matchesSelectors = isRoot
+                        ? ast
+                        : ast.filter((node) => containsPrefix(node));
+                    if (matchesSelectors.length) {
+                        isNestedInMixin = true;
+                        scopeSelector = stringifySelector(
+                            matchesSelectors.map((selectorNode) => {
+                                if (!isRoot) {
+                                    selectorNode = fixChunkOrdering(selectorNode, prefixType);
+                                }
+                                replaceTargetWithMixinAnchor(selectorNode, prefixType);
+                                return selectorNode;
+                            })
+                        );
+                    }
+                }
                 const atRuleSubset = createSubsetAst(
                     node,
                     selectorPrefix,
                     postcss.atRule({
-                        params: node.params,
+                        params: scopeSelector || node.params,
                         name: node.name,
                     }),
                     isRoot,
                     getCustomSelector,
-                    scopeSelector
+                    isNestedInMixin
                 );
                 if (atRuleSubset.nodes) {
                     mixinRoot.append(atRuleSubset);
@@ -114,13 +144,16 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     return mixinRoot as T;
 }
 
-function replaceTargetWithNesting(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
+export const stMixinMarker = 'st-mixin-marker';
+export const isStMixinMarker = (node: SelectorNode) =>
+    node.type === 'attribute' && node.value === stMixinMarker;
+function replaceTargetWithMixinAnchor(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
     walkSelector(selectorNode, (node) => {
         if (matchTypeAndValue(node, prefixType)) {
             convertToSelector(node).nodes = [
                 {
-                    type: `nesting`,
-                    value: `&`,
+                    type: `attribute`,
+                    value: stMixinMarker,
                     start: node.start,
                     end: node.end,
                 },

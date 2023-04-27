@@ -5,6 +5,7 @@ import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { StylableEvaluator } from './functions';
 import { nativePseudoElements } from './native-reserved-lists';
 import {
+    cloneSelector,
     createCombinatorSelector,
     parseSelectorWithCache,
     stringifySelector,
@@ -22,6 +23,7 @@ import {
 import { isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import {
+    STPart,
     ClassSymbol,
     CSSContains,
     CSSMedia,
@@ -191,7 +193,7 @@ export class StylableTransformer {
         stVarOverride: Record<string, string> = this.defaultStVarOverride,
         path: string[] = [],
         mixinTransform = false,
-        inferredNestSelector?: InferredSelector
+        inferredSelectorMixin?: InferredSelector
     ) {
         if (meta.type !== 'stylable') {
             return;
@@ -338,8 +340,8 @@ export class StylableTransformer {
                     meta,
                     node.selector,
                     node,
-                    (currentParent && this.containerInferredSelectorMap.get(currentParent)) ||
-                        inferredNestSelector
+                    currentParent && this.containerInferredSelectorMap.get(currentParent),
+                    inferredSelectorMixin
                 );
                 // save results
                 this.containerInferredSelectorMap.set(node, inferredSelector);
@@ -411,6 +413,7 @@ export class StylableTransformer {
         selector: string,
         selectorNode?: postcss.Rule | postcss.AtRule,
         inferredNestSelector?: InferredSelector,
+        inferredMixinSelector?: InferredSelector,
         unwrapGlobals = false
     ): {
         selector: string;
@@ -423,7 +426,8 @@ export class StylableTransformer {
             parseSelectorWithCache(selector, { clone: true }),
             selectorNode || postcss.rule({ selector }),
             selector,
-            inferredNestSelector
+            inferredNestSelector,
+            inferredMixinSelector
         );
         const targetSelectorAst = this.scopeSelectorAst(context);
         if (unwrapGlobals) {
@@ -441,12 +445,9 @@ export class StylableTransformer {
         selectorAst: SelectorList,
         selectorNode: postcss.Rule | postcss.AtRule,
         selectorStr?: string,
-        selectorNest?: InferredSelector
+        selectorNest?: InferredSelector,
+        selectorMixin?: InferredSelector
     ) {
-        const inferredContext = this.createInferredSelector(meta, {
-            name: meta.root,
-            type: 'class',
-        });
         return new ScopeContext(
             meta,
             this.resolver,
@@ -454,8 +455,9 @@ export class StylableTransformer {
             selectorNode,
             this.scopeSelectorAst.bind(this),
             this,
-            selectorNest || inferredContext.clone(),
-            inferredContext,
+            selectorNest,
+            selectorMixin,
+            undefined,
             selectorStr
         );
     }
@@ -479,7 +481,7 @@ export class StylableTransformer {
             for (const node of [...selector.nodes]) {
                 if (node.type !== `compound_selector`) {
                     if (node.type === 'combinator') {
-                        if (this.experimentalSelectorInference) {
+                        if (this.experimentalSelectorInference || context.isNested) {
                             context.setNextSelectorScope(context.inferredSelectorContext, node);
                         }
                     }
@@ -597,6 +599,12 @@ export class StylableTransformer {
             }
         } else if (node.type === `nesting`) {
             context.setNextSelectorScope(context.inferredSelectorNest, node, node.value);
+        } else if (node.type === 'attribute') {
+            STMixin.hooks.transformSelectorNode({
+                context: transformerContext,
+                selectorContext: context,
+                node,
+            });
         }
     }
 }
@@ -819,12 +827,15 @@ export class InferredSelector {
                         continue;
                     }
                     checked[name].add(uniqueId);
-                    // prefer custom selector
-                    const customSelector = STCustomSelector.getCustomSelectorExpended(meta, name);
-                    if (customSelector) {
-                        const selectorList = parseSelectorWithCache(customSelector, {
-                            clone: true,
-                        });
+                    //
+                    const partDef = STPart.getPart(meta, name);
+                    if (!partDef) {
+                        continue;
+                    }
+                    if (Array.isArray(partDef.mapTo)) {
+                        // prefer custom selector
+                        const selectorList = cloneSelector(partDef.mapTo);
+                        const selectorStr = stringifySelector(partDef.mapTo);
                         selectorList.forEach((selector) => {
                             const r = removeFirstRootInFirstCompound(selector, meta);
                             selector.nodes = r.selector.nodes;
@@ -838,8 +849,8 @@ export class InferredSelector {
                         const internalContext = this.api.createSelectorContext(
                             meta,
                             selectorList,
-                            postcss.rule({ selector: customSelector }),
-                            customSelector
+                            postcss.rule({ selector: selectorStr }),
+                            selectorStr
                         );
                         internalContext.isStandaloneSelector = isFirstInSelector;
                         const customAstSelectors = this.api.scopeSelectorAst(internalContext);
@@ -856,10 +867,8 @@ export class InferredSelector {
 
                         addInferredElement(name, inferred, customAstSelectors);
                         break resolved;
-                    }
-                    // matching class part
-                    const classSymbol = CSSClass.get(meta, name);
-                    if (classSymbol) {
+                    } else {
+                        // matching class part
                         const resolvedPart = this.api.getResolvedSymbols(meta).class[name];
                         const resolvedBaseSymbol = getOriginDefinition(resolvedPart);
                         const nodes: SelectorNode[] = [];
@@ -968,13 +977,17 @@ export class ScopeContext {
     public selector?: Selector;
     public compoundSelector?: CompoundSelector;
     public node?: CompoundSelector['nodes'][number];
+    // true for nested selector
+    public isNested: boolean;
     // store selector duplication points
     public splitSelectors = new SelectorMultiplier();
     public lastInferredSelectorNode: SelectorNode | undefined;
     // selector is not a continuation of another selector
     public isStandaloneSelector = true;
-    // used for nesting or after combinators
+    // used as initial selector or after combinators
     public inferredSelectorContext: InferredSelector;
+    // used for nesting selector
+    public inferredSelectorNest: InferredSelector;
     // current type while traversing a selector
     public inferredSelector: InferredSelector;
     // combined type of the multiple selectors
@@ -986,12 +999,44 @@ export class ScopeContext {
         public ruleOrAtRule: postcss.Rule | postcss.AtRule,
         public scopeSelectorAst: StylableTransformer['scopeSelectorAst'],
         private transformer: StylableTransformer,
-        public inferredSelectorNest: InferredSelector,
-        selectorContext: InferredSelector,
+        inferredSelectorNest?: InferredSelector,
+        public inferredSelectorMixin?: InferredSelector,
+        inferredSelectorContext?: InferredSelector,
         selectorStr?: string
     ) {
+        this.isNested = !!(
+            ruleOrAtRule.parent &&
+            // top level
+            ruleOrAtRule.parent.type !== 'root' &&
+            // directly in @st-scope
+            !STScope.isStScopeStatement(ruleOrAtRule.parent)
+        );
+        /* 
+            resolve default selector context for initial selector and selector
+            following a combinator.
+            
+            Currently set to stylesheet root for top level selectors and selectors
+            directly nested under @st-scope. But will change in the future to a universal selector
+            once experimentalSelectorInference will be the default behavior
+        */
+        const inferredContext =
+            inferredSelectorContext ||
+            (this.isNested || transformer.experimentalSelectorInference
+                ? new InferredSelector(transformer, [
+                      {
+                          _kind: 'css',
+                          meta: originMeta,
+                          symbol: { _kind: 'element', name: '*' },
+                      },
+                  ])
+                : transformer.createInferredSelector(originMeta, {
+                      name: originMeta.root,
+                      type: 'class',
+                  }));
+        // set selector data
         this.selectorStr = selectorStr || stringifySelector(selectorAst);
-        this.inferredSelectorContext = new InferredSelector(this.transformer, selectorContext);
+        this.inferredSelectorContext = new InferredSelector(this.transformer, inferredContext);
+        this.inferredSelectorNest = inferredSelectorNest || this.inferredSelectorContext.clone();
         this.inferredSelector = new InferredSelector(
             this.transformer,
             this.inferredSelectorContext
@@ -1038,6 +1083,7 @@ export class ScopeContext {
             this.scopeSelectorAst,
             this.transformer,
             this.inferredSelectorNest,
+            this.inferredSelectorMixin,
             selectorContext || this.inferredSelectorContext
         );
         ctx.transform = this.transform;
