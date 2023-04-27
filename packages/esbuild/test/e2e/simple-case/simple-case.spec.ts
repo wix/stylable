@@ -22,13 +22,18 @@ const stylesInOrder = [
 ];
 
 describe('Stylable ESBuild plugin', () => {
-    const tk = new ESBuildTestKit();
+    const tk = new ESBuildTestKit({
+        log: false,
+        launchOptions: {
+            headless: true,
+        },
+    });
     afterEach(() => tk.dispose());
 
     it('should build a project in dev mode', async () => {
         const { open } = await tk.build('simple-case', 'cssInJsDev');
         await contract(
-            await open({ headless: false }, 'index.html', true),
+            await open({}, 'index.html', true),
             stylesInOrder,
             `"class extending component '.root => .b__root' in stylesheet 'b.st.css' was set on a node that does not extend '.root => .deep__root' from stylesheet 'deep.st.css'"`,
             ' override-active'
@@ -37,12 +42,7 @@ describe('Stylable ESBuild plugin', () => {
 
     it('should build a project with a bundle', async () => {
         const { open, read } = await tk.build('simple-case', 'cssBundleProd');
-        await contract(
-            await open({ headless: true }, 'index.bundle.html', true),
-            [],
-            'none',
-            ' override-removed'
-        );
+        await contract(await open({}, 'index.bundle.html', true), [], 'none', ' override-removed');
         const css = read('dist-bundle/index.css');
 
         const matchOrder = new RegExp(

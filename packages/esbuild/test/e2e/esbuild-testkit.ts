@@ -11,6 +11,9 @@ type BuildFn = (
 
 export class ESBuildTestKit {
     disposables: Array<() => void> = [];
+    constructor(
+        private options: { log?: boolean; launchOptions?: playwright.LaunchOptions } = {}
+    ) {}
     async build(project: string, buildExport?: string) {
         let openServerUrl: string | undefined;
         const buildFile = require.resolve(`@stylable/esbuild/test/e2e/${project}/build`);
@@ -33,14 +36,16 @@ export class ESBuildTestKit {
             target: ['es2020'],
             bundle: true,
         }));
-        console.log(project, 'Build done!');
+        this.options.log && console.log(project, 'Build done!');
         const serve = async () => {
             if (openServerUrl) return openServerUrl;
-            const { server, serverUrl } = await runServer(cwd, 3000, (...args) =>
-                console.log(project, ...args)
+            const { server, serverUrl } = await runServer(
+                cwd,
+                3000,
+                (...args) => this.options.log && console.log(project, ...args)
             );
             this.disposables.push(() => server.close());
-            console.log(project, 'Served at ', serverUrl);
+            this.options.log && console.log(project, 'Served at ', serverUrl);
             return (openServerUrl = serverUrl);
         };
         const open = async (
@@ -56,8 +61,14 @@ export class ESBuildTestKit {
             }
             const url = openServerUrl + (pathname ? '/' + pathname : '');
             const browser = process.env.PLAYWRIGHT_SERVER
-                ? await playwright.chromium.connect(process.env.PLAYWRIGHT_SERVER, launchOptions)
-                : await playwright.chromium.launch(launchOptions);
+                ? await playwright.chromium.connect(process.env.PLAYWRIGHT_SERVER, {
+                      ...this.options.launchOptions,
+                      ...launchOptions,
+                  })
+                : await playwright.chromium.launch({
+                      ...this.options.launchOptions,
+                      ...launchOptions,
+                  });
 
             const browserContext = await browser.newContext();
             const page = await browserContext.newPage();
