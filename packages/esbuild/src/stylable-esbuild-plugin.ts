@@ -368,9 +368,10 @@ function buildUsageMapping(metafile: Metafile, stylable: Stylable): Optimization
             usageMapping[meta.namespace] ||= false;
         }
     }
+
     for (const [namespace, usage] of Object.entries(usages)) {
         if (usage.size > 1) {
-            console.error(
+            throw new Error(
                 `The namespace '${namespace}' is being used in multiple files. Please review the following file(s) and update them to use a unique namespace:\n${[
                     ...usage,
                 ].join('\n')}`
