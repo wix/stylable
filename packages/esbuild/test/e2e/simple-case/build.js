@@ -1,5 +1,6 @@
 const { stylablePlugin } = require('@stylable/esbuild');
-const { createNamespaceStrategyNode } = require('@stylable/node');
+const { rmSync, existsSync } = require('node:fs');
+const { join } = require('node:path');
 
 module.exports.cssInJsDev = (build, options) => {
     run('js', build, options);
@@ -10,6 +11,11 @@ module.exports.cssBundleProd = (build, options) => {
 };
 
 function run(cssInjection, build, options) {
+    const outdir = cssInjection === 'css' ? 'dist-bundle' : 'dist';
+    const path = join(__dirname, outdir);
+    if (existsSync(path)) {
+        rmSync(path, { recursive: true, force: true });
+    }
     return build({
         ...options({
             entryPoints: ['./index'],
@@ -17,18 +23,9 @@ function run(cssInjection, build, options) {
                 stylablePlugin({
                     mode: cssInjection === 'css' ? 'production' : 'development',
                     cssInjection,
-                    stylableConfig(config) {
-                        return {
-                            ...config,
-                            resolveNamespace: createNamespaceStrategyNode({
-                                hashFragment: 'minimal',
-                                strict: true,
-                            }),
-                        };
-                    },
                 }),
             ],
         }),
-        outdir: cssInjection === 'css' ? './dist-bundle' : 'dist',
+        outdir,
     });
 }
