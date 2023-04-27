@@ -33,10 +33,10 @@ interface ESBuildOptions {
      */
     cssInjection?: 'js' | 'css';
     /**
-     * Config how error and warning reported to webpack by stylable
-     * auto - Stylable warning will emit Webpack warning and Stylable error will emit Webpack error
-     * strict - Stylable error and warning will emit Webpack error
-     * loose - Stylable error and warning will emit Webpack warning
+     * Config how error and warning reported to esbuild by stylable
+     * auto - Stylable warning will emit esbuild warning and Stylable error will emit esbuild error
+     * strict - Stylable error and warning will emit esbuild error
+     * loose - Stylable error and warning will emit esbuild warning
      */
     diagnosticsMode?: DiagnosticsMode;
     /**
@@ -46,7 +46,8 @@ interface ESBuildOptions {
     /**
      * Use to load stylable config file.
      * true - it will automatically detect the closest "stylable.config.js" file and use it.
-     * string - it will use the provided string as the "configFile" file path.
+     * false - will not load any "stylable.config.js" file.
+     * string - will use the provided string as the "configFile" file path.
      */
     configFile?: boolean | string;
     /**
@@ -60,6 +61,12 @@ interface ESBuildOptions {
      * default for prod - 'namespace'
      */
     runtimeStylesheetId?: 'module' | 'namespace' | 'module+namespace';
+    /**
+     * Optimization options
+     */
+    optimize?: {
+        removeUnusedComponents?: boolean;
+    };
 }
 ```
 
