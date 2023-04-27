@@ -22,7 +22,7 @@ const namespaces = {
     nativeCss: 'stylable-native-css',
 };
 
-interface ESBuildOptions {
+export interface ESBuildOptions {
     /**
      * Determine the way css is injected to the document
      * js - every js module contains the css and inject it independently
@@ -468,7 +468,7 @@ function sortMarkersByDepth(
     const sorted = sortModulesByDepth(
         extracted,
         (m) => m.depth,
-        () => /*TODO: should we sort by id like in webpack? */ '',
+        (m) => m.path,
         -1
     );
 
