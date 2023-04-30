@@ -1,5 +1,5 @@
 import fs, { readFileSync, writeFileSync } from 'fs';
-import { relative, join, isAbsolute } from 'path';
+import { relative, join, isAbsolute, dirname } from 'path';
 import decache from 'decache';
 import type { Plugin, PluginBuild, Metafile } from 'esbuild';
 import { Stylable, StylableConfig, StylableMeta, StylableResults } from '@stylable/core';
@@ -11,7 +11,7 @@ import {
     collectImportsWithSideEffects,
     processUrlDependencies,
 } from '@stylable/build-tools';
-import { resolveConfig } from '@stylable/cli';
+import { resolveConfig, buildDTS } from '@stylable/cli';
 import { DiagnosticsMode, emitDiagnostics } from '@stylable/core/dist/index-internal';
 import { parse } from 'postcss';
 
@@ -42,11 +42,20 @@ export interface ESBuildOptions {
     stylableConfig?: (config: StylableConfig, build: PluginBuild) => StylableConfig;
     /**
      * Use to load stylable config file.
-     * true - it will automatically detect the closest "stylable.config.js" file and use it.
+     * true - automatically detect the closest "stylable.config.js" file and use it.
      * false - will not load any "stylable.config.js" file.
      * string - will use the provided string as the "configFile" file path.
      */
     configFile?: boolean | string;
+    /**
+     *  Use to enable automatic generation of typescript type definitions
+     */
+    devTypes?: {
+        srcDir?: string; // 'src'
+        outDir?: string; // 'st-types'
+        dtsSourceMap?: boolean; // true
+        enabled?: boolean;
+    };
     /**
      * Stylable build mode
      */
@@ -77,6 +86,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             configFile,
             runtimeStylesheetId,
             optimize,
+            devTypes,
         } = applyDefaultOptions(initialPluginOptions);
 
         enableEsbuildMetafile(build, cssInjection);
@@ -128,7 +138,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
          * handle css/stylable files imported via other stylable files
          */
         build.onResolve({ filter: /\.css$/, namespace: namespaces.jsModule }, (args) => {
-            // self import of css injection
+            // stylable file generated JavaScript module import self CSS source
             if (args.path === args.importer) {
                 return {
                     path: args.path,
@@ -148,7 +158,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
         });
 
         /**
-         * handle all initial stylable requests from
+         * handle all initial stylable requests from javascript
          */
         build.onResolve({ filter: /\.st\.css$/ }, (args) => {
             return {
@@ -260,27 +270,56 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
          * process the generated bundle and optimize the css output
          */
         build.onEnd(({ metafile }) => {
-            if (cssInjection !== 'css') {
-                return;
-            }
+            let mapping: OptimizationMapping;
+
             if (!metafile) {
                 throw new Error('metafile is required for css injection');
             }
 
-            const mapping = optimize.removeUnusedComponents
-                ? buildUsageMapping(metafile, stylable)
-                : {};
+            if (devTypes.enabled) {
+                const absSrcDir = join(projectRoot, devTypes.srcDir);
+                const absOutDir = join(projectRoot, devTypes.outDir);
 
-            for (const distFile of Object.keys(metafile.outputs)) {
-                if (!distFile.endsWith('.css')) {
-                    continue;
+                mapping ??= buildUsageMapping(metafile, stylable);
+
+                for (const metaSet of Object.values(mapping.usagesByNamespace!)) {
+                    for (const { meta, path } of metaSet) {
+                        if (path.startsWith(absSrcDir)) {
+                            buildDTS({
+                                res: { meta, exports: meta.exports! },
+                                targetFilePath: join(absOutDir, relative(absSrcDir, path)),
+                                outputLogs: [],
+                                sourceFilePath: undefined,
+                                generated: new Set(),
+                                dtsSourceMap: devTypes.dtsSourceMap,
+                                writeFileSync: fs.writeFileSync,
+                                relative,
+                                dirname,
+                                isAbsolute,
+                            });
+                        }
+                    }
                 }
-                const distFilePath = join(stylable.projectRoot, distFile);
+            }
 
-                writeFileSync(
-                    distFilePath,
-                    sortMarkersByDepth(readFileSync(distFilePath, 'utf8'), stylable, mapping)
-                );
+            if (cssInjection === 'css') {
+                mapping ??= buildUsageMapping(metafile, stylable);
+
+                for (const distFile of Object.keys(metafile.outputs)) {
+                    if (!distFile.endsWith('.css')) {
+                        continue;
+                    }
+                    const distFilePath = join(stylable.projectRoot, distFile);
+
+                    writeFileSync(
+                        distFilePath,
+                        sortMarkersByDepth(
+                            readFileSync(distFilePath, 'utf8'),
+                            stylable,
+                            optimize.removeUnusedComponents ? mapping : {}
+                        )
+                    );
+                }
             }
         });
     },
@@ -345,7 +384,13 @@ function enableEsbuildMetafile(build: PluginBuild, cssInjection: string) {
 function buildUsageMapping(metafile: Metafile, stylable: Stylable): OptimizationMapping {
     const usageMapping: Record<string, boolean> = {};
     const globalMappings: Record<string, Record<string, boolean>> = {};
-    const usages: Record<string, Set<string>> = {};
+    const usagesByNamespace: Record<
+        string,
+        Set<{
+            path: string;
+            meta: StylableMeta;
+        }>
+    > = {};
     for (const [key] of Object.entries(metafile.inputs)) {
         if (key.startsWith(namespaces.jsModule)) {
             const path = key.replace(namespaces.jsModule + ':', '');
@@ -355,8 +400,8 @@ function buildUsageMapping(metafile: Metafile, stylable: Stylable): Optimization
             }
             globalMappings[path] ||= {};
             Object.assign(globalMappings[path], meta.globals);
-            usages[meta.namespace] ||= new Set();
-            usages[meta.namespace].add(key);
+            usagesByNamespace[meta.namespace] ||= new Set();
+            usagesByNamespace[meta.namespace].add({ path, meta });
             usageMapping[meta.namespace] = true;
         } else if (key.startsWith(namespaces.unused)) {
             const meta =
@@ -369,16 +414,18 @@ function buildUsageMapping(metafile: Metafile, stylable: Stylable): Optimization
         }
     }
 
-    for (const [namespace, usage] of Object.entries(usages)) {
+    for (const [namespace, usage] of Object.entries(usagesByNamespace)) {
         if (usage.size > 1) {
             throw new Error(
                 `The namespace '${namespace}' is being used in multiple files. Please review the following file(s) and update them to use a unique namespace:\n${[
                     ...usage,
-                ].join('\n')}`
+                ]
+                    .map((e) => e.path)
+                    .join('\n')}`
             );
         }
     }
-    return { usageMapping, globalMappings };
+    return { usagesByNamespace, usageMapping, globalMappings };
 }
 
 function esbuildEmitDiagnostics(res: StylableResults, diagnosticsMode: DiagnosticsMode) {
@@ -407,21 +454,28 @@ function esbuildEmitDiagnostics(res: StylableResults, diagnosticsMode: Diagnosti
     return { errors, warnings };
 }
 
-function applyDefaultOptions(options: ESBuildOptions, prod = true): Required<ESBuildOptions> {
+function applyDefaultOptions(options: ESBuildOptions, prod = true) {
     const mode = options.mode ?? (prod ? 'production' : 'development');
     return {
         mode,
         cssInjection: 'css',
         diagnosticsMode: 'auto',
-        stylableConfig: (config) => config,
+        stylableConfig: (config: StylableConfig) => config,
         configFile: true,
         runtimeStylesheetId: mode === 'production' ? 'namespace' : 'module+namespace',
         ...options,
+        devTypes: {
+            enabled: !!options.devTypes,
+            srcDir: 'src',
+            outDir: 'st-types',
+            dtsSourceMap: true,
+            ...options.devTypes,
+        },
         optimize: {
             removeUnusedComponents: prod,
             ...options.optimize,
         },
-    };
+    } satisfies ESBuildOptions;
 }
 
 function createDecacheRequire(build: PluginBuild) {
@@ -445,6 +499,13 @@ function wrapWithDepthMarkers(css: string, depth: number | string) {
 interface OptimizationMapping {
     usageMapping?: Record<string, boolean>;
     globalMappings?: Record<string, Record<string, boolean>>;
+    usagesByNamespace?: Record<
+        string,
+        Set<{
+            path: string;
+            meta: StylableMeta;
+        }>
+    >;
 }
 
 function sortMarkersByDepth(
