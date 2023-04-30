@@ -119,7 +119,10 @@ export class StylableResolver {
         protected moduleResolver: ModuleResolver,
         protected cache?: StylableResolverCache
     ) {}
-    public getModule({ context, request }: Imported): CachedModuleEntity {
+    public getModule({
+        context,
+        request,
+    }: Pick<Imported, 'context' | 'request'>): CachedModuleEntity {
         let entity: CachedModuleEntity;
         let resolvedPath: string | undefined;
 
