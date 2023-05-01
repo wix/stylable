@@ -31,7 +31,7 @@ describe('Stylable ESBuild plugin', () => {
     afterEach(() => tk.dispose());
 
     it('should build a project in dev mode', async () => {
-        const { open } = await tk.build('simple-case', 'cssInJsDev');
+        const { open } = await tk.build({ project: 'simple-case', buildExport: 'cssInJsDev' });
         await contract(
             await open({}, 'index.html', true),
             stylesInOrder,
@@ -41,7 +41,10 @@ describe('Stylable ESBuild plugin', () => {
     });
 
     it('should build a project with a bundle', async () => {
-        const { open, read } = await tk.build('simple-case', 'cssBundleProd');
+        const { open, read } = await tk.build({
+            project: 'simple-case',
+            buildExport: 'cssBundleProd',
+        });
         await contract(await open({}, 'index.bundle.html', true), [], 'none', ' override-removed');
         const css = read('dist-bundle/index.css');
 

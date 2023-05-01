@@ -222,7 +222,6 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             return {
                 errors,
                 warnings,
-
                 watchFiles: [args.path, ...deepDependencies],
                 resolveDir: '.',
                 contents: cssInjection === 'js' ? processStubs(moduleCode) : moduleCode,
