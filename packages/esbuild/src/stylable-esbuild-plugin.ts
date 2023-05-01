@@ -222,7 +222,8 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             return {
                 errors,
                 warnings,
-                watchFiles: [...deepDependencies],
+
+                watchFiles: [args.path, ...deepDependencies],
                 resolveDir: '.',
                 contents: cssInjection === 'js' ? processStubs(moduleCode) : moduleCode,
                 pluginData: { stylableResults: res },
@@ -272,11 +273,10 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
         build.onEnd(({ metafile }) => {
             let mapping: OptimizationMapping;
 
-            if (!metafile) {
-                throw new Error('metafile is required for css injection');
-            }
-
             if (devTypes.enabled) {
+                if (!metafile) {
+                    throw new Error('metafile is required for css injection');
+                }
                 const absSrcDir = join(projectRoot, devTypes.srcDir);
                 const absOutDir = join(projectRoot, devTypes.outDir);
 
@@ -303,6 +303,9 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             }
 
             if (cssInjection === 'css') {
+                if (!metafile) {
+                    throw new Error('metafile is required for css injection');
+                }
                 mapping ??= buildUsageMapping(metafile, stylable);
 
                 for (const distFile of Object.keys(metafile.outputs)) {
@@ -458,7 +461,7 @@ function applyDefaultOptions(options: ESBuildOptions, prod = true) {
     const mode = options.mode ?? (prod ? 'production' : 'development');
     return {
         mode,
-        cssInjection: 'css',
+        cssInjection: mode === 'development' ? 'js' : 'css',
         diagnosticsMode: 'auto',
         stylableConfig: (config: StylableConfig) => config,
         configFile: true,
