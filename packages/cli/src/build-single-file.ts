@@ -197,7 +197,7 @@ export function buildSingleFile({
             generated,
             outputLogs,
             dtsSourceMap,
-            sourceFilePath: outputSources ? filePath : undefined,
+            sourceFilePath: outputSources ? undefined : filePath,
             writeFileSync: fs.writeFileSync,
             relative,
             dirname,
