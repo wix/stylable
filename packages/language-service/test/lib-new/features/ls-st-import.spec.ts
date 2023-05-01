@@ -13,6 +13,82 @@ describe('LS: st-import', () => {
     afterEach('remove temp dir', () => {
         tempDir.remove();
     });
+    it('should suggest @st-import at top level', () => {
+        // ToDo: refactor code to be handled as part of the st-import feature
+        // and use new ls-context instead of TopLevelDirectiveProvider
+        const { service, carets, assertCompletions, fs, textEditContext } = testLangService(
+            {
+                'a.st.css': `
+                    ^topLevel^
+                `,
+                'b.st.css': `
+                    /* existing in file */
+                    @st-import from "./a.st.css";
+                    
+                    @st^partial^
+                `,
+                'c.st.css': `
+                    .root {
+                        ^nestedInRule^
+                    }
+                    @media {
+                        ^nestedInMedia^
+                    }
+                    @st-scope .root {
+                        ^nestedInStScope^
+                    }
+                    ^beforeSelector^ .x {}
+                `,
+            },
+            { testOnNativeFileSystem: tempDir.path }
+        );
+        const aPath = fs.join(tempDir.path, 'a.st.css');
+        const bPath = fs.join(tempDir.path, 'b.st.css');
+        const cPath = fs.join(tempDir.path, 'c.st.css');
+        const aCarets = carets[aPath];
+        const bCarets = carets[bPath];
+        const cCarets = carets[cPath];
+        const { replaceText: bReplaceText } = textEditContext(bPath);
+
+        assertCompletions({
+            message: 'top-level',
+            actualList: service.onCompletion(aPath, aCarets.topLevel),
+            expectedList: [{ label: '@st-import' }],
+        });
+        assertCompletions({
+            message: 'partial',
+            actualList: service.onCompletion(bPath, bCarets.partial),
+            expectedList: [
+                {
+                    label: '@st-import',
+                    textEdit: bReplaceText(bCarets.partial, `@st-import $2 from "$1";`, {
+                        deltaStart: -3,
+                    }),
+                },
+            ],
+        });
+        assertCompletions({
+            message: 'nested-in-rule',
+            actualList: service.onCompletion(cPath, cCarets.nestedInRule),
+            unexpectedList: [{ label: '@st-import' }],
+        });
+        // ToDo: remove specific at-rules handling - @st-import should only be top level
+        assertCompletions({
+            message: 'nested-in-media',
+            actualList: service.onCompletion(cPath, cCarets.nestedInMedia),
+            unexpectedList: [{ label: '@st-import' }],
+        });
+        assertCompletions({
+            message: 'nested-in-st-scope',
+            actualList: service.onCompletion(cPath, cCarets.nestedInStScope),
+            unexpectedList: [{ label: '@st-import' }],
+        });
+        assertCompletions({
+            message: 'before-selector',
+            actualList: service.onCompletion(cPath, cCarets.beforeSelector),
+            unexpectedList: [{ label: '@st-import' }],
+        });
+    });
     describe('named imports', () => {
         it('should suggest named imports', () => {
             const { service, carets, assertCompletions, fs, textEditContext } = testLangService(
