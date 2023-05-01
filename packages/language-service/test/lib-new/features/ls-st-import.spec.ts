@@ -13,43 +13,114 @@ describe('LS: st-import', () => {
     afterEach('remove temp dir', () => {
         tempDir.remove();
     });
-    it('should suggest symbols from native css', () => {
-        const { service, carets, assertCompletions, fs } = testLangService(
-            {
-                'native.css': `
-                    .classA {}
-                    .classB {
-                        --propA: 1;
-                    }
-                    :vars {
-                        varA: green;
-                    }
-                    @property --propB;
-                `,
-                'entry.st.css': `
-                    @st-import [^top^] from './native.css';
-                `,
-            },
-            {
-                // ToDo: this part of the completion provider still relays on old code
-                // that cannot run in memory-fs on windows. once the code is refactor this test
-                // should remove the "testOnNativeFileSystem" flag
-                testOnNativeFileSystem: tempDir.path,
-            }
-        );
-        const entryPath = fs.join(tempDir.path, 'entry.st.css');
-        const entryCarets = carets[entryPath];
+    describe('named imports', () => {
+        it('should suggest named imports', () => {
+            const { service, carets, assertCompletions, fs, textEditContext } = testLangService(
+                {
+                    'source.st.css': `
+                        .classA {}
+                        .classB {
+                            --propA: 1;
+                        }
+                        :vars {
+                            varA: green;
+                            varB: red;
+                        }
+                        @property --propB;
+                        @keyframe jump {}
+                        @layer comps {}
+                    `,
+                    'entry.st.css': `
+                        @st-import [classB, --propA, ^topEmpty^] from './source.st.css';
+                        @st-import [classB, --pro^partial^] from './source.st.css';
+                    `,
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+            const { replaceText } = textEditContext(entryPath);
 
-        assertCompletions({
-            message: 'top',
-            actualList: service.onCompletion(entryPath, entryCarets.top),
-            expectedList: [
-                { label: 'classA' },
-                { label: 'classB' },
-                { label: 'varA' },
-                { label: '--propA' },
-                { label: '--propB' },
-            ],
+            assertCompletions({
+                message: 'top',
+                actualList: service.onCompletion(entryPath, entryCarets.topEmpty),
+                expectedList: [
+                    { label: 'root' },
+                    { label: 'classA' },
+                    { label: 'varA' },
+                    { label: 'varB' },
+                    { label: '--propB' },
+                ],
+                unexpectedList: [
+                    { label: 'classB' },
+                    { label: '--propA' },
+                    { label: 'jump' },
+                    { label: 'comp' },
+                ],
+            });
+
+            assertCompletions({
+                message: 'top',
+                actualList: service.onCompletion(entryPath, entryCarets.partial),
+                expectedList: [
+                    {
+                        label: '--propA',
+                        textEdit: replaceText(entryCarets.partial, '--propA', { deltaStart: -5 }),
+                    },
+                    {
+                        label: '--propB',
+                        textEdit: replaceText(entryCarets.partial, '--propB', { deltaStart: -5 }),
+                    },
+                ],
+                unexpectedList: [
+                    { label: 'root' },
+                    { label: 'classA' },
+                    { label: 'varA' },
+                    { label: 'varB' },
+                    { label: 'classB' },
+                    { label: 'jump' },
+                    { label: 'comp' },
+                ],
+            });
+        });
+        it('should suggest symbols from native css', () => {
+            const { service, carets, assertCompletions, fs } = testLangService(
+                {
+                    'native.css': `
+                        .classA {}
+                        .classB {
+                            --propA: 1;
+                        }
+                        :vars {
+                            varA: green;
+                        }
+                        @property --propB;
+                    `,
+                    'entry.st.css': `
+                        @st-import [^top^] from './native.css';
+                    `,
+                },
+                {
+                    // ToDo: this part of the completion provider still relays on old code
+                    // that cannot run in memory-fs on windows. once the code is refactor this test
+                    // should remove the "testOnNativeFileSystem" flag
+                    testOnNativeFileSystem: tempDir.path,
+                }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+
+            assertCompletions({
+                message: 'top',
+                actualList: service.onCompletion(entryPath, entryCarets.top),
+                expectedList: [
+                    { label: 'classA' },
+                    { label: 'classB' },
+                    { label: 'varA' },
+                    { label: '--propA' },
+                    { label: '--propB' },
+                ],
+            });
         });
     });
     describe('specifier completion', () => {

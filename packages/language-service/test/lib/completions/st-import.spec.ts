@@ -117,7 +117,7 @@ describe('@st-import Directive', () => {
                     const path = '../mixins/js-mixins.js';
 
                     const createComp = (str: string, rng: ProviderRange) =>
-                        asserters.namedCompletion(str, rng, path, 'Mixin');
+                        asserters.namedCompletion(str, rng, path);
                     it(
                         'Completes names of functions from JS imports, with prefix ' + prefix + ' ',
                         () => {
@@ -148,7 +148,7 @@ describe('@st-import Directive', () => {
                     const path = '../mixins/js-mixins.js';
 
                     const createComp = (str: string, rng: ProviderRange) =>
-                        asserters.namedCompletion(str, rng, path, 'Mixin');
+                        asserters.namedCompletion(str, rng, path);
                     it(
                         'Completes names of functions from JS imports, with prefix ' + prefix + ' ',
                         () => {

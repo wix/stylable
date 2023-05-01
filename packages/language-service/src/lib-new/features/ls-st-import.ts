@@ -1,5 +1,6 @@
 import type * as postcss from 'postcss';
-import { Completion, range, Snippet } from '../../lib/completion-types';
+import type { StylableSymbol } from '@stylable/core';
+import { Completion, namedCompletion, range, Snippet } from '../../lib/completion-types';
 import type { LangServiceContext } from '../lang-service-context';
 import path from 'path';
 export function getCompletions(context: LangServiceContext): Completion[] {
@@ -15,6 +16,7 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
     if (context.location.atRuleParams) {
         const { node, offsetInNode } = context.location.atRuleParams;
         if (!Array.isArray(node) && node.type === '<string>') {
+            // specifier completions
             // ToDo: check context better - should come after "from" ?
             const pathBeforeCaret = node.value.slice(1, offsetInNode);
             const originFilePath = context.meta.source;
@@ -50,10 +52,220 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
             } catch (e) {
                 // mapping failed - cannot get mapped completions
             }
+        } else {
+            // named imports
+            // get specifier module
+            const importFrom = getSpecifierModule(context);
+            if (!importFrom?.value) {
+                return completions;
+            }
+            //
+            const result = analyzeNamedImports(context);
+            if (!result) {
+                return completions;
+            }
+            const { importType, existingNames, nameBeforeCaret } = result;
+            if (importFrom.kind === 'css') {
+                // CSS import completions
+                const symbols =
+                    importType === 'top'
+                        ? importFrom.value.getAllSymbols()
+                        : {
+                              /* ToDo: handle typed imports */
+                          };
+                addNamedImportCompletion({
+                    context,
+                    completions,
+                    importFrom,
+                    availableImports: symbols,
+                    existingNames,
+                    nameBeforeCaret,
+                    normalizePath: false,
+                    resolveOrigin(symbol) {
+                        const originResolve = context.stylable.resolver.deepResolve(symbol) || {
+                            _kind: 'css',
+                            meta: importFrom.value,
+                            symbol,
+                        };
+                        if (originResolve._kind !== 'css') {
+                            return;
+                        }
+                        return createNamedCompletionDetail(originResolve.symbol);
+                    },
+                });
+            } else {
+                // JS import completions
+                addNamedImportCompletion({
+                    context,
+                    completions,
+                    importFrom,
+                    availableImports: importFrom.value,
+                    existingNames,
+                    nameBeforeCaret,
+                    normalizePath: true,
+                    resolveOrigin(symbol) {
+                        const originResolve = context.stylable.resolver.deepResolve(symbol) || {
+                            _kind: 'css',
+                            meta: importFrom.value,
+                            symbol,
+                        };
+                        if (originResolve._kind !== 'css') {
+                            return;
+                        }
+                        return createNamedCompletionDetail(originResolve.symbol);
+                    },
+                });
+            }
         }
     }
     return completions;
 }
+function addNamedImportCompletion({
+    context,
+    completions,
+    importFrom,
+    availableImports,
+    existingNames,
+    nameBeforeCaret,
+    normalizePath,
+    resolveOrigin,
+}: {
+    context: LangServiceContext;
+    completions: Completion[];
+    importFrom: NonNullable<ReturnType<typeof getSpecifierModule>>;
+    availableImports: Record<string, any>;
+    existingNames: Set<string>;
+    nameBeforeCaret: string;
+    normalizePath: boolean;
+    resolveOrigin?: (symbol: StylableSymbol) => string | undefined;
+}) {
+    for (const [name, value] of Object.entries(availableImports)) {
+        if (existingNames.has(name)) {
+            continue;
+        }
+        let deltaStart = 0;
+        if (name.startsWith(nameBeforeCaret)) {
+            deltaStart = -nameBeforeCaret.length;
+        } else {
+            continue;
+        }
+        const originNameOrValue = resolveOrigin?.(value);
+        let relativePath = path
+            .relative(context.meta.source, importFrom.resolvedPath || '')
+            .slice(1);
+        if (normalizePath) {
+            relativePath = path.normalize(relativePath);
+        }
+        relativePath = relativePath.replace(/\\/g, '/');
+        completions.push(
+            namedCompletion(
+                name,
+                range(context.getPosition(), { deltaStart }),
+                relativePath,
+                originNameOrValue
+            )
+        );
+    }
+}
+function createNamedCompletionDetail(symbol: StylableSymbol) {
+    switch (symbol._kind) {
+        case 'class':
+            return 'Stylable class';
+        case 'cssVar':
+            return `${symbol.global ? 'Global ' : ''}${symbol.name}`;
+        case 'var':
+            return symbol.text;
+        case 'element':
+            return 'Stylable element';
+    }
+    return undefined;
+}
+function getSpecifierModule(context: LangServiceContext) {
+    const paramsAst = context.location.atRuleParams!.ast;
+    let specifier = '';
+    for (let i = paramsAst.length - 1; i >= 0; --i) {
+        if (paramsAst[i].type === '<string>') {
+            specifier = paramsAst[i].value.slice(1, -1);
+            break;
+        }
+    }
+    if (!specifier) {
+        return;
+    }
+    let importModule;
+    try {
+        // ToDo: check invalidation
+        importModule = context.stylable.resolver.getModule({
+            context: path.dirname(context.meta.source),
+            request: specifier,
+        });
+    } catch {
+        return;
+    }
+    return importModule;
+}
+function analyzeNamedImports(context: LangServiceContext) {
+    const result: { importType: string; existingNames: Set<string>; nameBeforeCaret: string } = {
+        importType: 'unknown',
+        existingNames: new Set(),
+        nameBeforeCaret: '',
+    };
+    const { ast, node, parents } = context.location.atRuleParams!;
+    if (Array.isArray(node)) {
+        return;
+    }
+    const nodeIndex = ast.indexOf(node);
+    let blockStartIndex = -1;
+    for (let i = nodeIndex; i >= 0; i--) {
+        const currentNode = ast[i];
+        if (currentNode && currentNode.type === 'literal' && currentNode.value === '[') {
+            blockStartIndex = i;
+            break;
+        }
+    }
+    if (blockStartIndex === -1) {
+        return;
+    }
+    if (parents.length === 1) {
+        // top level imports
+        result.importType = 'top';
+        // get block end index
+        let blockEndIndex = nodeIndex;
+        for (let i = nodeIndex + 1; i <= ast.length - 1; i++) {
+            const currentNode = ast[i];
+            if (currentNode && currentNode.type === 'literal' && currentNode.value === ']') {
+                blockEndIndex = i;
+                break;
+            }
+        }
+        // collect names
+        const atRuleParamLocation = context.location.atRuleParams!;
+        let readyForImport = true;
+        for (let i = blockStartIndex + 1; i < blockEndIndex; ++i) {
+            const currentNode = ast[i];
+            if (
+                readyForImport &&
+                (currentNode.type === '<custom-ident>' || currentNode.type === '<dashed-ident>')
+            ) {
+                if (currentNode === atRuleParamLocation.node) {
+                    result.nameBeforeCaret = currentNode.value.slice(
+                        0,
+                        atRuleParamLocation.offsetInNode
+                    );
+                } else {
+                    result.existingNames.add(currentNode.value);
+                    readyForImport = false;
+                }
+            } else if (currentNode.type === 'literal' && currentNode.value === ',') {
+                readyForImport = true;
+            }
+        }
+    } else if (parents.length === 2) {
+        // typed import
+    }
+    return result;
+}
+
 function addSpecifierCompletions({
     completions,
     context,

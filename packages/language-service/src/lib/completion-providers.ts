@@ -44,7 +44,6 @@ import {
     extractJsModifierReturnType,
     extractTsSignature,
     getExistingNames,
-    getNamedValues,
     isDirective,
     isInValue,
 } from './provider';
@@ -830,6 +829,43 @@ export const NamedCompletionProvider: CompletionProvider & {
         return maybeResolveImport(importName, stylable, meta);
     },
 };
+function isNamedDirective(line: string) {
+    return line.includes(`-st-named`);
+}
+function getNamedValues(
+    src: string,
+    lineIndex: number
+): { isNamedValueLine: boolean; namedValues: string[] } {
+    const lines = src.split('\n');
+    let isNamedValueLine = false;
+    const namedValues: string[] = [];
+
+    for (let i = lineIndex; i >= 0; i--) {
+        if (isDirective(lines[i]) && !isNamedDirective(lines[i])) {
+            break;
+        } else if (isNamedDirective(lines[i])) {
+            isNamedValueLine = true;
+            const valueStart = lines[i].indexOf(':') + 1;
+            const value = lines[i].slice(valueStart);
+            value
+                .split(',')
+                .map((x) => x.trim())
+                .filter((x) => x !== '')
+                .forEach((x) => namedValues.push(x));
+            break;
+        } else {
+            const valueStart = lines[i].indexOf(':') + 1;
+            const value = lines[i].slice(valueStart);
+            value
+                .split(',')
+                .map((x) => x.trim())
+                .filter((x) => x !== '')
+                .forEach((x) => namedValues.push(x));
+        }
+    }
+
+    return { isNamedValueLine, namedValues };
+}
 
 function maybeResolveImport(
     importName: string,
@@ -853,116 +889,6 @@ function maybeResolveImport(
 export const newStImportCompletionProvider: CompletionProvider = {
     provide({ context }) {
         return stImport.getCompletions(context);
-    },
-};
-
-export const StImportNamedCompletionProvider: CompletionProvider & {
-    resolveImport: (
-        importName: string,
-        stylable: Stylable,
-        meta: StylableMeta
-    ) => StylableMeta | null;
-} = {
-    provide({
-        astAtCursor,
-        stylable,
-        meta,
-        position,
-        fullLineText,
-        src,
-    }: ProviderOptions): Completion[] {
-        const { isNamedValueLine, namedValues } = getNamedValues(src, position.line);
-        let importName = '';
-
-        if (astAtCursor.type === 'root') {
-            const atRule = getAtRuleByPosition(astAtCursor, position, 'st-import');
-            const comps: string[][] = [[]];
-
-            if (isNamedValueLine && atRule) {
-                const parsed = postcssValueParser(atRule.params);
-                parsed.walk((n) => {
-                    if (n.type === 'string') {
-                        importName = n.value;
-                    }
-                });
-
-                if (importName.endsWith('.css')) {
-                    const resolvedImport: StylableMeta | null = this.resolveImport(
-                        importName,
-                        stylable,
-                        meta
-                    );
-
-                    if (resolvedImport) {
-                        const { lastName } = getExistingNames(fullLineText, position);
-
-                        getNamedCSSImports(
-                            stylable,
-                            comps,
-                            resolvedImport,
-                            lastName,
-                            namedValues,
-                            meta
-                        );
-
-                        return comps
-                            .slice(1)
-                            .map((c) =>
-                                namedCompletion(
-                                    c[0],
-                                    new ProviderRange(
-                                        new ProviderPosition(
-                                            position.line,
-                                            position.character - lastName.length
-                                        ),
-                                        new ProviderPosition(position.line, position.character)
-                                    ),
-                                    c[1],
-                                    c[2]
-                                )
-                            );
-                    }
-                } else if (importName.endsWith('.js')) {
-                    let req: any;
-                    try {
-                        req = (stylable as any).requireModule(
-                            path.join(path.dirname(meta.source), importName)
-                        );
-                    } catch (e) {
-                        return [];
-                    }
-
-                    const { lastName } = getExistingNames(fullLineText, position);
-                    Object.keys(req).forEach((k) => {
-                        if (typeof req[k] === 'function' && k.startsWith(lastName)) {
-                            comps.push([k, importName, 'Mixin']);
-                        }
-                    });
-                    return comps
-                        .slice(1)
-                        .map((c) =>
-                            namedCompletion(
-                                c[0],
-                                new ProviderRange(
-                                    new ProviderPosition(
-                                        position.line,
-                                        position.character - lastName.length
-                                    ),
-                                    new ProviderPosition(position.line, position.character)
-                                ),
-                                c[1],
-                                c[2]
-                            )
-                        );
-                }
-            }
-        }
-
-        return [];
-    },
-
-    resolveImport(importName: string, stylable: Stylable, meta: StylableMeta): StylableMeta | null {
-        return maybeResolveImport(importName, stylable, meta);
     },
 };
 

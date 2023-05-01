@@ -49,7 +49,6 @@ import {
     TopLevelDirectiveProvider,
     ValueCompletionProvider,
     ValueDirectiveProvider,
-    StImportNamedCompletionProvider,
     newStImportCompletionProvider,
 } from './completion-providers';
 import { topLevelDirectives } from './completion-types';
@@ -103,7 +102,6 @@ export class Provider {
         StateSelectorCompletionProvider,
         PseudoElementCompletionProvider,
         ValueCompletionProvider,
-        StImportNamedCompletionProvider,
     ];
     constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
 
@@ -1618,14 +1616,6 @@ export function isDirective(line: string) {
     return directives.some((k) => line.trim().startsWith(k));
 }
 
-function isNamedDirective(line: string) {
-    return line.includes(`-st-named`);
-}
-
-function isStImportNamed(line: string) {
-    return line.trim().startsWith(topLevelDirectives.stImport) && line.includes('[');
-}
-
 export function isInValue(lineText: string, position: ProviderPosition) {
     let isInValue = false;
 
@@ -1664,52 +1654,6 @@ function getChunkAtCursor(
         lineChunkAtCursor = lineChunkAtCursor.slice(lineChunkAtCursor.lastIndexOf(' '));
     }
     return { lineChunkAtCursor: lineChunkAtCursor.trim(), fixedCharIndex };
-}
-
-export function getNamedValues(
-    src: string,
-    lineIndex: number
-): { isNamedValueLine: boolean; namedValues: string[] } {
-    const lines = src.split('\n');
-    let isNamedValueLine = false;
-    const namedValues: string[] = [];
-
-    for (let i = lineIndex; i >= 0; i--) {
-        if (isDirective(lines[i]) && !isNamedDirective(lines[i])) {
-            break;
-        } else if (isNamedDirective(lines[i])) {
-            isNamedValueLine = true;
-            const valueStart = lines[i].indexOf(':') + 1;
-            const value = lines[i].slice(valueStart);
-            value
-                .split(',')
-                .map((x) => x.trim())
-                .filter((x) => x !== '')
-                .forEach((x) => namedValues.push(x));
-            break;
-        } else if (isStImportNamed(lines[i])) {
-            isNamedValueLine = true;
-            const valueStart = lines[i].indexOf('[') + 1;
-            const valueEnd = lines[i].indexOf(']');
-            const value = lines[i].slice(valueStart, valueEnd);
-            value
-                .split(',')
-                .map((x) => x.trim())
-                .filter((x) => x !== '')
-                .forEach((x) => namedValues.push(x));
-            break;
-        } else {
-            const valueStart = lines[i].indexOf(':') + 1;
-            const value = lines[i].slice(valueStart);
-            value
-                .split(',')
-                .map((x) => x.trim())
-                .filter((x) => x !== '')
-                .forEach((x) => namedValues.push(x));
-        }
-    }
-
-    return { isNamedValueLine, namedValues };
 }
 
 export function getExistingNames(lineText: string, position: ProviderPosition) {
