@@ -1,32 +1,59 @@
 import { dirname, join } from 'node:path';
-import { readFileSync } from 'node:fs';
-import { build as esbuild, BuildOptions, BuildResult } from 'esbuild';
-import { runServer } from '@stylable/e2e-test-kit';
+import { readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { nodeFs } from '@file-services/node';
+import { BuildContext, BuildOptions, context } from 'esbuild';
+import { createTempDirectorySync, runServer } from '@stylable/e2e-test-kit';
+
 import playwright from 'playwright-core';
 
 type BuildFn = (
-    build: typeof esbuild,
+    build: typeof context,
     options: (options: BuildOptions) => BuildOptions
-) => Promise<BuildResult>;
+) => Promise<BuildContext>;
 
 export class ESBuildTestKit {
-    disposables: Array<() => void> = [];
+    disposables: Array<() => void | Promise<void>> = [];
     constructor(
         private options: { log?: boolean; launchOptions?: playwright.LaunchOptions } = {}
     ) {}
-    async build(project: string, buildExport?: string) {
+    async build({
+        project,
+        buildExport,
+        tmp = true,
+    }: {
+        project: string;
+        buildExport?: string;
+        tmp?: boolean;
+    }) {
         let openServerUrl: string | undefined;
-        const buildFile = require.resolve(`@stylable/esbuild/test/e2e/${project}/build`);
-        const cwd = dirname(buildFile);
+        let buildFile = require.resolve(`@stylable/esbuild/test/e2e/${project}/build.js`);
+        let projectDir = dirname(buildFile);
+
+        if (tmp) {
+            const t = createTempDirectorySync('esbuild-testkit');
+            this.disposables.push(() => t.remove());
+            nodeFs.copyDirectorySync(projectDir, t.path);
+            buildFile = join(t.path, 'build.js');
+            projectDir = t.path;
+
+            symlinkSync(
+                join(__dirname, '../../../../../node_modules'),
+                join(t.path, 'node_modules'),
+                'junction'
+            );
+            this.options.log &&
+                console.log(`created temp project ${projectDir} and linked node_modules`);
+        }
         const moduleExports = await import(buildFile);
         const run = moduleExports[buildExport || 'run'] as BuildFn;
         if (!run) {
             throw new Error(`could not find ${buildExport || 'run'} export in ${buildFile}`);
         }
-        const buildResult = await run(esbuild, (options: BuildOptions) => ({
+
+        const buildContext = await run(context, (options: BuildOptions) => ({
             ...options,
             plugins: [...(options.plugins ?? [])],
-            absWorkingDir: cwd,
+            absWorkingDir: projectDir,
             loader: {
                 '.png': 'file',
             },
@@ -36,11 +63,15 @@ export class ESBuildTestKit {
             target: ['es2020'],
             bundle: true,
         }));
+        this.disposables.push(() => buildContext.dispose());
+
+        await buildContext.rebuild();
+
         this.options.log && console.log(project, 'Build done!');
         const serve = async () => {
             if (openServerUrl) return openServerUrl;
             const { server, serverUrl } = await runServer(
-                cwd,
+                projectDir,
                 3000,
                 (...args) => this.options.log && console.log(project, ...args)
             );
@@ -87,17 +118,20 @@ export class ESBuildTestKit {
             return { page, responses };
         };
         return {
-            result: buildResult,
+            context: buildContext,
             serve,
             open,
+            write(pathInCwd: string, content: string) {
+                writeFileSync(join(projectDir, pathInCwd), content, 'utf8');
+            },
             read(pathInCwd: string) {
-                return readFileSync(join(cwd, pathInCwd), 'utf8');
+                return readFileSync(join(projectDir, pathInCwd), 'utf8');
             },
         };
     }
-    dispose() {
+    async dispose() {
         for (const dispose of this.disposables) {
-            dispose();
+            await dispose();
         }
     }
 }
