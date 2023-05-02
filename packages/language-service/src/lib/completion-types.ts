@@ -1,5 +1,6 @@
 import type { StylableSymbol } from '@stylable/core';
 import type { ProviderRange } from './completion-providers';
+import { stringifySelectorAst } from '@tokey/css-selector-parser';
 
 export class Completion {
     constructor(
@@ -250,27 +251,51 @@ stImportNamedCompletion.detail = ({
     symbol?: Partial<StylableSymbol>;
     jsValue?: any;
 }) => {
-    let symbolName = '';
-    let symbolValue = '';
     if (symbol) {
         switch (symbol?._kind) {
-            case 'class':
-                symbolName = 'Stylable class';
-                break;
-            case 'cssVar':
-                symbolName = `${symbol.global ? 'Global ' : ''}${symbol.name}`;
-                break;
+            case 'class': {
+                const global = symbol['-st-global']
+                    ? `=> "${stringifySelectorAst(symbol['-st-global'][0])}"`
+                    : '';
+                return `.${symbol.name} ${global} from '${relativePath}'`;
+            }
+            case 'cssVar': {
+                const global = symbol.global ? 'global ' : '';
+                return `.${symbol.name} (${global}custom property) from '${relativePath}'`;
+            }
             case 'var':
-                symbolValue = symbol.text || '';
-                break;
+                return `${symbol.name}: \`${
+                    symbol.text || ''
+                }\` (build var) from '${relativePath}'`;
             case 'element':
-                symbolName = 'Stylable element';
-                break;
+                return `${symbol.name} (type selector) from '${relativePath}'`;
+            case 'keyframes': {
+                const global = symbol.global ? 'global ' : '';
+                return `${symbol.name} (${global}keyframes) from '${relativePath}'`;
+            }
+            case 'layer': {
+                const global = symbol.global ? 'global ' : '';
+                return `${symbol.name} (${global}layer) from '${relativePath}'`;
+            }
+            case 'container': {
+                const global = symbol.global ? 'global ' : '';
+                return `${symbol.name} (${global}container) from '${relativePath}'`;
+            }
         }
     } else if (jsValue) {
-        // ToDo: show info about js value
+        const type = typeof jsValue;
+        if (type === 'function') {
+            const originName = (jsValue as Function).name || '';
+            if (originName) {
+                return `${originName}() from '${relativePath}'`;
+            }
+        } else if (type === 'string') {
+            return `"${jsValue}" from '${relativePath}'`;
+        } else {
+            return `${jsValue.toString()} from '${relativePath}'`;
+        }
     }
-    return `from: ${relativePath}\nValue: ${symbolValue || symbolName || ''}`;
+    return `from: ${relativePath}`;
 };
 
 stImportNamedCompletion.typeAssertCall = ({

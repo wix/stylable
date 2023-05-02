@@ -488,8 +488,6 @@ describe('LS: st-import', () => {
             });
         });
         it('should show global information as part of detail', () => {
-            // ToDo: check global keyframes, layer, and container
-            // ToDo: change css class detail to show global
             const { service, carets, assertCompletions, fs } = testLangService(
                 {
                     'source.st.css': `
@@ -499,9 +497,12 @@ describe('LS: st-import', () => {
                         @property st-global(--propA);
                         @keyframes st-global(jump) {}
                         @layer st-global(comps) {}
+                        @container st-global(box);
                     `,
                     'entry.st.css': `
-                        @st-import [^topEmpty^] from './source.st.css';
+                        @st-import [
+                            ^top^, keyframes(^keyframes^), layer(^layer^), container(^container^)
+                        ] from './source.st.css';
                     `,
                 },
                 { testOnNativeFileSystem: tempDir.path }
@@ -511,7 +512,7 @@ describe('LS: st-import', () => {
 
             assertCompletions({
                 message: 'top',
-                actualList: service.onCompletion(entryPath, entryCarets.topEmpty),
+                actualList: service.onCompletion(entryPath, entryCarets.top),
                 expectedList: [
                     {
                         label: 'classA',
@@ -529,6 +530,45 @@ describe('LS: st-import', () => {
                         detail: stImportNamedCompletion.detail({
                             relativePath: './source.st.css',
                             symbol: { _kind: 'cssVar', name: '--propA', global: true },
+                        }),
+                    },
+                ],
+            });
+            assertCompletions({
+                message: 'keyframes',
+                actualList: service.onCompletion(entryPath, entryCarets.keyframes),
+                expectedList: [
+                    {
+                        label: 'jump',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'keyframes', name: 'jump', global: true },
+                        }),
+                    },
+                ],
+            });
+            assertCompletions({
+                message: 'layer',
+                actualList: service.onCompletion(entryPath, entryCarets.layer),
+                expectedList: [
+                    {
+                        label: 'comps',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'layer', name: 'comps', global: true },
+                        }),
+                    },
+                ],
+            });
+            assertCompletions({
+                message: 'container',
+                actualList: service.onCompletion(entryPath, entryCarets.container),
+                expectedList: [
+                    {
+                        label: 'box',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'container', name: 'box', global: true },
                         }),
                     },
                 ],
@@ -598,10 +638,11 @@ describe('LS: st-import', () => {
             const { service, carets, assertCompletions, fs, textEditContext } = testLangService(
                 {
                     'code.js': `
-                        exports.mixinA = function(){}
-                        exports.mixinB = function(){}
-                        exports.formatterA = function(){}
+                        exports.mixinA = function mixinA(){}
+                        exports.mixinB = function mixinB(){}
+                        exports.formatterA = function formatterA(){}
                         exports.strA = "abc";
+                        exports.numA = 123;
                         exports.boolA = true;
                     `,
                     'entry.st.css': `
@@ -623,7 +664,7 @@ describe('LS: st-import', () => {
                         label: 'mixinA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './code.js',
-                            jsValue: function () {
+                            jsValue: function mixinA() {
                                 /**/
                             },
                         }),
@@ -632,7 +673,7 @@ describe('LS: st-import', () => {
                         label: 'mixinB',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './code.js',
-                            jsValue: function () {
+                            jsValue: function mixinB() {
                                 /**/
                             },
                         }),
@@ -641,7 +682,7 @@ describe('LS: st-import', () => {
                         label: 'formatterA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './code.js',
-                            jsValue: function () {
+                            jsValue: function formatterA() {
                                 /**/
                             },
                         }),
@@ -651,6 +692,13 @@ describe('LS: st-import', () => {
                         detail: stImportNamedCompletion.detail({
                             relativePath: './code.js',
                             jsValue: 'abc',
+                        }),
+                    },
+                    {
+                        label: 'numA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './code.js',
+                            jsValue: 123,
                         }),
                     },
                     {
@@ -671,7 +719,7 @@ describe('LS: st-import', () => {
                         label: 'mixinA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './code.js',
-                            jsValue: function () {
+                            jsValue: function mixinA() {
                                 /**/
                             },
                         }),
@@ -681,7 +729,7 @@ describe('LS: st-import', () => {
                         label: 'mixinB',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './code.js',
-                            jsValue: function () {
+                            jsValue: function mixinB() {
                                 /**/
                             },
                         }),

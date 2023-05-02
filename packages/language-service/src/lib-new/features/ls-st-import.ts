@@ -121,13 +121,8 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                     existingNames,
                     nameBeforeCaret,
                     resolveOrigin(symbol) {
-                        const originResolve = context.stylable.resolver.deepResolve(symbol) || {
-                            _kind: 'css',
-                            meta: importFrom.value,
-                            symbol,
-                        };
                         return {
-                            jsValue: originResolve.symbol,
+                            jsValue: symbol,
                             originPath: importFrom.resolvedPath,
                         };
                     },
