@@ -133,5 +133,6 @@ export class ESBuildTestKit {
         for (const dispose of this.disposables) {
             await dispose();
         }
+        this.disposables.length = 0;
     }
 }
