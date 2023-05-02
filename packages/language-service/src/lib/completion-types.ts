@@ -1,3 +1,4 @@
+import type { StylableSymbol } from '@stylable/core';
 import type { ProviderRange } from './completion-providers';
 
 export class Completion {
@@ -223,6 +224,46 @@ export function namedCompletion(
         rng
     );
 }
+
+export function stImportNamedCompletion({
+    originSymbol,
+    localName,
+    rng,
+    relativePath,
+}: {
+    originSymbol?: StylableSymbol;
+    localName: string;
+    rng: ProviderRange;
+    relativePath: string;
+}) {
+    const detail = stImportNamedCompletion.detail({ relativePath, symbol: originSymbol });
+    return new Completion(localName, detail, 'a', new Snippet(localName), rng);
+}
+stImportNamedCompletion.detail = ({
+    relativePath,
+    symbol,
+}: {
+    relativePath: string;
+    symbol?: Partial<StylableSymbol>;
+}) => {
+    let symbolName = '';
+    let symbolValue = '';
+    switch (symbol?._kind) {
+        case 'class':
+            symbolName = 'Stylable class';
+            break;
+        case 'cssVar':
+            symbolName = `${symbol.global ? 'Global ' : ''}${symbol.name}`;
+            break;
+        case 'var':
+            symbolValue = symbol.text || '';
+            break;
+        case 'element':
+            symbolName = 'Stylable element';
+            break;
+    }
+    return `from: ${relativePath}\nValue: ${symbolValue || symbolName || ''}`;
+};
 
 export function cssMixinCompletion(symbolName: string, rng: ProviderRange, from: string) {
     return new Completion(symbolName, 'from: ' + from, 'a', new Snippet(symbolName), rng);

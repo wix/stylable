@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
 import type { StylableSymbol } from '@stylable/core';
-import { Completion, namedCompletion, range, Snippet } from '../../lib/completion-types';
+import { Completion, stImportNamedCompletion, range, Snippet } from '../../lib/completion-types';
 import type { LangServiceContext } from '../lang-service-context';
 import path from 'path';
 export function getCompletions(context: LangServiceContext): Completion[] {
@@ -90,7 +90,7 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                         if (originResolve._kind !== 'css') {
                             return;
                         }
-                        return createNamedCompletionDetail(originResolve.symbol);
+                        return originResolve.symbol;
                     },
                 });
             } else {
@@ -112,7 +112,7 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                         if (originResolve._kind !== 'css') {
                             return;
                         }
-                        return createNamedCompletionDetail(originResolve.symbol);
+                        return originResolve.symbol;
                     },
                 });
             }
@@ -137,7 +137,7 @@ function addNamedImportCompletion({
     existingNames: Set<string>;
     nameBeforeCaret: string;
     normalizePath: boolean;
-    resolveOrigin?: (symbol: StylableSymbol) => string | undefined;
+    resolveOrigin?: (symbol: StylableSymbol) => StylableSymbol | undefined;
 }) {
     for (const [name, value] of Object.entries(availableImports)) {
         if (existingNames.has(name)) {
@@ -149,7 +149,7 @@ function addNamedImportCompletion({
         } else {
             continue;
         }
-        const originNameOrValue = resolveOrigin?.(value);
+        const originSymbol = resolveOrigin?.(value);
         let relativePath = path
             .relative(context.meta.source, importFrom.resolvedPath || '')
             .slice(1);
@@ -158,27 +158,14 @@ function addNamedImportCompletion({
         }
         relativePath = relativePath.replace(/\\/g, '/');
         completions.push(
-            namedCompletion(
-                name,
-                range(context.getPosition(), { deltaStart }),
+            stImportNamedCompletion({
+                originSymbol,
+                localName: name,
+                rng: range(context.getPosition(), { deltaStart }),
                 relativePath,
-                originNameOrValue
-            )
+            })
         );
     }
-}
-function createNamedCompletionDetail(symbol: StylableSymbol) {
-    switch (symbol._kind) {
-        case 'class':
-            return 'Stylable class';
-        case 'cssVar':
-            return `${symbol.global ? 'Global ' : ''}${symbol.name}`;
-        case 'var':
-            return symbol.text;
-        case 'element':
-            return 'Stylable element';
-    }
-    return undefined;
 }
 function getSpecifierModule(context: LangServiceContext) {
     const paramsAst = context.location.atRuleParams!.ast;

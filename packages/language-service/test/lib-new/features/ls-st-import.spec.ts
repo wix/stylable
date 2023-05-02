@@ -1,6 +1,7 @@
 import { createDefaultResolver } from '@stylable/core';
 import { createTempDirectorySync } from '@stylable/core-test-kit';
 import { testLangService } from '../../test-kit/test-lang-service';
+import { stImportNamedCompletion } from '@stylable/language-service/dist/lib/completion-types';
 import { Command } from 'vscode-languageserver';
 
 const triggerCompletion = Command.create('additional', 'editor.action.triggerSuggest');
@@ -121,11 +122,41 @@ describe('LS: st-import', () => {
                 message: 'top',
                 actualList: service.onCompletion(entryPath, entryCarets.topEmpty),
                 expectedList: [
-                    { label: 'root' },
-                    { label: 'classA' },
-                    { label: 'varA' },
-                    { label: 'varB' },
-                    { label: '--propB' },
+                    {
+                        label: 'root',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'class', name: 'root' },
+                        }),
+                    },
+                    {
+                        label: 'classA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'class', name: 'classA' },
+                        }),
+                    },
+                    {
+                        label: 'varA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'var', name: 'varA', text: 'green' },
+                        }),
+                    },
+                    {
+                        label: 'varB',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'var', name: 'varB', text: 'red' },
+                        }),
+                    },
+                    {
+                        label: '--propB',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'cssVar', name: '--propB' },
+                        }),
+                    },
                 ],
                 unexpectedList: [
                     { label: 'classB' },
@@ -136,7 +167,7 @@ describe('LS: st-import', () => {
             });
 
             assertCompletions({
-                message: 'top',
+                message: 'partial',
                 actualList: service.onCompletion(entryPath, entryCarets.partial),
                 expectedList: [
                     {
