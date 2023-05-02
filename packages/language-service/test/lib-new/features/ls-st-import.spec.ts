@@ -3,6 +3,7 @@ import { createTempDirectorySync } from '@stylable/core-test-kit';
 import { testLangService } from '../../test-kit/test-lang-service';
 import { stImportNamedCompletion } from '@stylable/language-service/dist/lib/completion-types';
 import { Command } from 'vscode-languageserver';
+import { parseCssSelector } from '@tokey/css-selector-parser';
 
 const triggerCompletion = Command.create('additional', 'editor.action.triggerSuggest');
 
@@ -190,6 +191,139 @@ describe('LS: st-import', () => {
                 ],
             });
         });
+        it('should suggest re-exports', () => {
+            const { service, carets, assertCompletions, fs } = testLangService(
+                {
+                    'origin.st.css': `
+                        .originClassA {
+                            --propA: 1;
+                        }
+                        :vars {
+                            varA: green;
+                        }
+                        @property --propB;
+                        @keyframe jump {}
+                        @layer comps {}
+                    `,
+                    'extend.st.css': `
+                        @st-import [originClassA, varA, --propA, --propB, keyframes(jump), layer(comps)] from './origin.st.css';
+                        .classA {
+                            -st-extends: originClassA;
+                        }
+                    `,
+                    'proxy.st.css': `
+                        @st-import [
+                            classA as proxyClassA, 
+                            varA as proxyVarA, 
+                            --propA as --proxyPropA,
+                            --propB as --proxyPropB,
+                            keyframes(
+                                jump as proxyJump
+                            ), 
+                            layer(
+                                comps as  proxyComps
+                            )
+                        ] from './extend.st.css';
+                    `,
+                    'entry.st.css': `
+                        @st-import [^topEmpty^] from './proxy.st.css';
+                    `,
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+            // ToDo: fix detail origin path and name
+            assertCompletions({
+                message: 'top',
+                actualList: service.onCompletion(entryPath, entryCarets.topEmpty),
+                expectedList: [
+                    {
+                        label: 'root',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './proxy.st.css',
+                            symbol: { _kind: 'class', name: 'root' },
+                        }),
+                    },
+                    {
+                        label: 'proxyClassA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './proxy.st.css',
+                            symbol: { _kind: 'class', name: 'proxyClassA' },
+                        }),
+                    },
+                    {
+                        label: 'proxyVarA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './proxy.st.css',
+                            symbol: { _kind: 'var', name: 'varA', text: 'green' },
+                        }),
+                    },
+                    {
+                        label: '--proxyPropA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './proxy.st.css',
+                            symbol: { _kind: 'cssVar', name: '--propA' },
+                        }),
+                    },
+                    {
+                        label: '--proxyPropB',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './proxy.st.css',
+                            symbol: { _kind: 'cssVar', name: '--propB' },
+                        }),
+                    },
+                ],
+                unexpectedList: [{ label: 'proxyJump' }, { label: 'proxyComp' }],
+            });
+        });
+        it('should show global information as part of detail', () => {
+            // ToDo: check global keyframes, layer, and container
+            // ToDo: change css class detail to show global
+            const { service, carets, assertCompletions, fs } = testLangService(
+                {
+                    'source.st.css': `
+                        .classA {
+                            -st-global: '.globalA';
+                        }
+                        @property st-global(--propA);
+                        @keyframe st-global(jump) {}
+                        @layer st-global(comps) {}
+                    `,
+                    'entry.st.css': `
+                        @st-import [^topEmpty^] from './source.st.css';
+                    `,
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+
+            assertCompletions({
+                message: 'top',
+                actualList: service.onCompletion(entryPath, entryCarets.topEmpty),
+                expectedList: [
+                    {
+                        label: 'classA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: {
+                                _kind: 'class',
+                                name: 'classA',
+                                '-st-global': parseCssSelector('.globalA'),
+                            },
+                        }),
+                    },
+                    {
+                        label: '--propA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './source.st.css',
+                            symbol: { _kind: 'cssVar', name: '--propA', global: true },
+                        }),
+                    },
+                ],
+            });
+        });
         it('should suggest symbols from native css', () => {
             const { service, carets, assertCompletions, fs } = testLangService(
                 {
@@ -197,9 +331,6 @@ describe('LS: st-import', () => {
                         .classA {}
                         .classB {
                             --propA: 1;
-                        }
-                        :vars {
-                            varA: green;
                         }
                         @property --propB;
                     `,
@@ -221,12 +352,133 @@ describe('LS: st-import', () => {
                 message: 'top',
                 actualList: service.onCompletion(entryPath, entryCarets.top),
                 expectedList: [
-                    { label: 'classA' },
-                    { label: 'classB' },
-                    { label: 'varA' },
-                    { label: '--propA' },
-                    { label: '--propB' },
+                    {
+                        label: 'classA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './native.css',
+                            symbol: {
+                                _kind: 'class',
+                                name: 'classA',
+                                '-st-global': parseCssSelector('.classA'),
+                            },
+                        }),
+                    },
+                    {
+                        label: 'classB',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './native.css',
+                            symbol: {
+                                _kind: 'class',
+                                name: 'classB',
+                                '-st-global': parseCssSelector('.classB'),
+                            },
+                        }),
+                    },
+                    {
+                        label: '--propA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './native.css',
+                            symbol: { _kind: 'cssVar', name: '--propA', global: true },
+                        }),
+                    },
                 ],
+            });
+        });
+        it('should suggest symbols from js', () => {
+            const { service, carets, assertCompletions, fs, textEditContext } = testLangService(
+                {
+                    'code.js': `
+                        exports.mixinA = function(){}
+                        exports.mixinB = function(){}
+                        exports.formatterA = function(){}
+                        exports.strA = "abc";
+                        exports.boolA = true;
+                    `,
+                    'entry.st.css': `
+                        @st-import [^top^] from './code.js';
+                        @st-import [mix^partial^] from './code.js';
+                    `,
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+            const { replaceText } = textEditContext(entryPath);
+
+            assertCompletions({
+                message: 'top',
+                actualList: service.onCompletion(entryPath, entryCarets.top),
+                expectedList: [
+                    {
+                        label: 'mixinA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './code.js',
+                            jsValue: function () {
+                                /**/
+                            },
+                        }),
+                    },
+                    {
+                        label: 'mixinB',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './code.js',
+                            jsValue: function () {
+                                /**/
+                            },
+                        }),
+                    },
+                    {
+                        label: 'formatterA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './code.js',
+                            jsValue: function () {
+                                /**/
+                            },
+                        }),
+                    },
+                    {
+                        label: 'strA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './code.js',
+                            jsValue: 'abc',
+                        }),
+                    },
+                    {
+                        label: 'boolA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './code.js',
+                            jsValue: true,
+                        }),
+                    },
+                ],
+            });
+
+            assertCompletions({
+                message: 'partial',
+                actualList: service.onCompletion(entryPath, entryCarets.partial),
+                expectedList: [
+                    {
+                        label: 'mixinA',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './code.js',
+                            jsValue: function () {
+                                /**/
+                            },
+                        }),
+                        textEdit: replaceText(entryCarets.partial, 'mixinA', { deltaStart: -3 }),
+                    },
+                    {
+                        label: 'mixinB',
+                        detail: stImportNamedCompletion.detail({
+                            relativePath: './code.js',
+                            jsValue: function () {
+                                /**/
+                            },
+                        }),
+                        textEdit: replaceText(entryCarets.partial, 'mixinB', { deltaStart: -3 }),
+                    },
+                ],
+                unexpectedList: [{ label: 'formatterA' }, { label: 'strA' }, { label: 'boolA' }],
             });
         });
     });
