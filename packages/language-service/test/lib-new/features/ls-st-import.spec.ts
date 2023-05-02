@@ -105,7 +105,7 @@ describe('LS: st-import', () => {
                             varB: red;
                         }
                         @property --propB;
-                        @keyframe jump {}
+                        @keyframes jump {}
                         @layer comps {}
                     `,
                     'entry.st.css': `
@@ -191,6 +191,114 @@ describe('LS: st-import', () => {
                 ],
             });
         });
+        it('should suggest typed named imports', () => {
+            const { service, carets, assertCompletions, fs, textEditContext, completion } =
+                testLangService(
+                    {
+                        'source.st.css': `
+                        .aClass {
+                            --aProp: 1;
+                            container-name: aContainer;
+                        }
+                        @container bContainer;
+                        :vars {
+                            aBuildVar: red;
+                        }
+                        @keyframes aKeyframes {}
+                        @keyframes bKeyframes {}
+                        @layer aLayer {}
+                        @layer bLayer {}
+                    `,
+                        'entry.st.css': `
+                        @st-import [
+                            keyframes(^keyframesEmpty^)
+                            layer(^layerEmpty^)
+                            container(^containerEmpty^)
+                        ] from './source.st.css';
+                        @st-import [
+                            keyframes(a^keyframesPartial^)
+                            layer(a^layerPartial^)
+                            container(a^containerPartial^)
+                        ] from './source.st.css';
+                    `,
+                    },
+                    { testOnNativeFileSystem: tempDir.path }
+                );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+            const { replaceText } = textEditContext(entryPath);
+
+            const capitalize = (value: string) => value[0].toUpperCase() + value.slice(1);
+            const supportedTypes = ['keyframes', 'layer', 'container'] as const;
+            const allTypes = ['class', 'prop', 'buildVar', ...supportedTypes] as const;
+            for (const type of supportedTypes) {
+                const capitalizedType = capitalize(type);
+                assertCompletions({
+                    message: `empty ${type}`,
+                    actualList: service.onCompletion(entryPath, entryCarets[type + 'Empty']),
+                    expectedList: [
+                        // a&b param from type
+                        ...completion(['a' + capitalizedType, 'b' + capitalizedType], (name) => ({
+                            label: name,
+                            detail: stImportNamedCompletion.detail({
+                                relativePath: './source.st.css',
+                                symbol: { _kind: type, name },
+                            }),
+                        })),
+                    ],
+                    unexpectedList: [
+                        // list of a&b params from all other types
+                        ...completion(
+                            allTypes
+                                .filter((typeName) => typeName !== type)
+                                .reduce((acc, paramType) => {
+                                    acc.push('a' + capitalize(paramType));
+                                    acc.push('b' + capitalize(paramType));
+                                    return acc;
+                                }, [] as string[]),
+                            (name) => ({
+                                label: name,
+                            })
+                        ),
+                    ],
+                });
+                assertCompletions({
+                    message: `partial ${type}`,
+                    actualList: service.onCompletion(entryPath, entryCarets[type + 'Partial']),
+                    expectedList: [
+                        // a param from type (without b)
+                        {
+                            label: 'a' + capitalizedType,
+                            textEdit: replaceText(
+                                entryCarets[type + 'Partial'],
+                                'a' + capitalizedType,
+                                { deltaStart: -1 }
+                            ),
+                            detail: stImportNamedCompletion.detail({
+                                relativePath: './source.st.css',
+                                symbol: { _kind: type, name: 'a' + capitalizedType },
+                            }),
+                        },
+                    ],
+                    unexpectedList: [
+                        // list of a&b params from all other types + b from current type
+                        { label: 'b' + capitalizedType },
+                        ...completion(
+                            allTypes
+                                .filter((typeName) => typeName !== type)
+                                .reduce((acc, paramType) => {
+                                    acc.push('a' + capitalize(paramType));
+                                    acc.push('b' + capitalize(paramType));
+                                    return acc;
+                                }, [] as string[]),
+                            (name) => ({
+                                label: name,
+                            })
+                        ),
+                    ],
+                });
+            }
+        });
         it('should suggest re-exports', () => {
             const { service, carets, assertCompletions, fs } = testLangService(
                 {
@@ -202,7 +310,7 @@ describe('LS: st-import', () => {
                             varA: green;
                         }
                         @property --propB;
-                        @keyframe jump {}
+                        @keyframes jump {}
                         @layer comps {}
                     `,
                     'extend.st.css': `
@@ -287,7 +395,7 @@ describe('LS: st-import', () => {
                             -st-global: '.globalA';
                         }
                         @property st-global(--propA);
-                        @keyframe st-global(jump) {}
+                        @keyframes st-global(jump) {}
                         @layer st-global(comps) {}
                     `,
                     'entry.st.css': `
