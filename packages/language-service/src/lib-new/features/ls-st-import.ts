@@ -80,7 +80,6 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                     availableImports: symbols,
                     existingNames,
                     nameBeforeCaret,
-                    normalizePath: false,
                     resolveOrigin(symbol) {
                         const originResolve = context.stylable.resolver.deepResolve(symbol) || {
                             _kind: 'css',
@@ -88,9 +87,9 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                             symbol,
                         };
                         if (originResolve._kind !== 'css') {
-                            return;
+                            return {};
                         }
-                        return originResolve.symbol;
+                        return { originSymbol: originResolve.symbol };
                     },
                 });
             } else {
@@ -102,17 +101,13 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                     availableImports: importFrom.value,
                     existingNames,
                     nameBeforeCaret,
-                    normalizePath: true,
                     resolveOrigin(symbol) {
                         const originResolve = context.stylable.resolver.deepResolve(symbol) || {
                             _kind: 'css',
                             meta: importFrom.value,
                             symbol,
                         };
-                        if (originResolve._kind !== 'css') {
-                            return;
-                        }
-                        return originResolve.symbol;
+                        return { jsValue: originResolve.symbol };
                     },
                 });
             }
@@ -127,7 +122,6 @@ function addNamedImportCompletion({
     availableImports,
     existingNames,
     nameBeforeCaret,
-    normalizePath,
     resolveOrigin,
 }: {
     context: LangServiceContext;
@@ -136,8 +130,9 @@ function addNamedImportCompletion({
     availableImports: Record<string, any>;
     existingNames: Set<string>;
     nameBeforeCaret: string;
-    normalizePath: boolean;
-    resolveOrigin?: (symbol: StylableSymbol) => StylableSymbol | undefined;
+    resolveOrigin?: (
+        symbol: StylableSymbol
+    ) => { originSymbol?: StylableSymbol | undefined } | { jsValue?: any };
 }) {
     for (const [name, value] of Object.entries(availableImports)) {
         if (existingNames.has(name)) {
@@ -149,17 +144,18 @@ function addNamedImportCompletion({
         } else {
             continue;
         }
-        const originSymbol = resolveOrigin?.(value);
-        let relativePath = path
-            .relative(context.meta.source, importFrom.resolvedPath || '')
-            .slice(1);
-        if (normalizePath) {
-            relativePath = path.normalize(relativePath);
+        const originSymbolOrValue = resolveOrigin?.(value);
+        let relativePath = path.relative(
+            path.dirname(context.meta.source),
+            importFrom.resolvedPath || ''
+        );
+        if (!path.isAbsolute(relativePath) && !relativePath.match(/^\./)) {
+            relativePath = './' + relativePath;
         }
         relativePath = relativePath.replace(/\\/g, '/');
         completions.push(
             stImportNamedCompletion({
-                originSymbol,
+                ...originSymbolOrValue,
                 localName: name,
                 rng: range(context.getPosition(), { deltaStart }),
                 relativePath,

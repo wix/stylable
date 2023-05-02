@@ -227,40 +227,48 @@ export function namedCompletion(
 
 export function stImportNamedCompletion({
     originSymbol,
+    jsValue,
     localName,
     rng,
     relativePath,
 }: {
-    originSymbol?: StylableSymbol;
     localName: string;
     rng: ProviderRange;
     relativePath: string;
+    originSymbol?: StylableSymbol;
+    jsValue?: any;
 }) {
-    const detail = stImportNamedCompletion.detail({ relativePath, symbol: originSymbol });
+    const detail = stImportNamedCompletion.detail({ relativePath, symbol: originSymbol, jsValue });
     return new Completion(localName, detail, 'a', new Snippet(localName), rng);
 }
 stImportNamedCompletion.detail = ({
     relativePath,
     symbol,
+    jsValue,
 }: {
     relativePath: string;
     symbol?: Partial<StylableSymbol>;
+    jsValue?: any;
 }) => {
     let symbolName = '';
     let symbolValue = '';
-    switch (symbol?._kind) {
-        case 'class':
-            symbolName = 'Stylable class';
-            break;
-        case 'cssVar':
-            symbolName = `${symbol.global ? 'Global ' : ''}${symbol.name}`;
-            break;
-        case 'var':
-            symbolValue = symbol.text || '';
-            break;
-        case 'element':
-            symbolName = 'Stylable element';
-            break;
+    if (symbol) {
+        switch (symbol?._kind) {
+            case 'class':
+                symbolName = 'Stylable class';
+                break;
+            case 'cssVar':
+                symbolName = `${symbol.global ? 'Global ' : ''}${symbol.name}`;
+                break;
+            case 'var':
+                symbolValue = symbol.text || '';
+                break;
+            case 'element':
+                symbolName = 'Stylable element';
+                break;
+        }
+    } else if (jsValue) {
+        // ToDo: show info about js value
     }
     return `from: ${relativePath}\nValue: ${symbolValue || symbolName || ''}`;
 };
