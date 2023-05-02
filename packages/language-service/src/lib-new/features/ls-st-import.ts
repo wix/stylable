@@ -68,7 +68,7 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
             if (!result) {
                 return completions;
             }
-            const { importType, existingNames, nameBeforeCaret } = result;
+            const { importType, existingNames, existingCalls, nameBeforeCaret } = result;
             if (!importType) {
                 return completions;
             }
@@ -100,9 +100,19 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                         return { originSymbol: originResolve.symbol };
                     },
                 });
+                if (importType === 'top') {
+                    addNamedImportCompletion({
+                        context,
+                        completions,
+                        importFrom,
+                        availableImports: TYPED_NAMED,
+                        existingNames: existingCalls,
+                        nameBeforeCaret,
+                        createCompletion: stImportNamedCompletion.typeAssertCall,
+                    });
+                }
             } else {
                 // JS import completions
-                // ToDo: ignore typed imports
                 addNamedImportCompletion({
                     context,
                     completions,
@@ -132,6 +142,7 @@ function addNamedImportCompletion({
     existingNames,
     nameBeforeCaret,
     resolveOrigin,
+    createCompletion = stImportNamedCompletion,
 }: {
     context: LangServiceContext;
     completions: Completion[];
@@ -142,6 +153,7 @@ function addNamedImportCompletion({
     resolveOrigin?: (
         symbol: StylableSymbol
     ) => { originSymbol?: StylableSymbol | undefined } | { jsValue?: any };
+    createCompletion?: (options: Parameters<typeof stImportNamedCompletion>[0]) => Completion;
 }) {
     for (const [name, value] of Object.entries(availableImports)) {
         if (existingNames.has(name)) {
@@ -163,7 +175,7 @@ function addNamedImportCompletion({
         }
         relativePath = relativePath.replace(/\\/g, '/');
         completions.push(
-            stImportNamedCompletion({
+            createCompletion({
                 ...originSymbolOrValue,
                 localName: name,
                 rng: range(context.getPosition(), { deltaStart }),
@@ -198,9 +210,15 @@ function getSpecifierModule(context: LangServiceContext) {
 }
 const TYPED_NAMED = { keyframes: 'keyframes', layer: 'layer', container: 'container' } as const;
 function analyzeNamedImports(context: LangServiceContext) {
-    const result: { importType: string; existingNames: Set<string>; nameBeforeCaret: string } = {
+    const result: {
+        importType: string;
+        existingNames: Set<string>;
+        existingCalls: Set<string>;
+        nameBeforeCaret: string;
+    } = {
         importType: '',
         existingNames: new Set(),
+        existingCalls: new Set(),
         nameBeforeCaret: '',
     };
     const { ast, node, parents } = context.location.atRuleParams!;
@@ -277,19 +295,30 @@ function collectExistingNamedImports({
     endIndex: number;
     nodes: CSSValueAST<any>[];
     caretLocation: NonNullable<AstLocationResult['atRuleParams']>;
-    result: { importType: string; existingNames: Set<string>; nameBeforeCaret: string };
+    result: {
+        importType: string;
+        existingNames: Set<string>;
+        existingCalls: Set<string>;
+        nameBeforeCaret: string;
+    };
 }) {
     let readyForImport = true;
     for (let i = startIndex; i < endIndex; ++i) {
         const currentNode = nodes[i];
         if (
             readyForImport &&
-            (currentNode.type === '<custom-ident>' || currentNode.type === '<dashed-ident>')
+            (currentNode.type === '<custom-ident>' ||
+                currentNode.type === '<dashed-ident>' ||
+                currentNode.type === 'call')
         ) {
             if (currentNode === caretLocation.node) {
                 result.nameBeforeCaret = currentNode.value.slice(0, caretLocation.offsetInNode);
             } else {
-                result.existingNames.add(currentNode.value);
+                if (currentNode.type === 'call') {
+                    result.existingCalls.add(currentNode.value);
+                } else {
+                    result.existingNames.add(currentNode.value);
+                }
                 readyForImport = false;
             }
         } else if (currentNode.type === 'literal' && currentNode.value === ',') {

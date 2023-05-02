@@ -273,6 +273,33 @@ stImportNamedCompletion.detail = ({
     return `from: ${relativePath}\nValue: ${symbolValue || symbolName || ''}`;
 };
 
+stImportNamedCompletion.typeAssertCall = ({
+    localName,
+    rng,
+}: Parameters<typeof stImportNamedCompletion>[0]) => {
+    const detail = stImportNamedCompletion.typeAssertCallDetail(localName);
+    const triggerCompletion = true;
+    return new Completion(
+        localName + '()',
+        detail,
+        'a',
+        new Snippet(`${localName}($1)`),
+        rng,
+        triggerCompletion
+    );
+};
+stImportNamedCompletion.typeAssertCallDetail = (type: string) => {
+    switch (type) {
+        case 'keyframes':
+            return '@keyframes definitions';
+        case 'layer':
+            return '@layer definitions';
+        case 'container':
+            return 'container query name definitions';
+    }
+    return '';
+};
+
 export function cssMixinCompletion(symbolName: string, rng: ProviderRange, from: string) {
     return new Completion(symbolName, 'from: ' + from, 'a', new Snippet(symbolName), rng);
 }

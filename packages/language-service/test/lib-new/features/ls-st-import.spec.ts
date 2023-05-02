@@ -299,6 +299,108 @@ describe('LS: st-import', () => {
                 });
             }
         });
+        it('should suggest typed import asserters', () => {
+            const { service, carets, assertCompletions, fs, completion, textEditContext } =
+                testLangService(
+                    {
+                        'source.st.css': ``,
+                        'code.js': ``,
+                        'entry.st.css': `
+                        @st-import [
+                            ^topLevelEmpty^
+                        ] from './source.st.css';
+                        @st-import [
+                            lay^topPartial^
+                        ] from './source.st.css';
+                        @st-import [
+                            keyframes(),
+                            ^topWithExisting^
+                            layer(),
+                        ] from './source.st.css';
+                        @st-import [
+                            keyframes(^notTop^)
+                        ] from './source.st.css';
+                        @st-import [
+                            keyframes(^onlyInCSS^)
+                        ] from './code.js';
+                    `,
+                    },
+                    { testOnNativeFileSystem: tempDir.path }
+                );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+            const { replaceText } = textEditContext(entryPath);
+
+            const supportedTypes = ['keyframes', 'layer', 'container'] as const;
+            assertCompletions({
+                message: `all`,
+                actualList: service.onCompletion(entryPath, entryCarets['topLevelEmpty']),
+                expectedList: [
+                    ...completion([...supportedTypes], (type) => ({
+                        label: type + '()',
+                        detail: stImportNamedCompletion.typeAssertCallDetail(type),
+                    })),
+                ],
+            });
+            assertCompletions({
+                message: `partial`,
+                actualList: service.onCompletion(entryPath, entryCarets['topPartial']),
+                expectedList: [
+                    // partial "lay" - only layer()
+                    {
+                        label: 'layer()',
+                        textEdit: replaceText(entryCarets['topPartial'], 'layer($1)', {
+                            deltaStart: -3,
+                        }),
+                        detail: stImportNamedCompletion.typeAssertCallDetail('layer'),
+                        command: triggerCompletion,
+                    },
+                ],
+                unexpectedList: [
+                    // all except layer
+                    ...completion(
+                        [...supportedTypes.filter((type) => type !== 'layer')],
+                        (type) => ({ label: type + '()' })
+                    ),
+                ],
+            });
+            assertCompletions({
+                message: `with existing`,
+                actualList: service.onCompletion(entryPath, entryCarets['topWithExisting']),
+                expectedList: [
+                    //  keyframes&layer already exist - only container
+                    {
+                        label: 'container()',
+                        textEdit: replaceText(entryCarets['topWithExisting'], 'container($1)'),
+                        detail: stImportNamedCompletion.typeAssertCallDetail('container'),
+                        command: triggerCompletion,
+                    },
+                ],
+                unexpectedList: [
+                    // all except container
+                    ...completion(
+                        [...supportedTypes.filter((type) => type !== 'container')],
+                        (type) => ({ label: type + '()' })
+                    ),
+                ],
+            });
+            assertCompletions({
+                message: `only at top of params`,
+                actualList: service.onCompletion(entryPath, entryCarets['notTop']),
+                unexpectedList: [
+                    // all
+                    ...completion([...supportedTypes], (type) => ({ label: type + '()' })),
+                ],
+            });
+            assertCompletions({
+                message: `only in CSS`,
+                actualList: service.onCompletion(entryPath, entryCarets['onlyInCSS']),
+                unexpectedList: [
+                    // all
+                    ...completion([...supportedTypes], (type) => ({ label: type + '()' })),
+                ],
+            });
+        });
         it('should suggest re-exports', () => {
             const { service, carets, assertCompletions, fs } = testLangService(
                 {
