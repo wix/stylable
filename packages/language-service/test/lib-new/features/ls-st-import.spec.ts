@@ -443,7 +443,7 @@ describe('LS: st-import', () => {
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
             const entryCarets = carets[entryPath];
-            // ToDo: fix detail origin path and name
+
             assertCompletions({
                 message: 'top',
                 actualList: service.onCompletion(entryPath, entryCarets.topEmpty),
@@ -458,28 +458,28 @@ describe('LS: st-import', () => {
                     {
                         label: 'proxyClassA',
                         detail: stImportNamedCompletion.detail({
-                            relativePath: './proxy.st.css',
-                            symbol: { _kind: 'class', name: 'proxyClassA' },
+                            relativePath: './extend.st.css',
+                            symbol: { _kind: 'class', name: 'classA' },
                         }),
                     },
                     {
                         label: 'proxyVarA',
                         detail: stImportNamedCompletion.detail({
-                            relativePath: './proxy.st.css',
+                            relativePath: './origin.st.css',
                             symbol: { _kind: 'var', name: 'varA', text: 'green' },
                         }),
                     },
                     {
                         label: '--proxyPropA',
                         detail: stImportNamedCompletion.detail({
-                            relativePath: './proxy.st.css',
+                            relativePath: './origin.st.css',
                             symbol: { _kind: 'cssVar', name: '--propA' },
                         }),
                     },
                     {
                         label: '--proxyPropB',
                         detail: stImportNamedCompletion.detail({
-                            relativePath: './proxy.st.css',
+                            relativePath: './origin.st.css',
                             symbol: { _kind: 'cssVar', name: '--propB' },
                         }),
                     },

@@ -84,7 +84,6 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                 addNamedImportCompletion({
                     context,
                     completions,
-                    importFrom,
                     availableImports: symbols,
                     existingNames,
                     nameBeforeCaret,
@@ -95,16 +94,18 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                             symbol,
                         };
                         if (originResolve._kind !== 'css') {
-                            return {};
+                            return { originPath: '' };
                         }
-                        return { originSymbol: originResolve.symbol };
+                        return {
+                            originSymbol: originResolve.symbol,
+                            originPath: originResolve.meta.source,
+                        };
                     },
                 });
                 if (importType === 'top') {
                     addNamedImportCompletion({
                         context,
                         completions,
-                        importFrom,
                         availableImports: TYPED_NAMED,
                         existingNames: existingCalls,
                         nameBeforeCaret,
@@ -116,7 +117,6 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                 addNamedImportCompletion({
                     context,
                     completions,
-                    importFrom,
                     availableImports: importFrom.value,
                     existingNames,
                     nameBeforeCaret,
@@ -126,7 +126,10 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                             meta: importFrom.value,
                             symbol,
                         };
-                        return { jsValue: originResolve.symbol };
+                        return {
+                            jsValue: originResolve.symbol,
+                            originPath: importFrom.resolvedPath,
+                        };
                     },
                 });
             }
@@ -137,7 +140,6 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
 function addNamedImportCompletion({
     context,
     completions,
-    importFrom,
     availableImports,
     existingNames,
     nameBeforeCaret,
@@ -146,13 +148,14 @@ function addNamedImportCompletion({
 }: {
     context: LangServiceContext;
     completions: Completion[];
-    importFrom: NonNullable<ReturnType<typeof getSpecifierModule>>;
     availableImports: Record<string, any>;
     existingNames: Set<string>;
     nameBeforeCaret: string;
-    resolveOrigin?: (
-        symbol: StylableSymbol
-    ) => { originSymbol?: StylableSymbol | undefined } | { jsValue?: any };
+    resolveOrigin?: (symbol: StylableSymbol) => {
+        originSymbol?: StylableSymbol | undefined;
+        jsValue?: any;
+        originPath: string;
+    };
     createCompletion?: (options: Parameters<typeof stImportNamedCompletion>[0]) => Completion;
 }) {
     for (const [name, value] of Object.entries(availableImports)) {
@@ -168,7 +171,7 @@ function addNamedImportCompletion({
         const originSymbolOrValue = resolveOrigin?.(value);
         let relativePath = path.relative(
             path.dirname(context.meta.source),
-            importFrom.resolvedPath || ''
+            originSymbolOrValue?.originPath || ''
         );
         if (!path.isAbsolute(relativePath) && !relativePath.match(/^\./)) {
             relativePath = './' + relativePath;
