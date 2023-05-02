@@ -2,13 +2,8 @@ const { stylablePlugin } = require('@stylable/esbuild');
 const { rmSync, existsSync } = require('node:fs');
 const { join } = require('node:path');
 
-module.exports.cssInJsDev = (build, options) => {
-    run('js', build, options);
-};
-
-module.exports.cssBundleProd = (build, options) => {
-    run('css', build, options);
-};
+module.exports.cssInJsDev = (build, options) => run('js', build, options);
+module.exports.cssBundleProd = (build, options) => run('css', build, options);
 
 function run(cssInjection, build, options) {
     const outdir = cssInjection === 'css' ? 'dist-bundle' : 'dist';
