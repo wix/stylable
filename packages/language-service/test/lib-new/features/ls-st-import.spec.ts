@@ -25,7 +25,7 @@ describe('LS: st-import', () => {
                 `,
                 'b.st.css': `
                     /* existing in file */
-                    @st-import from "./a.st.css";
+                    @st-import "./a.st.css";
                     
                     @st^partial^
                 `,

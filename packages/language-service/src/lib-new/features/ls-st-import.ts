@@ -168,7 +168,7 @@ function addNamedImportCompletion({
             path.dirname(context.meta.source),
             originSymbolOrValue?.originPath || ''
         );
-        if (!path.isAbsolute(relativePath) && !relativePath.match(/^\./)) {
+        if (!path.isAbsolute(relativePath) && !relativePath.startsWith('.')) {
             relativePath = './' + relativePath;
         }
         relativePath = relativePath.replace(/\\/g, '/');
