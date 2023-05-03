@@ -491,6 +491,7 @@ describe('ast-from-position', () => {
                     str: 'decl1: bookmark after',
                 },
             ]);
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('bookmark after');
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -519,6 +520,7 @@ describe('ast-from-position', () => {
                     str: 'decl1: before bookmark after',
                 },
             ]);
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('before bookmark after');
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -550,6 +552,9 @@ describe('ast-from-position', () => {
                     str: 'nest(bookmark)',
                 },
             ]);
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(
+                'before nest(bookmark) after'
+            );
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -578,6 +583,7 @@ describe('ast-from-position', () => {
                     str: 'decl1: before bookmark',
                 },
             ]);
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('before bookmark');
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -604,6 +610,7 @@ describe('ast-from-position', () => {
                     str: 'decl1: before',
                 },
             ]);
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('before');
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
@@ -672,6 +679,7 @@ describe('ast-from-position', () => {
                     str: '@name bookmark after {}',
                 },
             ]);
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql('bookmark after');
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -702,6 +710,9 @@ describe('ast-from-position', () => {
                     str: '@name before bookmark after {}',
                 },
             ]);
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(
+                'before bookmark after'
+            );
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -736,6 +747,9 @@ describe('ast-from-position', () => {
                     str: 'nest(bookmark)',
                 },
             ]);
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(
+                'before nest(bookmark) after'
+            );
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -766,6 +780,7 @@ describe('ast-from-position', () => {
                     str: '@name start bookmark {}',
                 },
             ]);
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql('start bookmark');
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -1018,6 +1033,7 @@ describe('ast-from-position', () => {
                     str: 'color: green',
                 },
             ]);
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('green');
             // selector level
             expect(stringifySelectorAst(selector!.node), 'target class node').to.eql('green');
             expect(selector!.afterSelector, 'after selector').to.eql(false);

@@ -52,6 +52,7 @@ export type AstLocation =
       }
     | {
           type: 'declValue';
+          ast: CSSValue.BaseAstNode[];
           node: CSSValue.BaseAstNode | CSSValue.BaseAstNode[];
           offsetInNode: number;
           parents: NodeType[];
@@ -59,6 +60,7 @@ export type AstLocation =
       }
     | {
           type: 'atRuleParams';
+          ast: CSSValue.BaseAstNode[];
           node: CSSValue.BaseAstNode | CSSValue.BaseAstNode[];
           offsetInNode: number;
           parents: NodeType[];
@@ -247,7 +249,7 @@ function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
             afterSpace: 0,
             checkContext,
         });
-        let where: (typeof base)['where'] = 'declValue';
+        let where: typeof base['where'] = 'declValue';
         const base = checkContext.result.base;
         if (isInValue) {
             where = 'declValue';
@@ -278,7 +280,7 @@ function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
             afterSpace: node.raws.between!.length,
             checkContext,
         });
-        let where: (typeof base)['where'] = 'declValue';
+        let where: typeof base['where'] = 'declValue';
         const base = checkContext.result.base;
         if (isInParams) {
             where = 'atRuleParams';
@@ -320,6 +322,7 @@ function checkValue({
     const ast = CSSValue.parseCSSValue(value);
     const valueLocation: Extract<AstLocation, { type: 'atRuleParams' | 'declValue' }> = {
         type,
+        ast,
         node: ast,
         offsetInNode: !isInIncludedSpace ? 0 : value.length + targetOffset - valueEnd,
         parents: [node],

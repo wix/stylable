@@ -296,7 +296,7 @@ export const namedCompletion: (
         label: typeName,
         sortText: 'a',
         insertText: typeName,
-        detail: 'from: ' + from + '\n' + 'Value: ' + value,
+        detail: 'from: ' + from + '\n' + 'Value: ' + (value || ''),
         range: rng,
     };
 };

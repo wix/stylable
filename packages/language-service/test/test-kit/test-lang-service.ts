@@ -73,6 +73,12 @@ export function testLangService(
         service,
         carets,
         assertCompletions,
+        completion<T>(
+            data: T[],
+            template: (value: T) => Partial<CompletionItem>
+        ): Partial<CompletionItem>[] {
+            return data.map(template);
+        },
         textEditContext(filePath: string) {
             const document = TextDocument.create(
                 URI.file(filePath).toString(),
