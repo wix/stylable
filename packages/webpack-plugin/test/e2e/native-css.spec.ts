@@ -49,12 +49,12 @@ describe(`(${project})`, () => {
                 ),
             };
         });
-        expect(localSideEffect, 'local side effect').to.eql(' from local side-effect');
+        expect(localSideEffect, 'local side effect').to.eql('from local side-effect');
         expect(customResolveSideEffect, 'custom resolve side effect').to.eql(
-            ' from custom resolved side-effect'
+            'from custom resolved side-effect'
         );
-        expect(libSideEffect, 'lib side effect').to.eql(' from lib side-effect');
-        expect(libClass, 'lib class').to.eql(' from lib class');
+        expect(libSideEffect, 'lib side effect').to.eql('from lib side-effect');
+        expect(libClass, 'lib class').to.eql('from lib class');
         expect(localColor, 'local import prop').to.eql('rgb(0, 128, 0)');
         expect(libColor, 'lib import prop').to.eql('rgb(0, 100, 0)');
         expect(customResolveColor, 'custom resolve import prop').to.eql('rgb(128, 0, 128)');
