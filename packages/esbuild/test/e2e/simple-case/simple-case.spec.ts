@@ -36,7 +36,7 @@ describe('Stylable ESBuild plugin', () => {
             await open({}, 'index.html', true),
             stylesInOrder,
             `"class extending component '.root => .b__root' in stylesheet 'b.st.css' was set on a node that does not extend '.root => .deep__root' from stylesheet 'deep.st.css'"`,
-            ' override-active'
+            'override-active'
         );
     });
 
@@ -45,7 +45,7 @@ describe('Stylable ESBuild plugin', () => {
             project: 'simple-case',
             buildExport: 'cssBundleProd',
         });
-        await contract(await open({}, 'index.bundle.html', true), [], 'none', ' override-removed');
+        await contract(await open({}, 'index.bundle.html', true), [], 'none', 'override-removed');
         const css = read('dist-bundle/index.css');
 
         const matchOrder = new RegExp(
@@ -87,8 +87,8 @@ async function contract(
     const assetLoaded = Boolean(responses?.find((r) => r.url().match(/asset-.*?\.png$/)));
 
     expect(assetLoaded, 'asset loaded').to.eql(true);
-    expect(reset, 'reset applied').to.eql(' true');
-    expect(sideEffects, 'side effects loaded').to.eql(' true');
+    expect(reset, 'reset applied').to.eql('true');
+    expect(sideEffects, 'side effects loaded').to.eql('true');
     expect(simpleOrderOverride, 'simple override').to.eql('rgb(0, 128, 0)');
     expect(styles, 'loaded stylesheets').to.eql(stylesheets);
     expect(devRule, 'dev rule applied').to.eql(devRuleMatch);
