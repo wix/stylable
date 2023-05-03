@@ -71,6 +71,9 @@ export interface StylableWebpackPluginOptions {
     cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
     /**
      * Determine the runtime stylesheet id kind used by the cssInjection js mode
+     * This sets the value of the st_id attribute on the stylesheet element
+     * default for dev - 'module'
+     * default for prod - 'namespace'
      */
     runtimeStylesheetId?: 'module' | 'namespace';
     /**
@@ -87,7 +90,7 @@ export interface StylableWebpackPluginOptions {
      */
     target?: 'oldie' | 'modern';
     /**
-     * Set the <style> tag st_id attribute to allow multiple Stylable build to be separated in the head
+     * Set the <style> tag st_runtime attribute to allow multiple Stylable build to be separated in the head
      * This only apply to cssInjection js mode
      */
     runtimeId?: string;

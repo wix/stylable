@@ -14,11 +14,14 @@ import { processProjects } from './process-projects';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 import { resolveNpmRequests } from './resolve-requests';
 import type { ModuleResolver } from '@stylable/core/dist/index-internal';
-import type { MinimalFS } from '@stylable/core';
+import type { MinimalFS, processNamespace } from '@stylable/core';
 
 interface StylableRuntimeConfigs {
     stcConfig?: Configuration<string> | undefined;
-    defaultConfig?: { resolveModule?: ModuleResolver };
+    defaultConfig?: {
+        resolveModule?: ModuleResolver;
+        resolveNamespace?: typeof processNamespace;
+    };
 }
 
 export async function projectsConfig(

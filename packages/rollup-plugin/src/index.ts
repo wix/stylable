@@ -100,31 +100,32 @@ export function stylableRollupPlugin({
     let emittedAssets!: Map<string, string>;
     let outputCSS = '';
     let stcBuilder: STCBuilder | undefined;
-
+    let configFromFile: ReturnType<typeof resolveStcConfig> | undefined;
     return {
         name: 'Stylable',
         async buildStart() {
             extracted = extracted || new Map();
             emittedAssets = emittedAssets || new Map();
-            const stConfig = stylableConfig({
-                fileSystem: fs,
-                optimizer: new StylableOptimizer(),
-                resolverCache: new Map(),
-                requireModule,
-                mode: mode || getDefaultMode(),
-                projectRoot: projectRoot || process.cwd(),
-                resolveNamespace: resolveNamespace || resolveNamespaceNode,
-            });
-            const configFromFile = resolveStcConfig(
-                stConfig.projectRoot,
-                typeof stcConfig === 'string' ? stcConfig : undefined,
-                fs
-            );
 
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
             } else {
+                const stConfig = stylableConfig({
+                    fileSystem: fs,
+                    optimizer: new StylableOptimizer(),
+                    resolverCache: new Map(),
+                    requireModule,
+                    mode: mode || getDefaultMode(),
+                    projectRoot: projectRoot || process.cwd(),
+                    resolveNamespace: resolveNamespace || resolveNamespaceNode,
+                });
+                configFromFile = resolveStcConfig(
+                    stConfig.projectRoot,
+                    typeof stcConfig === 'string' ? stcConfig : undefined,
+                    fs
+                );
+
                 stylable = new Stylable({
                     resolveModule: configFromFile?.config?.defaultConfig?.resolveModule,
                     ...stConfig,
@@ -138,7 +139,7 @@ export function stylableRollupPlugin({
                     }
                 } else if (configFromFile && configFromFile.config.stcConfig) {
                     stcBuilder = STCBuilder.create({
-                        rootDir: stConfig.projectRoot,
+                        rootDir: stylable.projectRoot,
                         configFilePath: configFromFile.path,
                         watchMode: this.meta.watchMode,
                     });

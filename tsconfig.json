@@ -43,6 +43,8 @@
     { "path": "./packages/webpack-extensions/src" },
     { "path": "./packages/webpack-extensions/test" },
     { "path": "./packages/webpack-plugin/src" },
-    { "path": "./packages/webpack-plugin/test" }
+    { "path": "./packages/webpack-plugin/test" },
+    { "path": "./packages/esbuild/src" },
+    { "path": "./packages/esbuild/test" }
   ]
 }

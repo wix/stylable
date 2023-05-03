@@ -138,7 +138,6 @@ export function buildSingleFile({
         );
     }
     // st.css.js
-
     const ast = includeCSSInJS
         ? tryRun(
               () => inlineAssetsForJsModule(res, stylable, fs),
@@ -149,29 +148,8 @@ export function buildSingleFile({
     moduleFormats.forEach(([format, ext]) => {
         outputLogs.push(`${format} module`);
 
-        const moduleCssImports = [];
-
+        const moduleCssImports = collectImportsWithSideEffects(res, stylable, ext);
         const cssDepth = res.meta.transformCssDepth?.cssDepth ?? 0;
-
-        for (const imported of res.meta.getImportStatements()) {
-            let resolved = imported.request;
-            try {
-                resolved = stylable.resolver.resolvePath(imported.context, imported.request);
-            } catch {
-                // use the fallback
-            }
-
-            if (resolved.endsWith('.st.css')) {
-                if (hasImportedSideEffects(stylable, res.meta, imported)) {
-                    // TODO: solve issue where request must be resolved before we add the extension
-                    moduleCssImports.push({ from: imported.request + ext });
-                }
-            }
-            if (resolved.endsWith('.css')) {
-                moduleCssImports.push({ from: imported.request + ext });
-            }
-        }
-
         if (injectCSSRequest) {
             moduleCssImports.push({ from: './' + cssAssetFilename });
         }
@@ -213,41 +191,18 @@ export function buildSingleFile({
     }
     // .d.ts
     if (dts) {
-        const dtsContent = generateDTSContent(res);
-        const dtsPath = targetFilePath + '.d.ts';
-
-        generated.add(dtsPath);
-        outputLogs.push('output .d.ts');
-
-        tryRun(() => fs.writeFileSync(dtsPath, dtsContent), `Write File Error: ${dtsPath}`);
-
-        // .d.ts.map
-        // if not explicitly defined, assumed true with "--dts" parent scope
-        if (dtsSourceMap !== false) {
-            const relativeTargetFilePath = relative(
-                dirname(targetFilePath),
-                outputSources ? targetFilePath : filePath
-            );
-
-            const dtsMappingContent = generateDTSSourceMap(
-                dtsContent,
-                res.meta,
-                // `relativeTargetFilePath` could be an absolute path in windows (e.g. unc path)
-                isAbsolute(relativeTargetFilePath)
-                    ? relativeTargetFilePath
-                    : relativeTargetFilePath.replace(/\\/g, '/')
-            );
-
-            const dtsMapPath = targetFilePath + '.d.ts.map';
-
-            generated.add(dtsMapPath);
-            outputLogs.push('output .d.ts.mp');
-
-            tryRun(
-                () => fs.writeFileSync(dtsMapPath, dtsMappingContent),
-                `Write File Error: ${dtsMapPath}`
-            );
-        }
+        buildDTS({
+            res,
+            targetFilePath,
+            generated,
+            outputLogs,
+            dtsSourceMap,
+            sourceFilePath: outputSources ? undefined : filePath,
+            writeFileSync: fs.writeFileSync,
+            relative,
+            dirname,
+            isAbsolute,
+        });
     }
 
     log(mode, `output: [${outputLogs.join(', ')}]`);
@@ -296,6 +251,90 @@ export function buildSingleFile({
     return {
         targetFilePath,
     };
+}
+
+export function buildDTS({
+    res,
+    targetFilePath,
+    generated,
+    outputLogs,
+    dtsSourceMap,
+    sourceFilePath,
+    writeFileSync,
+    relative,
+    dirname,
+    isAbsolute,
+}: {
+    res: StylableResults;
+    targetFilePath: string;
+    generated: Set<string>;
+    outputLogs: string[];
+    dtsSourceMap: boolean | undefined;
+    sourceFilePath: string | undefined;
+    writeFileSync: (path: string, data: string) => void;
+    relative: (from: string, to: string) => string;
+    dirname: (p: string) => string;
+    isAbsolute: (p: string) => boolean;
+}) {
+    const dtsContent = generateDTSContent(res);
+    const dtsPath = targetFilePath + '.d.ts';
+
+    generated.add(dtsPath);
+    outputLogs.push('output .d.ts');
+
+    tryRun(() => writeFileSync(dtsPath, dtsContent), `Write File Error: ${dtsPath}`);
+
+    // .d.ts.map
+    // if not explicitly defined, assumed true with "--dts" parent scope
+    if (dtsSourceMap !== false) {
+        const relativeTargetFilePath = relative(
+            dirname(targetFilePath),
+            sourceFilePath || targetFilePath
+        );
+
+        const dtsMappingContent = generateDTSSourceMap(
+            dtsContent,
+            res.meta,
+            // `relativeTargetFilePath` could be an absolute path in windows (e.g. unc path)
+            isAbsolute(relativeTargetFilePath)
+                ? relativeTargetFilePath
+                : relativeTargetFilePath.replace(/\\/g, '/')
+        );
+
+        const dtsMapPath = targetFilePath + '.d.ts.map';
+
+        generated.add(dtsMapPath);
+        outputLogs.push('output .d.ts.mp');
+
+        tryRun(
+            () => writeFileSync(dtsMapPath, dtsMappingContent),
+            `Write File Error: ${dtsMapPath}`
+        );
+    }
+}
+
+function collectImportsWithSideEffects(res: StylableResults, stylable: Stylable, ext: string) {
+    const moduleCssImports = [];
+
+    for (const imported of res.meta.getImportStatements()) {
+        let resolved = imported.request;
+        try {
+            resolved = stylable.resolver.resolvePath(imported.context, imported.request);
+        } catch {
+            // use the fallback
+        }
+
+        if (resolved.endsWith('.st.css')) {
+            if (hasImportedSideEffects(stylable, res.meta, imported)) {
+                // TODO: solve issue where request must be resolved before we add the extension
+                moduleCssImports.push({ from: imported.request + ext });
+            }
+        }
+        if (resolved.endsWith('.css')) {
+            moduleCssImports.push({ from: imported.request + ext });
+        }
+    }
+    return moduleCssImports;
 }
 
 function inlineAssetsForJsModule(res: StylableResults, stylable: Stylable, fs: IFileSystem) {

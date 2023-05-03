@@ -3,6 +3,7 @@ import type { FeatureContext } from './features';
 import type { Diagnostics } from './diagnostics';
 import type { SelectorList } from '@tokey/css-selector-parser';
 import type { PlugableRecord } from './helpers/plugable-record';
+import type { StylableExports } from './stylable-transformer';
 import { getSourcePath } from './stylable-utils';
 import {
     STSymbol,
@@ -45,6 +46,7 @@ const features = [
 ];
 
 export class StylableMeta {
+    public exports?: StylableExports;
     public data: PlugableRecord = {};
     public root = '';
     public source: string = getSourcePath(this.sourceAst, this.diagnostics);

@@ -35,7 +35,7 @@ interface ModuleOptions {
     /**
      * static imports for the module
      */
-    imports?: Array<{ from: string }>;
+    imports?: Array<{ from: string; defaultImport?: string }>;
     /**
      * Stylable transforms exports
      */
@@ -107,8 +107,13 @@ ${footer}
 }
 
 function moduleRequest(moduleType: 'esm' | 'cjs') {
-    return (moduleRequest: { from: string }) => {
-        const request = JSON.stringify(moduleRequest.from);
+    return ({ from, defaultImport }: { from: string; defaultImport?: string }) => {
+        const request = JSON.stringify(from);
+        if (defaultImport) {
+            return moduleType === 'esm'
+                ? `import ${defaultImport} from ${request};`
+                : `const ${defaultImport} = require(${request});`;
+        }
         return moduleType === 'esm' ? `import ${request};` : `require(${request});`;
     };
 }

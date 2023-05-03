@@ -158,7 +158,7 @@ export class StylableTransformer {
         });
     }
     public transform(meta: StylableMeta): StylableResults {
-        const metaExports: StylableExports = {
+        meta.exports = {
             classes: {},
             vars: {},
             stVars: {},
@@ -180,9 +180,9 @@ export class StylableTransformer {
         if (!this.experimentalSelectorInference) {
             meta.transformedScopes = validateScopes(this, meta);
         }
-        this.transformAst(meta.targetAst, meta, metaExports);
+        this.transformAst(meta.targetAst, meta, meta.exports);
         meta.transformDiagnostics = this.diagnostics;
-        const result = { meta, exports: metaExports };
+        const result = { meta, exports: meta.exports };
 
         return this.postProcessor ? this.postProcessor(result, this) : result;
     }
