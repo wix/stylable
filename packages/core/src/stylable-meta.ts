@@ -23,6 +23,7 @@ import {
     CSSKeyframes,
     CSSLayer,
     CSSContains,
+    STStructure,
 } from './features';
 
 const features = [
@@ -43,6 +44,7 @@ const features = [
     CSSKeyframes,
     CSSLayer,
     CSSContains,
+    STStructure,
 ];
 
 export class StylableMeta {

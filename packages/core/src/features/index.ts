@@ -45,3 +45,5 @@ export * as CSSContains from './css-contains';
 export type { ContainerSymbol } from './css-contains';
 
 export * as CSSMedia from './css-media';
+
+export * as STStructure from './st-structure';

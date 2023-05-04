@@ -16,6 +16,7 @@ import {
     CSSKeyframes,
     CSSLayer,
     CSSContains,
+    STStructure,
 } from './features';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
@@ -155,6 +156,14 @@ export class StylableProcessor implements FeatureContext {
                 }
                 case 'container': {
                     CSSContains.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                }
+                case 'st': {
+                    STStructure.hooks.analyzeAtRule({
                         context: this,
                         atRule,
                         analyzeRule,

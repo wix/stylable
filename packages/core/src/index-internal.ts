@@ -24,6 +24,7 @@ export {
     CSSLayer,
     CSSContains,
     CSSCustomProperty,
+    STStructure,
 } from './features';
 export type {
     MappedStates,
