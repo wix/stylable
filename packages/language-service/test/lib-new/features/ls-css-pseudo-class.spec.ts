@@ -1,27 +1,138 @@
+import { Command } from 'vscode-languageserver';
 import { testLangService } from '../../test-kit/test-lang-service';
 
+const triggerCompletion = Command.create('additional', 'editor.action.triggerSuggest');
+const triggerParameterHints = Command.create('additional', 'editor.action.triggerParameterHints');
+
 describe('LS: css-pseudo-class', () => {
-    it('should suggest root custom states', () => {
-        const { service, carets, assertCompletions } = testLangService(`
-            .root {
-                -st-states: aaa,bbb;
+    it('should suggest class custom states', () => {
+        const { service, carets, assertCompletions, textEditContext } = testLangService(`
+            .x {
+                -st-states: xxx;
+            }
+            .y {
+                -st-states: yyy;
+            }
+            .z {
+                -st-states: aaa, bbb;
             }
 
-            .root^afterRoot^ {}
+            .z^afterRoot^ {}
 
-            ^empty^ {}
+            .z:a^partial^ {}
 
+            .z .x^complex^ .y {}
         `);
-        const entryCarets = carets['/entry.st.css'];
+        const entryPath = '/entry.st.css';
+        const entryCarets = carets[entryPath];
+        const { replaceText } = textEditContext(entryPath);
 
         assertCompletions({
-            actualList: service.onCompletion('/entry.st.css', entryCarets.afterRoot),
+            message: 'classes states',
+            actualList: service.onCompletion(entryPath, entryCarets.afterRoot),
             expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+            unexpectedList: [{ label: ':xxx' }, { label: ':yyy' }],
         });
 
         assertCompletions({
-            actualList: service.onCompletion('/entry.st.css', entryCarets.empty),
+            message: 'partial',
+            actualList: service.onCompletion(entryPath, entryCarets.partial),
+            expectedList: [
+                {
+                    label: ':aaa',
+                    textEdit: replaceText(entryCarets.partial, ':aaa', { deltaStart: -2 }),
+                },
+            ],
+            unexpectedList: [{ label: ':bbb' }],
+        });
+
+        assertCompletions({
+            message: 'complex selector',
+            actualList: service.onCompletion(entryPath, entryCarets.partial),
+            expectedList: [
+                {
+                    label: ':aaa',
+                    textEdit: replaceText(entryCarets.partial, ':aaa', { deltaStart: -2 }),
+                },
+            ],
+            unexpectedList: [{ label: ':bbb' }],
+        });
+    });
+    it('should suggest root custom states in empty selector', () => {
+        // ToDo: once experimentalSelectorInference is on this should not behave like this
+        const { service, carets, assertCompletions } = testLangService(`
+            .root {
+                -st-states: aaa, bbb;
+            }
+
+            ^empty^ {}
+        `);
+        const entryPath = '/entry.st.css';
+        const entryCarets = carets[entryPath];
+
+        assertCompletions({
+            message: 'empty',
+            actualList: service.onCompletion(entryPath, entryCarets.empty),
             expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+        });
+    });
+    it('should NOT suggest used states', () => {
+        const { service, carets, assertCompletions } = testLangService(`
+            .x {
+                -st-states: aaa, bbb;
+            }
+
+            .x:aaa^afterExistingState^ {}
+        `);
+        const entryPath = '/entry.st.css';
+        const entryCarets = carets[entryPath];
+
+        assertCompletions({
+            actualList: service.onCompletion(entryPath, entryCarets.afterExistingState),
+            expectedList: [{ label: ':bbb' }],
+            unexpectedList: [{ label: ':aaa' }],
+        });
+    });
+    it('should suggest pseudo-element custom states', () => {
+        const { service, carets, assertCompletions } = testLangService(`
+            .root {}
+            .part {
+                -st-states: aaa, bbb;
+            }
+
+            .root::part^afterPseudoElement^ {}
+        `);
+        const entryPath = '/entry.st.css';
+        const entryCarets = carets[entryPath];
+
+        assertCompletions({
+            actualList: service.onCompletion(entryPath, entryCarets.afterPseudoElement),
+            expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+        });
+    });
+    it('should suggest states from extended class', () => {
+        const { service, carets, assertCompletions } = testLangService(`
+            .y {
+                -st-states: aaa, bbb;
+            }
+            .x {
+                -st-extends: y;
+                -st-states: ccc, ddd;
+            }
+
+            .x^afterClass^ {}
+        `);
+        const entryPath = '/entry.st.css';
+        const entryCarets = carets[entryPath];
+
+        assertCompletions({
+            actualList: service.onCompletion(entryPath, entryCarets.afterClass),
+            expectedList: [
+                { label: ':aaa' },
+                { label: ':bbb' },
+                { label: ':ccc' },
+                { label: ':ddd' },
+            ],
         });
     });
     it('should provide nested context', () => {
@@ -70,6 +181,117 @@ describe('LS: css-pseudo-class', () => {
             actualList: service.onCompletion('/entry.st.css', entryCarets.nestB),
             expectedList: [{ label: ':bbb' }],
             unexpectedList: [{ label: ':rrr' }, { label: ':aaa' }],
+        });
+    });
+    it('should NOT suggest states after ::', () => {
+        const { service, carets, assertCompletions } = testLangService(`
+            .x {
+                -st-states: aaa, bbb;
+            }
+
+            .x::^afterDoubleColon^ {}
+        `);
+        const entryPath = '/entry.st.css';
+        const entryCarets = carets[entryPath];
+
+        assertCompletions({
+            actualList: service.onCompletion(entryPath, entryCarets.afterDoubleColon),
+            unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+        });
+    });
+    describe.skip('definition', () => {
+        /*ToDo: move tests when implementation is refactored*/
+    });
+    describe('state with param', () => {
+        it('should suggest state with parenthesis', () => {
+            const { service, carets, assertCompletions, textEditContext } = testLangService(`
+                .x {
+                    -st-states: 
+                        word(string), 
+                        size(enum(small, big));
+                }
+    
+                .x^afterClass^ {}
+            `);
+            const entryPath = '/entry.st.css';
+            const entryCarets = carets[entryPath];
+            const { replaceText } = textEditContext(entryPath);
+
+            assertCompletions({
+                actualList: service.onCompletion(entryPath, entryCarets.afterClass),
+                expectedList: [
+                    {
+                        label: ':word()',
+                        textEdit: replaceText(entryCarets.afterClass, ':word($1)'),
+                        command: triggerParameterHints,
+                    },
+                    {
+                        label: ':size()',
+                        textEdit: replaceText(entryCarets.afterClass, ':size($1)'),
+                        command: triggerCompletion,
+                    },
+                ],
+            });
+        });
+        it('should suggest enum possible parameters', () => {
+            // ToDo: prevent names native css lsp from suggesting inside states definitions.
+            //       because native css lsp is returning results that mix with fixture
+            //       (everything is with prefixed with 'x')
+            const { service, carets, assertCompletions, textEditContext } = testLangService(`
+                .root {
+                    -st-states: 
+                        size(enum(xsmall, xmedium, xbig, xbigger)), 
+                        type(enum(shirt, hat));
+                }
+                .partA {}
+    
+                .root:size(^emptyEnumParam^) {}
+
+                .root:size(xb^partialEnumParam^) {}
+            `);
+            const entryPath = '/entry.st.css';
+            const entryCarets = carets[entryPath];
+            const { replaceText } = textEditContext(entryPath);
+
+            assertCompletions({
+                message: 'empty param',
+                actualList: service.onCompletion(entryPath, entryCarets.emptyEnumParam),
+                expectedList: [
+                    { label: 'xsmall' },
+                    { label: 'xmedium' },
+                    { label: 'xbig' },
+                    { label: 'xbigger' },
+                ],
+                unexpectedList: [
+                    // no selector completions
+                    // ToDo: normalize provider API
+                    { label: ':size' },
+                    { label: ':type' },
+                    { label: '::partA' },
+                    { label: ':global()' },
+                    // ToDo: disable native-css-lsp in this context: { label: '.partA' },
+                ],
+            });
+
+            assertCompletions({
+                message: 'partial param',
+                actualList: service.onCompletion(entryPath, entryCarets.partialEnumParam),
+                expectedList: [
+                    {
+                        label: 'xbig',
+                        textEdit: replaceText(entryCarets.partialEnumParam, 'xbig', {
+                            deltaStart: -2,
+                        }),
+                    },
+                    {
+                        label: 'xbigger',
+                        textEdit: replaceText(entryCarets.partialEnumParam, 'xbigger', {
+                            deltaStart: -2,
+                        }),
+                    },
+                ],
+                unexpectedList: [{ label: 'xsmall' }, { label: 'xmedium' }],
+            });
         });
     });
     describe('st-scope', () => {
@@ -345,5 +567,8 @@ describe('LS: css-pseudo-class', () => {
                 unexpectedList: [{ label: ':part-state' }],
             });
         });
+    });
+    describe.skip('st-import', () => {
+        /*ToDo: refactor tests from old format*/
     });
 });

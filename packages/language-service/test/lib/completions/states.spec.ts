@@ -6,134 +6,6 @@ import type { Completion } from '@stylable/language-service/dist/lib/completion-
 import * as asserters from '../../test-kit/completions-asserters';
 
 describe('States', () => {
-    describe('Local states', () => {
-        const str1 = ':hello';
-        const str2 = ':goodbye';
-        const str3 = ':holla';
-        const str4 = ':shmover';
-        const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
-            asserters.stateSelectorCompletion(str.slice(1), rng, path);
-
-        [str1, str2].forEach((str, j, a) => {
-            str.split('').forEach((_c, i) => {
-                const prefix = str.slice(0, i);
-
-                it(
-                    'should complete available states from same file, with prefix ' + prefix + ' ',
-                    () => {
-                        const rng = createRange(4, 5, 4, 5 + i);
-                        const asserter = asserters.getCompletions(
-                            'states/class-with-states.st.css',
-                            prefix
-                        );
-                        const exp: Array<Partial<Completion>> = [];
-                        const notExp: Array<Partial<Completion>> = [];
-                        exp.push(createCompletion(a[j], rng));
-                        if (prefix.length <= 1) {
-                            exp.push(createCompletion(a[1 - j], rng));
-                        } else {
-                            notExp.push(createCompletion(a[1 - j], rng));
-                        }
-                        asserter.suggested(exp);
-                        asserter.notSuggested(notExp);
-                    }
-                );
-
-                it(
-                    'should complete available states in complex selectors, with prefix ' +
-                        prefix +
-                        ' ',
-                    () => {
-                        const rng = createRange(9, 19, 9, 19 + i);
-                        const asserter = asserters.getCompletions(
-                            'states/complex-selectors.st.css',
-                            prefix
-                        );
-                        const exp: Array<Partial<Completion>> = [];
-                        const notExp: Array<Partial<Completion>> = [];
-                        if (str === str1) {
-                            exp.push(createCompletion(str1, rng));
-                        } else if (prefix.length <= 1) {
-                            exp.push(createCompletion(str1, rng));
-                        }
-                        notExp.push(createCompletion(str2, rng));
-                        asserter.suggested(exp);
-                        asserter.notSuggested(notExp);
-                    }
-                );
-            });
-        });
-
-        [str1, str3].forEach((str) => {
-            str.split('').forEach((_c, i) => {
-                const prefix = str.slice(0, i);
-
-                it(
-                    'should complete only unused states in complex selectors ending in state name, with prefix ' +
-                        prefix +
-                        ' ',
-                    () => {
-                        const rng = createRange(9, 25, 9, 25 + i);
-                        const asserter = asserters.getCompletions(
-                            'states/complex-selectors-with-states.st.css',
-                            prefix
-                        );
-                        const exp: Array<Partial<Completion>> = [];
-                        const notExp: Array<Partial<Completion>> = [];
-                        if (str === str1) {
-                            exp.push(createCompletion(str1, rng));
-                        } else if (prefix.length <= 2) {
-                            exp.push(createCompletion(str1, rng));
-                        }
-                        notExp.push(createCompletion(str3, rng));
-                        asserter.suggested(exp);
-                        asserter.notSuggested(notExp);
-                    }
-                );
-            });
-        });
-
-        str4.split('').forEach((_c, i) => {
-            const prefix = str4.slice(0, i);
-
-            it('should complete local root state on top level with prefix ' + prefix + ' ', () => {
-                const rng = createRange(4, 0, 4, 0 + i);
-                const asserter = asserters.getCompletions('states/top-level.st.css', prefix);
-                const exp: Array<Partial<Completion>> = [];
-                const compl = createCompletion(str4, rng);
-                exp.push(compl);
-                asserter.suggested(exp);
-            });
-
-            it(
-                'should complete local root state on top level from extends with prefix ' +
-                    prefix +
-                    ' ',
-                () => {
-                    const rng = createRange(9, 0, 9, 0 + i);
-                    const asserter = asserters.getCompletions(
-                        'states/top-level-with-extend.st.css',
-                        prefix
-                    );
-                    const exp: Array<Partial<Completion>> = [];
-                    const compl = createCompletion(str4, rng, './comp-to-import.st.css');
-                    exp.push(compl);
-                    asserter.suggested(exp);
-                }
-            );
-        });
-
-        it('should not complete state value after :: ', () => {
-            const asserter = asserters.getCompletions(
-                'states/class-with-states-double-colon.st.css'
-            );
-            asserter.notSuggested([
-                asserters.stateSelectorCompletion('hello', createRange(0, 0, 0, 0)),
-                asserters.stateSelectorCompletion('goodbye', createRange(0, 0, 0, 0)),
-            ]);
-        });
-    });
-
     describe('State with param', () => {
         describe('Definition', () => {
             it('should complete available states param types', () => {
@@ -429,19 +301,6 @@ describe('States', () => {
         });
 
         describe('Usage', () => {
-            it('should complete available states from same file (with parenthesis)', () => {
-                const rng = createRange(4, 5, 4, 5);
-                const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
-                    asserters.stateSelectorCompletion(str.slice(1), rng, path, true);
-
-                const asserter = asserters.getCompletions(
-                    'states/with-param/local-state-param.st.css'
-                );
-                const exp: Array<Partial<Completion>> = [];
-                exp.push(createCompletion(':hello', rng));
-                asserter.suggested(exp);
-            });
-
             it('should complete imported state (with parenthesis)', () => {
                 const rng = createRange(9, 5, 9, 5);
                 const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
@@ -454,39 +313,6 @@ describe('States', () => {
                 exp.push(createCompletion(':shmover', rng, './comp-to-import-with-param.st.css'));
                 asserter.suggested(exp);
             });
-
-            it('should complete enum state parameter options', () => {
-                const rng = createRange(4, 12, 4, 12);
-                const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
-                    asserters.stateEnumCompletion(str, rng, path);
-
-                const asserter = asserters.getCompletions(
-                    'states/with-param/enum/state-with-param-enum-suggestion.st.css'
-                );
-                const exp: Array<Partial<Completion>> = [];
-                exp.push(createCompletion('bob', rng));
-                exp.push(createCompletion('alice', rng));
-                exp.push(createCompletion('eve', rng));
-                asserter.suggested(exp);
-            });
-
-            it('should complete pre-existing enum state parameter options from imported file', () => {
-                const rng = createRange(9, 12, 9, 13);
-                const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
-                    asserters.stateEnumCompletion(str, rng, path);
-
-                const asserter = asserters.getCompletions(
-                    'states/with-param/enum/imported-state-with-enum-middle.st.css'
-                );
-                const exp: Array<Partial<Completion>> = [];
-                const unExp: Array<Partial<Completion>> = [];
-                exp.push(createCompletion('eve', rng, './state-with-enum.st.css'));
-                unExp.push(createCompletion('alice', rng, './state-with-enum.st.css'));
-                unExp.push(createCompletion('bob', rng, './state-with-enum.st.css'));
-                asserter.suggested(exp);
-                asserter.notSuggested(unExp);
-            });
-
             it('should complete template with enum parameter options from imported file', () => {
                 const rng = createRange(9, 19, 9, 20);
                 const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
@@ -501,31 +327,6 @@ describe('States', () => {
                 exp.push(createCompletion('e22', rng, './state-with-enum.st.css'));
                 unExp.push(createCompletion('aaa', rng, './state-with-enum.st.css'));
                 unExp.push(createCompletion('bbb', rng, './state-with-enum.st.css'));
-                asserter.suggested(exp);
-                asserter.notSuggested(unExp);
-            });
-
-            it('should not complete pseudo-states and pseudo-elements when inside an enum (from imported file)', () => {
-                const rng = createRange(9, 12, 9, 12);
-                const createEnumComp = (str: string, rng: ProviderRange, path?: string) =>
-                    asserters.stateEnumCompletion(str, rng, path);
-                const createStateComp = (str: string, rng: ProviderRange, path?: string) =>
-                    asserters.stateSelectorCompletion(str, rng, path);
-                const createElementComp = (str: string, rng: ProviderRange, path?: string) =>
-                    asserters.pseudoElementCompletion(str, rng, path);
-                const createGlobalComp = (rng: ProviderRange) => asserters.globalCompletion(rng);
-
-                const asserter = asserters.getCompletions(
-                    'states/with-param/enum/imported-state-with-enum-start.st.css'
-                );
-                const exp: Array<Partial<Completion>> = [];
-                const unExp: Array<Partial<Completion>> = [];
-                exp.push(createEnumComp('eve', rng, './state-with-enum.st.css'));
-                exp.push(createEnumComp('alice', rng, './state-with-enum.st.css'));
-                exp.push(createEnumComp('bob', rng, './state-with-enum.st.css'));
-                unExp.push(createStateComp('otherState', rng, './state-with-enum.st.css'));
-                unExp.push(createElementComp('part', rng));
-                unExp.push(createGlobalComp(rng));
                 asserter.suggested(exp);
                 asserter.notSuggested(unExp);
             });
