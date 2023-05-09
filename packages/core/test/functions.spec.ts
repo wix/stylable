@@ -44,6 +44,66 @@ describe('Stylable functions (native, formatter and variable)', () => {
             expect(rule.nodes[0].toString()).to.equal('background: green');
         });
 
+        it('js formatter *this* context ', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./formatter";
+                                -st-default: scopeKeys;
+                            }
+                            .container {
+                                --keys: scopeKeys();
+                            }
+                        `,
+                    },
+                    '/formatter.js': {
+                        content: `
+                            module.exports = function() {
+                                return Object.keys(this).join(', ');
+                            }
+                        `,
+                    },
+                },
+            });
+
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('--ns-keys: meta, evaluator, parsedValue, node, initialNode');
+        });
+
+        it('js formatter *this* context ', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./formatter";
+                                -st-default: ns;
+                            }
+                            .container {
+                                --animation-name: ns(kf);
+                            }
+                        `,
+                    },
+                    '/formatter.js': {
+                        content: `
+                            module.exports = function(name) {
+                                return this.meta.namespace + '__' + name;
+                            }
+                        `,
+                    },
+                },
+            });
+
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('--ns-animation-name: ns__kf');
+        });
+
         it('apply simple js formatter with quote wrapped args', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,

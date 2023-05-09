@@ -186,7 +186,10 @@ export function processDeclarationValue(
                 const formatter = resolvedSymbols.js[value];
                 const formatterArgs = getFormatterArgs(parsedNode);
                 try {
-                    parsedNode.resolvedValue = formatter.symbol.apply(null, formatterArgs);
+                    parsedNode.resolvedValue = formatter.symbol.apply(
+                        { meta, evaluator, parsedValue, node, initialNode },
+                        formatterArgs
+                    );
                     if (evaluator.valueHook && typeof parsedNode.resolvedValue === 'string') {
                         parsedNode.resolvedValue = evaluator.valueHook(
                             parsedNode.resolvedValue,
