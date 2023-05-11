@@ -11,6 +11,7 @@ type PartData = {
     mapTo: SelectorList | ClassSymbol;
 };
 const dataKey = plugableRecord.key<{
+    autoClassToPartEnabled: boolean;
     legacyParts: Record<string, PartData>;
 }>('part');
 
@@ -18,12 +19,16 @@ const dataKey = plugableRecord.key<{
 
 export const hooks = createFeature({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, { legacyParts: {} });
+        plugableRecord.set(meta.data, dataKey, { autoClassToPartEnabled: true, legacyParts: {} });
     },
 });
 
 // API
 
+export function disableAutoClassToPart(meta: StylableMeta) {
+    const data = plugableRecord.getUnsafe(meta.data, dataKey);
+    data.autoClassToPartEnabled = false;
+}
 export function registerLegacyPart(
     meta: StylableMeta,
     name: string,
@@ -39,11 +44,11 @@ export function registerLegacyPart(
     }
 }
 export function getPart(meta: StylableMeta, name: string): PartData | undefined {
-    const { legacyParts } = plugableRecord.getUnsafe(meta.data, dataKey);
-    return legacyParts[name];
+    const { autoClassToPartEnabled, legacyParts } = plugableRecord.getUnsafe(meta.data, dataKey);
+    return autoClassToPartEnabled ? legacyParts[name] : undefined;
 }
 
 export function getPartNames(meta: StylableMeta) {
-    const { legacyParts } = plugableRecord.getUnsafe(meta.data, dataKey);
-    return Object.keys(legacyParts);
+    const { autoClassToPartEnabled, legacyParts } = plugableRecord.getUnsafe(meta.data, dataKey);
+    return autoClassToPartEnabled ? Object.keys(legacyParts) : [];
 }

@@ -1,6 +1,12 @@
-import { testStylableCore } from '@stylable/core-test-kit';
-import { STStructure } from '@stylable/core/dist/index-internal';
+import {
+    diagnosticBankReportToStrings,
+    shouldReportNoDiagnostics,
+    testStylableCore,
+} from '@stylable/core-test-kit';
+import { STStructure, transformerDiagnostics } from '@stylable/core/dist/index-internal';
 import { expect } from 'chai';
+
+const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 type FuncParameters<F> = F extends (...args: any[]) => any ? Parameters<F> : never;
 
@@ -54,5 +60,29 @@ describe('@st structure', () => {
         expect(filterExpCalls(), 'only once').to.have.lengthOf(1);
 
         restoreSpy();
+    });
+    it('should prevent automatic .class=>::part definition', () => {
+        testStylableCore(`
+            @st .root;
+            .part {}
+
+            /* 
+                @transform-error ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`part`)}
+                @rule .entry__root::part
+            */
+            .root::part {}
+        `);
+    });
+    it('should register css class (top level) + no implicit root', () => {
+        const { sheets } = testStylableCore(`
+            @st .abc;
+            @st .xyz {}
+            .normal-class {}
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+        expect(meta.getAllClasses()).to.have.keys(['root', 'abc', 'xyz', 'normal-class']);
     });
 });
