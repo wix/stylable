@@ -1,5 +1,6 @@
 import { Command } from 'vscode-languageserver';
 import { testLangService } from '../../test-kit/test-lang-service';
+import { createTempDirectorySync } from '@stylable/core-test-kit';
 
 const triggerCompletion = Command.create('additional', 'editor.action.triggerSuggest');
 const triggerParameterHints = Command.create('additional', 'editor.action.triggerParameterHints');
@@ -454,13 +455,15 @@ describe('LS: css-pseudo-class', () => {
             });
         });
         it('should suggest matching intersection states', () => {
-            const { service, carets, assertCompletions, textEditContext } = testLangService({
-                'comp.st.css': `
+            const tempDir = createTempDirectorySync('lps-import-test-');
+            const { service, carets, assertCompletions, textEditContext, fs } = testLangService(
+                {
+                    'comp.st.css': `
                     .root {
                         -st-states: comp-state;
                     }
                 `,
-                'entry.st.css': `
+                    'entry.st.css': `
                     @st-import Comp from './comp.st.css';
                     .root {
                         -st-extends: Comp;
@@ -481,18 +484,21 @@ describe('LS: css-pseudo-class', () => {
                     }
 
                 `,
-            });
-            const entryCarets = carets['/entry.st.css'];
-            const { replaceText } = textEditContext('/entry.st.css');
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+            const { replaceText } = textEditContext(entryPath);
 
             assertCompletions({
-                actualList: service.onCompletion('/entry.st.css', entryCarets.inScope),
+                actualList: service.onCompletion(entryPath, entryCarets.inScope),
                 expectedList: [{ label: ':root-state' }, { label: ':comp-state' }],
                 unexpectedList: [{ label: ':shared' }, { label: ':onlyA' }, { label: ':onlyB' }],
             });
 
             assertCompletions({
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nest),
+                actualList: service.onCompletion(entryPath, entryCarets.nest),
                 expectedList: [{ label: ':shared' }],
                 unexpectedList: [
                     { label: ':onlyA' },
@@ -502,7 +508,7 @@ describe('LS: css-pseudo-class', () => {
             });
 
             assertCompletions({
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nestColon),
+                actualList: service.onCompletion(entryPath, entryCarets.nestColon),
                 expectedList: [
                     {
                         label: ':shared',
@@ -568,7 +574,163 @@ describe('LS: css-pseudo-class', () => {
             });
         });
     });
-    describe.skip('st-import', () => {
-        /*ToDo: refactor tests from old format*/
+    describe('st-import', () => {
+        let tempDir: ReturnType<typeof createTempDirectorySync>;
+        beforeEach('crate temp dir', () => {
+            tempDir = createTempDirectorySync('lps-import-test-');
+        });
+        afterEach('remove temp dir', () => {
+            tempDir.remove();
+        });
+        it('should suggest states from imported class', () => {
+            const { service, carets, assertCompletions, fs } = testLangService(
+                {
+                    'origin.st.css': `
+                        .root {
+                            -st-states: stateX;
+                        }
+                        .part {
+                            -st-states: stateY;
+                        }
+                    `,
+                    'entry.st.css': `
+                        @st-import Root, [part] from './origin.st.css';
+                        
+                        .extendingDefault {
+                            -st-extends: Root;
+                            -st-states: stateR;
+                        }
+                        .extendingNamed {
+                            -st-extends: part;
+                            -st-states: stateZ;
+                        }
+
+                        .Root^defaultClass^ {}
+                        .part^namedClass^ {}
+                        .extendingDefault^extendingDefault^ {}
+                        .extendingNamed^extendingClass^ {}
+                    `,
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+
+            assertCompletions({
+                message: 'default class',
+                actualList: service.onCompletion(entryPath, entryCarets.defaultClass),
+                expectedList: [{ label: ':stateX' }],
+                unexpectedList: [{ label: ':stateY' }, { label: ':stateZ' }, { label: ':stateR' }],
+            });
+            assertCompletions({
+                message: 'named class',
+                actualList: service.onCompletion(entryPath, entryCarets.namedClass),
+                expectedList: [{ label: ':stateY' }],
+                unexpectedList: [{ label: ':stateX' }, { label: ':stateZ' }, { label: ':stateR' }],
+            });
+            assertCompletions({
+                message: 'extending default (root)',
+                actualList: service.onCompletion(entryPath, entryCarets.extendingDefault),
+                expectedList: [{ label: ':stateX' }, { label: ':stateR' }],
+                unexpectedList: [{ label: ':stateY' }, { label: ':stateZ' }],
+            });
+            assertCompletions({
+                message: 'extending named',
+                actualList: service.onCompletion(entryPath, entryCarets.extendingClass),
+                expectedList: [{ label: ':stateY' }, { label: ':stateZ' }],
+                unexpectedList: [{ label: ':stateX' }, { label: ':stateR' }],
+            });
+        });
+        it('should suggest states for pseudo-elements', () => {
+            const { service, carets, assertCompletions, fs } = testLangService(
+                {
+                    'part-base.st.css': `
+                        .root {
+                            -st-states: yyy;
+                        }
+                        .base {
+                            -st-states: xxx;
+                        }
+                    `,
+                    'comp.st.css': `
+                        @st-import PartBase from './part-base.st.css';
+                        .root {
+                            -st-states: root-state;
+                        }
+                        .part {
+                            -st-extends: PartBase;
+                            -st-states: part-state, another-part-state;
+                        }
+                    `,
+                    'entry.st.css': `
+                        @st-import Comp from './comp.st.css';
+                        
+                        .extending {
+                            -st-extends: Comp;
+                            -st-states: xxx;
+                        }
+
+                        .extending::part^afterPseudoElement^ {}
+
+                        .extending::part:another-part-state:^afterUsedState^ {}
+
+                        .extending:xxx::part:another-part-state:yyy::base:^inDeepPseudoElement^ {}
+                    `,
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+
+            assertCompletions({
+                message: 'after pseudo element',
+                actualList: service.onCompletion(entryPath, entryCarets.afterPseudoElement),
+                expectedList: [{ label: ':part-state' }, { label: ':another-part-state' }],
+                unexpectedList: [{ label: ':root-state' }],
+            });
+            assertCompletions({
+                message: 'after existing state',
+                actualList: service.onCompletion(entryPath, entryCarets.afterUsedState),
+                expectedList: [{ label: ':part-state' }],
+                unexpectedList: [{ label: ':root-state' }, { label: ':another-part-state' }],
+            });
+            assertCompletions({
+                message: 'after 2 levels of pseudo-elements',
+                actualList: service.onCompletion(entryPath, entryCarets.inDeepPseudoElement),
+                expectedList: [{ label: ':xxx' }],
+            });
+        });
+        it('should suggest enum possible parameters', () => {
+            const { service, carets, assertCompletions, fs } = testLangService(
+                {
+                    'origin.st.css': `
+                        .root {
+                            -st-states: type(enum(shirt, hat));
+                        }
+                    `,
+                    'entry.st.css': `
+                        @st-import Root from './origin.st.css';
+
+                        .Root:type(^empty^) {}
+                        .Root:type(sh^partial^) {}
+                    `,
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
+            const entryPath = fs.join(tempDir.path, 'entry.st.css');
+            const entryCarets = carets[entryPath];
+
+            assertCompletions({
+                message: 'empty',
+                actualList: service.onCompletion(entryPath, entryCarets.empty),
+                expectedList: [{ label: 'shirt' }, { label: 'hat' }],
+            });
+            assertCompletions({
+                message: 'partial',
+                actualList: service.onCompletion(entryPath, entryCarets.partial),
+                expectedList: [{ label: 'shirt' }],
+                unexpectedList: [{ label: 'hat' }],
+            });
+        });
     });
 });
