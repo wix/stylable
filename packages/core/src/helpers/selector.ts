@@ -10,6 +10,7 @@ import {
     Class,
     Attribute,
     Invalid,
+    ImmutableSelector,
     ImmutableSelectorList,
     ImmutableSelectorNode,
     Combinator,
@@ -45,7 +46,7 @@ export function parseSelectorWithCache(
         : (cachedValue as ImmutableSelectorList);
 }
 
-export function cloneSelector<T extends Selector | SelectorList>(s: T): T {
+export function cloneSelector<T extends ImmutableSelector | ImmutableSelectorList>(s: T): T {
     return cloneDeep(s);
 }
 

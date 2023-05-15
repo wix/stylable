@@ -7,6 +7,7 @@ import { STStructure, transformerDiagnostics } from '@stylable/core/dist/index-i
 import { expect } from 'chai';
 
 const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
+const stStructureDiagnostics = diagnosticBankReportToStrings(STStructure.diagnostics);
 
 type FuncParameters<F> = F extends (...args: any[]) => any ? Parameters<F> : never;
 
@@ -61,28 +62,80 @@ describe('@st structure', () => {
 
         restoreSpy();
     });
-    it('should prevent automatic .class=>::part definition', () => {
-        testStylableCore(`
-            @st .root;
-            .part {}
+    describe('top level class', () => {
+        it('should prevent automatic .class=>::part definition', () => {
+            testStylableCore(`
+                @st .root;
+                .part {}
+    
+                /* 
+                    @transform-error ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`part`)}
+                    @rule .entry__root::part
+                */
+                .root::part {}
+            `);
+        });
+        it('should register css class + no implicit root', () => {
+            const { sheets } = testStylableCore(`
+                @st .abc;
+                @st .xyz {}
+                .normal-class {}
+            `);
 
-            /* 
-                @transform-error ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`part`)}
-                @rule .entry__root::part
-            */
-            .root::part {}
-        `);
-    });
-    it('should register css class (top level) + no implicit root', () => {
-        const { sheets } = testStylableCore(`
-            @st .abc;
-            @st .xyz {}
-            .normal-class {}
-        `);
+            const { meta } = sheets['/entry.st.css'];
 
-        const { meta } = sheets['/entry.st.css'];
+            shouldReportNoDiagnostics(meta);
+            expect(meta.getAllClasses()).to.have.keys(['root', 'abc', 'xyz', 'normal-class']);
+        });
+        it('should register css class selector mapping', () => {
+            const { sheets } = testStylableCore(`
+                @st .abc => :global(.xyz);
+    
+                /* @rule(standalone) .xyz */
+                .abc {}
+            `);
 
-        shouldReportNoDiagnostics(meta);
-        expect(meta.getAllClasses()).to.have.keys(['root', 'abc', 'xyz', 'normal-class']);
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(exports.classes.abc, 'single global class export').to.eql('xyz');
+        });
+        it('should report selector mapping diagnostics', () => {
+            testStylableCore({
+                'general.st.css': `
+                    /* @analyze-error(empty) ${stStructureDiagnostics.INVALID_MAPPING()} */
+                    @st .empty => ;
+        
+                    /* @rule(not global) .general__empty */
+                    .empty {}
+
+                    /* @analyze-error(multi) ${stStructureDiagnostics.INVALID_MAPPING()} */
+                    @st .multi => .a, .b;
+        
+                    /* @rule(multi) .general__multi */
+                    .multi {}
+                `,
+                'global.st.css': `
+                    /* @analyze-error(not global) word(.xyz) ${stStructureDiagnostics.GLOBAL_MAPPING_LIMITATION()} */
+                    @st .not-global => .xyz;
+        
+                    /* @rule(not global) .global__not-global */
+                    .not-global {}
+
+                    /* @analyze-error(not global pseudo) ${stStructureDiagnostics.GLOBAL_MAPPING_LIMITATION()} */
+                    @st .top-level-is => :is(.xyz);
+        
+                    /* @rule(not global pseudo) .global__top-level-is */
+                    .top-level-is {}
+
+                    /* @analyze-error(multi global) ${stStructureDiagnostics.GLOBAL_MAPPING_LIMITATION()} */
+                    @st .multi-global => :global(.a, .b);
+        
+                    /* @rule(multi global) .global__multi-global */
+                    .multi-global {}
+                `,
+            });
+        });
     });
 });

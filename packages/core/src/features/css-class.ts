@@ -534,7 +534,7 @@ function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
     }
 }
 
-function extendTypedRule(
+export function extendTypedRule(
     context: FeatureContext,
     node: postcss.Node,
     selector: string,
