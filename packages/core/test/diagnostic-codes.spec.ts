@@ -15,6 +15,7 @@ import {
     STVar,
     STCustomSelector,
     STCustomState,
+    STStructure,
 } from '@stylable/core/dist/features';
 import { generalDiagnostics } from '@stylable/core/dist/features/diagnostics';
 import { atPropertyValidationWarnings } from '@stylable/core/dist/helpers/css-custom-property';
@@ -55,6 +56,7 @@ describe('diagnostics error codes', () => {
             ...transformerDiagnostics,
             ...utilDiagnostics,
             ...sourcePathDiagnostics,
+            ...STStructure.diagnostics,
         };
 
         let failingCode = '';
