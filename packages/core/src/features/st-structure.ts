@@ -21,6 +21,11 @@ export const diagnostics = {
         () =>
             'class mapping expects a single selector within a global pseudo-class `=> :global(<selector>)`'
     ),
+    UNSUPPORTED_TOP_DEF: createDiagnosticReporter(
+        '21002',
+        'error',
+        () => 'top level @st must start with a class'
+    ),
 };
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
 
@@ -42,10 +47,22 @@ export const hooks = createFeature({
 
         const analyzed = analyzeStAtRule(atRule);
         if (!analyzed) {
+            if (atRule.parent?.type === 'root') {
+                context.diagnostics.report(diagnostics.UNSUPPORTED_TOP_DEF(), {
+                    node: atRule,
+                });
+            } else {
+                // ToDo: error on invalid nested definition
+            }
             return;
         }
         if (analyzed.type === 'topLevelClass') {
             // ToDo: error when nested (only top level for now)
+            if (!analyzed.name) {
+                context.diagnostics.report(diagnostics.UNSUPPORTED_TOP_DEF(), {
+                    node: atRule,
+                });
+            }
             // ToDo: pass atuRule for diagnostics
             CSSClass.addClass(context, analyzed.name /*, atRule*/);
             // class mapping
@@ -96,7 +113,7 @@ function analyzeStAtRule(atRule: postcss.AtRule) {
     const params = parseCSSValue(atRule.params);
 
     // collect class definition
-    if (params.length < 2) {
+    if (params.length === 0) {
         // ToDo: report expected signature diagnostic
         return;
     }
@@ -115,12 +132,22 @@ function analyzeStAtRule(atRule: postcss.AtRule) {
             } else {
                 result.name = nextToken.value;
             }
-            //
+            // collect mapped selector
             const mappedSelectors = analyzeMappedSelector(atRule.params, params, i);
             if (mappedSelectors) {
                 result.mappedSelectors = mappedSelectors;
+                return result;
+            } else {
+                // check leftover nodes
+                const foundExtraNodes = params
+                    .slice(i + 1)
+                    .some((node) => node.type !== 'space' && node.type !== 'comment');
+                if (foundExtraNodes) {
+                    // invalidate class with extra
+                    result.name = '';
+                }
+                return result;
             }
-            return result;
         }
     }
     return;

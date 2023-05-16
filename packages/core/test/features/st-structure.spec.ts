@@ -79,13 +79,38 @@ describe('@st structure', () => {
             const { sheets } = testStylableCore(`
                 @st .abc;
                 @st .xyz {}
+                @st .comment /*comment*/ {}
                 .normal-class {}
             `);
 
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
-            expect(meta.getAllClasses()).to.have.keys(['root', 'abc', 'xyz', 'normal-class']);
+            expect(meta.getAllClasses()).to.have.keys([
+                'root',
+                'abc',
+                'xyz',
+                'comment',
+                'normal-class',
+            ]);
+        });
+        it('should report non-class definition', () => {
+            testStylableCore(`
+                /* @analyze-error(element) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
+                @st abc;
+
+                /* @analyze-error(attribute) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
+                @st [abc];
+
+                /* @analyze-error(pseudo-element) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
+                @st ::abc;
+
+                /* @analyze-error(pseudo-class) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
+                @st :abc;
+
+                /* @analyze-error(multi classes) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
+                @st .a.b;
+            `);
         });
         it('should register css class selector mapping', () => {
             const { sheets } = testStylableCore(`
