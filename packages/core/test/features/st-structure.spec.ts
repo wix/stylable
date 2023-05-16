@@ -141,6 +141,19 @@ describe('@st structure', () => {
                 @st .xyz :is(.a, .b);
             `);
         });
+        it('should error on non local definition', () => {
+            testStylableCore({
+                'origin.st.css': `
+                    .external {}
+                `,
+                'entry.st.css': `
+                    @st-import [external] from "./origin.st.css";
+
+                    /* @analyze-error ${stStructureDiagnostics.OVERRIDE_IMPORTED_CLASS()}*/
+                    @st .external;
+                `,
+            });
+        });
         it('should register css class selector mapping', () => {
             const { sheets } = testStylableCore(`
                 @st .abc => :global(.xyz);

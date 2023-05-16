@@ -1,5 +1,6 @@
 import { plugableRecord } from '../helpers/plugable-record';
 import { FeatureContext, createFeature } from './feature';
+import * as STSymbol from './st-symbol';
 import * as STPart from './st-part';
 import * as CSSClass from './css-class';
 import { warnOnce } from '../helpers/deprecation';
@@ -38,6 +39,11 @@ export const diagnostics = {
         'error',
         () => `missing required class reference to extend a class (e.g. ":is(.class-name)"`
     ),
+    OVERRIDE_IMPORTED_CLASS: createDiagnosticReporter(
+        '21004',
+        'error',
+        () => `cannot override imported class definition`
+    ),
 };
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
 
@@ -74,6 +80,13 @@ export const hooks = createFeature({
                 context.diagnostics.report(diagnostics.UNSUPPORTED_TOP_DEF(), {
                     node: atRule,
                 });
+            }
+            const existingSymbol = STSymbol.get(context.meta, analyzed.name);
+            if (existingSymbol?._kind === 'import') {
+                context.diagnostics.report(diagnostics.OVERRIDE_IMPORTED_CLASS(), {
+                    node: atRule,
+                });
+                return;
             }
             // ToDo: pass atuRule for diagnostics
             CSSClass.addClass(context, analyzed.name /*, atRule*/);
