@@ -169,17 +169,8 @@ export function parsePseudoStates(
 
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
         const [stateDefinition, ...stateDefault] = workingState;
-
-        if (stateDefinition.value.startsWith('-')) {
-            diagnostics.report(stateDiagnostics.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
-                node: decl,
-                word: stateDefinition.value,
-            });
-        } else if (reservedFunctionalPseudoClasses.includes(stateDefinition.value)) {
-            diagnostics.report(stateDiagnostics.RESERVED_NATIVE_STATE(stateDefinition.value), {
-                node: decl,
-                word: stateDefinition.value,
-            });
+        const stateName = stateDefinition.value;
+        if (!validateStateName(stateName, diagnostics, decl)) {
             return;
         }
 
@@ -200,6 +191,21 @@ export function parsePseudoStates(
 
     return mappedStates;
 }
+function validateStateName(name: string, diagnostics: Diagnostics, node: postcss.Node) {
+    if (name.startsWith('-')) {
+        diagnostics.report(stateDiagnostics.STATE_STARTS_WITH_HYPHEN(name), {
+            node: node,
+            word: name,
+        });
+    } else if (reservedFunctionalPseudoClasses.includes(name)) {
+        diagnostics.report(stateDiagnostics.RESERVED_NATIVE_STATE(name), {
+            node: node,
+            word: name,
+        });
+        return false;
+    }
+    return true;
+}
 export function parseStateValue(
     value: BaseAstNode[],
     node: postcss.Node,
@@ -207,13 +213,14 @@ export function parseStateValue(
 ) {
     let stateName = '';
     let stateDef: MappedStates[string] = null; /*boolean*/
-    const [_amountToName, nameNode] = findCustomIdent(value, 0);
-    if (nameNode) {
+    const customIdentResult = findCustomIdent(value, 0);
+    const [amountToName, nameNode] = customIdentResult[0]
+        ? customIdentResult
+        : findNextCallNode(value, 0);
+    if (nameNode && validateStateName(nameNode.value, diagnostics, node)) {
         stateName = nameNode.value;
-    } else {
-        const [amountToName, nameNode] = findNextCallNode(value, 0);
-        if (nameNode) {
-            stateName = nameNode.value;
+        // state with parameter
+        if (nameNode.type === 'call') {
             // ToDo: translate resolveStateType to tokey and remove the double parsing
             const postcssStateValue = postcssValueParser(
                 stringifyCSSValue(value.slice(amountToName - 1))

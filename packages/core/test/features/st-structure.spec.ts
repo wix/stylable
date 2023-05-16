@@ -3,11 +3,16 @@ import {
     shouldReportNoDiagnostics,
     testStylableCore,
 } from '@stylable/core-test-kit';
-import { STStructure, transformerDiagnostics } from '@stylable/core/dist/index-internal';
+import {
+    STStructure,
+    transformerDiagnostics,
+    STCustomState,
+} from '@stylable/core/dist/index-internal';
 import { expect } from 'chai';
 
 const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 const stStructureDiagnostics = diagnosticBankReportToStrings(STStructure.diagnostics);
+const stStateDiagnostics = diagnosticBankReportToStrings(STCustomState.diagnostics);
 
 type FuncParameters<F> = F extends (...args: any[]) => any ? Parameters<F> : never;
 
@@ -236,6 +241,20 @@ describe('@st structure', () => {
                 @media {
                     /* @analyze-error ${stStructureDiagnostics.STATE_OUT_OF_CONTEXT()}*/
                     @st :in-at-rule;
+                }
+            `);
+        });
+        it('should report parsing issues', () => {
+            testStylableCore(`
+                @st .x {
+                    /* @analyze-warn ${stStateDiagnostics.NO_STATE_TYPE_GIVEN('bool')}*/
+                    @st :bool();
+
+                    /* @analyze-error ${stStateDiagnostics.STATE_STARTS_WITH_HYPHEN('-dashProxy')}*/
+                    @st :-dashProxy;
+
+                    /* @analyze-warn ${stStateDiagnostics.RESERVED_NATIVE_STATE('is')}*/
+                    @st :is;
                 }
             `);
         });
