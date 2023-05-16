@@ -51,6 +51,11 @@ export const diagnostics = {
         'error',
         () => 'state definition must be directly nested in a `@st .class{}` definition'
     ),
+    REDECLARE_STATE: createDiagnosticReporter(
+        '21006',
+        'error',
+        (name: string) => `state "${name}" is already declared`
+    ),
 };
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
 
@@ -150,12 +155,16 @@ export const hooks = createFeature({
             }
             // ToDo: reuse state name limitations (no dash prefix, reserved natives)
             const mappedStates = (classSymbol['-st-states'] ||= {});
-            if (mappedStates[analyzed.name]) {
-                // ToDo: report re-define error
-                // ToDo: figure out if last should override
+            const stateName = analyzed.name;
+            if (mappedStates[stateName]) {
+                // first state definition wins
+                context.diagnostics.report(diagnostics.REDECLARE_STATE(stateName), {
+                    node: atRule,
+                    word: ':' + stateName,
+                });
                 return;
             }
-            mappedStates[analyzed.name] = analyzed.stateDef;
+            mappedStates[stateName] = analyzed.stateDef;
         }
     },
 });

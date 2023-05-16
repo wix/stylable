@@ -258,5 +258,20 @@ describe('@st structure', () => {
                 }
             `);
         });
+        it('should report re-declare of state (first win)', () => {
+            testStylableCore(`
+                @st .x {
+                    @st :conflict(string);
+
+                    /* @analyze-error word(:conflict) ${stStructureDiagnostics.REDECLARE_STATE(
+                        'conflict'
+                    )} */
+                    @st :conflict(enum(a, b)) b;
+                }
+
+                /* @rule .entry__x.entry---conflict-3-ccc */
+                .x:conflict(ccc) {}
+            `);
+        });
     });
 });
