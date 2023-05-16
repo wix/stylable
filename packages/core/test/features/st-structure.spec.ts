@@ -112,6 +112,35 @@ describe('@st structure', () => {
                 @st .a.b;
             `);
         });
+        it('should extend another class', () => {
+            const { sheets } = testStylableCore(`
+                @st .abc :is(.defined-class-inline);
+                @st .xyz :is(.existing-class-after);
+
+                .existing-class-after {
+                    -st-states: state;
+                };
+
+                /* @rule .entry__xyz.entry--state */
+                .xyz:state {}
+            `);
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+            expect(exports.classes.abc, 'composed inline def').to.eql(
+                'entry__abc entry__defined-class-inline'
+            );
+        });
+        it('should report expected missing extended class reference', () => {
+            testStylableCore(`
+                /* @analyze-error(element) ${stStructureDiagnostics.MISSING_EXTEND()}*/
+                @st .xyz :is(root);
+
+                /* @analyze-error(multi class) ${stStructureDiagnostics.MISSING_EXTEND()}*/
+                @st .xyz :is(.a, .b);
+            `);
+        });
         it('should register css class selector mapping', () => {
             const { sheets } = testStylableCore(`
                 @st .abc => :global(.xyz);
