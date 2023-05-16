@@ -2,6 +2,8 @@ import { plugableRecord } from '../helpers/plugable-record';
 import { FeatureContext, createFeature } from './feature';
 import * as STSymbol from './st-symbol';
 import * as STPart from './st-part';
+import * as STCustomState from './st-custom-state';
+import type { MappedStates } from './st-custom-state';
 import * as CSSClass from './css-class';
 import { warnOnce } from '../helpers/deprecation';
 import type postcss from 'postcss';
@@ -43,6 +45,11 @@ export const diagnostics = {
         '21004',
         'error',
         () => `cannot override imported class definition`
+    ),
+    STATE_OUT_OF_CONTEXT: createDiagnosticReporter(
+        '21005',
+        'error',
+        () => 'state definition must be directly nested in a `@st .class{}` definition'
     ),
 };
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
@@ -135,6 +142,20 @@ export const hooks = createFeature({
                     );
                 }
             }
+        } else if (analyzed.type === 'state') {
+            const classSymbol = CSSClass.get(context.meta, analyzed.class);
+            if (!classSymbol) {
+                // assuming analyzing @st definitions dfs - class must be defined
+                return;
+            }
+            // ToDo: reuse state name limitations (no dash prefix, reserved natives)
+            const mappedStates = (classSymbol['-st-states'] ||= {});
+            if (mappedStates[analyzed.name]) {
+                // ToDo: report re-define error
+                // ToDo: figure out if last should override
+                return;
+            }
+            mappedStates[analyzed.name] = analyzed.stateDef;
         }
     },
 });
@@ -151,7 +172,14 @@ interface ParsedStClass {
     mappedSelectors?: ImmutableSelectorList;
 }
 
-type AnalyzedStDef = undefined | ParsedStClass;
+interface ParsedStState {
+    type: 'state';
+    name: string;
+    stateDef: MappedStates[string];
+    class: string;
+}
+
+type AnalyzedStDef = undefined | ParsedStClass | ParsedStState;
 function analyzeStAtRule(atRule: postcss.AtRule, context: FeatureContext): AnalyzedStDef {
     // cache
     const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
@@ -165,9 +193,49 @@ function analyzeStAtRule(atRule: postcss.AtRule, context: FeatureContext): Analy
         return;
     }
 
-    const analyzedDef = parseClassDefinition(context, atRule, params);
-    analyzedDefs.set(atRule, analyzedDef);
+    const analyzedDef =
+        parseClassDefinition(context, atRule, params) ||
+        parseStateDefinition(context, atRule, params);
+    if (analyzedDef) {
+        analyzedDefs.set(atRule, analyzedDef);
+    }
+
     return analyzedDef;
+}
+
+function parseStateDefinition(
+    context: FeatureContext,
+    atRule: postcss.AtRule,
+    params: BaseAstNode[]
+): ParsedStState | undefined {
+    const [amountToName, nameNode] = findNextPseudoClassNode(params, 0);
+    if (!nameNode) {
+        return;
+    }
+    const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    const parentRule = atRule.parent;
+    const parentAnalyze = parentRule && analyzedDefs.get(parentRule as any);
+    if (parentAnalyze?.type !== 'topLevelClass') {
+        context.diagnostics.report(diagnostics.STATE_OUT_OF_CONTEXT(), {
+            node: atRule,
+        });
+        return;
+    }
+    const parsedDef = STCustomState.parseStateValue(
+        params.slice(amountToName - 1),
+        atRule,
+        context.diagnostics
+    );
+    if (parsedDef === undefined) {
+        // diagnostics are reported from within parseStateValue()
+        return;
+    }
+    return {
+        type: 'state',
+        name: nameNode.value,
+        stateDef: parsedDef,
+        class: parentAnalyze.name,
+    };
 }
 
 function parseClassDefinition(

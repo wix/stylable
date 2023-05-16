@@ -2,6 +2,7 @@ import { createFeature } from './feature';
 import {
     stateDiagnostics,
     parsePseudoStates,
+    parseStateValue,
     transformPseudoClassToCustomState,
     booleanStateDelimiter,
     stateMiddleDelimiter,
@@ -12,6 +13,7 @@ import {
     validationErrors as sysValidationErrors,
     resolveStateParam,
     isTemplateState,
+    MappedStates,
 } from '../helpers/custom-state';
 
 export const diagnostics = {
@@ -29,6 +31,7 @@ const delimiters = {
 };
 export {
     parsePseudoStates,
+    parseStateValue,
     transformPseudoClassToCustomState,
     delimiters,
     createBooleanStateClassName,
@@ -37,4 +40,5 @@ export {
     sysValidationErrors,
     resolveStateParam,
     isTemplateState,
+    MappedStates,
 };

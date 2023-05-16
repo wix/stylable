@@ -21,6 +21,8 @@ import type { StylableResolver } from '../stylable-resolver';
 import type { ParsedValue } from '../types';
 import { CSSClass } from '../features';
 import { reservedFunctionalPseudoClasses } from '../native-reserved-lists';
+import { BaseAstNode, stringifyCSSValue } from '@tokey/css-value-parser';
+import { findCustomIdent, findNextCallNode } from './css-value-seeker';
 
 export interface MappedStates {
     [s: string]: StateParsedValue | string | TemplateStateParsedValue | null;
@@ -197,6 +199,44 @@ export function parsePseudoStates(
     });
 
     return mappedStates;
+}
+export function parseStateValue(
+    value: BaseAstNode[],
+    node: postcss.Node,
+    diagnostics: Diagnostics
+) {
+    let stateName = '';
+    let stateDef: MappedStates[string] = null; /*boolean*/
+    const [_amountToName, nameNode] = findCustomIdent(value, 0);
+    if (nameNode) {
+        stateName = nameNode.value;
+    } else {
+        const [amountToName, nameNode] = findNextCallNode(value, 0);
+        if (nameNode) {
+            stateName = nameNode.value;
+            // ToDo: translate resolveStateType to tokey and remove the double parsing
+            const postcssStateValue = postcssValueParser(
+                stringifyCSSValue(value.slice(amountToName - 1))
+            );
+            // get state definition
+            const [stateDefinition, ...stateDefault] = postcssStateValue.nodes;
+            const stateMap: MappedStates = {};
+            resolveStateType(
+                stateDefinition as FunctionNode,
+                stateMap,
+                stateDefault,
+                diagnostics,
+                node as postcss.Declaration // ToDo: change to accept any postcss node
+            );
+            if (stateMap[stateName]) {
+                stateDef = stateMap[stateName];
+            }
+        }
+    }
+    if (stateName) {
+        return stateDef;
+    }
+    return;
 }
 function resolveBooleanState(mappedStates: MappedStates, stateDefinition: ParsedValue) {
     const currentState = mappedStates[stateDefinition.value];

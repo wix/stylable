@@ -62,7 +62,7 @@ describe('@st structure', () => {
 
         restoreSpy();
     });
-    describe('top level class', () => {
+    describe('@st .name (top level class)', () => {
         it('should prevent automatic .class=>::part definition', () => {
             testStylableCore(`
                 @st .root;
@@ -203,6 +203,41 @@ describe('@st structure', () => {
                     .multi-global {}
                 `,
             });
+        });
+    });
+    describe('@st :name (pseudo-class)', () => {
+        it('should define pseudo-class on parent class def', () => {
+            const { sheets } = testStylableCore(`
+                @st .x {
+                    @st :bool;
+                    @st :ops(enum(a, b));
+                    @st :opsWithDefault(enum(w, x, y, z)) x;
+                }
+
+                /* @rule(bool) .entry__x.entry--bool*/
+                .x:bool {}
+
+                /* @rule(param) .entry__x.entry---ops-1-b*/
+                .x:ops(b) {}
+
+                /* @rule(default param) .entry__x.entry---opsWithDefault-1-x*/
+                .x:opsWithDefault {}
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should be nested in `@st .class{}`', () => {
+            testStylableCore(`
+                /* @analyze-error ${stStructureDiagnostics.STATE_OUT_OF_CONTEXT()}*/
+                @st :top-level;
+
+                @media {
+                    /* @analyze-error ${stStructureDiagnostics.STATE_OUT_OF_CONTEXT()}*/
+                    @st :in-at-rule;
+                }
+            `);
         });
     });
 });
