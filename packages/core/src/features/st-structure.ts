@@ -5,7 +5,7 @@ import * as STPart from './st-part';
 import * as CSSClass from './css-class';
 import { warnOnce } from '../helpers/deprecation';
 import type postcss from 'postcss';
-import { parseCSSValue, stringifyCSSValue } from '@tokey/css-value-parser';
+import { parseCSSValue, stringifyCSSValue, BaseAstNode } from '@tokey/css-value-parser';
 import { parseSelectorWithCache } from '../helpers/selector';
 import { ImmutableSelectorList, stringifySelectorAst } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter } from '../diagnostics';
@@ -47,13 +47,15 @@ export const diagnostics = {
 };
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
 
-const dataKey = plugableRecord.key<{}>('st-structure');
+const dataKey = plugableRecord.key<{
+    analyzedDefs: WeakMap<postcss.AtRule, AnalyzedStDef>;
+}>('st-structure');
 
 // HOOKS
 
 export const hooks = createFeature({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, {});
+        plugableRecord.set(meta.data, dataKey, { analyzedDefs: new WeakMap() });
     },
     analyzeAtRule({ context, atRule }) {
         if (!isStAtRule(atRule)) {
@@ -72,9 +74,7 @@ export const hooks = createFeature({
             } else {
                 // ToDo: error on invalid nested definition
             }
-            return;
-        }
-        if (analyzed.type === 'topLevelClass') {
+        } else if (analyzed.type === 'topLevelClass') {
             // ToDo: error when nested (only top level for now)
             if (!analyzed.name) {
                 context.diagnostics.report(diagnostics.UNSUPPORTED_TOP_DEF(), {
@@ -144,83 +144,96 @@ export const hooks = createFeature({
 function isStAtRule(node: postcss.AnyNode): node is postcss.AtRule {
     return node?.type === 'atrule' && node.name === 'st';
 }
-type AnalyzedStDef =
-    | undefined
-    | {
-          type: 'topLevelClass';
-          name: string;
-          extendedClass?: string;
-          mappedSelectors?: ImmutableSelectorList;
-      };
+interface ParsedStClass {
+    type: 'topLevelClass';
+    name: string;
+    extendedClass?: string;
+    mappedSelectors?: ImmutableSelectorList;
+}
+
+type AnalyzedStDef = undefined | ParsedStClass;
 function analyzeStAtRule(atRule: postcss.AtRule, context: FeatureContext): AnalyzedStDef {
+    // cache
+    const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    if (analyzedDefs.has(atRule)) {
+        return analyzedDefs.get(atRule);
+    }
+
     const params = parseCSSValue(atRule.params);
 
-    // collect class definition
     if (params.length === 0) {
         return;
     }
 
+    const analyzedDef = parseClassDefinition(context, atRule, params);
+    analyzedDefs.set(atRule, analyzedDef);
+    return analyzedDef;
+}
+
+function parseClassDefinition(
+    context: FeatureContext,
+    atRule: postcss.AtRule,
+    params: BaseAstNode[]
+): ParsedStClass | undefined {
     let index = 0;
 
     const [amountToClass, classNameNode] = findNextClassNode(params, index, { stopOnFail: true });
-    if (classNameNode) {
-        const result: AnalyzedStDef = { type: 'topLevelClass', name: '' };
-        // top level class
-        index += amountToClass;
-        result.name = classNameNode.value;
-        // collect extends class
-        const [amountToExtends, extendsNode] = findNextPseudoClassNode(params, index, {
-            name: 'is',
-            stopOnFail: true,
-            stopOnMatch: (_node, index, nodes) => {
-                const [amountToFatArrow] = findFatArrow(nodes, index, { stopOnFail: true });
-                return amountToFatArrow > 0;
-            },
-        });
-        if (extendsNode) {
-            index += amountToExtends;
-            if (extendsNode.type === 'call') {
-                const [amountToExtendedClass, nameNode] = findNextClassNode(extendsNode.args, 0, {
-                    stopOnFail: true,
-                });
-                if (amountToExtendedClass) {
-                    index += amountToExtends;
-                    // check leftover nodes
-                    const [amountToUnexpectedNode] = findAnything(
-                        extendsNode.args,
-                        amountToExtendedClass
-                    );
-                    if (!amountToUnexpectedNode) {
-                        result.extendedClass = nameNode!.value;
-                    }
+    if (!classNameNode) {
+        return;
+    }
+    const result: AnalyzedStDef = { type: 'topLevelClass', name: '' };
+    // top level class
+    index += amountToClass;
+    result.name = classNameNode.value;
+    // collect extends class
+    const [amountToExtends, extendsNode] = findNextPseudoClassNode(params, index, {
+        name: 'is',
+        stopOnFail: true,
+        stopOnMatch: (_node, index, nodes) => {
+            const [amountToFatArrow] = findFatArrow(nodes, index, { stopOnFail: true });
+            return amountToFatArrow > 0;
+        },
+    });
+    if (extendsNode) {
+        index += amountToExtends;
+        if (extendsNode.type === 'call') {
+            const [amountToExtendedClass, nameNode] = findNextClassNode(extendsNode.args, 0, {
+                stopOnFail: true,
+            });
+            if (amountToExtendedClass) {
+                index += amountToExtends;
+                // check leftover nodes
+                const [amountToUnexpectedNode] = findAnything(
+                    extendsNode.args,
+                    amountToExtendedClass
+                );
+                if (!amountToUnexpectedNode) {
+                    result.extendedClass = nameNode!.value;
                 }
             }
-            if (!result.extendedClass) {
-                context.diagnostics.report(diagnostics.MISSING_EXTEND(), {
-                    node: atRule,
-                    word: stringifyCSSValue(extendsNode),
-                });
-            }
         }
-        // collect mapped selectors
-        const [amountToMapping, mappingOpenNode] = findFatArrow(params, index, {
-            stopOnFail: false,
-        });
-        if (amountToMapping) {
-            index = atRule.params.length;
-            const mappedSelectors = parseSelectorWithCache(
-                atRule.params.slice(mappingOpenNode!.end)
-            );
-            if (mappedSelectors) {
-                result.mappedSelectors = mappedSelectors;
-            }
-        }
-        // check leftover nodes
-        const [amountToUnexpectedNode] = findAnything(params, index);
-        if (result.name && !amountToUnexpectedNode) {
-            return result;
+        if (!result.extendedClass) {
+            context.diagnostics.report(diagnostics.MISSING_EXTEND(), {
+                node: atRule,
+                word: stringifyCSSValue(extendsNode),
+            });
         }
     }
-
+    // collect mapped selectors
+    const [amountToMapping, mappingOpenNode] = findFatArrow(params, index, {
+        stopOnFail: false,
+    });
+    if (amountToMapping) {
+        index = atRule.params.length;
+        const mappedSelectors = parseSelectorWithCache(atRule.params.slice(mappingOpenNode!.end));
+        if (mappedSelectors) {
+            result.mappedSelectors = mappedSelectors;
+        }
+    }
+    // check leftover nodes
+    const [amountToUnexpectedNode] = findAnything(params, index);
+    if (result.name && !amountToUnexpectedNode) {
+        return result;
+    }
     return;
 }
