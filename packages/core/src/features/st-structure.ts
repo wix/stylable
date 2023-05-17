@@ -153,7 +153,6 @@ export const hooks = createFeature({
                 // assuming analyzing @st definitions dfs - class must be defined
                 return;
             }
-            // ToDo: reuse state name limitations (no dash prefix, reserved natives)
             const mappedStates = (classSymbol['-st-states'] ||= {});
             const stateName = analyzed.name;
             if (mappedStates[stateName]) {
