@@ -9,7 +9,11 @@ import { warnOnce } from '../helpers/deprecation';
 import type postcss from 'postcss';
 import { parseCSSValue, stringifyCSSValue, BaseAstNode } from '@tokey/css-value-parser';
 import { parseSelectorWithCache } from '../helpers/selector';
-import { ImmutableSelectorList, stringifySelectorAst } from '@tokey/css-selector-parser';
+import {
+    ImmutableSelector,
+    ImmutableSelectorList,
+    stringifySelectorAst,
+} from '@tokey/css-selector-parser';
 import { createDiagnosticReporter } from '../diagnostics';
 import { getAlias } from '../stylable-utils';
 import {
@@ -17,6 +21,7 @@ import {
     findFatArrow,
     findNextClassNode,
     findNextPseudoClassNode,
+    findPseudoElementNode,
 } from '../helpers/css-value-seeker';
 
 export const diagnostics = {
@@ -147,6 +152,25 @@ export const hooks = createFeature({
                     );
                 }
             }
+        } else if (analyzed.type === 'part') {
+            const classSymbol = CSSClass.get(context.meta, analyzed.class);
+            if (!classSymbol) {
+                // assuming analyzing @st definitions dfs - class must be defined
+                return;
+            }
+            const partName = analyzed.name;
+            const mappedParts = STPart.getStructureParts(classSymbol);
+            if (mappedParts[partName]) {
+                // ToDo: error on duplicate definition
+                return;
+            }
+            if (!analyzed.mappedSelector) {
+                // ToDo: error on missing selector mapping
+                return;
+            }
+            mappedParts[partName] = {
+                mapTo: [analyzed.mappedSelector],
+            };
         } else if (analyzed.type === 'state') {
             const classSymbol = CSSClass.get(context.meta, analyzed.class);
             if (!classSymbol) {
@@ -180,6 +204,13 @@ interface ParsedStClass {
     mappedSelectors?: ImmutableSelectorList;
 }
 
+interface ParsedStPart {
+    type: 'part';
+    name: string;
+    class: string;
+    mappedSelector?: ImmutableSelector;
+}
+
 interface ParsedStState {
     type: 'state';
     name: string;
@@ -187,7 +218,7 @@ interface ParsedStState {
     class: string;
 }
 
-type AnalyzedStDef = undefined | ParsedStClass | ParsedStState;
+type AnalyzedStDef = undefined | ParsedStClass | ParsedStPart | ParsedStState;
 function analyzeStAtRule(atRule: postcss.AtRule, context: FeatureContext): AnalyzedStDef {
     // cache
     const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
@@ -203,6 +234,7 @@ function analyzeStAtRule(atRule: postcss.AtRule, context: FeatureContext): Analy
 
     const analyzedDef =
         parseClassDefinition(context, atRule, params) ||
+        parsePseudoElementDefinition(context, atRule, params) ||
         parseStateDefinition(context, atRule, params);
     if (analyzedDef) {
         analyzedDefs.set(atRule, analyzedDef);
@@ -243,6 +275,49 @@ function parseStateDefinition(
         name: nameNode.value,
         stateDef: parsedDef,
         class: parentAnalyze.name,
+    };
+}
+
+function parsePseudoElementDefinition(
+    context: FeatureContext,
+    atRule: postcss.AtRule,
+    params: BaseAstNode[]
+): ParsedStPart | undefined {
+    let index = 0;
+    // collect pseudo element name
+    const [amountToName, nameNode] = findPseudoElementNode(params, 0);
+    if (!nameNode) {
+        return;
+    }
+    index += amountToName;
+    // collect class name to extend
+    const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    const parentRule = atRule.parent;
+    const parentAnalyze = parentRule && analyzedDefs.get(parentRule as any);
+    if (parentAnalyze?.type !== 'topLevelClass') {
+        context.diagnostics.report(diagnostics.STATE_OUT_OF_CONTEXT(), {
+            node: atRule,
+        });
+        return;
+    }
+    // collect mapped selectors
+    const [amountToMapping, mappingOpenNode] = findFatArrow(params, index, {
+        stopOnFail: false,
+    });
+    let mappedSelector: ImmutableSelector | undefined;
+    if (amountToMapping) {
+        index = atRule.params.length;
+        const mappedSelectors = parseSelectorWithCache(atRule.params.slice(mappingOpenNode!.end));
+        // ToDo: validate single selector; change to "result.mappedSelector" (single)
+        if (mappedSelectors.length) {
+            mappedSelector = mappedSelectors[0];
+        }
+    }
+    return {
+        type: 'part',
+        name: nameNode.value,
+        class: parentAnalyze.name,
+        mappedSelector,
     };
 }
 
@@ -302,6 +377,7 @@ function parseClassDefinition(
     if (amountToMapping) {
         index = atRule.params.length;
         const mappedSelectors = parseSelectorWithCache(atRule.params.slice(mappingOpenNode!.end));
+        // ToDo: validate single selector; change to "result.mappedSelector" (single)
         if (mappedSelectors) {
             result.mappedSelectors = mappedSelectors;
         }

@@ -35,7 +35,7 @@ import { basename } from 'path';
 import { createDiagnosticReporter } from '../diagnostics';
 import postcssValueParser from 'postcss-value-parser';
 
-export interface StPartDirectives {
+export interface StPartDirectives extends STPart.HasParts {
     '-st-root'?: boolean;
     '-st-states'?: MappedStates;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
@@ -201,7 +201,7 @@ export const hooks = createFeature<{
             // used to namespace classes from js mixins since js mixins
             // are scoped in the context of the mixed-in stylesheet
             // which might not have a definition for the mixed-in class
-            { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name: node.value } },
+            { _kind: 'css', meta: originMeta, symbol: createSymbol({ name: node.value }) },
         ];
         selectorContext.setNextSelectorScope(resolved, node, node.value);
         const { symbol, meta } = getOriginDefinition(resolved);
@@ -260,7 +260,8 @@ export function getAll(meta: StylableMeta): Record<string, ClassSymbol> {
 }
 
 export function createSymbol(input: Partial<ClassSymbol> & { name: string }): ClassSymbol {
-    return { ...input, _kind: 'class' };
+    const parts = input['-st-parts'] || {};
+    return { ...input, _kind: 'class', '-st-parts': parts };
 }
 
 export function addClass(context: FeatureContext, name: string, rule?: postcss.Rule): ClassSymbol {

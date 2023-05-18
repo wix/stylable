@@ -94,6 +94,43 @@ export function findNextPseudoClassNode(
     return [0, undefined];
 }
 
+export function findPseudoElementNode(
+    value: BaseAstNode[],
+    startIndex: number,
+    options?: Partial<FindAstOptions>
+): [takenNodeAmount: number, classNode: CustomIdent | Call | undefined] {
+    let index = startIndex;
+    while (index < value.length) {
+        // first colon
+        const [amountToColon] = findLiteral(value, index, { ...options, name: ':' });
+        // second colon
+        if (amountToColon) {
+            index += amountToColon;
+            // name
+            const [amountToSecondColon] = findLiteral(value, index, {
+                ...options,
+                name: ':',
+                stopOnFail: true,
+            });
+            if (amountToSecondColon) {
+                index += amountToSecondColon;
+                const [amountToName, nameNode] = findCustomIdent(value, index, {
+                    ...options,
+                    stopOnFail: true,
+                });
+                if (nameNode) {
+                    return [index + amountToName, nameNode];
+                }
+            }
+        }
+        if (options?.stopOnFail) {
+            break;
+        }
+        index++;
+    }
+    return [0, undefined];
+}
+
 export function findLiteral(
     value: BaseAstNode[],
     startIndex: number,

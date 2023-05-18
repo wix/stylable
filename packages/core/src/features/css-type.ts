@@ -94,7 +94,8 @@ export function getAll(meta: StylableMeta): Record<string, ElementSymbol> {
 }
 
 export function createSymbol(input: Partial<ElementSymbol> & { name: string }): ElementSymbol {
-    return { ...input, _kind: 'element' };
+    const parts = input['-st-parts'] || {};
+    return { ...input, _kind: 'element', '-st-parts': parts };
 }
 
 export function addType(context: FeatureContext, name: string, rule?: postcss.Rule): ElementSymbol {

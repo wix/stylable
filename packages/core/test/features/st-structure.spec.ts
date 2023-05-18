@@ -274,4 +274,51 @@ describe('@st structure', () => {
             `);
         });
     });
+    describe('@st ::name (pseudo-element)', () => {
+        it('should define pseudo-element on parent class def', () => {
+            const { sheets } = testStylableCore(`
+                @st .x {
+                    @st ::part => [part="x"];
+                }
+
+                /* @rule .entry__x [part="x"] */
+                .x::part {}
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should resolve inherited parts', () => {
+            const { sheets } = testStylableCore({
+                'base.st.css': `
+                    @st .base {
+                        @st ::part => [part="x"];
+                    }
+                `,
+                'legacy.st.css': `
+                    @st-import [base] from "./base.st.css";
+                    .clsA {
+                        -st-extends: base;
+                    }
+                `,
+                'entry.st.css': `
+                    @st-import Legacy, [clsA] from "./legacy.st.css";
+
+                    @st .root :is(.Legacy);
+                    @st .clsB :is(.clsA);
+
+                    /* @rule(extend) .entry__clsB [part="x"] */
+                    .clsB::part {}
+
+                    /* @rule(through extending part) .entry__root .legacy__clsA [part="x"] */
+                    .root::clsA::part {}
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
 });

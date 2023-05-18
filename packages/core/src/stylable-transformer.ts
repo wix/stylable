@@ -814,7 +814,8 @@ export class InferredSelector {
             const startIndex = resolvedContext.length === 1 ? 0 : 1;
             resolved: for (let i = startIndex; i < resolvedContext.length; i++) {
                 const { symbol, meta } = resolvedContext[i];
-                if (!symbol['-st-root'] || symbol.alias) {
+                const structureMode = STPart.isStructureMode(meta);
+                if (symbol.alias || (!structureMode && !symbol['-st-root'])) {
                     // non-root & alias classes don't have parts: bailout
                     continue;
                 }
@@ -828,7 +829,9 @@ export class InferredSelector {
                     }
                     checked[name].add(uniqueId);
                     //
-                    const partDef = STPart.getPart(meta, name);
+                    const partDef = structureMode
+                        ? STPart.getStructurePart(symbol, name)
+                        : STPart.getPart(meta, name);
                     if (!partDef) {
                         continue;
                     }
