@@ -44,7 +44,7 @@ export const diagnostics = {
     STATE_OUT_OF_CONTEXT: createDiagnosticReporter(
         '21004',
         'error',
-        () => 'state definition must be directly nested in a `@st .class{}` definition'
+        () => 'pseudo-state definition must be directly nested in a `@st .class{}` definition'
     ),
     REDECLARE_STATE: createDiagnosticReporter(
         '21005',
@@ -60,6 +60,11 @@ export const diagnostics = {
         '21007',
         'error',
         () => `mapped selector accepts only a single selector`
+    ),
+    ELEMENT_OUT_OF_CONTEXT: createDiagnosticReporter(
+        '21008',
+        'error',
+        () => 'pseudo-element definition must be directly nested in a `@st .class{}` definition'
     ),
 };
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
@@ -286,7 +291,7 @@ function parsePseudoElementDefinition(
     const parentRule = atRule.parent;
     const parentAnalyze = parentRule && analyzedDefs.get(parentRule as any);
     if (parentAnalyze?.type !== 'topLevelClass') {
-        context.diagnostics.report(diagnostics.STATE_OUT_OF_CONTEXT(), {
+        context.diagnostics.report(diagnostics.ELEMENT_OUT_OF_CONTEXT(), {
             node: atRule,
         });
         return;

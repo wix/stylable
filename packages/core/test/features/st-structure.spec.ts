@@ -320,6 +320,17 @@ describe('@st structure', () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it('should be nested in `@st .class{}`', () => {
+            testStylableCore(`
+                /* @analyze-error ${stStructureDiagnostics.ELEMENT_OUT_OF_CONTEXT()}*/
+                @st ::top-level => .top;
+
+                @media {
+                    /* @analyze-error ${stStructureDiagnostics.ELEMENT_OUT_OF_CONTEXT()}*/
+                    @st ::in-at-rule => .media;
+                }
+            `);
+        });
         it('should report mapped selector issues', () => {
             testStylableCore(`
                 @st .x {
