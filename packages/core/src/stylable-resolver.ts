@@ -361,11 +361,7 @@ export class StylableResolver {
                     deepResolved = {
                         _kind: `css`,
                         meta,
-                        symbol: {
-                            _kind: 'class',
-                            name,
-                            alias: symbol,
-                        },
+                        symbol: CSSClass.createSymbol({ name, alias: symbol }),
                     };
                 }
             } else {

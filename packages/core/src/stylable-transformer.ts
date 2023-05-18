@@ -496,7 +496,7 @@ export class StylableTransformer {
                                 {
                                     _kind: 'css',
                                     meta: context.originMeta,
-                                    symbol: { _kind: 'element', name: '*' },
+                                    symbol: CSSType.createSymbol({ name: '*' }),
                                 },
                             ],
                             node
@@ -861,7 +861,7 @@ export class InferredSelector {
                                       {
                                           _kind: 'css',
                                           meta,
-                                          symbol: { _kind: 'element', name: '*' },
+                                          symbol: CSSType.createSymbol({ name: '*' }),
                                       },
                                   ]);
 
@@ -1026,7 +1026,7 @@ export class ScopeContext {
                       {
                           _kind: 'css',
                           meta: originMeta,
-                          symbol: { _kind: 'element', name: '*' },
+                          symbol: CSSType.createSymbol({ name: '*' }),
                       },
                   ])
                 : transformer.createInferredSelector(originMeta, {

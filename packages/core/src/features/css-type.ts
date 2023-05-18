@@ -65,7 +65,7 @@ export const hooks = createFeature<{
                     {
                         _kind: 'css',
                         meta: context.meta,
-                        symbol: { _kind: 'element', name: node.value },
+                        symbol: createSymbol({ name: '*' }),
                     },
                 ];
             }
@@ -93,6 +93,10 @@ export function getAll(meta: StylableMeta): Record<string, ElementSymbol> {
     return STSymbol.getAllByType(meta, `element`);
 }
 
+export function createSymbol(input: Partial<ElementSymbol> & { name: string }): ElementSymbol {
+    return { ...input, _kind: 'element' };
+}
+
 export function addType(context: FeatureContext, name: string, rule?: postcss.Rule): ElementSymbol {
     const typeSymbol = STSymbol.get(context.meta, name, `element`);
     if (!typeSymbol && isCompRoot(name)) {
@@ -102,11 +106,7 @@ export function addType(context: FeatureContext, name: string, rule?: postcss.Ru
         }
         STSymbol.addSymbol({
             context,
-            symbol: {
-                _kind: 'element',
-                name,
-                alias,
-            },
+            symbol: createSymbol({ name, alias }),
             node: rule,
             safeRedeclare: !!alias,
         });

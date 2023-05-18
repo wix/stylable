@@ -9,10 +9,9 @@ describe(`testStylableCore()`, () => {
 
         const { meta, exports } = sheets[`/entry.st.css`];
 
-        expect(CSSClass.get(meta, `root`), `meta`).to.contain({
-            _kind: `class`,
-            name: `root`,
-        });
+        expect(CSSClass.get(meta, `root`), `meta`).to.deep.contain(
+            CSSClass.createSymbol({ name: `root` })
+        );
         expect(exports.classes.root, `exports.classes`).to.equal(`entry__root`);
     });
     it(`should inline test stylable content`, () => {

@@ -1,4 +1,5 @@
 import { createDefaultResolver } from '@stylable/core';
+import { CSSClass } from '@stylable/core/dist/index-internal';
 import { createTempDirectorySync } from '@stylable/core-test-kit';
 import { testLangService } from '../../test-kit/test-lang-service';
 import { stImportNamedCompletion } from '@stylable/language-service/dist/lib/completion-types';
@@ -169,14 +170,14 @@ describe('LS: st-import', () => {
                         label: 'root',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './source.st.css',
-                            symbol: { _kind: 'class', name: 'root' },
+                            symbol: CSSClass.createSymbol({ name: 'root' }),
                         }),
                     },
                     {
                         label: 'classA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './source.st.css',
-                            symbol: { _kind: 'class', name: 'classA' },
+                            symbol: CSSClass.createSymbol({ name: 'classA' }),
                         }),
                     },
                     {
@@ -485,14 +486,14 @@ describe('LS: st-import', () => {
                         label: 'root',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './proxy.st.css',
-                            symbol: { _kind: 'class', name: 'root' },
+                            symbol: CSSClass.createSymbol({ name: 'root' }),
                         }),
                     },
                     {
                         label: 'proxyClassA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './extend.st.css',
-                            symbol: { _kind: 'class', name: 'classA' },
+                            symbol: CSSClass.createSymbol({ name: 'classA' }),
                         }),
                     },
                     {
@@ -550,11 +551,10 @@ describe('LS: st-import', () => {
                         label: 'classA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './source.st.css',
-                            symbol: {
-                                _kind: 'class',
+                            symbol: CSSClass.createSymbol({
                                 name: 'classA',
                                 '-st-global': parseCssSelector('.globalA'),
-                            },
+                            }),
                         }),
                     },
                     {
@@ -637,22 +637,20 @@ describe('LS: st-import', () => {
                         label: 'classA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './native.css',
-                            symbol: {
-                                _kind: 'class',
+                            symbol: CSSClass.createSymbol({
                                 name: 'classA',
                                 '-st-global': parseCssSelector('.classA'),
-                            },
+                            }),
                         }),
                     },
                     {
                         label: 'classB',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './native.css',
-                            symbol: {
-                                _kind: 'class',
+                            symbol: CSSClass.createSymbol({
                                 name: 'classB',
                                 '-st-global': parseCssSelector('.classB'),
-                            },
+                            }),
                         }),
                     },
                     {

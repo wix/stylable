@@ -2,7 +2,10 @@ import { resolve } from 'path';
 import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import { processNamespace } from '@stylable/core';
-import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/index-internal';
+import {
+    CSSClass,
+    knownPseudoClassesWithNestedSelectors,
+} from '@stylable/core/dist/index-internal';
 
 chai.use(flatMatch);
 
@@ -101,12 +104,11 @@ describe('Stylable postcss process', () => {
         );
 
         expect(result.getAllClasses()).to.eql({
-            root: {
-                _kind: 'class',
+            root: CSSClass.createSymbol({
                 name: 'root',
                 '-st-root': true,
                 alias: undefined,
-            },
+            }),
         });
     });
 

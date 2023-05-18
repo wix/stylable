@@ -28,14 +28,16 @@ describe(`features/css-class`, () => {
         shouldReportNoDiagnostics(autoResult.meta);
 
         // symbols
-        expect(CSSClass.get(autoResult.meta, `root`), `auto root symbol`).to.contain({
-            _kind: `class`,
-            name: 'root',
-        });
-        expect(CSSClass.get(explicitResult.meta, `root`), `explicit root symbol`).to.contain({
-            _kind: `class`,
-            name: 'root',
-        });
+        expect(CSSClass.get(autoResult.meta, `root`), `auto root symbol`).to.deep.contain(
+            CSSClass.createSymbol({
+                name: 'root',
+            })
+        );
+        expect(CSSClass.get(explicitResult.meta, `root`), `explicit root symbol`).to.deep.contain(
+            CSSClass.createSymbol({
+                name: 'root',
+            })
+        );
 
         // JS exports
         expect(autoResult.exports.classes.root, `auto root JS export`).to.eql(`auto__root`);
@@ -245,10 +247,11 @@ describe(`features/css-class`, () => {
         shouldReportNoDiagnostics(meta);
 
         // symbols - ToDo: remove escape from key?
-        expect(CSSClass.get(meta, `a\\.`), `symbol`).to.contain({
-            _kind: `class`,
-            name: 'a\\.',
-        });
+        expect(CSSClass.get(meta, `a\\.`), `symbol`).to.deep.contain(
+            CSSClass.createSymbol({
+                name: 'a\\.',
+            })
+        );
 
         // JS exports - ToDo: remove escape from key
         expect(exports.classes[`a\\.`], `JS export`).to.eql(`entry.__a.`);
@@ -301,10 +304,11 @@ describe(`features/css-class`, () => {
         const { meta, exports } = sheets['/entry.st.css'];
 
         // symbols
-        expect(CSSClass.get(meta, `a`), `symbol`).to.contain({
-            _kind: `class`,
-            name: 'a',
-        });
+        expect(CSSClass.get(meta, `a`), `symbol`).to.deep.contain(
+            CSSClass.createSymbol({
+                name: 'a',
+            })
+        );
 
         // JS exports
         expect(exports.classes.a, `JS export`).to.eql(`entry__a`);
@@ -582,16 +586,18 @@ describe(`features/css-class`, () => {
 
             // symbols
             const importDef = meta.getImportStatements()[0];
-            expect(CSSClass.get(meta, `before`), `before symbol`).to.eql({
-                _kind: `class`,
-                name: 'before',
-                alias: STImport.createImportSymbol(importDef, `named`, `before`, `/`),
-            });
-            expect(CSSClass.get(meta, `after`), `after symbol`).to.eql({
-                _kind: `class`,
-                name: 'after',
-                alias: STImport.createImportSymbol(importDef, `named`, `after`, `/`),
-            });
+            expect(CSSClass.get(meta, `before`), `before symbol`).to.eql(
+                CSSClass.createSymbol({
+                    name: 'before',
+                    alias: STImport.createImportSymbol(importDef, `named`, `before`, `/`),
+                })
+            );
+            expect(CSSClass.get(meta, `after`), `after symbol`).to.eql(
+                CSSClass.createSymbol({
+                    name: 'after',
+                    alias: STImport.createImportSymbol(importDef, `named`, `after`, `/`),
+                })
+            );
             expect(CSSClass.get(meta, `unused`), `unused symbol`).to.eql(undefined);
 
             // JS exports
@@ -619,11 +625,12 @@ describe(`features/css-class`, () => {
 
             // symbols
             const importDef = meta.getImportStatements()[0];
-            expect(CSSClass.get(meta, `unknown`), `unknown symbol`).to.eql({
-                _kind: `class`,
-                name: 'unknown',
-                alias: STImport.createImportSymbol(importDef, `named`, `unknown`, `/`),
-            });
+            expect(CSSClass.get(meta, `unknown`), `unknown symbol`).to.eql(
+                CSSClass.createSymbol({
+                    name: 'unknown',
+                    alias: STImport.createImportSymbol(importDef, `named`, `unknown`, `/`),
+                })
+            );
 
             // JS exports
             expect(exports.classes[`unknown`], `unknown JS export`).to.eql(
@@ -653,11 +660,12 @@ describe(`features/css-class`, () => {
 
             // symbols
             const importDef = meta.getImportStatements()[0];
-            expect(CSSClass.get(meta, `imported-part`), `imported-part symbol`).to.eql({
-                _kind: `class`,
-                name: 'imported-part',
-                alias: STImport.createImportSymbol(importDef, `named`, `imported-part`, `/`),
-            });
+            expect(CSSClass.get(meta, `imported-part`), `imported-part symbol`).to.eql(
+                CSSClass.createSymbol({
+                    name: 'imported-part',
+                    alias: STImport.createImportSymbol(importDef, `named`, `imported-part`, `/`),
+                })
+            );
 
             // JS exports
             expect(exports.classes[`imported-part`], `imported-part JS export`).to.eql(
@@ -679,12 +687,13 @@ describe(`features/css-class`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             // symbols
-            expect(CSSClass.get(meta, `root`), `class`).to.eql({
-                _kind: `class`,
-                name: 'root',
-                '-st-root': true,
-                alias: undefined,
-            });
+            expect(CSSClass.get(meta, `root`), `class`).to.eql(
+                CSSClass.createSymbol({
+                    name: 'root',
+                    '-st-root': true,
+                    alias: undefined,
+                })
+            );
             expect(STSymbol.get(meta, `root`), `general`).to.equal(CSSClass.get(meta, `root`));
         });
         it(`should report unscoped class`, () => {
@@ -796,16 +805,18 @@ describe(`features/css-class`, () => {
 
             // symbols
             expect(CSSClass.get(meta, `imported`), `imported symbol`).to.eql(undefined);
-            expect(CSSClass.get(meta, `root`), `root symbol`).to.contain({
-                _kind: `class`,
-                name: 'root',
-                alias: undefined,
-            });
-            expect(CSSClass.get(meta, `class`), `class symbol`).to.contain({
-                _kind: `class`,
-                name: 'class',
-                alias: undefined,
-            });
+            expect(CSSClass.get(meta, `root`), `root symbol`).to.deep.contain(
+                CSSClass.createSymbol({
+                    name: 'root',
+                    alias: undefined,
+                })
+            );
+            expect(CSSClass.get(meta, `class`), `class symbol`).to.deep.contain(
+                CSSClass.createSymbol({
+                    name: 'class',
+                    alias: undefined,
+                })
+            );
 
             // JS exports
             expect(exports.classes.root, `root compose JS export`).to.eql(
@@ -841,16 +852,18 @@ describe(`features/css-class`, () => {
             shouldReportNoDiagnostics(meta);
 
             // symbols
-            expect(CSSClass.get(meta, `root`), `root symbol`).to.contain({
-                _kind: `class`,
-                name: 'root',
-                alias: undefined,
-            });
-            expect(CSSClass.get(meta, `class`), `class symbol`).to.contain({
-                _kind: `class`,
-                name: 'class',
-                alias: undefined,
-            });
+            expect(CSSClass.get(meta, `root`), `root symbol`).to.deep.contain(
+                CSSClass.createSymbol({
+                    name: 'root',
+                    alias: undefined,
+                })
+            );
+            expect(CSSClass.get(meta, `class`), `class symbol`).to.deep.contain(
+                CSSClass.createSymbol({
+                    name: 'class',
+                    alias: undefined,
+                })
+            );
 
             // JS exports
             expect(exports.classes.root, `root extended JS export`).to.eql(`entry__root`);
@@ -1152,10 +1165,11 @@ describe(`features/css-class`, () => {
             );
 
             // symbols
-            expect(CSSClass.get(meta, 'name'), 'imported symbol').to.contain({
-                _kind: 'class',
-                name: 'name',
-            });
+            expect(CSSClass.get(meta, 'name'), 'imported symbol').to.deep.contain(
+                CSSClass.createSymbol({
+                    name: 'name',
+                })
+            );
 
             // JS exports
             expect(exports.classes, 'JS export').to.eql({

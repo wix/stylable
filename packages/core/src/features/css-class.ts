@@ -259,6 +259,10 @@ export function getAll(meta: StylableMeta): Record<string, ClassSymbol> {
     return STSymbol.getAllByType(meta, `class`);
 }
 
+export function createSymbol(input: Partial<ClassSymbol> & { name: string }): ClassSymbol {
+    return { ...input, _kind: 'class' };
+}
+
 export function addClass(context: FeatureContext, name: string, rule?: postcss.Rule): ClassSymbol {
     let symbol = STSymbol.get(context.meta, name, `class`);
     if (!symbol) {
@@ -268,11 +272,7 @@ export function addClass(context: FeatureContext, name: string, rule?: postcss.R
         }
         symbol = STSymbol.addSymbol({
             context,
-            symbol: {
-                _kind: 'class',
-                name,
-                alias,
-            },
+            symbol: createSymbol({ name, alias }),
             node: rule,
             safeRedeclare: !!alias,
         }) as ClassSymbol;
