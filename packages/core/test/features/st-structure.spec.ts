@@ -176,13 +176,13 @@ describe('@st structure', () => {
         it('should report selector mapping diagnostics', () => {
             testStylableCore({
                 'general.st.css': `
-                    /* @analyze-error(empty) ${stStructureDiagnostics.INVALID_MAPPING()} */
+                    /* @analyze-error(empty) ${stStructureDiagnostics.MISSING_MAPPED_SELECTOR()} */
                     @st .empty => ;
         
                     /* @rule(not global) .general__empty */
                     .empty {}
 
-                    /* @analyze-error(multi) ${stStructureDiagnostics.INVALID_MAPPING()} */
+                    /* @analyze-error(multi) ${stStructureDiagnostics.MULTI_MAPPED_SELECTOR()} */
                     @st .multi => .a, .b;
         
                     /* @rule(multi) .general__multi */
@@ -319,6 +319,17 @@ describe('@st structure', () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        it('should report mapped selector issues', () => {
+            testStylableCore(`
+                @st .x {
+                    /* @analyze-error ${stStructureDiagnostics.MISSING_MAPPED_SELECTOR()}*/
+                    @st ::missing => ;
+
+                    /* @analyze-error ${stStructureDiagnostics.MULTI_MAPPED_SELECTOR()}*/
+                    @st ::missing => .a, .b;
+                }
+            `);
         });
     });
 });

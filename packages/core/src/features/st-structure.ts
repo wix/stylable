@@ -9,11 +9,7 @@ import { warnOnce } from '../helpers/deprecation';
 import type postcss from 'postcss';
 import { parseCSSValue, stringifyCSSValue, BaseAstNode } from '@tokey/css-value-parser';
 import { parseSelectorWithCache } from '../helpers/selector';
-import {
-    ImmutableSelector,
-    ImmutableSelectorList,
-    stringifySelectorAst,
-} from '@tokey/css-selector-parser';
+import { ImmutableSelector, stringifySelectorAst } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter } from '../diagnostics';
 import { getAlias } from '../stylable-utils';
 import {
@@ -30,36 +26,40 @@ export const diagnostics = {
         'error',
         () => `Currently class mapping is limited to single global selector: :global(<selector>)`
     ),
-    INVALID_MAPPING: createDiagnosticReporter(
-        '21001',
-        'error',
-        () =>
-            'class mapping expects a single selector within a global pseudo-class `=> :global(<selector>)`'
-    ),
     UNSUPPORTED_TOP_DEF: createDiagnosticReporter(
-        '21002',
+        '21001',
         'error',
         () => 'top level @st must start with a class'
     ),
     MISSING_EXTEND: createDiagnosticReporter(
-        '21003',
+        '21002',
         'error',
         () => `missing required class reference to extend a class (e.g. ":is(.class-name)"`
     ),
     OVERRIDE_IMPORTED_CLASS: createDiagnosticReporter(
-        '21004',
+        '21003',
         'error',
         () => `cannot override imported class definition`
     ),
     STATE_OUT_OF_CONTEXT: createDiagnosticReporter(
-        '21005',
+        '21004',
         'error',
         () => 'state definition must be directly nested in a `@st .class{}` definition'
     ),
     REDECLARE_STATE: createDiagnosticReporter(
-        '21006',
+        '21005',
         'error',
         (name: string) => `state "${name}" is already declared`
+    ),
+    MISSING_MAPPED_SELECTOR: createDiagnosticReporter(
+        '21006',
+        'error',
+        () => `missing mapped selector after "=>"`
+    ),
+    MULTI_MAPPED_SELECTOR: createDiagnosticReporter(
+        '21007',
+        'error',
+        () => `mapped selector accepts only a single selector`
     ),
 };
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
@@ -121,18 +121,9 @@ export const hooks = createFeature({
                 );
             }
             // class mapping
-            if (analyzed.mappedSelectors) {
-                const selectors = analyzed.mappedSelectors;
-                const firstSelectorNodes = selectors[0]?.nodes;
+            if (analyzed.mappedSelector) {
+                const firstSelectorNodes = analyzed.mappedSelector.nodes;
                 if (
-                    selectors.length !== 1 ||
-                    firstSelectorNodes.length === 0 ||
-                    firstSelectorNodes.length > 1
-                ) {
-                    context.diagnostics.report(diagnostics.INVALID_MAPPING(), {
-                        node: atRule,
-                    });
-                } else if (
                     firstSelectorNodes[0].type !== 'pseudo_class' ||
                     firstSelectorNodes[0].value !== 'global' ||
                     firstSelectorNodes[0].nodes?.length !== 1
@@ -201,7 +192,7 @@ interface ParsedStClass {
     type: 'topLevelClass';
     name: string;
     extendedClass?: string;
-    mappedSelectors?: ImmutableSelectorList;
+    mappedSelector?: ImmutableSelector;
 }
 
 interface ParsedStPart {
@@ -300,19 +291,16 @@ function parsePseudoElementDefinition(
         });
         return;
     }
-    // collect mapped selectors
-    const [amountToMapping, mappingOpenNode] = findFatArrow(params, index, {
-        stopOnFail: false,
-    });
-    let mappedSelector: ImmutableSelector | undefined;
-    if (amountToMapping) {
-        index = atRule.params.length;
-        const mappedSelectors = parseSelectorWithCache(atRule.params.slice(mappingOpenNode!.end));
-        // ToDo: validate single selector; change to "result.mappedSelector" (single)
-        if (mappedSelectors.length) {
-            mappedSelector = mappedSelectors[0];
-        }
+    // collect mapped selector
+    const [amountUntilSelector, mappedSelector] = parseMapping(context, atRule, params, index);
+    index += amountUntilSelector;
+    // check unexpected extra
+    const [amountToUnexpectedNode] = findAnything(params, index);
+    if (amountToUnexpectedNode) {
+        // ToDo: report unexpected extra syntax
+        return;
     }
+
     return {
         type: 'part',
         name: nameNode.value,
@@ -370,22 +358,49 @@ function parseClassDefinition(
             });
         }
     }
-    // collect mapped selectors
-    const [amountToMapping, mappingOpenNode] = findFatArrow(params, index, {
-        stopOnFail: false,
-    });
-    if (amountToMapping) {
-        index = atRule.params.length;
-        const mappedSelectors = parseSelectorWithCache(atRule.params.slice(mappingOpenNode!.end));
-        // ToDo: validate single selector; change to "result.mappedSelector" (single)
-        if (mappedSelectors) {
-            result.mappedSelectors = mappedSelectors;
-        }
-    }
-    // check leftover nodes
+    // collect mapped selector
+    const [amountUntilSelector, mappedSelector] = parseMapping(context, atRule, params, index);
+    result.mappedSelector = mappedSelector;
+    index += amountUntilSelector;
+    // check unexpected extra
     const [amountToUnexpectedNode] = findAnything(params, index);
-    if (result.name && !amountToUnexpectedNode) {
+    if (amountToUnexpectedNode) {
+        // ToDo: report unexpected extra syntax
+        return;
+    }
+    if (result.name) {
         return result;
     }
     return;
+}
+
+function parseMapping(
+    context: FeatureContext,
+    atRule: postcss.AtRule,
+    params: BaseAstNode[],
+    startIndex: number
+): [takenNodeAmount: number, mappedSelector: ImmutableSelector | undefined] {
+    let index = startIndex;
+    const [amountToMapping, mappingOpenNode] = findFatArrow(params, startIndex, {
+        stopOnFail: false,
+    });
+    if (amountToMapping) {
+        index += amountToMapping;
+        const selectorStr = atRule.params.slice(mappingOpenNode!.end);
+        const mappedSelectors = parseSelectorWithCache(selectorStr);
+        switch (mappedSelectors.length) {
+            case 1:
+                return [index + selectorStr.length, mappedSelectors[0]];
+            case 0:
+                context.diagnostics.report(diagnostics.MISSING_MAPPED_SELECTOR(), {
+                    node: atRule,
+                });
+                break;
+            default:
+                context.diagnostics.report(diagnostics.MULTI_MAPPED_SELECTOR(), {
+                    node: atRule,
+                });
+        }
+    }
+    return [0, undefined];
 }
