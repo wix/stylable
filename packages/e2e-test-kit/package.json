@@ -9,8 +9,8 @@
   "dependencies": {
     "@stylable/runtime": "^5.11.0",
     "node-eval": "^2.0.0",
-    "playwright-core": "^1.33.0",
-    "rimraf": "^5.0.0"
+    "playwright-core": "^1.34.2",
+    "rimraf": "^5.0.1"
   },
   "files": [
     "dist",
