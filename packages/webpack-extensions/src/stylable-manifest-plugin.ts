@@ -139,10 +139,16 @@ export class StylableManifestPlugin {
         stylable: Stylable,
         modules: Module[]
     ): MetadataList {
-        const stylableComps = modules.filter((module) => {
-            const resource = (module as any).resource;
-            return resource && this.options.filterComponents(resource);
-        });
+        const stylableComps = modules
+            .filter((module) => {
+                const resource = (module as any).resource;
+                return resource && this.options.filterComponents(resource);
+            })
+            .sort((m1, m2) => {
+                const r = (m1 as any).resource;
+                const r2 = (m2 as any).resource;
+                return r.localeCompare(r2);
+            });
 
         return stylableComps.map((module) => {
             const resource = (module as any).resource;
