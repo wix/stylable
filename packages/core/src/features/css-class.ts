@@ -20,7 +20,7 @@ import {
 } from '../helpers/selector';
 import { getAlias } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
-import { validateRuleStateDefinition, MappedStates } from '../helpers/custom-state';
+import { validateRuleStateDefinition } from '../helpers/custom-state';
 import type { Stylable } from '../stylable';
 import {
     ImmutableClass,
@@ -35,9 +35,8 @@ import { basename } from 'path';
 import { createDiagnosticReporter } from '../diagnostics';
 import postcssValueParser from 'postcss-value-parser';
 
-export interface StPartDirectives extends STPart.HasParts {
+export interface StPartDirectives extends STPart.HasParts, Partial<STCustomState.HasStates> {
     '-st-root'?: boolean;
-    '-st-states'?: MappedStates;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
     '-st-global'?: SelectorNode[];
 }

@@ -3,17 +3,15 @@ import { plugableRecord } from '../helpers/plugable-record';
 import type { StylableMeta } from '../stylable-meta';
 import type { ImmutableSelectorList, SelectorList } from '@tokey/css-selector-parser';
 import type { ClassSymbol } from './css-class';
-import type { MappedStates } from './st-custom-state';
+import type { HasStates } from './st-custom-state';
 
 export const diagnostics = {};
 
-export interface PartSymbol extends HasParts {
+export interface PartSymbol extends HasParts, HasStates {
     _kind: 'part';
     name: string;
     id: string;
     mapTo: ImmutableSelectorList | ClassSymbol;
-    // ToDo: handle part with state; + extract to HasStates
-    '-st-states'?: MappedStates;
 }
 export interface HasParts {
     '-st-parts': Record<string, PartSymbol>;
@@ -60,7 +58,8 @@ export function createSymbol(
     input: Partial<PartSymbol> & Pick<PartSymbol, 'name' | 'id' | 'mapTo'>
 ): PartSymbol {
     const parts = input['-st-parts'] || {};
-    return { ...input, _kind: 'part', '-st-parts': parts };
+    const states = input['-st-states'] || {};
+    return { ...input, _kind: 'part', '-st-parts': parts, '-st-states': states };
 }
 // ToDo: change to getLegacyPart / getLegacyPartNames or unify with structure getters
 export function getPart(meta: StylableMeta, name: string): PartSymbol | undefined {

@@ -16,6 +16,10 @@ import {
     MappedStates,
 } from '../helpers/custom-state';
 
+export interface HasStates {
+    '-st-states': MappedStates;
+}
+
 export const diagnostics = {
     ...stateDiagnostics,
 };

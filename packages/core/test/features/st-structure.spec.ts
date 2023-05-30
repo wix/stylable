@@ -442,5 +442,28 @@ describe('@st structure', () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it('should define pseudo-class for pseudo-element', () => {
+            const { sheets } = testStylableCore(`
+                @st .base {
+                    @st :baseState;
+                }
+
+                @st .x {
+                    @st ::a => .base {
+                        @st :aState;
+                    }
+                }
+
+                /* @rule(a::aState) .entry__x .entry__base.entry--aState */
+                .x::a:aState {}
+
+                /* @rule(a::baseState) .entry__x .entry__base.entry--baseState */
+                .x::a:baseState {}
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
     });
 });

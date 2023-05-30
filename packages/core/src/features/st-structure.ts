@@ -101,6 +101,7 @@ export const hooks = createFeature({
         warnOnce(experimentalMsg);
         STPart.disableAutoClassToPart(context.meta);
 
+        const { analyzedDefToPartSymbol } = plugableRecord.getUnsafe(context.meta.data, dataKey);
         const analyzed = analyzeStAtRule(atRule, context);
         if (!analyzed) {
             if (atRule.parent?.type === 'root') {
@@ -176,13 +177,9 @@ export const hooks = createFeature({
                 }
             }
         } else if (analyzed.type === 'part') {
-            const { analyzedDefToPartSymbol } = plugableRecord.getUnsafe(
-                context.meta.data,
-                dataKey
-            );
             const parentSymbol =
                 analyzed.parentAnalyze.type === 'topLevelClass'
-                    ? CSSClass.get(context.meta, analyzed.class)
+                    ? CSSClass.get(context.meta, analyzed.parentAnalyze.name)
                     : analyzedDefToPartSymbol.get(analyzed.parentAnalyze);
 
             if (!parentSymbol) {
@@ -221,12 +218,15 @@ export const hooks = createFeature({
             mappedParts[partName] = partSymbol;
             analyzedDefToPartSymbol.set(analyzed, partSymbol);
         } else if (analyzed.type === 'state') {
-            const classSymbol = CSSClass.get(context.meta, analyzed.class);
-            if (!classSymbol) {
-                // assuming analyzing @st definitions dfs - class must be defined
+            const parentSymbol =
+                analyzed.parentAnalyze.type === 'topLevelClass'
+                    ? CSSClass.get(context.meta, analyzed.parentAnalyze.name)
+                    : analyzedDefToPartSymbol.get(analyzed.parentAnalyze);
+            if (!parentSymbol) {
+                // assuming analyzing @st definitions dfs - class/part must be defined
                 return;
             }
-            const mappedStates = (classSymbol['-st-states'] ||= {});
+            const mappedStates = (parentSymbol['-st-states'] ||= {});
             const stateName = analyzed.name;
             if (mappedStates[stateName]) {
                 // first state definition wins
@@ -256,7 +256,6 @@ interface ParsedStClass {
 interface ParsedStPart {
     type: 'part';
     name: string;
-    class: string;
     parentAnalyze: ParsedStClass | ParsedStPart;
     mappedSelector: ImmutableSelector;
 }
@@ -264,8 +263,8 @@ interface ParsedStPart {
 interface ParsedStState {
     type: 'state';
     name: string;
+    parentAnalyze: ParsedStClass | ParsedStPart;
     stateDef: MappedStates[string];
-    class: string;
 }
 
 type AnalyzedStDef = undefined | ParsedStClass | ParsedStPart | ParsedStState;
@@ -305,7 +304,7 @@ function parseStateDefinition(
     const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     const parentRule = atRule.parent;
     const parentAnalyze = parentRule && analyzedDefs.get(parentRule as any);
-    if (parentAnalyze?.type !== 'topLevelClass') {
+    if (parentAnalyze?.type !== 'topLevelClass' && parentAnalyze?.type !== 'part') {
         context.diagnostics.report(diagnostics.STATE_OUT_OF_CONTEXT(), {
             node: atRule,
         });
@@ -324,7 +323,7 @@ function parseStateDefinition(
         type: 'state',
         name: nameNode.value,
         stateDef: parsedDef,
-        class: parentAnalyze.name,
+        parentAnalyze,
     };
 }
 
@@ -369,7 +368,6 @@ function parsePseudoElementDefinition(
     return {
         type: 'part',
         name: nameNode.value,
-        class: parentAnalyze.name,
         parentAnalyze,
         mappedSelector,
     };
