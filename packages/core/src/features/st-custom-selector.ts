@@ -49,7 +49,7 @@ export const hooks = createFeature({
             const analyzed = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const name = customSelector.slice(3);
             analyzed[name] = { selector, ast, isScoped, def: atRule };
-            STPart.registerLegacyPart(context.meta, name, { mapTo: ast });
+            STPart.registerLegacyPart(context.meta, { name, mapTo: ast });
         } else {
             // TODO: add warn there are two types one is not valid name and the other is empty name.
         }

@@ -6,7 +6,7 @@ import * as STCustomState from './st-custom-state';
 import type { MappedStates } from './st-custom-state';
 import * as CSSClass from './css-class';
 import { warnOnce } from '../helpers/deprecation';
-import type postcss from 'postcss';
+import postcss from 'postcss';
 import { parseCSSValue, stringifyCSSValue, BaseAstNode } from '@tokey/css-value-parser';
 import { parseSelectorWithCache } from '../helpers/selector';
 import { ImmutableSelector, stringifySelectorAst } from '@tokey/css-selector-parser';
@@ -66,20 +66,34 @@ export const diagnostics = {
         'error',
         () => 'pseudo-element definition must be directly nested in a `@st .class{}` definition'
     ),
+    MISSING_MAPPING: createDiagnosticReporter(
+        '21009',
+        'error',
+        () => 'expected selector mapping (e.g. "=> <selector>")'
+    ),
+    REDECLARE: createDiagnosticReporter(
+        '21010',
+        'error',
+        (type: string, src: string) => `redeclare ${type} definition: "${src}"`
+    ),
 };
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
 
 const dataKey = plugableRecord.key<{
     analyzedDefs: WeakMap<postcss.AtRule, AnalyzedStDef>;
+    analyzedDefToPartSymbol: Map<AnalyzedStDef, STPart.PartSymbol>;
 }>('st-structure');
 
 // HOOKS
 
 export const hooks = createFeature({
     metaInit({ meta }) {
-        plugableRecord.set(meta.data, dataKey, { analyzedDefs: new WeakMap() });
+        plugableRecord.set(meta.data, dataKey, {
+            analyzedDefs: new WeakMap(),
+            analyzedDefToPartSymbol: new Map(),
+        });
     },
-    analyzeAtRule({ context, atRule }) {
+    analyzeAtRule({ context, atRule, analyzeRule }) {
         if (!isStAtRule(atRule)) {
             return;
         }
@@ -139,34 +153,73 @@ export const hooks = createFeature({
                         word: stringifySelectorAst(firstSelectorNodes[0]),
                     });
                 } else {
+                    const mappedSelectorAst = firstSelectorNodes[0].nodes[0];
+                    // analyze mapped selector
+                    analyzeRule(
+                        postcss.rule({
+                            selector: stringifySelectorAst(mappedSelectorAst),
+                            source: atRule.source,
+                        }),
+                        {
+                            isScoped: false,
+                            originalNode: atRule,
+                        }
+                    );
+                    // register global mapping to class
                     CSSClass.extendTypedRule(
                         context,
                         atRule,
                         analyzed.name,
                         '-st-global',
-                        firstSelectorNodes[0].nodes[0].nodes
+                        mappedSelectorAst.nodes
                     );
                 }
             }
         } else if (analyzed.type === 'part') {
-            const classSymbol = CSSClass.get(context.meta, analyzed.class);
-            if (!classSymbol) {
-                // assuming analyzing @st definitions dfs - class must be defined
+            const { analyzedDefToPartSymbol } = plugableRecord.getUnsafe(
+                context.meta.data,
+                dataKey
+            );
+            const parentSymbol =
+                analyzed.parentAnalyze.type === 'topLevelClass'
+                    ? CSSClass.get(context.meta, analyzed.class)
+                    : analyzedDefToPartSymbol.get(analyzed.parentAnalyze);
+
+            if (!parentSymbol) {
+                // assuming analyzing @st definitions dfs - class/part must be defined
                 return;
             }
+            const parentId =
+                parentSymbol._kind === 'class' ? '.' + parentSymbol.name : parentSymbol.id;
             const partName = analyzed.name;
-            const mappedParts = STPart.getStructureParts(classSymbol);
+            const mappedParts = STPart.getStructureParts(parentSymbol);
             if (mappedParts[partName]) {
-                // ToDo: error on duplicate definition
+                const srcWord = '::' + partName;
+                context.diagnostics.report(diagnostics.REDECLARE('pseudo-element', srcWord), {
+                    node: atRule,
+                    word: srcWord,
+                });
                 return;
             }
-            if (!analyzed.mappedSelector) {
-                // ToDo: error on missing selector mapping
-                return;
-            }
-            mappedParts[partName] = {
+            // analyze mapped selector
+            analyzeRule(
+                postcss.rule({
+                    selector: stringifySelectorAst(analyzed.mappedSelector),
+                    source: atRule.source,
+                }),
+                {
+                    isScoped: false,
+                    originalNode: atRule,
+                }
+            );
+            // register part mapping to parent definition
+            const partSymbol = STPart.createSymbol({
+                name: partName,
+                id: parentId + '::' + partName,
                 mapTo: [analyzed.mappedSelector],
-            };
+            });
+            mappedParts[partName] = partSymbol;
+            analyzedDefToPartSymbol.set(analyzed, partSymbol);
         } else if (analyzed.type === 'state') {
             const classSymbol = CSSClass.get(context.meta, analyzed.class);
             if (!classSymbol) {
@@ -204,7 +257,8 @@ interface ParsedStPart {
     type: 'part';
     name: string;
     class: string;
-    mappedSelector?: ImmutableSelector;
+    parentAnalyze: ParsedStClass | ParsedStPart;
+    mappedSelector: ImmutableSelector;
 }
 
 interface ParsedStState {
@@ -286,11 +340,11 @@ function parsePseudoElementDefinition(
         return;
     }
     index += amountToName;
-    // collect class name to extend
+    // get symbol to extend
     const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     const parentRule = atRule.parent;
     const parentAnalyze = parentRule && analyzedDefs.get(parentRule as any);
-    if (parentAnalyze?.type !== 'topLevelClass') {
+    if (parentAnalyze?.type !== 'topLevelClass' && parentAnalyze?.type !== 'part') {
         context.diagnostics.report(diagnostics.ELEMENT_OUT_OF_CONTEXT(), {
             node: atRule,
         });
@@ -298,6 +352,12 @@ function parsePseudoElementDefinition(
     }
     // collect mapped selector
     const [amountUntilSelector, mappedSelector] = parseMapping(context, atRule, params, index);
+    if (!mappedSelector) {
+        context.diagnostics.report(diagnostics.MISSING_MAPPING(), {
+            node: atRule,
+        });
+        return;
+    }
     index += amountUntilSelector;
     // check unexpected extra
     const [amountToUnexpectedNode] = findAnything(params, index);
@@ -310,6 +370,7 @@ function parsePseudoElementDefinition(
         type: 'part',
         name: nameNode.value,
         class: parentAnalyze.name,
+        parentAnalyze,
         mappedSelector,
     };
 }

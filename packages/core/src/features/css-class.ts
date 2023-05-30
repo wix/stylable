@@ -277,7 +277,7 @@ export function addClass(context: FeatureContext, name: string, rule?: postcss.R
             node: rule,
             safeRedeclare: !!alias,
         }) as ClassSymbol;
-        STPart.registerLegacyPart(context.meta, name, { mapTo: symbol });
+        STPart.registerLegacyPart(context.meta, { name, mapTo: symbol });
     }
     // mark native css as global
     if (context.meta.type === 'css' && !symbol['-st-global']) {

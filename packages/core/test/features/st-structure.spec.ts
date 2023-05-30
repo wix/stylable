@@ -99,6 +99,7 @@ describe('@st structure', () => {
                 'normal-class',
             ]);
         });
+        // ToDo: report redefine
         it('should report non-class definition', () => {
             testStylableCore(`
                 /* @analyze-error(element) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
@@ -289,6 +290,34 @@ describe('@st structure', () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it('should analyze selector mapping', () => {
+            const { sheets } = testStylableCore(`
+                @st .x {
+                    @st ::part => .innerClass;
+                }
+            `);
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+            expect(exports.classes.innerClass, 'class definition').to.eql('entry__innerClass');
+        });
+        it('should define nested pseudo-elements', () => {
+            const { sheets } = testStylableCore(`
+                @st .x {
+                    @st ::first => [first] {
+                        @st ::second => [second];
+                    };
+                }
+
+                /* @rule .entry__x [first] [second] */
+                .x::first::second {}
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
         it('should resolve inherited parts', () => {
             const { sheets } = testStylableCore({
                 'base.st.css': `
@@ -320,7 +349,7 @@ describe('@st structure', () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        it('should be nested in `@st .class{}`', () => {
+        it('should be invalid out of `@st .class{}` and `@st ::part`', () => {
             testStylableCore(`
                 /* @analyze-error ${stStructureDiagnostics.ELEMENT_OUT_OF_CONTEXT()}*/
                 @st ::top-level => .top;
@@ -335,12 +364,83 @@ describe('@st structure', () => {
             testStylableCore(`
                 @st .x {
                     /* @analyze-error ${stStructureDiagnostics.MISSING_MAPPED_SELECTOR()}*/
-                    @st ::missing => ;
+                    @st ::missing-selector => ;
 
                     /* @analyze-error ${stStructureDiagnostics.MULTI_MAPPED_SELECTOR()}*/
-                    @st ::missing => .a, .b;
+                    @st ::multi-selector => .a, .b;
+
+                    /* @analyze-error ${stStructureDiagnostics.MISSING_MAPPING()}*/
+                    @st ::missing-mapping ;
                 }
             `);
+        });
+        it('should report definition issues', () => {
+            // ToDo: report on the original definition as well
+            const { sheets } = testStylableCore({
+                'invalid.st.css': `
+                    @st .x {
+                        @st ::duplicate => .a;
+
+                        /* @analyze-error ${stStructureDiagnostics.REDECLARE(
+                            'pseudo-element',
+                            '::duplicate'
+                        )}*/
+                        @st ::duplicate => .b;
+                    }
+                `,
+                'valid.st.css': `
+                    @st .x {
+                        @st ::noConflict => .xChild {
+                            @st ::noConflict => .deepChild;
+                        };
+                    }
+                    @st .y {
+                        @st ::noConflict => .yChild;
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/valid.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should infer nested pseudo-element', () => {
+            const { sheets } = testStylableCore({
+                'def.st.css': `
+                    @st .x {
+                        @st ::a => .base {
+                            @st ::aChild => .deep;
+                        }
+                        @st ::b => .base;
+                    }
+                    @st .base {
+                        @st ::baseChild => .baseChild;
+                    }
+                `,
+                'valid.st.css': `
+                    @st-import [x] from './def.st.css';
+                    
+                    /* @rule(a::aChild) .valid__t .def__x .def__base .def__deep */
+                    .t .x::a::aChild {}
+
+                    /* @rule(a::baseChild) .valid__t .def__x .def__base .def__baseChild */
+                    .t .x::a::baseChild {}
+
+                    /* @rule(b::baseChild) .valid__t .def__x .def__base .def__baseChild */
+                    .t .x::b::baseChild {}
+                `,
+                'invalid.st.css': `
+                    @st-import [x] from './def.st.css';
+
+                    .x::a::aChild {/*cause resolve of base*/}
+                    /* @rule(base infer unmodified) .def__x .def__base::aChild */
+                    .x::b::aChild {}
+                `,
+            });
+
+            const { meta } = sheets['/valid.st.css'];
+
+            shouldReportNoDiagnostics(meta);
         });
     });
 });

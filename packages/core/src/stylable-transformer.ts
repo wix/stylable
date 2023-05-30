@@ -662,7 +662,7 @@ function removeFirstRootInFirstCompound(selector: Selector, meta: StylableMeta) 
     return { selector: splitCompoundSelectors(compoundedSelector), hadRoot };
 }
 
-type SelectorSymbol = ClassSymbol | ElementSymbol;
+type SelectorSymbol = ClassSymbol | ElementSymbol | STPart.PartSymbol;
 type InferredResolve = CSSResolve<SelectorSymbol>;
 type InferredPseudoElement = {
     inferred: InferredSelector;
@@ -709,6 +709,18 @@ export class InferredSelector {
         } else {
             this.resolveSet.add(resolve);
         }
+    }
+    /**
+     * Takes a CSS part resolve and use it extend the current set of inferred resolved.
+     * Used to expand the resolved mapped selector with the part definition
+     * e.g. part can add nested states/parts that override the inferred mapped selector.
+     */
+    private addPartOverride(partResolve: CSSResolve<STPart.PartSymbol>) {
+        const newSet = new Set<InferredResolve[]>();
+        for (const resolve of this.resolveSet) {
+            newSet.add([partResolve, ...resolve]);
+        }
+        this.resolveSet = newSet;
     }
     public getPseudoClasses({ name: searchedName }: { name?: string } = {}) {
         const collectedStates: Record<string, InferredPseudoClass> = {};
@@ -784,7 +796,7 @@ export class InferredSelector {
     }) {
         const collectedElements: Record<string, InferredPseudoElement> = {};
         const resolvedCount: Record<string, number> = {};
-        const checked: Record<string, Set<string>> = {};
+        const checked: Record<string, Map<string, boolean>> = {};
         const expectedIntersectionCount = this.resolveSet.size; // ToDo: dec for any types
         const addInferredElement = (
             name: string,
@@ -811,27 +823,36 @@ export class InferredSelector {
              * search for elements in each resolved selector.
              * start at 1 for extended symbols to prefer inherited elements over local
              */
-            const startIndex = resolvedContext.length === 1 ? 0 : 1;
+            const startIndex =
+                resolvedContext.length === 1 || resolvedContext[0]?.symbol._kind === 'part' ? 0 : 1;
             resolved: for (let i = startIndex; i < resolvedContext.length; i++) {
                 const { symbol, meta } = resolvedContext[i];
                 const structureMode = STPart.isStructureMode(meta);
-                if (symbol.alias || (!structureMode && !symbol['-st-root'])) {
+                if (
+                    symbol._kind !== 'part' &&
+                    (symbol.alias || (!structureMode && !symbol['-st-root']))
+                ) {
                     // non-root & alias classes don't have parts: bailout
                     continue;
                 }
                 if (name) {
+                    const cacheContext = symbol._kind === 'part' ? symbol.id : symbol.name;
+                    const uniqueId = meta.source + '::' + cacheContext;
                     resolvedCount[name] ??= 0;
-                    checked[name] ||= new Set();
-                    const uniqueId = meta.source + '::' + name;
+                    checked[name] ||= new Map();
                     if (checked[name].has(uniqueId)) {
-                        resolvedCount[name]++;
+                        if (checked[name].get(uniqueId)) {
+                            resolvedCount[name]++;
+                        }
                         continue;
                     }
-                    checked[name].add(uniqueId);
-                    //
+                    // get part symbol
                     const partDef = structureMode
                         ? STPart.getStructurePart(symbol, name)
                         : STPart.getPart(meta, name);
+                    // save to cache
+                    checked[name].set(uniqueId, !!partDef);
+
                     if (!partDef) {
                         continue;
                     }
@@ -867,7 +888,10 @@ export class InferredSelector {
                                           symbol: CSSType.createSymbol({ name: '*' }),
                                       },
                                   ]);
-
+                        // add part resolve to inferred resolve set
+                        if (structureMode) {
+                            inferred.addPartOverride({ _kind: 'css', meta, symbol: partDef });
+                        }
                         addInferredElement(name, inferred, customAstSelectors);
                         break resolved;
                     } else {
