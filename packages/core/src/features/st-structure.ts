@@ -93,6 +93,11 @@ export const hooks = createFeature({
         if (stAtRule) {
             warnOnce(experimentalMsg);
             STPart.disableAutoClassToPart(context.meta);
+        } else if (meta.type === 'stylable') {
+            // set implicit root for legacy mode (root with flat structure)
+            meta.root = 'root';
+            const rootSymbol = CSSClass.addClass(context, 'root');
+            rootSymbol[`-st-root`] = true;
         }
     },
     metaInit({ meta }) {

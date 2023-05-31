@@ -731,6 +731,9 @@ export class InferredSelector {
         for (const resolve of this.resolveSet) {
             newSet.add([partResolve, ...resolve]);
         }
+        if (!this.resolveSet.size) {
+            newSet.add([partResolve]);
+        }
         this.resolveSet = newSet;
     }
     public getPseudoClasses({ name: searchedName }: { name?: string } = {}) {

@@ -69,12 +69,6 @@ export class StylableMeta {
         for (const { hooks } of features) {
             hooks.metaInit(context);
         }
-        // set default root
-        if (this.type === 'stylable') {
-            this.root = 'root';
-            const rootSymbol = CSSClass.addClass(context, 'root');
-            rootSymbol[`-st-root`] = true;
-        }
     }
     getSymbol(name: string) {
         return STSymbol.get(this, name);

@@ -68,6 +68,16 @@ describe('@st structure', () => {
 
         restoreSpy();
     });
+    it('should have no implicit root', () => {
+        const { sheets } = testStylableCore(`
+            @st .comp;
+        `);
+
+        const { meta, exports } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+        expect(exports.classes.root).to.eql(undefined);
+    });
     describe('@st .name (top level class)', () => {
         it('should prevent automatic .class=>::part definition', () => {
             testStylableCore(`
@@ -81,7 +91,7 @@ describe('@st structure', () => {
                 .root::part {}
             `);
         });
-        it('should register css class + no implicit root', () => {
+        it('should register css class', () => {
             const { sheets } = testStylableCore(`
                 @st .abc;
                 @st .xyz {}
@@ -92,13 +102,7 @@ describe('@st structure', () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
-            expect(meta.getAllClasses()).to.have.keys([
-                'root',
-                'abc',
-                'xyz',
-                'comment',
-                'normal-class',
-            ]);
+            expect(meta.getAllClasses()).to.have.keys(['abc', 'xyz', 'comment', 'normal-class']);
         });
         // ToDo: report redefine
         it('should report non-class definition', () => {
