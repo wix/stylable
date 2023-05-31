@@ -644,20 +644,31 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
     return transformedScopes;
 }
 
-function removeFirstRootInFirstCompound(selector: Selector, meta: StylableMeta) {
+function removeInitialCompoundMarker(
+    selector: Selector,
+    meta: StylableMeta,
+    structureMode: boolean
+) {
     let hadRoot = false;
     const compoundedSelector = groupCompoundSelectors(selector);
     const first = compoundedSelector.nodes.find(
         ({ type }) => type === `compound_selector`
     ) as CompoundSelector;
     if (first) {
-        first.nodes = first.nodes.filter((node) => {
-            if (node.type === 'class' && node.value === meta.root) {
-                hadRoot = true;
-                return false;
+        const matchNode = structureMode
+            ? (node: SelectorNode) => node.type === 'nesting'
+            : (node: SelectorNode) => node.type === 'class' && node.value === meta.root;
+        for (let i = 0; i < first.nodes.length; i++) {
+            const node = first.nodes[i];
+            if (node.type === 'comment') {
+                continue;
             }
-            return true;
-        });
+            if (matchNode(node)) {
+                hadRoot = true;
+                first.nodes.splice(i, 1);
+            }
+            break;
+        }
     }
     return { selector: splitCompoundSelectors(compoundedSelector), hadRoot };
 }
@@ -861,7 +872,7 @@ export class InferredSelector {
                         const selectorList = cloneSelector(partDef.mapTo);
                         const selectorStr = stringifySelector(partDef.mapTo);
                         selectorList.forEach((selector) => {
-                            const r = removeFirstRootInFirstCompound(selector, meta);
+                            const r = removeInitialCompoundMarker(selector, meta, structureMode);
                             selector.nodes = r.selector.nodes;
                             selector.before = '';
                             if (!r.hadRoot && !isFirstInSelector) {

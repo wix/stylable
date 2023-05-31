@@ -1,4 +1,5 @@
 import {
+    assertRule,
     diagnosticBankReportToStrings,
     shouldReportNoDiagnostics,
     testStylableCore,
@@ -289,6 +290,37 @@ describe('@st structure', () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        it('should define compound mapping', () => {
+            const { sheets } = testStylableCore(`
+                @st .x {
+                    @st ::compound => &[compound];
+
+                    @st ::onlyFirstNest => &[onlyFirstNest]&;
+
+                    @st ::withComments => /*c1*/&/*c2*/[withComments]/*c3*/;
+                }
+
+                /* @rule .entry__x[compound] */
+                .x::compound {}
+
+                /* @rule .entry__x[onlyFirstNest]& */
+                .x::onlyFirstNest {}
+                
+                .x::withComments {}
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            /* Notice:
+             * - comment 1 is removed by postcss for unknown reasons
+             * - comment 3 is ignored because postcss takes it as part of the "between" (prelude and open bracket)
+             */
+            expect(assertRule(meta.targetAst!.nodes[5]).selector, 'with comments').to.eql(
+                '.entry__x/*c2*/[withComments]'
+            );
         });
         it('should analyze selector mapping', () => {
             const { sheets } = testStylableCore(`
