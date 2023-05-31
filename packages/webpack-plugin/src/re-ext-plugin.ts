@@ -43,7 +43,7 @@ export class ReExt {
                         },
                         `replacing extension for ${relativeFilePath} to ${newExt}`,
                         resolveContext,
-                        (err: Error, resolved: unknown) => {
+                        (err, resolved) => {
                             err ? res(undefined) : res(resolved);
                         }
                     );

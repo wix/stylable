@@ -10,7 +10,7 @@
     "@stylable/core": "^5.11.0",
     "@tokey/css-value-parser": "^0.1.2",
     "js-beautify": "^1.14.7",
-    "postcss": "^8.4.23"
+    "postcss": "^8.4.24"
   },
   "files": [
     "dist",
