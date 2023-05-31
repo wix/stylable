@@ -5,6 +5,7 @@ import {
     testStylableCore,
 } from '@stylable/core-test-kit';
 import {
+    CSSClass,
     STStructure,
     transformerDiagnostics,
     STCustomState,
@@ -14,6 +15,7 @@ import { expect } from 'chai';
 const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 const stStructureDiagnostics = diagnosticBankReportToStrings(STStructure.diagnostics);
 const stStateDiagnostics = diagnosticBankReportToStrings(STCustomState.diagnostics);
+const classDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 
 type FuncParameters<F> = F extends (...args: any[]) => any ? Parameters<F> : never;
 
@@ -500,6 +502,26 @@ describe('@st structure', () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+    });
+    describe('@st-import', () => {
+        it('should handle default import with no implicit root', () => {
+            // ToDo: choose how to handle from a structure move stylesheet
+            testStylableCore({
+                'origin.st.css': `
+                    @st .x {}
+                `,
+                'entry.st.css': `
+                    @st-import Default from "./origin.st.css";
+
+                    .y {
+                        /* @transform-error ${classDiagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
+                            'default'
+                        )} */
+                        -st-extends: Default;
+                    }
+                `,
+            });
         });
     });
 });
