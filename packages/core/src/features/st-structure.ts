@@ -87,6 +87,14 @@ const dataKey = plugableRecord.key<{
 // HOOKS
 
 export const hooks = createFeature({
+    analyzeInit(context) {
+        const { meta } = context;
+        const stAtRule = meta.sourceAst.nodes.find((node) => isStAtRule(node));
+        if (stAtRule) {
+            warnOnce(experimentalMsg);
+            STPart.disableAutoClassToPart(context.meta);
+        }
+    },
     metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, {
             analyzedDefs: new WeakMap(),
@@ -97,9 +105,6 @@ export const hooks = createFeature({
         if (!isStAtRule(atRule)) {
             return;
         }
-
-        warnOnce(experimentalMsg);
-        STPart.disableAutoClassToPart(context.meta);
 
         const { analyzedDefToPartSymbol } = plugableRecord.getUnsafe(context.meta.data, dataKey);
         const analyzed = analyzeStAtRule(atRule, context);

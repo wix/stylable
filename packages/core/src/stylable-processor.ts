@@ -36,6 +36,7 @@ export class StylableProcessor implements FeatureContext {
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics);
 
+        STStructure.hooks.analyzeInit(this);
         STImport.hooks.analyzeInit(this);
         CSSCustomProperty.hooks.analyzeInit(this);
 
