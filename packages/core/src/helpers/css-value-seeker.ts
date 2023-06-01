@@ -2,8 +2,8 @@ import type { BaseAstNode, Call, CustomIdent, Literal } from '@tokey/css-value-p
 
 export interface FindAstOptions {
     stopOnFail: boolean;
-    ignoreWhitespace: true;
-    ignoreComments: true;
+    ignoreWhitespace: boolean;
+    ignoreComments: boolean;
     stopOnMatch?: (node: BaseAstNode, index: number, nodes: BaseAstNode[]) => boolean;
     name?: string;
 }
@@ -111,6 +111,7 @@ export function findPseudoElementNode(
                 ...options,
                 name: ':',
                 stopOnFail: true,
+                ignoreWhitespace: false,
             });
             if (amountToSecondColon) {
                 index += amountToSecondColon;

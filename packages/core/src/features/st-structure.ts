@@ -78,6 +78,11 @@ export const diagnostics = {
         'error',
         (type: string, src: string) => `redeclare ${type} definition: "${src}"`
     ),
+    INVALID_ST_DEF: createDiagnosticReporter(
+        '21011',
+        'error',
+        (params: string) => `invalid @st "${params}" definition`
+    ),
 };
 
 export interface PartSymbol extends HasParts, STCustomState.HasStates {
@@ -136,7 +141,9 @@ export const hooks = createFeature({
                     node: atRule,
                 });
             } else {
-                // ToDo: error on invalid nested definition
+                context.diagnostics.report(diagnostics.INVALID_ST_DEF(atRule.params), {
+                    node: atRule,
+                });
             }
         } else if (analyzed.type === 'topLevelClass') {
             // ToDo: error when nested (only top level for now)

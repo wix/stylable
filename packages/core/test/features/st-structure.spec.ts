@@ -287,10 +287,23 @@ describe('@st structure', () => {
             const { sheets } = testStylableCore(`
                 @st .x {
                     @st ::part => [part="x"];
+
+                    /*
+                    ToDo: fix value parser ident bug 
+                    @st ::noSpaces=>[noSpaces];
+                    */
+
+                    @st /*c1*/ :/*what?*/:/*c2*/comments/*c3*/=> [weirdComment]/*c5*/;
                 }
 
                 /* @rule .entry__x [part="x"] */
                 .x::part {}
+
+                /* @x-rule .entry__x [noSpaces] */
+                /* .x::noSpaces {} */
+
+                /* @rule .entry__x [weirdComment] */
+                .x::comments {}
             `);
 
             const { meta } = sheets['/entry.st.css'];
@@ -424,7 +437,15 @@ describe('@st structure', () => {
                             '::duplicate'
                         )}*/
                         @st ::duplicate => .b;
+                        
+                        /* @analyze-error ${stStructureDiagnostics.INVALID_ST_DEF(
+                            ': :invalidSpace => .c'
+                        )}*/
+                        @st : :invalidSpace => .c;
                     }
+
+                    /* @rule .invalid__x::invalidSpace */
+                    .x::invalidSpace {}
                 `,
                 'valid.st.css': `
                     @st .x {
