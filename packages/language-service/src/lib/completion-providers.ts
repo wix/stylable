@@ -958,11 +958,6 @@ export const PseudoElementCompletionPlugin: LangServicePlugin = {
             const colons = lineChunkAtCursor.match(/:*$/)![0].length;
 
             scope?.resolved.forEach((res) => {
-                // ToDo: implement deep structure completion
-                if (!(res.symbol as ClassSymbol)[`-st-root`]) {
-                    return;
-                }
-
                 comps = comps.concat(
                     STStructure.getPartNames(res.symbol)
                         .filter((e) => e.startsWith(filter) && e !== 'root')
