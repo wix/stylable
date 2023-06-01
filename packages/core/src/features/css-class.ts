@@ -4,7 +4,7 @@ import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import type { ElementSymbol } from './css-type';
-import * as STPart from './st-part';
+import type * as STStructure from './st-structure';
 import * as STCustomState from './st-custom-state';
 import { getOriginDefinition } from '../helpers/resolve';
 import { namespace } from '../helpers/namespace';
@@ -35,7 +35,7 @@ import { basename } from 'path';
 import { createDiagnosticReporter } from '../diagnostics';
 import postcssValueParser from 'postcss-value-parser';
 
-export interface StPartDirectives extends STPart.HasParts, Partial<STCustomState.HasStates> {
+export interface StPartDirectives extends STStructure.HasParts, Partial<STCustomState.HasStates> {
     '-st-root'?: boolean;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
     '-st-global'?: SelectorNode[];
@@ -276,7 +276,6 @@ export function addClass(context: FeatureContext, name: string, rule?: postcss.R
             node: rule,
             safeRedeclare: !!alias,
         }) as ClassSymbol;
-        STPart.registerLegacyPart(context.meta, { name, mapTo: symbol });
     }
     // mark native css as global
     if (context.meta.type === 'css' && !symbol['-st-global']) {

@@ -1,7 +1,8 @@
 import { plugableRecord } from '../helpers/plugable-record';
 import { FeatureContext, createFeature } from './feature';
+import type { StylableMeta } from '../stylable-meta';
 import * as STSymbol from './st-symbol';
-import * as STPart from './st-part';
+import * as STCustomSelector from './st-custom-selector';
 import * as STCustomState from './st-custom-state';
 import type { MappedStates } from './st-custom-state';
 import * as CSSClass from './css-class';
@@ -19,6 +20,7 @@ import {
     findNextPseudoClassNode,
     findPseudoElementNode,
 } from '../helpers/css-value-seeker';
+import type { ImmutableSelectorList } from '@tokey/css-selector-parser';
 
 export const diagnostics = {
     GLOBAL_MAPPING_LIMITATION: createDiagnosticReporter(
@@ -77,11 +79,23 @@ export const diagnostics = {
         (type: string, src: string) => `redeclare ${type} definition: "${src}"`
     ),
 };
+
+export interface PartSymbol extends HasParts, STCustomState.HasStates {
+    _kind: 'part';
+    name: string;
+    id: string;
+    mapTo: ImmutableSelectorList | CSSClass.ClassSymbol;
+}
+export interface HasParts {
+    '-st-parts': Record<string, PartSymbol>;
+}
+
 export const experimentalMsg = '[experimental feature] stylable structure (@st): API might change!';
 
 const dataKey = plugableRecord.key<{
+    isStructureMode: boolean;
     analyzedDefs: WeakMap<postcss.AtRule, AnalyzedStDef>;
-    analyzedDefToPartSymbol: Map<AnalyzedStDef, STPart.PartSymbol>;
+    analyzedDefToPartSymbol: Map<AnalyzedStDef, PartSymbol>;
 }>('st-structure');
 
 // HOOKS
@@ -92,7 +106,8 @@ export const hooks = createFeature({
         const stAtRule = meta.sourceAst.nodes.find((node) => isStAtRule(node));
         if (stAtRule) {
             warnOnce(experimentalMsg);
-            STPart.disableAutoClassToPart(context.meta);
+            const metaAnalysis = plugableRecord.getUnsafe(context.meta.data, dataKey);
+            metaAnalysis.isStructureMode = true;
         } else if (meta.type === 'stylable') {
             // set implicit root for legacy mode (root with flat structure)
             meta.root = 'root';
@@ -102,6 +117,8 @@ export const hooks = createFeature({
     },
     metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, {
+            // default to legacy flat mode
+            isStructureMode: false,
             analyzedDefs: new WeakMap(),
             analyzedDefToPartSymbol: new Map(),
         });
@@ -196,11 +213,9 @@ export const hooks = createFeature({
                 // assuming analyzing @st definitions dfs - class/part must be defined
                 return;
             }
-            const parentId =
-                parentSymbol._kind === 'class' ? '.' + parentSymbol.name : parentSymbol.id;
             const partName = analyzed.name;
-            const mappedParts = STPart.getStructureParts(parentSymbol);
-            if (mappedParts[partName]) {
+            // check re-declare
+            if (getPart(parentSymbol, partName)) {
                 const srcWord = '::' + partName;
                 context.diagnostics.report(diagnostics.REDECLARE('pseudo-element', srcWord), {
                     node: atRule,
@@ -220,12 +235,9 @@ export const hooks = createFeature({
                 }
             );
             // register part mapping to parent definition
-            const partSymbol = STPart.createSymbol({
-                name: partName,
-                id: parentId + '::' + partName,
-                mapTo: [analyzed.mappedSelector],
-            });
-            mappedParts[partName] = partSymbol;
+            const partSymbol = setPart(parentSymbol, getSymbolId(parentSymbol), partName, [
+                analyzed.mappedSelector,
+            ]);
             analyzedDefToPartSymbol.set(analyzed, partSymbol);
         } else if (analyzed.type === 'state') {
             const parentSymbol =
@@ -249,6 +261,27 @@ export const hooks = createFeature({
             mappedStates[stateName] = analyzed.stateDef;
         }
     },
+    analyzeDone({ meta }) {
+        const { isStructureMode } = plugableRecord.getUnsafe(meta.data, dataKey);
+        if (meta.type === 'stylable' && !isStructureMode) {
+            // legacy flat mode:
+            //  classes and custom-selectors are registered as .root pseudo-elements
+            const customSelectors = STCustomSelector.getCustomSelectors(meta);
+            const classes = CSSClass.getAll(meta);
+            const rootClass = classes['root']!;
+            const rootId = getSymbolId(rootClass);
+            // custom-selector definition precedence over class definition
+            for (const [partName, { mapTo }] of Object.entries(customSelectors)) {
+                setPart(rootClass, rootId, partName, mapTo);
+            }
+            for (const [className, classSymbol] of Object.entries(classes)) {
+                if (className === 'root' || customSelectors[className]) {
+                    continue;
+                }
+                setPart(rootClass, rootId, className, classSymbol);
+            }
+        }
+    },
 });
 
 // API
@@ -256,6 +289,50 @@ export const hooks = createFeature({
 function isStAtRule(node: postcss.AnyNode): node is postcss.AtRule {
     return node?.type === 'atrule' && node.name === 'st';
 }
+
+export function isStructureMode(meta: StylableMeta) {
+    return plugableRecord.getUnsafe(meta.data, dataKey).isStructureMode;
+}
+
+export function createPartSymbol(
+    input: Partial<PartSymbol> & Pick<PartSymbol, 'name' | 'id' | 'mapTo'>
+): PartSymbol {
+    const parts = input['-st-parts'] || {};
+    const states = input['-st-states'] || {};
+    return { ...input, _kind: 'part', '-st-parts': parts, '-st-states': states };
+}
+
+export function setPart(
+    symbol: HasParts,
+    parentId: string,
+    partName: string,
+    mapTo: PartSymbol['mapTo']
+) {
+    const partSymbol = createPartSymbol({
+        name: partName,
+        id: parentId + '::' + partName,
+        mapTo,
+    });
+    symbol['-st-parts'][partName] = partSymbol;
+    return partSymbol;
+}
+
+export function getParts(symbol: HasParts) {
+    return symbol['-st-parts'];
+}
+
+export function getPart(symbol: HasParts, name: string): PartSymbol | undefined {
+    return symbol['-st-parts'][name];
+}
+
+export function getPartNames(symbol: HasParts) {
+    return Object.keys(symbol['-st-parts']);
+}
+
+function getSymbolId(symbol: CSSClass.ClassSymbol | PartSymbol) {
+    return symbol._kind === 'class' ? '.' + symbol.name : symbol.id;
+}
+
 interface ParsedStClass {
     type: 'topLevelClass';
     name: string;

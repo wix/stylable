@@ -15,9 +15,9 @@ import type {
 import {
     nativePseudoElements,
     ResolvedElement,
-    STPart,
     STCustomSelector,
     STCustomState,
+    STStructure,
 } from '@stylable/core/dist/index-internal';
 import type { IFileSystem } from '@file-services/types';
 import {
@@ -958,12 +958,13 @@ export const PseudoElementCompletionPlugin: LangServicePlugin = {
             const colons = lineChunkAtCursor.match(/:*$/)![0].length;
 
             scope?.resolved.forEach((res) => {
+                // ToDo: implement deep structure completion
                 if (!(res.symbol as ClassSymbol)[`-st-root`]) {
                     return;
                 }
 
                 comps = comps.concat(
-                    STPart.getPartNames(res.meta)
+                    STStructure.getPartNames(res.symbol)
                         .filter((e) => e.startsWith(filter) && e !== 'root')
                         .map((c) => {
                             let relPath = path.relative(path.dirname(meta.source), res.meta.source);
@@ -1003,7 +1004,7 @@ export const PseudoElementCompletionPlugin: LangServicePlugin = {
                     }
 
                     comps = comps.concat(
-                        STPart.getPartNames(res.meta)
+                        STStructure.getPartNames(res.symbol)
                             .filter((e) => e.startsWith(filter) && e !== 'root')
                             .map((c) => {
                                 let relPath = path.relative(

@@ -18,7 +18,7 @@ import {
     CSSKeyframes,
     CSSLayer,
     CSSContains,
-    STPart,
+    STStructure,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { findRule } from './helpers/rule';
@@ -65,7 +65,7 @@ export type CachedModuleEntity =
 
 export type StylableResolverCache = Map<string, CachedModuleEntity>;
 
-export interface CSSResolve<T extends StylableSymbol | STPart.PartSymbol = StylableSymbol> {
+export interface CSSResolve<T extends StylableSymbol | STStructure.PartSymbol = StylableSymbol> {
     _kind: 'css';
     symbol: T;
     meta: StylableMeta;

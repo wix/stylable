@@ -805,18 +805,14 @@ describe(`features/css-class`, () => {
 
             // symbols
             expect(CSSClass.get(meta, `imported`), `imported symbol`).to.eql(undefined);
-            expect(CSSClass.get(meta, `root`), `root symbol`).to.deep.contain(
-                CSSClass.createSymbol({
-                    name: 'root',
-                    alias: undefined,
-                })
-            );
-            expect(CSSClass.get(meta, `class`), `class symbol`).to.deep.contain(
-                CSSClass.createSymbol({
-                    name: 'class',
-                    alias: undefined,
-                })
-            );
+            expect(CSSClass.get(meta, `root`), `root symbol`).to.deep.contain({
+                name: 'root',
+                alias: undefined,
+            });
+            expect(CSSClass.get(meta, `class`), `class symbol`).to.deep.contain({
+                name: 'class',
+                alias: undefined,
+            });
 
             // JS exports
             expect(exports.classes.root, `root compose JS export`).to.eql(
@@ -852,18 +848,14 @@ describe(`features/css-class`, () => {
             shouldReportNoDiagnostics(meta);
 
             // symbols
-            expect(CSSClass.get(meta, `root`), `root symbol`).to.deep.contain(
-                CSSClass.createSymbol({
-                    name: 'root',
-                    alias: undefined,
-                })
-            );
-            expect(CSSClass.get(meta, `class`), `class symbol`).to.deep.contain(
-                CSSClass.createSymbol({
-                    name: 'class',
-                    alias: undefined,
-                })
-            );
+            expect(CSSClass.get(meta, `root`), `root symbol`).to.deep.contain({
+                name: 'root',
+                alias: undefined,
+            });
+            expect(CSSClass.get(meta, `class`), `class symbol`).to.deep.contain({
+                name: 'class',
+                alias: undefined,
+            });
 
             // JS exports
             expect(exports.classes.root, `root extended JS export`).to.eql(`entry__root`);

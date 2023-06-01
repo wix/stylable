@@ -23,16 +23,13 @@ import {
 import { isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import {
-    STPart,
     ClassSymbol,
     CSSContains,
     CSSMedia,
     ElementSymbol,
     FeatureTransformContext,
     STNamespace,
-} from './features';
-import type { StylableMeta } from './stylable-meta';
-import {
+    STStructure,
     STImport,
     STGlobal,
     STScope,
@@ -46,6 +43,7 @@ import {
     CSSLayer,
     CSSCustomProperty,
 } from './features';
+import type { StylableMeta } from './stylable-meta';
 import {
     CSSResolve,
     StylableResolverCache,
@@ -673,7 +671,7 @@ function removeInitialCompoundMarker(
     return { selector: splitCompoundSelectors(compoundedSelector), hadRoot };
 }
 
-type SelectorSymbol = ClassSymbol | ElementSymbol | STPart.PartSymbol;
+type SelectorSymbol = ClassSymbol | ElementSymbol | STStructure.PartSymbol;
 type InferredResolve = CSSResolve<SelectorSymbol>;
 type InferredPseudoElement = {
     inferred: InferredSelector;
@@ -726,7 +724,7 @@ export class InferredSelector {
      * Used to expand the resolved mapped selector with the part definition
      * e.g. part can add nested states/parts that override the inferred mapped selector.
      */
-    private addPartOverride(partResolve: CSSResolve<STPart.PartSymbol>) {
+    private addPartOverride(partResolve: CSSResolve<STStructure.PartSymbol>) {
         const newSet = new Set<InferredResolve[]>();
         for (const resolve of this.resolveSet) {
             newSet.add([partResolve, ...resolve]);
@@ -841,7 +839,7 @@ export class InferredSelector {
                 resolvedContext.length === 1 || resolvedContext[0]?.symbol._kind === 'part' ? 0 : 1;
             resolved: for (let i = startIndex; i < resolvedContext.length; i++) {
                 const { symbol, meta } = resolvedContext[i];
-                const structureMode = STPart.isStructureMode(meta);
+                const structureMode = STStructure.isStructureMode(meta);
                 if (
                     symbol._kind !== 'part' &&
                     (symbol.alias || (!structureMode && !symbol['-st-root']))
@@ -861,9 +859,7 @@ export class InferredSelector {
                         continue;
                     }
                     // get part symbol
-                    const partDef = structureMode
-                        ? STPart.getStructurePart(symbol, name)
-                        : STPart.getPart(meta, name);
+                    const partDef = STStructure.getPart(symbol, name);
                     // save to cache
                     checked[name].set(uniqueId, !!partDef);
 
