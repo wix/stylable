@@ -290,16 +290,11 @@ describe('@st structure', () => {
                 @st .x {
                     @st ::compound => &[compound];
 
-                    @st ::onlyFirstNest => &[onlyFirstNest]&;
-
                     @st ::withComments => /*c1*/&/*c2*/[withComments]/*c3*/;
                 }
 
                 /* @rule .entry__x[compound] */
                 .x::compound {}
-
-                /* @rule .entry__x[onlyFirstNest]& */
-                .x::onlyFirstNest {}
                 
                 .x::withComments {}
             `);
@@ -312,7 +307,7 @@ describe('@st structure', () => {
              * - comment 1 is removed by postcss for unknown reasons
              * - comment 3 is ignored because postcss takes it as part of the "between" (prelude and open bracket)
              */
-            expect(assertRule(meta.targetAst!.nodes[5]).selector, 'with comments').to.eql(
+            expect(assertRule(meta.targetAst!.nodes[3]).selector, 'with comments').to.eql(
                 '.entry__x/*c2*/[withComments]'
             );
         });
@@ -397,6 +392,9 @@ describe('@st structure', () => {
 
                     /* @analyze-error ${stStructureDiagnostics.MISSING_MAPPING()}*/
                     @st ::missing-mapping ;
+
+                    /* @analyze-error ${stStructureDiagnostics.MAPPING_UNSUPPORTED_NESTING()}*/
+                    @st ::multi-selector => .a:not(&);
                 }
             `);
         });

@@ -9,7 +9,7 @@ import * as CSSClass from './css-class';
 import { warnOnce } from '../helpers/deprecation';
 import postcss from 'postcss';
 import { parseCSSValue, stringifyCSSValue, BaseAstNode } from '@tokey/css-value-parser';
-import { parseSelectorWithCache } from '../helpers/selector';
+import { parseSelectorWithCache, walkSelector } from '../helpers/selector';
 import { ImmutableSelector, stringifySelectorAst } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter } from '../diagnostics';
 import { getAlias } from '../stylable-utils';
@@ -83,6 +83,11 @@ export const diagnostics = {
         '21011',
         'error',
         (params: string) => `invalid @st "${params}" definition`
+    ),
+    MAPPING_UNSUPPORTED_NESTING: createDiagnosticReporter(
+        '21012',
+        'error',
+        () => 'mapped selector can only contain `&` as an initial selector'
     ),
 };
 
@@ -554,8 +559,26 @@ function parseMapping(
         const selectorStr = atRule.params.slice(mappingOpenNode!.end);
         const mappedSelectors = parseSelectorWithCache(selectorStr);
         switch (mappedSelectors.length) {
-            case 1:
-                return [index + selectorStr.length, mappedSelectors[0]];
+            case 1: {
+                // check for unsupported &
+                let passedActualSelector = false;
+                let containsUnsupportedNesting = false;
+                walkSelector(mappedSelectors[0], (node) => {
+                    if (passedActualSelector && node.type === 'nesting') {
+                        containsUnsupportedNesting = true;
+                    } else if (node.type !== 'comment' && node.type !== 'selector') {
+                        passedActualSelector = true;
+                    }
+                });
+                if (!containsUnsupportedNesting) {
+                    return [index + selectorStr.length, mappedSelectors[0]];
+                } else {
+                    context.diagnostics.report(diagnostics.MAPPING_UNSUPPORTED_NESTING(), {
+                        node: atRule,
+                    });
+                }
+                break;
+            }
             case 0:
                 context.diagnostics.report(diagnostics.MISSING_MAPPED_SELECTOR(), {
                     node: atRule,
