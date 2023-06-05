@@ -171,11 +171,6 @@ export const hooks = createFeature({
                 });
                 return;
             }
-            if (!analyzed.name) {
-                context.diagnostics.report(diagnostics.UNSUPPORTED_TOP_DEF(), {
-                    node: atRule,
-                });
-            }
             const existingSymbol = STSymbol.get(context.meta, analyzed.name);
             if (existingSymbol?._kind === 'import') {
                 context.diagnostics.report(diagnostics.OVERRIDE_IMPORTED_CLASS(), {

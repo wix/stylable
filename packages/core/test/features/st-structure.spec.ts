@@ -91,7 +91,7 @@ describe('@st structure', () => {
         });
         // ToDo: report redefine
         it('should report non-class definition', () => {
-            testStylableCore(`
+            const { sheets } = testStylableCore(`
                 /* @analyze-error(element) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
                 @st abc;
 
@@ -107,6 +107,10 @@ describe('@st structure', () => {
                 /* @analyze-error(multi classes) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
                 @st .a.b;
             `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(CSSClass.getAll(meta)).to.eql({});
         });
         it('should extend another class', () => {
             const { sheets } = testStylableCore(`
