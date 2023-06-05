@@ -30,3 +30,4 @@ export { deindent } from './deindent';
 export { MinimalDocument, MinimalElement } from './minimal-dom';
 export { createTempDirectorySync, copyDirectory } from './native-temp-dir';
 export { assertAtRule, assertComment, assertDecl, assertRule } from './postcss-node-asserts';
+export { spyCalls, logCalls } from './spy';

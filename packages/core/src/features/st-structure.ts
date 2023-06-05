@@ -61,7 +61,8 @@ export const diagnostics = {
     MULTI_MAPPED_SELECTOR: createDiagnosticReporter(
         '21007',
         'error',
-        () => `mapped selector accepts only a single selector`
+        () =>
+            'mapped selector accepts only a single selector.\nuse `:is()` or `:where()` to map multiple selectors)'
     ),
     ELEMENT_OUT_OF_CONTEXT: createDiagnosticReporter(
         '21008',
@@ -211,11 +212,7 @@ export const hooks = createFeature({
                 }
             }
         } else if (analyzed.type === 'part') {
-            const parentSymbol =
-                analyzed.parentAnalyze.type === 'topLevelClass'
-                    ? CSSClass.get(context.meta, analyzed.parentAnalyze.name)
-                    : analyzedDefToPartSymbol.get(analyzed.parentAnalyze);
-
+            const parentSymbol = getPartParentSymbol(context, analyzed, analyzedDefToPartSymbol);
             if (!parentSymbol) {
                 // assuming analyzing @st definitions dfs - class/part must be defined
                 return;
@@ -278,7 +275,7 @@ export const hooks = createFeature({
             const rootClass = classes['root']!;
             const rootId = getSymbolId(rootClass);
             // custom-selector definition precedence over class definition
-            for (const [partName, { mapTo }] of Object.entries(customSelectors)) {
+            for (const [partName, mapTo] of Object.entries(customSelectors)) {
                 setPart(rootClass, rootId, partName, mapTo);
             }
             for (const [className, classSymbol] of Object.entries(classes)) {
@@ -295,6 +292,16 @@ export const hooks = createFeature({
 
 function isStAtRule(node: postcss.AnyNode): node is postcss.AtRule {
     return node?.type === 'atrule' && node.name === 'st';
+}
+
+function getPartParentSymbol(
+    context: FeatureContext,
+    analyzed: ParsedStPart,
+    analyzedDefToPartSymbol: Map<AnalyzedStDef, PartSymbol>
+) {
+    return analyzed.parentAnalyze.type === 'topLevelClass'
+        ? CSSClass.get(context.meta, analyzed.parentAnalyze.name)
+        : analyzedDefToPartSymbol.get(analyzed.parentAnalyze);
 }
 
 export function isStructureMode(meta: StylableMeta) {

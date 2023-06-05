@@ -647,7 +647,7 @@ function removeInitialCompoundMarker(
     meta: StylableMeta,
     structureMode: boolean
 ) {
-    let hadRoot = false;
+    let hadCompoundStart = false;
     const compoundedSelector = groupCompoundSelectors(selector);
     const first = compoundedSelector.nodes.find(
         ({ type }) => type === `compound_selector`
@@ -662,13 +662,13 @@ function removeInitialCompoundMarker(
                 continue;
             }
             if (matchNode(node)) {
-                hadRoot = true;
+                hadCompoundStart = true;
                 first.nodes.splice(i, 1);
             }
             break;
         }
     }
-    return { selector: splitCompoundSelectors(compoundedSelector), hadRoot };
+    return { selector: splitCompoundSelectors(compoundedSelector), hadCompoundStart };
 }
 
 type SelectorSymbol = ClassSymbol | ElementSymbol | STStructure.PartSymbol;
@@ -874,7 +874,7 @@ export class InferredSelector {
                             const r = removeInitialCompoundMarker(selector, meta, structureMode);
                             selector.nodes = r.selector.nodes;
                             selector.before = '';
-                            if (!r.hadRoot && !isFirstInSelector) {
+                            if (!r.hadCompoundStart && !isFirstInSelector) {
                                 selector.nodes.unshift(
                                     createCombinatorSelector({ combinator: 'space' })
                                 );

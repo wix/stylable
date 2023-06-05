@@ -13,8 +13,6 @@ describe('LS: st-structure', () => {
             .cls^afterCls^ {}
 
             .cls::shallow^afterShallow^ {}
-
-            .root^afterRoot^ {}
         `);
         const entryCarets = carets['/entry.st.css'];
 

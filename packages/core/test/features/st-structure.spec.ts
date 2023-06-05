@@ -3,6 +3,7 @@ import {
     diagnosticBankReportToStrings,
     shouldReportNoDiagnostics,
     testStylableCore,
+    spyCalls,
 } from '@stylable/core-test-kit';
 import {
     CSSClass,
@@ -17,39 +18,13 @@ const stStructureDiagnostics = diagnosticBankReportToStrings(STStructure.diagnos
 const stStateDiagnostics = diagnosticBankReportToStrings(STCustomState.diagnostics);
 const classDiagnostics = diagnosticBankReportToStrings(CSSClass.diagnostics);
 
-type FuncParameters<F> = F extends (...args: any[]) => any ? Parameters<F> : never;
-
-const spy = <T, N extends keyof T>(target: T, funcName: N) => {
-    const origin = target[funcName];
-
-    if (typeof origin !== 'function') {
-        throw new Error('spy only supports functions');
-    }
-
-    // type OriginType = FuncType<typeof origin>;
-    type OriginArgs = FuncParameters<typeof origin>;
-    const calls: OriginArgs[] = [];
-
-    // proxy
-    target[funcName] = ((...args: OriginArgs[]) => {
-        // record
-        calls.push([...args] as any);
-        // call original
-        return origin(...args);
-    }) as T[N];
-    return {
-        calls,
-        restoreSpy() {
-            target[funcName] = origin;
-        },
-    };
-};
-
 describe('@st structure', () => {
     it('should warn experimental feature', () => {
-        const { restoreSpy, calls } = spy(console, 'warn');
+        const warnSpy = spyCalls(console, 'warn');
         const filterExpCalls = () =>
-            calls.filter(([msg]) => typeof msg === 'string' && msg === STStructure.experimentalMsg);
+            warnSpy.calls.filter(
+                ([msg]) => typeof msg === 'string' && msg === STStructure.experimentalMsg
+            );
 
         // no warn without using @st
         testStylableCore(`
@@ -59,7 +34,7 @@ describe('@st structure', () => {
         expect(filterExpCalls(), 'not used').to.have.lengthOf(0);
 
         // reset calls
-        calls.length = 0;
+        warnSpy.resetSpy();
 
         testStylableCore(`
             @st;
@@ -68,7 +43,7 @@ describe('@st structure', () => {
 
         expect(filterExpCalls(), 'only once').to.have.lengthOf(1);
 
-        restoreSpy();
+        warnSpy.restoreSpy();
     });
     it('should have no implicit root', () => {
         const { sheets } = testStylableCore(`
@@ -145,7 +120,7 @@ describe('@st structure', () => {
                 'entry__abc entry__defined-class-inline'
             );
         });
-        it('should report expected missing extended class reference', () => {
+        it('should disallow unsupported extends', () => {
             testStylableCore(`
                 /* @analyze-error(element) ${stStructureDiagnostics.MISSING_EXTEND()}*/
                 @st .xyz :is(root);

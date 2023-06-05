@@ -3,21 +3,7 @@ import type { IFileSystem } from '@file-services/types';
 import { expect } from 'chai';
 import { waitFor } from 'promise-assist';
 import { DirectoryProcessService } from '@stylable/cli';
-
-function createSpy<T extends (...args: any[]) => any>(fn?: T) {
-    const spy = (...args: any[]) => {
-        spy.calls.push(args);
-        spy.callCount++;
-        return fn?.(...args);
-    };
-    spy.calls = [] as unknown[][];
-    spy.callCount = 0;
-    spy.resetHistory = () => {
-        spy.calls.length = 0;
-        spy.callCount = 0;
-    };
-    return spy;
-}
+import { logCalls } from '@stylable/core-test-kit';
 
 const project1 = {
     '0.template.js': `
@@ -106,7 +92,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should handle directory added after watch started', async () => {
-            const changeSpy = createSpy();
+            const changeSpy = logCalls();
 
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
@@ -234,7 +220,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should report affectedFiles and no changeOrigin when watch started', async () => {
-            const changeSpy = createSpy();
+            const changeSpy = logCalls();
 
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
@@ -297,7 +283,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should report change for all files affected by the changeOrigin', async () => {
-            const changeSpy = createSpy();
+            const changeSpy = logCalls();
             const watcher = new DirectoryProcessService(fs, {
                 watchMode: true,
                 fileFilter: isTemplateFile,

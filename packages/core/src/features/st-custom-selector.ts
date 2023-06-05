@@ -126,9 +126,9 @@ export function getCustomSelector(meta: StylableMeta, name: string): SelectorLis
 export function getCustomSelectors(meta: StylableMeta) {
     const analyzed = plugableRecord.getUnsafe(meta.data, dataKey);
     return Object.entries(analyzed).reduce((acc, [name, { ast }]) => {
-        acc[name] = { mapTo: ast };
+        acc[name] = ast;
         return acc;
-    }, {} as Record<string, { mapTo: AnalyzedCustomSelector['ast'] }>);
+    }, {} as Record<string, AnalyzedCustomSelector['ast']>);
 }
 
 export function getCustomSelectorExpended(meta: StylableMeta, name: string): string | undefined {
