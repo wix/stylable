@@ -119,12 +119,15 @@ const dataKey = plugableRecord.key<{
 export const hooks = createFeature({
     analyzeInit(context) {
         const { meta } = context;
+        if (meta.type !== 'stylable') {
+            return;
+        }
         const stAtRule = meta.sourceAst.nodes.find((node) => isStAtRule(node));
         if (stAtRule) {
             warnOnce(experimentalMsg);
             const metaAnalysis = plugableRecord.getUnsafe(context.meta.data, dataKey);
             metaAnalysis.isStructureMode = true;
-        } else if (meta.type === 'stylable') {
+        } else {
             // set implicit root for legacy mode (root with flat structure)
             meta.root = 'root';
             const rootSymbol = CSSClass.addClass(context, 'root');
@@ -140,7 +143,7 @@ export const hooks = createFeature({
         });
     },
     analyzeAtRule({ context, atRule, analyzeRule }) {
-        if (!isStAtRule(atRule)) {
+        if (!isStAtRule(atRule) || context.meta.type !== 'stylable') {
             return;
         }
 

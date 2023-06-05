@@ -526,4 +526,21 @@ describe('@st structure', () => {
             });
         });
     });
+    describe('native css', () => {
+        it('should not collect `@st` definition from non stylable file', () => {
+            testStylableCore({
+                'native.css': `
+                    @st .x {
+                        @st ::y => .z;
+                    }
+                `,
+                'entry.st.css': `
+                    @st-import [x] from './native.css';
+
+                    /* @rule(not existing on native) .entry__x */
+                    .x {}
+                `,
+            });
+        });
+    });
 });
