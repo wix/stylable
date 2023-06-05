@@ -192,6 +192,14 @@ describe('@st structure', () => {
                 `,
             });
         });
+        it('should report unexpected extra value', () => {
+            testStylableCore(`
+                /* @analyze-error word(unexpected value) ${stStructureDiagnostics.UNEXPECTED_EXTRA_VALUE(
+                    'unexpected value'
+                )} */
+                @st .empty unexpected value;
+            `);
+        });
     });
     describe('@st :name (pseudo-class)', () => {
         it('should define pseudo-class on parent class def', () => {
@@ -235,9 +243,9 @@ describe('@st structure', () => {
 
                     /* @analyze-error ${stStateDiagnostics.STATE_STARTS_WITH_HYPHEN('-dashProxy')}*/
                     @st :-dashProxy;
-
-                    /* @analyze-warn ${stStateDiagnostics.RESERVED_NATIVE_STATE('is')}*/
-                    @st :is;
+                    
+                    /* @analyze-error ${stStructureDiagnostics.UNEXPECTED_EXTRA_VALUE('abc xyz')}*/
+                    @st :boolWithExtra abc xyz;
                 }
             `);
         });

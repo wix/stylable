@@ -210,17 +210,21 @@ export function parseStateValue(
     value: BaseAstNode[],
     node: postcss.Node,
     diagnostics: Diagnostics
-) {
+): [amountTaken: number, stateDef: MappedStates[string] | undefined] {
     let stateName = '';
     let stateDef: MappedStates[string] = null; /*boolean*/
+    let amountTaken = 0;
     const customIdentResult = findCustomIdent(value, 0);
     const [amountToName, nameNode] = customIdentResult[0]
         ? customIdentResult
         : findNextCallNode(value, 0);
     if (nameNode && validateStateName(nameNode.value, diagnostics, node)) {
+        amountTaken += amountToName;
         stateName = nameNode.value;
         // state with parameter
         if (nameNode.type === 'call') {
+            // take all of the definition since default value takes the rest
+            amountTaken = value.length;
             // ToDo: translate resolveStateType to tokey and remove the double parsing
             const postcssStateValue = postcssValueParser(
                 stringifyCSSValue(value.slice(amountToName - 1))
@@ -241,9 +245,9 @@ export function parseStateValue(
         }
     }
     if (stateName) {
-        return stateDef;
+        return [amountTaken, stateDef];
     }
-    return;
+    return [0, undefined];
 }
 function resolveBooleanState(mappedStates: MappedStates, stateDefinition: ParsedValue) {
     const currentState = mappedStates[stateDefinition.value];

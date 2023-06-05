@@ -89,6 +89,11 @@ export const diagnostics = {
         'error',
         () => 'mapped selector can only contain `&` as an initial selector'
     ),
+    UNEXPECTED_EXTRA_VALUE: createDiagnosticReporter(
+        '21013',
+        'error',
+        (extraValue: string) => `found unexpected extra value definition: "${extraValue}"`
+    ),
 };
 
 export interface PartSymbol extends HasParts, STCustomState.HasStates {
@@ -416,19 +421,28 @@ function parseStateDefinition(
         });
         return;
     }
-    const parsedDef = STCustomState.parseStateValue(
+    const [amountToStateDef, stateDef] = STCustomState.parseStateValue(
         params.slice(amountToName - 1),
         atRule,
         context.diagnostics
     );
-    if (parsedDef === undefined) {
+    if (stateDef === undefined) {
         // diagnostics are reported from within parseStateValue()
+        return;
+    }
+    const amountTaken = amountToName - 1 + amountToStateDef;
+    if (amountTaken < params.length) {
+        const unexpectedValue = stringifyCSSValue(params.slice(amountTaken)).trim();
+        context.diagnostics.report(diagnostics.UNEXPECTED_EXTRA_VALUE(unexpectedValue), {
+            node: atRule,
+            word: unexpectedValue,
+        });
         return;
     }
     return {
         type: 'state',
         name: nameNode.value,
-        stateDef: parsedDef,
+        stateDef,
         parentAnalyze,
     };
 }
@@ -535,7 +549,11 @@ function parseClassDefinition(
     // check unexpected extra
     const [amountToUnexpectedNode] = findAnything(params, index);
     if (amountToUnexpectedNode) {
-        // ToDo: report unexpected extra syntax
+        const unexpectedValue = stringifyCSSValue(params.slice(index)).trim();
+        context.diagnostics.report(diagnostics.UNEXPECTED_EXTRA_VALUE(unexpectedValue), {
+            node: atRule,
+            word: unexpectedValue,
+        });
         return;
     }
     if (result.name) {
