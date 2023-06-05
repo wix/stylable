@@ -81,6 +81,14 @@ describe('@st structure', () => {
             shouldReportNoDiagnostics(meta);
             expect(meta.getAllClasses()).to.have.keys(['abc', 'xyz', 'comment', 'normal-class']);
         });
+        it('should be valid only at top level', () => {
+            testStylableCore(`
+                @st .abc {
+                    /* @analyze-error ${stStructureDiagnostics.CLASS_OUT_OF_CONTEXT()} */
+                    @st .xyz;
+                }
+            `);
+        });
         // ToDo: report redefine
         it('should report non-class definition', () => {
             testStylableCore(`

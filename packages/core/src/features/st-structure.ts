@@ -94,6 +94,11 @@ export const diagnostics = {
         'error',
         (extraValue: string) => `found unexpected extra value definition: "${extraValue}"`
     ),
+    CLASS_OUT_OF_CONTEXT: createDiagnosticReporter(
+        '21014',
+        'error',
+        () => 'class definition must be top level'
+    ),
 };
 
 export interface PartSymbol extends HasParts, STCustomState.HasStates {
@@ -160,7 +165,12 @@ export const hooks = createFeature({
                 });
             }
         } else if (analyzed.type === 'topLevelClass') {
-            // ToDo: error when nested (only top level for now)
+            if (atRule.parent?.type !== 'root') {
+                context.diagnostics.report(diagnostics.CLASS_OUT_OF_CONTEXT(), {
+                    node: atRule,
+                });
+                return;
+            }
             if (!analyzed.name) {
                 context.diagnostics.report(diagnostics.UNSUPPORTED_TOP_DEF(), {
                     node: atRule,
