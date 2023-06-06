@@ -256,7 +256,10 @@ export const hooks = createFeature({
         } else if (analyzed.type === 'part') {
             const parentSymbol = getPartParentSymbol(context, analyzed, analyzedDefToPartSymbol);
             if (!parentSymbol) {
-                // assuming analyzing @st definitions dfs - class/part must be defined
+                // unreachable: assuming analyzing @st definitions dfs - class/part must be defined
+                context.diagnostics.report(diagnostics.ELEMENT_OUT_OF_CONTEXT(), {
+                    node: atRule,
+                });
                 return;
             }
             const partName = analyzed.name;
@@ -291,7 +294,10 @@ export const hooks = createFeature({
                     ? CSSClass.get(context.meta, analyzed.parentAnalyze.name)
                     : analyzedDefToPartSymbol.get(analyzed.parentAnalyze);
             if (!parentSymbol) {
-                // assuming analyzing @st definitions dfs - class/part must be defined
+                // unreachable: assuming analyzing @st definitions dfs - class/part must be defined
+                context.diagnostics.report(diagnostics.STATE_OUT_OF_CONTEXT(), {
+                    node: atRule,
+                });
                 return;
             }
             const mappedStates = (parentSymbol['-st-states'] ||= {});
