@@ -311,6 +311,8 @@ describe('@st structure', () => {
                     */
 
                     @st /*c1*/ :/*what?*/:/*c2*/comments/*c3*/=> [weirdComment]/*c5*/;
+
+                    @st ::unscoped => unscopedElement;
                 }
 
                 /* @rule .entry__x [part="x"] */
@@ -321,6 +323,9 @@ describe('@st structure', () => {
 
                 /* @rule .entry__x [weirdComment] */
                 .x::comments {}
+                
+                /* @rule .entry__x unscopedElement */
+                .x::unscoped {}
             `);
 
             const { meta } = sheets['/entry.st.css'];

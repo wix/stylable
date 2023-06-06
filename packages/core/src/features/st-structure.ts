@@ -279,7 +279,7 @@ export const hooks = createFeature({
                     source: atRule.source,
                 }),
                 {
-                    isScoped: false,
+                    isScoped: true,
                     originalNode: atRule,
                 }
             );
