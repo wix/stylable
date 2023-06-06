@@ -48,11 +48,7 @@ export const diagnostics = {
         'error',
         () => 'pseudo-state definition must be directly nested in a `@st .class{}` definition'
     ),
-    REDECLARE_STATE: createDiagnosticReporter(
-        '21005',
-        'error',
-        (name: string) => `state "${name}" is already declared`
-    ),
+    // 31005 - unused
     MISSING_MAPPED_SELECTOR: createDiagnosticReporter(
         '21006',
         'error',
@@ -117,6 +113,7 @@ const dataKey = plugableRecord.key<{
     isStructureMode: boolean;
     analyzedDefs: WeakMap<postcss.AtRule, AnalyzedStDef>;
     analyzedDefToPartSymbol: Map<AnalyzedStDef, PartSymbol>;
+    declaredClasses: Set<string>;
 }>('st-structure');
 
 // HOOKS
@@ -145,6 +142,7 @@ export const hooks = createFeature({
             isStructureMode: false,
             analyzedDefs: new WeakMap(),
             analyzedDefToPartSymbol: new Map(),
+            declaredClasses: new Set<string>(),
         });
     },
     analyzeAtRule({ context, atRule, analyzeRule }) {
@@ -152,7 +150,10 @@ export const hooks = createFeature({
             return;
         }
 
-        const { analyzedDefToPartSymbol } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+        const { analyzedDefToPartSymbol, declaredClasses } = plugableRecord.getUnsafe(
+            context.meta.data,
+            dataKey
+        );
         const analyzed = analyzeStAtRule(atRule, context);
         if (!analyzed) {
             if (atRule.parent?.type === 'root') {
@@ -178,8 +179,17 @@ export const hooks = createFeature({
                 });
                 return;
             }
-            // ToDo: pass atuRule for diagnostics
-            CSSClass.addClass(context, analyzed.name /*, atRule*/);
+            if (declaredClasses.has(analyzed.name)) {
+                // ToDo: use st-symbol redeclare api; improve st-symbol/css-class "final" marking and diagnostics
+                const srcWord = '.' + analyzed.name;
+                context.diagnostics.report(diagnostics.REDECLARE('class', srcWord), {
+                    node: atRule,
+                    word: srcWord,
+                });
+                return;
+            }
+            declaredClasses.add(analyzed.name);
+            CSSClass.addClass(context, analyzed.name, atRule);
             // extend class
             if (analyzed.extendedClass) {
                 const extendedSymbol =
@@ -274,9 +284,10 @@ export const hooks = createFeature({
             const stateName = analyzed.name;
             if (mappedStates[stateName]) {
                 // first state definition wins
-                context.diagnostics.report(diagnostics.REDECLARE_STATE(stateName), {
+                const srcWord = ':' + stateName;
+                context.diagnostics.report(diagnostics.REDECLARE('pseudo-state', srcWord), {
                     node: atRule,
-                    word: ':' + stateName,
+                    word: srcWord,
                 });
                 return;
             }

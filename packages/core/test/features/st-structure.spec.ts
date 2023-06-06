@@ -89,7 +89,14 @@ describe('@st structure', () => {
                 }
             `);
         });
-        // ToDo: report redefine
+        it('should report re-decare', () => {
+            testStylableCore(`
+                @st .dup;
+
+                /* @analyze-error word(.dup) ${stStructureDiagnostics.REDECLARE('class', '.dup')} */
+                @st .dup;
+            `);
+        });
         it('should report non-class definition', () => {
             const { sheets } = testStylableCore(`
                 /* @analyze-error(element) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
@@ -266,8 +273,9 @@ describe('@st structure', () => {
                 @st .x {
                     @st :conflict(string);
 
-                    /* @analyze-error word(:conflict) ${stStructureDiagnostics.REDECLARE_STATE(
-                        'conflict'
+                    /* @analyze-error word(:conflict) ${stStructureDiagnostics.REDECLARE(
+                        'pseudo-state',
+                        ':conflict'
                     )} */
                     @st :conflict(enum(a, b)) b;
                 }
@@ -425,7 +433,7 @@ describe('@st structure', () => {
                     @st .x {
                         @st ::duplicate => .a;
 
-                        /* @analyze-error ${stStructureDiagnostics.REDECLARE(
+                        /* @analyze-error word(::duplicate) ${stStructureDiagnostics.REDECLARE(
                             'pseudo-element',
                             '::duplicate'
                         )}*/

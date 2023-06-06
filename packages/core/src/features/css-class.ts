@@ -263,7 +263,7 @@ export function createSymbol(input: Partial<ClassSymbol> & { name: string }): Cl
     return { ...input, _kind: 'class', '-st-parts': parts };
 }
 
-export function addClass(context: FeatureContext, name: string, rule?: postcss.Rule): ClassSymbol {
+export function addClass(context: FeatureContext, name: string, rule?: postcss.Node): ClassSymbol {
     let symbol = STSymbol.get(context.meta, name, `class`);
     if (!symbol) {
         let alias = STSymbol.get(context.meta, name);
