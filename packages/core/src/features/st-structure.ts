@@ -10,7 +10,11 @@ import { warnOnce } from '../helpers/deprecation';
 import postcss from 'postcss';
 import { parseCSSValue, stringifyCSSValue, BaseAstNode } from '@tokey/css-value-parser';
 import { parseSelectorWithCache, walkSelector } from '../helpers/selector';
-import { ImmutableSelector, stringifySelectorAst } from '@tokey/css-selector-parser';
+import {
+    ImmutableSelector,
+    stringifySelectorAst,
+    ImmutablePseudoClass,
+} from '@tokey/css-selector-parser';
 import { createDiagnosticReporter } from '../diagnostics';
 import { getAlias } from '../stylable-utils';
 import {
@@ -205,19 +209,29 @@ export const hooks = createFeature({
             }
             // class mapping
             if (analyzed.mappedSelector) {
-                const firstSelectorNodes = analyzed.mappedSelector.nodes;
+                let globalNode: ImmutablePseudoClass | undefined = undefined;
+                let foundUnexpectedSelector = false;
+                for (const node of analyzed.mappedSelector.nodes) {
+                    if (node.type === 'pseudo_class' && node.value === 'global' && !globalNode) {
+                        globalNode = node;
+                    } else if (node.type !== 'comment') {
+                        foundUnexpectedSelector = true;
+                    }
+                }
+
                 if (
-                    firstSelectorNodes[0].type !== 'pseudo_class' ||
-                    firstSelectorNodes[0].value !== 'global' ||
-                    firstSelectorNodes[0].nodes?.length !== 1
+                    foundUnexpectedSelector ||
+                    !globalNode ||
+                    !globalNode.nodes ||
+                    globalNode.nodes.length !== 1
                 ) {
                     // ToDo: support non global mapping
                     context.diagnostics.report(diagnostics.GLOBAL_MAPPING_LIMITATION(), {
                         node: atRule,
-                        word: stringifySelectorAst(firstSelectorNodes[0]),
+                        word: stringifySelectorAst(analyzed.mappedSelector).trim(),
                     });
                 } else {
-                    const mappedSelectorAst = firstSelectorNodes[0].nodes[0];
+                    const mappedSelectorAst = globalNode.nodes[0];
                     // analyze mapped selector
                     analyzeRule(
                         postcss.rule({

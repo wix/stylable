@@ -164,9 +164,14 @@ describe('@st structure', () => {
         it('should register css class selector mapping', () => {
             const { sheets } = testStylableCore(`
                 @st .abc => :global(.xyz);
+
+                @st .comments =>/*c1*/:global(.comments);
     
                 /* @rule(standalone) .xyz */
                 .abc {}
+                
+                /* @rule(comments) .comments */
+                .comments {}
             `);
 
             const { meta, exports } = sheets['/entry.st.css'];
@@ -203,8 +208,17 @@ describe('@st structure', () => {
                     /* @rule(not global pseudo) .global__top-level-is */
                     .top-level-is {}
 
+                    /* @analyze-error(empty global) ${stStructureDiagnostics.GLOBAL_MAPPING_LIMITATION()} */
+                    @st .empty-global => :global;
+
+                    /* @analyze-error(no value global) ${stStructureDiagnostics.GLOBAL_MAPPING_LIMITATION()} */
+                    @st .no-value-global => :global();
+
                     /* @analyze-error(multi global) ${stStructureDiagnostics.GLOBAL_MAPPING_LIMITATION()} */
                     @st .multi-global => :global(.a, .b);
+
+                    /* @analyze-error(more then one global) ${stStructureDiagnostics.GLOBAL_MAPPING_LIMITATION()} */
+                    @st .more-then-one-global => :global(.a) :global(.b);
         
                     /* @rule(multi global) .global__multi-global */
                     .multi-global {}
