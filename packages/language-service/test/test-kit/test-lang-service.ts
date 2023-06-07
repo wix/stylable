@@ -67,12 +67,14 @@ export function testLangService(
     }
 
     const service = new StylableLanguageService({ fs, stylable });
-    return {
+    const api = {
         fs,
         stylable,
         service,
         carets,
-        assertCompletions,
+        assertCompletions: (...args: AssertArgs) => {
+            assertCompletions(api, args);
+        },
         completion<T>(
             data: T[],
             template: (value: T) => Partial<CompletionItem>
@@ -87,18 +89,24 @@ export function testLangService(
                 fs.readFileSync(filePath, { encoding: 'utf-8' })
             );
             return {
-                replaceText(
-                    offset: number,
-                    text: string,
-                    replaceOffsets?: Parameters<typeof range>[1]
-                ) {
-                    const position = document.positionAt(offset);
-                    return TextEdit.replace(range(position, replaceOffsets), text);
-                },
+                replaceText: createReplaceText(document),
             };
         },
     };
+    return api;
 }
+function createReplaceText(document: TextDocument) {
+    return function replaceText(
+        offset: number,
+        text: string,
+        replaceOffsets?: Parameters<typeof range>[1]
+    ) {
+        const position = document.positionAt(offset);
+        return TextEdit.replace(range(position, replaceOffsets), text);
+    };
+}
+
+type TestKitApi = ReturnType<typeof testLangService>;
 
 function setupFileSystem(input: string | IDirectoryContents, options: Partial<TestOptions>) {
     const content = typeof input === `string` ? { '/entry.st.css': input } : input;
@@ -113,17 +121,42 @@ function setupFileSystem(input: string | IDirectoryContents, options: Partial<Te
     }
 }
 
-export function assertCompletions({
-    actualList,
-    expectedList = [],
-    unexpectedList = [],
-    message = '',
-}: {
+interface AssertCompletionsConfig {
     actualList: CompletionItem[];
     expectedList?: Array<Partial<CompletionItem>>;
     unexpectedList?: Array<Partial<CompletionItem>>;
     message?: string;
-}) {
+}
+type AssertArgs =
+    | [config: AssertCompletionsConfig]
+    | [
+          filePath: string,
+          config: (context: {
+              filePath: string;
+              carets: Record<string | number, number>;
+              textEdit: {
+                  replaceText: ReturnType<typeof createReplaceText>;
+              };
+          }) => AssertCompletionsConfig
+      ];
+
+export function assertCompletions(
+    api: Pick<TestKitApi, 'carets' | 'textEditContext'>,
+    [configOrPath, generateConfig]: AssertArgs
+) {
+    const {
+        actualList,
+        expectedList = [],
+        unexpectedList = [],
+        message = '',
+    } = typeof configOrPath === 'string'
+        ? generateConfig!({
+              filePath: configOrPath,
+              carets: api.carets[configOrPath],
+              textEdit: api.textEditContext(configOrPath),
+          })
+        : configOrPath;
+
     const messagePrefix = message ? `(${message}) ` : '';
     for (const expected of expectedList) {
         const actual = actualList.find(({ label }) => label === expected.label);
@@ -132,9 +165,11 @@ export function assertCompletions({
                 `${messagePrefix}expected to find completion with label "${expected.label}"`
             );
         }
-        for (const [expectedField, expectedValue] of Object.entries(expected)) {
+        for (const [expectedField, expectedValue] of Object.entries(expected) as [
+            [keyof CompletionItem, any]
+        ]) {
             const expectLabel = `${messagePrefix}expected "${expected.label}" completions to have ${expectedField}`;
-            expect((actual as any)[expectedField], expectLabel).to.eql(expectedValue);
+            expect(actual[expectedField], expectLabel).to.eql(expectedValue);
         }
     }
     for (const expected of unexpectedList) {
