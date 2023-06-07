@@ -34,6 +34,7 @@ import {
     getStylableBuildData,
     isDependencyOf,
     normalizeNamespaceCollisionOption,
+    getWebpackBuildMeta,
 } from './plugin-utils';
 import { injectCssModules } from './mini-css-support';
 import type {
@@ -431,7 +432,7 @@ export class StylableWebpackPlugin {
                             isUsed: undefined,
                             ...loaderData,
                         };
-                        module.buildMeta.stylable = stylableBuildMeta;
+                        getWebpackBuildMeta(module).stylable = stylableBuildMeta;
 
                         /**
                          * We want to add the unused imports because we need them to calculate the depth correctly
@@ -504,7 +505,7 @@ export class StylableWebpackPlugin {
             for (const module of modules) {
                 if (
                     (isStylableModule(module) || isLoadedNativeCSSModule(module, moduleGraph)) &&
-                    module.buildMeta.stylable
+                    module.buildMeta?.stylable
                 ) {
                     stylableModules.set(module, null);
                 }

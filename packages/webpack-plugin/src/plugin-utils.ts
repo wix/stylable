@@ -128,6 +128,10 @@ export function replaceMappedCSSAssetPlaceholders({
                     getData: () => data,
                 });
 
+                if (!assetModule.buildInfo) {
+                    throw new Error('Missing asset module build info for ' + resourcePath);
+                }
+
                 if (assetModule.buildInfo.dataUrl) {
                     // Investigate using the data map from getData currently there is an unknown in term from escaping keeping extractDataUrlFromAssetModuleSource
                     return extractDataUrlFromAssetModuleSource(
@@ -308,8 +312,16 @@ export function createStaticCSS(
     return cssChunks;
 }
 
+export function getWebpackBuildMeta(module: Module): NonNullable<Module['buildMeta']> {
+    const buildMeta = module.buildMeta;
+    if (!buildMeta) {
+        throw new Error(`Stylable module ${module.identifier()} does not contains build meta`);
+    }
+    return buildMeta;
+}
+
 export function getStylableBuildMeta(module: Module): StylableBuildMeta {
-    const meta = module.buildMeta.stylable;
+    const meta = module.buildMeta?.stylable;
     if (!meta) {
         throw new Error(`Stylable module ${module.identifier()} does not contains build meta`);
     }
@@ -344,7 +356,7 @@ export function findIfStylableModuleUsed(
 
     let isInUse = false;
     for (const connectionModule of inConnections) {
-        if (connectionModule.buildMeta.sideEffectFree) {
+        if (connectionModule.buildMeta?.sideEffectFree) {
             const info = moduleGraph.getExportsInfo(connectionModule);
             const usedExports = (
                 info.getUsedExports as any

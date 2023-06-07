@@ -12,16 +12,13 @@ export class TestManifestPlugin {
                 const data: Record<string, string> = {};
                 for (const module of compilation.modules) {
                     if (isNormalModule(module) && module.resource.endsWith('.st.css')) {
-                        const {
-                            resource,
-                            buildInfo: { stylableNamespace },
-                        } = module;
+                        const stylableNamespace = module.buildInfo?.stylableNamespace;
 
                         if (!stylableNamespace) {
                             throw new Error('No stylableNamespace found in buildInfo');
                         }
 
-                        data[relative(compiler.context, resource)] = stylableNamespace;
+                        data[relative(compiler.context, module.resource)] = stylableNamespace;
                     }
                 }
 
