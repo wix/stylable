@@ -236,20 +236,23 @@ function collectRuleMixins(
     const resolvedSymbols = context.getResolvedSymbols(context.meta);
     const { mainNamespace } = resolvedSymbols;
     const decls: postcss.Declaration[] = [];
-    rule.walkDecls((decl) => {
-        if (decl.prop === `-st-mixin` || decl.prop === `-st-partial-mixin`) {
-            decls.push(decl);
+    for (const node of rule.nodes) {
+        if (
+            node.type === 'decl' &&
+            (node.prop === `-st-mixin` || node.prop === `-st-partial-mixin`)
+        ) {
+            decls.push(node);
             mixins = collectDeclMixins(
                 context,
                 resolvedSymbols,
-                decl,
+                node,
                 (mixinSymbolName) => {
                     return mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named';
                 },
                 mixins
             );
         }
-    });
+    }
     return [decls, mixins];
 }
 
