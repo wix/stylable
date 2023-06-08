@@ -87,9 +87,11 @@ async function contract(
                 ).getPropertyValue('--unused-deep'),
             };
         });
-
+        
     const assetLoaded = Boolean(responses?.find((r) => r.url().match(/asset-.*?\.png$/)));
+    const internalDirAsset = Boolean(responses?.find((r) => r.url().match(/internal-dir-.*?\.png$/)));
 
+    expect(internalDirAsset, 'asset loaded from internal dir').to.eql(true);
     expect(assetLoaded, 'asset loaded').to.eql(true);
     expect(reset, 'reset applied').to.eql('true');
     expect(sideEffects, 'side effects loaded').to.eql('true');
