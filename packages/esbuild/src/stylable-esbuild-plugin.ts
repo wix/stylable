@@ -223,7 +223,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 errors,
                 warnings,
                 watchFiles: [args.path, ...deepDependencies],
-                resolveDir: '.',
+                resolveDir: dirname(args.path),
                 contents: cssInjection === 'js' ? processStubs(moduleCode) : moduleCode,
                 pluginData: { stylableResults: res },
             };
@@ -247,7 +247,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             const res = stylable.transform(args.path);
             const cssDepth = res.meta.transformCssDepth!.cssDepth;
             return {
-                resolveDir: '.',
+                resolveDir: dirname(args.path),
                 contents: wrapWithDepthMarkers(res.meta.targetAst!.toString(), cssDepth),
                 loader: 'css',
             };
@@ -260,7 +260,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             const { meta } = args.pluginData.stylableResults as StylableResults;
             const { cssDepth = 0 } = meta.transformCssDepth!;
             return {
-                resolveDir: '.',
+                resolveDir: dirname(args.path),
                 contents: wrapWithDepthMarkers(meta.targetAst!.toString(), cssDepth),
                 loader: 'css',
             };
@@ -532,7 +532,7 @@ function sortMarkersByDepth(
     const sorted = sortModulesByDepth(
         extracted,
         (m) => m.depth,
-        (m) => m.path,
+        (_) => '', // we don't want to sort by path this way we get similar results as the js injection mode
         -1
     );
 

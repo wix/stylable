@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { ESBuildTestKit } from '../esbuild-testkit';
 import type { Page, Response } from 'playwright-core';
+import { sep } from 'node:path';
 
 /**
  * This is the expected order of the stylesheets in the DOM
@@ -12,6 +13,9 @@ const stylesInOrder = [
     },
     {
         st_id: 'side-effects.st.css|sideeffects',
+    },
+    {
+        st_id: `internal-dir${sep}internal-dir.st.css|internaldir`,
     },
     {
         st_id: 'a.st.css|a',
@@ -83,9 +87,11 @@ async function contract(
                 ).getPropertyValue('--unused-deep'),
             };
         });
-
+        
     const assetLoaded = Boolean(responses?.find((r) => r.url().match(/asset-.*?\.png$/)));
+    const internalDirAsset = Boolean(responses?.find((r) => r.url().match(/internal-dir-.*?\.png$/)));
 
+    expect(internalDirAsset, 'asset loaded from internal dir').to.eql(true);
     expect(assetLoaded, 'asset loaded').to.eql(true);
     expect(reset, 'reset applied').to.eql('true');
     expect(sideEffects, 'side effects loaded').to.eql('true');
