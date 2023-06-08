@@ -26,6 +26,7 @@ export function parseForEditing(
     const input = new postcss.Input(source, { from }); // ToDo: check why stringifier option doesn't work
     const parser = new EditTimeParser(input);
     parser.parse();
+    parser.closeAstSource();
     return {
         ast: parser.root,
         errorNodes: parser.errorNodes,
@@ -55,6 +56,29 @@ class EditTimeParser extends Parser {
     }
     createTokenizer() {
         this.tokenizer = tokenizer(this.input, { ignoreErrors: true });
+    }
+    public closeAstSource(node: postcss.Node = this.root) {
+        if (!node.source!.end) {
+            const nodes = (node as any).nodes;
+            // ToDo: add before/between/after values
+            if (!nodes || nodes.length === 0) {
+                const startPos = node.source!.start!;
+                node.source!.end = {
+                    offset: startPos.offset + node.source!.input.css.length,
+                    line: startPos.line,
+                    column: startPos.column,
+                };
+            } else {
+                const lastNode = nodes[nodes.length - 1];
+                this.closeAstSource(lastNode);
+                const closePos = lastNode.source!.end!;
+                node.source!.end = {
+                    offset: closePos.offset + (node.raws.after?.length || 0),
+                    line: closePos.line,
+                    column: closePos.column,
+                };
+            }
+        }
     }
 
     private reportNode(node: AnyNode, type: 'error' | 'ambiguity', report: string) {

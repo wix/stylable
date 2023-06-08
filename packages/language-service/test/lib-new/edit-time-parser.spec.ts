@@ -292,7 +292,7 @@ describe('edit-time-parser', () => {
             ERRORS.ATRULE_MISSING_NAME,
         ]);
     });
-    it('should handle unclosed at-rule', () => {
+    it('should handle unclosed at-rule (open body without close)', () => {
         const { ast, errorNodes } = safeParse(`
             @xxx abc {
         `);
@@ -305,6 +305,17 @@ describe('edit-time-parser', () => {
             params: 'abc',
         });
         expect(errorNodes.get(unclosed), 'errors').to.eql([ERRORS.MISSING_CLOSE]);
+    });
+    it('should handle unclosed at-rule (no body or semicolon)', () => {
+        const { ast } = parseForEditing(`@xxx abc \t\t\t`);
+
+        expect(ast.toString(), 'stringify').to.equal('@xxx abc \t\t\t');
+        const unclosed = assertAtRule(ast.nodes[0]);
+        expect(unclosed, 'node').to.include({
+            name: 'xxx',
+            params: 'abc',
+        });
+        expect(ast.source!.end!.offset, 'close parent with extra space').to.eql(11);
     });
     it('should keep track of end of source for unclosed nested nodes', () => {
         const { ast } = safeParse(`
