@@ -7,7 +7,7 @@ const triggerParameterHints = Command.create('additional', 'editor.action.trigge
 
 describe('LS: css-pseudo-class', () => {
     it('should suggest class custom states', () => {
-        const { service, carets, assertCompletions, textEditContext } = testLangService(`
+        const { service, assertCompletions } = testLangService(`
             .x {
                 -st-states: xxx;
             }
@@ -25,43 +25,41 @@ describe('LS: css-pseudo-class', () => {
             .z .x^complex^ .y {}
         `);
         const entryPath = '/entry.st.css';
-        const entryCarets = carets[entryPath];
-        const { replaceText } = textEditContext(entryPath);
 
-        assertCompletions({
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
             message: 'classes states',
-            actualList: service.onCompletion(entryPath, entryCarets.afterRoot),
+            actualList: service.onCompletion(filePath, carets.afterRoot),
             expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
             unexpectedList: [{ label: ':xxx' }, { label: ':yyy' }],
-        });
+        }));
 
-        assertCompletions({
+        assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
             message: 'partial',
-            actualList: service.onCompletion(entryPath, entryCarets.partial),
+            actualList: service.onCompletion(filePath, carets.partial),
             expectedList: [
                 {
                     label: ':aaa',
-                    textEdit: replaceText(entryCarets.partial, ':aaa', { deltaStart: -2 }),
+                    textEdit: replaceText(carets.partial, ':aaa', { deltaStart: -2 }),
                 },
             ],
             unexpectedList: [{ label: ':bbb' }],
-        });
+        }));
 
-        assertCompletions({
+        assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
             message: 'complex selector',
-            actualList: service.onCompletion(entryPath, entryCarets.partial),
+            actualList: service.onCompletion(filePath, carets.partial),
             expectedList: [
                 {
                     label: ':aaa',
-                    textEdit: replaceText(entryCarets.partial, ':aaa', { deltaStart: -2 }),
+                    textEdit: replaceText(carets.partial, ':aaa', { deltaStart: -2 }),
                 },
             ],
             unexpectedList: [{ label: ':bbb' }],
-        });
+        }));
     });
     it('should suggest root custom states in empty selector', () => {
         // ToDo: once experimentalSelectorInference is on this should not behave like this
-        const { service, carets, assertCompletions } = testLangService(`
+        const { service, assertCompletions } = testLangService(`
             .root {
                 -st-states: aaa, bbb;
             }
@@ -69,16 +67,15 @@ describe('LS: css-pseudo-class', () => {
             ^empty^ {}
         `);
         const entryPath = '/entry.st.css';
-        const entryCarets = carets[entryPath];
 
-        assertCompletions({
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
             message: 'empty',
-            actualList: service.onCompletion(entryPath, entryCarets.empty),
+            actualList: service.onCompletion(filePath, carets.empty),
             expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-        });
+        }));
     });
     it('should NOT suggest used states', () => {
-        const { service, carets, assertCompletions } = testLangService(`
+        const { service, assertCompletions } = testLangService(`
             .x {
                 -st-states: aaa, bbb;
             }
@@ -86,16 +83,15 @@ describe('LS: css-pseudo-class', () => {
             .x:aaa^afterExistingState^ {}
         `);
         const entryPath = '/entry.st.css';
-        const entryCarets = carets[entryPath];
 
-        assertCompletions({
-            actualList: service.onCompletion(entryPath, entryCarets.afterExistingState),
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            actualList: service.onCompletion(filePath, carets.afterExistingState),
             expectedList: [{ label: ':bbb' }],
             unexpectedList: [{ label: ':aaa' }],
-        });
+        }));
     });
     it('should suggest pseudo-element custom states', () => {
-        const { service, carets, assertCompletions } = testLangService(`
+        const { service, assertCompletions } = testLangService(`
             .root {}
             .part {
                 -st-states: aaa, bbb;
@@ -104,15 +100,14 @@ describe('LS: css-pseudo-class', () => {
             .root::part^afterPseudoElement^ {}
         `);
         const entryPath = '/entry.st.css';
-        const entryCarets = carets[entryPath];
 
-        assertCompletions({
-            actualList: service.onCompletion(entryPath, entryCarets.afterPseudoElement),
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            actualList: service.onCompletion(filePath, carets.afterPseudoElement),
             expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-        });
+        }));
     });
     it('should suggest states from extended class', () => {
-        const { service, carets, assertCompletions } = testLangService(`
+        const { service, assertCompletions } = testLangService(`
             .y {
                 -st-states: aaa, bbb;
             }
@@ -124,20 +119,19 @@ describe('LS: css-pseudo-class', () => {
             .x^afterClass^ {}
         `);
         const entryPath = '/entry.st.css';
-        const entryCarets = carets[entryPath];
 
-        assertCompletions({
-            actualList: service.onCompletion(entryPath, entryCarets.afterClass),
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            actualList: service.onCompletion(filePath, carets.afterClass),
             expectedList: [
                 { label: ':aaa' },
                 { label: ':bbb' },
                 { label: ':ccc' },
                 { label: ':ddd' },
             ],
-        });
+        }));
     });
     it('should provide nested context', () => {
-        const { service, carets, assertCompletions } = testLangService(`
+        const { service, assertCompletions } = testLangService(`
             .root {
                 -st-states: rrr;
             }
@@ -161,31 +155,30 @@ describe('LS: css-pseudo-class', () => {
             }
 
         `);
-        const entryCarets = carets['/entry.st.css'];
 
-        assertCompletions({
+        assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
             message: 'nestRoot',
-            actualList: service.onCompletion('/entry.st.css', entryCarets.nestRoot),
+            actualList: service.onCompletion(filePath, carets.nestRoot),
             expectedList: [{ label: ':rrr' }],
             unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-        });
+        }));
 
-        assertCompletions({
+        assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
             message: 'nestA',
-            actualList: service.onCompletion('/entry.st.css', entryCarets.nestA),
+            actualList: service.onCompletion(filePath, carets.nestA),
             expectedList: [{ label: ':aaa' }],
             unexpectedList: [{ label: ':rrr' }, { label: ':bbb' }],
-        });
+        }));
 
-        assertCompletions({
+        assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
             message: 'nestB',
-            actualList: service.onCompletion('/entry.st.css', entryCarets.nestB),
+            actualList: service.onCompletion(filePath, carets.nestB),
             expectedList: [{ label: ':bbb' }],
             unexpectedList: [{ label: ':rrr' }, { label: ':aaa' }],
-        });
+        }));
     });
     it('should NOT suggest states after ::', () => {
-        const { service, carets, assertCompletions } = testLangService(`
+        const { service, assertCompletions } = testLangService(`
             .x {
                 -st-states: aaa, bbb;
             }
@@ -193,19 +186,18 @@ describe('LS: css-pseudo-class', () => {
             .x::^afterDoubleColon^ {}
         `);
         const entryPath = '/entry.st.css';
-        const entryCarets = carets[entryPath];
 
-        assertCompletions({
-            actualList: service.onCompletion(entryPath, entryCarets.afterDoubleColon),
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            actualList: service.onCompletion(filePath, carets.afterDoubleColon),
             unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-        });
+        }));
     });
     describe.skip('definition', () => {
         /*ToDo: move tests when implementation is refactored*/
     });
     describe('state with param', () => {
         it('should suggest state with parenthesis', () => {
-            const { service, carets, assertCompletions, textEditContext } = testLangService(`
+            const { service, assertCompletions } = testLangService(`
                 .x {
                     -st-states: 
                         word(string), 
@@ -215,30 +207,28 @@ describe('LS: css-pseudo-class', () => {
                 .x^afterClass^ {}
             `);
             const entryPath = '/entry.st.css';
-            const entryCarets = carets[entryPath];
-            const { replaceText } = textEditContext(entryPath);
 
-            assertCompletions({
-                actualList: service.onCompletion(entryPath, entryCarets.afterClass),
+            assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
+                actualList: service.onCompletion(filePath, carets.afterClass),
                 expectedList: [
                     {
                         label: ':word()',
-                        textEdit: replaceText(entryCarets.afterClass, ':word($1)'),
+                        textEdit: replaceText(carets.afterClass, ':word($1)'),
                         command: triggerParameterHints,
                     },
                     {
                         label: ':size()',
-                        textEdit: replaceText(entryCarets.afterClass, ':size($1)'),
+                        textEdit: replaceText(carets.afterClass, ':size($1)'),
                         command: triggerCompletion,
                     },
                 ],
-            });
+            }));
         });
         it('should suggest enum possible parameters', () => {
             // ToDo: prevent names native css lsp from suggesting inside states definitions.
             //       because native css lsp is returning results that mix with fixture
             //       (everything is with prefixed with 'x')
-            const { service, carets, assertCompletions, textEditContext } = testLangService(`
+            const { service, assertCompletions } = testLangService(`
                 .root {
                     -st-states: 
                         size(enum(xsmall, xmedium, xbig, xbigger)), 
@@ -251,12 +241,10 @@ describe('LS: css-pseudo-class', () => {
                 .root:size(xb^partialEnumParam^) {}
             `);
             const entryPath = '/entry.st.css';
-            const entryCarets = carets[entryPath];
-            const { replaceText } = textEditContext(entryPath);
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'empty param',
-                actualList: service.onCompletion(entryPath, entryCarets.emptyEnumParam),
+                actualList: service.onCompletion(filePath, carets.emptyEnumParam),
                 expectedList: [
                     { label: 'xsmall' },
                     { label: 'xmedium' },
@@ -272,32 +260,32 @@ describe('LS: css-pseudo-class', () => {
                     { label: ':global()' },
                     // ToDo: disable native-css-lsp in this context: { label: '.partA' },
                 ],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                 message: 'partial param',
-                actualList: service.onCompletion(entryPath, entryCarets.partialEnumParam),
+                actualList: service.onCompletion(filePath, carets.partialEnumParam),
                 expectedList: [
                     {
                         label: 'xbig',
-                        textEdit: replaceText(entryCarets.partialEnumParam, 'xbig', {
+                        textEdit: replaceText(carets.partialEnumParam, 'xbig', {
                             deltaStart: -2,
                         }),
                     },
                     {
                         label: 'xbigger',
-                        textEdit: replaceText(entryCarets.partialEnumParam, 'xbigger', {
+                        textEdit: replaceText(carets.partialEnumParam, 'xbigger', {
                             deltaStart: -2,
                         }),
                     },
                 ],
                 unexpectedList: [{ label: 'xsmall' }, { label: 'xmedium' }],
-            });
+            }));
         });
     });
     describe('st-scope', () => {
         it('should suggest class custom states (in st-scope params)', () => {
-            const { service, carets, assertCompletions } = testLangService(`
+            const { service, assertCompletions } = testLangService(`
                 .root {
                     -st-states: aaa,bbb;
                 }
@@ -307,20 +295,19 @@ describe('LS: css-pseudo-class', () => {
                 @st-scope ^empty^ {}
 
             `);
-            const entryCarets = carets['/entry.st.css'];
 
-            assertCompletions({
-                actualList: service.onCompletion('/entry.st.css', entryCarets.afterRoot),
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
+                actualList: service.onCompletion(filePath, carets.afterRoot),
                 expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-            });
+            }));
 
-            assertCompletions({
-                actualList: service.onCompletion('/entry.st.css', entryCarets.empty),
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
+                actualList: service.onCompletion(filePath, carets.empty),
                 expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-            });
+            }));
         });
         it('should suggest class custom states with nesting selector', () => {
-            const { service, carets, assertCompletions, textEditContext } = testLangService(`
+            const { service, assertCompletions } = testLangService(`
                 .x {
                     -st-states: aaa,bbb;
                 }
@@ -338,57 +325,61 @@ describe('LS: css-pseudo-class', () => {
                     }
                 }
             `);
-            const entryCarets = carets['/entry.st.css'];
-            const { replaceText } = textEditContext('/entry.st.css');
 
-            assertCompletions({
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'after &',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nest),
+                actualList: service.onCompletion(filePath, carets.nest),
                 expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'after & in media',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nestInMedia),
+                actualList: service.onCompletion(filePath, carets.nestInMedia),
                 expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-            });
+            }));
 
-            assertCompletions({
-                message: 'after &:',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nestColon),
-                expectedList: [
-                    {
-                        label: ':aaa',
-                        textEdit: replaceText(entryCarets.nestColon, ':aaa', { deltaStart: -1 }),
-                    },
-                    {
-                        label: ':bbb',
-                        textEdit: replaceText(entryCarets.nestColon, ':bbb', { deltaStart: -1 }),
-                    },
-                ],
-            });
+            assertCompletions(
+                '/entry.st.css',
+                ({ filePath, carets, textEdit: { replaceText } }) => ({
+                    message: 'after &:',
+                    actualList: service.onCompletion(filePath, carets.nestColon),
+                    expectedList: [
+                        {
+                            label: ':aaa',
+                            textEdit: replaceText(carets.nestColon, ':aaa', { deltaStart: -1 }),
+                        },
+                        {
+                            label: ':bbb',
+                            textEdit: replaceText(carets.nestColon, ':bbb', { deltaStart: -1 }),
+                        },
+                    ],
+                })
+            );
 
-            assertCompletions({
-                message: 'after &: in media',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nestColonInMedia),
-                expectedList: [
-                    {
-                        label: ':aaa',
-                        textEdit: replaceText(entryCarets.nestColonInMedia, ':aaa', {
-                            deltaStart: -1,
-                        }),
-                    },
-                    {
-                        label: ':bbb',
-                        textEdit: replaceText(entryCarets.nestColonInMedia, ':bbb', {
-                            deltaStart: -1,
-                        }),
-                    },
-                ],
-            });
+            assertCompletions(
+                '/entry.st.css',
+                ({ filePath, carets, textEdit: { replaceText } }) => ({
+                    message: 'after &: in media',
+                    actualList: service.onCompletion(filePath, carets.nestColonInMedia),
+                    expectedList: [
+                        {
+                            label: ':aaa',
+                            textEdit: replaceText(carets.nestColonInMedia, ':aaa', {
+                                deltaStart: -1,
+                            }),
+                        },
+                        {
+                            label: ':bbb',
+                            textEdit: replaceText(carets.nestColonInMedia, ':bbb', {
+                                deltaStart: -1,
+                            }),
+                        },
+                    ],
+                })
+            );
         });
         it('should suggest root custom states an empty nested selector', () => {
-            const { service, carets, assertCompletions, textEditContext } = testLangService(`
+            const { service, assertCompletions } = testLangService(`
                 .root {
                     -st-states: root-state;
                 }
@@ -409,54 +400,58 @@ describe('LS: css-pseudo-class', () => {
                     }
                 }
             `);
-            const entryCarets = carets['/entry.st.css'];
-            const { replaceText } = textEditContext('/entry.st.css');
 
-            assertCompletions({
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'empty',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.empty),
+                actualList: service.onCompletion(filePath, carets.empty),
                 expectedList: [{ label: ':root-state' }],
                 unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'empty in media',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.emptyInMedia),
+                actualList: service.onCompletion(filePath, carets.emptyInMedia),
                 expectedList: [{ label: ':root-state' }],
                 unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-            });
+            }));
 
-            assertCompletions({
-                message: 'colon',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.colon),
-                expectedList: [
-                    {
-                        label: ':root-state',
-                        textEdit: replaceText(entryCarets.colon, ':root-state', {
-                            deltaStart: -1,
-                        }),
-                    },
-                ],
-                unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-            });
+            assertCompletions(
+                '/entry.st.css',
+                ({ filePath, carets, textEdit: { replaceText } }) => ({
+                    message: 'colon',
+                    actualList: service.onCompletion(filePath, carets.colon),
+                    expectedList: [
+                        {
+                            label: ':root-state',
+                            textEdit: replaceText(carets.colon, ':root-state', {
+                                deltaStart: -1,
+                            }),
+                        },
+                    ],
+                    unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                })
+            );
 
-            assertCompletions({
-                message: 'colonInMedia',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.colonInMedia),
-                expectedList: [
-                    {
-                        label: ':root-state',
-                        textEdit: replaceText(entryCarets.colonInMedia, ':root-state', {
-                            deltaStart: -1,
-                        }),
-                    },
-                ],
-                unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-            });
+            assertCompletions(
+                '/entry.st.css',
+                ({ filePath, carets, textEdit: { replaceText } }) => ({
+                    message: 'colonInMedia',
+                    actualList: service.onCompletion(filePath, carets.colonInMedia),
+                    expectedList: [
+                        {
+                            label: ':root-state',
+                            textEdit: replaceText(carets.colonInMedia, ':root-state', {
+                                deltaStart: -1,
+                            }),
+                        },
+                    ],
+                    unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                })
+            );
         });
         it('should suggest matching intersection states', () => {
             const tempDir = createTempDirectorySync('lps-import-test-');
-            const { service, carets, assertCompletions, textEditContext, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'comp.st.css': `
                     .root {
@@ -488,31 +483,29 @@ describe('LS: css-pseudo-class', () => {
                 { testOnNativeFileSystem: tempDir.path }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
-            const { replaceText } = textEditContext(entryPath);
 
-            assertCompletions({
-                actualList: service.onCompletion(entryPath, entryCarets.inScope),
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
+                actualList: service.onCompletion(filePath, carets.inScope),
                 expectedList: [{ label: ':root-state' }, { label: ':comp-state' }],
                 unexpectedList: [{ label: ':shared' }, { label: ':onlyA' }, { label: ':onlyB' }],
-            });
+            }));
 
-            assertCompletions({
-                actualList: service.onCompletion(entryPath, entryCarets.nest),
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
+                actualList: service.onCompletion(filePath, carets.nest),
                 expectedList: [{ label: ':shared' }],
                 unexpectedList: [
                     { label: ':onlyA' },
                     { label: ':onlyB' },
                     { label: ':root-state' },
                 ],
-            });
+            }));
 
-            assertCompletions({
-                actualList: service.onCompletion(entryPath, entryCarets.nestColon),
+            assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
+                actualList: service.onCompletion(filePath, carets.nestColon),
                 expectedList: [
                     {
                         label: ':shared',
-                        textEdit: replaceText(entryCarets.nestColon, ':shared', {
+                        textEdit: replaceText(carets.nestColon, ':shared', {
                             deltaStart: -1,
                         }),
                     },
@@ -522,12 +515,12 @@ describe('LS: css-pseudo-class', () => {
                     { label: ':onlyB' },
                     { label: ':root-state' },
                 ],
-            });
+            }));
         });
     });
     describe('nesting', () => {
         it('should infer nest from parent nesting selector', () => {
-            const { service, carets, assertCompletions } = testLangService(`
+            const { service, assertCompletions } = testLangService(`
                 .root {
                     -st-states: root-state;
                 }
@@ -552,26 +545,25 @@ describe('LS: css-pseudo-class', () => {
                     }
                 }
             `);
-            const entryCarets = carets['/entry.st.css'];
 
-            assertCompletions({
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'nest',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nest),
+                actualList: service.onCompletion(filePath, carets.nest),
                 expectedList: [{ label: ':part-state' }],
                 unexpectedList: [{ label: ':root-state' }],
-            });
-            assertCompletions({
+            }));
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'doubleNest',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.doubleNest),
+                actualList: service.onCompletion(filePath, carets.doubleNest),
                 expectedList: [{ label: ':part-state' }],
                 unexpectedList: [{ label: ':root-state' }],
-            });
-            assertCompletions({
+            }));
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'nestUnderNonAmp',
-                actualList: service.onCompletion('/entry.st.css', entryCarets.nestUnderNonAmp),
+                actualList: service.onCompletion(filePath, carets.nestUnderNonAmp),
                 expectedList: [{ label: ':root-state' }],
                 unexpectedList: [{ label: ':part-state' }],
-            });
+            }));
         });
     });
     describe('st-import', () => {
@@ -583,7 +575,7 @@ describe('LS: css-pseudo-class', () => {
             tempDir.remove();
         });
         it('should suggest states from imported class', () => {
-            const { service, carets, assertCompletions, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'origin.st.css': `
                         .root {
@@ -614,35 +606,34 @@ describe('LS: css-pseudo-class', () => {
                 { testOnNativeFileSystem: tempDir.path }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'default class',
-                actualList: service.onCompletion(entryPath, entryCarets.defaultClass),
+                actualList: service.onCompletion(filePath, carets.defaultClass),
                 expectedList: [{ label: ':stateX' }],
                 unexpectedList: [{ label: ':stateY' }, { label: ':stateZ' }, { label: ':stateR' }],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'named class',
-                actualList: service.onCompletion(entryPath, entryCarets.namedClass),
+                actualList: service.onCompletion(filePath, carets.namedClass),
                 expectedList: [{ label: ':stateY' }],
                 unexpectedList: [{ label: ':stateX' }, { label: ':stateZ' }, { label: ':stateR' }],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'extending default (root)',
-                actualList: service.onCompletion(entryPath, entryCarets.extendingDefault),
+                actualList: service.onCompletion(filePath, carets.extendingDefault),
                 expectedList: [{ label: ':stateX' }, { label: ':stateR' }],
                 unexpectedList: [{ label: ':stateY' }, { label: ':stateZ' }],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'extending named',
-                actualList: service.onCompletion(entryPath, entryCarets.extendingClass),
+                actualList: service.onCompletion(filePath, carets.extendingClass),
                 expectedList: [{ label: ':stateY' }, { label: ':stateZ' }],
                 unexpectedList: [{ label: ':stateX' }, { label: ':stateR' }],
-            });
+            }));
         });
         it('should suggest states for pseudo-elements', () => {
-            const { service, carets, assertCompletions, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'part-base.st.css': `
                         .root {
@@ -680,28 +671,27 @@ describe('LS: css-pseudo-class', () => {
                 { testOnNativeFileSystem: tempDir.path }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'after pseudo element',
-                actualList: service.onCompletion(entryPath, entryCarets.afterPseudoElement),
+                actualList: service.onCompletion(filePath, carets.afterPseudoElement),
                 expectedList: [{ label: ':part-state' }, { label: ':another-part-state' }],
                 unexpectedList: [{ label: ':root-state' }],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'after existing state',
-                actualList: service.onCompletion(entryPath, entryCarets.afterUsedState),
+                actualList: service.onCompletion(filePath, carets.afterUsedState),
                 expectedList: [{ label: ':part-state' }],
                 unexpectedList: [{ label: ':root-state' }, { label: ':another-part-state' }],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'after 2 levels of pseudo-elements',
-                actualList: service.onCompletion(entryPath, entryCarets.inDeepPseudoElement),
+                actualList: service.onCompletion(filePath, carets.inDeepPseudoElement),
                 expectedList: [{ label: ':xxx' }],
-            });
+            }));
         });
         it('should suggest enum possible parameters', () => {
-            const { service, carets, assertCompletions, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'origin.st.css': `
                         .root {
@@ -718,19 +708,18 @@ describe('LS: css-pseudo-class', () => {
                 { testOnNativeFileSystem: tempDir.path }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'empty',
-                actualList: service.onCompletion(entryPath, entryCarets.empty),
+                actualList: service.onCompletion(filePath, carets.empty),
                 expectedList: [{ label: 'shirt' }, { label: 'hat' }],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'partial',
-                actualList: service.onCompletion(entryPath, entryCarets.partial),
+                actualList: service.onCompletion(filePath, carets.partial),
                 expectedList: [{ label: 'shirt' }],
                 unexpectedList: [{ label: 'hat' }],
-            });
+            }));
         });
     });
 });
