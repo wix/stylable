@@ -14,6 +14,7 @@ import {
 import { resolveConfig, buildDTS } from '@stylable/cli';
 import { DiagnosticsMode, emitDiagnostics } from '@stylable/core/dist/index-internal';
 import { parse } from 'postcss';
+import { buildCache } from './build-cache';
 
 const namespaces = {
     unused: 'stylable-unused',
@@ -88,6 +89,8 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             optimize,
             devTypes,
         } = applyDefaultOptions(initialPluginOptions);
+        // we need a cache instance per stylable config.
+        const { checkCache, addToCache, transferBuildInfo } = buildCache();
 
         enableEsbuildMetafile(build, cssInjection);
 
@@ -172,6 +175,11 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
          * this flow will create the Stylable JS modules
          */
         build.onLoad({ filter: /.*/, namespace: namespaces.jsModule }, (args) => {
+            const cacheResults = checkCache(args.path);
+            if (cacheResults) {
+                return cacheResults;
+            }
+
             const res = stylable.transform(args.path);
             const { errors, warnings } = esbuildEmitDiagnostics(res, diagnosticsMode);
             const { imports, collector } = importsCollector(res);
@@ -219,14 +227,14 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     : undefined
             );
 
-            return {
+            return addToCache(args.path, {
                 errors,
                 warnings,
                 watchFiles: [args.path, ...deepDependencies],
                 resolveDir: dirname(args.path),
                 contents: cssInjection === 'js' ? processStubs(moduleCode) : moduleCode,
                 pluginData: { stylableResults: res },
-            };
+            });
         });
 
         /**
@@ -323,6 +331,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     );
                 }
             }
+            transferBuildInfo();
         });
     },
 });
