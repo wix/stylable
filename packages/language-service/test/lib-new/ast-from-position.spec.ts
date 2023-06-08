@@ -1080,5 +1080,42 @@ describe('ast-from-position', () => {
             expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
+        it('should get unclosed at-rule cursor at name', () => {
+            const { position, parsed } = setupWithCursor(`@bookmark|`);
+
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
+
+            // base level
+            expect(base.node.toString(), 'base target at-rule').to.eql('@bookmark');
+            expect(base.offsetInNode, 'base offset').to.eql(9);
+            expect(base.where, 'where').to.eql('atRuleName');
+            // unresolved levels
+            expect(selector, 'selector').to.eql(undefined);
+            expect(declValue, 'declValue').to.eql(undefined);
+            expect(atRuleParams, 'atRuleParams').to.eql(undefined);
+        });
+        it('should get unclosed at-rule cursor empty params', () => {
+            const { position, parsed } = setupWithCursor(`@bookmark |`);
+
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
+
+            // base level
+            expect(base.node.toString(), 'base target at-rule').to.eql('@bookmark ');
+            expect(base.offsetInNode, 'base offset').to.eql(10);
+            expect(base.where, 'where').to.eql('atRuleParams');
+            // atrule-params level
+            expect(stringifyCSSValue(atRuleParams!.node as any), 'target params node').to.eql('');
+            expect(atRuleParams!.offsetInNode).to.eql(0);
+            assertNodes(atRuleParams!.parents, [
+                {
+                    desc: 'rule node',
+                    str: '@bookmark ',
+                },
+            ]);
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql('');
+            // unresolved levels
+            expect(selector, 'selector').to.eql(undefined);
+            expect(declValue, 'declValue').to.eql(undefined);
+        });
     });
 });

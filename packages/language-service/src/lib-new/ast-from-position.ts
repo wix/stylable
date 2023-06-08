@@ -74,7 +74,7 @@ export interface AstLocationResult {
 }
 function isClosed(node: postcss.AnyNode) {
     const isLast = node.parent && node.parent.nodes[node.parent.nodes.length - 1] === node;
-    if (node.type === 'decl') {
+    if (node.type === 'decl' || (node.type === 'atrule' && !node.nodes)) {
         return isLast ? node.parent?.raws.semicolon : true;
     }
     return true;
@@ -269,7 +269,7 @@ function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
 function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
     if (isAtRule(node)) {
         const valueStart =
-            checkContext.baseNodeOffset + 1 + node.name.length + node.raws.afterName!.length;
+            checkContext.baseNodeOffset + 1 + node.name.length + (node.raws.afterName!.length || 1);
         const valueEnd = valueStart + node.params.length;
         const isInParams = checkValue({
             type: 'atRuleParams',
