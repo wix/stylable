@@ -724,8 +724,8 @@ export function validateRuleStateDefinition(
                             !!stateParam.defaultValue
                         );
                         if (errors) {
-                            selectorNode.walkDecls((decl) => {
-                                if (decl.prop === `-st-states`) {
+                            for (const node of selectorNode.nodes) {
+                                if (node.type === 'decl' && node.prop === `-st-states`) {
                                     diagnostics.report(
                                         stateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
                                             stateName,
@@ -733,14 +733,13 @@ export function validateRuleStateDefinition(
                                             errors
                                         ),
                                         {
-                                            node: decl,
-                                            word: decl.value,
+                                            node: node,
+                                            word: node.value,
                                         }
                                     );
-                                    return false;
+                                    break;
                                 }
-                                return;
-                            });
+                            }
                         }
                     }
                 }
