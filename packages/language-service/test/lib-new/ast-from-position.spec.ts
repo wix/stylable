@@ -54,7 +54,7 @@ function expectAstLocation(
     expectation: {
         node?: NodeType;
         stringify?: string;
-        unIndentedStringify?: string;
+        deindent?: boolean;
         where?: string;
         parents?: { str: string; desc?: string; type?: string }[];
     }
@@ -69,8 +69,12 @@ function expectAstLocation(
             throw new Error(`expected where="${expectation.where}"`);
         }
     }
-    if (expectation.unIndentedStringify || expectation.stringify) {
-        const expectedSource = expectation.unIndentedStringify ?? deindent(expectation.stringify!);
+    if (expectation.stringify) {
+        const disableDeindent =
+            expectation.deindent === false || !expectation.stringify.includes('\n');
+        const expectedSource = disableDeindent
+            ? expectation.stringify
+            : deindent(expectation.stringify);
         let caretOffset = actual.offsetInNode;
         let stringified = stringifyResultAst(actual.node);
         if (expectedSource.includes('|')) {
@@ -124,7 +128,8 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: parsed.ast,
                 where: 'root',
-                unIndentedStringify: ' \t\n|\n\t ',
+                stringify: ' \t\n|\n\t ',
+                deindent: false,
             });
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -419,7 +424,7 @@ describe('ast-from-position', () => {
             });
             // selector-after level
             expectAstLocation(selector!, {
-                unIndentedStringify: ` .bookmark |`,
+                stringify: ` .bookmark |`,
                 parents: [
                     {
                         desc: 'rule node',
@@ -576,7 +581,7 @@ describe('ast-from-position', () => {
             });
             // decl-value level
             expectAstLocation(declValue!, {
-                unIndentedStringify: ' | ',
+                stringify: ' | ',
                 parents: [
                     {
                         desc: 'decl',
@@ -606,7 +611,7 @@ describe('ast-from-position', () => {
             // decl-value level
             expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' bookmark after');
             expectAstLocation(declValue!, {
-                unIndentedStringify: ' |',
+                stringify: ' |',
                 parents: [
                     {
                         desc: 'value node',
@@ -732,7 +737,7 @@ describe('ast-from-position', () => {
             expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' before');
             expect(declValue!.afterValue, 'after value').to.eql(true);
             expectAstLocation(declValue!, {
-                unIndentedStringify: ' before  |',
+                stringify: ' before  |',
                 parents: [
                     {
                         desc: 'decl node',
@@ -782,7 +787,7 @@ describe('ast-from-position', () => {
             // at-rule-params level
             expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' params ');
             expectAstLocation(atRuleParams!, {
-                unIndentedStringify: '| ',
+                stringify: '| ',
                 parents: [
                     {
                         desc: 'atRule node',
@@ -809,7 +814,7 @@ describe('ast-from-position', () => {
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql('  params ');
             expectAstLocation(atRuleParams!, {
-                unIndentedStringify: ' | ',
+                stringify: ' | ',
                 parents: [
                     {
                         desc: 'atRule node',
@@ -838,7 +843,7 @@ describe('ast-from-position', () => {
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' bookmark after ');
             expectAstLocation(atRuleParams!, {
-                unIndentedStringify: ' |',
+                stringify: ' |',
                 parents: [
                     {
                         desc: 'rule node',
@@ -962,7 +967,7 @@ describe('ast-from-position', () => {
             // atrule-params level
             expect(atRuleParams!.afterValue, 'space is part of params').to.eql(false);
             expectAstLocation(atRuleParams!, {
-                unIndentedStringify: '   |   ',
+                stringify: '   |   ',
                 parents: [
                     {
                         desc: 'rule node',
@@ -987,13 +992,13 @@ describe('ast-from-position', () => {
 
             // base level
             expectAstLocation(base, {
-                unIndentedStringify: '@name params   |   ',
+                stringify: '@name params   |   ',
                 where: 'atRuleParams',
             });
             // atrule-params level
             expect(atRuleParams!.afterValue, 'after params value').to.eql(false);
             expectAstLocation(atRuleParams!, {
-                unIndentedStringify: '   |   ',
+                stringify: '   |   ',
                 parents: [
                     {
                         desc: 'rule node',
@@ -1159,7 +1164,8 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
                 where: 'invalid',
-                unIndentedStringify: 'book|mark\n',
+                stringify: 'book|mark\n',
+                deindent: false,
             });
             // selector level
             expect(selector!.afterSelector, 'after selector').to.eql(false);
@@ -1194,7 +1200,7 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
                 where: 'declValue',
-                unIndentedStringify: 'color: gre|en',
+                stringify: 'color: gre|en',
             });
             // decl-value level
             expectAstLocation(declValue!, {
@@ -1235,13 +1241,13 @@ describe('ast-from-position', () => {
 
             // base level
             expectAstLocation(base, {
-                unIndentedStringify: '.before   |   \t',
+                stringify: '.before   |   \t',
                 where: 'invalid',
             });
             // selector level
             expect(selector!.afterSelector, 'after selector').to.eql(true);
             expectAstLocation(selector!, {
-                unIndentedStringify: '.before   |   \t',
+                stringify: '.before   |   \t',
                 parents: [
                     {
                         desc: 'invalid node',
@@ -1291,7 +1297,7 @@ describe('ast-from-position', () => {
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' ');
             expectAstLocation(atRuleParams!, {
-                unIndentedStringify: ' |',
+                stringify: ' |',
                 parents: [
                     {
                         desc: 'rule node',
