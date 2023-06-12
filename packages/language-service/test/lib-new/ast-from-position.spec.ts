@@ -54,7 +54,7 @@ function expectAstLocation(
     expectation: {
         node?: NodeType;
         stringify?: string;
-        unIndentedStringify?: string;
+        deindent?: boolean;
         where?: string;
         parents?: { str: string; desc?: string; type?: string }[];
     }
@@ -69,8 +69,12 @@ function expectAstLocation(
             throw new Error(`expected where="${expectation.where}"`);
         }
     }
-    if (expectation.unIndentedStringify || expectation.stringify) {
-        const expectedSource = expectation.unIndentedStringify ?? deindent(expectation.stringify!);
+    if (expectation.stringify) {
+        const disableDeindent =
+            expectation.deindent === false || !expectation.stringify.includes('\n');
+        const expectedSource = disableDeindent
+            ? expectation.stringify
+            : deindent(expectation.stringify);
         let caretOffset = actual.offsetInNode;
         let stringified = stringifyResultAst(actual.node);
         if (expectedSource.includes('|')) {
@@ -124,7 +128,8 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: parsed.ast,
                 where: 'root',
-                unIndentedStringify: ' \t\n|\n\t ',
+                stringify: ' \t\n|\n\t ',
+                deindent: false,
             });
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
@@ -419,7 +424,7 @@ describe('ast-from-position', () => {
             });
             // selector-after level
             expectAstLocation(selector!, {
-                unIndentedStringify: ` .bookmark |`,
+                stringify: ` .bookmark |`,
                 parents: [
                     {
                         desc: 'rule node',
@@ -571,18 +576,27 @@ describe('ast-from-position', () => {
             // base level
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
-                where: 'declBetweenColonAndValue',
+                where: 'declValue',
                 stringify: `decl: | declValue`,
+            });
+            // decl-value level
+            expectAstLocation(declValue!, {
+                stringify: ' | ',
+                parents: [
+                    {
+                        desc: 'decl',
+                        str: 'decl:  declValue',
+                    },
+                ],
             });
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
-            expect(declValue, 'declValue').to.eql(undefined);
             expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it(`should find value start`, () => {
             const { position, parsed } = setupWithCursor(`
                 .selector {
-                    decl1: |bookmark after;
+                    decl1: |bookmark after ;
                     decl2: other;
                 }
             `);
@@ -592,16 +606,16 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
                 where: 'declValue',
-                stringify: `decl1: |bookmark after`,
+                stringify: `decl1: |bookmark after `,
             });
             // decl-value level
-            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('bookmark after');
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' bookmark after ');
             expectAstLocation(declValue!, {
-                stringify: '|bookmark',
+                stringify: ' |',
                 parents: [
                     {
                         desc: 'value node',
-                        str: 'decl1: bookmark after',
+                        str: 'decl1: bookmark after ',
                     },
                 ],
             });
@@ -625,7 +639,7 @@ describe('ast-from-position', () => {
                 stringify: `decl1: before book|mark after`,
             });
             // decl-value level
-            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('before bookmark after');
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' before bookmark after');
             expectAstLocation(declValue!, {
                 stringify: 'book|mark',
                 parents: [
@@ -655,7 +669,7 @@ describe('ast-from-position', () => {
             });
             // decl-value level
             expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(
-                'before nest(bookmark) after'
+                ' before nest(bookmark) after'
             );
             expectAstLocation(declValue!, {
                 stringify: 'book|mark',
@@ -677,7 +691,7 @@ describe('ast-from-position', () => {
         it(`should find value end`, () => {
             const { position, parsed } = setupWithCursor(`
                 .selector {
-                    decl1: before bookmark|;
+                    decl1: before bookmark| ;
                     decl2: other;
                 }
             `);
@@ -687,16 +701,16 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
                 where: 'declValue',
-                stringify: `decl1: before bookmark|`,
+                stringify: `decl1: before bookmark| `,
             });
             // decl-value level
-            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('before bookmark');
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' before bookmark ');
             expectAstLocation(declValue!, {
                 stringify: 'bookmark|',
                 parents: [
                     {
                         desc: 'decl node',
-                        str: 'decl1: before bookmark',
+                        str: 'decl1: before bookmark ',
                     },
                 ],
             });
@@ -719,13 +733,15 @@ describe('ast-from-position', () => {
                 stringify: `decl1: before   |`,
             });
             // decl-value level
-            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql('before');
-            expect(declValue!.afterValue, 'after value').to.eql(true);
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' before      \t\n');
             expectAstLocation(declValue!, {
-                stringify: 'before   |',
+                stringify: '   |   \t\n',
+                deindent: false,
                 parents: [
                     {
                         desc: 'decl node',
+                        // postcss stringify doesn't show unclosed after spaces on decl
+                        // they belong in parent rule raws after
                         str: 'decl1: before',
                     },
                 ],
@@ -769,10 +785,47 @@ describe('ast-from-position', () => {
                 stringify: '@bookmark| params {}',
                 where: 'atRuleName',
             });
+            // at-rule-params level
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' params ');
+            expectAstLocation(atRuleParams!, {
+                stringify: '| ',
+                parents: [
+                    {
+                        desc: 'atRule node',
+                        str: '@bookmark params {}',
+                    },
+                ],
+            });
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
-            expect(atRuleParams, 'atRuleParams').to.eql(undefined);
+        });
+        it(`should find between name and params (pre param whitespace)`, () => {
+            const { position, parsed } = setupWithCursor(`
+                @name | params {}
+            `);
+
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
+
+            // base level
+            expectAstLocation(base, {
+                stringify: '@name | params {}',
+                where: 'atRuleParams',
+            });
+            // atrule-params level
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql('  params ');
+            expectAstLocation(atRuleParams!, {
+                stringify: ' | ',
+                parents: [
+                    {
+                        desc: 'atRule node',
+                        str: '@name  params {}',
+                    },
+                ],
+            });
+            // unresolved levels
+            expect(selector, 'selector').to.eql(undefined);
+            expect(declValue, 'declValue').to.eql(undefined);
         });
         it(`should find params start`, () => {
             const { position, parsed } = setupWithCursor(`
@@ -789,9 +842,9 @@ describe('ast-from-position', () => {
                 where: 'atRuleParams',
             });
             // atrule-params level
-            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql('bookmark after');
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' bookmark after ');
             expectAstLocation(atRuleParams!, {
-                stringify: '|bookmark',
+                stringify: ' |',
                 parents: [
                     {
                         desc: 'rule node',
@@ -819,7 +872,7 @@ describe('ast-from-position', () => {
             });
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(
-                'before bookmark after'
+                ' before bookmark after '
             );
             expectAstLocation(atRuleParams!, {
                 stringify: 'book|mark',
@@ -850,7 +903,7 @@ describe('ast-from-position', () => {
             });
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(
-                'before nest(bookmark) after'
+                ' before nest(bookmark) after '
             );
             expectAstLocation(atRuleParams!, {
                 stringify: 'book|mark',
@@ -884,7 +937,7 @@ describe('ast-from-position', () => {
                 where: 'atRuleParams',
             });
             // atrule-params level
-            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql('start bookmark');
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' start bookmark ');
             expectAstLocation(atRuleParams!, {
                 stringify: 'bookmark|',
                 parents: [
@@ -913,9 +966,8 @@ describe('ast-from-position', () => {
                 where: 'atRuleParams',
             });
             // atrule-params level
-            expect(atRuleParams!.afterValue, 'after params value').to.eql(true);
             expectAstLocation(atRuleParams!, {
-                stringify: 'params   |',
+                stringify: '   |   ',
                 parents: [
                     {
                         desc: 'rule node',
@@ -940,17 +992,45 @@ describe('ast-from-position', () => {
 
             // base level
             expectAstLocation(base, {
-                unIndentedStringify: '@name params   |   ',
+                stringify: '@name params   |   ',
                 where: 'atRuleParams',
             });
             // atrule-params level
-            expect(atRuleParams!.afterValue, 'after params value').to.eql(true);
             expectAstLocation(atRuleParams!, {
-                stringify: 'params   |',
+                stringify: '   |   ',
                 parents: [
                     {
                         desc: 'rule node',
                         str: '@name params      ',
+                    },
+                ],
+            });
+            // unresolved levels
+            expect(selector, 'selector').to.eql(undefined);
+            expect(declValue, 'declValue').to.eql(undefined);
+        });
+        it(`should find between params and unclosed end`, () => {
+            const { position, parsed } = setupWithCursor(`@name params   |   \n\t`, {
+                deindent: false,
+            });
+
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
+
+            // base level
+            expectAstLocation(base, {
+                stringify: '@name params   |',
+                deindent: false,
+                where: 'atRuleParams',
+            });
+            // atrule-params level
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' params      \n\t');
+            expectAstLocation(atRuleParams!, {
+                stringify: '   |   \n\t',
+                deindent: false,
+                parents: [
+                    {
+                        desc: 'rule node',
+                        str: '@name params',
                     },
                 ],
             });
@@ -1112,7 +1192,8 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
                 where: 'invalid',
-                unIndentedStringify: 'book|mark\n',
+                stringify: 'book|mark\n',
+                deindent: false,
             });
             // selector level
             expect(selector!.afterSelector, 'after selector').to.eql(false);
@@ -1147,7 +1228,7 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
                 where: 'declValue',
-                unIndentedStringify: 'color: gre|en',
+                stringify: 'color: gre|en',
             });
             // decl-value level
             expectAstLocation(declValue!, {
@@ -1188,13 +1269,13 @@ describe('ast-from-position', () => {
 
             // base level
             expectAstLocation(base, {
-                unIndentedStringify: '.before   |   \t',
+                stringify: '.before   |   \t',
                 where: 'invalid',
             });
             // selector level
             expect(selector!.afterSelector, 'after selector').to.eql(true);
             expectAstLocation(selector!, {
-                unIndentedStringify: '.before   |   \t',
+                stringify: '.before   |   \t',
                 parents: [
                     {
                         desc: 'invalid node',
@@ -1217,10 +1298,19 @@ describe('ast-from-position', () => {
                 stringify: '@bookmark|',
                 where: 'atRuleName',
             });
+            // atrule-params level
+            expectAstLocation(atRuleParams!, {
+                stringify: '|',
+                parents: [
+                    {
+                        desc: 'atrule node',
+                        str: '@bookmark',
+                    },
+                ],
+            });
             // unresolved levels
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
-            expect(atRuleParams, 'atRuleParams').to.eql(undefined);
         });
         it('should get unclosed at-rule cursor empty params', () => {
             const { position, parsed } = setupWithCursor(`@bookmark |`);
@@ -1233,9 +1323,9 @@ describe('ast-from-position', () => {
                 where: 'atRuleParams',
             });
             // atrule-params level
-            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql('');
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' ');
             expectAstLocation(atRuleParams!, {
-                stringify: '',
+                stringify: ' |',
                 parents: [
                     {
                         desc: 'rule node',
