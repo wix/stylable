@@ -48,7 +48,7 @@ import {
     isInValue,
 } from './provider';
 import type { ExtendedTsLanguageService } from './types';
-import { getAtRuleByPosition, isComment, isDeclaration } from './utils/postcss-ast-utils';
+import { isComment, isDeclaration } from './utils/postcss-ast-utils';
 import type { CursorPosition } from './utils/selector-analyzer';
 import type { LangServiceContext } from '../lib-new/lang-service-context';
 import * as cssPseudoClass from '../lib-new/features/ls-css-pseudo-class';
@@ -403,23 +403,22 @@ export const ValueDirectiveProvider: LangServicePlugin & {
 // Selector level
 export const GlobalCompletionProvider: LangServicePlugin = {
     onCompletion({
+        context,
         parentSelector,
         fullLineText,
         position,
         lineChunkAtCursor,
-        astAtCursor,
     }: ProviderOptions): Completion[] {
+        const isSelectorContext =
+            context.isInSelectorAllowedSpace() ||
+            // natively allow in custom-selector; ToDO: make custom-selector plugin that enable selector at mapped location
+            (context.location.base.node as any).name === 'custom-selector';
         if (
+            isSelectorContext &&
             !parentSelector &&
             !lineChunkAtCursor.endsWith('::') &&
             !isBetweenChars(fullLineText, position, '(', ')')
         ) {
-            if (astAtCursor.type === 'root') {
-                if (getAtRuleByPosition(astAtCursor, position, 'st-import')) {
-                    return [];
-                }
-            }
-
             let offset = 0;
             if (fullLineText.lastIndexOf(':') !== -1) {
                 if (

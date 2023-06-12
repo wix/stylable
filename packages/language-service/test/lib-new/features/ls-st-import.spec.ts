@@ -103,30 +103,36 @@ describe('LS: st-import', () => {
 
         const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
+        const unexpectedList = [
+            { label: '.xxx' },
+            { label: 'input' },
+            { label: '@media' },
+            { label: ':global()' },
+        ];
         assertCompletions(entryPath, ({ filePath, carets }) => ({
             message: 'specifierEmpty',
             actualList: service.onCompletion(filePath, carets.specifierEmpty),
-            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+            unexpectedList,
         }));
         assertCompletions(entryPath, ({ filePath, carets }) => ({
             message: 'specifierWithDot',
             actualList: service.onCompletion(filePath, carets.specifierWithDot),
-            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+            unexpectedList,
         }));
         assertCompletions(entryPath, ({ filePath, carets }) => ({
             message: 'default',
             actualList: service.onCompletion(filePath, carets.default),
-            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+            unexpectedList,
         }));
         assertCompletions(entryPath, ({ filePath, carets }) => ({
             message: 'named',
             actualList: service.onCompletion(filePath, carets.named),
-            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+            unexpectedList,
         }));
         assertCompletions(entryPath, ({ filePath, carets }) => ({
             message: 'namedTyped',
             actualList: service.onCompletion(filePath, carets.namedTyped),
-            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+            unexpectedList,
         }));
     });
     describe('named imports', () => {
