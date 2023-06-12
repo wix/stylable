@@ -275,7 +275,12 @@ function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
     if (isAtRule(node)) {
         const AtPrefixLength = 1;
         const { afterName = '', between = '' } = node.raws;
-        const prelude = afterName + node.params + between;
+        const parentNode = node.parent;
+        const unclosedExtraSpace =
+            parentNode?.nodes[parentNode.nodes.length - 1] === node && !parentNode.raws.semicolon
+                ? node.parent?.raws.after
+                : '';
+        const prelude = afterName + node.params + between + unclosedExtraSpace;
         const valueStart = checkContext.baseNodeOffset + AtPrefixLength + node.name.length;
         const valueEnd = valueStart + prelude.length;
 

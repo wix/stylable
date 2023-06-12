@@ -1009,6 +1009,35 @@ describe('ast-from-position', () => {
             expect(selector, 'selector').to.eql(undefined);
             expect(declValue, 'declValue').to.eql(undefined);
         });
+        it(`should find between params and unclosed end`, () => {
+            const { position, parsed } = setupWithCursor(`@name params   |   \n\t`, {
+                deindent: false,
+            });
+
+            const { base, selector, declValue, atRuleParams } = getAstNodeAt(parsed, position);
+
+            // base level
+            expectAstLocation(base, {
+                stringify: '@name params   |',
+                deindent: false,
+                where: 'atRuleParams',
+            });
+            // atrule-params level
+            expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(' params      \n\t');
+            expectAstLocation(atRuleParams!, {
+                stringify: '   |   \n\t',
+                deindent: false,
+                parents: [
+                    {
+                        desc: 'rule node',
+                        str: '@name params',
+                    },
+                ],
+            });
+            // unresolved levels
+            expect(selector, 'selector').to.eql(undefined);
+            expect(declValue, 'declValue').to.eql(undefined);
+        });
         it(`should find before declaration`, () => {
             const { position, parsed } = setupWithCursor(`
                 .before {}
