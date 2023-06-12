@@ -105,6 +105,11 @@ export class Provider {
     ];
     constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
 
+    public analyzeCaretContext(context: LangServiceContext) {
+        for (const provider of this.plugins) {
+            provider.analyzeCaretLocation?.(context);
+        }
+    }
     public provideCompletionItemsFromSrc(
         context: LangServiceContext,
         fs: IFileSystem

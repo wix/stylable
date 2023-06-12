@@ -76,6 +76,7 @@ export interface ProviderOptions {
 }
 
 export interface LangServicePlugin {
+    analyzeCaretLocation?(context: LangServiceContext): void;
     onCompletion(options: ProviderOptions): Completion[];
 }
 

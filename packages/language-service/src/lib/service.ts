@@ -67,6 +67,7 @@ export class StylableLanguageService {
 
         if (stylableFile && stylableFile.stat.isFile()) {
             const context = new LangServiceContext(this.fs, this.stylable, stylableFile, offset);
+            this.provider.analyzeCaretContext(context);
             return this.getCompletions(context);
         } else {
             return [];
