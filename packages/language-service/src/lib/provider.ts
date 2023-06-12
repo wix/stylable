@@ -30,7 +30,7 @@ import { URI } from 'vscode-uri';
 
 import {
     CodeMixinCompletionProvider,
-    CompletionProvider,
+    LangServicePlugin,
     createRange,
     CssMixinCompletionProvider,
     ExtendCompletionProvider,
@@ -49,7 +49,6 @@ import {
     TopLevelDirectiveProvider,
     ValueCompletionProvider,
     ValueDirectiveProvider,
-    newStImportCompletionProvider,
 } from './completion-providers';
 import { topLevelDirectives } from './completion-types';
 import type { Completion } from './completion-types';
@@ -68,6 +67,7 @@ import {
     SelectorQuery,
 } from './utils/selector-analyzer';
 import type { LangServiceContext } from '../lib-new/lang-service-context';
+import { StImportPlugin } from '../lib-new/features/ls-st-import';
 
 function findLast<T>(
     arr: T[],
@@ -85,8 +85,8 @@ function findLast<T>(
 }
 
 export class Provider {
-    private providers: CompletionProvider[] = [
-        newStImportCompletionProvider,
+    private plugins: LangServicePlugin[] = [
+        StImportPlugin,
         RulesetInternalDirectivesProvider,
         ImportInternalDirectivesProvider,
         TopLevelDirectiveProvider,
@@ -129,8 +129,8 @@ export class Provider {
             res.cursorLineIndex,
             fs
         );
-        for (const provider of this.providers) {
-            completions.push(...provider.provide(options));
+        for (const provider of this.plugins) {
+            completions.push(...provider.onCompletion(options));
         }
 
         return this.dedupeComps(completions);

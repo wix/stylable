@@ -6,8 +6,15 @@ import path from 'path';
 import { STSymbol } from '@stylable/core/dist/index-internal';
 import type { AstLocationResult } from '../ast-from-position';
 import type { CSSValueAST } from '@tokey/css-value-parser';
+import type { LangServicePlugin } from '../../lib/completion-providers';
 
-export function getCompletions(context: LangServiceContext): Completion[] {
+export const StImportPlugin: LangServicePlugin = {
+    onCompletion({ context }) {
+        return getCompletions(context);
+    },
+};
+
+function getCompletions(context: LangServiceContext): Completion[] {
     const completions: Completion[] = [];
     const { node } = context.location.base;
     if (node.type === 'atrule' && node.name === 'st-import') {

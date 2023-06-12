@@ -52,7 +52,6 @@ import { getAtRuleByPosition, isComment, isDeclaration } from './utils/postcss-a
 import type { CursorPosition } from './utils/selector-analyzer';
 import type { LangServiceContext } from '../lib-new/lang-service-context';
 import * as cssPseudoClass from '../lib-new/features/ls-css-pseudo-class';
-import * as stImport from '../lib-new/features/ls-st-import';
 
 export interface ProviderOptions {
     context: LangServiceContext;
@@ -76,8 +75,8 @@ export interface ProviderOptions {
     fakes: postcss.Rule[];
 }
 
-export interface CompletionProvider {
-    provide(options: ProviderOptions): Completion[];
+export interface LangServicePlugin {
+    onCompletion(options: ProviderOptions): Completion[];
 }
 
 export class ProviderPosition {
@@ -193,8 +192,8 @@ const topLevelDeclarations: Array<keyof typeof topLevelDirectives> = [
 
 // Inside :import ruleset, which is not inside media query
 // If directive doesn't already exist
-export const ImportInternalDirectivesProvider: CompletionProvider = {
-    provide({
+export const ImportInternalDirectivesProvider: LangServicePlugin = {
+    onCompletion({
         parentSelector,
         isMediaQuery,
         fullLineText,
@@ -229,10 +228,10 @@ export const ImportInternalDirectivesProvider: CompletionProvider = {
 // Inside ruleset, which is not :import or :vars
 // Only inside simple selector, except -st-mixin
 // If directive doesn't already exist
-export const RulesetInternalDirectivesProvider: CompletionProvider & {
+export const RulesetInternalDirectivesProvider: LangServicePlugin & {
     isSimpleSelector: (sel: string) => boolean;
 } = {
-    provide({
+    onCompletion({
         parentSelector,
         isMediaQuery,
         fullLineText,
@@ -291,8 +290,8 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
 
 // Only top level
 // @st-namespace may not repeat
-export const TopLevelDirectiveProvider: CompletionProvider = {
-    provide({
+export const TopLevelDirectiveProvider: LangServicePlugin = {
+    onCompletion({
         parentSelector,
         isMediaQuery,
         fullLineText,
@@ -341,10 +340,10 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
 // RHS of declaration
 // Declaration is not -st-directive (except -st-mixin)
 // Not inside another value()
-export const ValueDirectiveProvider: CompletionProvider & {
+export const ValueDirectiveProvider: LangServicePlugin & {
     isInsideValueDirective: (wholeLine: string, pos: number) => boolean;
 } = {
-    provide({ parentSelector, fullLineText, position }: ProviderOptions): Completion[] {
+    onCompletion({ parentSelector, fullLineText, position }: ProviderOptions): Completion[] {
         if (
             parentSelector &&
             !isDirective(fullLineText) &&
@@ -401,8 +400,8 @@ export const ValueDirectiveProvider: CompletionProvider & {
 };
 
 // Selector level
-export const GlobalCompletionProvider: CompletionProvider = {
-    provide({
+export const GlobalCompletionProvider: LangServicePlugin = {
+    onCompletion({
         parentSelector,
         fullLineText,
         position,
@@ -448,8 +447,9 @@ export const GlobalCompletionProvider: CompletionProvider = {
 
 // Selector level
 // Not after :, unless entire chunk is :
-export const SelectorCompletionProvider: CompletionProvider = {
-    provide({
+export const SelectorCompletionProvider: LangServicePlugin = {
+    onCompletion({
+        context,
         parentSelector,
         fullLineText,
         position,
@@ -458,7 +458,11 @@ export const SelectorCompletionProvider: CompletionProvider = {
         fakes,
         stylable,
     }: ProviderOptions): Completion[] {
-        if (!parentSelector && (lineChunkAtCursor === ':' || !lineChunkAtCursor.endsWith(':'))) {
+        if (
+            context.isInSelectorAllowedSpace() &&
+            !parentSelector &&
+            (lineChunkAtCursor === ':' || !lineChunkAtCursor.endsWith(':'))
+        ) {
             const comps: Completion[] = [];
             comps.push(
                 ...Object.keys(meta.getAllClasses())
@@ -523,8 +527,8 @@ export const SelectorCompletionProvider: CompletionProvider = {
 
 // Inside ruleset of simple selector, not :import or :vars
 // RHS of -st-extends
-export const ExtendCompletionProvider: CompletionProvider = {
-    provide({ lineChunkAtCursor, position, meta, stylable }: ProviderOptions): Completion[] {
+export const ExtendCompletionProvider: LangServicePlugin = {
+    onCompletion({ lineChunkAtCursor, position, meta, stylable }: ProviderOptions): Completion[] {
         if (lineChunkAtCursor.startsWith(`-st-extends`)) {
             const value = lineChunkAtCursor.slice(`-st-extends:`.length);
             const spaces = value.search(/\S|$/);
@@ -579,8 +583,13 @@ export const ExtendCompletionProvider: CompletionProvider = {
 
 // Inside ruleset, which is not :import or :vars
 // RHS of -st-extends
-export const CssMixinCompletionProvider: CompletionProvider = {
-    provide({ lineChunkAtCursor, meta, position, fullLineText }: ProviderOptions): Completion[] {
+export const CssMixinCompletionProvider: LangServicePlugin = {
+    onCompletion({
+        lineChunkAtCursor,
+        meta,
+        position,
+        fullLineText,
+    }: ProviderOptions): Completion[] {
         if (lineChunkAtCursor.startsWith(`-st-mixin:`)) {
             const { names, lastName } = getExistingNames(fullLineText, position);
             const symbols = meta.getAllSymbols();
@@ -620,8 +629,8 @@ export const CssMixinCompletionProvider: CompletionProvider = {
 // Only inside simple selector
 // RHS of -st-mixin
 // There is  a JS/TS import
-export const CodeMixinCompletionProvider: CompletionProvider = {
-    provide({
+export const CodeMixinCompletionProvider: LangServicePlugin = {
+    onCompletion({
         parentSelector,
         meta,
         fullLineText,
@@ -662,8 +671,8 @@ export const CodeMixinCompletionProvider: CompletionProvider = {
 
 // Inside ruleset, which is not :import
 // RHS of any rule except -st-extends, -st-from
-export const FormatterCompletionProvider: CompletionProvider = {
-    provide({
+export const FormatterCompletionProvider: LangServicePlugin = {
+    onCompletion({
         meta,
         fullLineText,
         parentSelector,
@@ -708,14 +717,14 @@ export const FormatterCompletionProvider: CompletionProvider = {
 // Inside :import
 // RHS of -st-named
 // import exists
-export const NamedCompletionProvider: CompletionProvider & {
+export const NamedCompletionProvider: LangServicePlugin & {
     resolveImport: (
         importName: string,
         stylable: Stylable,
         meta: StylableMeta
     ) => StylableMeta | null;
 } = {
-    provide({
+    onCompletion({
         parentSelector,
         astAtCursor,
         stylable,
@@ -886,14 +895,8 @@ function maybeResolveImport(
     return resolvedImport;
 }
 
-export const newStImportCompletionProvider: CompletionProvider = {
-    provide({ context }) {
-        return stImport.getCompletions(context);
-    },
-};
-
-export const PseudoElementCompletionProvider: CompletionProvider = {
-    provide({
+export const PseudoElementCompletionProvider: LangServicePlugin = {
+    onCompletion({
         parentSelector,
         resolved,
         resolvedElements,
@@ -1104,8 +1107,8 @@ function isPositionInDecl(position: ProviderPosition, decl: postcss.Declaration)
     return false;
 }
 
-export const StateTypeCompletionProvider: CompletionProvider = {
-    provide({ astAtCursor, fullLineText, position }: ProviderOptions): Completion[] {
+export const StateTypeCompletionProvider: LangServicePlugin = {
+    onCompletion({ astAtCursor, fullLineText, position }: ProviderOptions): Completion[] {
         const acc: Completion[] = [];
 
         if (isNodeRule(astAtCursor)) {
@@ -1188,14 +1191,14 @@ export const StateTypeCompletionProvider: CompletionProvider = {
     },
 };
 
-export const StateSelectorCompletionProvider: CompletionProvider = {
-    provide({ context }: ProviderOptions) {
+export const StateSelectorCompletionProvider: LangServicePlugin = {
+    onCompletion({ context }: ProviderOptions) {
         return cssPseudoClass.getCompletions(context);
     },
 };
 
-export const ValueCompletionProvider: CompletionProvider = {
-    provide({ fullLineText, position, meta, stylable }: ProviderOptions): Completion[] {
+export const ValueCompletionProvider: LangServicePlugin = {
+    onCompletion({ fullLineText, position, meta, stylable }: ProviderOptions): Completion[] {
         if (isInValue(fullLineText, position)) {
             const inner = fullLineText
                 .slice(0, fullLineText.indexOf(')', position.character) + 1)
