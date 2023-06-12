@@ -87,6 +87,48 @@ describe('LS: st-import', () => {
             unexpectedList: [{ label: '@st-import' }],
         }));
     });
+    it('should not suggest native css or selectors', () => {
+        const { service, assertCompletions, fs } = testLangService(
+            {
+                'other.st.css': ``,
+                'entry.st.css': `
+                    @st-import ^default^ from '.^specifierEmpty^';
+                    @st-import [^named^, keyframes(^namedTyped^)] from '.^specifierWithDot^';
+                    
+                    .xxx {}
+                `,
+            },
+            { testOnNativeFileSystem: tempDir.path }
+        );
+
+        const entryPath = fs.join(tempDir.path, 'entry.st.css');
+
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'specifierEmpty',
+            actualList: service.onCompletion(filePath, carets.specifierEmpty),
+            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+        }));
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'specifierWithDot',
+            actualList: service.onCompletion(filePath, carets.specifierWithDot),
+            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+        }));
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'default',
+            actualList: service.onCompletion(filePath, carets.default),
+            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+        }));
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'named',
+            actualList: service.onCompletion(filePath, carets.named),
+            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+        }));
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'namedTyped',
+            actualList: service.onCompletion(filePath, carets.namedTyped),
+            unexpectedList: [{ label: '.xxx' }, { label: 'input' }, { label: '@media' }],
+        }));
+    });
     describe('named imports', () => {
         it('should suggest named imports', () => {
             const { service, assertCompletions, fs } = testLangService(

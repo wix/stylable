@@ -9,6 +9,12 @@ import type { CSSValueAST } from '@tokey/css-value-parser';
 import type { LangServicePlugin } from '../../lib/completion-providers';
 
 export const StImportPlugin: LangServicePlugin = {
+    analyzeCaretLocation(context) {
+        const node = context.location.base.node;
+        if (node.type === 'atrule' && node.name === 'st-import') {
+            context.setFlag('runNativeCSSService', false);
+        }
+    },
     onCompletion({ context }) {
         return getCompletions(context);
     },
