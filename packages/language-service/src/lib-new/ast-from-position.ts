@@ -39,7 +39,6 @@ export type AstLocation =
               | 'atRuleBody'
               | 'declProp'
               | 'declBetweenPropAndColon'
-              | 'declBetweenColonAndValue'
               | 'declValue'
               | 'invalid';
       }
@@ -238,28 +237,29 @@ function checkRuleSelector(
 function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
     if (isDeclaration(node)) {
         const between = node.raws.between!;
-        const valueStart = checkContext.baseNodeOffset + node.prop.length + between.length;
-        const valueEnd = valueStart + node.value.length;
+        const colon = between.slice(0, between.indexOf(':') + 1);
+        const afterColon = between.slice(colon.length);
+        const valueStart = checkContext.baseNodeOffset + node.prop.length + colon.length;
+        // ToDo: "where=declImportant"
+        // ToDo: handle afterNodeContent ": value \n |"
+        const valueEnd = valueStart + afterColon.length + node.value.length;
+        const valueAfterColon = afterColon + node.value;
+        const ast = CSSValue.parseCSSValue(valueAfterColon);
         const isInValue = checkValue({
             type: 'declValue',
+            ast,
             value: node.value,
             node,
             valueStart,
             valueEnd,
-            afterSpace: 0,
             checkContext,
         });
-        let where: typeof base['where'] = 'declValue';
+        let where: (typeof base)['where'] = 'declValue';
         const base = checkContext.result.base;
         if (isInValue) {
             where = 'declValue';
         } else if (base.offsetInNode > node.prop.length) {
-            const spaceAfterColon = between.length - between.indexOf(':');
-            if (valueStart - spaceAfterColon >= checkContext.targetOffset) {
-                where = 'declBetweenPropAndColon';
-            } else {
-                where = 'declBetweenColonAndValue';
-            }
+            where = 'declBetweenPropAndColon';
         } else {
             where = 'declProp';
         }
@@ -268,58 +268,76 @@ function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
 }
 function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
     if (isAtRule(node)) {
-        const valueStart =
-            checkContext.baseNodeOffset + 1 + node.name.length + (node.raws.afterName!.length || 1);
-        const valueEnd = valueStart + node.params.length;
+        const AtPrefixLength = 1;
+        const { afterName = '', between = '' } = node.raws;
+        const prelude = afterName + node.params + between;
+        const valueStart = checkContext.baseNodeOffset + AtPrefixLength + node.name.length;
+        const valueEnd = valueStart + prelude.length;
+
+        const ast = CSSValue.parseCSSValue(prelude);
+
         const isInParams = checkValue({
             type: 'atRuleParams',
+            ast,
             value: node.params,
             node,
             valueStart,
             valueEnd,
-            afterSpace: node.raws.between!.length,
             checkContext,
         });
-        let where: typeof base['where'] = 'declValue';
+        let where: (typeof base)['where'] = 'atRuleParams';
         const base = checkContext.result.base;
         if (isInParams) {
-            where = 'atRuleParams';
+            if (checkContext.result.atRuleParams!.offsetInNode === 0) {
+                // @name| params
+                where = 'atRuleName';
+            } else {
+                // @name pa|rams
+                where = 'atRuleParams';
+            }
         } else if (
             checkContext.baseNodeOffset + node.name.length + 1 >=
             checkContext.targetOffset
         ) {
+            // @na|me params
             where = 'atRuleName';
         } else {
+            // @name params { | }
             where = 'atRuleBody';
         }
         base.where = where;
     }
 }
 function checkValue({
+    ast,
     value,
     node,
     type,
     valueStart,
     valueEnd,
-    afterSpace,
     checkContext: { targetOffset, result, afterNodeContent },
 }: {
+    ast: CSSValue.BaseAstNode[];
     value: string;
     node: postcss.AnyNode;
     type: 'atRuleParams' | 'declValue';
     valueStart: number;
     valueEnd: number;
-    afterSpace: number;
     checkContext: CheckContext;
 }) {
+    /* value | */
     const isAfterValue = valueEnd < targetOffset;
-    const isInIncludedSpace =
-        afterNodeContent || (isAfterValue && valueEnd + afterSpace >= targetOffset);
-    if (valueStart > targetOffset || (isAfterValue && !isInIncludedSpace)) {
+    /* 
+        value <allowed newlines> | 
+        for example for unclosed whitespace in "rule{ prop: value \n |"
+        ToDo extract out
+    */
+    const isInIncludedSpace = afterNodeContent || (isAfterValue && valueEnd >= targetOffset);
+    const isBeforeValue = valueStart > targetOffset;
+    if (isBeforeValue || (isAfterValue && !isInIncludedSpace)) {
         // not in value
         return false;
     }
-    const ast = CSSValue.parseCSSValue(value);
     const valueLocation: Extract<AstLocation, { type: 'atRuleParams' | 'declValue' }> = {
         type,
         ast,
