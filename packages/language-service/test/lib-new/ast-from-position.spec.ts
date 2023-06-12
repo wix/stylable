@@ -596,7 +596,7 @@ describe('ast-from-position', () => {
         it(`should find value start`, () => {
             const { position, parsed } = setupWithCursor(`
                 .selector {
-                    decl1: |bookmark after;
+                    decl1: |bookmark after ;
                     decl2: other;
                 }
             `);
@@ -606,16 +606,16 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
                 where: 'declValue',
-                stringify: `decl1: |bookmark after`,
+                stringify: `decl1: |bookmark after `,
             });
             // decl-value level
-            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' bookmark after');
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' bookmark after ');
             expectAstLocation(declValue!, {
                 stringify: ' |',
                 parents: [
                     {
                         desc: 'value node',
-                        str: 'decl1: bookmark after',
+                        str: 'decl1: bookmark after ',
                     },
                 ],
             });
@@ -691,7 +691,7 @@ describe('ast-from-position', () => {
         it(`should find value end`, () => {
             const { position, parsed } = setupWithCursor(`
                 .selector {
-                    decl1: before bookmark|;
+                    decl1: before bookmark| ;
                     decl2: other;
                 }
             `);
@@ -701,16 +701,16 @@ describe('ast-from-position', () => {
             expectAstLocation(base, {
                 node: (parsed.ast as any).nodes[0].nodes[0],
                 where: 'declValue',
-                stringify: `decl1: before bookmark|`,
+                stringify: `decl1: before bookmark| `,
             });
             // decl-value level
-            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' before bookmark');
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' before bookmark ');
             expectAstLocation(declValue!, {
                 stringify: 'bookmark|',
                 parents: [
                     {
                         desc: 'decl node',
-                        str: 'decl1: before bookmark',
+                        str: 'decl1: before bookmark ',
                     },
                 ],
             });
@@ -733,14 +733,15 @@ describe('ast-from-position', () => {
                 stringify: `decl1: before   |`,
             });
             // decl-value level
-            // ToDo: should be `before   |   \t`
-            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' before');
-            expect(declValue!.afterValue, 'after value').to.eql(true);
+            expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(' before      \t\n');
             expectAstLocation(declValue!, {
-                stringify: ' before  |',
+                stringify: '   |   \t\n',
+                deindent: false,
                 parents: [
                     {
                         desc: 'decl node',
+                        // postcss stringify doesn't show unclosed after spaces on decl
+                        // they belong in parent rule raws after
                         str: 'decl1: before',
                     },
                 ],
@@ -965,7 +966,6 @@ describe('ast-from-position', () => {
                 where: 'atRuleParams',
             });
             // atrule-params level
-            expect(atRuleParams!.afterValue, 'space is part of params').to.eql(false);
             expectAstLocation(atRuleParams!, {
                 stringify: '   |   ',
                 parents: [
@@ -996,7 +996,6 @@ describe('ast-from-position', () => {
                 where: 'atRuleParams',
             });
             // atrule-params level
-            expect(atRuleParams!.afterValue, 'after params value').to.eql(false);
             expectAstLocation(atRuleParams!, {
                 stringify: '   |   ',
                 parents: [
