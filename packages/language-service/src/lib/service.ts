@@ -327,17 +327,17 @@ export class StylableLanguageService {
                 );
             }
         }
-
-        const cssCompletions = this.cssService.getCompletions(cleanDocument, position);
-
-        for (const cssComp of cssCompletions) {
-            const label = cssComp.label;
-
-            if (!groupedCompletions.has(label)) {
-                // CSS declaration property names have built in sorting
-                // at-rules, rules and declaration values do not
-                cssComp.sortText = cssComp.sortText || 'z';
-                groupedCompletions.set(label, cssComp);
+        // native CSS service
+        if (context.getFlag('runNativeCSSService')) {
+            const cssCompletions = this.cssService.getCompletions(cleanDocument, position);
+            for (const cssComp of cssCompletions) {
+                const label = cssComp.label;
+                if (!groupedCompletions.has(label)) {
+                    // CSS declaration property names have built in sorting
+                    // at-rules, rules and declaration values do not
+                    cssComp.sortText = cssComp.sortText || 'z';
+                    groupedCompletions.set(label, cssComp);
+                }
             }
         }
 

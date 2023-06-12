@@ -33,6 +33,9 @@ export class LangServiceContext {
     public ambiguousNodes: Map<any, ParseReport[]>;
     public location: ReturnType<typeof getAstNodeAt>;
     public document: TextDocument;
+    private flags = {
+        runNativeCSSService: true,
+    };
     constructor(
         public fs: IFileSystem,
         public stylable: Stylable,
@@ -55,6 +58,12 @@ export class LangServiceContext {
             this.fileData.stat.mtime.getTime(),
             this.fileData.content
         );
+    }
+    public setFlag(flag: keyof LangServiceContext['flags'], enabled: boolean) {
+        this.flags[flag] = enabled;
+    }
+    public getFlag(flag: keyof LangServiceContext['flags']) {
+        return this.flags[flag];
     }
     public getPosition(offset: number = this.offset) {
         return this.document.positionAt(offset);
