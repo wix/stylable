@@ -300,6 +300,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
          */
         build.onEnd(
             wrapDebug(`onEnd generate cssInjection: ${cssInjection}`, ({ metafile }) => {
+                transferBuildInfo();
                 if (!onLoadCalled) {
                     lazyDebugPrint();
                     return;
@@ -357,7 +358,6 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                         );
                     }
                 }
-                transferBuildInfo();
                 lazyClearCaches(stylable);
                 lazyDebugPrint();
             })
