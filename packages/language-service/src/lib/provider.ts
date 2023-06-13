@@ -29,26 +29,26 @@ import type {
 import { URI } from 'vscode-uri';
 
 import {
-    CodeMixinCompletionProvider,
+    CodeMixinCompletionPlugin,
     LangServicePlugin,
     createRange,
-    CssMixinCompletionProvider,
-    ExtendCompletionProvider,
-    FormatterCompletionProvider,
-    GlobalCompletionProvider,
-    ImportInternalDirectivesProvider,
-    NamedCompletionProvider,
-    ProviderOptions,
+    CssMixinCompletionPlugin,
+    ExtendCompletionPlugin,
+    FormatterCompletionPlugin,
+    GlobalCompletionPlugin,
+    ImportInternalDirectivesPlugin,
+    NamedCompletionPlugin,
+    PluginCompletionOptions,
     ProviderPosition,
     ProviderRange,
-    PseudoElementCompletionProvider,
-    RulesetInternalDirectivesProvider,
-    SelectorCompletionProvider,
-    StateSelectorCompletionProvider,
-    StateTypeCompletionProvider,
-    TopLevelDirectiveProvider,
-    ValueCompletionProvider,
-    ValueDirectiveProvider,
+    PseudoElementCompletionPlugin,
+    RulesetInternalDirectivesPlugin,
+    SelectorCompletionPlugin,
+    StateSelectorCompletionPlugin,
+    StateTypeCompletionPlugin,
+    TopLevelDirectivePlugin,
+    ValueCompletionPlugin,
+    ValueDirectivePlugin,
 } from './completion-providers';
 import { topLevelDirectives } from './completion-types';
 import type { Completion } from './completion-types';
@@ -87,27 +87,27 @@ function findLast<T>(
 export class Provider {
     private plugins: LangServicePlugin[] = [
         StImportPlugin,
-        RulesetInternalDirectivesProvider,
-        ImportInternalDirectivesProvider,
-        TopLevelDirectiveProvider,
-        ValueDirectiveProvider,
-        GlobalCompletionProvider,
-        SelectorCompletionProvider,
-        ExtendCompletionProvider,
-        CssMixinCompletionProvider,
-        CodeMixinCompletionProvider,
-        FormatterCompletionProvider,
-        NamedCompletionProvider,
-        StateTypeCompletionProvider,
-        StateSelectorCompletionProvider,
-        PseudoElementCompletionProvider,
-        ValueCompletionProvider,
+        RulesetInternalDirectivesPlugin,
+        ImportInternalDirectivesPlugin,
+        TopLevelDirectivePlugin,
+        ValueDirectivePlugin,
+        GlobalCompletionPlugin,
+        SelectorCompletionPlugin,
+        ExtendCompletionPlugin,
+        CssMixinCompletionPlugin,
+        CodeMixinCompletionPlugin,
+        FormatterCompletionPlugin,
+        NamedCompletionPlugin,
+        StateTypeCompletionPlugin,
+        StateSelectorCompletionPlugin,
+        PseudoElementCompletionPlugin,
+        ValueCompletionPlugin,
     ];
     constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
 
     public analyzeCaretContext(context: LangServiceContext) {
-        for (const provider of this.plugins) {
-            provider.analyzeCaretLocation?.(context);
+        for (const plugin of this.plugins) {
+            plugin.analyzeCaretLocation?.(context);
         }
     }
     public provideCompletionItemsFromSrc(
@@ -124,7 +124,7 @@ export class Provider {
             return [];
         }
 
-        const options = this.createProviderOptions(
+        const options = this.createPluginCompletionOptions(
             context,
             src,
             pos,
@@ -727,7 +727,7 @@ export class Provider {
         }
     }
 
-    private createProviderOptions(
+    private createPluginCompletionOptions(
         context: LangServiceContext,
         src: string,
         position: ProviderPosition,
@@ -736,7 +736,7 @@ export class Provider {
         fullLineText: string,
         cursorPosInLine: number,
         fs: IFileSystem
-    ): ProviderOptions {
+    ): PluginCompletionOptions {
         const path = pathFromPosition(meta.sourceAst, {
             line: position.line + 1,
             character: position.character,
