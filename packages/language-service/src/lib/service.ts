@@ -328,7 +328,7 @@ export class StylableLanguageService {
             }
         }
         // native CSS service
-        if (context.getFlag('runNativeCSSService')) {
+        if (context.flags.runNativeCSSService) {
             const cssCompletions = this.cssService.getCompletions(cleanDocument, position);
             for (const cssComp of cssCompletions) {
                 const label = cssComp.label;

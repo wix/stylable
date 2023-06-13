@@ -12,7 +12,7 @@ export const StImportPlugin: LangServicePlugin = {
     analyzeCaretLocation(context) {
         const node = context.location.base.node;
         if (node.type === 'atrule' && node.name === 'st-import') {
-            context.setFlag('runNativeCSSService', false);
+            context.flags.runNativeCSSService = false;
         }
     },
     onCompletion({ context }) {
