@@ -418,7 +418,6 @@ function processAssetsAndApplyStubs(
 
 function importsCollector(res: StylableResults) {
     const imports: { from: string }[] = [];
-    const buildDeps: string[] = [];
     const collector = (contextMeta: StylableMeta, absPath: string, hasSideEffects: boolean) => {
         if (hasSideEffects) {
             if (!absPath.endsWith('.st.css')) {
@@ -427,12 +426,11 @@ function importsCollector(res: StylableResults) {
             } else {
                 imports.push({ from: absPath });
             }
-            buildDeps.push(absPath);
         } else if (contextMeta === res.meta) {
             imports.push({ from: namespaces.unused + `:` + absPath });
         }
     };
-    return { imports, buildDeps, collector };
+    return { imports, collector };
 }
 
 function enableEsbuildMetafile(build: PluginBuild, cssInjection: string) {
