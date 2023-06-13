@@ -301,10 +301,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
         build.onEnd(
             wrapDebug(`onEnd generate cssInjection: ${cssInjection}`, ({ metafile }) => {
                 if (!onLoadCalled) {
-                    void Promise.resolve().then(() => {
-                        (globalThis as any).stylable_debug();
-                        (globalThis as any).stylable_debug_clear();
-                    });
+                    lazyDebugPrint();
                     return;
                 }
                 onLoadCalled = false;
@@ -362,15 +359,21 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 }
                 transferBuildInfo();
                 lazyClearCaches(stylable);
-
-                void Promise.resolve().then(() => {
-                    (globalThis as any).stylable_debug();
-                    (globalThis as any).stylable_debug_clear();
-                });
+                lazyDebugPrint();
             })
         );
     },
 });
+
+function lazyDebugPrint() {
+    if (process.env.STYLABLE_DEBUG !== 'true') {
+        return;
+    }
+    void Promise.resolve().then(() => {
+        (globalThis as any).stylable_debug();
+        (globalThis as any).stylable_debug_clear();
+    });
+}
 
 function debounce<T extends (...args: any[]) => void>(fn: T, time: number) {
     let timeout: ReturnType<typeof setTimeout>;

@@ -2,14 +2,17 @@ const timers: Record<string, number> = {};
 const counters: Record<string, number> = {};
 
 (globalThis as any).stylable_debug = () => {
-    console.log('Timers:');
-    for (const [name, time] of Object.entries(timers)) {
-        console.log(`  ${name}: ${time.toFixed(2)}ms`);
-    }
     console.log('Counters:');
-    for (const [name, count] of Object.entries(counters)) {
-        console.log(`  ${name}: ${count}`);
-    }
+    console.table(counters);
+    console.log('Timers:');
+    console.table(timers);
+    console.log(
+        'Total time:',
+        Object.values(timers)
+            .reduce((a, b) => a + b, 0)
+            .toFixed(2),
+        'ms'
+    );
 };
 
 (globalThis as any).stylable_debug_clear = () => {
@@ -22,6 +25,9 @@ const counters: Record<string, number> = {};
 };
 
 export function wrapDebug<T extends any[], R>(name: string, fn: (...args: T) => R) {
+    if (process.env.STYLABLE_DEBUG !== 'true') {
+        return fn;
+    }
     return (...args: T) => {
         inc(name);
         const stop = start(name);
