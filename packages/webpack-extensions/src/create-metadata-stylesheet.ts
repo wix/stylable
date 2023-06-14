@@ -57,8 +57,8 @@ export function rewriteImports(
                     );
                 }
                 if (rawRule.type === 'rule') {
-                    rawRule.walkDecls((decl) => {
-                        if (decl.prop === `-st-from`) {
+                    rawRule.nodes.forEach((decl) => {
+                        if (decl.type === 'decl' && decl.prop === `-st-from`) {
                             decl.value = JSON.stringify(
                                 `/${ensureHash(resolved.meta, hashes)}.st.css`
                             );

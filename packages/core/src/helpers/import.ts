@@ -413,7 +413,10 @@ function createPseudoImportProps(
 function patchDecls(node: Rule, named: string[], pseudoImport: Imported) {
     const namedDecls: Declaration[] = [];
     const defaultDecls: Declaration[] = [];
-    node.walkDecls((decl) => {
+    for (const decl of node.nodes) {
+        if (decl.type !== 'decl') {
+            continue;
+        }
         if (decl.prop === '-st-named') {
             decl.assign({ value: named.join(', ') });
             namedDecls.push(decl);
@@ -421,7 +424,7 @@ function patchDecls(node: Rule, named: string[], pseudoImport: Imported) {
             decl.assign({ value: pseudoImport.defaultExport });
             defaultDecls.push(decl);
         }
-    });
+    }
     return { defaultDecls, namedDecls };
 }
 

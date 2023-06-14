@@ -41,6 +41,62 @@ describe(`features/st-mixin`, () => {
 
         shouldReportNoDiagnostics(meta);
     });
+    it(`should append mixin declarations (within nesting)`, () => {
+        const { sheets } = testStylableCore(`
+            .mix {
+                propA: blue;
+                propB: green;
+            }
+
+            /* @rule .entry__empty {propA: blue; propB: green;} */
+            .empty {
+                -st-mixin: mix;
+            }
+
+            .insert {
+                /* @rule .entry__child {before:1; propA:blue; propB:green; after: 2} */
+                .child {
+                    before: 1;
+                    -st-mixin: mix;
+                    after: 2;
+                }
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it.skip(`should keep other nested rules`, () => {
+        const { sheets } = testStylableCore(`
+            .mix {
+                propA: blue;
+                propB: green;
+            }
+
+            /* @rule .entry__empty {propA: blue; propB: green;} */
+            .empty {
+                -st-mixin: mix;
+            }
+
+            .insert {
+                /* @rule .entry__child {before:1; propA:blue; propB:green; after: 2} */
+                .child {
+                    .grandchild-1 { z-index: 1; }
+                    before: 1;
+                    .grandchild-2 { z-index: 2; }
+                    -st-mixin: mix;
+                    .grandchild-3 { z-index: 3; }
+                    after: 2;
+                    .grandchild-4 { z-index: 4; }
+                }
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
     it(`should append mixin rules`, () => {
         const { sheets } = testStylableCore(`
             .mix {
