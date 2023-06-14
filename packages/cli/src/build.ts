@@ -212,6 +212,7 @@ export async function build(
                     for (const { filePath, content, files } of outputs) {
                         processGeneratedFiles.add(filePath);
                         log(mode, buildMessages.EMIT_BUNDLE(filePath, files.length));
+                        fs.ensureDirectorySync(dirname(filePath));
                         fs.writeFileSync(filePath, content);
                     }
                 }, 'failed to write or minify bundle file');
