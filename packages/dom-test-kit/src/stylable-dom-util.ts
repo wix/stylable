@@ -1,4 +1,4 @@
-import { pseudoStates } from '@stylable/core';
+import { STCustomState } from '@stylable/core/dist/index-internal';
 import {
     parseCssSelector,
     walk,
@@ -53,13 +53,13 @@ export class StylableDOMUtil {
             } else if (node.type === 'pseudo_class') {
                 const args = node.nodes;
                 if (!args) {
-                    convertToClass(node).value = pseudoStates.createBooleanStateClassName(
+                    convertToClass(node).value = STCustomState.createBooleanStateClassName(
                         node.value,
                         namespace
                     );
                 } else {
                     const nestedContent = stringifySelectorAst(args);
-                    convertToClass(node).value = pseudoStates.createStateWithParamClassName(
+                    convertToClass(node).value = STCustomState.createStateWithParamClassName(
                         node.value,
                         namespace,
                         nestedContent
@@ -83,12 +83,12 @@ export class StylableDOMUtil {
 
         if (typeof param === 'boolean') {
             return element.classList.contains(
-                pseudoStates.createBooleanStateClassName(stateName, namespace)
+                STCustomState.createBooleanStateClassName(stateName, namespace)
             );
         }
 
         return element.classList.contains(
-            pseudoStates.createStateWithParamClassName(stateName, namespace, String(param))
+            STCustomState.createStateWithParamClassName(stateName, namespace, String(param))
         );
     }
 
@@ -97,7 +97,7 @@ export class StylableDOMUtil {
             return null;
         }
 
-        const booleanState = pseudoStates.createBooleanStateClassName(
+        const booleanState = STCustomState.createBooleanStateClassName(
             stateName,
             this.stylesheet.namespace
         );
@@ -120,7 +120,7 @@ export class StylableDOMUtil {
     public getStateValueFromClassName(cls: string, baseState: string) {
         if (cls.startsWith(baseState)) {
             const param = cls.slice(baseState.length);
-            const paramIndex = param.indexOf(pseudoStates.stateMiddleDelimiter);
+            const paramIndex = param.indexOf(STCustomState.delimiters.stateMiddleDelimiter);
 
             if (paramIndex !== -1) {
                 return param.slice(paramIndex + 1);
@@ -132,8 +132,10 @@ export class StylableDOMUtil {
 
     public getBaseStateWithParam(stateName: string) {
         const singleCharState = 'x';
-        return pseudoStates
-            .createStateWithParamClassName(stateName, this.stylesheet.namespace, singleCharState)
-            .slice(0, -3);
+        return STCustomState.createStateWithParamClassName(
+            stateName,
+            this.stylesheet.namespace,
+            singleCharState
+        ).slice(0, -3);
     }
 }

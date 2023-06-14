@@ -9,10 +9,15 @@ import {
     StylableSymbol,
     CSSClass,
     STSymbol,
+    STCustomSelector,
     VarSymbol,
     CSSVarSymbol,
     KeyframesSymbol,
+    LayerSymbol,
+    ContainerSymbol,
     CSSKeyframes,
+    CSSLayer,
+    CSSContains,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { findRule } from './helpers/rule';
@@ -30,6 +35,7 @@ export interface InvalidCachedModule {
     error: unknown;
     request: string;
     context: string;
+    resolvedPath: string | undefined;
 }
 
 export interface CachedStylableMeta {
@@ -44,7 +50,18 @@ export interface CachedJsModule {
     value: JsModule;
 }
 
-export type CachedModuleEntity = InvalidCachedModule | CachedStylableMeta | CachedJsModule;
+export interface ResolveOnly {
+    resolvedPath: string;
+    kind: 'resolve';
+    value: null;
+}
+
+export type CachedModuleEntity =
+    | InvalidCachedModule
+    | CachedStylableMeta
+    | CachedJsModule
+    | ResolveOnly;
+
 export type StylableResolverCache = Map<string, CachedModuleEntity>;
 
 export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
@@ -69,6 +86,8 @@ export interface MetaResolvedSymbols {
     customValues: Record<string, CustomValueExtension<any>>;
     cssVar: Record<string, CSSResolve<CSSVarSymbol>>;
     keyframes: Record<string, CSSResolve<KeyframesSymbol>>;
+    layer: Record<string, CSSResolve<LayerSymbol>>;
+    container: Record<string, CSSResolve<ContainerSymbol>>;
     import: Record<string, CSSResolve<ImportSymbol>>;
 }
 
@@ -81,7 +100,7 @@ export type ReportError = (
     isElement: boolean
 ) => void;
 
-export function isInPath(
+function isInPath(
     extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
     { symbol: { name: name1 }, meta: { source: source1 } }: CSSResolve<ClassSymbol | ElementSymbol>
 ) {
@@ -97,20 +116,29 @@ export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (resolvedPath: string) => any,
-        public resolvePath: ModuleResolver,
+        protected moduleResolver: ModuleResolver,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, request }: Imported): CachedModuleEntity {
-        const key = `${context}${safePathDelimiter}${request}`;
+    public getModule({
+        context,
+        request,
+    }: Pick<Imported, 'context' | 'request'>): CachedModuleEntity {
+        let entity: CachedModuleEntity;
+        let resolvedPath: string | undefined;
+
+        const key = cacheKey(context, request);
+
         if (this.cache?.has(key)) {
-            return this.cache.get(key)!;
+            const entity = this.cache.get(key)!;
+            if (entity.kind === 'resolve') {
+                resolvedPath = entity.resolvedPath;
+            } else {
+                return entity;
+            }
         }
 
-        let entity: CachedModuleEntity;
-        let resolvedPath: string;
-
         try {
-            resolvedPath = this.resolvePath(context, request);
+            resolvedPath ||= this.moduleResolver(context, request);
         } catch (error) {
             entity = {
                 kind: request.endsWith('css') ? 'css' : 'js',
@@ -118,6 +146,7 @@ export class StylableResolver {
                 error,
                 request,
                 context,
+                resolvedPath: undefined,
             };
             this.cache?.set(key, entity);
             return entity;
@@ -128,14 +157,14 @@ export class StylableResolver {
             try {
                 entity = { kind, value: this.fileProcessor.process(resolvedPath), resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error, request, context };
+                entity = { kind, value: null, error, request, context, resolvedPath };
             }
         } else {
             const kind = 'js';
             try {
                 entity = { kind, value: this.requireModule(resolvedPath), resolvedPath };
             } catch (error) {
-                entity = { kind, value: null, error, request, context };
+                entity = { kind, value: null, error, request, context, resolvedPath };
             }
         }
 
@@ -143,11 +172,27 @@ export class StylableResolver {
 
         return entity;
     }
-
+    public analyze(filePath: string) {
+        return this.fileProcessor.process(filePath);
+    }
+    public resolvePath(directoryPath: string, request: string): string {
+        const key = cacheKey(directoryPath, request);
+        let resolvedPath = this.cache?.get(key)?.resolvedPath;
+        if (resolvedPath !== undefined) {
+            return resolvedPath;
+        }
+        resolvedPath = this.moduleResolver(directoryPath, request);
+        this.cache?.set(key, {
+            resolvedPath,
+            value: null,
+            kind: 'resolve',
+        });
+        return resolvedPath;
+    }
     public resolveImported(
         imported: Imported,
         name: string,
-        subtype: 'mappedSymbols' | 'mappedKeyframes' = 'mappedSymbols'
+        subtype: 'mappedSymbols' | 'mappedKeyframes' | STSymbol.Namespaces = 'mappedSymbols'
     ): CSSResolve | JSResolve | null {
         const res = this.getModule(imported);
         if (res.value === null) {
@@ -156,8 +201,13 @@ export class StylableResolver {
 
         if (res.kind === 'css') {
             const { value: meta } = res;
-            const namespace = subtype === `mappedSymbols` ? `main` : `keyframes`;
-            name = !name && namespace === `main` ? `root` : name;
+            const namespace =
+                subtype === `mappedSymbols`
+                    ? `main`
+                    : subtype === 'mappedKeyframes'
+                    ? `keyframes`
+                    : subtype;
+            name = !name && namespace === `main` ? meta.root : name;
             const symbol = STSymbol.getAll(meta, namespace)[name];
             return {
                 _kind: 'css',
@@ -183,7 +233,9 @@ export class StylableResolver {
                 maybeImport &&
                 maybeImport._kind !== 'var' &&
                 maybeImport._kind !== 'cssVar' &&
-                maybeImport._kind !== 'keyframes'
+                maybeImport._kind !== 'keyframes' &&
+                maybeImport._kind !== 'layer' &&
+                maybeImport._kind !== 'container'
             ) {
                 if (maybeImport.alias && !maybeImport[`-st-extends`]) {
                     maybeImport = maybeImport.alias;
@@ -267,7 +319,6 @@ export class StylableResolver {
         }
         return null;
     }
-
     public resolveSymbols(meta: StylableMeta, diagnostics: Diagnostics) {
         const resolvedSymbols: MetaResolvedSymbols = {
             mainNamespace: {},
@@ -277,6 +328,8 @@ export class StylableResolver {
             js: {},
             customValues: { ...stTypes },
             keyframes: {},
+            layer: {},
+            container: {},
             cssVar: {},
             import: {},
         };
@@ -342,9 +395,31 @@ export class StylableResolver {
         }
         // resolve keyframes
         for (const [name, symbol] of Object.entries(CSSKeyframes.getAll(meta))) {
-            const result = resolveKeyframes(meta, symbol, this);
+            const result = resolveByNamespace(meta, symbol, this, 'keyframes');
             if (result) {
                 resolvedSymbols.keyframes[name] = {
+                    _kind: `css`,
+                    meta: result.meta,
+                    symbol: result.symbol,
+                };
+            }
+        }
+        // resolve layers
+        for (const [name, symbol] of Object.entries(CSSLayer.getAll(meta))) {
+            const result = resolveByNamespace(meta, symbol, this, 'layer');
+            if (result) {
+                resolvedSymbols.layer[name] = {
+                    _kind: `css`,
+                    meta: result.meta,
+                    symbol: result.symbol,
+                };
+            }
+        }
+        // resolve containers
+        for (const [name, symbol] of Object.entries(CSSContains.getAll(meta))) {
+            const result = resolveByNamespace(meta, symbol, this, 'container');
+            if (result) {
+                resolvedSymbols.container[name] = {
                     _kind: `css`,
                     meta: result.meta,
                     symbol: result.symbol,
@@ -368,7 +443,9 @@ export class StylableResolver {
                     : meta.getClass(nameOrSymbol)
                 : nameOrSymbol;
 
-        const customSelector = isElement ? null : meta.customSelectors[':--' + name];
+        const customSelector = isElement
+            ? null
+            : STCustomSelector.getCustomSelectorExpended(meta, name);
 
         if (!symbol && !customSelector) {
             return [];
@@ -435,6 +512,11 @@ export class StylableResolver {
         return extendPath;
     }
 }
+
+function cacheKey(context: string, request: string) {
+    return `${context}${safePathDelimiter}${request}`;
+}
+
 function validateClassResolveExtends(
     meta: StylableMeta,
     name: string,
@@ -442,28 +524,30 @@ function validateClassResolveExtends(
     deepResolved: CSSResolve<StylableSymbol> | JSResolve | null
 ): ReportError | undefined {
     return (res, extend) => {
-        const decl = findRule(meta.ast, '.' + name);
+        const decl = findRule(meta.sourceAst, '.' + name);
         if (decl) {
             // ToDo: move to STExtends
             if (res && res._kind === 'js') {
-                diagnostics.error(decl, CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
+                diagnostics.report(CSSClass.diagnostics.CANNOT_EXTEND_JS(), {
+                    node: decl,
                     word: decl.value,
                 });
             } else if (res && !res.symbol) {
-                diagnostics.error(
-                    decl,
-                    CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name),
-                    { word: decl.value }
-                );
+                diagnostics.report(CSSClass.diagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name), {
+                    node: decl,
+                    word: decl.value,
+                });
             } else {
-                diagnostics.error(decl, CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
+                diagnostics.report(CSSClass.diagnostics.IMPORT_ISNT_EXTENDABLE(), {
+                    node: decl,
                     word: decl.value,
                 });
             }
         } else {
             if (deepResolved?.symbol.alias) {
-                meta.ast.walkRules(new RegExp('\\.' + name), (rule) => {
-                    diagnostics.error(rule, CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
+                meta.sourceAst.walkRules(new RegExp('\\.' + name), (rule) => {
+                    diagnostics.report(CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
+                        node: rule,
                         word: name,
                     });
                     return false;
@@ -488,22 +572,23 @@ export function createSymbolResolverWithCache(
     };
 }
 
-function resolveKeyframes(meta: StylableMeta, symbol: KeyframesSymbol, resolver: StylableResolver) {
+function resolveByNamespace<NS extends STSymbol.Namespaces>(
+    meta: StylableMeta,
+    symbol: StylableSymbol,
+    resolver: StylableResolver,
+    type: NS
+): CSSResolve<STSymbol.SymbolByNamespace<NS>> | undefined {
     const current = { meta, symbol };
-    while (current.symbol?.import) {
-        const res = resolver.resolveImported(
-            current.symbol.import,
-            current.symbol.name,
-            'mappedKeyframes' // ToDo: refactor out of resolver
-        );
-        if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
+    while ('import' in current.symbol && current.symbol.import) {
+        const res = resolver.resolveImported(current.symbol.import, current.symbol.name, type);
+        if (res?._kind === 'css' && res.symbol?._kind === type) {
             ({ meta: current.meta, symbol: current.symbol } = res);
         } else {
             return undefined;
         }
     }
-    if (current.symbol) {
-        return current;
+    if (current.symbol?._kind === type) {
+        return current as CSSResolve<STSymbol.SymbolByNamespace<typeof type>>;
     }
     return undefined;
 }

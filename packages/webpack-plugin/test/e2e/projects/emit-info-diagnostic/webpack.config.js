@@ -14,9 +14,13 @@ module.exports = {
                 hooks: {
                     postProcessor: (result) => {
                         // Todo: replace implementation with permanent info diagnostic
-                        result.meta.diagnostics.info(
-                            result.meta.ast.root(),
-                            'test info diagnostic!'
+                        result.meta.diagnostics.report(
+                            {
+                                code: '99999',
+                                message: 'test info diagnostic!',
+                                severity: 'info',
+                            },
+                            { node: result.meta.sourceAst.root() }
                         );
                         return result;
                     },

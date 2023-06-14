@@ -1,11 +1,11 @@
+import { nodeFs } from '@file-services/node';
 import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
-import { STSymbol } from '@stylable/core/dist/features';
+import { STSymbol } from '@stylable/core/dist/index-internal';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
-import { basename, relative } from 'path';
 import { normalizeRelative, ensureDirectory, tryRun } from './build-tools';
-import type { Log } from './logger';
+import { createDefaultLogger, Log } from './logger';
 
 export interface ReExports {
     root: string;
@@ -15,11 +15,29 @@ export interface ReExports {
     stVars: Record<string, string>;
 }
 
+export interface IndexGeneratorParameters {
+    indexFileTargetPath: string;
+    stylable: Stylable;
+    log?: Log;
+    fs?: Pick<IFileSystem, 'dirname' | 'relative' | 'basename'>;
+}
+
 export class IndexGenerator {
     private indexFileOutput = new Map<string, ReExports>();
     private collisionDetector = new NameCollisionDetector<string>();
+    private log: Log;
 
-    constructor(public stylable: Stylable, private log: Log) {}
+    public indexFileTargetPath: string;
+    public stylable: Stylable;
+    public fs: NonNullable<IndexGeneratorParameters['fs']>;
+
+    constructor({ log, stylable, indexFileTargetPath, fs }: IndexGeneratorParameters) {
+        this.stylable = stylable;
+        this.indexFileTargetPath = indexFileTargetPath;
+
+        this.log = log ?? createDefaultLogger();
+        this.fs = fs ?? nodeFs;
+    }
 
     public generateReExports(filePath: string): ReExports | undefined {
         return {
@@ -31,38 +49,46 @@ export class IndexGenerator {
         };
     }
 
-    public generateFileIndexEntry(filePath: string, fullOutDir: string) {
+    public generateFileIndexEntry(filePath: string) {
         const reExports = this.generateReExports(filePath);
         if (reExports) {
             this.checkForCollisions(reExports, filePath);
             this.log('[Generator Index]', `Add file: ${filePath}`);
-            this.indexFileOutput.set(normalizeRelative(relative(fullOutDir, filePath)), reExports);
+            this.indexFileOutput.set(
+                normalizeRelative(
+                    this.fs.relative(this.fs.dirname(this.indexFileTargetPath), filePath)
+                ),
+                reExports
+            );
         }
     }
 
-    public removeEntryFromIndex(filePath: string, fullOutDir: string) {
-        this.indexFileOutput.delete(normalizeRelative(relative(fullOutDir, filePath)));
+    public removeEntryFromIndex(filePath: string) {
+        this.indexFileOutput.delete(
+            normalizeRelative(this.fs.relative(this.fs.dirname(this.indexFileTargetPath), filePath))
+        );
     }
 
-    public async generateIndexFile(fs: IFileSystem, indexFileTargetPath: string) {
-        const indexFileContent = this.generateIndexSource(indexFileTargetPath);
-        ensureDirectory(fs.dirname(indexFileTargetPath), fs);
+    public async generateIndexFile(fs: IFileSystem) {
+        const indexFileContent = this.generateIndexSource();
+        ensureDirectory(fs.dirname(this.indexFileTargetPath), fs);
 
         await tryRun(
-            () => fs.promises.writeFile(indexFileTargetPath, '\n' + indexFileContent + '\n'),
+            () => fs.promises.writeFile(this.indexFileTargetPath, '\n' + indexFileContent + '\n'),
             'Write Index File Error'
         );
 
-        this.log('[Generator Index]', 'creating index file: ' + indexFileTargetPath);
+        this.log('[Generator Index]', 'creating index file: ' + this.indexFileTargetPath);
     }
 
     public filename2varname(filePath: string) {
-        const varname = basename(basename(filePath, '.css'), '.st') // remove prefixes and .st.css ext
+        const varname = this.fs
+            .basename(this.fs.basename(filePath, '.css'), '.st') // remove prefixes and .st.css ext
             .replace(/^\d+/, ''); // remove leading numbers
         return upperfirst(camelcase(varname));
     }
 
-    protected generateIndexSource(_indexFileTargetPath: string) {
+    protected generateIndexSource() {
         return [...this.indexFileOutput.entries()]
             .map(([from, reExports]) => createImportForComponent(from, reExports))
             .join('\n');

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
 import { nodeFs } from '@file-services/node';
-import { getDocumentFormatting } from '@stylable/code-formatter';
+import { getDocumentFormatting, formatCSS } from '@stylable/code-formatter';
 import { createLogger } from './logger';
 import { writeFileSync } from 'fs';
 
@@ -9,6 +9,11 @@ const { join } = nodeFs;
 
 const argv = yargs
     .usage('$0 [options]')
+    .option('experimental', {
+        type: 'boolean',
+        description: 'use experimental code formatter',
+        default: false,
+    })
     .option('target', {
         type: 'string',
         description: 'file or directory to format',
@@ -79,8 +84,15 @@ const argv = yargs
     .option('require', {
         type: 'array',
         description: 'require hooks',
+        string: true,
         alias: 'r',
         default: [] as string[],
+    })
+    .option('wrapLineLength', {
+        type: 'number',
+        description: 'Length of line to be considered when wrapping',
+        alias: 'W',
+        default: 80,
     })
 
     .alias('h', 'help')
@@ -103,6 +115,8 @@ const {
     selectorSeparatorNewline,
     target,
     silent,
+    experimental,
+    wrapLineLength,
 } = argv;
 
 const log = createLogger(
@@ -116,23 +130,19 @@ if (debug) {
 
 // execute all require hooks before running the CLI build
 for (const request of requires) {
-    if (request) {
-        require(request);
-    }
+    require(request);
 }
 
-function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css') {
-    const files = nodeFs.readdirSync(dirPath, 'utf-8');
-    let res: string[] = [];
+function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css', res = new Set<string>()) {
+    const items = nodeFs.readdirSync(dirPath, { withFileTypes: true });
 
-    for (const item of files) {
-        const currentlFilePath = join(dirPath, item);
-        const itemStat = nodeFs.statSync(join(currentlFilePath));
+    for (const item of items) {
+        const path = join(dirPath, item.name);
 
-        if (itemStat.isFile() && item.endsWith(fileSuffixFilter)) {
-            res.push(currentlFilePath);
-        } else if (itemStat.isDirectory()) {
-            res = res.concat(readDirectoryDeep(currentlFilePath));
+        if (item.isFile() && path.endsWith(fileSuffixFilter)) {
+            res.add(path);
+        } else if (item.isDirectory()) {
+            readDirectoryDeep(path, fileSuffixFilter, res);
         }
     }
 
@@ -142,20 +152,26 @@ function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css') {
 function formatStylesheet(filePath: string) {
     const fileContent = nodeFs.readFileSync(filePath, 'utf-8');
 
-    const newText = getDocumentFormatting(
-        fileContent,
-        { start: 0, end: fileContent.length },
-        {
-            end_with_newline: endWithNewline,
-            indent_empty_lines: indentEmptyLines,
-            indent_size: indentSize,
-            indent_with_tabs: indentWithTabs,
-            max_preserve_newlines: maxPerserveNewlines,
-            newline_between_rules: newlineBetweenRules,
-            preserve_newlines: perserveNewlines,
-            selector_separator_newline: selectorSeparatorNewline,
-        }
-    );
+    const newText = experimental
+        ? formatCSS(fileContent, {
+              indent: ' '.repeat(indentSize),
+              endWithNewline,
+              wrapLineLength,
+          })
+        : getDocumentFormatting(
+              fileContent,
+              { start: 0, end: fileContent.length },
+              {
+                  end_with_newline: endWithNewline,
+                  indent_empty_lines: indentEmptyLines,
+                  indent_size: indentSize,
+                  indent_with_tabs: indentWithTabs,
+                  max_preserve_newlines: maxPerserveNewlines,
+                  newline_between_rules: newlineBetweenRules,
+                  preserve_newlines: perserveNewlines,
+                  selector_separator_newline: selectorSeparatorNewline,
+              }
+          );
 
     if (newText.length) {
         writeFileSync(filePath, newText);
@@ -183,7 +199,7 @@ if (formatPathStats.isFile()) {
 } else if (formatPathStats.isDirectory()) {
     const stylesheets = readDirectoryDeep(target);
 
-    if (stylesheets.length) {
+    if (stylesheets.size) {
         for (const stylesheet of stylesheets) {
             formatStylesheet(stylesheet);
         }

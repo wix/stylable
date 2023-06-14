@@ -1,1 +1,2 @@
-export { getDocumentFormatting } from './formatter';
+export { formatDocumentExperimental, getDocumentFormatting } from './formatter';
+export { formatCSS } from './format-css';

@@ -1,69 +1,47 @@
 import { isAbsolute } from 'path';
 import type * as postcss from 'postcss';
-import { replaceRuleSelector } from './replace-rule-selector';
-import type { Diagnostics } from './diagnostics';
-import type { Imported, ImportSymbol, StylableSymbol } from './features';
-import { isChildOfAtRule } from './helpers/rule';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
+import type { ImportSymbol, StylableSymbol } from './features';
+import { isChildOfAtRule, stMixinMarker, isStMixinMarker } from './helpers/rule';
 import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
-
-export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
 }
 
-export function expandCustomSelectors(
-    rule: postcss.Rule,
-    customSelectors: Record<string, string>,
-    diagnostics?: Diagnostics
-): string {
-    if (rule.selector.includes(':--')) {
-        rule.selector = rule.selector.replace(
-            CUSTOM_SELECTOR_RE,
-            (extensionName, _matches, selector) => {
-                if (!customSelectors[extensionName] && diagnostics) {
-                    diagnostics.warn(rule, `The selector '${rule.selector}' is undefined`, {
-                        word: rule.selector,
-                    });
-                    return selector;
-                }
-                // TODO: support nested CustomSelectors
-                return ':matches(' + customSelectors[extensionName] + ')';
-            }
-        );
-
-        return (rule.selector = transformMatchesOnRule(rule, false));
-    }
-    return rule.selector;
-}
-
-export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
-    return replaceRuleSelector(rule, { lineBreak });
-}
-
-export const INVALID_MERGE_OF = (mergeValue: string) => {
-    return `invalid merge of: \n"${mergeValue}"`;
+export const utilDiagnostics = {
+    INVALID_MERGE_OF: createDiagnosticReporter(
+        '14001',
+        'error',
+        (mergeValue: string) => `invalid merge of: \n"${mergeValue}"`
+    ),
 };
+
 // ToDo: move to helpers/mixin
 export function mergeRules(
     mixinAst: postcss.Root,
     rule: postcss.Rule,
     mixinDecl: postcss.Declaration,
-    report?: Diagnostics
+    report: Diagnostics,
+    useNestingAsAnchor: boolean
 ) {
     let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
     const nestedInKeyframes = isChildOfAtRule(rule, `keyframes`);
+    const anchorSelector = useNestingAsAnchor ? '&' : '[' + stMixinMarker + ']';
+    const anchorNodeCheck = useNestingAsAnchor ? undefined : isStMixinMarker;
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
         if (isChildOfAtRule(mixinRule, 'keyframes')) {
             return;
         }
-        if (mixinRule.selector === '&' && !mixinRoot) {
+        if (mixinRule.selector === anchorSelector && !mixinRoot) {
             if (mixinRule.parent === mixinAst) {
                 mixinRoot = mixinRule;
             } else {
                 const { selector } = scopeNestedSelector(
                     parseSelectorWithCache(rule.selector),
-                    parseSelectorWithCache(mixinRule.selector)
+                    parseSelectorWithCache(mixinRule.selector),
+                    false,
+                    anchorNodeCheck
                 );
                 mixinRoot = 'NoRoot';
                 mixinRule.selector = selector;
@@ -71,7 +49,9 @@ export function mergeRules(
         } else {
             const { selector } = scopeNestedSelector(
                 parseSelectorWithCache(rule.selector),
-                parseSelectorWithCache(mixinRule.selector)
+                parseSelectorWithCache(mixinRule.selector),
+                false,
+                anchorNodeCheck
             );
             mixinRule.selector = selector;
         }
@@ -82,9 +62,9 @@ export function mergeRules(
         // TODO: handle rules before and after decl on entry
         mixinAst.nodes.slice().forEach((node) => {
             if (node === mixinRoot) {
-                node.walkDecls((node) => {
-                    rule.insertBefore(mixinDecl, node);
-                });
+                for (const nested of [...node.nodes]) {
+                    rule.insertBefore(mixinDecl, nested);
+                }
             } else if (node.type === 'decl') {
                 rule.insertBefore(mixinDecl, node);
             } else if (node.type === 'rule' || node.type === 'atrule') {
@@ -97,7 +77,9 @@ export function mergeRules(
                     }
                     nextRule = node;
                 } else {
-                    report?.warn(rule, INVALID_MERGE_OF(node.toString()));
+                    report?.report(utilDiagnostics.INVALID_MERGE_OF(node.toString()), {
+                        node: rule,
+                    });
                 }
             }
         });
@@ -106,15 +88,20 @@ export function mergeRules(
     return rule;
 }
 
-export function findDeclaration(importNode: Imported, test: any) {
-    const fromIndex = importNode.rule.nodes.findIndex(test);
-    return importNode.rule.nodes[fromIndex] as postcss.Declaration;
-}
+export const sourcePathDiagnostics = {
+    MISSING_SOURCE_FILENAME: createDiagnosticReporter(
+        '17001',
+        'error',
+        () => 'missing source filename'
+    ),
+};
 
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
     const source = (root.source && root.source.input.file) || '';
     if (!source) {
-        diagnostics.error(root, 'missing source filename');
+        diagnostics.report(sourcePathDiagnostics.MISSING_SOURCE_FILENAME(), {
+            node: root,
+        });
     } else if (!isAbsolute(source)) {
         throw new Error('source filename is not absolute path: "' + source + '"');
     }
@@ -129,9 +116,4 @@ export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
     }
 
     return undefined;
-}
-
-export function isValidClassName(className: string) {
-    const test = /^-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/g; // checks valid classname
-    return !!className.match(test);
 }

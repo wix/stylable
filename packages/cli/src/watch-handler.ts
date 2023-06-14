@@ -1,5 +1,6 @@
 import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
-import type { Stylable, StylableResolverCache } from '@stylable/core';
+import type { Stylable } from '@stylable/core';
+import type { StylableResolverCache } from '@stylable/core/dist/index-internal';
 import type { BuildContext } from './types';
 import decache from 'decache';
 import {

@@ -26,13 +26,12 @@ import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
 import { createDiagnosis } from './diagnosis';
 import { getColorPresentation, resolveDocumentColors } from './feature/color-provider';
-import { format, lspFormattingOptionsToJsBeautifyOptions } from './feature/formatting';
+import { format, StylableLangServiceFormattingOptions } from './feature/formatting';
 import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
 import { typescriptSupport } from './typescript-support';
 import type { ExtendedTsLanguageService } from './types';
-import type { CSSBeautifyOptions } from 'js-beautify';
-import type { FormattingOptions } from 'vscode-languageserver';
+import { LangServiceContext } from '../lib-new/lang-service-context';
 
 export interface StylableLanguageServiceOptions {
     fs: IFileSystem;
@@ -67,15 +66,9 @@ export class StylableLanguageService {
         const stylableFile = this.readStylableFile(filePath);
 
         if (stylableFile && stylableFile.stat.isFile()) {
-            const document = TextDocument.create(
-                URI.file(filePath).toString(),
-                'stylable',
-                stylableFile.stat.mtime.getTime(),
-                stylableFile.content
-            );
-            const position = document.positionAt(offset);
-
-            return this.getCompletions(document, filePath, position);
+            const context = new LangServiceContext(this.fs, this.stylable, stylableFile, offset);
+            this.provider.analyzeCaretContext(context);
+            return this.getCompletions(context);
         } else {
             return [];
         }
@@ -239,60 +232,57 @@ export class StylableLanguageService {
         return null;
     }
 
-    public onDocumentFormatting(filePath: string, options: FormattingOptions): TextEdit[] {
+    public onDocumentFormatting(
+        filePath: string,
+        options: StylableLangServiceFormattingOptions
+    ): TextEdit[] {
         const srcText = this.fs.readFileSync(filePath, 'utf8');
 
         return this.getDocumentFormatting(
             TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, srcText),
             { start: 0, end: srcText.length },
-            lspFormattingOptionsToJsBeautifyOptions(options)
+            options
         );
     }
 
     public onDocumentRangeFormatting(
         filePath: string,
         offset: { start: number; end: number },
-        options: FormattingOptions
+        options: StylableLangServiceFormattingOptions
     ): TextEdit[] {
         const srcText = this.fs.readFileSync(filePath, 'utf8');
 
         return this.getDocumentFormatting(
             TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, srcText),
             offset,
-            lspFormattingOptionsToJsBeautifyOptions(options)
+            options
         );
     }
 
     public getDocumentFormatting(
         doc: TextDocument,
         offset: { start: number; end: number },
-        options: CSSBeautifyOptions
+        options: StylableLangServiceFormattingOptions
     ) {
         return format(doc, offset, options);
     }
 
-    public provideCompletionItemsFromSrc(src: string, pos: Position, fileName: string) {
-        return this.provider.provideCompletionItemsFromSrc(src, pos, fileName, this.fs);
+    public provideCompletionItemsFromSrc(context: LangServiceContext) {
+        return this.provider.provideCompletionItemsFromSrc(context, this.fs);
     }
 
-    public getCompletions(document: TextDocument, filePath: string, position: Position) {
-        const content = document.getText();
+    public getCompletions(context: LangServiceContext) {
+        const content = context.document.getText();
+        const filePath = context.meta.source;
+        const position = context.getPosition();
 
-        const stCompletions = this.provider.provideCompletionItemsFromSrc(
-            content,
-            {
-                line: position.line,
-                character: position.character,
-            },
-            filePath,
-            this.fs
-        );
+        const stCompletions = this.provider.provideCompletionItemsFromSrc(context, this.fs);
 
         const ast = safeParse(content, { from: filePath });
         const cleanDocument = this.cssService.createSanitizedDocument(
             ast,
             filePath,
-            document.version
+            context.document.version
         );
 
         const groupedCompletions = new Map<string, CompletionItem>();
@@ -337,17 +327,17 @@ export class StylableLanguageService {
                 );
             }
         }
-
-        const cssCompletions = this.cssService.getCompletions(cleanDocument, position);
-
-        for (const cssComp of cssCompletions) {
-            const label = cssComp.label;
-
-            if (!groupedCompletions.has(label)) {
-                // CSS declaration property names have built in sorting
-                // at-rules, rules and declaration values do not
-                cssComp.sortText = cssComp.sortText || 'z';
-                groupedCompletions.set(label, cssComp);
+        // native CSS service
+        if (context.flags.runNativeCSSService) {
+            const cssCompletions = this.cssService.getCompletions(cleanDocument, position);
+            for (const cssComp of cssCompletions) {
+                const label = cssComp.label;
+                if (!groupedCompletions.has(label)) {
+                    // CSS declaration property names have built in sorting
+                    // at-rules, rules and declaration values do not
+                    cssComp.sortText = cssComp.sortText || 'z';
+                    groupedCompletions.set(label, cssComp);
+                }
             }
         }
 
@@ -415,6 +405,7 @@ export class StylableLanguageService {
             if (stat.isFile()) {
                 const content = this.fs.readFileSync(filePath, 'utf8');
                 return {
+                    path: filePath,
                     content,
                     stat,
                 };
@@ -427,7 +418,8 @@ export class StylableLanguageService {
     }
 }
 
-interface StylableFile {
+export interface StylableFile {
+    path: string;
     stat: IFileSystemStats;
     content: string;
 }

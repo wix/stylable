@@ -1,14 +1,16 @@
 import { nodeFs as fs } from '@file-services/node';
-import { Stylable, StylableConfig, StylableResolverCache } from '@stylable/core';
+import { Stylable, StylableConfig } from '@stylable/core';
+import { StylableResolverCache, validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { build } from './build';
-import { projectsConfig } from './config/projects-config';
+import { projectsConfig, resolveConfig } from './config/projects-config';
 import {
     createBuildIdentifier,
     createDefaultOptions,
+    hasStylableCSSOutput,
     NAMESPACE_RESOLVER_MODULE_REQUEST,
 } from './config/resolve-options';
 import { DiagnosticsManager } from './diagnostics-manager';
-import { createDefaultLogger } from './logger';
+import { createDefaultLogger, levels } from './logger';
 import type { BuildContext, BuildOptions } from './types';
 import { WatchHandler } from './watch-handler';
 
@@ -54,12 +56,10 @@ export async function buildStylable(
         watchOptions = {},
     }: BuildStylableContext = {}
 ) {
-    const projects = await projectsConfig(
-        rootDir,
-        overrideBuildOptions,
-        defaultOptions,
-        configFilePath
-    );
+    const { config } = resolveConfig(rootDir, configFilePath, fs) || {};
+    validateDefaultConfig(config?.defaultConfig);
+
+    const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions, config);
     const watchHandler = new WatchHandler(fileSystem, {
         log,
         resolverCache,
@@ -81,13 +81,21 @@ export async function buildStylable(
 
             log('[Project]', projectRoot, buildOptions);
 
-            const stylable = Stylable.create({
+            if (!hasStylableCSSOutput(buildOptions)) {
+                log(
+                    `No target output declared for "${identifier}", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`,
+                    levels.info
+                );
+            }
+
+            const stylable = new Stylable({
                 fileSystem,
                 requireModule,
                 projectRoot,
                 resolveNamespace,
                 resolverCache,
                 fileProcessorCache,
+                ...config?.defaultConfig,
             });
 
             const { service, generatedFiles } = await build(buildOptions, {

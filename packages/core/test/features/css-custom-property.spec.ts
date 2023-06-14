@@ -1,8 +1,16 @@
 import { STImport, CSSCustomProperty, STSymbol } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import { generateScopedCSSVar } from '@stylable/core/dist/helpers/css-custom-property';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+    deindent,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
+
+const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
+const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
+const customPropertyDiagnostics = diagnosticBankReportToStrings(CSSCustomProperty.diagnostics);
 
 describe(`features/css-custom-property`, () => {
     it(`should process css declaration prop`, () => {
@@ -37,14 +45,6 @@ describe(`features/css-custom-property`, () => {
         // JS exports
         expect(exports.vars.propA, `propA JS export`).to.eql(`--entry-propA`);
         expect(exports.vars.propB, `propB JS export`).to.eql(`--entry-propB`);
-
-        // deprecation
-        ignoreDeprecationWarn(() => {
-            expect(meta.cssVars, `deprecated 'meta.cssVars'`).to.eql({
-                '--propA': CSSCustomProperty.get(meta, `--propA`),
-                '--propB': CSSCustomProperty.get(meta, `--propB`),
-            });
-        });
     });
     it(`should process css declaration value var()`, () => {
         const { sheets } = testStylableCore(`
@@ -131,10 +131,9 @@ describe(`features/css-custom-property`, () => {
         expect(exports.vars.propB, `propB JS export`).to.eql(`--entry-propB`);
     });
     it(`should process conflicted definitions`, () => {
-        const symbolDiag = STSymbol.diagnostics;
         const { sheets } = testStylableCore(`
             /* @analyze-warn(@property conflicted) word(--conflicted)
-                ${symbolDiag.REDECLARE_SYMBOL(`--conflicted`)}*/
+                ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--conflicted`)}*/
             @property --conflicted {
                 syntax: '<color>';
                 initial-value: green;
@@ -148,7 +147,7 @@ describe(`features/css-custom-property`, () => {
             };
 
             /* @analyze-warn(@property conflicted) word(--conflicted)
-                ${symbolDiag.REDECLARE_SYMBOL(`--conflicted`)}*/
+                ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--conflicted`)}*/
             @property --conflicted {
                 syntax: '<color>';
                 initial-value: green;
@@ -187,8 +186,15 @@ describe(`features/css-custom-property`, () => {
     });
     it(`should collect global css props`, () => {
         const { sheets } = testStylableCore(`
-            /* @transform-remove(definition)*/
+            /* @transform-remove(build-def)*/
             @property st-global(--propX);
+
+            /* @atrule(runtime-def) --propY */
+            @property st-global(--propY) {
+                syntax: '<color>';
+                initial-value: green;
+                inherits: false;
+            }
 
             .root {
                 /* @decl(prop) --propX: green */
@@ -196,6 +202,9 @@ describe(`features/css-custom-property`, () => {
 
                 /* @decl(value) prop: var(--propX) */
                 prop: var(--propX);
+
+                /* @decl(value) --propY: var(--propY) */
+                --propY: var(--propY);
             }
         `);
 
@@ -207,7 +216,7 @@ describe(`features/css-custom-property`, () => {
         testStylableCore(`
             /* 
                 @atrule(no-dashes) propY 
-                @analyze-warn(no-dashes) word(propY) ${CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE(
+                @analyze-error(no-dashes) word(propY) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
                     'propY'
                 )}
             */
@@ -219,7 +228,7 @@ describe(`features/css-custom-property`, () => {
             
             /* 
                 @atrule(no-dashes-global) st-global(propZ)
-                @analyze-warn(no-dashes-global) word(propZ) ${CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE(
+                @analyze-error(no-dashes-global) word(propZ) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
                     'propZ'
                 )}
             */
@@ -232,7 +241,7 @@ describe(`features/css-custom-property`, () => {
             .decls {
                 /* 
                     @decl(empty var) prop: var() 
-                    @analyze-warn(empty var) ${CSSCustomProperty.diagnostics.MISSING_PROP_NAME()}
+                    @analyze-error(empty var) ${customPropertyDiagnostics.MISSING_PROP_NAME()}
                 */
                 prop: var();
             }
@@ -240,7 +249,7 @@ describe(`features/css-custom-property`, () => {
             .root {
                 /* 
                     @decl(no-dashes) prop: var(propA) 
-                    @analyze-warn(no-dashes) word(propA) ${CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_USE(
+                    @analyze-error(no-dashes) word(propA) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
                         'propA'
                     )}
                 */
@@ -248,13 +257,38 @@ describe(`features/css-custom-property`, () => {
 
                 /* 
                     @decl(space+text) prop: var(--entry-propB notAllowed, fallback) 
-                    @analyze-warn(space+text) word(--propB notAllowed, fallback) ${CSSCustomProperty.diagnostics.ILLEGAL_CSS_VAR_ARGS(
+                    @analyze-error(space+text) word(--propB notAllowed, fallback) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_ARGS(
                         '--propB notAllowed, fallback'
                     )}
                 */
                 prop: var(--propB notAllowed, fallback);
             }
         `);
+    });
+    it(`should collect runtime @property definitions`, () => {
+        const { sheets } = testStylableCore(`
+            @property --a;
+            @property st-global(--b);
+
+            @property --c {
+                syntax: '<color>';
+                initial-value: green;
+                inherits: false;
+            }
+            @property st-global(--d) {
+                syntax: '<color>';
+                initial-value: green;
+                inherits: false;
+            }
+
+            .root {
+                --e: var(--f);
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        expect(CSSCustomProperty.getRuntimeTypedDefinitionNames(meta)).to.eql(['--c', '--d']);
     });
     it.skip(`should escape`, () => {
         const { sheets } = testStylableCore(`
@@ -272,7 +306,7 @@ describe(`features/css-custom-property`, () => {
     describe(`@property validation`, () => {
         it(`should report on missing syntax`, () => {
             const { sheets } = testStylableCore(`
-                /* @analyze-warn(syntax) word(--a) ${CSSCustomProperty.diagnostics.MISSING_REQUIRED_DESCRIPTOR(
+                /* @analyze-error(syntax) word(--a) ${customPropertyDiagnostics.MISSING_REQUIRED_DESCRIPTOR(
                     'syntax'
                 )} */
                 @property --a {
@@ -280,7 +314,7 @@ describe(`features/css-custom-property`, () => {
                     initial-value: #c0ffee;
                 }
 
-                /* @analyze-warn(inherits) word(--b) ${CSSCustomProperty.diagnostics.MISSING_REQUIRED_DESCRIPTOR(
+                /* @analyze-error(inherits) word(--b) ${customPropertyDiagnostics.MISSING_REQUIRED_DESCRIPTOR(
                     'inherits'
                 )} */
                 @property --b {
@@ -288,7 +322,7 @@ describe(`features/css-custom-property`, () => {
                     initial-value: #c0ffee;
                 }
 
-                /* @analyze-warn(inherits) word(--c) ${CSSCustomProperty.diagnostics.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR()} */
+                /* @analyze-warn(inherits) word(--c) ${customPropertyDiagnostics.MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR()} */
                 @property --c {
                     syntax: '<color>';
                     inherits: false;
@@ -311,7 +345,7 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-warn(atrule) word(abc) ${CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_TYPE(
+                    /* @analyze-error(atrule) word(abc) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_TYPE(
                         'atrule'
                     )} */
                     @some-at-rule abc{}
@@ -321,7 +355,7 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-warn(rule) word(div) ${CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_TYPE(
+                    /* @analyze-error(rule) word(div) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_TYPE(
                         'rule'
                     )} */
                     div {}
@@ -334,7 +368,7 @@ describe(`features/css-custom-property`, () => {
                     syntax: '*';
                     inherits: false;
 
-                    /* @analyze-warn word(initialValue) ${CSSCustomProperty.diagnostics.INVALID_DESCRIPTOR_NAME(
+                    /* @analyze-error word(initialValue) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_NAME(
                         'initialValue'
                     )} */
                     initialValue: red;
@@ -345,10 +379,10 @@ describe(`features/css-custom-property`, () => {
     describe(`@st-global-custom-property (deprecated)`, () => {
         it(`should mark properties as global`, () => {
             testStylableCore(`
-                /* @analyze-info(first) ${CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()}*/
+                /* @analyze-info(first) ${customPropertyDiagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()}*/
                 @st-global-custom-property --x;
                 
-                /* @analyze-info(second) ${CSSCustomProperty.diagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()}*/
+                /* @analyze-info(second) ${customPropertyDiagnostics.DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY()}*/
                 @st-global-custom-property --a      ,--b,
                 --c  ,  --d  ;
     
@@ -362,10 +396,9 @@ describe(`features/css-custom-property`, () => {
             `);
         });
         it(`should conflict with @property - and override global definition`, () => {
-            const symbolDiag = STSymbol.diagnostics;
             const { sheets } = testStylableCore(`
                 /* @analyze-warn(@property before) word(--before)
-                    ${symbolDiag.REDECLARE_SYMBOL(`--before`)}*/
+                    ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--before`)}*/
                 @property --before {
                     syntax: '<color>';
                     initial-value: green;
@@ -373,13 +406,17 @@ describe(`features/css-custom-property`, () => {
                 };
                 
                 /*
-                @analyze-warn(before) word(--before) ${symbolDiag.REDECLARE_SYMBOL(`--before`)}
-                @analyze-warn(after) word(--after) ${symbolDiag.REDECLARE_SYMBOL(`--after`)}
+                @analyze-warn(before) word(--before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
+                    `--before`
+                )}
+                @analyze-warn(after) word(--after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
+                    `--after`
+                )}
                 */
                 @st-global-custom-property --before, --after;
                 
                 /* @analyze-warn(@property after) word(--after) 
-                    ${symbolDiag.REDECLARE_SYMBOL(`--after`)}*/
+                    ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--after`)}*/
                 @property --after{
                     syntax: '<color>';
                     initial-value: green;
@@ -404,7 +441,7 @@ describe(`features/css-custom-property`, () => {
             testStylableCore(`
                 /* 
                     @transform-remove(no-dashes)
-                    @analyze-warn(no-dashes) word(propA) ${CSSCustomProperty.diagnostics.ILLEGAL_GLOBAL_CSS_VAR(
+                    @analyze-error(no-dashes) word(propA) ${customPropertyDiagnostics.ILLEGAL_GLOBAL_CSS_VAR(
                         'propA'
                     )}
                 */
@@ -412,7 +449,7 @@ describe(`features/css-custom-property`, () => {
                 
                 /* 
                     @transform-remove(missing comma)
-                    @analyze-warn(missing comma) word(--propB --propC) ${CSSCustomProperty.diagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
+                    @analyze-error(missing comma) word(--propB --propC) ${customPropertyDiagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
                         '--propB --propC'
                     )}
                 */
@@ -515,20 +552,20 @@ describe(`features/css-custom-property`, () => {
                     }
                 `,
                 '/entry.st.css': `
-                    /* @analyze-warn(before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`--before`)} */
+                    /* @analyze-warn(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--before`)} */
                     @property --before;
                     
                     /* 
-                    @analyze-warn(imported before) word(--before) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                    @analyze-warn(imported before) word(--before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                         `--before`
                     )}
-                    @analyze-warn(imported after) word(--after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(
+                    @analyze-warn(imported after) word(--after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
                         `--after`
                     )}
                     */
                     @st-import [--before, --after] from "./props.st.css";
                     
-                    /* @analyze-warn(after) ${STSymbol.diagnostics.REDECLARE_SYMBOL(`--after`)} */
+                    /* @analyze-warn(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(`--after`)} */
                     @property --after;
 
                     .root {
@@ -628,7 +665,7 @@ describe(`features/css-custom-property`, () => {
             const { sheets } = testStylableCore({
                 '/props.st.css': ``,
                 '/entry.st.css': `
-                    /* @transform-warn word(--unknown) ${STImport.diagnostics.UNKNOWN_IMPORTED_SYMBOL(
+                    /* @transform-error word(--unknown) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
                         '--unknown',
                         './props.st.css'
                     )} */
@@ -882,6 +919,89 @@ describe(`features/css-custom-property`, () => {
             expect(
                 CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--local-global')
             ).to.equal('--local-global');
+        });
+    });
+    describe('native css', () => {
+        it('should not namespace', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent(`
+                    @property --a {
+                        syntax: '<color>';
+                        initial-value: green;
+                        inherits: false;
+                    }
+                    .x {
+                        --b: var(--c);
+                    }
+                `),
+                '/entry.st.css': `
+                    @st-import [--a, --b, --c] from './native.css';
+
+                    .root {
+                        /* @decl --a: var(--a) */
+                        --a: var(--a);
+
+                        /* @decl --b: var(--b) */
+                        --b: var(--b);
+
+                        /* @decl --c: var(--c) */
+                        --c: var(--c);
+                    }
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+            const { meta, exports } = stylable.transform('/entry.st.css');
+
+            shouldReportNoDiagnostics(nativeMeta);
+            shouldReportNoDiagnostics(meta);
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                deindent(`
+                    @property --a {
+                        syntax: '<color>';
+                        initial-value: green;
+                        inherits: false;
+                    }
+                    .x {
+                        --b: var(--c);
+                    }
+                `)
+            );
+
+            // JS exports
+            expect(exports.vars, `JS export`).to.eql({
+                a: '--a',
+                b: '--b',
+                c: '--c',
+            });
+        });
+        it('should ignore stylable specific transformations', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent(`
+                    @st-global-custom-property --a;
+                    @property st-global(--a) {
+                        syntax: '<color>';
+                        initial-value: green;
+                        inherits: false;
+                    }
+                    @property --no-body;
+                `),
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+
+            expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
+                deindent(`
+                    @st-global-custom-property --a;
+                    @property st-global(--a) {
+                        syntax: '<color>';
+                        initial-value: green;
+                        inherits: false;
+                    }
+                    @property --no-body;
+                `)
+            );
         });
     });
 });

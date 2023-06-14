@@ -17,6 +17,8 @@ export function create(
         namespace,
         classes: exports.classes,
         keyframes: exports.keyframes,
+        layers: exports.layers,
+        containers: exports.containers,
         vars: exports.vars,
         stVars: exports.stVars,
         cssStates,

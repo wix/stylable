@@ -9,12 +9,9 @@ import {
     promises,
 } from 'fs';
 import { join, relative } from 'path';
-import rimrafCb from 'rimraf';
-import { promisify } from 'util';
+import { sync as rimrafSync, rimraf } from 'rimraf';
 
 const { writeFile, mkdir } = promises;
-
-const rimraf = promisify(rimrafCb);
 
 const rootTempDir = join(__dirname, '..', '..', '..', '.temp');
 
@@ -125,7 +122,7 @@ export function createTempDirectorySync(prefix = 'temp-'): ITempDirectorySync {
     mkdirSync(tempDir, { recursive: true });
     return {
         path: tempDir,
-        remove: () => rimrafCb.sync(tempDir),
+        remove: () => rimrafSync(tempDir),
     };
 }
 
@@ -138,7 +135,7 @@ export interface ITempDirectory {
     /**
      * Remove the directory and all its contents.
      */
-    remove(): Promise<void>;
+    remove(): Promise<boolean>;
 }
 
 export async function createTempDirectory(prefix = 'temp-'): Promise<ITempDirectory> {

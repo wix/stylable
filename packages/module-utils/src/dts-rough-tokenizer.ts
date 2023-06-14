@@ -107,8 +107,10 @@ export type TokenizedDtsEntry =
     | VarsToken
     | StVarsToken
     | KeyframesToken
+    | LayersToken
+    | ContainersToken
     | StatesToken;
-export type RelevantKeys = 'classes' | 'vars' | 'stVars' | 'keyframes';
+export type RelevantKeys = 'classes' | 'vars' | 'stVars' | 'keyframes' | 'layers' | 'containers';
 
 export interface DtsToken extends DTSCodeToken {
     line: number;
@@ -122,6 +124,13 @@ export type ClassesToken = { type: 'classes'; tokens: DtsToken[]; start: number;
 export type VarsToken = { type: 'vars'; tokens: DtsToken[]; start: number; end: number };
 export type StVarsToken = { type: 'stVars'; tokens: DtsToken[]; start: number; end: number };
 export type KeyframesToken = { type: 'keyframes'; tokens: DtsToken[]; start: number; end: number };
+export type LayersToken = { type: 'layers'; tokens: DtsToken[]; start: number; end: number };
+export type ContainersToken = {
+    type: 'containers';
+    tokens: DtsToken[];
+    start: number;
+    end: number;
+};
 export type StatesToken = {
     type: 'states';
     tokens: { className: DtsToken; classStates: ClassStateToken[] }[];
@@ -133,7 +142,14 @@ const shouldAddToken = (type: DTSCodeToken['type']) =>
     isComment(type) || type === 'space' ? false : true;
 
 function isRelevantKey(name: string): name is RelevantKeys {
-    return name === 'classes' || name === 'vars' || name === 'stVars' || name === 'keyframes';
+    return (
+        name === 'classes' ||
+        name === 'vars' ||
+        name === 'stVars' ||
+        name === 'keyframes' ||
+        name === 'layers' ||
+        name === 'containers'
+    );
 }
 
 function findDtsTokens(tokens: DTSCodeToken[]) {

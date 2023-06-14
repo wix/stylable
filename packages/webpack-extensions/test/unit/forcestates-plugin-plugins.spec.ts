@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 import { applyStylableForceStateSelectors } from '@stylable/webpack-extensions';
-import { cssParse } from '@stylable/core';
+import { cssParse } from '@stylable/core/dist/index-internal';
 
 describe('stylable-forcestates plugins', () => {
     it('basic native plugin support', () => {

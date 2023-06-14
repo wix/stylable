@@ -1,6 +1,25 @@
-import { normalize } from 'path';
+import { isAbsolute, join, normalize } from 'path';
 import { expect } from 'chai';
-import { collectAssets, fixRelativeUrls, isAsset, makeAbsolute, cssParse } from '@stylable/core';
+import { cssParse } from '@stylable/core/dist/index-internal';
+import { processDeclarationFunctions } from '@stylable/core/dist/process-declaration-functions';
+import { fixRelativeUrls, isAsset, makeAbsolute } from '@stylable/core/dist/stylable-assets';
+import type * as postcss from 'postcss';
+
+function collectAssets(ast: postcss.Root) {
+    const assetDependencies: string[] = [];
+    ast.walkDecls((decl) => {
+        processDeclarationFunctions(
+            decl,
+            (node) => {
+                if (node.type === 'url') {
+                    assetDependencies.push(node.url);
+                }
+            },
+            false
+        );
+    });
+    return assetDependencies;
+}
 
 const css = `
     .a{
@@ -43,7 +62,19 @@ describe('stylable assets', () => {
 
     it('makeAbsolute', () => {
         const ast = cssParse(css);
-        expect(collectAssets(ast).map((_) => makeAbsolute(_, '/root', '/root/module'))).to.eql([
+        expect(
+            collectAssets(ast).map((_) =>
+                makeAbsolute(
+                    {
+                        join,
+                        isAbsolute,
+                    },
+                    _,
+                    '/root',
+                    '/root/module'
+                )
+            )
+        ).to.eql([
             normalize('/root/module/a.png'),
             normalize('/root/b.png'),
             '~some-package/c.png',

@@ -1,9 +1,18 @@
-import { StylableDOMUtil } from '@stylable/dom-test-kit';
+import { StylableDOMUtil, PartialElement } from '@stylable/dom-test-kit';
 import { DTSKit } from '@stylable/e2e-test-kit';
+import { MinimalDocument } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import { contractTest } from './contract-test';
 
-describe('stylable-dom-utils', contractTest(StylableDOMUtil));
+const minDoc = new MinimalDocument();
+
+describe(
+    'stylable-dom-utils',
+    contractTest(StylableDOMUtil, {
+        scopeSelectorTest: true,
+        createElement: () => minDoc.createElement('div') as unknown as PartialElement,
+    })
+);
 
 describe('stylable-dom-utils type compliance', function () {
     this.timeout(25000);

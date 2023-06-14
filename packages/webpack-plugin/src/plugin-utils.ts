@@ -8,6 +8,7 @@ import type {
     ModuleGraph,
     NormalModule,
 } from 'webpack';
+
 import type {
     BuildData,
     DependencyTemplates,
@@ -18,10 +19,11 @@ import type {
     WebpackCreateHash,
     WebpackOutputOptions,
 } from './types';
-import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core';
+import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core/dist/index-internal';
 import decache from 'decache';
 import { CalcDepthContext, getCSSViewModule } from '@stylable/build-tools';
 import { join, parse } from 'path';
+import { ReExt } from './re-ext-plugin';
 
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
@@ -48,6 +50,12 @@ export function isSameResourceModule(moduleA: any, moduleB: any) {
 
 export function isStylableModule(module: any): module is NormalModule {
     return module.resource?.endsWith('.st.css');
+}
+export function isLoadedNativeCSSModule(
+    module: any,
+    moduleGraph: ModuleGraph
+): module is NormalModule {
+    return module.resource?.endsWith('.css') && isStylableModule(moduleGraph.getIssuer(module));
 }
 
 export function isAssetModule(module: Module): module is NormalModule {
@@ -120,6 +128,10 @@ export function replaceMappedCSSAssetPlaceholders({
                     getData: () => data,
                 });
 
+                if (!assetModule.buildInfo) {
+                    throw new Error('Missing asset module build info for ' + resourcePath);
+                }
+
                 if (assetModule.buildInfo.dataUrl) {
                     // Investigate using the data map from getData currently there is an unknown in term from escaping keeping extractDataUrlFromAssetModuleSource
                     return extractDataUrlFromAssetModuleSource(
@@ -189,15 +201,35 @@ export function outputOptionsAwareHashContent(
     return contentHash.toString();
 }
 
+export const LOADER_NAME = 'stylable-plugin-loader';
+
 export function injectLoader(compiler: Compiler) {
-    if (!compiler.options.module.rules) {
+    const options = compiler.options;
+    if (!options.module.rules) {
         compiler.options.module.rules = [];
     }
-    compiler.options.module.rules.unshift({
+    const loaderPath = require.resolve('./loader');
+    options.module.rules.unshift({
         test: /\.st\.css$/,
-        loader: require.resolve('./loader'),
+        loader: LOADER_NAME,
         sideEffects: true,
     });
+    options.resolve ||= {};
+    options.resolve.plugins ||= [];
+
+    // dual mode support
+    options.resolve.plugins.push(new ReExt(/\.st\.css\.(c|m)?js$/, '.st.css'));
+
+    options.resolveLoader ??= {};
+    options.resolveLoader.alias ??= {};
+    if (Array.isArray(options.resolveLoader.alias)) {
+        options.resolveLoader.alias.unshift({
+            name: LOADER_NAME,
+            alias: loaderPath,
+        });
+    } else {
+        options.resolveLoader.alias[LOADER_NAME] = loaderPath;
+    }
 }
 
 export function createDecacheRequire(compiler: Compiler) {
@@ -280,8 +312,16 @@ export function createStaticCSS(
     return cssChunks;
 }
 
+export function getWebpackBuildMeta(module: Module): NonNullable<Module['buildMeta']> {
+    const buildMeta = module.buildMeta;
+    if (!buildMeta) {
+        throw new Error(`Stylable module ${module.identifier()} does not contains build meta`);
+    }
+    return buildMeta;
+}
+
 export function getStylableBuildMeta(module: Module): StylableBuildMeta {
-    const meta = module.buildMeta.stylable;
+    const meta = module.buildMeta?.stylable;
     if (!meta) {
         throw new Error(`Stylable module ${module.identifier()} does not contains build meta`);
     }
@@ -302,7 +342,7 @@ export function getStylableBuildData(
 export function findIfStylableModuleUsed(
     m: Module,
     compilation: Compilation,
-    UnusedDependency: typeof dependencies.ModuleDependency
+    UnusedDependency: typeof dependencies.HarmonyImportDependency
 ) {
     const moduleGraph = compilation.moduleGraph;
     const chunkGraph = compilation.chunkGraph;
@@ -316,7 +356,7 @@ export function findIfStylableModuleUsed(
 
     let isInUse = false;
     for (const connectionModule of inConnections) {
-        if (connectionModule.buildMeta.sideEffectFree) {
+        if (connectionModule.buildMeta?.sideEffectFree) {
             const info = moduleGraph.getExportsInfo(connectionModule);
             const usedExports = (
                 info.getUsedExports as any
@@ -479,7 +519,7 @@ export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthConte
             ),
         getModulePathNoExt: (module) => {
             if (isStylableModule(module)) {
-                return module.resource.replace(/\.st\.css/g, '');
+                return module.resource.replace(/\.st\.css$/, '');
             }
             const { dir, name } = parse((module as NormalModule)?.resource || '');
             return join(dir, name);

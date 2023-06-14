@@ -16,6 +16,7 @@ export {
     getOnlyChunk,
     getSortedModules,
     getStaticPublicPath,
+    getWebpackBuildMeta,
     getStylableBuildData,
     getStylableBuildMeta,
     getStylableModules,
@@ -35,7 +36,10 @@ export {
     uniqueFilterMap,
 } from './plugin-utils';
 export { getImports, getReplacementToken } from './loader-utils';
-export { applyWebpackConfigStylableExcludes } from './webpack-config-stylable-excludes';
+export {
+    applyWebpackConfigStylableExcludes,
+    bundleServerLibs,
+} from './webpack-config-stylable-excludes';
 export {
     BuildData,
     CompilationParams,

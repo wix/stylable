@@ -5,10 +5,12 @@ import type { ClassSymbol } from './css-class';
 import type { ElementSymbol } from './css-type';
 import type { CSSVarSymbol } from './css-custom-property';
 import type { KeyframesSymbol } from './css-keyframes';
+import type { LayerSymbol } from './css-layer';
+import type { ContainerSymbol } from './css-contains';
 import { plugableRecord } from '../helpers/plugable-record';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { StylableMeta } from '../stylable-meta';
 import type * as postcss from 'postcss';
+import { createDiagnosticReporter } from '../diagnostics';
 
 // SYMBOLS DEFINITION
 
@@ -19,7 +21,9 @@ export type StylableSymbol =
     | ClassSymbol
     | ElementSymbol
     | CSSVarSymbol
-    | KeyframesSymbol;
+    | KeyframesSymbol
+    | LayerSymbol
+    | ContainerSymbol;
 // the namespace that each symbol exists on
 const NAMESPACES = {
     import: `main`,
@@ -27,18 +31,34 @@ const NAMESPACES = {
     cssVar: `main`,
     element: `main`,
     keyframes: `keyframes`,
+    layer: `layer`,
+    container: `container`,
     var: `main`,
 } as const;
+export const readableTypeMap: Record<StylableSymbol['_kind'], string> = {
+    class: 'css class',
+    element: 'css element type',
+    cssVar: 'css custom property',
+    import: 'stylable imported symbol',
+    keyframes: 'css keyframes',
+    layer: 'css layer',
+    container: 'css container name',
+    var: 'stylable var',
+};
 // state structure
 function createState(clone?: State): State {
     return {
         byNS: {
             main: clone ? [...clone.byNS.main] : [],
             keyframes: clone ? [...clone.byNS.keyframes] : [],
+            layer: clone ? [...clone.byNS.layer] : [],
+            container: clone ? [...clone.byNS.container] : [],
         },
         byNSFlat: {
             main: clone ? { ...clone.byNSFlat.main } : {},
             keyframes: clone ? { ...clone.byNSFlat.keyframes } : {},
+            layer: clone ? { ...clone.byNSFlat.layer } : {},
+            container: clone ? { ...clone.byNSFlat.container } : {},
         },
         byType: {
             import: clone ? { ...clone.byType.import } : {},
@@ -46,6 +66,8 @@ function createState(clone?: State): State {
             cssVar: clone ? { ...clone.byType.cssVar } : {},
             element: clone ? { ...clone.byType.element } : {},
             keyframes: clone ? { ...clone.byType.keyframes } : {},
+            layer: clone ? { ...clone.byType.layer } : {},
+            container: clone ? { ...clone.byType.container } : {},
             var: clone ? { ...clone.byType.var } : {},
         },
     };
@@ -66,7 +88,13 @@ type FilterByNamespace<NS extends Namespaces, T extends SymbolTypes = SymbolType
 type NamespaceToSymbolType = {
     [NS in SymbolTypeToNamespace[SymbolTypes]]: FilterByNamespace<NS>;
 };
-type Namespaces = keyof NamespaceToSymbolType;
+export type Namespaces = keyof NamespaceToSymbolType;
+export type SymbolByNamespace<NS extends Namespaces> = Extract<
+    StylableSymbol,
+    {
+        _kind: NamespaceToSymbolType[NS];
+    }
+>;
 interface SymbolDeclaration<NS = Namespaces> {
     name: string;
     symbol: filterSymbols<
@@ -90,12 +118,16 @@ interface State {
 const dataKey = plugableRecord.key<State>('mappedSymbols');
 
 export const diagnostics = {
-    REDECLARE_SYMBOL(name: string) {
-        return `redeclare symbol "${name}"`;
-    },
-    REDECLARE_ROOT() {
-        return `root is used for the stylesheet and cannot be overridden`;
-    },
+    REDECLARE_SYMBOL: createDiagnosticReporter(
+        '06001',
+        'warning',
+        (name: string) => `redeclare symbol "${name}"`
+    ),
+    REDECLARE_ROOT: createDiagnosticReporter(
+        '06002',
+        'error',
+        () => `root is used for the stylesheet and cannot be overridden`
+    ),
 };
 
 // HOOKS
@@ -146,18 +178,16 @@ export function addSymbol({
     const typeTable = byType[symbol._kind];
     const nsName = NAMESPACES[symbol._kind];
     if (node && name === `root` && nsName === `main` && byNSFlat[nsName][name]) {
-        context.diagnostics.warn(node, diagnostics.REDECLARE_ROOT(), { word: `root` });
+        context.diagnostics.report(diagnostics.REDECLARE_ROOT(), {
+            node,
+            word: `root`,
+        });
         return;
     }
     byNS[nsName].push({ name, symbol, ast: node, safeRedeclare });
     byNSFlat[nsName][name] = symbol;
     typeTable[name] = symbol;
-    // deprecated
-    if (nsName === `main`) {
-        ignoreDeprecationWarn(() => {
-            context.meta.mappedSymbols[name] = symbol;
-        });
-    }
+    return symbol;
 }
 
 export function reportRedeclare(context: FeatureContext) {
@@ -176,7 +206,8 @@ export function reportRedeclare(context: FeatureContext) {
         for (const name of collisions) {
             for (const { safeRedeclare, ast } of flat[name]) {
                 if (!safeRedeclare && ast) {
-                    context.diagnostics.warn(ast, diagnostics.REDECLARE_SYMBOL(name), {
+                    context.diagnostics.report(diagnostics.REDECLARE_SYMBOL(name), {
+                        node: ast,
                         word: name,
                     });
                 }

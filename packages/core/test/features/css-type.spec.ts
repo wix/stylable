@@ -1,7 +1,12 @@
 import { STImport, CSSType, STSymbol } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
-import { testStylableCore, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    shouldReportNoDiagnostics,
+    diagnosticBankReportToStrings,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
+
+const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
 
 describe(`features/css-type`, () => {
     it(`should process element types`, () => {
@@ -35,21 +40,12 @@ describe(`features/css-type`, () => {
             CSSType.get(meta, `Btn`)
         );
         expect(meta.getAllTypeElements(), `meta.getAllTypeElements`).to.eql(CSSType.getAll(meta));
-
-        // deprecation
-        expect(
-            ignoreDeprecationWarn(() => meta.elements),
-            `deprecated 'meta.elements'`
-        ).to.eql({
-            Btn: CSSType.get(meta, `Btn`),
-            Gallery: CSSType.get(meta, `Gallery`),
-        });
     });
     it(`should report invalid cases`, () => {
         testStylableCore(`
             /* 
                 @rule(functional element type) div()
-                @analyze-error(functional element type) ${CSSType.diagnostics.INVALID_FUNCTIONAL_SELECTOR(
+                @analyze-error(functional element type) ${cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                     `div`,
                     `type`
                 )}
@@ -63,7 +59,7 @@ describe(`features/css-type`, () => {
         anywhere in the selector: "div .local span"
         */
         const { sheets } = testStylableCore(`
-                /* @analyze-warn word(button) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                /* @analyze-warn word(button) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                     `button`
                 )} */
                 button {}
@@ -76,6 +72,24 @@ describe(`features/css-type`, () => {
         const { meta } = sheets[`/entry.st.css`];
 
         expect(meta.diagnostics.reports.length, `only unscoped diagnostic`).to.equal(1);
+    });
+    it('should set element inferred selector to context after native element', () => {
+        testStylableCore({
+            'comp.st.css': ` .part {} `,
+            'entry.st.css': `
+                @st-import Comp from './comp.st.css';
+                .class { -st-states: state('.class-state'); }
+            
+                /* @rule(root state) .entry__class input:state */
+                .class input:state {}
+    
+                /* @rule(unknown comp pseudo-element) .comp__root input::part */
+                Comp input::part {}
+    
+                /* @rule(unknown standalone pseudo-element) .comp__root input::class */
+                Comp input::class {}
+            `,
+        });
     });
     describe(`st-import`, () => {
         it(`should resolve imported root (default) as element type`, () => {
@@ -156,6 +170,45 @@ describe(`features/css-type`, () => {
                 root: `entry__root`,
             });
         });
+        it(`should resolve imported element type (no class)`, () => {
+            // element type is not namespaced and should be avoided
+            const { sheets } = testStylableCore({
+                '/before.st.css': `Part {}`,
+                '/after.st.css': `Part {}`,
+                '/entry.st.css': `
+                    /* @check .entry__root Part */
+                    .root BeforePart {}
+
+                    @st-import [Part as BeforePart] from './before.st.css';
+                    @st-import [Part as AfterPart] from './after.st.css';
+
+                    /* @check .entry__root Part */
+                    .root AfterPart {}
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            const importBeforeDef = meta.getImportStatements()[0];
+            const importAfterDef = meta.getImportStatements()[1];
+            expect(CSSType.get(meta, `BeforePart`), `before type symbol`).to.eql({
+                _kind: `element`,
+                name: 'BeforePart',
+                alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
+            });
+            expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql({
+                _kind: `element`,
+                name: 'AfterPart',
+                alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
+            });
+            // JS exports
+            expect(exports.classes, `not add as classes exports`).to.eql({
+                root: `entry__root`,
+            });
+        });
         it(`should resolve deep imported element type`, () => {
             testStylableCore({
                 '/base.st.css': ``,
@@ -180,7 +233,7 @@ describe(`features/css-type`, () => {
                 '/entry.st.css': `
                     @st-import [importedPart] from "./classes.st.css";
 
-                    /* @analyze-warn word(importedPart) ${CSSType.diagnostics.UNSCOPED_TYPE_SELECTOR(
+                    /* @analyze-warn word(importedPart) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
                         `importedPart`
                     )} */
                     importedPart {}

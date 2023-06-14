@@ -2,40 +2,11 @@ import path from 'path';
 import type * as postcss from 'postcss';
 import { processDeclarationFunctions } from './process-declaration-functions';
 
-export interface UrlNode {
-    type: 'url';
-    url: string;
-    stringType?: string;
-    name?: string;
-    before?: string;
-    after?: string;
-    innerSpacingBefore?: string;
-    innerSpacingAfter?: string;
-}
-
-export type OnUrlCallback = (node: UrlNode) => void;
-
-export function collectAssets(ast: postcss.Root) {
-    const assetDependencies: string[] = [];
-    ast.walkDecls((decl) => {
-        processDeclarationFunctions(
-            decl,
-            (node) => {
-                if (node.type === 'url') {
-                    assetDependencies.push(node.url);
-                }
-            },
-            false
-        );
-    });
-    return assetDependencies;
-}
-
-export function isExternal(url: string) {
+function isExternal(url: string) {
     return url === '' || url.startsWith('data:') || isUrl(url);
 }
 
-export function isUrl(maybeUrl: string) {
+function isUrl(maybeUrl: string) {
     maybeUrl = maybeUrl.trim();
     if (maybeUrl.includes(' ')) {
         return false;
@@ -52,17 +23,34 @@ export function isAsset(url: string) {
     return !isExternal(url);
 }
 
-export function makeAbsolute(resourcePath: string, rootContext: string, moduleContext: string) {
-    const isAbs = path.isAbsolute(resourcePath);
+export function isRelativeNativeCss(fullPath: string) {
+    return (
+        fullPath.endsWith('.css') &&
+        !fullPath.endsWith('.st.css') &&
+        !fullPath.includes(path.sep + 'node_modules' + path.sep) &&
+        !isUrl(fullPath)
+    );
+}
+
+export function makeAbsolute(
+    host: {
+        join: (...paths: string[]) => string;
+        isAbsolute: (path: string) => boolean;
+    },
+    resourcePath: string,
+    rootContext: string,
+    moduleContext: string
+) {
+    const isAbs = host.isAbsolute(resourcePath);
     let abs: string;
     if (isExternal(resourcePath) || resourcePath.startsWith('~')) {
         abs = resourcePath;
     } else if (isAbs && resourcePath.startsWith('/')) {
-        abs = path.join(rootContext, resourcePath);
+        abs = host.join(rootContext, resourcePath);
     } else if (isAbs) {
         abs = resourcePath;
     } else {
-        abs = path.join(moduleContext, resourcePath);
+        abs = host.join(moduleContext, resourcePath);
     }
     return abs;
 }

@@ -7,15 +7,18 @@ import type { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
     CSSResolve,
-    expandCustomSelectors,
     ImportSymbol,
-    SRule,
-    StateParsedValue,
     Stylable,
     StylableMeta,
     JSResolve,
+    Diagnostics,
 } from '@stylable/core';
-import { safeParse, process as stylableProcess } from '@stylable/core/dist/index-internal';
+import {
+    safeParse,
+    StylableProcessor,
+    STCustomSelector,
+    MappedStates,
+} from '@stylable/core/dist/index-internal';
 import type {
     Location,
     ParameterInformation,
@@ -26,28 +29,26 @@ import type {
 import { URI } from 'vscode-uri';
 
 import {
-    CodeMixinCompletionProvider,
-    CompletionProvider,
+    CodeMixinCompletionPlugin,
+    LangServicePlugin,
     createRange,
-    CssMixinCompletionProvider,
-    ExtendCompletionProvider,
-    FormatterCompletionProvider,
-    GlobalCompletionProvider,
-    ImportInternalDirectivesProvider,
-    NamedCompletionProvider,
-    ProviderOptions,
+    CssMixinCompletionPlugin,
+    ExtendCompletionPlugin,
+    FormatterCompletionPlugin,
+    GlobalCompletionPlugin,
+    ImportInternalDirectivesPlugin,
+    NamedCompletionPlugin,
+    PluginCompletionOptions,
     ProviderPosition,
     ProviderRange,
-    PseudoElementCompletionProvider,
-    RulesetInternalDirectivesProvider,
-    SelectorCompletionProvider,
-    StateEnumCompletionProvider,
-    StateSelectorCompletionProvider,
-    StateTypeCompletionProvider,
-    TopLevelDirectiveProvider,
-    ValueCompletionProvider,
-    ValueDirectiveProvider,
-    StImportNamedCompletionProvider,
+    PseudoElementCompletionPlugin,
+    RulesetInternalDirectivesPlugin,
+    SelectorCompletionPlugin,
+    StateSelectorCompletionPlugin,
+    StateTypeCompletionPlugin,
+    TopLevelDirectivePlugin,
+    ValueCompletionPlugin,
+    ValueDirectivePlugin,
 } from './completion-providers';
 import { topLevelDirectives } from './completion-types';
 import type { Completion } from './completion-types';
@@ -65,6 +66,8 @@ import {
     SelectorInternalChunk,
     SelectorQuery,
 } from './utils/selector-analyzer';
+import type { LangServiceContext } from '../lib-new/lang-service-context';
+import { StImportPlugin } from '../lib-new/features/ls-st-import';
 
 function findLast<T>(
     arr: T[],
@@ -82,41 +85,47 @@ function findLast<T>(
 }
 
 export class Provider {
-    private providers: CompletionProvider[] = [
-        RulesetInternalDirectivesProvider,
-        ImportInternalDirectivesProvider,
-        TopLevelDirectiveProvider,
-        ValueDirectiveProvider,
-        GlobalCompletionProvider,
-        SelectorCompletionProvider,
-        ExtendCompletionProvider,
-        CssMixinCompletionProvider,
-        CodeMixinCompletionProvider,
-        FormatterCompletionProvider,
-        NamedCompletionProvider,
-        StateTypeCompletionProvider,
-        StateSelectorCompletionProvider,
-        StateEnumCompletionProvider,
-        PseudoElementCompletionProvider,
-        ValueCompletionProvider,
-        StImportNamedCompletionProvider,
+    private plugins: LangServicePlugin[] = [
+        StImportPlugin,
+        RulesetInternalDirectivesPlugin,
+        ImportInternalDirectivesPlugin,
+        TopLevelDirectivePlugin,
+        ValueDirectivePlugin,
+        GlobalCompletionPlugin,
+        SelectorCompletionPlugin,
+        ExtendCompletionPlugin,
+        CssMixinCompletionPlugin,
+        CodeMixinCompletionPlugin,
+        FormatterCompletionPlugin,
+        NamedCompletionPlugin,
+        StateTypeCompletionPlugin,
+        StateSelectorCompletionPlugin,
+        PseudoElementCompletionPlugin,
+        ValueCompletionPlugin,
     ];
     constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
 
+    public analyzeCaretContext(context: LangServiceContext) {
+        for (const plugin of this.plugins) {
+            plugin.analyzeCaretLocation?.(context);
+        }
+    }
     public provideCompletionItemsFromSrc(
-        src: string,
-        pos: Position,
-        fileName: string,
+        context: LangServiceContext,
         fs: IFileSystem
     ): Completion[] {
-        const res = fixAndProcess(src, pos, fileName);
+        const src = context.document.getText();
+        const filePath = context.meta.source;
+        const pos = context.getPosition();
+        const res = fixAndProcess(src, pos, filePath);
         const completions: Completion[] = [];
 
         if (!res.processed.meta) {
             return [];
         }
 
-        const options = this.createProviderOptions(
+        const options = this.createPluginCompletionOptions(
+            context,
             src,
             pos,
             res.processed.meta,
@@ -125,8 +134,8 @@ export class Provider {
             res.cursorLineIndex,
             fs
         );
-        for (const provider of this.providers) {
-            completions.push(...provider.provide(options));
+        for (const provider of this.plugins) {
+            completions.push(...provider.onCompletion(options));
         }
 
         return this.dedupeComps(completions);
@@ -237,7 +246,7 @@ export class Provider {
                             position.line + 1,
                             position.character
                         );
-                        const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+                        const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
                         const selec = (pfp[pfp.length - 1] as postcss.Rule).selector;
 
                         // If called from -st-state, i.e. inside node, pos is not in selector.
@@ -291,7 +300,10 @@ export class Provider {
                     )
                 );
             }
-        } else if (Object.keys(meta.customSelectors).find((sym) => sym === ':--' + word)) {
+        } else if (STCustomSelector.getCustomSelector(meta, word)) {
+            // ToDo: figure out if this is necessary.
+            // seems to point to local custom selector definition.
+            // see local-custom-selector.st.css for example.
             defs.push(
                 new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
             );
@@ -355,7 +367,7 @@ export class Provider {
         const line = split[pos.line];
         let value = '';
 
-        const stPath = pathFromPosition(meta.rawAst, {
+        const stPath = pathFromPosition(meta.sourceAst, {
             line: pos.line + 1,
             character: pos.character + 1,
         });
@@ -672,7 +684,7 @@ export class Provider {
             });
         }
 
-        let stateDef = null as StateParsedValue | string | null;
+        let stateDef = null as MappedStates[string];
 
         if (word) {
             const resolvedElements = this.stylable.transformSelector(meta, line).resolved;
@@ -715,7 +727,8 @@ export class Provider {
         }
     }
 
-    private createProviderOptions(
+    private createPluginCompletionOptions(
+        context: LangServiceContext,
         src: string,
         position: ProviderPosition,
         meta: StylableMeta,
@@ -723,8 +736,8 @@ export class Provider {
         fullLineText: string,
         cursorPosInLine: number,
         fs: IFileSystem
-    ): ProviderOptions {
-        const path = pathFromPosition(meta.rawAst, {
+    ): PluginCompletionOptions {
+        const path = pathFromPosition(meta.sourceAst, {
             line: position.line + 1,
             character: position.character,
         });
@@ -732,19 +745,19 @@ export class Provider {
         const parentAst: postcss.Node | undefined = (astAtCursor as postcss.Declaration).parent
             ? (astAtCursor as postcss.Declaration).parent
             : undefined;
-        const parentSelector: SRule | null =
+        const parentSelector: postcss.Rule | null =
             parentAst &&
             isSelector(parentAst) &&
             fakeRules.findIndex((f) => {
                 return f.selector === parentAst.selector;
             }) === -1
-                ? (parentAst as SRule)
+                ? parentAst
                 : astAtCursor &&
                   isSelector(astAtCursor) &&
                   fakeRules.findIndex((f) => {
                       return f.selector === astAtCursor.selector;
                   }) === -1
-                ? (astAtCursor as SRule)
+                ? astAtCursor
                 : null;
 
         const { lineChunkAtCursor, fixedCharIndex } = getChunkAtCursor(
@@ -759,9 +772,10 @@ export class Provider {
             (ps.selector[0] as SelectorChunk).classes[0] ||
             (ps.selector[0] as SelectorChunk).customSelectors[0] ||
             chunkStrings[0];
-        const expandedLine: string = expandCustomSelectors(
-            postcss.rule({ selector: lineChunkAtCursor }),
-            meta.customSelectors
+        // transforms inline custom selectors (e.g. ":--custom" -> ".x .y")
+        const expandedLine: string = STCustomSelector.transformCustomSelectorInline(
+            meta,
+            lineChunkAtCursor
         )
             .split(' ')
             .pop()!; // TODO: replace with selector parser
@@ -777,6 +791,7 @@ export class Provider {
         }
 
         return {
+            context,
             meta,
             fs,
             stylable: this.stylable,
@@ -831,7 +846,7 @@ function findRefs(
     const refs: Location[] = [];
 
     if (word.startsWith(':global(')) {
-        scannedMeta.rawAst.walkRules((rule) => {
+        scannedMeta.sourceAst.walkRules((rule) => {
             if (rule.selector.includes(word) && rule.source && rule.source.start) {
                 refs.push({
                     uri: URI.file(scannedMeta.source).toString(),
@@ -851,7 +866,7 @@ function findRefs(
         return refs;
     }
     const valueRegex = new RegExp('(\\.?' + word + ')(\\s|$|\\:|;|\\)|,)', 'g');
-    scannedMeta.rawAst.walkRules((rule) => {
+    scannedMeta.sourceAst.walkRules((rule) => {
         // Usage in selector
         const filterRegex = new RegExp('(\\.?' + word + ')(\\s|$|\\:|;|\\))', 'g');
         if (filterRegex.test(rule.selector) && !!rule.source && !!rule.source.start) {
@@ -887,7 +902,7 @@ function findRefs(
                 !!pos &&
                 resScanned[0].some((rs) => {
                     const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
-                    const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+                    const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
                     let lastStPath = pfp[pfp.length - 1];
                     if (lastStPath.type === 'decl') {
                         lastStPath = pfp[pfp.length - 2] as postcss.Rule;
@@ -951,7 +966,7 @@ function findRefs(
             }
         }
     });
-    scannedMeta.rawAst.walkDecls((decl) => {
+    scannedMeta.sourceAst.walkDecls((decl) => {
         if (!decl.source || !decl.source.start) {
             return;
         }
@@ -988,13 +1003,13 @@ function findRefs(
             }
         }
     });
-    scannedMeta.rawAst.walkDecls((decl) => {
+    scannedMeta.sourceAst.walkDecls((decl) => {
         if (!decl.source || !decl.source.start || !pos) {
             return;
         }
         const directiveRegex = new RegExp(`-st-states`);
         const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
-        const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+        const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
         const char = isInNode(postcsspos, pfp[pfp.length - 1]) ? 1 : pos.character;
         const callPs = parseSelector((pfp[pfp.length - 1] as postcss.Rule).selector, char);
         const callingElement = findLast(
@@ -1051,7 +1066,7 @@ function findRefs(
             }
         }
     });
-    scannedMeta.rawAst.walkDecls(`-st-mixin`, (decl) => {
+    scannedMeta.sourceAst.walkDecls(`-st-mixin`, (decl) => {
         // usage in -st-mixin
         if (!decl.source || !decl.source.start) {
             return;
@@ -1092,7 +1107,7 @@ function findRefs(
             }
         });
     });
-    scannedMeta.rawAst.walkDecls(word, (decl) => {
+    scannedMeta.sourceAst.walkDecls(word, (decl) => {
         // Variable definition
         if (
             decl.parent &&
@@ -1116,7 +1131,7 @@ function findRefs(
             });
         }
     });
-    scannedMeta.rawAst.walkDecls((decl) => {
+    scannedMeta.sourceAst.walkDecls((decl) => {
         // Variable usage
         if (decl.value.includes('value(') && !!decl.source && !!decl.source.start) {
             const usageRegex = new RegExp('value\\(\\s*' + word + '\\s*\\)', 'g');
@@ -1167,7 +1182,7 @@ function newFindRefs(
         // Global selector strings are special
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.analyze(stylesheetPath);
-            scannedMeta.rawAst.walkRules((rule) => {
+            scannedMeta.sourceAst.walkRules((rule) => {
                 if (rule.selector.includes(word)) {
                     refs = refs.concat(findRefs(word, defMeta, scannedMeta, callingMeta, stylable));
                 }
@@ -1238,7 +1253,7 @@ function newFindRefs(
         stylesheetsPath.forEach((stylesheetPath) => {
             const scannedMeta = stylable.analyze(stylesheetPath);
             let done = false;
-            scannedMeta.rawAst.walkRules((r) => {
+            scannedMeta.sourceAst.walkRules((r) => {
                 if (valueRegex.test(r.selector) && !done) {
                     const resolved = stylable.transformSelector(scannedMeta, r.selector).resolved;
                     const resolvedInner = resolved[0].find((r) => r.name === word);
@@ -1259,7 +1274,7 @@ function newFindRefs(
                     }
                 }
             });
-            scannedMeta.rawAst.walkDecls((d) => {
+            scannedMeta.sourceAst.walkDecls((d) => {
                 if (valueRegex.test(d.value) && !done) {
                     if (
                         d.prop === `-st-named` &&
@@ -1298,7 +1313,7 @@ function newFindRefs(
                 Object.keys(symbolStates).some((k) => {
                     if (k === word && !!pos) {
                         const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
-                        const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+                        const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
                         let lastStPath = pfp[pfp.length - 1];
                         if (lastStPath.type === 'decl') {
                             lastStPath = pfp[pfp.length - 2] as postcss.Rule;
@@ -1353,7 +1368,7 @@ function newFindRefs(
             if (!pos) {
                 return;
             }
-            scannedMeta.rawAst.walkRules((r) => {
+            scannedMeta.sourceAst.walkRules((r) => {
                 if (r.selector.includes(':' + word) && !done) {
                     // Won't work if word appears elsewhere in string
                     const parsed = parseSelector(r.selector, r.selector.indexOf(word));
@@ -1470,7 +1485,7 @@ export function createMeta(src: string, path: string) {
             fakes.push(r);
         }
 
-        meta = stylableProcess(ast);
+        meta = new StylableProcessor(new Diagnostics()).process(ast);
     } catch (error) {
         return { meta: null, fakes };
     }
@@ -1606,14 +1621,6 @@ export function isDirective(line: string) {
     return directives.some((k) => line.trim().startsWith(k));
 }
 
-function isNamedDirective(line: string) {
-    return line.includes(`-st-named`);
-}
-
-function isStImportNamed(line: string) {
-    return line.trim().startsWith(topLevelDirectives.stImport) && line.includes('[');
-}
-
 export function isInValue(lineText: string, position: ProviderPosition) {
     let isInValue = false;
 
@@ -1652,52 +1659,6 @@ function getChunkAtCursor(
         lineChunkAtCursor = lineChunkAtCursor.slice(lineChunkAtCursor.lastIndexOf(' '));
     }
     return { lineChunkAtCursor: lineChunkAtCursor.trim(), fixedCharIndex };
-}
-
-export function getNamedValues(
-    src: string,
-    lineIndex: number
-): { isNamedValueLine: boolean; namedValues: string[] } {
-    const lines = src.split('\n');
-    let isNamedValueLine = false;
-    const namedValues: string[] = [];
-
-    for (let i = lineIndex; i >= 0; i--) {
-        if (isDirective(lines[i]) && !isNamedDirective(lines[i])) {
-            break;
-        } else if (isNamedDirective(lines[i])) {
-            isNamedValueLine = true;
-            const valueStart = lines[i].indexOf(':') + 1;
-            const value = lines[i].slice(valueStart);
-            value
-                .split(',')
-                .map((x) => x.trim())
-                .filter((x) => x !== '')
-                .forEach((x) => namedValues.push(x));
-            break;
-        } else if (isStImportNamed(lines[i])) {
-            isNamedValueLine = true;
-            const valueStart = lines[i].indexOf('[') + 1;
-            const valueEnd = lines[i].indexOf(']');
-            const value = lines[i].slice(valueStart, valueEnd);
-            value
-                .split(',')
-                .map((x) => x.trim())
-                .filter((x) => x !== '')
-                .forEach((x) => namedValues.push(x));
-            break;
-        } else {
-            const valueStart = lines[i].indexOf(':') + 1;
-            const value = lines[i].slice(valueStart);
-            value
-                .split(',')
-                .map((x) => x.trim())
-                .filter((x) => x !== '')
-                .forEach((x) => namedValues.push(x));
-        }
-    }
-
-    return { isNamedValueLine, namedValues };
 }
 
 export function getExistingNames(lineText: string, position: ProviderPosition) {
@@ -1818,10 +1779,10 @@ export function getDefSymbol(
             return { word, meta: null };
         }
     }
-
-    const expandedLine: string = expandCustomSelectors(
-        postcss.rule({ selector: lineChunkAtCursor }),
-        meta.customSelectors
+    // transforms inline custom selectors (e.g. ":--custom" -> ".x .y")
+    const expandedLine: string = STCustomSelector.transformCustomSelectorInline(
+        meta,
+        lineChunkAtCursor
     )
         .split(' ')
         .pop()!; // TODO: replace with selector parser

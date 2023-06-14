@@ -1,12 +1,10 @@
 import path from 'path';
-import fs from 'fs';
+import fs from '@file-services/node';
 import { expect } from 'chai';
-import { TextDocument } from 'vscode-languageserver-textdocument';
-import { URI } from 'vscode-uri';
 import type { ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
 import { Completion, Snippet } from '@stylable/language-service/dist/lib/completion-types';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
-import { getCaretPosition } from './asserters';
+import { LangServiceContext } from '@stylable/language-service/dist/lib-new/lang-service-context';
 
 function assertPresent(
     actualCompletions: Completion[],
@@ -69,15 +67,20 @@ function assertNotPresent(
 export function getCompletions(fileName: string, prefix = '') {
     const fullPath = path.join(CASES_PATH, fileName);
     const src: string = fs.readFileSync(fullPath).toString();
-
-    const pos = getCaretPosition(src);
-    pos.character += prefix.length;
-
-    const completions = stylableLSP.provideCompletionItemsFromSrc(
-        src.replace('|', prefix),
-        pos,
-        fullPath
+    const stat = fs.statSync(fullPath);
+    const offset = src.indexOf('|') + prefix.length;
+    const context = new LangServiceContext(
+        fs,
+        stylableLSP.getStylable(),
+        {
+            path: fullPath,
+            stat,
+            content: src.replace('|', prefix),
+        },
+        offset
     );
+
+    const completions = stylableLSP.provideCompletionItemsFromSrc(context);
 
     return {
         completions,
@@ -93,17 +96,19 @@ export function getCompletions(fileName: string, prefix = '') {
 export function getStylableAndCssCompletions(fileName: string) {
     const fullPath = path.join(CASES_PATH, fileName);
     const src: string = fs.readFileSync(fullPath).toString();
-
-    const pos = getCaretPosition(src);
-
-    const document = TextDocument.create(
-        URI.file(fullPath).toString(),
-        'stylable',
-        1,
-        src.replace('|', '')
+    const stat = fs.statSync(fullPath);
+    const offset = src.indexOf('|');
+    const context = new LangServiceContext(
+        fs,
+        stylableLSP.getStylable(),
+        {
+            path: fullPath,
+            stat,
+            content: src.replace('|', ''),
+        },
+        offset
     );
-
-    return stylableLSP.getCompletions(document, fullPath, pos);
+    return stylableLSP.getCompletions(context);
 }
 
 // syntactic
@@ -130,10 +135,10 @@ export const stScopeDirectiveCompletion: (rng: ProviderRange) => Partial<Complet
 };
 export const namespaceDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
     return {
-        label: '@namespace',
+        label: '@st-namespace',
         detail: 'Declare a namespace for the file',
         sortText: 'a',
-        insertText: '@namespace "$1";\n',
+        insertText: '@st-namespace "$1";\n',
         range: rng,
     };
 };
@@ -291,7 +296,7 @@ export const namedCompletion: (
         label: typeName,
         sortText: 'a',
         insertText: typeName,
-        detail: 'from: ' + from + '\n' + 'Value: ' + value,
+        detail: 'from: ' + from + '\n' + 'Value: ' + (value || ''),
         range: rng,
     };
 };

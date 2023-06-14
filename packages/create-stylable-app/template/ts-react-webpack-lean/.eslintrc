@@ -8,11 +8,13 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
-    "plugin:stylable/recommended",
     "prettier"
   ],
   "plugins": ["react-hooks"],
   "ignorePatterns": ["node_modules", "dist", "st-types"],
+  "parserOptions": {
+    "sourceType": "module"
+  },
   "settings": {
     "react": {
       "version": "detect"

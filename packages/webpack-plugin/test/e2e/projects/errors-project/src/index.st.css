@@ -5,7 +5,7 @@
 
 .root {
     -st-extends: NotFound;
-    background-color: green; 
+    background-color: green;
 }
 
-.root:unknown-state {}
+NotFound {}

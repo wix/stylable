@@ -1,4 +1,5 @@
-import type { DiagnosticsMode, Stylable, StylableExports } from '@stylable/core';
+import type { Stylable, StylableMeta } from '@stylable/core';
+import type { DiagnosticsMode, StylableExports } from '@stylable/core/dist/index-internal';
 import type { Chunk, Compilation, Compiler, LoaderContext } from 'webpack';
 
 export interface StylableBuildMeta {
@@ -6,10 +7,12 @@ export interface StylableBuildMeta {
     exports: StylableExports;
     urls: string[];
     depth: number;
+    cssDepth: number;
     namespace: string;
     isUsed: undefined | boolean;
     globals: Record<string, boolean>;
     unusedImports: string[];
+    type: StylableMeta['type'];
 }
 
 export type BuildData = Pick<
@@ -19,7 +22,7 @@ export type BuildData = Pick<
 
 export type LoaderData = Pick<
     StylableBuildMeta,
-    'css' | 'urls' | 'exports' | 'namespace' | 'globals' | 'unusedImports'
+    'css' | 'urls' | 'exports' | 'namespace' | 'globals' | 'unusedImports' | 'cssDepth' | 'type'
 >;
 
 export interface StylableLoaderContext extends LoaderContext<{}> {
@@ -30,6 +33,7 @@ export interface StylableLoaderContext extends LoaderContext<{}> {
     target: 'oldie' | 'modern';
     assetFilter: (url: string, context: string) => boolean;
     flagStylableModule: (loaderData: LoaderData) => void;
+    includeGlobalSideEffects: boolean;
 }
 
 /* webpack missing types */

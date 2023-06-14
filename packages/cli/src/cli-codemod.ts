@@ -23,6 +23,7 @@ const argv = yargs
     .option('mods', {
         alias: 'm',
         type: 'array',
+        string: true,
         description: 'array of builtin codemods to execute',
         default: [] as string[],
         choices: [...registeredMods.keys()],
@@ -30,12 +31,14 @@ const argv = yargs
     .option('external', {
         alias: 'e',
         type: 'array',
+        string: true,
         description: 'array of external codemod to execute',
         default: [] as string[],
     })
     .option('require', {
         alias: 'r',
         type: 'array',
+        string: true,
         description: 'require hooks',
         default: [] as string[],
     })
@@ -49,9 +52,7 @@ const { mods, rootDir: rawRootDir, require: requires, external } = argv;
 const rootDir = resolve(rawRootDir);
 // execute all require hooks before running the CLI build
 for (const request of requires) {
-    if (request) {
-        require(request);
-    }
+    require(request);
 }
 
 const log = createLogger(

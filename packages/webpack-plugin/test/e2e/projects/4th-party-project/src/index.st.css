@@ -1,4 +1,4 @@
-@namespace "mainIndex";
+@st-namespace "mainIndex";
 
 :import {
     -st-from: "test-components/index.st.css";

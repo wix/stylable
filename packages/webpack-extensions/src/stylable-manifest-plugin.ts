@@ -1,5 +1,5 @@
 import { Stylable, StylableMeta } from '@stylable/core';
-import { STSymbol } from '@stylable/core/dist/features';
+import { STSymbol } from '@stylable/core/dist/index-internal';
 import { resolveNamespace } from '@stylable/node';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
 import { hashContent } from './hash-content-util';
@@ -55,7 +55,7 @@ export class StylableManifestPlugin {
         this.options = Object.assign({}, defaultOptions, options);
     }
     public apply(compiler: Compiler) {
-        const stylable = Stylable.create({
+        const stylable = new Stylable({
             projectRoot: compiler.context,
             fileSystem: {
                 readlinkSync: (filePath) =>

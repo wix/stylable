@@ -10,7 +10,7 @@ import {
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { realpathSync, renameSync, rmdirSync, unlinkSync, promises } from 'fs';
+import { realpathSync, renameSync, rmSync, unlinkSync, promises } from 'fs';
 import { join, sep } from 'path';
 
 const { writeFile } = promises;
@@ -47,7 +47,7 @@ describe('Stylable Cli Watch - Single project', function () {
 
         await run({
             dirPath: tempDir.path,
-            args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss'],
+            args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss', '--unsr=false'],
             steps: [
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -208,7 +208,7 @@ describe('Stylable Cli Watch - Single project', function () {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
+                        rmSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
@@ -237,7 +237,7 @@ describe('Stylable Cli Watch - Single project', function () {
                 {
                     msg: buildMessages.START_WATCHING(),
                     action() {
-                        rmdirSync(join(tempDir.path, 'styles'), { recursive: true });
+                        rmSync(join(tempDir.path, 'styles'), { recursive: true });
                     },
                 },
                 {
@@ -303,7 +303,8 @@ describe('Stylable Cli Watch - Single project', function () {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -335,7 +336,8 @@ describe('Stylable Cli Watch - Single project', function () {
             args: ['--outDir', './dist', '-w', '--cjs', '--css'],
             steps: [
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
                 {
                     msg: buildMessages.START_WATCHING(),
@@ -352,7 +354,8 @@ describe('Stylable Cli Watch - Single project', function () {
                     },
                 },
                 {
-                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css'),
+                    msg: STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css')
+                        .message,
                 },
             ],
         });
@@ -402,6 +405,58 @@ describe('Stylable Cli Watch - Single project', function () {
         const files = loadDirSync(tempDir.path);
         expect(files['dist/index.st.css']).to.include('style.st.css');
         expect(files['dist/index.st.css']).to.include('comp.st.css');
+    });
+
+    it('should re-bundle', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            src: {
+                'comp.st.css': `.root{ z-index:0 }`,
+                'style.st.css': `.root{ z-index:1 }`,
+            },
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--srcDir', './src', '--outDir', './dist', '-w', '--bundle', 'bundle.css'],
+            steps: [
+                {
+                    msg: buildMessages.START_WATCHING(),
+                    action() {
+                        const files = loadDirSync(tempDir.path);
+                        expect(files['dist/bundle.css']).to.include('z-index:0');
+                        expect(files['dist/bundle.css']).to.include('z-index:1');
+                        return writeFile(
+                            join(tempDir.path, 'src', 'comp.st.css'),
+                            `.root{ z-index:2 }`
+                        );
+                    },
+                },
+                {
+                    msg: buildMessages.FINISHED_PROCESSING(2),
+                    action() {
+                        const files = loadDirSync(tempDir.path);
+                        expect(files['dist/bundle.css']).to.include('z-index:2');
+                        expect(files['dist/bundle.css']).to.include('z-index:1');
+                        return writeFile(
+                            join(tempDir.path, 'src', 'style.st.css'),
+                            `.root{ z-index:3 }`
+                        );
+                    },
+                },
+                {
+                    msg: buildMessages.FINISHED_PROCESSING(2),
+                    action() {
+                        const files = loadDirSync(tempDir.path);
+                        expect(files['dist/bundle.css']).to.include('z-index:2');
+                        expect(files['dist/bundle.css']).to.include('z-index:3');
+                    },
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files['dist/bundle.css']).to.include('z-index:2');
+        expect(files['dist/bundle.css']).to.include('z-index:3');
     });
 
     it('should not trigger circular assets build', async () => {

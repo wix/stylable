@@ -12,6 +12,7 @@ cjs
 **/test/**/dist2
 **/test/**/dist3
 **/test/**/dist-prod
+**/test/**/dist-bundle
 
 # Dependency directories
 node_modules/
@@ -19,6 +20,8 @@ jspm_packages/
 
 # 3rd party testing fixtures (order matters!)
 !**/test/**/node_modules
+
+**/test/**/generated
 
 # Created by the extension "VS Live Share"
 .vs

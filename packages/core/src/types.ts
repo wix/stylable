@@ -1,10 +1,6 @@
 import type * as postcss from 'postcss';
 import type { Box } from './custom-values';
-import type { StylableMeta } from './stylable-meta';
 import type { StylableExports, StylableResults } from './stylable-transformer';
-
-export type PartialObject<T> = Partial<T> & object;
-export type CSSObject = any & object;
 
 export interface ParsedValue {
     type: string;
@@ -14,22 +10,8 @@ export interface ParsedValue {
     url?: string;
 }
 
-export interface StateTypeValidator {
-    name: string;
-    args: string[];
-}
-
-export type StateArguments = Array<StateTypeValidator | string>;
-
-export interface StateParsedValue {
-    type: string;
-    defaultValue?: string;
-    arguments: StateArguments;
-}
-
 export interface OptimizeConfig {
     removeComments?: boolean;
-    removeStylableDirectives?: boolean;
     removeUnusedComponents?: boolean;
     classNameOptimizations?: boolean;
     removeEmptyNodes?: boolean;
@@ -41,46 +23,17 @@ export interface IStylableOptimizer {
     optimize(
         config: OptimizeConfig,
         stylableResult: StylableResults,
-        usageMapping: Record<string, boolean>,
-        delimiter?: string
+        usageMapping: Record<string, boolean>
     ): void;
     getNamespace(namespace: string): string;
     getClassName(className: string): string;
     optimizeAst(
         config: OptimizeConfig,
-        outputAst: postcss.Root,
+        targetAst: postcss.Root,
         usageMapping: Record<string, boolean>,
-        delimiter: string | undefined,
         jsExports: StylableExports,
         globals: Record<string, boolean>
     ): void;
-    removeStylableDirectives(root: postcss.Root, shouldComment?: boolean): void;
-}
-
-export interface IStylableClassNameOptimizer {
-    context: {
-        names: Record<string, string>;
-    };
-    rewriteSelector(
-        selector: string,
-        usageMapping: Record<string, boolean>,
-        globals: Record<string, boolean>
-    ): string;
-    generateName(name: string): string;
-    optimizeAstAndExports(
-        ast: postcss.Root,
-        exported: Record<string, string>,
-        classes: string[],
-        usageMapping: Record<string, boolean>,
-        globals?: Record<string, boolean>
-    ): void;
-}
-
-export interface IStylableNamespaceOptimizer {
-    index: number;
-    namespacePrefix: string;
-    namespaceMapping: Record<string, string>;
-    getNamespace(meta: StylableMeta, ..._env: any[]): string;
 }
 
 export type ModuleResolver = (directoryPath: string, request: string) => string;

@@ -1,5 +1,4 @@
 import { createFeature, FeatureContext } from './feature';
-import type { StylableDirectives } from './types';
 import { generalDiagnostics } from './diagnostics';
 import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
@@ -7,11 +6,12 @@ import * as CSSClass from './css-class';
 import type { StylableMeta } from '../stylable-meta';
 import { isCompRoot, stringifySelector } from '../helpers/selector';
 import { getOriginDefinition } from '../helpers/resolve';
-import { ignoreDeprecationWarn } from '../helpers/deprecation';
 import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
+import { createDiagnosticReporter } from '../diagnostics';
 
-export interface ElementSymbol extends StylableDirectives {
+// ToDo: should probably consider removing StylableDirectives from this symbol
+export interface ElementSymbol extends CSSClass.StPartDirectives {
     _kind: 'element';
     name: string;
     alias?: ImportSymbol;
@@ -19,9 +19,12 @@ export interface ElementSymbol extends StylableDirectives {
 
 export const diagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR,
-    UNSCOPED_TYPE_SELECTOR(name: string) {
-        return `unscoped type selector "${name}" will affect all elements of the same type in the document`;
-    },
+    UNSCOPED_TYPE_SELECTOR: createDiagnosticReporter(
+        `03001`,
+        'warning',
+        (name: string) =>
+            `unscoped type selector "${name}" will affect all elements of the same type in the document`
+    ),
 };
 
 // HOOKS
@@ -30,44 +33,52 @@ export const hooks = createFeature<{
     SELECTOR: Type;
     IMMUTABLE_SELECTOR: ImmutableType;
 }>({
-    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes, parents] }): void {
-        /**
-         * intent to deprecate: currently `value(param)` can be used
-         * as a custom state value. Unless there is a reasonable
-         * use case, this should be removed.
-         */
-        if (
-            node.nodes &&
-            (parents.length < 2 ||
-                parents[parents.length - 2].type !== `pseudo_class` ||
-                node.value !== `value`)
-        ) {
+    analyzeSelectorNode({ context, node, rule, walkContext: [_index, _nodes] }): void {
+        if (node.nodes) {
             // error on functional type
-            context.diagnostics.error(
-                rule,
+            context.diagnostics.report(
                 diagnostics.INVALID_FUNCTIONAL_SELECTOR(node.value, `type`),
-                { word: stringifySelector(node) }
+                {
+                    node: rule,
+                    word: stringifySelector(node),
+                }
             );
         }
         addType(context, node.value, rule);
     },
     transformSelectorNode({ context, node, selectorContext }): void {
         const resolvedSymbols = context.getResolvedSymbols(context.meta);
-        const resolved = resolvedSymbols.element[node.value] || [
-            // provides resolution for native elements
-            // that are not collected by parts
-            // or elements that are added by js mixin
-            {
-                _kind: 'css',
-                meta: context.meta,
-                symbol: { _kind: 'element', name: node.value },
-            },
-        ];
-        selectorContext.setCurrentAnchor({ name: node.value, type: 'element', resolved });
+        let resolved = resolvedSymbols.element[node.value];
+        if (!resolved) {
+            const resolvedClass = resolvedSymbols.class[node.value];
+            if (resolvedClass?.length > 1 && resolvedClass[0].symbol.alias) {
+                // fallback to imported class alias for case that no actual
+                // type selector was found in the source rules, but transform is
+                // called with such selector externally (this happens for invalid selectors
+                // during language service completions)
+                resolved = resolvedSymbols.class[node.value];
+            } else {
+                // provides resolution for native elements
+                // that are not collected by parts
+                // or elements that are added by js mixin
+                resolved = [
+                    {
+                        _kind: 'css',
+                        meta: context.meta,
+                        symbol: { _kind: 'element', name: node.value },
+                    },
+                ];
+            }
+        }
+        selectorContext.setNextSelectorScope(resolved, node, node.value);
         // native node does not resolve e.g. div
-        if (resolved && resolved.length > 1) {
+        if (selectorContext.transform && resolved && resolved.length > 1) {
             const { symbol, meta } = getOriginDefinition(resolved);
-            CSSClass.namespaceClass(meta, symbol, node, selectorContext.originMeta);
+            if (symbol._kind === 'class') {
+                CSSClass.namespaceClass(meta, symbol, node);
+            } else {
+                node.value = symbol.name;
+            }
         }
     },
 });
@@ -99,10 +110,6 @@ export function addType(context: FeatureContext, name: string, rule?: postcss.Ru
             node: rule,
             safeRedeclare: !!alias,
         });
-        // deprecated
-        ignoreDeprecationWarn(() => {
-            context.meta.elements[name] = STSymbol.get(context.meta, name, `element`)!;
-        });
     }
     return STSymbol.get(context.meta, name, `element`)!;
 }
@@ -124,10 +131,15 @@ export function validateTypeScoping({
     index: number;
     rule: postcss.Rule;
 }): boolean {
+    if (context.meta.type !== 'stylable') {
+        // ignore in native CSS
+        return true;
+    }
     if (locallyScoped === false) {
         if (CSSClass.checkForScopedNodeAfter(context, rule, nodes, index) === false) {
             if (reportUnscoped) {
-                context.diagnostics.warn(rule, diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+                context.diagnostics.report(diagnostics.UNSCOPED_TYPE_SELECTOR(node.value), {
+                    node: rule,
                     word: node.value,
                 });
             }

@@ -1,6 +1,6 @@
 :import {
     -st-from: "./not-included.st.css";
-    -st-named: x;
+    -st-named: x, --softProp;
 }
 
 :import {
@@ -18,10 +18,22 @@
     -st-named: keyframes(x);
 }
 
+:import {
+    -st-from: "./included-via-layer.st.css";
+    -st-named: layer(L1);
+}
+
+:import {
+    -st-from: "./included-via-property.st.css";
+    -st-named: --p as --locP;
+}
+
 WithGlobals {}
 
 .root {
     -st-mixin: x;
     -st-extends: x1;
     animation-name: x;
+    color: var(--locP);
+    background: var(--softProp);
 }

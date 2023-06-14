@@ -1,14 +1,19 @@
 import chaiSubset from 'chai-subset';
-import type { SRule } from '@stylable/core';
+import { Diagnostics } from '@stylable/core';
 import { STMixin } from '@stylable/core/dist/features';
-import { ignoreDeprecationWarn } from '@stylable/core/dist/helpers/deprecation';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
     matchRuleAndDeclaration,
+    diagnosticBankReportToStrings,
+    assertRule,
+    assertDecl,
+    assertAtRule,
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import type * as postcss from 'postcss';
+
+const mixinDiagnostics = diagnosticBankReportToStrings(STMixin.diagnostics);
 
 chai.use(chaiSubset);
 describe(`features/st-mixin`, () => {
@@ -29,6 +34,62 @@ describe(`features/st-mixin`, () => {
                 before: 1;
                 -st-mixin: mix;
                 after: 2;
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it(`should append mixin declarations (within nesting)`, () => {
+        const { sheets } = testStylableCore(`
+            .mix {
+                propA: blue;
+                propB: green;
+            }
+
+            /* @rule .entry__empty {propA: blue; propB: green;} */
+            .empty {
+                -st-mixin: mix;
+            }
+
+            .insert {
+                /* @rule .entry__child {before:1; propA:blue; propB:green; after: 2} */
+                .child {
+                    before: 1;
+                    -st-mixin: mix;
+                    after: 2;
+                }
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it.skip(`should keep other nested rules`, () => {
+        const { sheets } = testStylableCore(`
+            .mix {
+                propA: blue;
+                propB: green;
+            }
+
+            /* @rule .entry__empty {propA: blue; propB: green;} */
+            .empty {
+                -st-mixin: mix;
+            }
+
+            .insert {
+                /* @rule .entry__child {before:1; propA:blue; propB:green; after: 2} */
+                .child {
+                    .grandchild-1 { z-index: 1; }
+                    before: 1;
+                    .grandchild-2 { z-index: 2; }
+                    -st-mixin: mix;
+                    .grandchild-3 { z-index: 3; }
+                    after: 2;
+                    .grandchild-4 { z-index: 4; }
+                }
             }
         `);
 
@@ -134,7 +195,7 @@ describe(`features/st-mixin`, () => {
     it(`should handle circular mixins`, () => {
         testStylableCore(`
             /* 
-            @transform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
+            @transform-error(a) ${mixinDiagnostics.CIRCULAR_MIXIN([
                 `b from /entry.st.css`,
                 `a from /entry.st.css`,
             ])} 
@@ -149,7 +210,7 @@ describe(`features/st-mixin`, () => {
             }
 
             /* 
-            @transform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
+            @transform-error(a) ${mixinDiagnostics.CIRCULAR_MIXIN([
                 `a from /entry.st.css`,
                 `b from /entry.st.css`,
             ])} 
@@ -213,6 +274,26 @@ describe(`features/st-mixin`, () => {
 
         shouldReportNoDiagnostics(meta);
     });
+    it(`should report unknown args`, () => {
+        testStylableCore(`
+            :vars {
+                a: red;
+                point_to_a: value(a);
+            }
+            .mix {
+                color: value(point_to_a);
+            }
+
+            /* @rule .entry__root { color: green } */
+            .root {
+                /* @transform-warn word(unknown) ${mixinDiagnostics.UNKNOWN_ARG('unknown')} */
+                -st-mixin: mix(
+                    a green, 
+                    unknown red
+                );
+            }
+        `);
+    });
     it(`should handle invalid cases`, () => {
         testStylableCore(`
             .mixA {
@@ -222,17 +303,36 @@ describe(`features/st-mixin`, () => {
                 color: green;
             }
 
-            /* @rule .entry__root { -st-mixin: "mixA" } */
+            /* @rule .entry__root { } */
             .root {
-                /* @analyze-error ${STMixin.diagnostics.VALUE_CANNOT_BE_STRING()} */
+                /* @transform-error ${mixinDiagnostics.VALUE_CANNOT_BE_STRING()} */
                 -st-mixin: "mixA";
             }
 
             /* @rule .entry__root { color: green } */
             .root {
                 -st-mixin: mixA;
-                /* @analyze-warn ${STMixin.diagnostics.OVERRIDE_MIXIN(`-st-mixin`)} */
+                /* @transform-warn ${mixinDiagnostics.OVERRIDE_MIXIN(`-st-mixin`)} */
                 -st-mixin: mixB;
+            }
+
+            :vars {
+                colorX: red;
+            }
+            /* @rule .entry__root { } */
+            .root {
+                /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(`colorX`, 'var')} */
+                -st-mixin: colorX;
+            }
+            
+            @property --customPropX;
+            /* @rule .entry__root { } */
+            .root {
+                /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(
+                    `--customPropX`,
+                    'cssVar'
+                )} */
+                -st-mixin: --customPropX;
             }
         `);
     });
@@ -257,7 +357,7 @@ describe(`features/st-mixin`, () => {
                 stylableConfig: {
                     onProcess(meta) {
                         // remove -st-mixin origin before apply mixin.
-                        const mixToClass = meta.ast.nodes[2] as postcss.Rule;
+                        const mixToClass = meta.sourceAst.nodes[2] as postcss.Rule;
                         const stMixinDecl = mixToClass.nodes[1];
                         stMixinDecl.remove();
                         return meta;
@@ -266,147 +366,37 @@ describe(`features/st-mixin`, () => {
             }
         );
     });
-    describe(`SRule (deprecated)`, () => {
-        // ToDo: remove in v5 when SRule is removed
-        it(`should collect mixins on rules`, () => {
-            testStylableCore(
-                `
-                .x {
-                    -st-mixin: my-mixin
+    it('should support CSS nesting as part of a mixin', () => {
+        const { sheets } = testStylableCore(`
+            .mix {
+                id: mix;
+                &:hover.mix {
+                    id: hover;
                 }
-                .my-mixin {}
-            `,
-                {
-                    stylableConfig: {
-                        onProcess(meta) {
-                            const mixinRule = meta.ast.nodes[0] as SRule;
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type
-                            ).to.eql('my-mixin');
+                @media {
+                    id: atrule;
+                }
+            }
 
-                            return meta;
-                        },
-                    },
-                }
-            );
-        });
-        it(`should use last mixin deceleration`, () => {
-            testStylableCore(
-                `
-                .x {
-                    -st-mixin: my-mixin1;
-                    -st-mixin: my-mixin2;
-                }
-                .my-mixin1 {}
-                .my-mixin2 {}
-            `,
-                {
-                    stylableConfig: {
-                        onProcess(meta) {
-                            const mixinRule = meta.ast.nodes[0] as SRule;
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type
-                            ).to.eql('my-mixin2');
+            .root {
+                -st-mixin: mix;
+            }
+        `);
 
-                            return meta;
-                        },
-                    },
-                }
-            );
-        });
-        it(`should use last mixin deceleration for -st-partial-mixin`, () => {
-            testStylableCore(
-                `
-                .x {
-                    -st-partial-mixin: my-mixin1;
-                    -st-partial-mixin: my-mixin2;
-                }
-                .my-mixin1 {}
-                .my-mixin2 {}
-            `,
-                {
-                    stylableConfig: {
-                        onProcess(meta) {
-                            const mixinRule = meta.ast.nodes[0] as SRule;
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type
-                            ).to.eql('my-mixin2');
+        const { meta } = sheets['/entry.st.css'];
 
-                            return meta;
-                        },
-                    },
-                }
-            );
-        });
-        it(`should use mixin deceleration in order for mixed -st-mixin and -st-partial-mixin`, () => {
-            testStylableCore(
-                `
-                .x {
-                    -st-mixin: my-mixin1;
-                    -st-partial-mixin: my-mixin2;
-                }
-                .y {
-                    -st-partial-mixin: my-mixin2;
-                    -st-mixin: my-mixin1;
-                }
-                .my-mixin1 {}
-                .my-mixin2 {}
-            `,
-                {
-                    stylableConfig: {
-                        onProcess(meta) {
-                            const mixinRule1 = meta.ast.nodes[0] as SRule;
-                            const mixinRule2 = meta.ast.nodes[1] as SRule;
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule1.mixins!)[0].mixin.type
-                            ).to.eql('my-mixin1');
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule1.mixins!)[1].mixin.type
-                            ).to.eql('my-mixin2');
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule2.mixins!)[0].mixin.type
-                            ).to.eql('my-mixin2');
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule2.mixins!)[1].mixin.type
-                            ).to.eql('my-mixin1');
-
-                            return meta;
-                        },
-                    },
-                }
-            );
-        });
-        it(`should use mixin last deceleration in order for mixed -st-mixin and -st-partial-mixin with duplicates`, () => {
-            testStylableCore(
-                `
-                .x {
-                    -st-mixin: my-mixin1;
-                    -st-partial-mixin: my-mixin2;
-                    -st-mixin: my-mixin3;
-                    -st-partial-mixin: my-mixin4;
-                }
-                .my-mixin1 {}
-                .my-mixin2 {}
-                .my-mixin3 {}
-                .my-mixin4 {}
-            `,
-                {
-                    stylableConfig: {
-                        onProcess(meta) {
-                            const mixinRule = meta.ast.nodes[0] as SRule;
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule.mixins!)[0].mixin.type
-                            ).to.eql('my-mixin3');
-                            expect(
-                                ignoreDeprecationWarn(() => mixinRule.mixins!)[1].mixin.type
-                            ).to.eql('my-mixin4');
-
-                            return meta;
-                        },
-                    },
-                }
-            );
-        });
+        shouldReportNoDiagnostics(meta);
+        const mixedIntoRule = assertRule(meta.targetAst!.nodes[1], 'mixed into');
+        expect(mixedIntoRule.selector).to.eql('.entry__root');
+        const firstMixedDecl = assertDecl(mixedIntoRule.nodes[0], 'id: mix');
+        expect(firstMixedDecl.prop).to.eql('id');
+        expect(firstMixedDecl.value).to.eql('mix');
+        const nestHoverRule = assertRule(mixedIntoRule.nodes[1], '&:hover.mix');
+        expect(nestHoverRule.selector).to.eql('.entry__root&:hover');
+        const nestAtRule = assertAtRule(mixedIntoRule.nodes[2], '@media');
+        const nestInAtRule = assertDecl(nestAtRule.nodes[0], 'id: atrule');
+        expect(nestInAtRule.prop).to.eql('id');
+        expect(nestInAtRule.value).to.eql('atrule');
     });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {
@@ -528,13 +518,44 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it(`should report unknown args (from another sheet)`, () => {
+            const { sheets } = testStylableCore({
+                '/vars.st.css': `
+                    :vars {
+                        a: red;
+                        point_to_a: value(a);
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [point_to_a] from './vars.st.css';
+                    .mix {
+                        color: value(point_to_a);
+                    }
+    
+                    /* @rule .entry__root { color: green } */
+                    .root {
+                        /* @transform-warn word(unknown) ${mixinDiagnostics.UNKNOWN_ARG(
+                            'unknown'
+                        )} */
+                        -st-mixin: mix(
+                            a green, 
+                            unknown red
+                        );
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(meta.transformDiagnostics?.reports.length).to.eql(1);
+        });
         it(`should handle circular mixins from multiple stylesheets`, () => {
             // ToDo: check why circular_mixin is not reported
             testStylableCore({
                 '/sheet1.st.css': `
                     @st-import [b] from './sheet2.st.css';
                     /* 
-                    @xtransform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
+                    @xtransform-warn(a) ${mixinDiagnostics.CIRCULAR_MIXIN([
                         `b from /sheet2.st.css`,
                         `a from /sheet1.st.css`,
                     ])} 
@@ -551,7 +572,7 @@ describe(`features/st-mixin`, () => {
                 '/sheet2.st.css': `
                     @st-import [a] from './sheet1.st.css';
                     /* 
-                    @xtransform-warn(a) ${STMixin.diagnostics.CIRCULAR_MIXIN([
+                    @xtransform-warn(a) ${mixinDiagnostics.CIRCULAR_MIXIN([
                         `a from /sheet1.st.css`,
                         `b from /sheet2.st.css`,
                     ])} 
@@ -572,14 +593,12 @@ describe(`features/st-mixin`, () => {
                     @st-import [unresolved] from './mixin.st.css';
 
                     .a {
-                        /* @analyze-warn ${STMixin.diagnostics.UNKNOWN_MIXIN(`unknown`)} */
+                        /* @transform-error ${mixinDiagnostics.UNKNOWN_MIXIN(`unknown`)} */
                         -st-mixin: unknown;
                     }
 
                     .a {
-                        /* @transform-error ${STMixin.diagnostics.UNKNOWN_MIXIN_SYMBOL(
-                            `unresolved`
-                        )} */
+                        /* @transform-error ${mixinDiagnostics.UNKNOWN_MIXIN(`unresolved`)} */
                         -st-mixin: unresolved;
                     }
                 `,
@@ -616,7 +635,7 @@ describe(`features/st-mixin`, () => {
         it(`should report on circular mixin when mixed on local class`, () => {
             testStylableCore(`
                 /* 
-                @transform-warn ${STMixin.diagnostics.CIRCULAR_MIXIN([`root from /entry.st.css`])}
+                @transform-error ${mixinDiagnostics.CIRCULAR_MIXIN([`root from /entry.st.css`])}
                 @rule(self)[0] .entry__a {} 
                 @rule(self appended)[1] .entry__a .entry__a {}
                 @rule(other appended)[2] .entry__a .entry__b {}
@@ -786,11 +805,10 @@ describe(`features/st-mixin`, () => {
                 .mix-deep {
                     propA: value(v1);
                     propB: value(v2);
-                    propC: value(v3);
                 }
                 .mix {
                     -st-partial-mixin: mix-deep(v2 value(v1));
-                    propX: value(v3);
+                    propX: value(v2);
                 }
 
                 /* 
@@ -803,20 +821,11 @@ describe(`features/st-mixin`, () => {
                 .SEP {}
 
                 /* 
-                    @rule(v2) .entry__a { }
+                    @rule(v2) .entry__a { propX: white }
                     @rule(v2-end)[1] .entry__SEP
                 */
                 .a {
                     -st-partial-mixin: mix(v2 white);
-                }
-                .SEP {}
-
-                /* 
-                    @rule(v3) .entry__a { propX: white }
-                    @rule(v3-end)[1] .entry__SEP
-                */
-                .a {
-                    -st-partial-mixin: mix(v3 white);
                 }
                 .SEP {}
             `);
@@ -869,7 +878,7 @@ describe(`features/st-mixin`, () => {
 
                 /*  @rule(v1) .entry__a { } */
                 .a {
-                    /* @analyze-warn word(mix-color) ${STMixin.diagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(
+                    /* @transform-error word(mix-color) ${mixinDiagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(
                         `mix-color`
                     )} */
                     -st-partial-mixin: mix-color();
@@ -1274,12 +1283,12 @@ describe(`features/st-mixin`, () => {
                 '/entry.st.css': `
                     @st-import [notAFunction, throw] from './mixins.js';
 
-                    /* @transform-error(not a function) word(notAFunction) ${STMixin.diagnostics.JS_MIXIN_NOT_A_FUNC()} */
                     .a {
+                        /* @transform-error(not a function) word(notAFunction) ${mixinDiagnostics.JS_MIXIN_NOT_A_FUNC()} */
                         -st-mixin: notAFunction;
                     }
 
-                    /* @transform-error(mix throw) word(throw) ${STMixin.diagnostics.FAILED_TO_APPLY_MIXIN(
+                    /* @transform-error(mix throw) word(throw) ${mixinDiagnostics.FAILED_TO_APPLY_MIXIN(
                         `bug in js mix`
                     )} */
                     .a {
@@ -1483,7 +1492,7 @@ describe(`features/st-mixin`, () => {
 
                 /* @rule .entry__root {val: local} */
                 .root {
-                    /* @transform-warn ${STMixin.diagnostics.INVALID_NAMED_PARAMS()} */
+                    /* @transform-error ${mixinDiagnostics.INVALID_NAMED_PARAMS()} */
                     -st-mixin: mix(varNameWithNoValue);
                 }
             `);
@@ -1653,6 +1662,108 @@ describe(`features/st-mixin`, () => {
             shouldReportNoDiagnostics(meta);
         });
     });
+    describe(`st-custom-selector`, () => {
+        it(`should mix class through a custom selector`, () => {
+            const { sheets } = testStylableCore(`
+                @custom-selector :--x .x, .not-x;
+
+                :--x {
+                    color: green;
+                }
+
+                /* @rule(inline) .entry__a { color: green } */
+                .a {
+                    -st-mixin: x;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it(`should mix class through a custom selector (deep)`, () => {
+            const { sheets } = testStylableCore(`
+                @custom-selector :--a .a;
+                @custom-selector :--b .b:--a;
+
+                .mix:--b {
+                    color: green;
+                }
+
+                /* @rule(deep)[1] .entry__c.entry__b.entry__a { color: green } */
+                .c {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it.skip(`should attempt to correct compound order`, () => {
+            // ToDo: fix compound selector ordering
+            const { sheets } = testStylableCore(`
+                @custom-selector :--div div;
+
+                .mix:--div {
+                    color: green;
+                }
+
+                /* @rule(fix composed)[1] div.entry__a { color: green } */
+                .a {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
+    describe('st-scope', () => {
+        it('should collect mixin from st-sope selector', () => {
+            const { sheets } = testStylableCore({
+                '/mix.st.css': `
+                    @st-scope .mix {
+                        .part { color: green; }
+                        .part2 { color: purple; }
+                        &:state { color: gold; }
+                    }
+                    @st-scope .mix.compoundAfter {
+                        .part { color: blue; }
+                    }
+                    @st-scope .compoundBefore.mix {
+                        .part { color: pink; }
+                    }
+                    @st-scope .mix, .notMix, .mix[extra] {
+                        .part { color: white; }
+                    }
+                    .mix {
+                        -st-states: state;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [mix] from './mix.st.css';
+
+                    /* 
+                        @rule(descendant)[1] .entry__into .mix__part {color: green;} 
+                        @rule(descendant2)[2] .entry__into .mix__part2 {color: purple;} 
+                        @rule(state)[3] .entry__into.mix--state {color: gold;} 
+                        @rule(+after)[4] .entry__into.mix__compoundAfter .mix__part {color: blue;} 
+                        @rule(+before)[5] .entry__into.mix__compoundBefore .mix__part {color: pink;} 
+                        @rule(multi selector)[6] .entry__into .mix__part, .entry__into[extra] .mix__part {color: white;}
+                    */
+                    .into {
+                        -st-mixin: mix;
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
     describe(`higher-level feature integrations`, () => {
         // ToDo: move to their higher level feature spec when created
         describe(`css-asset`, () => {
@@ -1797,7 +1908,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[2] as postcss.Container,
+                    meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
                     'id: nested'
@@ -1832,7 +1943,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[2] as postcss.Container,
+                    meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
                     'id: nested'
@@ -1866,7 +1977,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[3] as postcss.Container,
+                    meta.targetAst!.nodes[3] as postcss.Container,
                     0,
                     '.entry__a .mixin__mix',
                     'id: nested'
@@ -1902,7 +2013,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[2] as postcss.Container,
+                    meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
                     'id: nested'
@@ -1937,7 +2048,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[2] as postcss.Container,
+                    meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
                     'id: nested'
@@ -1971,7 +2082,7 @@ describe(`features/st-mixin`, () => {
                 shouldReportNoDiagnostics(meta);
 
                 matchRuleAndDeclaration(
-                    meta.outputAst!.nodes[3] as postcss.Container,
+                    meta.targetAst!.nodes[3] as postcss.Container,
                     0,
                     '.entry__a .mixin__mix',
                     'id: nested'
@@ -1979,23 +2090,128 @@ describe(`features/st-mixin`, () => {
             });
         });
     });
-    describe(`regressions`, () => {
-        it(`should not change meta.mixins during transform`, () => {
-            // ToDo: remove in v5 (no meta.mixins)
-            const { stylable, sheets } = testStylableCore(
-                `
-                .root { -st-mixin: mix; }
-                .mix { color: green }
-            `
+    describe('stylable API', () => {
+        it('should resolve mixin expression', () => {
+            const { stylable, sheets } = testStylableCore({
+                '/sheet.st.css': `
+                    .mix-base-type {
+                        prop: value(not-part-of-mixin);
+                    }
+                    .css-mix {
+                        -st-extends: mix-base-type;
+                        prop: value(bg-color);
+                    }
+                `,
+                'code.js': `
+                    module.exports = {
+                        'code-mix': ([arg1, arg2]) => {
+                            return { [arg1]: arg2 + '!' }
+                        },
+                        'code-str': "not valid mixin",
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [css-mix as importedClassMix] from './sheet.st.css';
+                    @st-import [code-mix as importedFuncMix, code-str] from './code.js';
+                    .local-mix {
+                        background: value(bg-size) value(bg-color);
+                    }
+                    .local-mix:hover {
+                        background-color: value(bg-hover-color);
+                    }
+                    ElementMix {
+                        color: value(colorList, value(color-index));
+                    }
+                    :vars {
+                        st-var-name: "cannot be used as mixin";
+                    }
+                `,
+            });
+            const inputExpr = `
+                local-mix(a 1, b value(x), c ' " , quotation and comma'), 
+                importedClassMix(c 2),
+                unknownBetweenMix(e 3),
+                st-var-name(e 4),
+                ElementMix(f 5, g 6),
+                code-str(argX),
+                importedFuncMix(argA, argB),
+            `;
+
+            const diagnostics = new Diagnostics();
+            const resolvedMixins = stylable.stMixin.resolveExpr(
+                sheets['/entry.st.css'].meta,
+                inputExpr,
+                {
+                    diagnostics,
+                    resolveOptionalArgs: true,
+                }
             );
-            const { meta } = sheets['/entry.st.css'];
 
-            stylable.transform(meta);
-            const mixins1 = [...meta.mixins];
-            stylable.transform(meta);
-            const mixins2 = [...meta.mixins];
+            expect(resolvedMixins[0], 'local-mix').to.eql({
+                name: 'local-mix',
+                kind: 'css-fragment',
+                args: [{ a: '1' }, { b: 'value(x)' }, { c: ` " , quotation and comma` }],
+                optionalArgs: new Map([
+                    ['bg-size', { name: 'bg-size' }],
+                    ['bg-color', { name: 'bg-color' }],
+                    ['bg-hover-color', { name: 'bg-hover-color' }],
+                ]),
+            });
+            expect(resolvedMixins[1], 'importedClassMix').to.eql({
+                name: 'importedClassMix',
+                kind: 'css-fragment',
+                args: [{ c: '2' }],
+                optionalArgs: new Map([['bg-color', { name: 'bg-color' }]]),
+            });
+            expect(resolvedMixins[2], 'unknownBetweenMix').to.eql({
+                name: 'unknownBetweenMix',
+                kind: 'invalid',
+                args: 'e 3',
+            });
+            expect(resolvedMixins[3], 'st-var-name').to.eql({
+                name: 'st-var-name',
+                kind: 'invalid',
+                args: 'e 4',
+            });
+            expect(resolvedMixins[4], 'ElementMix').to.eql({
+                name: 'ElementMix',
+                kind: 'css-fragment',
+                args: [{ f: '5' }, { g: '6' }],
+                optionalArgs: new Map([
+                    ['colorList', { name: 'colorList' }],
+                    ['color-index', { name: 'color-index' }],
+                ]),
+            });
+            expect(resolvedMixins[5], 'code-str').to.eql({
+                name: 'code-str',
+                kind: 'invalid',
+                args: 'argX',
+            });
+            const jsMix = resolvedMixins[6];
+            expect(jsMix, 'importedFuncMix').to.deep.include({
+                name: 'importedFuncMix',
+                kind: 'js-func',
+                args: ['argA', 'argB'],
+            });
+            expect(
+                jsMix.kind === 'js-func' && jsMix.func(['color', 'green']),
+                'importedFuncMix func ref'
+            ).to.eql({ color: 'green!' });
+            expect(diagnostics.reports, 'diagnostics').to.containSubset([
+                STMixin.diagnostics.UNKNOWN_MIXIN('unknownBetweenMix'),
+                STMixin.diagnostics.UNSUPPORTED_MIXIN_SYMBOL('st-var-name', 'var'),
+                STMixin.diagnostics.JS_MIXIN_NOT_A_FUNC(),
+            ]);
+        });
+        it('should combine two selectors', () => {
+            const { stylable } = testStylableCore(``);
+            const api = stylable.stMixin;
 
-            expect(mixins1).to.eql(mixins2);
+            expect(api.scopeNestedSelector('.a', '.b'), 'descendant').to.eql('.a .b');
+            expect(api.scopeNestedSelector('.a', '&'), 'replacement').to.eql('.a');
+            expect(api.scopeNestedSelector('.a', '&.b'), 'compound').to.eql('.a.b');
+            expect(api.scopeNestedSelector('.a', ':not(&)'), 'nested').to.eql(':not(.a)');
+            expect(api.scopeNestedSelector('.a', '.b&'), 'after').to.eql('.b.a');
         });
     });
 });

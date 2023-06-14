@@ -1,12 +1,10 @@
 import postcss from 'postcss';
+import { processNamespace, MinimalFS } from '@stylable/core';
 import {
-    processNamespace,
     emitDiagnostics,
-    visitMetaCSSDependenciesBFS,
     DiagnosticsMode,
-    MinimalFS,
-} from '@stylable/core';
-import { StylableOptimizer } from '@stylable/optimizer';
+    tryCollectImportsDeep,
+} from '@stylable/core/dist/index-internal';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
@@ -49,8 +47,6 @@ interface LoaderImport {
     index: number;
 }
 
-const optimizer = new StylableOptimizer();
-
 const stylableLoader: LoaderDefinition = function (content) {
     const callback = this.async();
 
@@ -76,16 +72,12 @@ const stylableLoader: LoaderDefinition = function (content) {
         resolveNamespace,
     });
 
-    const { meta, exports } = stylable.transform(content, this.resourcePath);
+    const { meta, exports } = stylable.transform(stylable.analyze(this.resourcePath, content));
 
     emitDiagnostics(this, meta, diagnosticsMode);
-
-    visitMetaCSSDependenciesBFS(
-        meta,
-        ({ source }) => this.addDependency(source),
-        stylable.resolver,
-        (resolvedPath) => this.addDependency(resolvedPath)
-    );
+    for (const filePath of tryCollectImportsDeep(stylable.resolver, meta)) {
+        this.addDependency(filePath);
+    }
 
     addBuildInfo(this, meta.namespace);
 
@@ -129,12 +121,8 @@ const stylableLoader: LoaderDefinition = function (content) {
         }),
     ];
 
-    if (mode !== 'development') {
-        optimizer.removeStylableDirectives(meta.outputAst!);
-    }
-
     postcss(plugins)
-        .process(meta.outputAst!, {
+        .process(meta.targetAst!, {
             from: this.resourcePath,
             to: this.resourcePath,
             map: false,

@@ -39,7 +39,24 @@
         "@typescript-eslint/prefer-regexp-exec": "off",
         "@typescript-eslint/restrict-plus-operands": "off",
         "@typescript-eslint/restrict-template-expressions": "off",
-        "@typescript-eslint/unbound-method": "off"
+        "@typescript-eslint/unbound-method": "off",
+        "@typescript-eslint/no-misused-promises": "off" // ToDo: remove once eslint fix issue.
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "excludedFiles": ["packages/*/test/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              "@stylable/*/src/*",
+              "@stylable/*/dist/*",
+              "!@stylable/*/dist/index-internal"
+            ]
+          }
+        ]
       }
     }
   ]

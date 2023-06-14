@@ -1,25 +1,19 @@
-import type {
-    ClassSymbol,
+import type { ClassSymbol, StylableMeta, StylableResults, StylableSymbol } from '@stylable/core';
+import {
+    MappedStates,
     StateParsedValue,
-    StylableMeta,
-    StylableResults,
-    StylableSymbol,
-} from '@stylable/core';
-import type { MappedStates } from '@stylable/core/dist/index-internal';
+    namespace as scope,
+} from '@stylable/core/dist/index-internal';
 
 export const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
 
 function addStatesEntries(
-    stateEntries: Map<string, StateParsedValue | string | null>,
+    stateEntries: Map<string, MappedStates[string]>,
     stStates: MappedStates | undefined
 ) {
     if (stStates) {
         for (const [stateName, stateDef] of Object.entries(stStates)) {
-            if (typeof stateDef === 'string') {
-                continue;
-            }
-
             if (!stateEntries.has(stateName)) {
                 stateEntries.set(stateName, stateDef);
             }
@@ -46,7 +40,11 @@ function collectLocalStates(cls: ClassSymbol) {
 
     // stringify states for current class
     for (const [stateName, stateDef] of stateEntries.entries()) {
-        stateEntriesString += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
+        const booleanState = !stateDef;
+        const mappedState = stateDef?.type === 'template' || typeof stateDef === 'string';
+        if (booleanState || !mappedState) {
+            stateEntriesString += `${asString(stateName)}?: ${getStateTSType(stateDef)}; `;
+        }
     }
 
     return stateEntriesString;
@@ -130,17 +128,14 @@ function wrapNL(code: string) {
     return code ? `\n${code}\n` : code;
 }
 
-// TODO: make available from core currently defined in transformer class
-function scope(name: string, namespace: string, delimiter = '__') {
-    return namespace ? namespace + delimiter + name : name;
-}
-
 export function generateDTSContent({ exports, meta }: StylableResults) {
     const namespace = asString(meta.namespace);
     const classes = wrapNL(stringifyClasses(exports.classes, meta.namespace));
     const vars = wrapNL(stringifyStringRecord(exports.vars));
     const stVars = wrapNL(stringifyStringRecord(exports.stVars));
     const keyframes = wrapNL(stringifyStringRecord(exports.keyframes));
+    const layers = wrapNL(stringifyStringRecord(exports.layers));
+    const containers = wrapNL(stringifyStringRecord(exports.containers));
     const states = wrapNL(stringifyStates(meta));
 
     return `/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */
@@ -155,6 +150,10 @@ declare const vars: {${vars}};
 declare const stVars: {${stVars}};
 
 declare const keyframes: {${keyframes}};
+
+declare const layers: {${layers}};
+
+declare const containers: {${containers}};
 
 declare function st<T extends string = keyof states>(
     ctx: T | NullableString,
@@ -174,6 +173,8 @@ export {
     vars,
     stVars,
     keyframes,
+    layers,
+    containers,
     namespace,
     st,
     style,

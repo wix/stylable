@@ -1,0 +1,6 @@
+@st-import FromTS from "ts-paths/blue.st.css";
+@st-import FromWebpack from "wp-alias/green.st.css";
+
+.root {
+    -st-mixin: FromTS, FromWebpack;
+}

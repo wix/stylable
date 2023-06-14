@@ -1,13 +1,11 @@
 import { dirname, relative } from 'path';
 import postcssValueParser from 'postcss-value-parser';
 import type * as postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
 import {
-    CSSResolve,
-    JSResolve,
     StylableResolver,
     createSymbolResolverWithCache,
     MetaResolvedSymbols,
@@ -20,14 +18,9 @@ import type { FeatureTransformContext } from './features/feature';
 import { CSSCustomProperty, STVar } from './features';
 import { unbox, CustomValueError } from './custom-values';
 
-export type ValueFormatter = (name: string) => string;
-export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
-
 export interface EvalValueData {
     value: string;
-    passedThrough: string[];
     node?: postcss.Node;
-    valueHook?: replaceValueHook;
     meta: StylableMeta;
     stVarOverride?: Record<string, string> | null;
     cssVarsMapping?: Record<string, string>;
@@ -45,23 +38,31 @@ export interface EvalValueResult {
 
 export class StylableEvaluator {
     public stVarOverride: Record<string, string> | null | undefined;
-    constructor(options: { stVarOverride?: Record<string, string> | null } = {}) {
+    public getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols;
+    public valueHook?: replaceValueHook;
+    constructor(options: {
+        stVarOverride?: Record<string, string> | null;
+        valueHook?: replaceValueHook;
+        getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols;
+    }) {
+        this.valueHook = options.valueHook;
         this.stVarOverride = options.stVarOverride;
+        this.getResolvedSymbols = options.getResolvedSymbols;
     }
     evaluateValue(
-        context: FeatureTransformContext,
-        data: Omit<EvalValueData, 'passedThrough'> & { passedThrough?: string[] }
+        context: Omit<FeatureTransformContext, 'getResolvedSymbols'>,
+        data: Omit<EvalValueData, 'passedThrough' | 'valueHook'>
     ) {
         return processDeclarationValue(
             context.resolver,
-            context.getResolvedSymbols,
+            this.getResolvedSymbols,
             data.value,
             data.meta,
             data.node,
             data.stVarOverride || this.stVarOverride,
-            data.valueHook,
+            this.valueHook,
             context.diagnostics,
-            data.passedThrough,
+            context.passedThrough,
             data.cssVarsMapping,
             data.args,
             data.rootArgument,
@@ -72,11 +73,18 @@ export class StylableEvaluator {
 
 // old API
 
-export const functionWarnings = {
-    FAIL_TO_EXECUTE_FORMATTER: (resolvedValue: string, message: string) =>
-        `failed to execute formatter "${resolvedValue}" with error: "${message}"`,
-    UNKNOWN_FORMATTER: (name: string) =>
-        `cannot find native function or custom formatter called ${name}`,
+export const functionDiagnostics = {
+    FAIL_TO_EXECUTE_FORMATTER: createDiagnosticReporter(
+        '15001',
+        'error',
+        (resolvedValue: string, message: string) =>
+            `failed to execute formatter "${resolvedValue}" with error: "${message}"`
+    ),
+    UNKNOWN_FORMATTER: createDiagnosticReporter(
+        '15002',
+        'error',
+        (name: string) => `cannot find native function or custom formatter called ${name}`
+    ),
 };
 
 export function resolveArgumentsValue(
@@ -122,7 +130,11 @@ export function processDeclarationValue(
     rootArgument?: string,
     initialNode?: postcss.Node
 ): EvalValueResult {
-    const evaluator = new StylableEvaluator({ stVarOverride: variableOverride });
+    const evaluator = new StylableEvaluator({
+        stVarOverride: variableOverride,
+        valueHook,
+        getResolvedSymbols,
+    });
     const resolvedSymbols = getResolvedSymbols(meta);
     const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -136,12 +148,11 @@ export function processDeclarationValue(
                         resolver,
                         evaluator,
                         getResolvedSymbols,
+                        passedThrough,
                     },
                     data: {
                         value,
-                        passedThrough,
                         node,
-                        valueHook,
                         meta,
                         stVarOverride: variableOverride,
                         cssVarsMapping,
@@ -176,8 +187,8 @@ export function processDeclarationValue(
                 const formatterArgs = getFormatterArgs(parsedNode);
                 try {
                     parsedNode.resolvedValue = formatter.symbol.apply(null, formatterArgs);
-                    if (valueHook && typeof parsedNode.resolvedValue === 'string') {
-                        parsedNode.resolvedValue = valueHook(
+                    if (evaluator.valueHook && typeof parsedNode.resolvedValue === 'string') {
+                        parsedNode.resolvedValue = evaluator.valueHook(
                             parsedNode.resolvedValue,
                             { name: parsedNode.value, args: formatterArgs },
                             true,
@@ -187,13 +198,15 @@ export function processDeclarationValue(
                 } catch (error) {
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                     if (diagnostics && node) {
-                        diagnostics.warn(
-                            node,
-                            functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
+                        diagnostics.report(
+                            functionDiagnostics.FAIL_TO_EXECUTE_FORMATTER(
                                 parsedNode.resolvedValue,
                                 (error as Error)?.message
                             ),
-                            { word: (node as postcss.Declaration).value }
+                            {
+                                node,
+                                word: (node as postcss.Declaration).value,
+                            }
                         );
                     }
                 }
@@ -205,12 +218,11 @@ export function processDeclarationValue(
                         resolver,
                         evaluator,
                         getResolvedSymbols,
+                        passedThrough,
                     },
                     data: {
                         value,
-                        passedThrough,
                         node,
-                        valueHook,
                         meta,
                         stVarOverride: variableOverride,
                         cssVarsMapping,
@@ -224,7 +236,8 @@ export function processDeclarationValue(
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
             } else if (node) {
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
+                diagnostics.report(functionDiagnostics.UNKNOWN_FORMATTER(value), {
+                    node,
                     word: value,
                 });
             }
@@ -263,12 +276,14 @@ export function processDeclarationValue(
                     const invalidNode = initialNode || node;
 
                     if (invalidNode) {
-                        diagnostics.warn(
-                            invalidNode,
+                        diagnostics.report(
                             STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
                                 [...(rootArgument ? [rootArgument] : []), ...args].join(', ')
                             ),
-                            { word: value }
+                            {
+                                node: invalidNode,
+                                word: value,
+                            }
                         );
                     } else {
                         // TODO: catch broken variable resolutions without a node

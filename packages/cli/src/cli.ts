@@ -15,8 +15,10 @@ async function main() {
         preserveWatchOutput,
         config,
     } = argv;
-    const { resolveNamespace } = require(namespaceResolver);
     const rootDir = resolve(argv.rootDir);
+    const { resolveNamespace } = require(require.resolve(namespaceResolver, {
+        paths: [rootDir],
+    }));
 
     //
     const log = createLogger(
@@ -31,9 +33,7 @@ async function main() {
 
     // execute all require hooks before running the CLI build
     for (const request of requires) {
-        if (request) {
-            require(request);
-        }
+        require(request);
     }
 
     const defaultOptions = createDefaultOptions();

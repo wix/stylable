@@ -1,0 +1,6 @@
+@st-import Imported from './imported-only-from-css.st.css';
+
+.root {
+  -st-extends: Imported;
+  color: red;
+}

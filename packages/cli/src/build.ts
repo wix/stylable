@@ -1,14 +1,19 @@
-import type { BuildContext, BuildOptions } from './types';
-import { visitMetaCSSDependenciesBFS } from '@stylable/core';
+import { fixRelativeUrls, tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
+import type { BuildContext, BuildOptions, ModuleFormats } from './types';
 import { IndexGenerator as BaseIndexGenerator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { DiagnosticsManager } from './diagnostics-manager';
-import type { Diagnostic } from './report-diagnostics';
+import type { CLIDiagnostic } from './report-diagnostics';
 import { tryRun } from './build-tools';
 import { errorMessages, buildMessages } from './messages';
+import postcss from 'postcss';
+import { sortModulesByDepth } from '@stylable/build-tools';
+import { StylableOptimizer } from '@stylable/optimizer';
+import type { Stylable } from '@stylable/core';
+import type { IFileSystem } from '@file-services/types';
 
 export async function build(
     {
@@ -17,7 +22,9 @@ export async function build(
         indexFile,
         IndexGenerator = BaseIndexGenerator,
         cjs,
+        cjsExt,
         esm,
+        esmExt,
         includeCSSInJS,
         outputCSS,
         outputCSSNameTemplate,
@@ -27,10 +34,14 @@ export async function build(
         optimize,
         minify,
         manifest,
+        bundle,
         dts,
         dtsSourceMap,
         diagnostics,
         diagnosticsMode,
+        inlineRuntime,
+        runtimeCjsRequest = '@stylable/runtime/dist/pure.js',
+        runtimeEsmRequest = '@stylable/runtime/esm/pure.js',
     }: BuildOptions,
     {
         projectRoot: _projectRoot,
@@ -44,7 +55,7 @@ export async function build(
         diagnosticsManager = new DiagnosticsManager({ log }),
     }: BuildContext
 ) {
-    const { join, realpathSync, relative } = fs;
+    const { join, realpathSync, relative, dirname } = fs;
     const projectRoot = realpathSync(_projectRoot);
     const rootDir = realpathSync(_rootDir);
     const fullSrcDir = join(projectRoot, srcDir);
@@ -57,11 +68,24 @@ export async function build(
     }
 
     const mode = watch ? '[Watch]' : '[Build]';
-    const generator = new IndexGenerator(stylable, log);
+    const indexFileGenerator = indexFile
+        ? new IndexGenerator({ stylable, log, indexFileTargetPath: join(fullOutDir, indexFile) })
+        : null;
     const buildGeneratedFiles = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
-    const moduleFormats = getModuleFormats({ cjs, esm });
+    const moduleFormats = getModuleFormats({ cjs, esm, esmExt, cjsExt });
+
+    const { runtimeCjsOutPath, runtimeEsmOutPath } = copyRuntime(
+        inlineRuntime,
+        projectRoot,
+        fullOutDir,
+        cjs,
+        esm,
+        runtimeCjsRequest,
+        runtimeEsmRequest,
+        fs
+    );
 
     const service = new DirectoryProcessService(fs, {
         watchMode: watch,
@@ -118,8 +142,7 @@ export async function build(
                         }
                         diagnosticsManager.delete(identifier, deletedFile);
                         sourceFiles.delete(deletedFile);
-                        generator.removeEntryFromIndex(deletedFile, fullOutDir);
-                        removeBuildProducts({
+                        const { targetFilePath } = removeBuildProducts({
                             fullOutDir,
                             fullSrcDir,
                             filePath: deletedFile,
@@ -133,6 +156,12 @@ export async function build(
                             dts,
                             dtsSourceMap,
                         });
+
+                        if (indexFileGenerator) {
+                            indexFileGenerator.removeEntryFromIndex(
+                                outputSources ? targetFilePath : deletedFile
+                            );
+                        }
                     }
                 }
             }
@@ -150,13 +179,11 @@ export async function build(
             }
 
             for (const filePath of affectedFiles) {
-                if (!indexFile) {
-                    // map st output file path to src file path
-                    outputFiles.set(
-                        join(fullOutDir, relative(fullSrcDir, filePath)),
-                        new Set([filePath])
-                    );
-                }
+                // map st output file path to src file path
+                outputFiles.set(
+                    join(fullOutDir, relative(fullSrcDir, filePath)),
+                    new Set([filePath])
+                );
 
                 // remove assets from the affected files (handled in buildAggregatedEntities)
                 if (assets.has(filePath)) {
@@ -170,12 +197,31 @@ export async function build(
             updateWatcherDependencies(affectedFiles);
             // rebuild assets from aggregated content: index files and assets
             await buildAggregatedEntities(affectedFiles, processGeneratedFiles);
-
+            // rebundle
+            if (bundle) {
+                tryRun(() => {
+                    const outputs = bundleFiles({
+                        stylable,
+                        sourceFiles,
+                        fullSrcDir,
+                        fullOutDir,
+                        bundle,
+                        minify,
+                        fs,
+                    });
+                    for (const { filePath, content, files } of outputs) {
+                        processGeneratedFiles.add(filePath);
+                        log(mode, buildMessages.EMIT_BUNDLE(filePath, files.length));
+                        fs.ensureDirectorySync(dirname(filePath));
+                        fs.writeFileSync(filePath, content);
+                    }
+                }, 'failed to write or minify bundle file');
+            }
             if (!diagnostics) {
                 diagnosticsManager.delete(identifier);
             }
 
-            const count = deletedFiles.size + affectedFiles.size + assets.size;
+            const count = deletedFiles.size + affectedFiles.size + assets.size + (bundle ? 1 : 0);
 
             if (count) {
                 log(
@@ -207,33 +253,65 @@ export async function build(
     function buildFiles(filesToBuild: Set<string>, generated: Set<string>) {
         for (const filePath of filesToBuild) {
             try {
-                if (indexFile) {
-                    generator.generateFileIndexEntry(filePath, fullOutDir);
-                } else {
-                    buildSingleFile({
-                        fullOutDir,
-                        filePath,
-                        fullSrcDir,
-                        log,
-                        fs,
-                        stylable,
-                        diagnosticsManager,
-                        diagnosticsMode,
-                        identifier,
-                        projectAssets: assets,
-                        moduleFormats,
-                        includeCSSInJS,
-                        outputCSS,
-                        outputCSSNameTemplate,
-                        outputSources,
-                        useNamespaceReference,
-                        injectCSSRequest,
-                        optimize,
-                        dts,
-                        dtsSourceMap,
-                        minify,
-                        generated,
-                    });
+                const { targetFilePath } = buildSingleFile({
+                    fullOutDir,
+                    filePath,
+                    fullSrcDir,
+                    log,
+                    fs,
+                    stylable,
+                    diagnosticsManager,
+                    diagnosticsMode,
+                    identifier,
+                    projectAssets: assets,
+                    moduleFormats,
+                    includeCSSInJS,
+                    outputCSS,
+                    outputCSSNameTemplate,
+                    outputSources,
+                    useNamespaceReference,
+                    injectCSSRequest,
+                    optimize,
+                    dts,
+                    dtsSourceMap,
+                    minify,
+                    generated,
+                    resolveRuntimeRequest: (targetFilePath, moduleFormat) => {
+                        if (inlineRuntime) {
+                            if (moduleFormat === 'cjs' && runtimeCjsOutPath) {
+                                return (
+                                    './' +
+                                    relative(dirname(targetFilePath), runtimeCjsOutPath).replace(
+                                        /\\/g,
+                                        '/'
+                                    )
+                                );
+                            }
+                            if (moduleFormat === 'esm' && runtimeEsmOutPath) {
+                                return (
+                                    './' +
+                                    relative(dirname(targetFilePath), runtimeEsmOutPath).replace(
+                                        /\\/g,
+                                        '/'
+                                    )
+                                );
+                            }
+                        } else {
+                            if (moduleFormat === 'cjs') {
+                                return runtimeCjsRequest;
+                            }
+                            if (moduleFormat === 'esm') {
+                                return runtimeEsmRequest;
+                            }
+                        }
+                        return '@stylable/runtime';
+                    },
+                });
+
+                if (indexFileGenerator) {
+                    indexFileGenerator.generateFileIndexEntry(
+                        outputSources ? targetFilePath : filePath
+                    );
                 }
             } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
@@ -242,7 +320,6 @@ export async function build(
     }
 
     function updateWatcherDependencies(affectedFiles: Set<string>) {
-        const resolver = stylable.createResolver();
         for (const filePath of affectedFiles) {
             try {
                 sourceFiles.add(filePath);
@@ -250,12 +327,10 @@ export async function build(
                     () => stylable.analyze(filePath),
                     errorMessages.STYLABLE_PROCESS(filePath)
                 );
-                visitMetaCSSDependenciesBFS(
-                    meta,
-                    ({ source }) => registerInvalidation(source, filePath),
-                    resolver,
-                    (resolvedPath) => registerInvalidation(resolvedPath, filePath)
-                );
+                // todo: consider merging this API with stylable.getDependencies()
+                for (const depFilePath of tryCollectImportsDeep(stylable.resolver, meta)) {
+                    registerInvalidation(depFilePath, filePath);
+                }
             } catch (error) {
                 setFileErrorDiagnostic(filePath, error);
             }
@@ -273,9 +348,12 @@ export async function build(
     }
 
     function setFileErrorDiagnostic(filePath: string, error: any) {
-        const diagnostic: Diagnostic = {
-            type: 'error',
+        const diagnostic: CLIDiagnostic = {
+            severity: 'error',
             message: error instanceof Error ? error.message : String(error),
+            code: '00000',
+            node: postcss.root(),
+            filePath,
         };
 
         diagnosticsManager.set(identifier, filePath, {
@@ -285,12 +363,11 @@ export async function build(
     }
 
     async function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
-        if (indexFile) {
-            const indexFilePath = join(fullOutDir, indexFile);
-            generated.add(indexFilePath);
-            await generator.generateIndexFile(fs, indexFilePath);
+        if (indexFileGenerator) {
+            await indexFileGenerator.generateIndexFile(fs);
 
-            outputFiles.set(indexFilePath, affectedFiles);
+            generated.add(indexFileGenerator.indexFileTargetPath);
+            outputFiles.set(indexFileGenerator.indexFileTargetPath, affectedFiles);
         } else {
             const generatedAssets = handleAssets(assets, projectRoot, srcDir, outDir, fs);
             for (const generatedAsset of generatedAssets) {
@@ -303,6 +380,96 @@ export async function build(
             }
         }
     }
+}
+
+function bundleFiles({
+    stylable,
+    sourceFiles,
+    fullSrcDir,
+    fullOutDir,
+    bundle,
+    minify,
+    fs,
+}: {
+    sourceFiles: Set<string>;
+    stylable: Stylable;
+    fullOutDir: string;
+    fullSrcDir: string;
+    bundle: string;
+    fs: IFileSystem;
+    minify: boolean | undefined;
+}) {
+    const { join, relative } = fs;
+    const sortedModules = sortModulesByDepth(
+        Array.from(sourceFiles),
+        (m) => {
+            const meta = stylable.analyze(m);
+            if (!meta.transformCssDepth) {
+                stylable.transform(meta);
+            }
+            return meta.transformCssDepth?.cssDepth ?? 0;
+        },
+        (m) => {
+            return m;
+        },
+        -1 /** PRINT_ORDER */
+    );
+    const cssBundleCode = sortedModules
+        .map((m) => {
+            const meta = stylable.analyze(m);
+            const targetFilePath = join(fullOutDir, relative(fullSrcDir, meta.source));
+            const ast = meta.targetAst!;
+            fixRelativeUrls(ast, targetFilePath, join(fullOutDir, bundle));
+            return ast.toString();
+        })
+        .join('\n');
+
+    return [
+        {
+            filePath: join(fullOutDir, bundle),
+            content: minify ? new StylableOptimizer().minifyCSS(cssBundleCode) : cssBundleCode,
+            files: sortedModules,
+        },
+    ];
+}
+
+function copyRuntime(
+    inlineRuntime: boolean | undefined,
+    projectRoot: string,
+    fullOutDir: string,
+    cjs: boolean | undefined,
+    esm: boolean | undefined,
+    runtimeCjsRequest: string,
+    runtimeEsmRequest: string,
+    fs: BuildContext['fs']
+) {
+    let runtimeCjsOutPath;
+    let runtimeEsmOutPath;
+
+    if (inlineRuntime) {
+        const runtimeCjsPath = resolveRequestInContext(fs, runtimeCjsRequest, projectRoot);
+        const runtimeEsmPath = resolveRequestInContext(fs, runtimeEsmRequest, projectRoot);
+        if (cjs) {
+            fs.ensureDirectorySync(fullOutDir);
+            runtimeCjsOutPath = fs.join(fullOutDir, 'stylable-cjs-runtime.js');
+            fs.writeFileSync(runtimeCjsOutPath, fs.readFileSync(runtimeCjsPath, 'utf8'));
+        }
+        if (esm) {
+            fs.ensureDirectorySync(fullOutDir);
+            runtimeEsmOutPath = fs.join(fullOutDir, 'stylable-esm-runtime.js');
+            fs.writeFileSync(runtimeEsmOutPath, fs.readFileSync(runtimeEsmPath, 'utf8'));
+        }
+    }
+
+    return { runtimeCjsOutPath, runtimeEsmOutPath };
+}
+
+function resolveRequestInContext(fs: IFileSystem, request: string, projectRoot: string) {
+    return fs.isAbsolute(request)
+        ? request
+        : require.resolve(request, {
+              paths: [projectRoot],
+          });
 }
 
 export function createGenerator(
@@ -324,13 +491,23 @@ export function createGenerator(
     }, `Could not resolve custom generator from "${absoluteGeneratorPath}"`);
 }
 
-function getModuleFormats({ esm, cjs }: { [k: string]: boolean | undefined }) {
-    const formats: Array<'esm' | 'cjs'> = [];
+function getModuleFormats({
+    esm,
+    cjs,
+    cjsExt,
+    esmExt,
+}: {
+    esm: boolean | undefined;
+    cjs: boolean | undefined;
+    cjsExt: '.cjs' | '.js' | undefined;
+    esmExt: '.mjs' | '.js' | undefined;
+}): ModuleFormats {
+    const formats: ModuleFormats = [];
     if (esm) {
-        formats.push('esm');
+        formats.push(['esm', esmExt || '.mjs']);
     }
     if (cjs) {
-        formats.push('cjs');
+        formats.push(['cjs', cjsExt || '.js']);
     }
     return formats;
 }

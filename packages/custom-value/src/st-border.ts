@@ -1,9 +1,9 @@
+import { CustomValueStrategy } from '@stylable/core';
 import {
     BoxedValueArray,
     BoxedValueMap,
     createCustomValue,
-    CustomValueStrategy,
-} from '@stylable/core';
+} from '@stylable/core/dist/index-internal';
 
 export const stBorder = createCustomValue<BoxedValueMap, BoxedValueArray>({
     processArgs: (node, customTypes) => {

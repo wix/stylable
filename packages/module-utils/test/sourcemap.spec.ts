@@ -1,7 +1,6 @@
-import { generateStylableResult } from '@stylable/core-test-kit';
+import { generateStylableResult, deindent } from '@stylable/core-test-kit';
 import { generateDTSSourceMap, generateDTSContent } from '@stylable/module-utils';
 import { expect } from 'chai';
-import deindent from 'deindent';
 import { SourceMapConsumer } from 'source-map';
 
 function getPosition(content: string, query: string) {
@@ -113,7 +112,7 @@ describe('.d.ts source-maps', () => {
             getPosition(dtsText, 'c1":') // source mapping starts after the first double quote
         );
 
-        expect(originalPosition).to.eql({ line: 3, column: 4, source: 'entry.st.css', name: null });
+        expect(originalPosition).to.eql({ line: 2, column: 4, source: 'entry.st.css', name: null });
     });
 
     it('maps the "c1" css variable in the ".d.ts" to its position in the original ".st.css" file', async () => {
@@ -160,6 +159,80 @@ describe('.d.ts source-maps', () => {
         expect(originalPosition).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
     });
 
+    it('maps the layer in the ".d.ts" to its position in the original ".st.css" file', async () => {
+        const res = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/another.st.css': {
+                    namespace: 'another',
+                    content: `@layer L0`,
+                },
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: deindent(`
+                        @st-import [layer(L0 as imported-layer)] from "./another.st.css";
+                        @layer L1 {}
+                    `),
+                },
+            },
+        });
+
+        const dtsText = generateDTSContent(res);
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta);
+
+        sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
+        // local layer
+        expect(
+            sourceMapConsumer.originalPositionFor(
+                getPosition(dtsText, 'L1":') // source mapping starts after the first double quote
+            )
+        ).to.eql({ line: 2, column: 0, source: 'entry.st.css', name: null });
+        // imported layer
+        expect(
+            sourceMapConsumer.originalPositionFor(
+                getPosition(dtsText, 'imported-layer":') // source mapping starts after the first double quote
+            )
+        ).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
+    });
+
+    it('maps the container in the ".d.ts" to its position in the original ".st.css" file', async () => {
+        const res = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/another.st.css': {
+                    namespace: 'another',
+                    content: `.a { container: C1; }`,
+                },
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: deindent(`
+                        @st-import [container(C1 as imported-container)] from "./another.st.css";
+                        .a {
+                            container: C2;
+                        }
+                    `),
+                },
+            },
+        });
+
+        const dtsText = generateDTSContent(res);
+        const sourcemapText = generateDTSSourceMap(dtsText, res.meta);
+
+        sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
+        // local container
+        expect(
+            sourceMapConsumer.originalPositionFor(
+                getPosition(dtsText, 'C2":') // source mapping starts after the first double quote
+            )
+        ).to.eql({ line: 3, column: 4, source: 'entry.st.css', name: null });
+        // imported container
+        expect(
+            sourceMapConsumer.originalPositionFor(
+                getPosition(dtsText, 'imported-container":') // source mapping starts after the first double quote
+            )
+        ).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
+    });
+
     it('maps states in the ".d.ts" to their positions in the original ".st.css" file', async () => {
         const res = generateStylableResult({
             entry: `/entry.st.css`,
@@ -185,13 +258,13 @@ describe('.d.ts source-maps', () => {
         );
 
         expect(state1OriginalPosition).to.eql({
-            line: 2,
+            line: 1,
             column: 8,
             source: 'entry.st.css',
             name: null,
         });
         expect(state2OriginalPosition).to.eql({
-            line: 3,
+            line: 2,
             column: 9,
             source: 'entry.st.css',
             name: null,
@@ -228,19 +301,19 @@ describe('.d.ts source-maps', () => {
         );
 
         expect(state1OriginalPosition).to.eql({
-            line: 2,
+            line: 1,
             column: 8,
             source: 'entry.st.css',
             name: null,
         });
         expect(state2OriginalPosition).to.eql({
-            line: 3,
+            line: 2,
             column: 13,
             source: 'entry.st.css',
             name: null,
         });
         expect(state3OriginalPosition).to.eql({
-            line: 4,
+            line: 3,
             column: 13,
             source: 'entry.st.css',
             name: null,
@@ -270,7 +343,7 @@ describe('.d.ts source-maps', () => {
         );
 
         expect(sameStateOriginalPosition).to.eql({
-            line: 2, // expect .test class (1 based index)
+            line: 1, // expect .test class (1 based index)
             column: 8,
             source: 'entry.st.css',
             name: null,
@@ -297,6 +370,7 @@ describe('.d.ts source-maps', () => {
                         --css2: green;
                     }
                     @keyframes k1 {}
+                    @layer l1 {}
                     `),
                 },
             },
@@ -334,56 +408,65 @@ describe('.d.ts source-maps', () => {
         const keyframes1OriginalPosition = sourceMapConsumer.originalPositionFor(
             getPosition(dtsText, 'k1":')
         );
+        const layer1OriginalPosition = sourceMapConsumer.originalPositionFor(
+            getPosition(dtsText, 'l1":')
+        );
 
         expect(class1OriginalPosition).to.eql({
-            line: 6,
+            line: 5,
             column: 0,
             source: 'entry.st.css',
             name: null,
         });
         expect(class2OriginalPosition).to.eql({
-            line: 10,
+            line: 9,
             column: 0,
             source: 'entry.st.css',
             name: null,
         });
         expect(stVar1OriginalPosition).to.eql({
-            line: 3,
+            line: 2,
             column: 4,
             source: 'entry.st.css',
             name: null,
         });
         expect(stVar2OriginalPosition).to.eql({
-            line: 4,
+            line: 3,
             column: 4,
             source: 'entry.st.css',
             name: null,
         });
         expect(cssVar1OriginalPosition).to.eql({
-            line: 8,
-            column: 4,
-            source: 'entry.st.css',
-            name: null,
-        });
-        expect(cssVar2OriginalPosition).to.eql({
-            line: 12,
-            column: 4,
-            source: 'entry.st.css',
-            name: null,
-        });
-        expect(state1OriginalPosition).to.eql({
             line: 7,
             column: 4,
             source: 'entry.st.css',
             name: null,
         });
-        expect(state2OriginalPosition).to.eql({
+        expect(cssVar2OriginalPosition).to.eql({
             line: 11,
             column: 4,
             source: 'entry.st.css',
             name: null,
         });
+        expect(state1OriginalPosition).to.eql({
+            line: 6,
+            column: 4,
+            source: 'entry.st.css',
+            name: null,
+        });
+        expect(state2OriginalPosition).to.eql({
+            line: 10,
+            column: 4,
+            source: 'entry.st.css',
+            name: null,
+        });
         expect(keyframes1OriginalPosition).to.eql({
+            line: 13,
+            column: 0,
+            source: 'entry.st.css',
+            name: null,
+        });
+        expect(layer1OriginalPosition).to.eql({
             line: 14,
             column: 0,
             source: 'entry.st.css',
@@ -433,31 +516,31 @@ describe('.d.ts source-maps', () => {
 
         expect(aOriginalPosition).to.eql({
             column: 4,
-            line: 3,
+            line: 2,
             name: null,
             source: 'entry.st.css',
         });
         expect(bOriginalPosition).to.eql({
             column: 14,
-            line: 3,
+            line: 2,
             name: null,
             source: 'entry.st.css',
         });
         expect(cOriginalPosition).to.eql({
             column: 6,
-            line: 6,
+            line: 5,
             name: null,
             source: 'entry.st.css',
         });
         expect(dOriginalPosition).to.eql({
             column: 15,
-            line: 5,
+            line: 4,
             name: null,
             source: 'entry.st.css',
         });
         expect(eOriginalPosition).to.eql({
             column: 15,
-            line: 4,
+            line: 3,
             name: null,
             source: 'entry.st.css',
         });

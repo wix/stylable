@@ -1,4 +1,4 @@
-import { nativePseudoClasses, pseudoStates } from '@stylable/core';
+import { nativePseudoClasses, STCustomState } from '@stylable/core/dist/index-internal';
 import {
     parseCssSelector,
     stringifySelectorAst,
@@ -23,19 +23,22 @@ export const OVERRIDE_STATE_PREFIX = 'stylable-force-state-';
 
 const { hasOwnProperty } = Object.prototype;
 
-export const MATCH_STATE_CLASS = new RegExp(`^(.+?)${pseudoStates.booleanStateDelimiter}(.+)`);
+export const MATCH_STATE_CLASS = new RegExp(
+    `^(.+?)${STCustomState.delimiters.booleanStateDelimiter}(.+)`
+);
 export const MATCH_STATE_ATTR = new RegExp(
-    `^class~="(.+?)${pseudoStates.booleanStateDelimiter}(.+)"`
+    `^class~="(.+?)${STCustomState.delimiters.booleanStateDelimiter}(.+)"`
 );
 
 export function createDataAttr(dataAttrPrefix: string, stateName: string, param?: string) {
-    const paramWithValueExtraDil = param !== undefined ? pseudoStates.stateMiddleDelimiter : '';
-    const statePart = param !== undefined ? pseudoStates.resolveStateParam(param) : '';
+    const paramWithValueExtraDil =
+        param !== undefined ? STCustomState.delimiters.stateMiddleDelimiter : '';
+    const statePart = param !== undefined ? STCustomState.resolveStateParam(param) : '';
     return `${dataAttrPrefix}${paramWithValueExtraDil}${stateName}${statePart}`;
 }
 
 export function applyStylableForceStateSelectors(
-    outputAst: postcss.Root,
+    targetAst: postcss.Root,
     namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean) = {},
     dataPrefix = OVERRIDE_STATE_PREFIX,
     plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext = (id) => id
@@ -47,7 +50,7 @@ export function applyStylableForceStateSelectors(
 
     const mapping: Record<string, string> = {};
     addForceStateSelectors(
-        outputAst,
+        targetAst,
         plugin({
             getForceStateAttrContentFromNative(name) {
                 return this.getForceStateAttrContent(name);

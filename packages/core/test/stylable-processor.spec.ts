@@ -1,8 +1,8 @@
 import { resolve } from 'path';
 import chai, { expect } from 'chai';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
-import { processNamespace, processorWarnings } from '@stylable/core';
-import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/native-reserved-lists';
+import { processNamespace } from '@stylable/core';
+import { knownPseudoClassesWithNestedSelectors } from '@stylable/core/dist/index-internal';
 
 chai.use(flatMatch);
 
@@ -11,86 +11,9 @@ describe('Stylable postcss process', () => {
         const { diagnostics, namespace } = processSource(``);
         expect(namespace).to.equal('s0');
         expect(diagnostics.reports[0]).to.include({
-            type: 'error',
+            severity: 'error',
             message: 'missing source filename',
         });
-    });
-
-    it('report on invalid namespace', () => {
-        const { diagnostics } = processSource(`@namespace App;`, { from: '/path/to/source' });
-
-        expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.INVALID_NAMESPACE_DEF(),
-        });
-    });
-
-    it('warn on empty-ish namespace', () => {
-        const { diagnostics } = processSource(`@namespace '   ';`, { from: '/path/to/source' });
-
-        expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.EMPTY_NAMESPACE_DEF(),
-        });
-    });
-
-    it('error on invalid rule nesting', () => {
-        const { diagnostics } = processSource(
-            `
-            .x{
-                .y{}
-            }
-        
-        `,
-            { from: '/path/to/source' }
-        );
-
-        expect(diagnostics.reports[0]).to.include({
-            type: 'error',
-            message: processorWarnings.INVALID_NESTING('.y', '.x'),
-        });
-    });
-
-    it('collect namespace', () => {
-        const from = resolve('/path/to/style.css');
-        const result = processSource(
-            `
-            @namespace "name";
-            @namespace 'anther-name';
-        `,
-            { from }
-        );
-
-        expect(result.namespace).to.equal(processNamespace('anther-name', from));
-    });
-
-    it('resolve namespace hook', () => {
-        const from = resolve('/path/to/style.css');
-        const result = processSource(
-            `
-            @namespace "name";
-        `,
-            { from },
-            (s) => 'Test-' + s
-        );
-
-        expect(result.namespace).to.equal('Test-name');
-    });
-
-    it('use filename as default namespace prefix', () => {
-        const from = resolve('/path/to/style.st.css');
-        const distFrom = resolve('/dist/path/to/style.st.css');
-
-        const result = processSource(
-            `
-            /* st-namespace-reference="../../../path/to/style.st.css" */\n
-        `,
-            { from: distFrom }
-        );
-
-        // assure namespace generated with st-namespace-reference
-        // is identical between source and dist with the relative correction
-        expect(result.namespace).to.eql(processNamespace('style', from));
     });
 
     it('use filename as default namespace prefix (empty)', () => {
@@ -110,14 +33,14 @@ describe('Stylable postcss process', () => {
         const result = processSource(
             `
             :import {
-                -st-from: './file.css';
+                -st-from: './file.st.css';
                 -st-default: Style;
             }
             .myclass {
                 -st-extends: Style;
             }
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -129,7 +52,7 @@ describe('Stylable postcss process', () => {
                     type: 'default',
                     import: {
                         // from: '/path/to/file.css',
-                        request: './file.css',
+                        request: './file.st.css',
                         defaultExport: 'Style',
                     },
                 },
@@ -151,7 +74,7 @@ describe('Stylable postcss process', () => {
                 )
                 .join(``)}
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         // unknown pseudo-class
@@ -174,7 +97,7 @@ describe('Stylable postcss process', () => {
             `
 
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         expect(result.getAllClasses()).to.eql({
@@ -196,7 +119,7 @@ describe('Stylable postcss process', () => {
             :not(.classD){}
             .classE:hover{}
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         expect(Object.keys(result.getAllClasses()).length).to.eql(6);
@@ -213,7 +136,7 @@ describe('Stylable postcss process', () => {
                 .classE:hover{}
             }
         `,
-            { from: 'path/to/style.css' }
+            { from: 'path/to/style.st.css' }
         );
 
         expect(Object.keys(result.getAllClasses()).length).to.eql(6);
@@ -227,7 +150,7 @@ describe('Stylable postcss process', () => {
                     img: url('./x.svg');
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: 'path/to/style.st.css' }
             );
 
             expect(result.urls.length).to.eql(1);

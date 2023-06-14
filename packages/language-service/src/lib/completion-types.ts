@@ -1,4 +1,6 @@
+import type { StylableSymbol } from '@stylable/core';
 import type { ProviderRange } from './completion-providers';
+import { stringifySelectorAst } from '@tokey/css-selector-parser';
 
 export class Completion {
     constructor(
@@ -16,6 +18,16 @@ export class Snippet {
     constructor(public source: string) {}
 }
 
+export function range(
+    pos: { line: number; character: number },
+    { deltaStart = 0, deltaEnd = 0 }: { deltaStart?: number; deltaEnd?: number } = {}
+) {
+    return {
+        start: { line: pos.line, character: pos.character + deltaStart },
+        end: { line: pos.line, character: pos.character + deltaEnd },
+    };
+}
+
 export const importDirectives = {
     from: `-st-from`,
     default: `-st-default`,
@@ -30,7 +42,7 @@ export const rulesetDirectives = {
 
 export const topLevelDirectives = {
     root: '.root' as const,
-    namespace: '@namespace' as const,
+    namespace: '@st-namespace' as const,
     customSelector: '@custom-selector :--' as const,
     vars: ':vars' as const,
     import: ':import' as const,
@@ -116,7 +128,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 topLevelDirectives.namespace,
                 'Declare a namespace for the file',
                 'a',
-                new Snippet('@namespace "$1";\n'),
+                new Snippet('@st-namespace "$1";\n'),
                 rng
             );
         case topLevelDirectives.customSelector:
@@ -213,6 +225,105 @@ export function namedCompletion(
         rng
     );
 }
+
+export function stImportNamedCompletion({
+    originSymbol,
+    jsValue,
+    localName,
+    rng,
+    relativePath,
+}: {
+    localName: string;
+    rng: ProviderRange;
+    relativePath: string;
+    originSymbol?: StylableSymbol;
+    jsValue?: any;
+}) {
+    const detail = stImportNamedCompletion.detail({ relativePath, symbol: originSymbol, jsValue });
+    return new Completion(localName, detail, 'a', new Snippet(localName), rng);
+}
+stImportNamedCompletion.detail = ({
+    relativePath,
+    symbol,
+    jsValue,
+}: {
+    relativePath: string;
+    symbol?: Partial<StylableSymbol>;
+    jsValue?: any;
+}) => {
+    if (symbol) {
+        switch (symbol?._kind) {
+            case 'class': {
+                const global = symbol['-st-global']
+                    ? `=> "${stringifySelectorAst(symbol['-st-global'][0])}"`
+                    : '';
+                return `.${symbol.name} ${global} from '${relativePath}'`;
+            }
+            case 'cssVar': {
+                const global = symbol.global ? 'global ' : '';
+                return `.${symbol.name} (${global}custom property) from '${relativePath}'`;
+            }
+            case 'var':
+                return `${symbol.name}: \`${
+                    symbol.text || ''
+                }\` (build var) from '${relativePath}'`;
+            case 'element':
+                return `${symbol.name} (type selector) from '${relativePath}'`;
+            case 'keyframes': {
+                const global = symbol.global ? 'global ' : '';
+                return `${symbol.name} (${global}keyframes) from '${relativePath}'`;
+            }
+            case 'layer': {
+                const global = symbol.global ? 'global ' : '';
+                return `${symbol.name} (${global}layer) from '${relativePath}'`;
+            }
+            case 'container': {
+                const global = symbol.global ? 'global ' : '';
+                return `${symbol.name} (${global}container) from '${relativePath}'`;
+            }
+        }
+    } else if (jsValue) {
+        const type = typeof jsValue;
+        if (type === 'function') {
+            const originName = (jsValue as Function).name || '';
+            if (originName) {
+                return `${originName}() from '${relativePath}'`;
+            }
+        } else if (type === 'string') {
+            return `"${jsValue}" from '${relativePath}'`;
+        } else {
+            return `${jsValue.toString()} from '${relativePath}'`;
+        }
+    }
+    return `from: ${relativePath}`;
+};
+
+stImportNamedCompletion.typeAssertCall = ({
+    localName,
+    rng,
+}: Parameters<typeof stImportNamedCompletion>[0]) => {
+    const detail = stImportNamedCompletion.typeAssertCallDetail(localName);
+    const triggerCompletion = true;
+    return new Completion(
+        localName + '()',
+        detail,
+        'a',
+        new Snippet(`${localName}($1)`),
+        rng,
+        triggerCompletion
+    );
+};
+stImportNamedCompletion.typeAssertCallDetail = (type: string) => {
+    switch (type) {
+        case 'keyframes':
+            return '@keyframes definitions';
+        case 'layer':
+            return '@layer definitions';
+        case 'container':
+            return 'container query name definitions';
+    }
+    return '';
+};
 
 export function cssMixinCompletion(symbolName: string, rng: ProviderRange, from: string) {
     return new Completion(symbolName, 'from: ' + from, 'a', new Snippet(symbolName), rng);

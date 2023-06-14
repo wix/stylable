@@ -3,6 +3,7 @@ import {
     stringifySelectorAst,
     walk,
     SelectorNode,
+    PseudoClass,
     Selector,
     SelectorList,
     FunctionalSelector,
@@ -11,6 +12,7 @@ import {
     Invalid,
     ImmutableSelectorList,
     ImmutableSelectorNode,
+    Combinator,
 } from '@tokey/css-selector-parser';
 import cloneDeep from 'lodash.clonedeep';
 
@@ -41,6 +43,10 @@ export function parseSelectorWithCache(
     return options.clone
         ? (cloneDeep(cachedValue) as SelectorList)
         : (cachedValue as ImmutableSelectorList);
+}
+
+export function cloneSelector<T extends Selector | SelectorList>(s: T): T {
+    return cloneDeep(s);
 }
 
 /**
@@ -110,6 +116,36 @@ export function convertToSelector(node: SelectorNode): Selector {
     // ToDo: should this fix castedNode.end?
     return castedNode;
 }
+export function convertToPseudoClass(
+    node: SelectorNode,
+    name: string,
+    nestedSelectors?: SelectorList
+): PseudoClass {
+    const castedNode = node as PseudoClass;
+    castedNode.type = 'pseudo_class';
+    castedNode.value = name;
+    castedNode.colonComments = [];
+    if (nestedSelectors) {
+        castedNode.nodes = nestedSelectors;
+    } else {
+        delete castedNode.nodes;
+    }
+    return castedNode;
+}
+
+export function createCombinatorSelector(partial: Partial<Combinator>): Combinator {
+    const type = partial.combinator || 'space';
+    return {
+        type: `combinator`,
+        combinator: type,
+        value: partial.value ?? (type === 'space' ? ` ` : type),
+        before: partial.before ?? ``,
+        after: partial.after ?? ``,
+        start: partial.start ?? 0,
+        end: partial.end ?? 0,
+        invalid: partial.invalid ?? false,
+    };
+}
 
 export function isInPseudoClassContext(parents: ReadonlyArray<ImmutableSelectorNode>) {
     for (const parent of parents) {
@@ -127,41 +163,11 @@ export function matchTypeAndValue(
     return a.type === b.type && (a as any).value === (b as any).value;
 }
 
-export function isRootValid(ast: ImmutableSelectorList) {
-    let isValid = true;
-    walk(ast, (node, index, nodes) => {
-        if (node.type === 'pseudo_class') {
-            return walk.skipNested;
-        }
-        if (node.type === 'class' && node.value === `root`) {
-            let isLastScopeGlobal = false;
-            for (let i = 0; i < index; i++) {
-                const part = nodes[i];
-                if (isGlobal(part)) {
-                    isLastScopeGlobal = true;
-                }
-                if (part.type === 'combinator' && !isLastScopeGlobal) {
-                    isValid = false;
-                    return walk.skipCurrentSelector;
-                }
-                if (part.type === 'type' || (part.type === 'class' && part.value !== 'root')) {
-                    isLastScopeGlobal = false;
-                }
-            }
-        }
-        return undefined;
-    });
-    return isValid;
-}
-
-function isGlobal(node: ImmutableSelectorNode) {
-    return node.type === 'pseudo_class' && node.value === 'global';
-}
-
 export function isCompRoot(name: string) {
     return name.charAt(0).match(/[A-Z]/);
 }
 
+const isNestedNode = (node: SelectorNode) => node.type === 'nesting';
 /**
  * combine 2 selector lists.
  * - add each scoping selector at the begging of each nested selector
@@ -170,7 +176,8 @@ export function isCompRoot(name: string) {
 export function scopeNestedSelector(
     scopeSelectorAst: ImmutableSelectorList,
     nestedSelectorAst: ImmutableSelectorList,
-    rootScopeLevel = false
+    rootScopeLevel = false,
+    isAnchor: (node: SelectorNode) => boolean = isNestedNode
 ): { selector: string; ast: SelectorList } {
     const resultSelectors: SelectorList = [];
     nestedSelectorAst.forEach((targetAst) => {
@@ -198,7 +205,7 @@ export function scopeNestedSelector(
                 : false;
             let nestedMixRoot = false;
             walkSelector(outputAst, (node, i, nodes) => {
-                if (node.type === 'nesting') {
+                if (isAnchor(node)) {
                     nestedMixRoot = true;
                     nodes.splice(i, 1, {
                         type: `selector`,

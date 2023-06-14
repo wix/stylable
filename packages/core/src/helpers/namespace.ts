@@ -1,7 +1,8 @@
 import { murmurhash3_32_gc } from '../murmurhash';
 
-export function namespace(name: string, namespace: string, delimiter = '__') {
-    return namespace ? namespace + delimiter + name : name;
+export const namespaceDelimiter = '__';
+export function namespace(name: string, namespace: string) {
+    return namespace ? namespace + namespaceDelimiter + name : name;
 }
 
 export interface PackageInfo {

@@ -11,10 +11,11 @@ import {
     Selector,
     ImmutableSelectorNode,
     groupCompoundSelectors,
+    SelectorList,
+    SelectorNode,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
-import { ignoreDeprecationWarn } from './deprecation';
-import type { SRule } from '../deprecated/postcss-ast-extension';
+import { transformInlineCustomSelectors } from './custom-selector';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     return !!(
@@ -34,65 +35,40 @@ export function isInConditionalGroup(node: postcss.Rule | postcss.AtRule, includ
     );
 }
 
-export function createWarningRule(
-    extendedNode: string,
-    scopedExtendedNode: string,
-    extendedFile: string,
-    extendingNode: string,
-    scopedExtendingNode: string,
-    extendingFile: string,
-    useScoped = false
-) {
-    const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
-    return postcss.rule({
-        selector: `.${useScoped ? scopedExtendingNode : extendingNode}:not(.${
-            useScoped ? scopedExtendedNode : extendedNode
-        })::before`,
-        nodes: [
-            postcss.decl({
-                prop: 'content',
-                value: message,
-            }),
-            postcss.decl({
-                prop: 'display',
-                value: `block !important`,
-            }),
-            postcss.decl({
-                prop: 'font-family',
-                value: `monospace !important`,
-            }),
-            postcss.decl({
-                prop: 'background-color',
-                value: `red !important`,
-            }),
-            postcss.decl({
-                prop: 'color',
-                value: `white !important`,
-            }),
-        ],
-    });
-}
-
-export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
-    root: postcss.Root | postcss.AtRule,
+export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcss.Rule>(
+    root: postcss.Root | postcss.AtRule | postcss.Rule,
     selectorPrefix: string,
     mixinTarget?: T,
-    isRoot = false
+    isRoot = false,
+    getCustomSelector?: (name: string) => SelectorList | undefined,
+    isNestedInMixin = false
 ): T {
     // keyframes on class mixin?
     const prefixSelectorList = parseSelectorWithCache(selectorPrefix);
     const prefixType = prefixSelectorList[0].nodes[0];
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
-
     root.nodes.forEach((node) => {
-        if (node.type === `rule`) {
+        if (node.type === 'decl') {
+            mixinTarget?.append(node.clone());
+        } else if (
+            node.type === `rule` &&
+            (node.selector === ':vars' || node.selector === ':import')
+        ) {
+            // nodes that don't mix
+            return;
+        } else if (node.type === `rule`) {
             const selectorAst = parseSelectorWithCache(node.selector, { clone: true });
-            const ast = isRoot
+            let ast = isRoot
                 ? scopeNestedSelector(prefixSelectorList, selectorAst, true).ast
                 : selectorAst;
-
-            const matchesSelectors = isRoot ? ast : ast.filter((node) => containsPrefix(node));
+            if (getCustomSelector) {
+                ast = transformInlineCustomSelectors(ast, getCustomSelector, () => {
+                    /*don't report*/
+                });
+            }
+            const matchesSelectors =
+                isRoot || isNestedInMixin ? ast : ast.filter((node) => containsPrefix(node));
 
             if (matchesSelectors.length) {
                 const selector = stringifySelector(
@@ -100,23 +76,59 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                         if (!isRoot) {
                             selectorNode = fixChunkOrdering(selectorNode, prefixType);
                         }
-                        replaceTargetWithNesting(selectorNode, prefixType);
+                        replaceTargetWithMixinAnchor(selectorNode, prefixType);
                         return selectorNode;
                     })
                 );
 
-                mixinRoot.append(node.clone({ selector }));
+                const clonedRule = createSubsetAst(
+                    node,
+                    selectorPrefix,
+                    node.clone({ selector, nodes: [] }),
+                    isRoot,
+                    getCustomSelector,
+                    true /*isNestedInMixin*/
+                );
+                mixinRoot.append(clonedRule);
             }
         } else if (node.type === `atrule`) {
-            if (node.name === 'media' || node.name === 'supports') {
+            if (
+                node.name === 'media' ||
+                node.name === 'supports' ||
+                node.name === 'st-scope' ||
+                node.name === 'layer' ||
+                node.name === 'container'
+            ) {
+                let scopeSelector = node.name === 'st-scope' ? node.params : '';
+                let isNestedInMixin = false;
+                if (scopeSelector) {
+                    const ast = parseSelectorWithCache(scopeSelector, { clone: true });
+                    const matchesSelectors = isRoot
+                        ? ast
+                        : ast.filter((node) => containsPrefix(node));
+                    if (matchesSelectors.length) {
+                        isNestedInMixin = true;
+                        scopeSelector = stringifySelector(
+                            matchesSelectors.map((selectorNode) => {
+                                if (!isRoot) {
+                                    selectorNode = fixChunkOrdering(selectorNode, prefixType);
+                                }
+                                replaceTargetWithMixinAnchor(selectorNode, prefixType);
+                                return selectorNode;
+                            })
+                        );
+                    }
+                }
                 const atRuleSubset = createSubsetAst(
                     node,
                     selectorPrefix,
                     postcss.atRule({
-                        params: node.params,
+                        params: scopeSelector || node.params,
                         name: node.name,
                     }),
-                    isRoot
+                    isRoot,
+                    getCustomSelector,
+                    isNestedInMixin
                 );
                 if (atRuleSubset.nodes) {
                     mixinRoot.append(atRuleSubset);
@@ -132,13 +144,16 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     return mixinRoot as T;
 }
 
-function replaceTargetWithNesting(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
+export const stMixinMarker = 'st-mixin-marker';
+export const isStMixinMarker = (node: SelectorNode) =>
+    node.type === 'attribute' && node.value === stMixinMarker;
+function replaceTargetWithMixinAnchor(selectorNode: Selector, prefixType: ImmutableSelectorNode) {
     walkSelector(selectorNode, (node) => {
         if (matchTypeAndValue(node, prefixType)) {
             convertToSelector(node).nodes = [
                 {
-                    type: `nesting`,
-                    value: `&`,
+                    type: `attribute`,
+                    value: stMixinMarker,
                     start: node.start,
                     end: node.end,
                 },
@@ -214,8 +229,4 @@ export function findRule(
         }
     });
     return found;
-}
-
-export function getRuleScopeSelector(rule: postcss.Rule) {
-    return ignoreDeprecationWarn(() => (rule as SRule).stScopeSelector);
 }

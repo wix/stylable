@@ -4,7 +4,6 @@ module.exports.baseConfig = () => {
         mode: 'development',
         resolve: {
             alias: {
-                jsdom: require.resolve('./jsdom-browser.js'),
                 path: require.resolve('@file-services/path'),
             },
             fallback: {

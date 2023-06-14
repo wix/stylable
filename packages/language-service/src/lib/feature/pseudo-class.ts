@@ -4,14 +4,18 @@ import type {
     SignatureHelp,
     SignatureInformation,
 } from 'vscode-languageserver';
-import { StateParsedValue, systemValidators } from '@stylable/core';
+import {
+    StateParsedValue,
+    STCustomState,
+    TemplateStateParsedValue,
+} from '@stylable/core/dist/index-internal';
 import type { ProviderPosition } from '../completion-providers';
 
 // Goes over an '-st-states' declaration value
 // parses the state and position to resolve if inside a state with a parameter
 // returns: `-st-states: someState([1] str[2]ing([a] re[b]gex( [args] ) [c]) [3])
 // caret positions:
-// 1, 2, 3 - requires typing information (string, number, enum, tag)
+// 1, 2, 3 - requires typing information (string, number, enum)
 // a, b, c - require validator informationbased on type defined
 // args - TODO: should return validator function information
 export function resolveStateTypeOrValidator(
@@ -154,7 +158,7 @@ function isValidatorsHintingRequired(
 }
 
 export function createStateValidatorSignature(type: string) {
-    const valiadtors = systemValidators[type].subValidators;
+    const valiadtors = STCustomState.systemValidators[type].subValidators;
 
     if (valiadtors) {
         const validatorsString = Object.keys(valiadtors).join(', ');
@@ -174,7 +178,7 @@ export function createStateValidatorSignature(type: string) {
 }
 
 export function createStateTypeSignature() {
-    const stateTypes = Object.keys(systemValidators).join(' | ');
+    const stateTypes = Object.keys(STCustomState.systemValidators).join(' | ');
     const sigInfo: SignatureInformation = {
         label: `Supported state types:\n- "${stateTypes}"`,
         parameters: [{ label: stateTypes }] as ParameterInformation[],
@@ -201,9 +205,11 @@ export function isBetweenLengths(location: number, length: number, modifier: { l
     return location >= length && location <= length + modifier.length;
 }
 
-export function resolveStateParams(stateDef: StateParsedValue) {
+export function resolveStateParams(stateDef: StateParsedValue | TemplateStateParsedValue): string {
     const typeArguments: string[] = [];
-    if (stateDef.arguments.length > 0) {
+    if (STCustomState.isTemplateState(stateDef)) {
+        return resolveStateParams(stateDef.params[0]);
+    } else if (stateDef.arguments.length > 0) {
         stateDef.arguments.forEach((arg) => {
             if (typeof arg === 'object') {
                 if (arg.args.length > 0) {

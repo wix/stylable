@@ -1,11 +1,12 @@
 import { matchDiagnostic } from './diagnostics';
-import type { StylableMeta } from '@stylable/core';
+import type { Diagnostic, StylableMeta } from '@stylable/core';
 import type * as postcss from 'postcss';
 
 interface Test {
     type: TestScopes;
     expectation: string;
     errors: string[];
+    hasMissingDiagnostic: boolean;
 }
 
 type AST = postcss.Rule | postcss.AtRule | postcss.Declaration;
@@ -23,7 +24,10 @@ const testScopes = Object.keys(tests) as TestScopes[];
 const testScopesRegex = () => testScopes.join(`|`);
 
 interface Context {
-    meta: Pick<StylableMeta, 'outputAst' | 'rawAst' | 'diagnostics' | 'transformDiagnostics'>;
+    meta: Pick<
+        StylableMeta,
+        'source' | 'sourceAst' | 'targetAst' | 'diagnostics' | 'transformDiagnostics'
+    >;
 }
 const isRoot = (val: any): val is postcss.Root => val.type === `root`;
 
@@ -65,14 +69,15 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
     const context = isDeprecatedInput
         ? {
               meta: {
-                  outputAst: result,
-                  rawAst: result,
+                  source: '/undefined.st.css',
+                  sourceAst: result,
+                  targetAst: result,
                   diagnostics: null as unknown as StylableMeta['diagnostics'],
                   transformDiagnostics: null as unknown as StylableMeta['transformDiagnostics'],
               },
           }
         : result;
-    const rootAst = context.meta.rawAst;
+    const rootAst = context.meta.sourceAst;
     const expectedTestAmount =
         expectedTestInput ??
         (rootAst.toString().match(new RegExp(`${testScopesRegex()}`, `gm`))?.length || 0);
@@ -116,6 +121,7 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
                                         testScope + testInput
                                     ),
                                 ],
+                                hasMissingDiagnostic: false,
                             };
                             errors.push(...result.errors);
                             checks.push(result);
@@ -136,6 +142,9 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
         }
     });
     // report errors
+    if (checks.find((error) => error.hasMissingDiagnostic)) {
+        errors.push(testInlineExpectsErrors.diagnosticsDump(context.meta));
+    }
     if (errors.length) {
         throw new Error(testInlineExpectsErrors.combine(errors));
     }
@@ -163,6 +172,7 @@ function checkTest(
                 type: `@check`,
                 expectation,
                 errors: [testInlineExpectsErrors.unsupportedNode(`@check`, type)],
+                hasMissingDiagnostic: false,
             };
     }
 }
@@ -176,6 +186,7 @@ function ruleTest(
         type: `@rule`,
         expectation,
         errors: [],
+        hasMissingDiagnostic: false,
     };
     const { msg, ruleIndex, expectedSelector, expectedBody } = expectation.match(
         /(?<msg>\([^)]*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
@@ -273,6 +284,7 @@ function atRuleTest(
         type: `@atrule`,
         expectation,
         errors: [],
+        hasMissingDiagnostic: false,
     };
     const { msg, expectedParams } = expectation.match(/(?<msg>\([^)]*\))*(?<expectedParams>.*)/)!
         .groups!;
@@ -309,16 +321,18 @@ function declTest(
         type: `@decl`,
         expectation,
         errors: [],
+        hasMissingDiagnostic: false,
     };
-    let { label, prop, value } = expectation.match(
-        /(?<label>\([^)]*\))*(?<prop>[^:]*)\s*:?\s*(?<value>.*)/
+    // eslint-disable-next-line prefer-const
+    let { label, prop, colon, value } = expectation.match(
+        /(?<label>\([^)]*\))*(?<prop>[^:]*)\s*(?<colon>:?)\s*(?<value>.*)/
     )!.groups!;
     label = label ? label + `: ` : ``;
     prop = prop.trim();
     value = value.trim();
     if (!targetNode) {
         result.errors.push(testInlineExpectsErrors.removedNode(srcNode.type, label));
-    } else if (!prop || !value) {
+    } else if (!prop || !colon) {
         result.errors.push(testInlineExpectsErrors.declMalformed(prop, value, label));
     } else if (targetNode.type === `decl`) {
         if (targetNode.prop !== prop.trim() || targetNode.value !== value) {
@@ -361,6 +375,7 @@ function transformTest(
             type: `@transform`,
             expectation,
             errors: isRemoved ? [] : [testInlineExpectsErrors.transformRemoved(node.type, label)],
+            hasMissingDiagnostic: false,
         };
     }
     // check transform diagnostics
@@ -377,6 +392,7 @@ function diagnosticTest(
         type: `@${type}`,
         expectation,
         errors: [],
+        hasMissingDiagnostic: false,
     };
     const matchResult = expectation.match(
         /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>[\s\S]*)/
@@ -416,7 +432,10 @@ function diagnosticTest(
             locationMismatch: testInlineExpectsErrors.diagnosticsLocationMismatch,
             wordMismatch: testInlineExpectsErrors.diagnosticsWordMismatch,
             severityMismatch: testInlineExpectsErrors.diagnosticsSeverityMismatch,
-            expectedNotFound: testInlineExpectsErrors.diagnosticExpectedNotFound,
+            expectedNotFound: (...args) => {
+                result.hasMissingDiagnostic = true;
+                return testInlineExpectsErrors.diagnosticExpectedNotFound(...args);
+            },
         }
     );
     if (error) {
@@ -427,10 +446,10 @@ function diagnosticTest(
 
 function getTargetComment(meta: Context['meta'], { source }: postcss.Comment) {
     let match: postcss.Comment | undefined = undefined;
-    if (!meta.outputAst) {
+    if (!meta.targetAst) {
         return;
     }
-    meta.outputAst.walkComments((outputComment) => {
+    meta.targetAst.walkComments((outputComment) => {
         if (
             outputComment.source?.start?.offset === source?.start?.offset &&
             outputComment.source?.end?.offset === source?.end?.offset
@@ -485,10 +504,8 @@ export const testInlineExpectsErrors = {
     declMalformed: (expectedProp: string, expectedLabel: string, label = ``) => {
         if (!expectedProp && !expectedLabel) {
             return `${label}malformed declaration expectation, format should be: "prop: value"`;
-        } else if (!expectedProp) {
-            return `${label}malformed declaration expectation missing prop: "???: ${expectedLabel}"`;
         } else {
-            return `${label}malformed declaration expectation missing value: "${expectedProp}: ???"`;
+            return `${label}malformed declaration expectation missing prop: "???: ${expectedLabel}"`;
         }
     },
     deprecatedRootInputNotSupported: (expectation: string) =>
@@ -516,4 +533,36 @@ export const testInlineExpectsErrors = {
     diagnosticExpectedNotFound: (type: string, message: string, label = ``) =>
         `${label}no "${type}" diagnostic found for "${message}"`,
     combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
+    diagnosticsDump: ({ source, diagnostics, transformDiagnostics }: Context['meta']) => {
+        const transformReport = (diagnostics: Diagnostic[]) => {
+            return JSON.stringify(
+                diagnostics.map((diagnostic) => {
+                    const node = diagnostic.node.clone();
+                    if ('nodes' in node) {
+                        (node as any).nodes = [];
+                    }
+                    return {
+                        ...diagnostic,
+                        node: node.toString(),
+                    };
+                }),
+                null,
+                2
+            );
+        };
+        const analyzedReports = transformReport(diagnostics.reports);
+        const transformReports = transformDiagnostics
+            ? transformReport(transformDiagnostics.reports)
+            : 'not transformed';
+
+        return [
+            `********* Diagnostics DUMP *********`,
+            `Diagnostics found in ${source}:`,
+            ' - analyze:',
+            analyzedReports,
+            ' - transform:',
+            transformReports,
+            '***********************************',
+        ].join('\n');
+    },
 };

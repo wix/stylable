@@ -1,5 +1,6 @@
 /* eslint-disable no-var */
 import type { Host, StateMap, StateValue } from './types';
+export { injectCSS, statesRuntime, classesRuntime } from './pure';
 
 export function stylesheet(host?: Host) {
     host = host || {};

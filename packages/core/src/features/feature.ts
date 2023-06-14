@@ -21,6 +21,7 @@ export interface FeatureTransformContext extends FeatureContext {
     resolver: StylableResolver;
     evaluator: StylableEvaluator;
     getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols;
+    passedThrough?: string[];
 }
 
 export interface NodeTypes {
@@ -37,16 +38,28 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
     analyzeAtRule: (options: {
         context: FeatureContext;
         atRule: postcss.AtRule;
-        analyzeRule: (rule: postcss.Rule, options: { isScoped: boolean }) => boolean;
+        analyzeRule: (
+            rule: postcss.Rule,
+            options: { isScoped: boolean; originalNode: postcss.AtRule | postcss.Rule }
+        ) => boolean;
     }) => void;
     analyzeSelectorNode: (options: {
         context: FeatureContext;
         node: T['IMMUTABLE_SELECTOR'];
+        topSelectorIndex: number;
         rule: postcss.Rule;
+        originalNode: postcss.AtRule | postcss.Rule; // used by rules generated from at-rules
         walkContext: SelectorNodeContext;
     }) => SelectorWalkReturn;
+    analyzeSelectorDone: (options: {
+        context: FeatureContext;
+        rule: postcss.Rule;
+        originalNode: postcss.AtRule | postcss.Rule; // used by rules generated from at-rules
+    }) => SelectorWalkReturn;
     analyzeDeclaration: (options: { context: FeatureContext; decl: postcss.Declaration }) => void;
+    analyzeDone: (context: FeatureContext) => void;
     prepareAST: (options: {
+        context: FeatureTransformContext;
         node: postcss.ChildNode;
         toRemove: Array<postcss.Node | (() => void)>;
     }) => void;
@@ -56,12 +69,14 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         context: FeatureTransformContext;
         atRule: postcss.AtRule;
         resolved: T['RESOLVED'];
+        // ToDo: move to FeatureTransformContext
+        transformer: StylableTransformer;
     }) => void;
     transformSelectorNode: (options: {
         context: FeatureTransformContext;
         node: T['SELECTOR'];
         selectorContext: Required<ScopeContext>;
-    }) => void;
+    }) => boolean | void;
     transformDeclaration: (options: {
         context: FeatureTransformContext;
         decl: postcss.Declaration;
@@ -94,7 +109,13 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
     analyzeSelectorNode() {
         /**/
     },
+    analyzeSelectorDone() {
+        /**/
+    },
     analyzeDeclaration() {
+        /**/
+    },
+    analyzeDone() {
         /**/
     },
     prepareAST() {

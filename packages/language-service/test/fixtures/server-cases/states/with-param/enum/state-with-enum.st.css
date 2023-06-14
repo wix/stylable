@@ -1,7 +1,0 @@
-.root {
-    -st-states: hello(enum(bob, alice, eve)), otherState;
-}
-
-.root .part {
-
-}

@@ -34,7 +34,7 @@ After installing `@stylable/cli`, the `stc` command will be available, running `
 | `--srcDir`                |        | source directory relative to root                                                      | `./`             |
 | `--outDir`                |        | target directory relative to root                                                      | `./`             |
 | `--indexFile`             |        | filename of the generated index                                                        | `false`          |
-| `--cjs`                   |        | output commonjs modules (`.js`)                                                        | `true`           |
+| `--cjs`                   |        | output commonjs modules (`.js`)                                                        | `false`          |
 | `--esm`                   |        | output esm modules (`.mjs`)                                                            | `false`          |
 | `--css`                   |        | output transpiled css files (`.css`)                                                   | `false`          |
 | `--stcss`                 |        | output stylable source files (`.st.css`)                                               | `false`          |
@@ -65,10 +65,10 @@ The `stc` configuration should be located in the `stylable.config.js` file under
 The CLI provides a helper method and type definitions to provide a better configuration experience.
 
 ```js
-const { typedConfiguration } = require('@stylable/cli');
+const { stcConfig } = require('@stylable/cli');
 
 // This can be an object or a method that returns an object.
-exports.stcConfig = typedConfiguration({
+exports.stcConfig = stcConfig({
     options: {
         // BuildOptions
     }
@@ -85,7 +85,7 @@ export interface BuildOptions {
     outDir: string;
     /** should the build need to output manifest file */
     manifest?: string;
-    /** opt into build index file and specify the filepath for the generated index file */
+    /** generates Stylable index file for the given name, the index file will reference Stylable sources from the `srcDir` unless the `outputSources` option is `true` in which case it will reference the `outDir` */
     indexFile?: string;
     /** custom cli index generator class */
     IndexGenerator?: typeof IndexGenerator;
@@ -154,7 +154,7 @@ export class Generator extends Base {
     }    
     protected generateIndexSource(indexFileTargetPath: string) {
         const source = super.generateIndexSource(indexFileTargetPath);
-        return '@namespace "INDEX";\n' + source;
+        return '@st-namespace "INDEX";\n' + source;
     }
 }
 ```
@@ -186,9 +186,9 @@ export interface MultipleProjectsConfig<PRESET extends string> {
 
 > Example for simple monorepo with Stylable packages
 ```js
-const { typedConfiguration } = require('@stylable/cli');
+const { stcConfig } = require('@stylable/cli');
 
-exports.stcConfig = typedConfiguration({
+exports.stcConfig = stcConfig({
     options: {
         srcDir: './src',
         outDir: './dist',
@@ -303,6 +303,12 @@ After installing `@stylable/cli`, the `stc-format` command will be available, ru
 | `--help`                      | `h`   | Show help                                                     | `boolean`     |                               |
 | `--version`                   | `v`   | Show version number                                           | `boolean`     |                               |
 
+### Experimental formatter
+
+A new experimental formatter is available using the `--experimental` argument.
+
+Currently not all configuration is accepted by the new formatter, the supported formatting options arguments are `--endWithNewline`, `--indentSize`, and a new `--wrapLineLength`.
+
 ### Formatting the source directory
 
 ```sh
@@ -337,6 +343,8 @@ npx -p @stylable/cli stc-codemod --help
 > Note that this codemod does not preserve comments inside the `:import` 
 
 - `st-global-custom-property-to-at-property` - Convert deprecated `@st-global-custom-property *;` to `@property st-global(*);` syntax.
+
+- `namespace-to-st-namespace` - Converts `@namespace` that would have been used as Stylable namespace configuration to `@st-namespace`.
 
 ### Provide an external codemod
 

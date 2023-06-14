@@ -1,6 +1,8 @@
 import type { StylableConfig } from '@stylable/core';
+import { validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { stylableModuleFactory } from '@stylable/module-utils';
 import fs from 'fs';
+import { defaultStylableMatcher } from './common';
 import { resolveNamespace } from './resolve-namespace';
 
 export interface Options {
@@ -9,11 +11,10 @@ export interface Options {
     afterCompile?: (code: string, filename: string) => string;
     runtimePath?: string;
     ignoreJSModules?: boolean;
+    configPath?: string;
 }
 
 const HOOK_EXTENSION = '.css';
-
-const defaultStylableMatcher = (filename: string) => !!filename.match(/\.st\.css$/);
 
 export function attachHook({
     matcher,
@@ -21,7 +22,25 @@ export function attachHook({
     stylableConfig,
     runtimePath,
     ignoreJSModules,
+    configPath,
 }: Partial<Options> = {}) {
+    let options: Partial<StylableConfig> = {
+        ...stylableConfig,
+    };
+
+    try {
+        if (configPath) {
+            const { defaultConfig } = require(configPath);
+            const defaultConfigObj = defaultConfig(fs);
+
+            validateDefaultConfig(defaultConfigObj);
+
+            options = { ...defaultConfigObj, ...options };
+        }
+    } catch (e) {
+        throw new Error(`Failed to load Stylable config from ${configPath}:\n${e}`);
+    }
+
     const stylableToModule = stylableModuleFactory(
         {
             projectRoot: 'root',
@@ -29,7 +48,7 @@ export function attachHook({
             requireModule: require,
             resolveNamespace,
             resolverCache: new Map(),
-            ...stylableConfig,
+            ...options,
         },
         { runtimePath }
     );

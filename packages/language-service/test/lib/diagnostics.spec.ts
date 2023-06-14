@@ -3,7 +3,7 @@ import { Stylable } from '@stylable/core';
 import { safeParse } from '@stylable/core/dist/index-internal';
 import { StylableLanguageService } from '@stylable/language-service';
 import { expect } from 'chai';
-import deindent from 'deindent';
+import { deindent } from '@stylable/core-test-kit';
 import { createDiagnostics } from '../test-kit/diagnostics-setup';
 
 describe('diagnostics', () => {
@@ -12,19 +12,18 @@ describe('diagnostics', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: '.gaga .root{}',
+                [filePath]: '.root:unknown{}',
             },
             filePath
         );
 
         expect(diagnostics).to.deep.include({
             range: {
-                start: { line: 0, character: 0 },
+                start: { line: 0, character: 6 },
                 end: { line: 0, character: 13 },
             },
-            message:
-                '".root" class cannot be used after native elements or selectors external to the stylesheet',
-            severity: 2,
+            message: 'unknown pseudo-class "unknown"',
+            severity: 1,
             source: 'stylable',
         });
     });
@@ -32,13 +31,13 @@ describe('diagnostics', () => {
     it('should not duplicate diagnostics within multiple runs on the same file', () => {
         const filePath = '/style.st.css';
         const files = {
-            [filePath]: '.gaga .root{}',
+            [filePath]: '.root:unknown{}',
         };
         const fs = createMemoryFs(files);
 
         const stylableLSP = new StylableLanguageService({
             fs,
-            stylable: Stylable.create({
+            stylable: new Stylable({
                 fileSystem: fs,
                 requireModule: require,
                 projectRoot: '/',
@@ -78,7 +77,7 @@ describe('diagnostics', () => {
                 end: { line: 3, character: 44 },
             },
             message: `cannot resolve imported symbol "ninja" from stylesheet ".${filePathA}"`,
-            severity: 2,
+            severity: 1,
             source: 'stylable',
         });
     });
@@ -176,7 +175,7 @@ describe('diagnostics', () => {
 
             const diagnostics = createDiagnostics(
                 {
-                    [filePath]: deindent`
+                    [filePath]: deindent(`
                     @st-scope [div=rtl] {
                          .root {}
                     }
@@ -184,7 +183,7 @@ describe('diagnostics', () => {
                     @st-scope * {
                         .root {}
                     }
-                    `,
+                    `),
                 },
                 filePath
             );

@@ -1,10 +1,10 @@
 import { createDefaultLogger, Log } from './logger';
-import { Diagnostic, DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
+import { CLIDiagnostic, DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
 
 export type DiagnosticsMode = 'strict' | 'loose';
 
 interface ProcessDiagnostics {
-    diagnostics: Diagnostic[];
+    diagnostics: CLIDiagnostic[];
     diagnosticsMode?: DiagnosticsMode | undefined;
 }
 
@@ -68,7 +68,7 @@ export class DiagnosticsManager {
     public report() {
         let diagnosticMode: DiagnosticsMode = 'loose';
         const diagnosticMessages: DiagnosticMessages = new Map();
-        const collectedDiagnostics = new Map<string, Map<string, Diagnostic>>();
+        const collectedDiagnostics = new Map<string, Map<string, CLIDiagnostic>>();
 
         for (const buildDiagnostics of this.store.values()) {
             for (const [
@@ -88,7 +88,7 @@ export class DiagnosticsManager {
                 const ids = collectedDiagnostics.get(filePath)!;
 
                 for (const diagnostic of diagnostics) {
-                    const diagnosticId = `${diagnostic.type};${diagnostic.message}`;
+                    const diagnosticId = `${diagnostic.severity};${diagnostic.message}`;
                     if (!ids.has(diagnosticId)) {
                         ids.set(diagnosticId, diagnostic);
                         currentDiagnostics.push(ids.get(diagnosticId)!);

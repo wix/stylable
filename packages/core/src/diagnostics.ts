@@ -1,35 +1,48 @@
 import type * as postcss from 'postcss';
 
-export type DiagnosticType = 'error' | 'warning' | 'info';
+export type DiagnosticSeverity = 'error' | 'warning' | 'info';
+
+export interface DiagnosticBase {
+    severity: DiagnosticSeverity;
+    message: string;
+    code: string;
+}
+
+export interface DiagnosticContext {
+    node: postcss.Node;
+    word?: string;
+    filePath?: string;
+}
 
 export interface DiagnosticOptions {
     word?: string;
 }
 
-export interface Diagnostic {
-    type: DiagnosticType;
-    node: postcss.Node;
-    message: string;
-    options: DiagnosticOptions;
-}
+export type Diagnostic = DiagnosticBase & DiagnosticContext;
 
 export class Diagnostics {
     constructor(public reports: Diagnostic[] = []) {}
-    public add(
-        type: DiagnosticType,
-        node: postcss.Node,
-        message: string,
-        options: DiagnosticOptions = {}
-    ) {
-        this.reports.push({ type, node, message, options });
+    public report(diagnostic: DiagnosticBase, context: DiagnosticContext) {
+        const node = context.node;
+        this.reports.push({
+            filePath: node.source?.input.from,
+            ...diagnostic,
+            ...context,
+        });
     }
-    public error(node: postcss.Node, message: string, options?: DiagnosticOptions) {
-        this.add('error', node, message, options);
-    }
-    public warn(node: postcss.Node, message: string, options?: DiagnosticOptions) {
-        this.add('warning', node, message, options);
-    }
-    public info(node: postcss.Node, message: string, options?: DiagnosticOptions) {
-        this.add('info', node, message, options);
-    }
+}
+
+export function createDiagnosticReporter<T extends any[]>(
+    code: string,
+    severity: DiagnosticSeverity,
+    message: (...args: T) => string
+) {
+    const func = (...args: T): DiagnosticBase => {
+        return { code, severity, message: message(...args) };
+    };
+
+    func.code = code;
+    func.severity = severity;
+
+    return func;
 }

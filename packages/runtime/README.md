@@ -21,6 +21,8 @@ import {
     vars, 
     stVars, 
     keyframes, 
+    layers, 
+    containers, 
     cssStates 
 } from './local.st.css';
 ```
@@ -30,8 +32,10 @@ import {
 |`style`|utility function that returns a string to be used as a node class name for classes and states passed to it |
 |`classes`|an object mapping exported classes from their source name to their scoped name |
 |`vars`|an object mapping exported css custom properties (vars) from their source name to their scoped name |
-|`stVars`|an object mapping build time Stylable variables to their build time values (these cannot be overriden in runtime) |
+|`stVars`|an object mapping build time Stylable variables to their build time values (these cannot be overridden in runtime) |
 |`keyframes`|an object mapping exported keyframes from their source name to their scoped name |
+|`layers`|an object mapping exported layers from their source name to their scoped name |
+|`containers`|an object mapping exported containers from their source name to their scoped name |
 |`cssStates`|utility function that maps an object representing states and their values to a string with all required classes |
 
 #### Style utility function

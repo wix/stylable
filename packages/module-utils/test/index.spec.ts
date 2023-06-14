@@ -23,7 +23,7 @@ describe('Module Factory', () => {
         const testFile = '/entry.st.css';
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit(
             {
-                [testFile]: '.root {}',
+                [testFile]: '.root {background: red}',
             },
             { injectCSS: false }
         );
@@ -33,11 +33,13 @@ describe('Module Factory', () => {
         const exports = evalStylableModule(moduleSource, testFile);
 
         expect(exports).to.deep.include({
-            $css: '',
+            namespace: 'entry',
             classes: {
                 root: 'entry__root',
             },
         });
+        expect(moduleSource).to.not.match(/background/);
+        expect(moduleSource).to.not.match(/injectCSS/);
     });
 
     it('should create a module with cross file use', () => {
@@ -84,20 +86,19 @@ describe('Module Factory', () => {
 
         const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
 
-        const exports = evalStylableModule(moduleSource, testFile);
-        expect(Object.keys(exports as {}).sort()).to.eql(
+        const exports = evalStylableModule<{}>(moduleSource, testFile);
+        expect(Object.keys(exports).sort()).to.eql(
             [
                 'namespace',
                 'classes',
                 'keyframes',
+                'layers',
+                'containers',
                 'vars',
                 'stVars',
                 'cssStates',
                 'style',
                 'st',
-                '$id',
-                '$depth',
-                '$css',
             ].sort()
         );
     });

@@ -1,18 +1,21 @@
 import {
     Diagnostics,
-    FileProcessor,
-    postProcessor,
     processNamespace,
-    replaceValueHook,
     StylableMeta,
-    StylableResolver,
-    createStylableFileProcessor,
-    createDefaultResolver,
     Stylable,
     StylableConfig,
+    createDefaultResolver,
 } from '@stylable/core';
 import { createJavascriptRequireModule } from './test-stylable-core';
-import { process, StylableTransformer } from '@stylable/core/dist/index-internal';
+import {
+    FileProcessor,
+    StylableProcessor,
+    StylableResolver,
+    StylableTransformer,
+    createStylableFileProcessor,
+    postProcessor,
+    replaceValueHook,
+} from '@stylable/core/dist/index-internal';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
 import { createMemoryFs } from '@file-services/memory';
@@ -104,7 +107,9 @@ export function processSource(
     options: { from?: string } = {},
     resolveNamespace?: typeof processNamespace
 ) {
-    return process(postcss.parse(source, options), undefined, resolveNamespace);
+    return new StylableProcessor(new Diagnostics(), resolveNamespace).process(
+        postcss.parse(source, options)
+    );
 }
 
 export function createProcess(
@@ -126,7 +131,7 @@ export function generateStylableResult(
 }
 
 export function generateStylableRoot(config: Config) {
-    return generateStylableResult(config).meta.outputAst!;
+    return generateStylableResult(config).meta.targetAst!;
 }
 
 export function generateStylableExports(config: Config) {
@@ -139,7 +144,7 @@ export function generateStylableEnvironment(
 ) {
     const fs = createMemoryFs(content);
 
-    const stylable = Stylable.create({
+    const stylable = new Stylable({
         fileSystem: fs,
         projectRoot: '/',
         resolveNamespace: (ns) => ns,

@@ -217,7 +217,7 @@ describe('Signature Help', () => {
     describe('State with parameters', () => {
         describe('definition', () => {
             describe('type hinting', () => {
-                const types = ['string', 'number', 'enum', 'tag'];
+                const types = ['string', 'number', 'enum'];
 
                 types.forEach((str) =>
                     str.split('').forEach((_c, i) => {
@@ -236,11 +236,9 @@ describe('Signature Help', () => {
                                     activeParameter: 0,
                                     signatures: [
                                         SignatureInformation.create(
-                                            'Supported state types:\n- "string | number | enum | tag"',
+                                            'Supported state types:\n- "string | number | enum"',
                                             undefined,
-                                            ParameterInformation.create(
-                                                'string | number | enum | tag'
-                                            )
+                                            ParameterInformation.create('string | number | enum')
                                         ),
                                     ],
                                 };
@@ -262,9 +260,9 @@ describe('Signature Help', () => {
                         activeParameter: 0,
                         signatures: [
                             SignatureInformation.create(
-                                'Supported state types:\n- "string | number | enum | tag"',
+                                'Supported state types:\n- "string | number | enum"',
                                 undefined,
-                                ParameterInformation.create('string | number | enum | tag')
+                                ParameterInformation.create('string | number | enum')
                             ),
                         ],
                     };
@@ -320,9 +318,9 @@ describe('Signature Help', () => {
                         activeParameter: 0,
                         signatures: [
                             SignatureInformation.create(
-                                'Supported state types:\n- "string | number | enum | tag"',
+                                'Supported state types:\n- "string | number | enum"',
                                 undefined,
-                                ParameterInformation.create('string | number | enum | tag')
+                                ParameterInformation.create('string | number | enum')
                             ),
                         ],
                     };
@@ -411,6 +409,37 @@ describe('Signature Help', () => {
                                     'shmover(number(min(3), max(42)))',
                                     undefined,
                                     ParameterInformation.create('number(min(3), max(42))')
+                                ),
+                            ],
+                        };
+
+                        expect(sig).to.not.equal(null);
+                        expect(sig).to.deep.equal(exp);
+                    }
+                );
+            });
+
+            str.split('').forEach((_c, i) => {
+                const prefix = str.slice(0, i);
+                it(
+                    'Provides signature help and identifies imported template state with parameter type definition and validators, with prefix ' +
+                        prefix,
+                    () => {
+                        const filePath =
+                            'states/with-param/imported-template-state-param-and-validators-suggestion.st.css';
+
+                        const sig = getSignatureHelp(filePath, prefix);
+
+                        const exp: SignatureHelp = {
+                            activeSignature: 0,
+                            activeParameter: 0,
+                            signatures: [
+                                SignatureInformation.create(
+                                    'templateWithParam(string(minLength(2), maxLength(6)))',
+                                    undefined,
+                                    ParameterInformation.create(
+                                        'string(minLength(2), maxLength(6))'
+                                    )
                                 ),
                             ],
                         };

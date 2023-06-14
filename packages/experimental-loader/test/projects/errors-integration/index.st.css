@@ -3,6 +3,6 @@
     -st-default: NotFound;
 }
 
-.root {
-    -st-extends: Unknown;
+Unknown {
+    color: red;
 }

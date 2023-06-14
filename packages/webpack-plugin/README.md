@@ -49,6 +49,9 @@ interface StylableWebpackPluginOptions {
     cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
     /**
      * Determine the runtime stylesheet id kind used by the cssInjection js mode
+     * This sets the value of the st_id attribute on the stylesheet element
+     * default for dev - 'module'
+     * default for prod - 'namespace'
      */
     runtimeStylesheetId?: 'module' | 'namespace';
     /**
@@ -75,8 +78,6 @@ interface StylableWebpackPluginOptions {
     optimize?: {
         /* Removes comments from output css */
         removeComments?: boolean;
-        /* Removes all Stylable directives like -st-extends */
-        removeStylableDirectives?: boolean;
         /* Removes unused rules that target unused components */
         removeUnusedComponents?: boolean;
         /* Remove empty css rules */
@@ -160,7 +161,6 @@ new StylableWebpackPlugin({
     diagnosticsMode: 'auto',
     optimize: {
       removeUnusedComponents: true,
-      removeStylableDirectives: true,
       removeComments: false,
       classNameOptimizations: false,
       shortNamespaces: false,
@@ -179,7 +179,6 @@ new StylableWebpackPlugin({
     diagnosticsMode: 'auto',
     optimize: {
       removeUnusedComponents: true,
-      removeStylableDirectives: true,
       removeComments: true,
       classNameOptimizations: true,
       shortNamespaces: true,

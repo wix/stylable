@@ -1,6 +1,6 @@
 import { extract, parseWithComments } from 'jest-docblock';
 import type { StylableMeta, StylableSymbol } from '@stylable/core';
-import { plugableRecord } from '@stylable/core/dist/helpers/plugable-record';
+import { plugableRecord } from '@stylable/core/dist/index-internal';
 import type { Rule } from 'postcss';
 
 export interface CssDoc {
@@ -21,7 +21,7 @@ export function getCssDocsForSymbol(meta: StylableMeta, symbol: StylableSymbol):
 
 function extractCSSDocsToSymbolMap(meta: StylableMeta) {
     const docs = new Map<StylableSymbol, CssDoc>();
-    meta.rawAst.walkComments((comment) => {
+    meta.sourceAst.walkComments((comment) => {
         const node = comment.next();
         if (node?.type === 'rule') {
             const symbol = meta.getSymbol(
