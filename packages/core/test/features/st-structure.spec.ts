@@ -305,10 +305,7 @@ describe('@st structure', () => {
                 @st .x {
                     @st ::part => [part="x"];
 
-                    /*
-                    ToDo: fix value parser ident bug 
                     @st ::noSpaces=>[noSpaces];
-                    */
 
                     @st /*c1*/ :/*what?*/:/*c2*/comments/*c3*/=> [weirdComment]/*c5*/;
 
@@ -318,8 +315,8 @@ describe('@st structure', () => {
                 /* @rule .entry__x [part="x"] */
                 .x::part {}
 
-                /* @x-rule .entry__x [noSpaces] */
-                /* .x::noSpaces {} */
+                /* @rule .entry__x [noSpaces] */
+                .x::noSpaces {}
 
                 /* @rule .entry__x [weirdComment] */
                 .x::comments {}
