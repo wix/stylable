@@ -1,7 +1,20 @@
+import { expect } from 'chai';
 import { testLangService } from '../../test-kit/test-lang-service';
 
 describe('LS: st-structure', () => {
     // ToDo: refactor legacy flat mode tests cases here
+    it('should not report unknown rule from native lsp', () => {
+        const { service } = testLangService(`
+                @st .x {
+                    @st :y;
+                    @st ::z => [z];
+                }
+            `);
+
+        const result = service.diagnose('/entry.st.css');
+
+        expect(result).to.eql([]);
+    });
     it('should suggest nested parts', () => {
         const { service, carets, assertCompletions } = testLangService(`
             @st .cls {

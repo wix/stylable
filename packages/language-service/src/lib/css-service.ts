@@ -174,6 +174,7 @@ export class CssService {
                 } else if (
                     diag.code === 'unknownAtRules' &&
                     (atRuleName === '@custom-selector' ||
+                        atRuleName === '@st' ||
                         atRuleName === '@st-scope' ||
                         atRuleName === '@st-namespace' ||
                         atRuleName === '@st-import' ||
