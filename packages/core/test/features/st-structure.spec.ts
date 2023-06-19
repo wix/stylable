@@ -231,6 +231,40 @@ describe('@st structure', () => {
                 @st .empty unexpected value;
             `);
         });
+        it('should disallow -st-* definitions on class that is defined with @st', () => {
+            testStylableCore(`
+                @st .new;
+                
+                .old { -st-states: yState; }
+
+                .new {
+                    /* @analyze-error(extend) ${classDiagnostics.DISABLED_DIRECTIVE(
+                        'new',
+                        '-st-extends'
+                    )} */
+                    -st-extends: old;
+
+                    /* @analyze-error(extend) ${classDiagnostics.DISABLED_DIRECTIVE(
+                        'new',
+                        '-st-states'
+                    )} */
+                    -st-states: xState;
+
+                    /* @analyze-error(extend) ${classDiagnostics.DISABLED_DIRECTIVE(
+                        'new',
+                        '-st-global'
+                    )} */
+                    -st-global: ".xxx";
+                }
+
+                /* @rule(extend fail) .entry__new:yState */
+                .new:yState {}
+
+                
+                /* @rule(legacy def) .entry__old.entry--yState */
+                .old:yState {}
+            `);
+        });
     });
     describe('@st :name (pseudo-class)', () => {
         it('should define pseudo-class on parent class def', () => {

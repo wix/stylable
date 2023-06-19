@@ -34,6 +34,7 @@ import * as postcss from 'postcss';
 import { basename } from 'path';
 import { createDiagnosticReporter } from '../diagnostics';
 import postcssValueParser from 'postcss-value-parser';
+import { plugableRecord } from '../helpers/plugable-record';
 
 export interface StPartDirectives extends STStructure.HasParts, Partial<STCustomState.HasStates> {
     '-st-root'?: boolean;
@@ -118,7 +119,26 @@ export const diagnostics = {
         'error',
         (name: string) => `cannot use alias for unknown import "${name}"`
     ),
+    DISABLED_DIRECTIVE: createDiagnosticReporter(
+        '00009',
+        'error',
+        (className: string, directive: keyof typeof stPartDirectives) => {
+            const alternative =
+                directive === '-st-extends'
+                    ? ` use "@st .${className} :is(.base)" instead`
+                    : directive === '-st-global'
+                    ? `use "@st .${className} => :global(<selector>)" instead`
+                    : directive === '-st-states'
+                    ? `use "@st .${className} { @st .state; }" instead`
+                    : '';
+            return `cannot use ${directive} on .${className} since class is defined with "@st" - ${alternative}`;
+        }
+    ),
 };
+
+const dataKey = plugableRecord.key<{
+    classesDefinedWithAtSt: Set<string>;
+}>('st-structure');
 
 // HOOKS
 
@@ -127,6 +147,11 @@ export const hooks = createFeature<{
     IMMUTABLE_SELECTOR: ImmutableClass;
     RESOLVED: Record<string, string>;
 }>({
+    metaInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, {
+            classesDefinedWithAtSt: new Set<string>(),
+        });
+    },
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
             // error on functional class
@@ -141,7 +166,7 @@ export const hooks = createFeature<{
         addClass(context, node.value, rule);
     },
     analyzeDeclaration({ context, decl }) {
-        if (context.meta.type === 'stylable' && decl.prop in stPartDirectives) {
+        if (context.meta.type === 'stylable' && isDirectiveDeclaration(decl)) {
             handleDirectives(context, decl);
         }
     },
@@ -455,7 +480,22 @@ export function checkForScopedNodeAfter(
     return false;
 }
 
-function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
+function isDirectiveDeclaration(
+    decl: postcss.Declaration
+): decl is postcss.Declaration & { prop: keyof typeof stPartDirectives } {
+    return decl.prop in stPartDirectives;
+}
+export function disableDirectivesForClass(context: FeatureContext, className: string) {
+    // ToDo: move directive analyze to @st-structure
+    // called when class is defined with @st
+    const { classesDefinedWithAtSt } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    classesDefinedWithAtSt.add(className);
+}
+
+function handleDirectives(
+    context: FeatureContext,
+    decl: postcss.Declaration & { prop: keyof typeof stPartDirectives }
+) {
     const rule = decl.parent as postcss.Rule;
     if (rule?.type !== 'rule') {
         return;
@@ -465,7 +505,17 @@ function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
         return !accType ? type : accType !== type ? `complex` : type;
     }, `` as (typeof isSimplePerSelector)[number]['type']);
     const isSimple = type !== `complex`;
-    if (decl.prop === `-st-states`) {
+
+    const { classesDefinedWithAtSt } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    if (type === 'class' && classesDefinedWithAtSt.has(rule.selector.replace('.', ''))) {
+        context.diagnostics.report(
+            diagnostics.DISABLED_DIRECTIVE(rule.selector.replace('.', ''), decl.prop),
+            {
+                node: decl,
+            }
+        );
+        return;
+    } else if (decl.prop === `-st-states`) {
         if (isSimple && type !== 'type') {
             extendTypedRule(
                 context,

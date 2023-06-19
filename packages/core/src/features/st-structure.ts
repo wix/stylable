@@ -165,6 +165,7 @@ export const hooks = createFeature({
         } else if (analyzed.type === 'topLevelClass') {
             declaredClasses.add(analyzed.name);
             CSSClass.addClass(context, analyzed.name, atRule);
+            CSSClass.disableDirectivesForClass(context, analyzed.name);
             // extend class
             if (analyzed.extendedClass) {
                 const extendedSymbol =
