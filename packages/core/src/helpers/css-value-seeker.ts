@@ -8,7 +8,11 @@ export interface FindAstOptions {
     name?: string;
 }
 
-type FindAstResult<T extends BaseAstNode> = [takenNodeAmount: number, matchedNode: T | undefined];
+type FindAstResult<T extends BaseAstNode> = [
+    takenNodeAmount: number,
+    matchedNode: T | undefined,
+    inspectedAmount: number
+];
 
 export function findAnything(
     value: BaseAstNode[],
@@ -22,21 +26,30 @@ export function findFatArrow(
     value: BaseAstNode[],
     startIndex: number,
     options?: Partial<FindAstOptions>
-): [takenNodeAmount: number, EqlNode: Literal | undefined] {
-    const [amountToEql] = findLiteral(value, startIndex, { ...options, name: '=' });
+): FindAstResult<Literal & { value: '>' }> {
+    const [amountToEql, _eqlNode, eqlNodeInspectAmount] = findLiteral(value, startIndex, {
+        ...options,
+        name: '=',
+    });
     if (amountToEql) {
         const nextNode = value[startIndex + amountToEql];
-        if (nextNode?.type === 'literal' && nextNode.value === '>') {
-            return [amountToEql + 1, nextNode];
+        if (isExactLiteral(nextNode, '>')) {
+            return [amountToEql + 1, nextNode, amountToEql + 1];
         }
     }
-    return [0, undefined];
+    return [0, undefined, eqlNodeInspectAmount];
+}
+export function isExactLiteral<T extends string>(
+    token: BaseAstNode,
+    name: T
+): token is Literal & { value: '>' } {
+    return token && token.type === 'literal' && token.value === name;
 }
 export function findNextClassNode(
     value: BaseAstNode[],
     startIndex: number,
     options?: Partial<FindAstOptions>
-): [takenNodeAmount: number, classNode: CustomIdent | undefined] {
+): FindAstResult<CustomIdent> {
     const name = options?.name || '';
     let index = startIndex;
     while (index < value.length) {
@@ -48,7 +61,7 @@ export function findNextClassNode(
                 stopOnFail: true,
             });
             if (amountToName) {
-                return [amountToDot + amountToName, nameNode];
+                return [amountToDot + amountToName, nameNode, index - startIndex + 1];
             }
         }
         if (options?.stopOnFail) {
@@ -56,13 +69,13 @@ export function findNextClassNode(
         }
         index++;
     }
-    return [0, undefined];
+    return [0, undefined, value.length - startIndex];
 }
 export function findNextPseudoClassNode(
     value: BaseAstNode[],
     startIndex: number,
     options?: Partial<FindAstOptions>
-): [takenNodeAmount: number, classNode: CustomIdent | Call | undefined] {
+): FindAstResult<CustomIdent | Call> {
     const name = options?.name || '';
     let index = startIndex;
     while (index < value.length) {
@@ -73,16 +86,18 @@ export function findNextPseudoClassNode(
                 name,
                 stopOnFail: true,
                 ignoreComments: true,
-                ignoreWhitespace: true,
+                ignoreWhitespace: false,
             };
             const [amountToName, nameNode] = findCustomIdent(value, index, nameOptions);
 
             if (amountToName) {
-                return [amountToColon + amountToName, nameNode];
+                return [amountToColon + amountToName, nameNode, index - startIndex + 1];
             } else {
                 const [amountToCall, callNode] = findNextCallNode(value, index, nameOptions);
                 if (amountToCall) {
-                    return [amountToColon + amountToCall, callNode];
+                    return [amountToColon + amountToCall, callNode, index - startIndex + 1];
+                } else {
+                    break;
                 }
             }
         } else if (options?.stopOnFail) {
@@ -91,22 +106,20 @@ export function findNextPseudoClassNode(
             index++;
         }
     }
-    return [0, undefined];
+    return [0, undefined, value.length - startIndex];
 }
 
 export function findPseudoElementNode(
     value: BaseAstNode[],
     startIndex: number,
     options?: Partial<FindAstOptions>
-): [takenNodeAmount: number, classNode: CustomIdent | Call | undefined] {
+): FindAstResult<CustomIdent | Call> {
     let index = startIndex;
     while (index < value.length) {
         // first colon
-        const [amountToColon] = findLiteral(value, index, { ...options, name: ':' });
-        // second colon
+        const [amountToColon] = findLiteral(value, index, { ...options, name: ':' }); // second colon
         if (amountToColon) {
-            index += amountToColon;
-            // name
+            index += amountToColon; // name
             const [amountToSecondColon] = findLiteral(value, index, {
                 ...options,
                 name: ':',
@@ -120,7 +133,11 @@ export function findPseudoElementNode(
                     stopOnFail: true,
                 });
                 if (nameNode) {
-                    return [index + amountToName, nameNode];
+                    return [
+                        index - startIndex + amountToName,
+                        nameNode,
+                        index - startIndex + amountToName,
+                    ];
                 }
             }
         }
@@ -129,14 +146,14 @@ export function findPseudoElementNode(
         }
         index++;
     }
-    return [0, undefined];
+    return [0, undefined, index - startIndex];
 }
 
 export function findLiteral(
     value: BaseAstNode[],
     startIndex: number,
     options?: Partial<FindAstOptions>
-) {
+): FindAstResult<Literal> {
     const name = options?.name || '';
     return findValueAstNode<Literal>(
         value,
@@ -149,7 +166,7 @@ export function findCustomIdent(
     value: BaseAstNode[],
     startIndex: number,
     options?: Partial<FindAstOptions>
-) {
+): FindAstResult<CustomIdent> {
     const name = options?.name || '';
     return findValueAstNode<CustomIdent>(
         value,
@@ -162,7 +179,7 @@ export function findNextCallNode(
     value: BaseAstNode[],
     startIndex: number,
     options?: Partial<FindAstOptions>
-): [takenNodeAmount: number, classNode: Call | undefined] {
+): FindAstResult<Call> {
     const name = options?.name || '';
     return findValueAstNode(
         value,
@@ -191,11 +208,11 @@ export function findValueAstNode<T extends BaseAstNode>(
         } else if (ignoreWhitespace && node.type === 'space') {
             // continue;
         } else if (check(node)) {
-            return [index - startIndex + 1, node as T];
+            return [index - startIndex + 1, node as T, index - startIndex + 1];
         } else if (stopOnFail || stopOnMatch?.(node, index, valueAst)) {
             break;
         }
         index++;
     }
-    return [0, undefined];
+    return [0, undefined, index - startIndex];
 }

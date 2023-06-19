@@ -14,6 +14,7 @@ import {
     ImmutableSelector,
     stringifySelectorAst,
     ImmutablePseudoClass,
+    ImmutableSelectorList,
 } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter } from '../diagnostics';
 import { getAlias } from '../stylable-utils';
@@ -23,8 +24,8 @@ import {
     findNextClassNode,
     findNextPseudoClassNode,
     findPseudoElementNode,
+    isExactLiteral,
 } from '../helpers/css-value-seeker';
-import type { ImmutableSelectorList } from '@tokey/css-selector-parser';
 
 export const diagnostics = {
     GLOBAL_MAPPING_LIMITATION: createDiagnosticReporter(
@@ -160,38 +161,8 @@ export const hooks = createFeature({
         );
         const analyzed = analyzeStAtRule(atRule, context);
         if (!analyzed) {
-            if (atRule.parent?.type === 'root') {
-                context.diagnostics.report(diagnostics.UNSUPPORTED_TOP_DEF(), {
-                    node: atRule,
-                });
-            } else {
-                context.diagnostics.report(diagnostics.INVALID_ST_DEF(atRule.params), {
-                    node: atRule,
-                });
-            }
+            // not valid
         } else if (analyzed.type === 'topLevelClass') {
-            if (atRule.parent?.type !== 'root') {
-                context.diagnostics.report(diagnostics.CLASS_OUT_OF_CONTEXT(), {
-                    node: atRule,
-                });
-                return;
-            }
-            const existingSymbol = STSymbol.get(context.meta, analyzed.name);
-            if (existingSymbol?._kind === 'import') {
-                context.diagnostics.report(diagnostics.OVERRIDE_IMPORTED_CLASS(), {
-                    node: atRule,
-                });
-                return;
-            }
-            if (declaredClasses.has(analyzed.name)) {
-                // ToDo: use st-symbol redeclare api; improve st-symbol/css-class "final" marking and diagnostics
-                const srcWord = '.' + analyzed.name;
-                context.diagnostics.report(diagnostics.REDECLARE('class', srcWord), {
-                    node: atRule,
-                    word: srcWord,
-                });
-                return;
-            }
             declaredClasses.add(analyzed.name);
             CSSClass.addClass(context, analyzed.name, atRule);
             // extend class
@@ -209,28 +180,9 @@ export const hooks = createFeature({
             }
             // class mapping
             if (analyzed.mappedSelector) {
-                let globalNode: ImmutablePseudoClass | undefined = undefined;
-                let foundUnexpectedSelector = false;
-                for (const node of analyzed.mappedSelector.nodes) {
-                    if (node.type === 'pseudo_class' && node.value === 'global' && !globalNode) {
-                        globalNode = node;
-                    } else if (node.type !== 'comment') {
-                        foundUnexpectedSelector = true;
-                    }
-                }
-
-                if (
-                    foundUnexpectedSelector ||
-                    !globalNode ||
-                    !globalNode.nodes ||
-                    globalNode.nodes.length !== 1
-                ) {
-                    // ToDo: support non global mapping
-                    context.diagnostics.report(diagnostics.GLOBAL_MAPPING_LIMITATION(), {
-                        node: atRule,
-                        word: stringifySelectorAst(analyzed.mappedSelector).trim(),
-                    });
-                } else {
+                // ToDo: support non global mapping
+                const globalNode = findGlobalPseudo(analyzed);
+                if (globalNode && globalNode.nodes?.length === 1) {
                     const mappedSelectorAst = globalNode.nodes[0];
                     // analyze mapped selector
                     analyzeRule(
@@ -345,12 +297,12 @@ function isStAtRule(node: postcss.AnyNode): node is postcss.AtRule {
 
 function getPartParentSymbol(
     context: FeatureContext,
-    analyzed: ParsedStPart,
+    { parentAnalyze }: ParsedStPart,
     analyzedDefToPartSymbol: Map<AnalyzedStDef, PartSymbol>
 ) {
-    return analyzed.parentAnalyze.type === 'topLevelClass'
-        ? CSSClass.get(context.meta, analyzed.parentAnalyze.name)
-        : analyzedDefToPartSymbol.get(analyzed.parentAnalyze);
+    return parentAnalyze.type === 'topLevelClass'
+        ? CSSClass.get(context.meta, parentAnalyze.name)
+        : analyzedDefToPartSymbol.get(parentAnalyze);
 }
 
 export function isStructureMode(meta: StylableMeta) {
@@ -396,167 +348,429 @@ function getSymbolId(symbol: CSSClass.ClassSymbol | PartSymbol) {
     return symbol._kind === 'class' ? '.' + symbol.name : symbol.id;
 }
 
-interface ParsedStClass {
+type ParsedStClass = {
     type: 'topLevelClass';
+    params: BaseAstNode[];
+    match: boolean;
+    ranges: Record<'class' | 'extend' | 'mapArrow' | 'mapTo' | 'leftoverValue', BaseAstNode[]>;
     name: string;
     extendedClass?: string;
     mappedSelector?: ImmutableSelector;
-}
+};
 
 interface ParsedStPart {
     type: 'part';
+    params: BaseAstNode[];
+    match: boolean;
+    ranges: Record<'pseudoElement' | 'mapArrow' | 'mapTo' | 'leftoverValue', BaseAstNode[]>;
     name: string;
     parentAnalyze: ParsedStClass | ParsedStPart;
+    mappedArrow: boolean;
     mappedSelector: ImmutableSelector;
 }
 
 interface ParsedStState {
     type: 'state';
+    params: BaseAstNode[];
+    match: boolean;
+    ranges: Record<'leftoverValue', BaseAstNode[]>;
     name: string;
     parentAnalyze: ParsedStClass | ParsedStPart;
     stateDef: MappedStates[string];
 }
 
-type AnalyzedStDef = undefined | ParsedStClass | ParsedStPart | ParsedStState;
-function analyzeStAtRule(atRule: postcss.AtRule, context: FeatureContext): AnalyzedStDef {
+function isMatch(result: any): result is AnalyzedStDef {
+    return result.match;
+}
+
+type AnalyzedStDef = ParsedStClass | ParsedStPart | ParsedStState;
+function analyzeStAtRule(
+    atRule: postcss.AtRule,
+    context: FeatureContext
+): AnalyzedStDef | undefined {
     // cache
     const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     if (analyzedDefs.has(atRule)) {
         return analyzedDefs.get(atRule);
     }
+    // parse
+    const params = parseCSSValue(atRuleFullParams(atRule));
 
-    const params = parseCSSValue(atRule.params);
+    const def =
+        params.length === 0
+            ? undefined
+            : parseClassDefinition(atRule, params) ||
+              parsePseudoElementDefinition(context, atRule, params) ||
+              parseStateDefinition(context, atRule, params);
 
-    if (params.length === 0) {
+    if (!def) {
+        if (atRule.parent?.type === 'root') {
+            context.diagnostics.report(diagnostics.UNSUPPORTED_TOP_DEF(), {
+                node: atRule,
+            });
+        } else {
+            context.diagnostics.report(diagnostics.INVALID_ST_DEF(atRule.params), {
+                node: atRule,
+            });
+        }
         return;
     }
 
-    const analyzedDef =
-        parseClassDefinition(context, atRule, params) ||
-        parsePseudoElementDefinition(context, atRule, params) ||
-        parseStateDefinition(context, atRule, params);
-    if (analyzedDef) {
-        analyzedDefs.set(atRule, analyzedDef);
+    // validate
+    switch (def.type) {
+        case 'topLevelClass': {
+            if (!validateTopLevelClass({ def, atRule, context })) {
+                return;
+            }
+            break;
+        }
+        case 'part': {
+            if (!validatePart({ def, atRule, context })) {
+                return;
+            }
+            break;
+        }
+        case 'state': {
+            if (!validateState({ def, atRule, context })) {
+                return;
+            }
+            break;
+        }
+    }
+    if (!isMatch(def)) {
+        return;
     }
 
-    return analyzedDef;
+    analyzedDefs.set(atRule, def);
+    return def;
+}
+
+function validateTopLevelClass({
+    def,
+    atRule,
+    context,
+}: {
+    def: Partial<ParsedStClass>;
+    atRule: postcss.AtRule;
+    context: FeatureContext;
+}) {
+    const { declaredClasses } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    if (!def.ranges || !def.params) {
+        // should always be provided by parser
+        return false;
+    }
+    if (!def.name) {
+        // ToDo: fix type to have name required
+        return false;
+    }
+    if (def.ranges.extend.length && !def.extendedClass) {
+        context.diagnostics.report(diagnostics.MISSING_EXTEND(), {
+            node: atRule,
+            word: stringifyCSSValue(def.ranges.extend),
+        });
+    }
+    if (def.ranges.leftoverValue.find((node) => node.type !== 'comment' && node.type !== 'space')) {
+        const unexpectedValue = stringifyCSSValue(def.ranges.leftoverValue).trim();
+        context.diagnostics.report(diagnostics.UNEXPECTED_EXTRA_VALUE(unexpectedValue), {
+            node: atRule,
+            word: unexpectedValue,
+        });
+        return false;
+    }
+    if (atRule.parent?.type !== 'root') {
+        context.diagnostics.report(diagnostics.CLASS_OUT_OF_CONTEXT(), {
+            node: atRule,
+        });
+        return false;
+    }
+    const existingSymbol = STSymbol.get(context.meta, def.name);
+    if (existingSymbol?._kind === 'import') {
+        context.diagnostics.report(diagnostics.OVERRIDE_IMPORTED_CLASS(), {
+            node: atRule,
+        });
+        return false;
+    }
+    if (declaredClasses.has(def.name)) {
+        // ToDo: use st-symbol redeclare api; improve st-symbol/css-class "final" marking and diagnostics
+        const srcWord = '.' + def.name;
+        context.diagnostics.report(diagnostics.REDECLARE('class', srcWord), {
+            node: atRule,
+            word: srcWord,
+        });
+        return false;
+    }
+    if (def.ranges.mapArrow.length) {
+        if (!def.mappedSelector) {
+            // report missing selector
+            const arrowEnd = def.ranges.mapArrow[def.ranges.mapArrow.length - 1];
+            for (let i = def.params.length - 1; i >= 0; i--) {
+                const node = def.params[i];
+                if (node === arrowEnd) {
+                    break;
+                } else if (isExactLiteral(node, ',')) {
+                    context.diagnostics.report(diagnostics.MULTI_MAPPED_SELECTOR(), {
+                        node: atRule,
+                    });
+                    return false;
+                }
+            }
+            context.diagnostics.report(diagnostics.MISSING_MAPPED_SELECTOR(), {
+                node: atRule,
+            });
+            return false;
+        }
+        const globalNode = findGlobalPseudo(def, true);
+        if (!globalNode || !globalNode.nodes || globalNode.nodes.length !== 1) {
+            context.diagnostics.report(diagnostics.GLOBAL_MAPPING_LIMITATION(), {
+                node: atRule,
+                word: stringifySelectorAst(def.mappedSelector).trim(),
+            });
+            return false;
+        }
+    }
+    return true;
+}
+function validatePart({
+    def,
+    atRule,
+    context,
+}: {
+    def: Partial<ParsedStPart>;
+    atRule: postcss.AtRule;
+    context: FeatureContext;
+}) {
+    if (!def.parentAnalyze) {
+        context.diagnostics.report(diagnostics.ELEMENT_OUT_OF_CONTEXT(), {
+            node: atRule,
+        });
+        return false;
+    }
+    if (!def.mappedSelector) {
+        if (!def.mappedArrow) {
+            context.diagnostics.report(diagnostics.MISSING_MAPPING(), {
+                node: atRule,
+            });
+            return false;
+        }
+        // report missing selector
+        const arrowEnd = def.ranges!.mapArrow[def.ranges!.mapArrow.length - 1];
+        for (let i = def.params!.length - 1; i >= 0; i--) {
+            const node = def.params![i];
+            if (node === arrowEnd) {
+                break;
+            } else if (isExactLiteral(node, ',')) {
+                context.diagnostics.report(diagnostics.MULTI_MAPPED_SELECTOR(), {
+                    node: atRule,
+                });
+                return false;
+            }
+        }
+        context.diagnostics.report(diagnostics.MISSING_MAPPED_SELECTOR(), {
+            node: atRule,
+        });
+        return false;
+    }
+    if (validateNestingInMapping(def.mappedSelector, context, atRule)) {
+        return false;
+    }
+    return true;
+}
+function validateState({
+    def,
+    atRule,
+    context,
+}: {
+    def: Partial<ParsedStState>;
+    atRule: postcss.AtRule;
+    context: FeatureContext;
+}) {
+    if (!def.parentAnalyze) {
+        context.diagnostics.report(diagnostics.STATE_OUT_OF_CONTEXT(), {
+            node: atRule,
+        });
+        return false;
+    }
+    const [amountToActualValue] = findAnything(def.ranges!.leftoverValue, 0);
+    if (amountToActualValue) {
+        const unexpectedValue = stringifyCSSValue(def.ranges!.leftoverValue).trim();
+        context.diagnostics.report(diagnostics.UNEXPECTED_EXTRA_VALUE(unexpectedValue), {
+            node: atRule,
+            word: unexpectedValue,
+        });
+        return false;
+    }
+
+    return true;
+}
+function findGlobalPseudo(def: Partial<ParsedStClass>, checkAfter = false) {
+    if (!def.mappedSelector) {
+        return;
+    }
+    let globalNode: ImmutablePseudoClass | undefined = undefined;
+    let foundUnexpectedSelector = false;
+    for (const node of def.mappedSelector.nodes) {
+        if (node.type === 'pseudo_class' && node.value === 'global' && !globalNode) {
+            globalNode = node;
+            if (!checkAfter) {
+                break;
+            }
+        } else if (node.type !== 'comment') {
+            foundUnexpectedSelector = true;
+        }
+    }
+    return foundUnexpectedSelector ? undefined : globalNode;
 }
 
 function parseStateDefinition(
     context: FeatureContext,
     atRule: postcss.AtRule,
     params: BaseAstNode[]
-): ParsedStState | undefined {
+) {
+    const result: Partial<ParsedStState> = {
+        type: 'state',
+        params,
+        match: true,
+        ranges: { leftoverValue: [] },
+    };
+
+    let index = 0;
+
+    const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey); // name
     const [amountToName, nameNode] = findNextPseudoClassNode(params, 0);
-    if (!nameNode) {
+    if (nameNode) {
+        result.name = nameNode.value;
+    } else {
+        // not a pseudo-state definition
         return;
     }
-    const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    index += amountToName;
+    // parent
     const parentRule = atRule.parent;
     const parentAnalyze = parentRule && analyzedDefs.get(parentRule as any);
-    if (parentAnalyze?.type !== 'topLevelClass' && parentAnalyze?.type !== 'part') {
-        context.diagnostics.report(diagnostics.STATE_OUT_OF_CONTEXT(), {
-            node: atRule,
-        });
-        return;
+    if (
+        parentAnalyze &&
+        (parentAnalyze.type === 'topLevelClass' || parentAnalyze.type === 'part')
+    ) {
+        result.parentAnalyze = parentAnalyze;
     }
+    // state
     const [amountToStateDef, stateDef] = STCustomState.parseStateValue(
-        params.slice(amountToName - 1),
+        params.slice(index - 1),
         atRule,
         context.diagnostics
     );
-    if (stateDef === undefined) {
-        // diagnostics are reported from within parseStateValue()
-        return;
+    if (stateDef !== undefined) {
+        index += amountToStateDef;
+        result.stateDef = stateDef;
+    } else {
+        result.match = false;
     }
-    const amountTaken = amountToName - 1 + amountToStateDef;
-    if (amountTaken < params.length) {
-        const unexpectedValue = stringifyCSSValue(params.slice(amountTaken)).trim();
-        context.diagnostics.report(diagnostics.UNEXPECTED_EXTRA_VALUE(unexpectedValue), {
-            node: atRule,
-            word: unexpectedValue,
-        });
-        return;
+    // leftover
+    const amountTaken = index - 1;
+    result.ranges!.leftoverValue.push(...params.slice(amountTaken));
+    const [amountToUnexpected] = findAnything(params, index);
+    if (amountToUnexpected) {
+        result.match = false;
     }
-    return {
-        type: 'state',
-        name: nameNode.value,
-        stateDef,
-        parentAnalyze,
-    };
+    return result;
 }
 
 function parsePseudoElementDefinition(
     context: FeatureContext,
     atRule: postcss.AtRule,
     params: BaseAstNode[]
-): ParsedStPart | undefined {
-    let index = 0;
-    // collect pseudo element name
-    const [amountToName, nameNode] = findPseudoElementNode(params, 0);
-    if (!nameNode) {
-        return;
-    }
-    index += amountToName;
-    // get symbol to extend
+) {
     const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    const result: Partial<ParsedStPart> = {
+        type: 'part',
+        params,
+        match: true,
+        name: '',
+        ranges: { pseudoElement: [], mapArrow: [], mapTo: [], leftoverValue: [] },
+    };
+
+    let index = 0;
+
+    // collect pseudo element name
+    const [amountToName, nameNode, nameInspectAmount] = findPseudoElementNode(params, 0);
+    result.ranges!.pseudoElement.push(...params.slice(index, index + nameInspectAmount));
+    index += amountToName;
+    if (nameNode) {
+        result.name = nameNode.value;
+    } else {
+        // not a pseudo-element definition
+        return false;
+    }
+    // get symbol to extend
     const parentRule = atRule.parent;
     const parentAnalyze = parentRule && analyzedDefs.get(parentRule as any);
-    if (parentAnalyze?.type !== 'topLevelClass' && parentAnalyze?.type !== 'part') {
-        context.diagnostics.report(diagnostics.ELEMENT_OUT_OF_CONTEXT(), {
-            node: atRule,
-        });
-        return;
+    if (parentAnalyze?.type === 'topLevelClass' || parentAnalyze?.type === 'part') {
+        result.parentAnalyze = parentAnalyze;
     }
     // collect mapped selector
-    const [amountUntilSelector, mappedSelector] = parseMapping(context, atRule, params, index);
-    if (!mappedSelector) {
-        context.diagnostics.report(diagnostics.MISSING_MAPPING(), {
-            node: atRule,
-        });
-        return;
+    const [amountToMapping, mappingOpenNode, mapArrowInspectAmount] = findFatArrow(params, index, {
+        stopOnFail: false,
+    });
+    result.ranges!.mapArrow.push(...params.slice(index, index + mapArrowInspectAmount));
+    index += amountToMapping;
+    if (mappingOpenNode) {
+        result.mappedArrow = true;
+        // selector
+        result.ranges!.mapTo.push(...params.slice(index));
+        index = params.length - 1;
+        const selectorStr = atRuleFullParams(atRule).slice(mappingOpenNode.end);
+        const mappedSelectors = parseSelectorWithCache(selectorStr.trim());
+        const filteredSelector =
+            mappedSelectors.length === 1 && filterCommentsAndSpaces(mappedSelectors[0]);
+        if (filteredSelector && filteredSelector.nodes.length) {
+            result.mappedSelector = filteredSelector;
+        }
+    } else {
+        result.match = false;
     }
-    index += amountUntilSelector;
     // check unexpected extra
-    const [amountToUnexpectedNode] = findAnything(params, index);
-    if (amountToUnexpectedNode) {
-        // ToDo: report unexpected extra syntax
-        return;
-    }
+    result.ranges!.leftoverValue.push(...params.slice(index + 1));
 
-    return {
-        type: 'part',
-        name: nameNode.value,
-        parentAnalyze,
-        mappedSelector,
-    };
+    return result;
 }
 
-function parseClassDefinition(
-    context: FeatureContext,
-    atRule: postcss.AtRule,
-    params: BaseAstNode[]
-): ParsedStClass | undefined {
-    let index = 0;
+function parseClassDefinition(atRule: postcss.AtRule, params: BaseAstNode[]) {
+    const result: ParsedStClass = {
+        type: 'topLevelClass',
+        params,
+        match: true,
+        ranges: { class: [], extend: [], mapArrow: [], mapTo: [], leftoverValue: [] },
+        name: '',
+    };
 
-    const [amountToClass, classNameNode] = findNextClassNode(params, index, { stopOnFail: true });
-    if (!classNameNode) {
-        return;
-    }
-    const result: AnalyzedStDef = { type: 'topLevelClass', name: '' };
+    let index = 0;
     // top level class
-    index += amountToClass;
-    result.name = classNameNode.value;
-    // collect extends class
-    const [amountToExtends, extendsNode] = findNextPseudoClassNode(params, index, {
-        name: 'is',
+    const [amountToClass, classNameNode, classInspectedAmount] = findNextClassNode(params, index, {
         stopOnFail: true,
-        stopOnMatch: (_node, index, nodes) => {
-            const [amountToFatArrow] = findFatArrow(nodes, index, { stopOnFail: true });
-            return amountToFatArrow > 0;
-        },
     });
+    result.ranges.class.push(...params.slice(index, index + classInspectedAmount));
+    index += amountToClass;
+    if (classNameNode) {
+        result.name = classNameNode.value;
+    } else {
+        // not a class definition
+        return false;
+    }
+    // collect extends class
+    const [amountToExtends, extendsNode, extendInspectAmount] = findNextPseudoClassNode(
+        params,
+        index,
+        {
+            name: 'is',
+            stopOnFail: true,
+            stopOnMatch: (_node, index, nodes) => {
+                const [amountToFatArrow] = findFatArrow(nodes, index, { stopOnFail: true });
+                return amountToFatArrow > 0;
+            },
+        }
+    );
     if (extendsNode) {
+        result.ranges.extend.push(...params.slice(index, index + extendInspectAmount));
         index += amountToExtends;
         if (extendsNode.type === 'call') {
             const [amountToExtendedClass, nameNode] = findNextClassNode(extendsNode.args, 0, {
@@ -574,78 +788,66 @@ function parseClassDefinition(
                 }
             }
         }
-        if (!result.extendedClass) {
-            context.diagnostics.report(diagnostics.MISSING_EXTEND(), {
-                node: atRule,
-                word: stringifyCSSValue(extendsNode),
-            });
-        }
     }
     // collect mapped selector
-    const [amountUntilSelector, mappedSelector] = parseMapping(context, atRule, params, index);
-    result.mappedSelector = mappedSelector;
-    index += amountUntilSelector;
-    // check unexpected extra
-    const [amountToUnexpectedNode] = findAnything(params, index);
-    if (amountToUnexpectedNode) {
-        const unexpectedValue = stringifyCSSValue(params.slice(index)).trim();
-        context.diagnostics.report(diagnostics.UNEXPECTED_EXTRA_VALUE(unexpectedValue), {
-            node: atRule,
-            word: unexpectedValue,
-        });
-        return;
-    }
-    if (result.name) {
-        return result;
-    }
-    return;
-}
-
-function parseMapping(
-    context: FeatureContext,
-    atRule: postcss.AtRule,
-    params: BaseAstNode[],
-    startIndex: number
-): [takenNodeAmount: number, mappedSelector: ImmutableSelector | undefined] {
-    let index = startIndex;
-    const [amountToMapping, mappingOpenNode] = findFatArrow(params, startIndex, {
+    const [amountToMapping, mappingOpenNode, mapArrowInspectAmount] = findFatArrow(params, index, {
         stopOnFail: false,
     });
-    if (amountToMapping) {
+    if (mappingOpenNode) {
+        result.ranges.mapArrow.push(...params.slice(index, index + mapArrowInspectAmount));
         index += amountToMapping;
-        const selectorStr = atRule.params.slice(mappingOpenNode!.end);
+        // selector
+        result.ranges.mapTo.push(...params.slice(index));
+        index = params.length;
+        const selectorStr = atRuleFullParams(atRule).slice(mappingOpenNode.end);
         const mappedSelectors = parseSelectorWithCache(selectorStr);
-        switch (mappedSelectors.length) {
-            case 1: {
-                // check for unsupported &
-                let passedActualSelector = false;
-                let containsUnsupportedNesting = false;
-                walkSelector(mappedSelectors[0], (node) => {
-                    if (passedActualSelector && node.type === 'nesting') {
-                        containsUnsupportedNesting = true;
-                    } else if (node.type !== 'comment' && node.type !== 'selector') {
-                        passedActualSelector = true;
-                    }
-                });
-                if (!containsUnsupportedNesting) {
-                    return [index + selectorStr.length, mappedSelectors[0]];
-                } else {
-                    context.diagnostics.report(diagnostics.MAPPING_UNSUPPORTED_NESTING(), {
-                        node: atRule,
-                    });
-                }
-                break;
-            }
-            case 0:
-                context.diagnostics.report(diagnostics.MISSING_MAPPED_SELECTOR(), {
-                    node: atRule,
-                });
-                break;
-            default:
-                context.diagnostics.report(diagnostics.MULTI_MAPPED_SELECTOR(), {
-                    node: atRule,
-                });
+        const filteredSelector =
+            mappedSelectors.length === 1 && filterCommentsAndSpaces(mappedSelectors[0]);
+        if (filteredSelector && filteredSelector.nodes.length) {
+            result.mappedSelector = filteredSelector;
         }
     }
-    return [0, undefined];
+    // unexpected extra value
+    result.ranges.leftoverValue.push(...params.slice(index));
+
+    return result;
+}
+
+function validateNestingInMapping(
+    selector: ImmutableSelector,
+    context: FeatureContext,
+    atRule: postcss.AtRule
+) {
+    // check for unsupported & anywhere except first
+    let invalid = false;
+    let passedActualSelector = false;
+    walkSelector(selector, (node) => {
+        if (passedActualSelector && node.type === 'nesting') {
+            context.diagnostics.report(diagnostics.MAPPING_UNSUPPORTED_NESTING(), {
+                node: atRule,
+            });
+            invalid = true;
+            return walkSelector.stopAll;
+        } else if (node.type !== 'comment' && node.type !== 'selector') {
+            passedActualSelector = true;
+        }
+        return;
+    });
+    return invalid;
+}
+
+function atRuleFullParams(atRule: postcss.AtRule) {
+    const afterName = atRule.raws.afterName || '';
+    const between = atRule.raws.between || '';
+    return afterName + atRule.params + between;
+}
+
+function filterCommentsAndSpaces(selector: ImmutableSelector) {
+    const filteredSelector: ImmutableSelector = {
+        ...selector,
+        after: '',
+        before: '',
+        nodes: selector.nodes.filter((node) => node.type !== 'comment'),
+    };
+    return filteredSelector;
 }

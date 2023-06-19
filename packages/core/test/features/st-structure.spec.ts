@@ -1,5 +1,4 @@
 import {
-    assertRule,
     diagnosticBankReportToStrings,
     shouldReportNoDiagnostics,
     testStylableCore,
@@ -100,18 +99,17 @@ describe('@st structure', () => {
         it('should report non-class definition', () => {
             const { sheets } = testStylableCore(`
                 /* @analyze-error(element) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
+                @st .;
+
+                /* @analyze-error(element) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
                 @st abc;
 
                 /* @analyze-error(attribute) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
                 @st [abc];
 
-                /* @analyze-error(pseudo-element) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
-                @st ::abc;
-
-                /* @analyze-error(pseudo-class) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
-                @st :abc;
-
-                /* @analyze-error(multi classes) ${stStructureDiagnostics.UNSUPPORTED_TOP_DEF()} */
+                /* @analyze-error(multi classes) word(.b) ${stStructureDiagnostics.UNEXPECTED_EXTRA_VALUE(
+                    '.b'
+                )} */
                 @st .a.b;
             `);
 
@@ -269,18 +267,36 @@ describe('@st structure', () => {
             `);
         });
         it('should report parsing issues', () => {
-            testStylableCore(`
-                @st .x {
-                    /* @analyze-warn ${stStateDiagnostics.NO_STATE_TYPE_GIVEN('bool')}*/
-                    @st :bool();
+            const { sheets } = testStylableCore({
+                'invalid.st.css': `
+                    @st .x {
+                        /* @analyze-warn ${stStateDiagnostics.NO_STATE_TYPE_GIVEN('bool')}*/
+                        @st :bool();
 
-                    /* @analyze-error ${stStateDiagnostics.STATE_STARTS_WITH_HYPHEN('-dashProxy')}*/
-                    @st :-dashProxy;
-                    
-                    /* @analyze-error ${stStructureDiagnostics.UNEXPECTED_EXTRA_VALUE('abc xyz')}*/
-                    @st :boolWithExtra abc xyz;
-                }
-            `);
+                        /* @analyze-error ${stStateDiagnostics.STATE_STARTS_WITH_HYPHEN(
+                            '-dashProxy'
+                        )}*/
+                        @st :-dashProxy;
+
+                        /* @analyze-error ${stStructureDiagnostics.UNEXPECTED_EXTRA_VALUE(
+                            'abc xyz'
+                        )}*/
+                        @st :boolWithExtra abc xyz;
+                    }
+                `,
+                'valid.st.css': `
+                    @st .x {
+                        @st :boolWithExtra /*abc xyz*/;
+                    }
+
+                    /* @rule(boolWithExtra) .valid__x.valid--boolWithExtra */
+                    .x:boolWithExtra {}
+                `,
+            });
+
+            const { meta } = sheets['/valid.st.css'];
+
+            shouldReportNoDiagnostics(meta);
         });
         it('should report re-declare of state (first win)', () => {
             testStylableCore(`
@@ -340,20 +356,13 @@ describe('@st structure', () => {
                 /* @rule .entry__x[compound] */
                 .x::compound {}
                 
+                /* @rule .entry__x[withComments]*/
                 .x::withComments {}
             `);
 
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
-
-            /* Notice:
-             * - comment 1 is removed by postcss for unknown reasons
-             * - comment 3 is ignored because postcss takes it as part of the "between" (prelude and open bracket)
-             */
-            expect(assertRule(meta.targetAst!.nodes[3]).selector, 'with comments').to.eql(
-                '.entry__x/*c2*/[withComments]'
-            );
         });
         it('should analyze selector mapping', () => {
             const { sheets } = testStylableCore(`
@@ -428,16 +437,19 @@ describe('@st structure', () => {
         it('should report mapped selector issues', () => {
             testStylableCore(`
                 @st .x {
-                    /* @analyze-error ${stStructureDiagnostics.MISSING_MAPPED_SELECTOR()}*/
+                    /* @analyze-error(empty) ${stStructureDiagnostics.MISSING_MAPPED_SELECTOR()}*/
                     @st ::missing-selector => ;
 
-                    /* @analyze-error ${stStructureDiagnostics.MULTI_MAPPED_SELECTOR()}*/
+                    /* @analyze-error(comment) ${stStructureDiagnostics.MISSING_MAPPED_SELECTOR()}*/
+                    @st ::missing-selector => /*c*/;
+
+                    /* @analyze-error(multi) ${stStructureDiagnostics.MULTI_MAPPED_SELECTOR()}*/
                     @st ::multi-selector => .a, .b;
 
-                    /* @analyze-error ${stStructureDiagnostics.MISSING_MAPPING()}*/
+                    /* @analyze-error(no-arrow) ${stStructureDiagnostics.MISSING_MAPPING()}*/
                     @st ::missing-mapping ;
 
-                    /* @analyze-error ${stStructureDiagnostics.MAPPING_UNSUPPORTED_NESTING()}*/
+                    /* @analyze-error(nesting) ${stStructureDiagnostics.MAPPING_UNSUPPORTED_NESTING()}*/
                     @st ::multi-selector => .a:not(&);
                 }
             `);
