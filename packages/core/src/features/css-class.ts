@@ -386,6 +386,7 @@ export function createWarningRule(
 ) {
     const message = `"class extending component '${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({
+        raws: { between: ' ' },
         selector: `${scopedExtendingNode}:not(${scopedExtendedNode})::before`,
         nodes: [
             postcss.decl({

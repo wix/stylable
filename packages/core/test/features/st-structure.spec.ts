@@ -137,6 +137,38 @@ describe('@st structure', () => {
                 'entry__abc entry__defined-class-inline'
             );
         });
+        it('should add runtime inherit check (dev mode)', () => {
+            const source = `
+                @st .super :is(.root);
+            `;
+            //
+            const { sheets: devSheets } = testStylableCore(source, {
+                stylableConfig: { mode: 'development' },
+            });
+            const { sheets: prodSheets } = testStylableCore(source, {
+                stylableConfig: { mode: 'production' },
+            });
+
+            const { meta: devMeta } = devSheets['/entry.st.css'];
+            const { meta: prodMeta } = prodSheets['/entry.st.css'];
+
+            const devActual = devMeta.targetAst!.toString().replace(/\s\s+/g, ' ');
+            const prodActual = prodMeta.targetAst?.toString().replace(/\s\s+/g, ' ');
+
+            const expected = CSSClass.createWarningRule(
+                '.root' /*extendedNode*/,
+                '.entry__root' /*scopedExtendedNode*/,
+                'entry.st.css' /*extendedFile*/,
+                '.super' /*extendingNode*/,
+                '.entry__super' /*scopedExtendingNode*/,
+                'entry.st.css' /*extendingFile*/
+            )
+                .toString()
+                .replace(/\s\s+/g, ' ');
+
+            expect(devActual, 'development').to.contain(expected);
+            expect(prodActual, 'production').to.not.contain(expected);
+        });
         it('should disallow unsupported extends', () => {
             testStylableCore(`
                 /* @analyze-error(element) ${stStructureDiagnostics.MISSING_EXTEND()}*/
