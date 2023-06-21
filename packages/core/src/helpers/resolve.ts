@@ -1,7 +1,9 @@
-import type { ClassSymbol, ElementSymbol } from '../features';
+import type { ClassSymbol, ElementSymbol, STStructure } from '../features';
 import type { CSSResolve } from '../stylable-resolver';
 
-export function getOriginDefinition(resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>) {
+export function getOriginDefinition<T extends ClassSymbol | ElementSymbol | STStructure.PartSymbol>(
+    resolved: CSSResolve<T>[]
+) {
     for (const r of resolved) {
         const { symbol } = r;
         if (symbol._kind === 'class' || symbol._kind === 'element') {

@@ -23,16 +23,13 @@ import {
 import { isChildOfAtRule } from './helpers/rule';
 import { getOriginDefinition } from './helpers/resolve';
 import {
-    STPart,
     ClassSymbol,
     CSSContains,
     CSSMedia,
     ElementSymbol,
     FeatureTransformContext,
     STNamespace,
-} from './features';
-import type { StylableMeta } from './stylable-meta';
-import {
+    STStructure,
     STImport,
     STGlobal,
     STScope,
@@ -46,6 +43,7 @@ import {
     CSSLayer,
     CSSCustomProperty,
 } from './features';
+import type { StylableMeta } from './stylable-meta';
 import {
     CSSResolve,
     StylableResolverCache,
@@ -496,7 +494,7 @@ export class StylableTransformer {
                                 {
                                     _kind: 'css',
                                     meta: context.originMeta,
-                                    symbol: { _kind: 'element', name: '*' },
+                                    symbol: CSSType.createSymbol({ name: '*' }),
                                 },
                             ],
                             node
@@ -644,25 +642,36 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
     return transformedScopes;
 }
 
-function removeFirstRootInFirstCompound(selector: Selector, meta: StylableMeta) {
-    let hadRoot = false;
+function removeInitialCompoundMarker(
+    selector: Selector,
+    meta: StylableMeta,
+    structureMode: boolean
+) {
+    let hadCompoundStart = false;
     const compoundedSelector = groupCompoundSelectors(selector);
     const first = compoundedSelector.nodes.find(
         ({ type }) => type === `compound_selector`
     ) as CompoundSelector;
     if (first) {
-        first.nodes = first.nodes.filter((node) => {
-            if (node.type === 'class' && node.value === meta.root) {
-                hadRoot = true;
-                return false;
+        const matchNode = structureMode
+            ? (node: SelectorNode) => node.type === 'nesting'
+            : (node: SelectorNode) => node.type === 'class' && node.value === meta.root;
+        for (let i = 0; i < first.nodes.length; i++) {
+            const node = first.nodes[i];
+            if (node.type === 'comment') {
+                continue;
             }
-            return true;
-        });
+            if (matchNode(node)) {
+                hadCompoundStart = true;
+                first.nodes.splice(i, 1);
+            }
+            break;
+        }
     }
-    return { selector: splitCompoundSelectors(compoundedSelector), hadRoot };
+    return { selector: splitCompoundSelectors(compoundedSelector), hadCompoundStart };
 }
 
-type SelectorSymbol = ClassSymbol | ElementSymbol;
+type SelectorSymbol = ClassSymbol | ElementSymbol | STStructure.PartSymbol;
 type InferredResolve = CSSResolve<SelectorSymbol>;
 type InferredPseudoElement = {
     inferred: InferredSelector;
@@ -709,6 +718,21 @@ export class InferredSelector {
         } else {
             this.resolveSet.add(resolve);
         }
+    }
+    /**
+     * Takes a CSS part resolve and use it extend the current set of inferred resolved.
+     * Used to expand the resolved mapped selector with the part definition
+     * e.g. part can add nested states/parts that override the inferred mapped selector.
+     */
+    private addPartOverride(partResolve: CSSResolve<STStructure.PartSymbol>) {
+        const newSet = new Set<InferredResolve[]>();
+        for (const resolve of this.resolveSet) {
+            newSet.add([partResolve, ...resolve]);
+        }
+        if (!this.resolveSet.size) {
+            newSet.add([partResolve]);
+        }
+        this.resolveSet = newSet;
     }
     public getPseudoClasses({ name: searchedName }: { name?: string } = {}) {
         const collectedStates: Record<string, InferredPseudoClass> = {};
@@ -784,7 +808,7 @@ export class InferredSelector {
     }) {
         const collectedElements: Record<string, InferredPseudoElement> = {};
         const resolvedCount: Record<string, number> = {};
-        const checked: Record<string, Set<string>> = {};
+        const checked: Record<string, Map<string, boolean>> = {};
         const expectedIntersectionCount = this.resolveSet.size; // ToDo: dec for any types
         const addInferredElement = (
             name: string,
@@ -811,24 +835,34 @@ export class InferredSelector {
              * search for elements in each resolved selector.
              * start at 1 for extended symbols to prefer inherited elements over local
              */
-            const startIndex = resolvedContext.length === 1 ? 0 : 1;
+            const startIndex =
+                resolvedContext.length === 1 || resolvedContext[0]?.symbol._kind === 'part' ? 0 : 1;
             resolved: for (let i = startIndex; i < resolvedContext.length; i++) {
                 const { symbol, meta } = resolvedContext[i];
-                if (!symbol['-st-root'] || symbol.alias) {
+                const structureMode = STStructure.isStructureMode(meta);
+                if (
+                    symbol._kind !== 'part' &&
+                    (symbol.alias || (!structureMode && !symbol['-st-root']))
+                ) {
                     // non-root & alias classes don't have parts: bailout
                     continue;
                 }
                 if (name) {
+                    const cacheContext = symbol._kind === 'part' ? symbol.id : symbol.name;
+                    const uniqueId = meta.source + '::' + cacheContext;
                     resolvedCount[name] ??= 0;
-                    checked[name] ||= new Set();
-                    const uniqueId = meta.source + '::' + name;
+                    checked[name] ||= new Map();
                     if (checked[name].has(uniqueId)) {
-                        resolvedCount[name]++;
+                        if (checked[name].get(uniqueId)) {
+                            resolvedCount[name]++;
+                        }
                         continue;
                     }
-                    checked[name].add(uniqueId);
-                    //
-                    const partDef = STPart.getPart(meta, name);
+                    // get part symbol
+                    const partDef = STStructure.getPart(symbol, name);
+                    // save to cache
+                    checked[name].set(uniqueId, !!partDef);
+
                     if (!partDef) {
                         continue;
                     }
@@ -837,10 +871,10 @@ export class InferredSelector {
                         const selectorList = cloneSelector(partDef.mapTo);
                         const selectorStr = stringifySelector(partDef.mapTo);
                         selectorList.forEach((selector) => {
-                            const r = removeFirstRootInFirstCompound(selector, meta);
+                            const r = removeInitialCompoundMarker(selector, meta, structureMode);
                             selector.nodes = r.selector.nodes;
                             selector.before = '';
-                            if (!r.hadRoot && !isFirstInSelector) {
+                            if (!r.hadCompoundStart && !isFirstInSelector) {
                                 selector.nodes.unshift(
                                     createCombinatorSelector({ combinator: 'space' })
                                 );
@@ -861,10 +895,13 @@ export class InferredSelector {
                                       {
                                           _kind: 'css',
                                           meta,
-                                          symbol: { _kind: 'element', name: '*' },
+                                          symbol: CSSType.createSymbol({ name: '*' }),
                                       },
                                   ]);
-
+                        // add part resolve to inferred resolve set
+                        if (structureMode) {
+                            inferred.addPartOverride({ _kind: 'css', meta, symbol: partDef });
+                        }
                         addInferredElement(name, inferred, customAstSelectors);
                         break resolved;
                     } else {
@@ -1026,7 +1063,7 @@ export class ScopeContext {
                       {
                           _kind: 'css',
                           meta: originMeta,
-                          symbol: { _kind: 'element', name: '*' },
+                          symbol: CSSType.createSymbol({ name: '*' }),
                       },
                   ])
                 : transformer.createInferredSelector(originMeta, {

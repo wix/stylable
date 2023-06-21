@@ -16,6 +16,7 @@ import {
     CSSKeyframes,
     CSSLayer,
     CSSContains,
+    STStructure,
 } from './features';
 import { processDeclarationFunctions } from './process-declaration-functions';
 import {
@@ -35,6 +36,7 @@ export class StylableProcessor implements FeatureContext {
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics);
 
+        STStructure.hooks.analyzeInit(this);
         STImport.hooks.analyzeInit(this);
         CSSCustomProperty.hooks.analyzeInit(this);
 
@@ -65,6 +67,7 @@ export class StylableProcessor implements FeatureContext {
             this.collectUrls(decl);
         });
         STCustomSelector.hooks.analyzeDone(this);
+        STStructure.hooks.analyzeDone(this);
 
         STNamespace.setMetaNamespace(this, this.resolveNamespace);
 
@@ -155,6 +158,14 @@ export class StylableProcessor implements FeatureContext {
                 }
                 case 'container': {
                     CSSContains.hooks.analyzeAtRule({
+                        context: this,
+                        atRule,
+                        analyzeRule,
+                    });
+                    break;
+                }
+                case 'st': {
+                    STStructure.hooks.analyzeAtRule({
                         context: this,
                         atRule,
                         analyzeRule,

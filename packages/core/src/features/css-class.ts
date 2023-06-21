@@ -4,7 +4,7 @@ import * as STSymbol from './st-symbol';
 import type { StylableSymbol } from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import type { ElementSymbol } from './css-type';
-import * as STPart from './st-part';
+import type * as STStructure from './st-structure';
 import * as STCustomState from './st-custom-state';
 import { getOriginDefinition } from '../helpers/resolve';
 import { namespace } from '../helpers/namespace';
@@ -20,7 +20,7 @@ import {
 } from '../helpers/selector';
 import { getAlias } from '../stylable-utils';
 import type { StylableMeta } from '../stylable-meta';
-import { validateRuleStateDefinition, MappedStates } from '../helpers/custom-state';
+import { validateRuleStateDefinition } from '../helpers/custom-state';
 import type { Stylable } from '../stylable';
 import {
     ImmutableClass,
@@ -34,10 +34,10 @@ import * as postcss from 'postcss';
 import { basename } from 'path';
 import { createDiagnosticReporter } from '../diagnostics';
 import postcssValueParser from 'postcss-value-parser';
+import { plugableRecord } from '../helpers/plugable-record';
 
-export interface StPartDirectives {
+export interface StPartDirectives extends STStructure.HasParts, Partial<STCustomState.HasStates> {
     '-st-root'?: boolean;
-    '-st-states'?: MappedStates;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
     '-st-global'?: SelectorNode[];
 }
@@ -119,7 +119,26 @@ export const diagnostics = {
         'error',
         (name: string) => `cannot use alias for unknown import "${name}"`
     ),
+    DISABLED_DIRECTIVE: createDiagnosticReporter(
+        '00009',
+        'error',
+        (className: string, directive: keyof typeof stPartDirectives) => {
+            const alternative =
+                directive === '-st-extends'
+                    ? ` use "@st .${className} :is(.base)" instead`
+                    : directive === '-st-global'
+                    ? `use "@st .${className} => :global(<selector>)" instead`
+                    : directive === '-st-states'
+                    ? `use "@st .${className} { @st .state; }" instead`
+                    : '';
+            return `cannot use ${directive} on .${className} since class is defined with "@st" - ${alternative}`;
+        }
+    ),
 };
+
+const dataKey = plugableRecord.key<{
+    classesDefinedWithAtSt: Set<string>;
+}>('st-structure');
 
 // HOOKS
 
@@ -128,6 +147,11 @@ export const hooks = createFeature<{
     IMMUTABLE_SELECTOR: ImmutableClass;
     RESOLVED: Record<string, string>;
 }>({
+    metaInit({ meta }) {
+        plugableRecord.set(meta.data, dataKey, {
+            classesDefinedWithAtSt: new Set<string>(),
+        });
+    },
     analyzeSelectorNode({ context, node, rule }): void {
         if (node.nodes) {
             // error on functional class
@@ -142,7 +166,7 @@ export const hooks = createFeature<{
         addClass(context, node.value, rule);
     },
     analyzeDeclaration({ context, decl }) {
-        if (context.meta.type === 'stylable' && decl.prop in stPartDirectives) {
+        if (context.meta.type === 'stylable' && isDirectiveDeclaration(decl)) {
             handleDirectives(context, decl);
         }
     },
@@ -201,7 +225,7 @@ export const hooks = createFeature<{
             // used to namespace classes from js mixins since js mixins
             // are scoped in the context of the mixed-in stylesheet
             // which might not have a definition for the mixed-in class
-            { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name: node.value } },
+            { _kind: 'css', meta: originMeta, symbol: createSymbol({ name: node.value }) },
         ];
         selectorContext.setNextSelectorScope(resolved, node, node.value);
         const { symbol, meta } = getOriginDefinition(resolved);
@@ -259,7 +283,12 @@ export function getAll(meta: StylableMeta): Record<string, ClassSymbol> {
     return STSymbol.getAllByType(meta, `class`);
 }
 
-export function addClass(context: FeatureContext, name: string, rule?: postcss.Rule): ClassSymbol {
+export function createSymbol(input: Partial<ClassSymbol> & { name: string }): ClassSymbol {
+    const parts = input['-st-parts'] || {};
+    return { ...input, _kind: 'class', '-st-parts': parts };
+}
+
+export function addClass(context: FeatureContext, name: string, rule?: postcss.Node): ClassSymbol {
     let symbol = STSymbol.get(context.meta, name, `class`);
     if (!symbol) {
         let alias = STSymbol.get(context.meta, name);
@@ -268,15 +297,10 @@ export function addClass(context: FeatureContext, name: string, rule?: postcss.R
         }
         symbol = STSymbol.addSymbol({
             context,
-            symbol: {
-                _kind: 'class',
-                name,
-                alias,
-            },
+            symbol: createSymbol({ name, alias }),
             node: rule,
             safeRedeclare: !!alias,
         }) as ClassSymbol;
-        STPart.registerLegacyPart(context.meta, name, { mapTo: symbol });
     }
     // mark native css as global
     if (context.meta.type === 'css' && !symbol['-st-global']) {
@@ -362,6 +386,7 @@ export function createWarningRule(
 ) {
     const message = `"class extending component '${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({
+        raws: { between: ' ' },
         selector: `${scopedExtendingNode}:not(${scopedExtendedNode})::before`,
         nodes: [
             postcss.decl({
@@ -456,7 +481,22 @@ export function checkForScopedNodeAfter(
     return false;
 }
 
-function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
+function isDirectiveDeclaration(
+    decl: postcss.Declaration
+): decl is postcss.Declaration & { prop: keyof typeof stPartDirectives } {
+    return decl.prop in stPartDirectives;
+}
+export function disableDirectivesForClass(context: FeatureContext, className: string) {
+    // ToDo: move directive analyze to @st-structure
+    // called when class is defined with @st
+    const { classesDefinedWithAtSt } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    classesDefinedWithAtSt.add(className);
+}
+
+function handleDirectives(
+    context: FeatureContext,
+    decl: postcss.Declaration & { prop: keyof typeof stPartDirectives }
+) {
     const rule = decl.parent as postcss.Rule;
     if (rule?.type !== 'rule') {
         return;
@@ -466,7 +506,17 @@ function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
         return !accType ? type : accType !== type ? `complex` : type;
     }, `` as (typeof isSimplePerSelector)[number]['type']);
     const isSimple = type !== `complex`;
-    if (decl.prop === `-st-states`) {
+
+    const { classesDefinedWithAtSt } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    if (type === 'class' && classesDefinedWithAtSt.has(rule.selector.replace('.', ''))) {
+        context.diagnostics.report(
+            diagnostics.DISABLED_DIRECTIVE(rule.selector.replace('.', ''), decl.prop),
+            {
+                node: decl,
+            }
+        );
+        return;
+    } else if (decl.prop === `-st-states`) {
         if (isSimple && type !== 'type') {
             extendTypedRule(
                 context,
@@ -534,7 +584,7 @@ function handleDirectives(context: FeatureContext, decl: postcss.Declaration) {
     }
 }
 
-function extendTypedRule(
+export function extendTypedRule(
     context: FeatureContext,
     node: postcss.Node,
     selector: string,

@@ -12,7 +12,6 @@ import {
     STGlobal,
     STScope,
     STVar,
-    STPart,
     STCustomSelector,
     STCustomState,
     STMixin,
@@ -23,6 +22,7 @@ import {
     CSSKeyframes,
     CSSLayer,
     CSSContains,
+    STStructure,
 } from './features';
 
 const features = [
@@ -32,7 +32,6 @@ const features = [
     STGlobal,
     STScope,
     STVar,
-    STPart,
     STCustomSelector,
     STCustomState,
     STMixin,
@@ -43,6 +42,7 @@ const features = [
     CSSKeyframes,
     CSSLayer,
     CSSContains,
+    STStructure,
 ];
 
 export class StylableMeta {
@@ -66,12 +66,6 @@ export class StylableMeta {
         const context: FeatureContext = { meta: this, diagnostics };
         for (const { hooks } of features) {
             hooks.metaInit(context);
-        }
-        // set default root
-        if (this.type === 'stylable') {
-            this.root = 'root';
-            const rootSymbol = CSSClass.addClass(context, 'root');
-            rootSymbol[`-st-root`] = true;
         }
     }
     getSymbol(name: string) {

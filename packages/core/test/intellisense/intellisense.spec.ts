@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createTransformer } from '@stylable/core-test-kit';
-import { STCustomSelector } from '@stylable/core/dist/index-internal';
+import { STCustomSelector, CSSType } from '@stylable/core/dist/index-internal';
 
 describe('Stylable intellisense selector meta data', () => {
     it('resolve single class element', () => {
@@ -251,7 +251,7 @@ describe('Stylable intellisense selector meta data', () => {
             {
                 type: 'pseudo-element',
                 name: 'part',
-                resolved: [{ _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } }],
+                resolved: [{ _kind: 'css', meta, symbol: CSSType.createSymbol({ name: '*' }) }],
             },
         ]);
     });
@@ -526,7 +526,7 @@ describe('Stylable intellisense selector meta data', () => {
                 type: 'pseudo-element',
                 name: 'pongo',
                 resolved: [
-                    { _kind: 'css', meta: otherMeta, symbol: { _kind: 'element', name: '*' } },
+                    { _kind: 'css', meta: otherMeta, symbol: CSSType.createSymbol({ name: '*' }) },
                 ],
             },
         ]);

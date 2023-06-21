@@ -24,10 +24,11 @@ describe(`features/css-type`, () => {
         const { meta } = sheets['/entry.st.css'];
 
         // symbols
-        expect(CSSType.get(meta, `Btn`), `collect capital letters`).to.contain({
-            _kind: `element`,
-            name: 'Btn',
-        });
+        expect(CSSType.get(meta, `Btn`), `collect capital letters`).to.deep.contain(
+            CSSType.createSymbol({
+                name: 'Btn',
+            })
+        );
         expect(CSSType.get(meta, `div`), `ignore lowercase`).to.eql(undefined);
         expect(STSymbol.get(meta, `Btn`), `general symbols`).to.equal(CSSType.get(meta, `Btn`));
         expect(CSSType.getAll(meta), `getAll`).to.eql({
@@ -115,16 +116,18 @@ describe(`features/css-type`, () => {
             // symbols
             const importBeforeDef = meta.getImportStatements()[0];
             const importAfterDef = meta.getImportStatements()[1];
-            expect(CSSType.get(meta, `Before`), `before type symbol`).to.eql({
-                _kind: `element`,
-                name: 'Before',
-                alias: STImport.createImportSymbol(importBeforeDef, `default`, `default`, `/`),
-            });
-            expect(CSSType.get(meta, `After`), `after type symbol`).to.eql({
-                _kind: `element`,
-                name: 'After',
-                alias: STImport.createImportSymbol(importAfterDef, `default`, `default`, `/`),
-            });
+            expect(CSSType.get(meta, `Before`), `before type symbol`).to.eql(
+                CSSType.createSymbol({
+                    name: 'Before',
+                    alias: STImport.createImportSymbol(importBeforeDef, `default`, `default`, `/`),
+                })
+            );
+            expect(CSSType.get(meta, `After`), `after type symbol`).to.eql(
+                CSSType.createSymbol({
+                    name: 'After',
+                    alias: STImport.createImportSymbol(importAfterDef, `default`, `default`, `/`),
+                })
+            );
 
             // JS exports
             expect(exports.classes, `not added as classes exports`).to.eql({
@@ -154,16 +157,18 @@ describe(`features/css-type`, () => {
             // symbols
             const importBeforeDef = meta.getImportStatements()[0];
             const importAfterDef = meta.getImportStatements()[1];
-            expect(CSSType.get(meta, `BeforePart`), `before type symbol`).to.eql({
-                _kind: `element`,
-                name: 'BeforePart',
-                alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
-            });
-            expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql({
-                _kind: `element`,
-                name: 'AfterPart',
-                alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
-            });
+            expect(CSSType.get(meta, `BeforePart`), `before type symbol`).to.eql(
+                CSSType.createSymbol({
+                    name: 'BeforePart',
+                    alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
+                })
+            );
+            expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql(
+                CSSType.createSymbol({
+                    name: 'AfterPart',
+                    alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
+                })
+            );
 
             // JS exports
             expect(exports.classes, `not add as classes exports`).to.eql({
@@ -194,16 +199,18 @@ describe(`features/css-type`, () => {
             // symbols
             const importBeforeDef = meta.getImportStatements()[0];
             const importAfterDef = meta.getImportStatements()[1];
-            expect(CSSType.get(meta, `BeforePart`), `before type symbol`).to.eql({
-                _kind: `element`,
-                name: 'BeforePart',
-                alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
-            });
-            expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql({
-                _kind: `element`,
-                name: 'AfterPart',
-                alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
-            });
+            expect(CSSType.get(meta, `BeforePart`), `before type symbol`).to.eql(
+                CSSType.createSymbol({
+                    name: 'BeforePart',
+                    alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
+                })
+            );
+            expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql(
+                CSSType.createSymbol({
+                    name: 'AfterPart',
+                    alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
+                })
+            );
             // JS exports
             expect(exports.classes, `not add as classes exports`).to.eql({
                 root: `entry__root`,

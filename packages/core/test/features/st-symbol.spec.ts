@@ -7,6 +7,8 @@ import {
     VarSymbol,
     ImportSymbol,
     KeyframesSymbol,
+    CSSClass,
+    CSSType,
 } from '@stylable/core/dist/features';
 import { Diagnostics } from '@stylable/core/dist/diagnostics';
 import { diagnosticBankReportToStrings, testStylableCore } from '@stylable/core-test-kit';
@@ -23,7 +25,7 @@ describe(`features/st-symbol`, () => {
     it(`should keep symbol on meta`, () => {
         const { sheets } = testStylableCore(``);
         const { meta } = sheets[`/entry.st.css`];
-        const symbol: StylableSymbol = { _kind: `class`, name: `a` };
+        const symbol: StylableSymbol = CSSClass.createSymbol({ name: `a` });
         const context = { meta, diagnostics: new Diagnostics() };
 
         STSymbol.addSymbol({ context, symbol });
@@ -37,8 +39,8 @@ describe(`features/st-symbol`, () => {
     it(`should keep track of symbols by type`, () => {
         const { sheets } = testStylableCore(``);
         const { meta } = sheets[`/entry.st.css`];
-        const classSymbol: StylableSymbol = { _kind: `class`, name: `a` };
-        const typeSymbol: StylableSymbol = { _kind: `element`, name: `a` };
+        const classSymbol: StylableSymbol = CSSClass.createSymbol({ name: `a` });
+        const typeSymbol: StylableSymbol = CSSType.createSymbol({ name: `a` });
         const context = { meta, diagnostics: new Diagnostics() };
 
         STSymbol.addSymbol({ context, symbol: classSymbol });
@@ -57,8 +59,8 @@ describe(`features/st-symbol`, () => {
     it(`should override previous symbol`, () => {
         const { sheets } = testStylableCore(``);
         const { meta } = sheets[`/entry.st.css`];
-        const symbolA: StylableSymbol = { _kind: `class`, name: `a` };
-        const symbolB: StylableSymbol = { _kind: `element`, name: `a` };
+        const symbolA: StylableSymbol = CSSClass.createSymbol({ name: `a` });
+        const symbolB: StylableSymbol = CSSType.createSymbol({ name: `a` });
         const context = { meta, diagnostics: new Diagnostics() };
 
         STSymbol.addSymbol({ context, symbol: symbolA });
@@ -85,8 +87,8 @@ describe(`features/st-symbol`, () => {
     it(`should return collected symbols by namespace`, () => {
         const { sheets } = testStylableCore(``);
         const { meta } = sheets[`/entry.st.css`];
-        const classSymbol: StylableSymbol = { _kind: `class`, name: `a` };
-        const typeSymbol: StylableSymbol = { _kind: `element`, name: `b` };
+        const classSymbol: StylableSymbol = CSSClass.createSymbol({ name: `a` });
+        const typeSymbol: StylableSymbol = CSSType.createSymbol({ name: `b` });
         const keyframesSymbol: StylableSymbol = { _kind: `keyframes`, name: `c`, alias: `` };
         const context = { meta, diagnostics: new Diagnostics() };
 
@@ -119,23 +121,23 @@ describe(`features/st-symbol`, () => {
         STSymbol.addSymbol({
             context,
             localName: `localA`,
-            symbol: {
-                _kind: `class`,
+            symbol: CSSClass.createSymbol({
                 name: `A`,
-            },
+            }),
         });
 
-        expect(STSymbol.get(meta, `localA`)).to.eql({
-            _kind: `class`,
-            name: `A`,
-        });
+        expect(STSymbol.get(meta, `localA`)).to.eql(
+            CSSClass.createSymbol({
+                name: `A`,
+            })
+        );
         expect(STSymbol.get(meta, `A`)).to.eql(undefined);
     });
     describe(`diagnostics`, () => {
         it(`should warn on node with re-declared symbol`, () => {
             const { sheets } = testStylableCore(``);
             const { meta } = sheets[`/entry.st.css`];
-            const symbol: StylableSymbol = { _kind: `class`, name: `a` };
+            const symbol: StylableSymbol = CSSClass.createSymbol({ name: `a` });
             const ruleA = new postcss.Rule();
             const ruleB = new postcss.Rule();
             const context = { meta, diagnostics: new Diagnostics() };
@@ -162,7 +164,7 @@ describe(`features/st-symbol`, () => {
         it(`should NOT warn re-declared symbol with safeRedeclare=true`, () => {
             const { sheets } = testStylableCore(``);
             const { meta } = sheets[`/entry.st.css`];
-            const symbol: StylableSymbol = { _kind: `class`, name: `a` };
+            const symbol: StylableSymbol = CSSClass.createSymbol({ name: `a` });
             const ruleA = new postcss.Rule();
             const ruleB = new postcss.Rule();
             const context = { meta, diagnostics: new Diagnostics() };
@@ -179,7 +181,7 @@ describe(`features/st-symbol`, () => {
         it(`should warn on root declaration`, () => {
             const { sheets } = testStylableCore(``);
             const { meta } = sheets[`/entry.st.css`];
-            const symbol: StylableSymbol = { _kind: `class`, name: `root` };
+            const symbol: StylableSymbol = CSSClass.createSymbol({ name: `root` });
             const rule = new postcss.Rule();
             const context = { meta, diagnostics: new Diagnostics() };
 
