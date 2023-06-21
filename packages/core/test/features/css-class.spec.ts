@@ -1002,6 +1002,27 @@ describe(`features/css-class`, () => {
             });
         });
     });
+    describe('st-scope', () => {
+        it('should allow nested global/external selectors anywhere', () => {
+            const { sheets } = testStylableCore({
+                '/external.st.css': ``,
+                '/valid.st.css': `
+                    @st-import [root as external] from './external.st.css';
+                    @st-scope .root {
+                        .external {}
+
+                        @media screen and (max-width: 555px) {
+                            .external {}
+                        }
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/valid.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
     describe(`css-pseudo-element`, () => {
         // ToDo: move to css-pseudo-element spec once feature is created
         describe(`st-mixin`, () => {
