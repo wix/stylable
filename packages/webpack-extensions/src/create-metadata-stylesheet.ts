@@ -26,7 +26,7 @@ export function createMetadataForStylesheet(
     };
 }
 
-export function createNamespaceMapping(
+function createNamespaceMapping(
     usedMeta: Map<StylableMeta, ResolvedImport[]>,
     hashes: Map<StylableMeta, string>
 ) {
@@ -37,7 +37,7 @@ export function createNamespaceMapping(
     return namespaceMapping;
 }
 
-export function rewriteImports(
+function rewriteImports(
     usedMeta: Map<StylableMeta, ResolvedImport[]>,
     hashes: Map<StylableMeta, string>
 ) {
@@ -92,7 +92,7 @@ function ruleByLocation(ruleA: Rule | AtRule) {
     };
 }
 
-export function ensureHash(meta: StylableMeta, hashes: Map<StylableMeta, string>) {
+function ensureHash(meta: StylableMeta, hashes: Map<StylableMeta, string>) {
     const hash = hashes.get(meta);
     if (!hash) {
         throw new Error('Missing meta hash for:' + meta.source);
@@ -100,7 +100,7 @@ export function ensureHash(meta: StylableMeta, hashes: Map<StylableMeta, string>
     return hash;
 }
 
-export function createContentHashPerMeta(usedMeta: Iterable<StylableMeta>) {
+function createContentHashPerMeta(usedMeta: Iterable<StylableMeta>) {
     const hashes = new Map<StylableMeta, string>();
     for (const meta of usedMeta) {
         hashes.set(meta, hashContent(meta.sourceAst.toString()));
@@ -108,7 +108,7 @@ export function createContentHashPerMeta(usedMeta: Iterable<StylableMeta>) {
     return hashes;
 }
 
-export function collectDependenciesDeep(
+function collectDependenciesDeep(
     stylable: Stylable,
     meta: StylableMeta,
     out = new Map<StylableMeta, ResolvedImport[]>()
