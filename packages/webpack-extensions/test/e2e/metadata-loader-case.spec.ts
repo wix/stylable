@@ -1,8 +1,7 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { dirname, join } from 'path';
-import { readFileSync } from 'fs';
-import { hashContent } from '@stylable/webpack-extensions';
+import { getSheetContentAndHash } from './utils';
 
 const project = 'metadata-loader-case';
 const projectDir = dirname(
@@ -28,18 +27,16 @@ describe(`(${project})`, () => {
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
         const getMetadataFromLibraryBundle = new Function(bundleContent + '\nreturn metadata;');
 
-        const compXContent = readFileSync(join(projectRunner.testDir, 'comp-x.st.css'), 'utf-8');
-        const compContent = readFileSync(join(projectRunner.testDir, 'comp.st.css'), 'utf-8');
-        const indexContent = readFileSync(join(projectRunner.testDir, 'index.st.css'), 'utf-8');
-        const indexHash = hashContent(indexContent);
-        const compHash = hashContent(compContent);
-        const compXHash = hashContent(compXContent);
+        const comp = getSheetContentAndHash(join(projectRunner.testDir, 'comp.st.css'));
+        const compX = getSheetContentAndHash(join(projectRunner.testDir, 'comp-x.st.css'));
+        const index = getSheetContentAndHash(join(projectRunner.testDir, 'index.st.css'));
+
         const stylesheetMapping = {
-            [`/${indexHash}.st.css`]: indexContent
-                .replace('./comp.st.css', `/${compHash}.st.css`)
-                .replace('./comp-x.st.css', `/${compXHash}.st.css`),
-            [`/${compXHash}.st.css`]: compXContent,
-            [`/${compHash}.st.css`]: compContent,
+            [`/${index.hash}.st.css`]: index.content
+                .replace('./comp.st.css', `/${comp.hash}.st.css`)
+                .replace('./comp-x.st.css', `/${compX.hash}.st.css`),
+            [`/${compX.hash}.st.css`]: compX.content,
+            [`/${comp.hash}.st.css`]: comp.content,
         };
         const metadata = getMetadataFromLibraryBundle().default;
 
@@ -47,12 +44,12 @@ describe(`(${project})`, () => {
             entry: metadata.entry,
             stylesheetMapping: metadata.stylesheetMapping,
         }).to.deep.include({
-            entry: `/${indexHash}.st.css`,
+            entry: `/${index.hash}.st.css`,
             stylesheetMapping,
         });
 
-        expect(metadata.namespaceMapping[`/${indexHash}.st.css`]).to.match(/index\d+/);
-        expect(metadata.namespaceMapping[`/${compHash}.st.css`]).to.match(/comp\d+/);
-        expect(metadata.namespaceMapping[`/${compXHash}.st.css`]).to.match(/compx\d+/);
+        expect(metadata.namespaceMapping[`/${index.hash}.st.css`]).to.match(/index\d+/);
+        expect(metadata.namespaceMapping[`/${comp.hash}.st.css`]).to.match(/comp\d+/);
+        expect(metadata.namespaceMapping[`/${compX.hash}.st.css`]).to.match(/compx\d+/);
     });
 });
