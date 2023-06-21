@@ -1,8 +1,6 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
-import { hashContent } from '@stylable/webpack-extensions';
 import { EOL } from 'os';
 import { getSheetContentAndHash } from './utils';
 
