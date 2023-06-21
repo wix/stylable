@@ -1,9 +1,8 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
-import { hashContent } from '@stylable/webpack-extensions';
 import { EOL } from 'os';
+import { getSheetContentAndHash } from './utils';
 
 const project = 'manifest-plugin';
 const projectDir = dirname(
@@ -32,29 +31,39 @@ describe(`${project} - manifest (vars)`, () => {
         const manifestKey = Object.keys(assets).find((key) => key.startsWith('stylable.manifest'))!;
         const source = assets[manifestKey].source();
 
-        const compContent = readFileSync(
-            join(projectRunner.testDir, 'Button.comp.st.css'),
-            'utf-8'
+        const button = getSheetContentAndHash(join(projectRunner.testDir, 'Button.comp.st.css'));
+        const accordion = getSheetContentAndHash(
+            join(projectRunner.testDir, 'Accordion.comp.st.css')
         );
-        const commonContent = readFileSync(join(projectRunner.testDir, 'common.st.css'), 'utf-8');
-        const commonHash = hashContent(commonContent);
-        const compHash = hashContent(compContent);
+        const common = getSheetContentAndHash(join(projectRunner.testDir, 'common.st.css'));
 
         expect(JSON.parse(source)).to.deep.include({
             name: 'manifest-plugin-test',
             version: '0.0.0-test',
-            componentsIndex: `:import{-st-from: "/${compHash}.st.css";-st-default: Button;-st-named:--myColor as --Button-myColor;} .root Button{}${EOL}`,
-            componentsEntries: { Button: `/${compHash}.st.css` },
+            componentsIndex: [
+                `:import{-st-from: "/${accordion.hash}.st.css";-st-default: Accordion;-st-named:--myColor as --Accordion-myColor;} .root Accordion{}`,
+                `:import{-st-from: "/${button.hash}.st.css";-st-default: Button;-st-named:--myColor as --Button-myColor;} .root Button{}`,
+                ``, // empty line
+            ].join(EOL),
+            componentsEntries: {
+                Button: `/${button.hash}.st.css`,
+                Accordion: `/${accordion.hash}.st.css`,
+            },
             stylesheetMapping: {
-                [`/${compHash}.st.css`]: compContent.replace(
+                [`/${button.hash}.st.css`]: button.content.replace(
                     './common.st.css',
-                    `/${commonHash}.st.css`
+                    `/${common.hash}.st.css`
                 ),
-                [`/${commonHash}.st.css`]: commonContent,
+                [`/${accordion.hash}.st.css`]: accordion.content.replace(
+                    './common.st.css',
+                    `/${common.hash}.st.css`
+                ),
+                [`/${common.hash}.st.css`]: common.content,
             },
             namespaceMapping: {
-                [`/${commonHash}.st.css`]: 'common911354609',
-                [`/${compHash}.st.css`]: 'Buttoncomp1090430236',
+                [`/${common.hash}.st.css`]: 'common911354609',
+                [`/${button.hash}.st.css`]: 'Buttoncomp1090430236',
+                [`/${accordion.hash}.st.css`]: 'Accordioncomp4108556147',
             },
         });
     });

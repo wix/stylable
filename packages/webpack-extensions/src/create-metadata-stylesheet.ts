@@ -103,7 +103,7 @@ export function ensureHash(meta: StylableMeta, hashes: Map<StylableMeta, string>
 export function createContentHashPerMeta(usedMeta: Iterable<StylableMeta>) {
     const hashes = new Map<StylableMeta, string>();
     for (const meta of usedMeta) {
-        hashes.set(meta, hashContent(meta.sourceAst.toString()));
+        hashes.set(meta, hashContent(meta.source + meta.sourceAst.toString()));
     }
     return hashes;
 }
