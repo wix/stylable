@@ -18,11 +18,17 @@ import * as postcss from 'postcss';
 import { transformInlineCustomSelectors } from './custom-selector';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
-    return !!(
-        rule.parent &&
-        rule.parent.type === 'atrule' &&
-        (rule.parent as postcss.AtRule).name === atRuleName
-    );
+    let currentParent = rule.parent;
+    while (currentParent) {
+        if (
+            currentParent.type === 'atrule' &&
+            (currentParent as postcss.AtRule).name === atRuleName
+        ) {
+            return true;
+        }
+        currentParent = currentParent.parent;
+    }
+    return false;
 }
 
 export function isInConditionalGroup(node: postcss.Rule | postcss.AtRule, includeRoot = true) {
