@@ -15,7 +15,7 @@ export function injectCssModules(
     assetsModules: Map<string, NormalModule>
 ) {
     const MiniCssExtractPlugin = compilation.options.plugins.find(
-        (plugin) => plugin.constructor?.name === 'MiniCssExtractPlugin'
+        (plugin) => plugin?.constructor?.name === 'MiniCssExtractPlugin'
     );
 
     if (!MiniCssExtractPlugin) {
