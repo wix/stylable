@@ -1003,7 +1003,7 @@ describe(`features/css-class`, () => {
         });
     });
     describe('st-scope', () => {
-        it('should mark everything inside as scoped', () => {
+        it('should allow nested global/external selectors anywhere', () => {
             const { sheets } = testStylableCore({
                 '/external.st.css': ``,
                 '/valid.st.css': `
