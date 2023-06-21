@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core-test-kit",
-  "version": "5.12.0",
+  "version": "5.13.0",
   "description": "Stylable core test-kit",
   "main": "dist/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@file-services/memory": "^7.3.0",
-    "@stylable/core": "^5.12.0",
+    "@stylable/core": "^5.13.0",
     "chai": "^4.3.7",
     "flat": "^5.0.2",
     "postcss": "^8.4.24"
