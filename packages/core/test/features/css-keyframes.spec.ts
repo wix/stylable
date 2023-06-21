@@ -149,10 +149,13 @@ describe(`features/css-keyframes`, () => {
         // ToDo: make sure this is actually testing anything: "from" and "to" wouldn't be namespaces anyhow
         const { sheets } = testStylableCore(`
             @keyframes name {
-                /* @check from */
+                /* @rule from */
                 from {}
-                /* @check to */
-                to {}
+                /* @rule to */
+                to {
+                    /* @rule deep */
+                    deep {}
+                }
             }
         `);
 
