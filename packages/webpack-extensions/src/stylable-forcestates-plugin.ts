@@ -37,7 +37,7 @@ export function createDataAttr(dataAttrPrefix: string, stateName: string, param?
     return `${dataAttrPrefix}${paramWithValueExtraDil}${stateName}${statePart}`;
 }
 /**
- * 
+ *
  * @param targetAst - target ast to transform
  * @param namespaceMapping - known namespaces (use to detect framework specific namespaces like Stylable)
  * @param dataPrefix - prefix for the data attribute
@@ -50,7 +50,7 @@ export function applyStylableForceStateSelectors(
     plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext = (id) => id
 ) {
     const mapping: Record<string, string> = {};
-    addForceStateSelectors(targetAst, createContext(dataPrefix, namespaceMapping, mapping, plugin));
+    addForceStateSelectors(targetAst, createForceStatesContext(dataPrefix, namespaceMapping, mapping, plugin));
     return mapping;
 }
 
@@ -74,7 +74,7 @@ export function addForceStateSelectors(
     context: AddForceStateSelectorsContext
 ) {
     targetAst.walkRules((rule) =>
-        overrideRuleWithForceStates(parseCssSelector(rule.selector), context, rule)
+        mutateWithForceStates(parseCssSelector(rule.selector), context, rule)
     );
 }
 /**
@@ -84,7 +84,7 @@ export function addForceStateSelectors(
  * @param mapping - mapping of the original state to the override state
  * @param plugin - plugin to override the context
  */
-export function createContext(
+export function createForceStatesContext(
     dataPrefix: string,
     namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean),
     mapping: Record<string, string>,
@@ -131,7 +131,7 @@ export function createContext(
  * @param context - context to use for the transformation
  * @param rule - optional rule to update the selector on (if not provided only the selector ast will be mutated)
  */
-function overrideRuleWithForceStates(
+export function mutateWithForceStates(
     selectorAst: SelectorList,
     context: AddForceStateSelectorsContext,
     rule?: postcss.Rule
