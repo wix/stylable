@@ -179,8 +179,8 @@ export function processDeclarationValue(
                         ).replace(/\\/gm, '/')
                     );
                 }
-            } else if (value === 'format') {
-                // preserve native format function quotation
+            } else if (value === 'format' || value === 'path') {
+                // preserve native format/path function arg quotation
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
             } else if (resolvedSymbols.js[value]) {
                 const formatter = resolvedSymbols.js[value];
