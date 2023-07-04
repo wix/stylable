@@ -4,14 +4,13 @@ import type { Stylable } from '../stylable';
 import type { ImmutablePseudoClass } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
 import type { SRule } from '../deprecated/postcss-ast-extension';
-import { createDiagnosticReporter } from '../diagnostics';
 
 export const diagnostics = {
-    MISSING_SCOPING_PARAM: createDiagnosticReporter(
-        '11009',
-        'error',
-        () => '"@st-scope" missing scoping selector parameter'
-    ),
+    // INVALID_SCOPING: createDiagnosticReporter(
+    //     '11009',
+    //     'error',
+    //     () => '"@st-scope" requires a valid selector or empty value'
+    // ),
 };
 
 // HOOKS
@@ -21,19 +20,38 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         if (!isStScopeStatement(atRule)) {
             return;
         }
-        if (!atRule.params) {
-            context.diagnostics.report(diagnostics.MISSING_SCOPING_PARAM(), { node: atRule });
+        const selectorAst = parseSelectorWithCache(atRule.params);
+        const isValidSelector =
+            selectorAst.length !== 0 &&
+            selectorAst.every((selector) => {
+                let foundSelector = false;
+                for (const { type } of selector.nodes) {
+                    switch (type) {
+                        case 'invalid':
+                            return false;
+                        case 'comment':
+                            break;
+                        default:
+                            foundSelector = true;
+                    }
+                }
+                return foundSelector;
+            });
+        if (isValidSelector) {
+            analyzeRule(
+                postcss.rule({
+                    selector: atRule.params,
+                    source: atRule.source,
+                }),
+                {
+                    isScoped: true,
+                    originalNode: atRule,
+                }
+            );
+        } else if (atRule.params.trim() !== '') {
+            // ToDo(tech debt): report invalid selector
+            // this is a breaking change as "/**/" currently works.
         }
-        analyzeRule(
-            postcss.rule({
-                selector: atRule.params,
-                source: atRule.source,
-            }),
-            {
-                isScoped: true,
-                originalNode: atRule,
-            }
-        );
         context.meta.scopes.push(atRule);
     },
     prepareAST({ node, toRemove }) {
