@@ -145,6 +145,7 @@ export class CssService {
             atRule.name = mq;
 
             const replacementDiff = `${stScope} ${atRule.params}`.length - `${mq} all`.length;
+            atRule.raws.afterName = ' ';
             atRule.params = 'all' + ' '.repeat(replacementDiff);
         });
 
