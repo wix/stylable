@@ -4,14 +4,13 @@ import type { Stylable } from '../stylable';
 import type { ImmutablePseudoClass } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
 import type { SRule } from '../deprecated/postcss-ast-extension';
-import { createDiagnosticReporter } from '../diagnostics';
 
 export const diagnostics = {
-    MISSING_SCOPING_PARAM: createDiagnosticReporter(
-        '11009',
-        'error',
-        () => '"@st-scope" missing scoping selector parameter'
-    ),
+    // INVALID_SCOPING: createDiagnosticReporter(
+    //     '11009',
+    //     'error',
+    //     () => '"@st-scope" requires a valid selector or empty value'
+    // ),
 };
 
 // HOOKS
@@ -21,9 +20,8 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         if (!isStScopeStatement(atRule)) {
             return;
         }
-        if (!atRule.params) {
-            context.diagnostics.report(diagnostics.MISSING_SCOPING_PARAM(), { node: atRule });
-        }
+        // notice: any value from params would be taken as a scoping
+        // selector to be prepended to nested selectors
         analyzeRule(
             postcss.rule({
                 selector: atRule.params,

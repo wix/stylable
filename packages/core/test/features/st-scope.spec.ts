@@ -1,6 +1,11 @@
 import { STGlobal } from '@stylable/core/dist/features';
 import type { StylableMeta } from '@stylable/core';
-import { testStylableCore, collectAst, shouldReportNoDiagnostics } from '@stylable/core-test-kit';
+import {
+    testStylableCore,
+    collectAst,
+    shouldReportNoDiagnostics,
+    deindent,
+} from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
 
@@ -28,6 +33,77 @@ const queryStScope = (meta: StylableMeta, params: string): postcss.AtRule | unde
 
 describe(`features/st-scope`, () => {
     // ToDo: move relevant tests here
+    it('should allow nested global/external selectors', () => {
+        const { sheets } = testStylableCore({
+            '/external.st.css': ``,
+            '/valid.st.css': `
+                @st-import External, [root as external] from './external.st.css';
+                @st-scope {
+                    .external {}
+                    External {}
+                    div {}
+
+                    @media screen and (max-width: 555px) {
+                        .external {}
+                        External {}
+                        span {}
+                    }
+                }
+            `,
+        });
+
+        const { meta } = sheets['/valid.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+        expect(deindent(meta.targetAst!.toString())).to.eql(
+            deindent(`
+            .external__root {}
+            .external__root {}
+            div {}
+
+            @media screen and (max-width: 555px) {
+                .external__root {}
+                .external__root {}
+                span {}
+            }
+        `)
+        );
+    });
+    it('should prepend scoping selector to nested rules', () => {
+        const { sheets } = testStylableCore({
+            '/external.st.css': `.part{}`,
+            '/prepend.st.css': `
+                @st-import External, [part as externalPart] from './external.st.css';
+                @st-scope .s {
+
+                    /* @rule .prepend__s .external__part */
+                    .externalPart {}
+
+                    /* @rule .prepend__s .external__root */
+                    External {}
+
+                    /* @rule .prepend__s div */
+                    div {}
+
+                    @media screen and (max-width: 555px) {
+
+                        /* @rule .prepend__s .external__part */
+                        .externalPart {}
+
+                        /* @rule .prepend__s .external__root */
+                        External {}
+
+                        /* @rule .prepend__s span */
+                        span {}
+                    }
+                }
+            `,
+        });
+
+        const { meta } = sheets['/prepend.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
     describe('st-global', () => {
         it('should collect global rules', () => {
             const { sheets } = testStylableCore(`
