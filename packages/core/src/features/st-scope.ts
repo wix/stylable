@@ -20,38 +20,18 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
         if (!isStScopeStatement(atRule)) {
             return;
         }
-        const selectorAst = parseSelectorWithCache(atRule.params);
-        const isValidSelector =
-            selectorAst.length !== 0 &&
-            selectorAst.every((selector) => {
-                let foundSelector = false;
-                for (const { type } of selector.nodes) {
-                    switch (type) {
-                        case 'invalid':
-                            return false;
-                        case 'comment':
-                            break;
-                        default:
-                            foundSelector = true;
-                    }
-                }
-                return foundSelector;
-            });
-        if (isValidSelector) {
-            analyzeRule(
-                postcss.rule({
-                    selector: atRule.params,
-                    source: atRule.source,
-                }),
-                {
-                    isScoped: true,
-                    originalNode: atRule,
-                }
-            );
-        } else if (atRule.params.trim() !== '') {
-            // ToDo(tech debt): report invalid selector
-            // this is a breaking change as "/**/" currently works.
-        }
+        // notice: any value from params would be taken as a scoping
+        // selector to be prepended to nested selectors
+        analyzeRule(
+            postcss.rule({
+                selector: atRule.params,
+                source: atRule.source,
+            }),
+            {
+                isScoped: true,
+                originalNode: atRule,
+            }
+        );
         context.meta.scopes.push(atRule);
     },
     prepareAST({ node, toRemove }) {
