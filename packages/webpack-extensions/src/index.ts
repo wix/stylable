@@ -9,6 +9,8 @@ export {
     applyStylableForceStateSelectors,
     createDataAttr,
     createForceStateMatchers,
+    createForceStatesContext,
+    mutateWithForceStates,
 } from './stylable-forcestates-plugin';
 export {
     GetLogicModule,

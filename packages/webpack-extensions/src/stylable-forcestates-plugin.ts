@@ -36,50 +36,21 @@ export function createDataAttr(dataAttrPrefix: string, stateName: string, param?
     const statePart = param !== undefined ? STCustomState.resolveStateParam(param) : '';
     return `${dataAttrPrefix}${paramWithValueExtraDil}${stateName}${statePart}`;
 }
-
+/**
+ *
+ * @param targetAst - target ast to transform
+ * @param namespaceMapping - known namespaces (use to detect framework specific namespaces like Stylable)
+ * @param dataPrefix - prefix for the data attribute
+ * @param plugin - plugin to override the context
+ */
 export function applyStylableForceStateSelectors(
     targetAst: postcss.Root,
     namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean) = {},
     dataPrefix = OVERRIDE_STATE_PREFIX,
     plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext = (id) => id
 ) {
-    const isKnownNamespace =
-        typeof namespaceMapping === 'function'
-            ? namespaceMapping
-            : (name: string) => hasOwnProperty.call(namespaceMapping, name);
-
     const mapping: Record<string, string> = {};
-    addForceStateSelectors(
-        targetAst,
-        plugin({
-            getForceStateAttrContentFromNative(name) {
-                return this.getForceStateAttrContent(name);
-            },
-            getForceStateAttrContent(name) {
-                return dataPrefix + name;
-            },
-            getStateClassName(name) {
-                const parts = name.match(MATCH_STATE_CLASS);
-                return parts![2];
-            },
-            getStateAttr(content) {
-                const parts = content.match(MATCH_STATE_ATTR);
-                return parts![2];
-            },
-            isStateClassName(name) {
-                const parts = name.match(MATCH_STATE_CLASS);
-                return parts ? isKnownNamespace(parts[1]) : false;
-            },
-            isStateAttr(content) {
-                const parts = content.match(MATCH_STATE_ATTR);
-                return parts ? isKnownNamespace(parts[1]) : false;
-            },
-            onMapping(key, value) {
-                mapping[key] = value;
-                mapping[value] = key;
-            },
-        })
-    );
+    addForceStateSelectors(targetAst, createForceStatesContext(dataPrefix, namespaceMapping, mapping, plugin));
     return mapping;
 }
 
@@ -93,22 +64,91 @@ export interface AddForceStateSelectorsContext {
     onMapping(key: string, value: string): void;
 }
 
-export function addForceStateSelectors(ast: postcss.Root, context: AddForceStateSelectorsContext) {
-    ast.walkRules((rule) => {
-        const selectorAst = parseCssSelector(rule.selector);
+/**
+ * adds force state selectors to the entire ast
+ * @param targetAst - target ast to transform
+ * @param context - context to use for the transformation
+ */
+export function addForceStateSelectors(
+    targetAst: postcss.Root,
+    context: AddForceStateSelectorsContext
+) {
+    targetAst.walkRules((rule) =>
+        mutateWithForceStates(parseCssSelector(rule.selector), context, rule)
+    );
+}
+/**
+ * creates a context to share across the transformation of addForceStateSelectors
+ * @param dataPrefix - prefix for the data attribute
+ * @param namespaceMapping - known namespaces (use to detect framework specific namespaces like Stylable)
+ * @param mapping - mapping of the original state to the override state
+ * @param plugin - plugin to override the context
+ */
+export function createForceStatesContext(
+    dataPrefix: string,
+    namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean),
+    mapping: Record<string, string>,
+    plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext
+) {
+    const isKnownNamespace =
+        typeof namespaceMapping === 'function'
+            ? namespaceMapping
+            : (name: string) => hasOwnProperty.call(namespaceMapping, name);
 
-        const overrideSelectors = selectorAst.reduce((selectors, selector) => {
-            if (hasStates(selector, context)) {
-                selectors.push(transformStates(cloneDeep(selector), context));
-            }
-            return selectors;
-        }, [] as SelectorList);
+    return plugin({
+        getForceStateAttrContentFromNative(name) {
+            return this.getForceStateAttrContent(name);
+        },
+        getForceStateAttrContent(name) {
+            return dataPrefix + name;
+        },
+        getStateClassName(name) {
+            const parts = name.match(MATCH_STATE_CLASS);
+            return parts![2];
+        },
+        getStateAttr(content) {
+            const parts = content.match(MATCH_STATE_ATTR);
+            return parts![2];
+        },
+        isStateClassName(name) {
+            const parts = name.match(MATCH_STATE_CLASS);
+            return parts ? isKnownNamespace(parts[1]) : false;
+        },
+        isStateAttr(content) {
+            const parts = content.match(MATCH_STATE_ATTR);
+            return parts ? isKnownNamespace(parts[1]) : false;
+        },
+        onMapping(key, value) {
+            mapping[key] = value;
+            mapping[value] = key;
+        },
+    });
+}
 
-        if (overrideSelectors.length) {
-            selectorAst.push(...overrideSelectors);
+/**
+ *
+ * @param selectorAst - selector ast to override
+ * @param context - context to use for the transformation
+ * @param rule - optional rule to update the selector on (if not provided only the selector ast will be mutated)
+ */
+export function mutateWithForceStates(
+    selectorAst: SelectorList,
+    context: AddForceStateSelectorsContext,
+    rule?: postcss.Rule
+) {
+    const overrideSelectors: SelectorList = [];
+    for (const selector of selectorAst) {
+        if (hasStates(selector, context)) {
+            overrideSelectors.push(transformStates(cloneDeep(selector), context));
+        }
+    }
+
+    if (overrideSelectors.length) {
+        selectorAst.push(...overrideSelectors);
+        if (rule) {
             rule.selector = stringifySelectorAst(selectorAst);
         }
-    });
+    }
 }
 
 function isNative(name: string) {
