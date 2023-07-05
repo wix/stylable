@@ -199,7 +199,12 @@ export class CssService {
                 } else if (diag.code === 'unknownProperties') {
                     const prop = diag.message.match(/'(.*)'/)![1];
 
-                    if (meta.getStVar(prop) || prop === 'container' || prop === 'container-name') {
+                    if (
+                        meta.getStVar(prop) ||
+                        prop === 'container' ||
+                        prop === 'container-name' ||
+                        prop === 'd'
+                    ) {
                         return false;
                     }
                 }

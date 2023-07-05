@@ -2,7 +2,7 @@ import { dirname, relative } from 'path';
 import postcssValueParser from 'postcss-value-parser';
 import type * as postcss from 'postcss';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
-import { isCssNativeFunction } from './native-reserved-lists';
+import { nativeFunctionsDic } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
 import type { StylableMeta } from './stylable-meta';
 import {
@@ -180,7 +180,7 @@ export function processDeclarationValue(
                     );
                 }
             } else if (value === 'format') {
-                // preserve native format function quotation
+                // preserve native format function arg quotation
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
             } else if (resolvedSymbols.js[value]) {
                 const formatter = resolvedSymbols.js[value];
@@ -232,8 +232,9 @@ export function processDeclarationValue(
                     },
                     node: parsedNode,
                 });
-            } else if (isCssNativeFunction(value)) {
-                parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+            } else if (nativeFunctionsDic[value]) {
+                const { preserveQuotes } = nativeFunctionsDic[value];
+                parsedNode.resolvedValue = stringifyFunction(value, parsedNode, preserveQuotes);
             } else if (node) {
                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                 diagnostics.report(functionDiagnostics.UNKNOWN_FORMATTER(value), {
