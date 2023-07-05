@@ -9,6 +9,7 @@ import {
     assertRule,
     assertDecl,
     assertAtRule,
+    deindent,
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import type * as postcss from 'postcss';
@@ -273,6 +274,48 @@ describe(`features/st-mixin`, () => {
         const { meta } = sheets['/ns.st.css'];
 
         shouldReportNoDiagnostics(meta);
+    });
+    it(`should accept used build-vars from mixin and replace them`, () => {
+        const deindentAndRemoveSpaces = (str: string) => deindent(str).replace(/\s/g, '');
+        const { sheets } = testStylableCore({
+            '/mix.st.css': `
+                :vars {
+                    a: red;
+                    point_to_a: value(a);
+                    media-val: 123px
+                }
+                .mix {
+                    color: value(point_to_a);
+                }
+                @media (min-width: value(media-val)) {
+                    .mix { color: purple; }
+                }
+            `,
+            '/valid.st.css': `
+                @st-import [mix] from "./mix.st.css";
+
+                .root {
+                    -st-mixin: mix(
+                        a green, 
+                        media-val 789px
+                    );
+                }
+            `,
+        });
+
+        const { meta } = sheets['/valid.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+        expect(deindentAndRemoveSpaces(meta.targetAst!.toString())).to.equal(
+            deindentAndRemoveSpaces(`
+                .valid__root {
+                    color: green;
+                }
+                @media (min-width: 789px) {
+                    .valid__root { color: purple; }
+                }
+            `)
+        );
     });
     it(`should report unknown args`, () => {
         testStylableCore(`

@@ -537,8 +537,9 @@ function collectOptionalArgs(
     mixinRoot: postcss.Root,
     optionalArgs: Set<string> = new Set()
 ) {
-    mixinRoot.walkDecls((decl) => {
-        const varNames = STVar.parseVarsFromExpr(decl.value);
+    mixinRoot.walk((node) => {
+        const value = node.type === 'decl' ? node.value : node.type === 'atrule' ? node.params : '';
+        const varNames = STVar.parseVarsFromExpr(value);
         for (const name of varNames) {
             for (const refName of STVar.resolveReferencedVarNames(context, name)) {
                 optionalArgs.add(refName);
