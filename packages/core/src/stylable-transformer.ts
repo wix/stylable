@@ -302,25 +302,19 @@ export class StylableTransformer {
                 });
             }
 
-            if (this.mode === 'production') {
-                if (decl.prop.startsWith('-st-')) {
+            if (decl.prop.startsWith('-st-')) {
+                if (this.mode === 'production') {
                     this.directiveNodes.push(decl);
                 }
+                return;
             }
 
-            switch (decl.prop) {
-                case `-st-partial-mixin`:
-                case `-st-mixin`:
-                case `-st-states`:
-                    break;
-                default:
-                    decl.value = this.evaluator.evaluateValue(transformContext, {
-                        value: decl.value,
-                        meta,
-                        node: decl,
-                        cssVarsMapping,
-                    }).outputValue;
-            }
+            decl.value = this.evaluator.evaluateValue(transformContext, {
+                value: decl.value,
+                meta,
+                node: decl,
+                cssVarsMapping,
+            }).outputValue;
         };
 
         ast.walk((node) => {
