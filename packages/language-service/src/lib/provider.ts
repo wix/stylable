@@ -400,7 +400,7 @@ export class Provider {
 
         let mixin = '';
         const rev = parsed.nodes[parsed.nodes.length - 1];
-        if (rev.type === 'function' && !!rev.unclosed) {
+        if (rev?.type === 'function' && !!rev.unclosed) {
             mixin = rev.value;
         } else {
             return null;
