@@ -1,6 +1,6 @@
 type FunctionConfig<T> = Pick<
     {
-        [K in keyof T]: T[K] extends (...args: any[]) => infer R ? R : never;
+        [K in keyof T]: T[K] extends (...args: any[]) => infer R ? () => R : never;
     },
     {
         [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
@@ -22,7 +22,7 @@ export function wrapAndCatchErrors<T extends Record<string, any>>(
         }
         proto[name as keyof T] = function (this: T, ...args: any[]) {
             try {
-                return func.apply(this, args) || defaultReturn;
+                return func.apply(this, args) || (defaultReturn as () => any)();
             } catch (e) {
                 const errorContent = e instanceof Error ? e.stack : e;
                 console.error(`\nUnexpected error in ${name}\n`);

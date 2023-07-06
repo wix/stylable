@@ -421,16 +421,16 @@ export class StylableLanguageService {
 
 wrapAndCatchErrors(
     {
-        onDefinition: [],
-        onCompletion: [],
-        onSignatureHelp: null,
-        onReferences: [],
-        onHover: null,
-        onColorPresentation: [],
-        onDocumentColor: undefined,
-        onDocumentFormatting: undefined,
-        onDocumentRangeFormatting: undefined,
-        onRenameRequest: undefined,
+        onDefinition: () => [],
+        onCompletion: () => [],
+        onSignatureHelp: () => null,
+        onReferences: () => [],
+        onHover: () => null,
+        onColorPresentation: () => [],
+        onDocumentColor: () => [],
+        onDocumentFormatting: () => [],
+        onDocumentRangeFormatting: () => [],
+        onRenameRequest: () => ({ changes: {} }),
     },
     StylableLanguageService
 );
