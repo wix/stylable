@@ -176,6 +176,10 @@ describe('diagnostics', () => {
             const diagnostics = createDiagnostics(
                 {
                     [filePath]: deindent(`
+                    @st-scope{
+                        .root {}
+                    }
+
                     @st-scope {
                         .root {}
                     }
