@@ -827,10 +827,15 @@ export class InferredSelector {
         for (const resolvedContext of this.resolveSet.values()) {
             /**
              * search for elements in each resolved selector.
-             * start at 1 for extended symbols to prefer inherited elements over local
+             * start at 1 for legacy flat mode to prefer inherited elements over local
              */
             const startIndex =
-                resolvedContext.length === 1 || resolvedContext[0]?.symbol._kind === 'part' ? 0 : 1;
+                resolvedContext.length === 1 ||
+                (resolvedContext[0] &&
+                    (STStructure.isStructureMode(resolvedContext[0].meta) ||
+                        resolvedContext[0].symbol._kind === 'part'))
+                    ? 0
+                    : 1;
             resolved: for (let i = startIndex; i < resolvedContext.length; i++) {
                 const { symbol, meta } = resolvedContext[i];
                 const structureMode = STStructure.isStructureMode(meta);
