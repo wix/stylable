@@ -458,6 +458,26 @@ describe('@st structure', () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it('should resolve first level definition', () => {
+            const { sheets } = testStylableCore(`
+                @st .b {
+                    @st ::title => & > h2;
+                }
+                @st .a :is(.b) {
+                    @st ::title => & > h1;
+                }
+
+                /* @rule .entry__a > h1 */
+                .a::title {}
+
+                /* @rule .entry__b > h2 */
+                .b::title {}
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
         it('should resolve inherited parts', () => {
             const { sheets } = testStylableCore({
                 'base.st.css': `
