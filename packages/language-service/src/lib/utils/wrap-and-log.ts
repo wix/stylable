@@ -20,9 +20,9 @@ export function wrapAndCatchErrors<T extends Record<string, any>>(
             );
             continue;
         }
-        proto[name as keyof T] = function (this: T, ...args: any[]) {
+        proto[name as keyof T] = function (this: T, ...args: unknown[]) {
             try {
-                return func.apply(this, args) || (defaultReturn as () => any)();
+                return func.apply(this, args) || (defaultReturn as () => unknown)();
             } catch (e) {
                 const errorContent = e instanceof Error ? e.stack : e;
                 console.error(`\nUnexpected error in ${name}\n`);
