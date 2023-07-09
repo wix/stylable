@@ -32,6 +32,7 @@ import { getRefs, getRenameRefs } from './provider';
 import { typescriptSupport } from './typescript-support';
 import type { ExtendedTsLanguageService } from './types';
 import { LangServiceContext } from '../lib-new/lang-service-context';
+import { wrapAndCatchErrors } from './utils/wrap-and-log';
 
 export interface StylableLanguageServiceOptions {
     fs: IFileSystem;
@@ -417,6 +418,22 @@ export class StylableLanguageService {
         return null;
     }
 }
+
+wrapAndCatchErrors(
+    {
+        onDefinition: () => [],
+        onCompletion: () => [],
+        onSignatureHelp: () => null,
+        onReferences: () => [],
+        onHover: () => null,
+        onColorPresentation: () => [],
+        onDocumentColor: () => [],
+        onDocumentFormatting: () => [],
+        onDocumentRangeFormatting: () => [],
+        onRenameRequest: () => ({ changes: {} }),
+    },
+    StylableLanguageService
+);
 
 export interface StylableFile {
     path: string;
