@@ -8,5 +8,9 @@ export default {
       name: '@typescript-eslint/parser',
       reason: 'drop node 14 and type issues with ESLintUtils.RuleCreator',
     },
+    {
+      name: '@typescript-eslint/utils',
+      reason: 'drop node 14 and type issues with ESLintUtils.RuleCreator',
+    },
   ],
 };
