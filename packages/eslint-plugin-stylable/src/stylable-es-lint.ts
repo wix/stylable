@@ -7,7 +7,7 @@ import {
     AST_NODE_TYPES,
     ASTUtils,
     TSESTree as esTree,
-} from '@typescript-eslint/experimental-utils';
+} from '@typescript-eslint/utils';
 
 const { isIdentifier } = ASTUtils;
 
