@@ -499,7 +499,7 @@ export class StylableResolver {
                         break;
                     }
                 } else {
-                    current = { _kind: 'css', symbol: parent, meta };
+                    current = { _kind: 'css', symbol: parent, meta: current.meta };
                 }
             } else {
                 break;

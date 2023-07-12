@@ -478,7 +478,52 @@ describe('@st structure', () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        it('should resolve inherited parts', () => {
+        it('should resolve inherited between multiple stylesheet definitions', () => {
+            const { sheets } = testStylableCore({
+                'origin.st.css': `
+                    @st .origin {
+                        @st ::x => [x-of-origin];
+                    }
+                `,
+                'def.st.css': `
+                    @st-import [origin] from "./origin.st.css";
+
+                    @st .base :is(.origin) {
+                        @st ::a => [a-of-base];
+                    }
+                    @st .compose :is(.base) {
+                        @st ::b => [b-of-compose];
+                    }
+
+                    /* @rule(compose) .def__compose [x-of-origin] */
+                    .compose::x {}
+
+                    /* @rule(compose) .def__compose [b-of-compose] */
+                    .compose::b {}
+                    
+                    /* @rule(inherited) .def__compose [a-of-base] */
+                    .compose::a {}
+                `,
+                'entry.st.css': `
+                    @st-import [compose] from "./def.st.css";
+                    
+                    @st .x :is(.compose);
+
+                    /* @rule(compose) .entry__x [x-of-origin] */
+                    .x::x {}
+
+                    /* @rule(compose) .entry__x [b-of-compose] */
+                    .x::b {}
+                    
+                    /* @rule(inherited) .entry__x [a-of-base] */
+                    .x::a {}
+                `,
+            });
+
+            shouldReportNoDiagnostics(sheets['/def.st.css'].meta);
+            shouldReportNoDiagnostics(sheets['/entry.st.css'].meta);
+        });
+        it('should resolve inherited parts with legacy flat mode', () => {
             const { sheets } = testStylableCore({
                 'base.st.css': `
                     @st .base {
