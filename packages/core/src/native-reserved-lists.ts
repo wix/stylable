@@ -163,6 +163,7 @@ export const nativeFunctionsDic: Record<string, { preserveQuotes: boolean }> = {
     scaleX: { preserveQuotes: false },
     scaleY: { preserveQuotes: false },
     scaleZ: { preserveQuotes: false },
+    scroll: { preserveQuotes: false },
     sepia: { preserveQuotes: false },
     skew: { preserveQuotes: false },
     skewX: { preserveQuotes: false },
