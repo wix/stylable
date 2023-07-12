@@ -342,7 +342,7 @@ function collectImportsWithSideEffects(res: StylableResults, stylable: Stylable,
 }
 
 function inlineAssetsForJsModule(res: StylableResults, stylable: Stylable, fs: IFileSystem) {
-    const ast = res.meta.targetAst!.clone();
+    const ast = res.meta.targetAst!.clone() as NonNullable<typeof res.meta.targetAst>;
     processUrlDependencies({
         meta: { targetAst: ast, source: res.meta.source },
         rootContext: stylable.projectRoot,
