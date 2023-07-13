@@ -34,24 +34,40 @@ describe('features/css-pseudo-class', () => {
     });
     describe('st-custom-state', () => {
         it('should transform boolean state', () => {
-            const { sheets } = testStylableCore(`
-                .root {
-                    /* @transform-remove(removed decl) */
-                    -st-states: bool,
-                                exBool(boolean);
-                }
+            const { sheets } = testStylableCore({
+                '/valid.st.css': `
+                    .root {
+                        /* @transform-remove(removed decl) */
+                        -st-states: bool,
+                                    exBool(boolean);
+                    }
 
-                /* @rule(boolean) .entry__root.entry--bool */
-                .root:bool {}
+                    /* @rule(boolean) .valid__root.valid--bool */
+                    .root:bool {}
 
-                /* @rule(explicit boolean) .entry__root.entry--exBool */
-                .root:exBool {}
+                    /* @rule(explicit boolean) .valid__root.valid--exBool */
+                    .root:exBool {}
 
-                /* @rule(nested) .entry__root:not(.entry--bool) */
-                .root:not(:bool) {}
-            `);
+                    /* @rule(nested) .valid__root:not(.valid--bool) */
+                    .root:not(:bool) {}
+                `,
+                '/invalid.st.css': `
+                    .root {
+                        -st-states: bool;
+                    }
+                    
+                    /* 
+                        @transform-error ${stCustomStateDiagnostics.NO_PARAM_REQUIRED(
+                            'bool',
+                            'unknown-param'
+                        )}
+                        @rule .invalid__root.invalid--bool
+                    */
+                    .root:bool(unknown-param) {}
+                `,
+            });
 
-            const { meta } = sheets['/entry.st.css'];
+            const { meta } = sheets['/valid.st.css'];
             shouldReportNoDiagnostics(meta);
         });
         describe('string parameter', () => {
@@ -409,6 +425,38 @@ describe('features/css-pseudo-class', () => {
                         @rule .entry__root.entry---size-4-huge
                     */
                    .root:size(huge) {}
+                `);
+            });
+        });
+        describe('custom mapped static', () => {
+            it('should transform to global selector', () => {
+                const { sheets } = testStylableCore(`
+                    .root {
+                        -st-states: static(".x[y]"),
+                    }
+
+                    /* @rule .entry__root.x[y]*/
+                    .root:static {}
+                `);
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
+            it('should report error for unexpected param', () => {
+                testStylableCore(`
+                    .root {
+                        -st-states: static("[y]"),
+                    }
+
+                    /* 
+                        @transform-error ${stCustomStateDiagnostics.NO_PARAM_REQUIRED(
+                            'static',
+                            'unknown-param'
+                        )}
+                        @rule .entry__root[y]
+                    */
+                    .root:static(unknown-param) {}
                 `);
             });
         });

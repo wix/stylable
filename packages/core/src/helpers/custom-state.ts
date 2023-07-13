@@ -154,6 +154,12 @@ export const stateDiagnostics = {
         (state: string, finalSelector: string) =>
             `pseudo-state "${state}" result cannot start with a type or universal selector "${finalSelector}"`
     ),
+    NO_PARAM_REQUIRED: createDiagnosticReporter(
+        '08018',
+        'error',
+        (name: string, param: string) =>
+            `pseudo-state "${name}" accepts no parameter, but received "${param}"`
+    ),
 };
 
 // parse
@@ -855,12 +861,24 @@ export function transformPseudoClassToCustomState(
     diagnostics: Diagnostics,
     selectorNode?: postcss.Node
 ) {
-    if (stateDef === null) {
-        convertToClass(stateNode).value = createBooleanStateClassName(name, namespace);
-        delete stateNode.nodes;
-    } else if (typeof stateDef === 'string') {
-        // simply concat global mapped selector - ToDo: maybe change to 'selector'
-        convertToInvalid(stateNode).value = stateDef;
+    if (stateDef === null || typeof stateDef === 'string') {
+        if (stateNode.nodes && selectorNode) {
+            diagnostics.report(
+                stateDiagnostics.NO_PARAM_REQUIRED(name, stringifySelector(stateNode.nodes)),
+                {
+                    node: selectorNode,
+                    word: stringifySelector(stateNode),
+                }
+            );
+        }
+        if (stateDef === null) {
+            // boolean
+            convertToClass(stateNode).value = createBooleanStateClassName(name, namespace);
+        } else {
+            // static template selector
+            // simply concat global mapped selector - ToDo: maybe change to 'selector'
+            convertToInvalid(stateNode).value = stateDef;
+        }
         delete stateNode.nodes;
     } else if (typeof stateDef === 'object') {
         if (isTemplateState(stateDef)) {
