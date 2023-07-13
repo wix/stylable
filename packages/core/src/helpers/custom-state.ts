@@ -861,10 +861,7 @@ export function transformPseudoClassToCustomState(
     diagnostics: Diagnostics,
     selectorNode?: postcss.Node
 ) {
-    if (stateDef === null) {
-        convertToClass(stateNode).value = createBooleanStateClassName(name, namespace);
-        delete stateNode.nodes;
-    } else if (typeof stateDef === 'string') {
+    if (stateDef === null || typeof stateDef === 'string') {
         if (stateNode.nodes && selectorNode) {
             diagnostics.report(
                 stateDiagnostics.NO_PARAM_REQUIRED(name, stringifySelector(stateNode.nodes)),
@@ -874,8 +871,14 @@ export function transformPseudoClassToCustomState(
                 }
             );
         }
-        // simply concat global mapped selector - ToDo: maybe change to 'selector'
-        convertToInvalid(stateNode).value = stateDef;
+        if (stateDef === null) {
+            // boolean
+            convertToClass(stateNode).value = createBooleanStateClassName(name, namespace);
+        } else {
+            // static template selector
+            // simply concat global mapped selector - ToDo: maybe change to 'selector'
+            convertToInvalid(stateNode).value = stateDef;
+        }
         delete stateNode.nodes;
     } else if (typeof stateDef === 'object') {
         if (isTemplateState(stateDef)) {
