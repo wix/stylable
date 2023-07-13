@@ -326,4 +326,30 @@ describe('features/css-pseudo-element', () => {
             });
         });
     });
+    describe('st-import', () => {
+        it('should resolve inferred selector across stylesheet', () => {
+            const { sheets } = testStylableCore({
+                'origin.st.css': `
+                    .root {}
+                    .extend {
+                        -st-extends: root;
+                    }
+                `,
+                'entry.st.css': `
+                    @st-import [extend as eee] from './origin.st.css';
+    
+                    .local {
+                        -st-extends: eee;
+                    }
+
+                    /* @rule .entry__local .origin__extend */
+                    .local::extend {}
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
 });
