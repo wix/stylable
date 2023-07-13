@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "clean": "rimraf -g ./packages/*/{dist,cjs,esm}",
-    "build": "tsc --build",
+    "build": "tsc --build && node scripts/build.js",
     "watch": "npm run build -- -w",
     "lint": "eslint .",
     "pretest": "npm run build",
