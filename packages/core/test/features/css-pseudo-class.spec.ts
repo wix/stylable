@@ -412,6 +412,38 @@ describe('features/css-pseudo-class', () => {
                 `);
             });
         });
+        describe('custom mapped static', () => {
+            it('should transform to global selector', () => {
+                const { sheets } = testStylableCore(`
+                    .root {
+                        -st-states: static(".x[y]"),
+                    }
+
+                    /* @rule .entry__root.x[y]*/
+                    .root:static {}
+                `);
+
+                const { meta } = sheets['/entry.st.css'];
+
+                shouldReportNoDiagnostics(meta);
+            });
+            it('should report error for unexpected param', () => {
+                testStylableCore(`
+                    .root {
+                        -st-states: static("[y]"),
+                    }
+
+                    /* 
+                        @transform-error ${stCustomStateDiagnostics.NO_PARAM_REQUIRED(
+                            'static',
+                            'unknown-param'
+                        )}
+                        @rule .entry__root[y]
+                    */
+                    .root:static(unknown-param) {}
+                `);
+            });
+        });
         describe('custom mapped parameter', () => {
             it('should transform mapped state (quoted)', () => {
                 const { sheets } = testStylableCore(`
