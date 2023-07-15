@@ -22,20 +22,28 @@ function buildPureEsmRuntime() {
 
 function buildCoreLib() {
     const coreRoot = path.join(packagesRoot, 'core');
-    const outCjs = `./dist/stylable.lib.cjs`;
-    const outEsm = `./dist/stylable.lib.mjs`;
-
-    bundle(coreRoot, 'cjs', outCjs);
-    bundle(coreRoot, 'esm', outEsm);
+    // bundle({
+    //     absWorkingDir: coreRoot,
+    //     format: 'iife',
+    //     outfile: `./dist/stylable.lib.js`,
+    //     globalName: 'StylableCore',
+    // });
+    bundle({
+        absWorkingDir: coreRoot,
+        format: 'cjs',
+        outfile: `./dist/stylable.lib.cjs`,
+    });
+    bundle({
+        absWorkingDir: coreRoot,
+        format: 'esm',
+        outfile: `./dist/stylable.lib.mjs`,
+    });
 }
-function bundle(coreRoot, format, outfile) {
+function bundle(options) {
     esbuild
         .build({
-            absWorkingDir: coreRoot,
             entryPoints: ['./src/index.ts'],
-            outfile,
             bundle: true,
-            format,
             platform: 'browser',
             sourcemap: true,
             minify: true,
@@ -44,11 +52,12 @@ function bundle(coreRoot, format, outfile) {
                 path: '@file-services/path',
                 // remove after moving the defaultResolver from core
                 'enhanced-resolve/lib/ResolverFactory.js': path.join(
-                    coreRoot,
+                    options.absWorkingDir,
                     'src',
                     'enhanced-resolve-alias.ts'
                 ),
             },
+            ...options,
         })
         .then(({ errors, warnings }) => {
             if (errors.length || warnings.length) {
