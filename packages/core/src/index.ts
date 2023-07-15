@@ -37,3 +37,5 @@ export { createDefaultResolver } from './module-resolver';
 // low-level api
 export { parseModuleImportStatement, ensureModuleImport } from './helpers/import';
 export { validateCustomPropertyName } from './helpers/css-custom-property';
+
+export { generateStylableJSModuleSource } from './stylable-js-module-source';
