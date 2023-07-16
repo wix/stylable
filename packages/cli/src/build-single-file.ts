@@ -1,10 +1,6 @@
-import type { Stylable, StylableResults } from '@stylable/core';
+import { type Stylable, type StylableResults, generateStylableJSModuleSource } from '@stylable/core';
 import { isAsset, isRelativeNativeCss } from '@stylable/core/dist/index-internal';
-import {
-    generateDTSContent,
-    generateDTSSourceMap,
-    generateStylableJSModuleSource,
-} from '@stylable/module-utils';
+import { generateDTSContent, generateDTSSourceMap } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
 import type { IFileSystem } from '@file-services/types';
 import { hasImportedSideEffects, processUrlDependencies } from '@stylable/build-tools';

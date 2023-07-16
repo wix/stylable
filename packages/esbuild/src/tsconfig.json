@@ -7,7 +7,6 @@
     { "path": "../../core/src" },
     { "path": "../../cli/src" },
     { "path": "../../node/src" },
-    { "path": "../../module-utils/src" },
     { "path": "../../optimizer/src" }
   ]
 }
