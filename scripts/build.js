@@ -25,18 +25,18 @@ function buildCoreLib() {
     // bundle({
     //     absWorkingDir: coreRoot,
     //     format: 'iife',
-    //     outfile: `./dist/stylable.lib.js`,
+    //     outfile: `./dist/lib.js`,
     //     globalName: 'StylableCore',
     // });
     bundle({
         absWorkingDir: coreRoot,
         format: 'cjs',
-        outfile: `./dist/stylable.lib.cjs`,
+        outfile: `./dist/lib.cjs`,
     });
     bundle({
         absWorkingDir: coreRoot,
         format: 'esm',
-        outfile: `./dist/stylable.lib.mjs`,
+        outfile: `./dist/lib.mjs`,
     });
 }
 function bundle(options) {

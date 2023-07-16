@@ -11,7 +11,7 @@
       "program": "${workspaceFolder}/scripts/test-runner.js",
       "args": ["--glob", "packages/*/dist/**/${fileBasenameNoExtension}.js", "--timeout", "999999"],
       "runtimeArgs": ["--enable-source-maps"],
-      "preLaunchTask": "npm: build:ts-only",
+      "preLaunchTask": "npm: build:dev",
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": ["<node_internals>/**"],
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
