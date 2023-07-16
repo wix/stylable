@@ -1,10 +1,14 @@
 import fs, { readFileSync, writeFileSync } from 'fs';
 import { relative, join, isAbsolute, dirname } from 'path';
 import type { Plugin, PluginBuild } from 'esbuild';
-import { Stylable, StylableConfig, StylableResults } from '@stylable/core';
+import {
+    Stylable,
+    StylableConfig,
+    StylableResults,
+    generateStylableJSModuleSource,
+} from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
-import { generateStylableJSModuleSource } from '@stylable/module-utils';
 import { collectImportsWithSideEffects } from '@stylable/build-tools';
 import { resolveConfig, buildDTS } from '@stylable/cli';
 import type { DiagnosticsMode } from '@stylable/core/dist/index-internal';
