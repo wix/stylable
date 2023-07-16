@@ -188,7 +188,7 @@ export const nativeFunctionsDic: Record<string, { preserveQuotes: boolean }> = {
     oklch: { preserveQuotes: true },
     supports: { preserveQuotes: true },
     anchor: { preserveQuotes: true },
-    selector: { preserveQuotes: true /* TODO:transform the nested selector */ }, 
+    selector: { preserveQuotes: true /* TODO:transform the nested selector */ },
     style: { preserveQuotes: true /* TODO: transform the dashed ident property */ },
     'image-set': { preserveQuotes: true },
     sin: { preserveQuotes: true },
@@ -205,4 +205,4 @@ export const nativeFunctionsDic: Record<string, { preserveQuotes: boolean }> = {
     exp: { preserveQuotes: true },
     abs: { preserveQuotes: true },
     sign: { preserveQuotes: true },
-}
+};
