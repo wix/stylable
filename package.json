@@ -7,7 +7,8 @@
   "scripts": {
     "clean": "rimraf -g ./packages/*/{dist,cjs,esm}",
     "build": "tsc --build && node scripts/build.js",
-    "watch": "npm run build -- -w",
+    "build:dev": "tsc --build",
+    "watch": "tsc --build -w",
     "lint": "eslint .",
     "pretest": "npm run build",
     "test": "node --enable-source-maps scripts/test-runner.js --parallel",
