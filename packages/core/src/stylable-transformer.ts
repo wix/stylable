@@ -165,7 +165,7 @@ export class StylableTransformer {
             containers: {},
         };
         meta.transformedScopes = null;
-        meta.targetAst = meta.sourceAst.clone() as postcss.Root;
+        meta.targetAst = meta.sourceAst.clone();
         const context = {
             meta,
             diagnostics: this.diagnostics,

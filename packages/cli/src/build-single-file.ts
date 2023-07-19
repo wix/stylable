@@ -1,4 +1,8 @@
-import { type Stylable, type StylableResults, generateStylableJSModuleSource } from '@stylable/core';
+import {
+    type Stylable,
+    type StylableResults,
+    generateStylableJSModuleSource,
+} from '@stylable/core';
 import { isAsset, isRelativeNativeCss } from '@stylable/core/dist/index-internal';
 import { generateDTSContent, generateDTSSourceMap } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -338,7 +342,7 @@ function collectImportsWithSideEffects(res: StylableResults, stylable: Stylable,
 }
 
 function inlineAssetsForJsModule(res: StylableResults, stylable: Stylable, fs: IFileSystem) {
-    const ast = res.meta.targetAst!.clone() as NonNullable<typeof res.meta.targetAst>;
+    const ast = res.meta.targetAst!.clone();
     processUrlDependencies({
         meta: { targetAst: ast, source: res.meta.source },
         rootContext: stylable.projectRoot,

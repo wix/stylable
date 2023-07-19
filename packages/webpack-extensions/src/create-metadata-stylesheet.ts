@@ -44,7 +44,7 @@ function rewriteImports(
     const sourcesByHash: Record<string, string> = {};
     for (const [meta, resolvedImports] of usedMeta.entries()) {
         const hash = ensureHash(meta, hashes);
-        const rawAst = meta.sourceAst.clone() as typeof meta.sourceAst;
+        const rawAst = meta.sourceAst.clone();
         for (const { resolved, stImport } of resolvedImports) {
             if (resolved && resolved._kind === 'css') {
                 const rawRule = rawAst.nodes?.find(ruleByLocation(stImport.rule));
