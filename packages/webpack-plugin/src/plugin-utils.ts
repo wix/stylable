@@ -470,7 +470,7 @@ function getModuleRequestPath(
 export interface OptimizationMapping {
     usageMapping: Record<string, boolean>;
     namespaceMapping: Record<string, string>;
-    namespaceToFileMapping: Map<string, Set<NormalModule>>;
+    potentialNamespaceCollision: Map<string, Set<NormalModule>>;
 }
 
 export function createOptimizationMapping(
@@ -485,17 +485,21 @@ export function createOptimizationMapping(
                 acc.usageMapping[namespace] = isUsed ?? true;
             }
             acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
-            if (acc.namespaceToFileMapping.has(namespace)) {
-                acc.namespaceToFileMapping.get(namespace)!.add(module);
+            if (!isUsed) {
+                // skip collision map for unused stylesheets
+                return acc;
+            }
+            if (acc.potentialNamespaceCollision.has(namespace)) {
+                acc.potentialNamespaceCollision.get(namespace)!.add(module);
             } else {
-                acc.namespaceToFileMapping.set(namespace, new Set([module]));
+                acc.potentialNamespaceCollision.set(namespace, new Set([module]));
             }
             return acc;
         },
         {
             usageMapping: {},
             namespaceMapping: {},
-            namespaceToFileMapping: new Map<string, Set<NormalModule>>(),
+            potentialNamespaceCollision: new Map<string, Set<NormalModule>>(),
         }
     );
 }
