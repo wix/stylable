@@ -589,11 +589,11 @@ export class StylableWebpackPlugin {
                 (m) => m.resource
             );
 
-            const { usageMapping, namespaceMapping, namespaceToFileMapping } =
+            const { usageMapping, namespaceMapping, potentialNamespaceCollision } =
                 createOptimizationMapping(sortedModules, optimizer);
 
             reportNamespaceCollision(
-                namespaceToFileMapping,
+                potentialNamespaceCollision,
                 compilation,
                 normalizeNamespaceCollisionOption(
                     this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE
