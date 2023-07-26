@@ -19,7 +19,7 @@
     "@stylable/runtime": "^5.15.1",
     "decache": "^4.6.2",
     "lodash.clonedeep": "^4.5.0",
-    "postcss": "^8.4.26"
+    "postcss": "^8.4.27"
   },
   "files": [
     "dist",
