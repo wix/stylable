@@ -245,11 +245,16 @@ describe('features/st-namespace', () => {
             @namespace was previously used instead of @st-namespace.
             In order to preserve backwards compatibility, @namespace will
             continue to define the stylable namespace under specific conditions.
+
+            ToDo(major): remove special handling of native @namespace
         */
         it('should override default namespace with @namespace', () => {
             const { sheets } = testStylableCore({
                 '/other.st.css': `
-                    /* @transform-remove */
+                    /* 
+                        @transform-remove 
+                        @analyze-info ${diagnostics.NATIVE_OVERRIDE_DEPRECATION()}
+                    */
                     @namespace "button";
     
                     /* @rule .button__x */
@@ -258,8 +263,6 @@ describe('features/st-namespace', () => {
             });
 
             const { meta, exports } = sheets['/other.st.css'];
-
-            shouldReportNoDiagnostics(meta);
 
             expect(meta.namespace, 'meta.namespace').to.eql('button');
 
