@@ -224,24 +224,32 @@ describe('Generate DTS', function () {
                 :vars {
                     buildVar: red;
                 }
+                @keyframes anim {}
             `,
             'test.st.css': `
-                @st-import CompRoot, [cls, --customProp, buildVar] from './origin.st.css';
+                @st-import CompRoot, [
+                    cls,
+                    --customProp,
+                    buildVar,
+                    keyframes(anim)
+                ] from './origin.st.css';
                 .cls { color: value(buildVar); }
                 .CompRoot { 
                     color: green;
                     --customProp: green;
+                    animation: anim;
                 }
             `,
             'test.ts': `
                 import { eq } from "./test-kit";
-                import { classes, vars, stVars } from "./test.st.css";
+                import { classes, vars, stVars, keyframes } from "./test.st.css";
                 
                 eq<string>(classes.cls);
                 eq<string>(classes.CompRoot);
                 eq<string>(vars.customProp);
                 eq<string>(vars.customProp);
                 eq<string>(stVars.buildVar);
+                eq<string>(keyframes.anim);
             `,
         });
 
@@ -249,6 +257,7 @@ describe('Generate DTS', function () {
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('CompRoot'));
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('customProp'));
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('buildVar'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('anim'));
     });
 
     describe('st function', () => {
