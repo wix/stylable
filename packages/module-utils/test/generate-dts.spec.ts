@@ -219,7 +219,9 @@ describe('Generate DTS', function () {
     it('should not expose imported symbols', () => {
         tk.populate({
             'origin.st.css': `
-                .cls {}
+                .cls {
+                    container-name: cont;
+                }
                 @property --customProp;
                 :vars {
                     buildVar: red;
@@ -231,7 +233,8 @@ describe('Generate DTS', function () {
                     cls,
                     --customProp,
                     buildVar,
-                    keyframes(anim)
+                    keyframes(anim),
+                    container(cont),
                 ] from './origin.st.css';
                 .cls { color: value(buildVar); }
                 .CompRoot { 
@@ -239,10 +242,11 @@ describe('Generate DTS', function () {
                     --customProp: green;
                     animation: anim;
                 }
+                @container cont (inline-size > 1px) {}
             `,
             'test.ts': `
                 import { eq } from "./test-kit";
-                import { classes, vars, stVars, keyframes } from "./test.st.css";
+                import { classes, vars, stVars, keyframes, containers } from "./test.st.css";
                 
                 eq<string>(classes.cls);
                 eq<string>(classes.CompRoot);
@@ -250,6 +254,7 @@ describe('Generate DTS', function () {
                 eq<string>(vars.customProp);
                 eq<string>(stVars.buildVar);
                 eq<string>(keyframes.anim);
+                eq<string>(containers.cont);
             `,
         });
 
@@ -258,6 +263,7 @@ describe('Generate DTS', function () {
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('customProp'));
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('buildVar'));
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('anim'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('cont'));
     });
 
     describe('st function', () => {

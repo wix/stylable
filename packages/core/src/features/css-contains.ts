@@ -91,8 +91,13 @@ STImport.ImportTypeHook.set(`container`, (context, localName, importName, import
     });
 });
 
+interface ResolvedSymbols {
+    record: Record<string, ResolvedContainer>;
+    locals: Set<string>;
+}
+
 export const hooks = createFeature<{
-    RESOLVED: Record<string, ResolvedContainer>;
+    RESOLVED: ResolvedSymbols;
 }>({
     metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, {
@@ -170,12 +175,18 @@ export const hooks = createFeature<{
     },
     transformResolve({ context }) {
         const symbols = STSymbol.getAllByType(context.meta, `container`);
-        const resolved: Record<string, ResolvedContainer> = {};
+        const resolved: ResolvedSymbols = {
+            record: {},
+            locals: new Set(),
+        };
         const resolvedSymbols = context.getResolvedSymbols(context.meta);
         for (const [name, symbol] of Object.entries(symbols)) {
             const res = resolvedSymbols.container[name];
             if (res) {
-                resolved[name] = res;
+                resolved.record[name] = res;
+                if (res.meta === context.meta) {
+                    resolved.locals.add(name);
+                }
             } else if (symbol.import) {
                 context.diagnostics.report(
                     diagnostics.UNKNOWN_IMPORTED_CONTAINER(symbol.name, symbol.import.request),
@@ -197,8 +208,8 @@ export const hooks = createFeature<{
         const bucket = analyzed[prop];
         const value = decl.value;
         decl.value = bucket[value].transformNames((name) => {
-            const resolve = resolved[name];
-            return resolve ? getTransformedName(resolved[name]) : name;
+            const resolve = resolved.record[name];
+            return resolve ? getTransformedName(resolved.record[name]) : name;
         });
     },
     transformAtRuleNode({ context, atRule, resolved }) {
@@ -213,7 +224,7 @@ export const hooks = createFeature<{
             if (node.type === 'comment' || node.type === 'space') {
                 // do nothing
             } else if (node.type === 'word') {
-                const resolve = resolved[node.value];
+                const resolve = resolved.record[node.value];
                 if (resolve) {
                     node.value = getTransformedName(resolve);
                     changed = true;
@@ -247,8 +258,8 @@ export const hooks = createFeature<{
         }).outputValue;
     },
     transformJSExports({ exports, resolved }) {
-        for (const [name, resolve] of Object.entries(resolved)) {
-            exports.containers[name] = getTransformedName(resolve);
+        for (const name of resolved.locals) {
+            exports.containers[name] = getTransformedName(resolved.record[name]);
         }
     },
 });
