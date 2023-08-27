@@ -493,7 +493,7 @@ describe(`features/css-custom-property`, () => {
                 `,
             });
 
-            const { meta, exports } = sheets['/entry.st.css'];
+            const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
 
@@ -510,10 +510,29 @@ describe(`features/css-custom-property`, () => {
                 global: false,
                 alias: STSymbol.get(meta, `--after`, `import`),
             });
+        });
+        it(`should NOT expose imported symbols properties to runtime`, () => {
+            const { sheets } = testStylableCore({
+                '/props.st.css': `
+                    @property --propA;
+                    .root {
+                        --propB: red;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [--propA, --propB as --local] from './props.st.css';
+                    .root {
+                        --propA: green;
+                    }
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
 
             // JS exports
-            expect(exports.vars.before, `before JS export`).to.eql(`--props-before`);
-            expect(exports.vars.after, `after JS export`).to.eql(`--props-after`);
+            expect(exports.vars).to.eql({});
         });
         it(`should re-export imported symbols`, () => {
             const { sheets } = testStylableCore({
@@ -534,14 +553,9 @@ describe(`features/css-custom-property`, () => {
                 `,
             });
 
-            const { meta, exports } = sheets['/entry.st.css'];
+            const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
-
-            // JS exports
-            expect(exports.vars.propA, `propA export`).to.eql(`--props-propA`);
-            expect(exports.vars.local, `mapped export`).to.eql(`--props-propB`);
-            expect(exports.vars.deepProp, `deep export`).to.eql(`--base-deepProp`);
         });
         it(`should override imported with local definition`, () => {
             const { sheets } = testStylableCore({
@@ -621,7 +635,7 @@ describe(`features/css-custom-property`, () => {
                 `,
             });
 
-            const { meta, exports } = sheets['/entry.st.css'];
+            const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
 
@@ -632,9 +646,6 @@ describe(`features/css-custom-property`, () => {
                 global: false,
                 alias: STSymbol.get(meta, `--mapped`, `import`),
             });
-
-            // JS exports
-            expect(exports.vars.mapped, `mapped JS export`).to.eql(`--props-a`);
         });
         it(`should resolve global property`, () => {
             const { sheets } = testStylableCore({
@@ -951,7 +962,7 @@ describe(`features/css-custom-property`, () => {
             });
 
             const { meta: nativeMeta } = stylable.transform('/native.css');
-            const { meta, exports } = stylable.transform('/entry.st.css');
+            const { meta } = stylable.transform('/entry.st.css');
 
             shouldReportNoDiagnostics(nativeMeta);
             shouldReportNoDiagnostics(meta);
@@ -968,13 +979,6 @@ describe(`features/css-custom-property`, () => {
                     }
                 `)
             );
-
-            // JS exports
-            expect(exports.vars, `JS export`).to.eql({
-                a: '--a',
-                b: '--b',
-                c: '--c',
-            });
         });
         it('should ignore stylable specific transformations', () => {
             const { stylable } = testStylableCore({

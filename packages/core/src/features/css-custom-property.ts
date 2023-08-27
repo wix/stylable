@@ -69,8 +69,13 @@ const dataKey = plugableRecord.key<{
 
 // HOOKS
 
+interface ResolvedSymbols {
+    localToGlobal: Record<string, string>;
+    locals: Set<string>;
+}
+
 export const hooks = createFeature<{
-    RESOLVED: Record<string, string>;
+    RESOLVED: ResolvedSymbols;
 }>({
     metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, {
@@ -164,7 +169,10 @@ export const hooks = createFeature<{
         }
     },
     transformResolve({ context: { meta, getResolvedSymbols } }) {
-        const customPropsMapping: Record<string, string> = {};
+        const customPropsMapping: ResolvedSymbols = {
+            localToGlobal: {},
+            locals: new Set(),
+        };
         const resolvedSymbols = getResolvedSymbols(meta);
         for (const [localVarName, localSymbol] of Object.entries(
             STSymbol.getAllByType(meta, `cssVar`)
@@ -175,7 +183,10 @@ export const hooks = createFeature<{
                 symbol: localSymbol,
                 meta,
             };
-            customPropsMapping[localVarName] = getTransformedName(resolve);
+            customPropsMapping.localToGlobal[localVarName] = getTransformedName(resolve);
+            if (resolve.meta === meta) {
+                customPropsMapping.locals.add(localVarName);
+            }
         }
 
         return customPropsMapping;
@@ -187,8 +198,8 @@ export const hooks = createFeature<{
 
         if (atRule.nodes?.length) {
             const propName = globalValue(atRule.params) || atRule.params;
-            if (resolved[propName]) {
-                atRule.params = resolved[propName] || atRule.params;
+            if (resolved.localToGlobal[propName]) {
+                atRule.params = resolved.localToGlobal[propName] || atRule.params;
             }
         } else if (context.meta.type === 'stylable') {
             // remove `@property` with no body
@@ -196,7 +207,7 @@ export const hooks = createFeature<{
         }
     },
     transformDeclaration({ decl, resolved }) {
-        decl.prop = resolved[decl.prop] || decl.prop;
+        decl.prop = resolved.localToGlobal[decl.prop] || decl.prop;
     },
     transformValue({ node, data: { cssVarsMapping } }) {
         const { value } = node;
@@ -212,8 +223,8 @@ export const hooks = createFeature<{
         }
     },
     transformJSExports({ exports, resolved }) {
-        for (const varName of Object.keys(resolved)) {
-            exports.vars[varName.slice(2)] = resolved[varName];
+        for (const varName of resolved.locals) {
+            exports.vars[varName.slice(2)] = resolved.localToGlobal[varName];
         }
     },
 });

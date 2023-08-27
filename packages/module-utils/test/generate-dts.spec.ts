@@ -218,23 +218,31 @@ describe('Generate DTS', function () {
 
     it('should not expose imported symbols', () => {
         tk.populate({
-            'origin.st.css': `.cls {}`,
+            'origin.st.css': `
+                .cls {}
+                @property --customProp;
+            `,
             'test.st.css': `
-                @st-import CompRoot, [cls] from './base.st.css';
+                @st-import CompRoot, [cls, --customProp] from './origin.st.css';
                 .cls { color: green; }
-                .CompRoot { color: green; }
+                .CompRoot { 
+                    color: green;
+                    --customProp: green;
+                }
             `,
             'test.ts': `
                 import { eq } from "./test-kit";
-                import { classes } from "./test.st.css";
+                import { classes, vars } from "./test.st.css";
                 
                 eq<string>(classes.cls);
                 eq<string>(classes.CompRoot);
+                eq<string>(vars.customProp);
             `,
         });
 
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('cls'));
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('CompRoot'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('customProp'));
     });
 
     describe('st function', () => {
