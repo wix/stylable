@@ -163,14 +163,9 @@ describe('.d.ts source-maps', () => {
         const res = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
-                '/another.st.css': {
-                    namespace: 'another',
-                    content: `@layer L0`,
-                },
                 '/entry.st.css': {
                     namespace: 'entry',
                     content: deindent(`
-                        @st-import [layer(L0 as imported-layer)] from "./another.st.css";
                         @layer L1 {}
                     `),
                 },
@@ -185,12 +180,6 @@ describe('.d.ts source-maps', () => {
         expect(
             sourceMapConsumer.originalPositionFor(
                 getPosition(dtsText, 'L1":') // source mapping starts after the first double quote
-            )
-        ).to.eql({ line: 2, column: 0, source: 'entry.st.css', name: null });
-        // imported layer
-        expect(
-            sourceMapConsumer.originalPositionFor(
-                getPosition(dtsText, 'imported-layer":') // source mapping starts after the first double quote
             )
         ).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
     });

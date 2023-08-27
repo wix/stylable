@@ -227,6 +227,7 @@ describe('Generate DTS', function () {
                     buildVar: red;
                 }
                 @keyframes anim {}
+                @layer layer1 {}
             `,
             'test.st.css': `
                 @st-import CompRoot, [
@@ -235,6 +236,7 @@ describe('Generate DTS', function () {
                     buildVar,
                     keyframes(anim),
                     container(cont),
+                    layer(layer1),
                 ] from './origin.st.css';
                 .cls { color: value(buildVar); }
                 .CompRoot { 
@@ -243,10 +245,11 @@ describe('Generate DTS', function () {
                     animation: anim;
                 }
                 @container cont (inline-size > 1px) {}
+                @layer layer1 {}
             `,
             'test.ts': `
                 import { eq } from "./test-kit";
-                import { classes, vars, stVars, keyframes, containers } from "./test.st.css";
+                import { classes, vars, stVars, keyframes, containers, layers } from "./test.st.css";
                 
                 eq<string>(classes.cls);
                 eq<string>(classes.CompRoot);
@@ -255,6 +258,7 @@ describe('Generate DTS', function () {
                 eq<string>(stVars.buildVar);
                 eq<string>(keyframes.anim);
                 eq<string>(containers.cont);
+                eq<string>(layers.layer1);
             `,
         });
 
@@ -264,6 +268,7 @@ describe('Generate DTS', function () {
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('buildVar'));
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('anim'));
         expect(tk.typecheck('test.ts')).to.include(propNotOnType('cont'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('layer1'));
     });
 
     describe('st function', () => {
