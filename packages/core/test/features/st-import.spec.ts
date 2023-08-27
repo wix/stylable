@@ -98,6 +98,20 @@ describe(`features/st-import`, () => {
         });
         expect(meta.getSymbol(`c`), `mapped origin`).to.equal(undefined);
     });
+    it('should not add imported symbols to runtime exports', () => {
+        const { sheets } = testStylableCore({
+            'origin.st.css': `
+                .cls {}
+            `,
+            'entry.st.css': `
+                @st-import Root, [cls] from "./origin.st.css"; 
+            `,
+        });
+
+        const { exports } = sheets['/entry.st.css'];
+
+        expect(Object.keys(exports.classes)).to.not.contain('cls');
+    });
     it(`should only be defined at top level`, () => {
         const { sheets } = testStylableCore(`
             .x {

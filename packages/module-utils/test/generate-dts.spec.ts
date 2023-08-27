@@ -2,6 +2,7 @@ import { DTSKit } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 
 const propUnknownNotOnType = "Property 'unknown' does not exist on type";
+const propNotOnType = (name: string) => `Property '${name}' does not exist on type`;
 
 describe('Generate DTS', function () {
     this.timeout(25000);
@@ -213,6 +214,27 @@ describe('Generate DTS', function () {
         });
 
         expect(tk.typecheck('test.ts')).to.include(propUnknownNotOnType);
+    });
+
+    it('should not expose imported symbols', () => {
+        tk.populate({
+            'origin.st.css': `.cls {}`,
+            'test.st.css': `
+                @st-import CompRoot, [cls] from './base.st.css';
+                .cls { color: green; }
+                .CompRoot { color: green; }
+            `,
+            'test.ts': `
+                import { eq } from "./test-kit";
+                import { classes } from "./test.st.css";
+                
+                eq<string>(classes.cls);
+                eq<string>(classes.CompRoot);
+            `,
+        });
+
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('cls'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('CompRoot'));
     });
 
     describe('st function', () => {

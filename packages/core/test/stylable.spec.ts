@@ -217,7 +217,9 @@ describe('Stylable', () => {
                 'foo.st.css': '.foo {}',
                 'entry.st.css': `
                   @st-import [foo] from './foo.st.css';
-                  .root .foo { }
+                  .baz {
+                    -st-extends: foo;
+                  }
                 `,
             });
 
@@ -229,7 +231,9 @@ describe('Stylable', () => {
                 '/entry.st.css',
                 `
                 @st-import [bar] from './foo.st.css';
-                .root .bar { }
+                .baz {
+                    -st-extends: bar;
+                }
 
                 `
             );
@@ -240,7 +244,7 @@ describe('Stylable', () => {
             const res = stylable.transform(stylable.analyze('/entry.st.css'));
 
             expect(res.exports.classes).to.eql({
-                bar: 'foo__bar',
+                baz: 'entry__baz foo__bar',
                 root: 'entry__root',
             });
             expect(
