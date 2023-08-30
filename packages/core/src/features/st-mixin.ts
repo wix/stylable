@@ -420,7 +420,7 @@ function handleJSMixin(
     const meta = context.meta;
     const mixDef = config.mixDef;
     const res = mixinFunction((mixDef.data.options as any[]).map((v) => v.value));
-    const mixinRoot = cssObjectToAst(res).root;
+    const mixinRoot = cssObjectToAst(res);
 
     mixinRoot.walkDecls((decl) => {
         if (!isValidDeclaration(decl)) {
