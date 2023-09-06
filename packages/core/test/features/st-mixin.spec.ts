@@ -537,6 +537,43 @@ describe(`features/st-mixin`, () => {
             `)
             );
         });
+        it('should mix nested at-rules with content', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    @media (x>y) {
+                        .inner {
+                            color: green;
+                        }
+                    }
+                }
+
+                .into {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    @media (x>y) {
+                        .entry__inner {
+                            color: green;
+                        }
+                    }
+                }
+
+                .entry__into {
+                    @media (x>y) {
+                        .entry__inner {
+                            color: green;
+                        }
+                    }
+                }
+            `)
+            );
+        });
     });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {
