@@ -63,6 +63,7 @@ export const diagnostics = {
     VALUE_CANNOT_BE_STRING: mixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
     INVALID_NAMED_PARAMS: mixinHelperDiagnostics.INVALID_NAMED_PARAMS,
     INVALID_MERGE_OF: utilDiagnostics.INVALID_MERGE_OF,
+    INVALID_RECURSIVE_MIXIN: utilDiagnostics.INVALID_RECURSIVE_MIXIN,
     PARTIAL_MIXIN_MISSING_ARGUMENTS: createDiagnosticReporter(
         '10001',
         'error',

@@ -15,6 +15,11 @@ export const utilDiagnostics = {
         'error',
         (mergeValue: string) => `invalid merge of: \n"${mergeValue}"`
     ),
+    INVALID_RECURSIVE_MIXIN: createDiagnosticReporter(
+        '10010',
+        'error',
+        () => `invalid recursive mixin`
+    ),
 };
 
 // ToDo: move to helpers/mixin
@@ -46,7 +51,8 @@ export function mergeRules(
                 mixinRoot = 'NoRoot';
                 mixinRule.selector = selector;
             }
-        } else {
+        } else if (!isChildOfMixinRoot(mixinRule, mixinRoot)) {
+            // scope to mixin target if not already scoped by parent
             const { selector } = scopeNestedSelector(
                 parseSelectorWithCache(rule.selector),
                 parseSelectorWithCache(mixinRule.selector),
@@ -54,6 +60,12 @@ export function mergeRules(
                 anchorNodeCheck
             );
             mixinRule.selector = selector;
+        } else if (mixinRule.selector.includes(anchorSelector)) {
+            // report invalid nested mixin
+            mixinRule.selector = mixinRule.selector.split(anchorSelector).join('&');
+            report?.report(utilDiagnostics.INVALID_RECURSIVE_MIXIN(), {
+                node: rule,
+            });
         }
     });
 
@@ -87,6 +99,17 @@ export function mergeRules(
 
     return rule;
 }
+
+const isChildOfMixinRoot = (rule: postcss.Rule, mixinRoot: postcss.Rule | null | 'NoRoot') => {
+    let current: postcss.Container | postcss.Document | undefined = rule.parent;
+    while (current) {
+        if (current === mixinRoot) {
+            return true;
+        }
+        current = current.parent;
+    }
+    return false;
+};
 
 export const sourcePathDiagnostics = {
     MISSING_SOURCE_FILENAME: createDiagnosticReporter(

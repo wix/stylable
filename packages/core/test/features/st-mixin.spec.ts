@@ -6,9 +6,6 @@ import {
     shouldReportNoDiagnostics,
     matchRuleAndDeclaration,
     diagnosticBankReportToStrings,
-    assertRule,
-    assertDecl,
-    assertAtRule,
     deindent,
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
@@ -81,7 +78,7 @@ describe(`features/st-mixin`, () => {
             }
 
             .insert {
-                /* @rule .entry__child {before:1; propA:blue; propB:green; after: 2} */
+                /* @rule .entry__child {.entry__grandchild-1 { z-index: 1; }; before: 1; .entry__grandchild-2 { z-index: 2; }; propA: blue; propB: green; .entry__grandchild-3 { z-index: 3; }; after: 2; .entry__grandchild-4 { z-index: 4; }} */
                 .child {
                     .grandchild-1 { z-index: 1; }
                     before: 1;
@@ -409,37 +406,137 @@ describe(`features/st-mixin`, () => {
             }
         );
     });
-    it('should support CSS nesting as part of a mixin', () => {
-        const { sheets } = testStylableCore(`
-            .mix {
-                id: mix;
-                &:hover.mix {
-                    id: hover;
+    describe('css nesting', () => {
+        it('should support CSS nesting as part of a mixin', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    .inner {
+                        color: green;
+                    }
                 }
-                @media {
-                    id: atrule;
+
+                .into {
+                    -st-mixin: mix;
                 }
-            }
+            `);
 
-            .root {
-                -st-mixin: mix;
-            }
-        `);
+            const { meta } = sheets['/entry.st.css'];
 
-        const { meta } = sheets['/entry.st.css'];
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    .entry__inner {
+                        color: green;
+                    }
+                }
 
-        shouldReportNoDiagnostics(meta);
-        const mixedIntoRule = assertRule(meta.targetAst!.nodes[1], 'mixed into');
-        expect(mixedIntoRule.selector).to.eql('.entry__root');
-        const firstMixedDecl = assertDecl(mixedIntoRule.nodes[0], 'id: mix');
-        expect(firstMixedDecl.prop).to.eql('id');
-        expect(firstMixedDecl.value).to.eql('mix');
-        const nestHoverRule = assertRule(mixedIntoRule.nodes[1], '&:hover.mix');
-        expect(nestHoverRule.selector).to.eql('.entry__root&:hover');
-        const nestAtRule = assertAtRule(mixedIntoRule.nodes[2], '@media');
-        const nestInAtRule = assertDecl(nestAtRule.nodes[0], 'id: atrule');
-        expect(nestInAtRule.prop).to.eql('id');
-        expect(nestInAtRule.value).to.eql('atrule');
+                .entry__into {
+                    .entry__inner {
+                        color: green;
+                    }
+                }
+            `)
+            );
+        });
+        it('should preserve nesting selector', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    &.inner {
+                        color: green;
+                    }
+                }
+
+                .into {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    &.entry__inner {
+                        color: green;
+                    }
+                }
+
+                .entry__into {
+                    &.entry__inner {
+                        color: green;
+                    }
+                }
+            `)
+            );
+        });
+        it('should mix into nesting context', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    &.inner {
+                        color: green;
+                    }
+                }
+
+                .intoTop {
+                    &.intoNested {
+                        -st-mixin: mix;
+                    }
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    &.entry__inner {
+                        color: green;
+                    }
+                }
+
+                .entry__intoTop {
+                    &.entry__intoNested {
+                    &.entry__inner {
+                        color: green;
+                    }
+                    }
+                }
+            `)
+            );
+        });
+        it('should report recursive mixin ', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    &.inner.mix {
+                        color: green;
+                    }
+                }
+
+                /* @transform-error ${mixinDiagnostics.INVALID_RECURSIVE_MIXIN()}*/
+                .into {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    &.entry__inner.entry__mix {
+                        color: green;
+                    }
+                }
+
+                /* @transform-error ${mixinDiagnostics.INVALID_RECURSIVE_MIXIN()}*/
+                .entry__into {
+                    &&.entry__inner {
+                        color: green;
+                    }
+                }
+            `)
+            );
+        });
     });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {
