@@ -95,6 +95,7 @@ class EditTimeParser extends Parser {
         this.init(node, tokens[0][2]);
         this.raw(node, 'value', tokens, /* keep spaces*/ true);
         node.source!.end = this.getPosition(this.getLastOffset(tokens));
+        node.source!.end.offset++;
         this.extendParentEnd(node);
         return node;
     }

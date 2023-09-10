@@ -317,7 +317,7 @@ describe('edit-time-parser', () => {
         });
         expect(ast.source!.end!.offset, 'close parent with extra space').to.eql(12);
     });
-    it.skip('should keep track of end of source for unclosed nested nodes', () => {
+    it('should keep track of end of source for unclosed nested nodes', () => {
         const { ast } = safeParse(`
             @xxx abc {
                 .yyy {
@@ -329,13 +329,13 @@ describe('edit-time-parser', () => {
         const rule = assertRule(atrule.nodes[0]);
         const invalid = assertInvalid(rule.nodes[0]);
         /**
-         * ToDo: fix
-         * nodes.end.offset should be 33 (not 32)
-         * ast.end.column should be 11 (not 12)
+         * ToDo(fix): ast.end.column should be 11 (not 12)
+         * this is a postcss bug that is caused by calculating the root
+         * end with the next non existing position
          */
-        expect(atrule.source!.end!, 'atrule').to.eql(ast.source!.end);
-        expect(rule.source!.end!, 'rule').to.eql(ast.source!.end);
-        expect(invalid.source!.end!, 'decl').to.eql(ast.source!.end);
+        expect(atrule.source!.end!.offset, 'atrule').to.eql(ast.source!.end!.offset);
+        expect(rule.source!.end!.offset, 'rule').to.eql(ast.source!.end!.offset);
+        expect(invalid.source!.end!.offset, 'decl').to.eql(ast.source!.end!.offset);
     });
     it('should handle unclosed comment', () => {
         const { ast, errorNodes, ambiguousNodes } = safeParse(`
