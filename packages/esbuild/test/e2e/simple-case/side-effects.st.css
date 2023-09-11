@@ -1,3 +1,4 @@
+@test-marker side-effects.st.css|sideeffects;
 @property st-global(--side-effects);
 
 :global(body) {
