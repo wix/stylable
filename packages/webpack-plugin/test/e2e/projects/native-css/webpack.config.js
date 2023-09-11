@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
+    entry: ['./src/external.css', './src/index.js'],
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',
@@ -23,4 +24,14 @@ module.exports = {
         }),
         new HtmlWebpackPlugin(),
     ],
+    /*JUST TO TEST THAT AN EXTERNAL ENTRY CSS IS SAFE TO USE */
+    module: {
+        rules: [
+            {
+                test: /\.css$/i,
+                exclude: /\.st\.css?/,
+                use: ['css-loader'],
+            },
+        ],
+    },
 };
