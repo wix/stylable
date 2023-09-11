@@ -69,7 +69,7 @@ describe('Stylable ESBuild plugin', () => {
         expect(css).to.match(matchOrder);
     });
 
-    it.skip('should build a project with a bundle (minify)', async () => {
+    it('should build a project with a bundle (minify)', async () => {
         const { open, read } = await tk.build({
             project: 'simple-case',
             buildExport: 'cssBundleProd',
