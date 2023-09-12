@@ -66,6 +66,7 @@ export class StylableProcessor implements FeatureContext {
 
             this.collectUrls(decl);
         });
+        STNamespace.hooks.analyzeDone(this);
         STCustomSelector.hooks.analyzeDone(this);
         STStructure.hooks.analyzeDone(this);
 

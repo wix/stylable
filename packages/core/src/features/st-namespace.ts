@@ -34,11 +34,17 @@ export const diagnostics = {
         'error',
         () => 'st-namespace-reference dose not have any value'
     ),
+    NATIVE_OVERRIDE_DEPRECATION: createDiagnosticReporter(
+        '11014',
+        'info',
+        () => '@namespace will stop working in version 6, use @st-namespace instead'
+    ),
 };
 
 const dataKey = plugableRecord.key<{
     namespaces: string[];
     usedNativeNamespace: string[];
+    usedNativeNamespaceNodes: AtRule[];
     foundStNamespace: boolean;
 }>('namespace');
 
@@ -49,6 +55,7 @@ export const hooks = createFeature({
         plugableRecord.set(meta.data, dataKey, {
             namespaces: [],
             usedNativeNamespace: [],
+            usedNativeNamespaceNodes: [],
             foundStNamespace: false,
         });
     },
@@ -69,12 +76,22 @@ export const hooks = createFeature({
             data.namespaces.push(match);
             if (isNamespace) {
                 data.usedNativeNamespace.push(atRule.params);
+                data.usedNativeNamespaceNodes.push(atRule);
             } else {
                 // clear @namespace matches once @st-namespace if found
                 data.usedNativeNamespace.length = 0;
+                data.usedNativeNamespaceNodes.length = 0;
                 // mark to prevent any further @namespace collection
                 data.foundStNamespace = true;
             }
+        }
+    },
+    analyzeDone(context) {
+        const { usedNativeNamespaceNodes } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+        for (const node of usedNativeNamespaceNodes) {
+            context.diagnostics.report(diagnostics.NATIVE_OVERRIDE_DEPRECATION(), {
+                node,
+            });
         }
     },
     prepareAST({ context, node, toRemove }) {
