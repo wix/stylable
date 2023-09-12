@@ -9,19 +9,29 @@ import { sep } from 'node:path';
  */
 const stylesInOrder = [
     {
-        st_id: 'reset.css|reset',
+        path: 'reset.css',
+        fileName: 'reset.css',
+        namespace: 'reset',
     },
     {
-        st_id: 'side-effects.st.css|sideeffects',
+        path: 'side-effects.st.css',
+        fileName: 'side-effects.st.css',
+        namespace: 'sideeffects',
     },
     {
-        st_id: `internal-dir${sep}internal-dir.st.css|internaldir`,
+        path: `internal-dir${sep}internal-dir.st.css`,
+        fileName: 'internal-dir.st.css',
+        namespace: 'internaldir',
     },
     {
-        st_id: 'a.st.css|a',
+        path: 'a.st.css',
+        fileName: 'a.st.css',
+        namespace: 'a',
     },
     {
-        st_id: 'b.st.css|b',
+        path: 'b.st.css',
+        fileName: 'b.st.css',
+        namespace: 'b',
     },
 ];
 
@@ -38,7 +48,7 @@ describe('Stylable ESBuild plugin', () => {
         const { open } = await tk.build({ project: 'simple-case', buildExport: 'cssInJsDev' });
         await contract(
             await open({}, 'index.html', true),
-            stylesInOrder,
+            stylesInOrder.map(({ path, namespace }) => ({ st_id: `${path}|${namespace}` })),
             `"class extending component '.root => .b__root' in stylesheet 'b.st.css' was set on a node that does not extend '.root => .deep__root' from stylesheet 'deep.st.css'"`,
             'override-active'
         );
@@ -53,9 +63,27 @@ describe('Stylable ESBuild plugin', () => {
         const css = read('dist-bundle/index.css');
 
         const matchOrder = new RegExp(
-            stylesInOrder.map(({ st_id }) => escapeRegExp(st_id.split('|')[0])).join('[\\s\\S]*?')
+            stylesInOrder.map(({ fileName }) => escapeRegExp(fileName)).join('[\\s\\S]*?')
         );
 
+        expect(css).to.match(matchOrder);
+    });
+
+    it('should build a project with a bundle (minify)', async () => {
+        const { open, read } = await tk.build({
+            project: 'simple-case',
+            buildExport: 'cssBundleProd',
+            overrideOptions: {
+                minify: true,
+            },
+        });
+        await contract(await open({}, 'index.bundle.html', true), [], 'none', 'override-removed');
+
+        const css = read('dist-bundle/index.css');
+
+        const matchOrder = new RegExp(
+            stylesInOrder.map(({ fileName }) => escapeRegExp(fileName)).join('[\\s\\S]*?')
+        );
         expect(css).to.match(matchOrder);
     });
 });

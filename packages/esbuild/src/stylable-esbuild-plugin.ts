@@ -30,6 +30,7 @@ import {
     OptimizationMapping,
     buildUsageMapping,
     sortMarkersByDepth,
+    IdForPath,
 } from './plugin-utils';
 
 export interface ESBuildOptions {
@@ -128,6 +129,8 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
         );
         let onLoadCalled = false;
         const stylable = new Stylable(stConfig);
+
+        const idForPath = new IdForPath();
 
         /**
          * make all unused imports resolve to a special empty js module
@@ -278,10 +281,15 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 onLoadCalled = true;
                 const res = stylable.transform(args.path);
                 const { cssDepth, deepDependencies } = res.meta.transformCssDepth!;
+                const pathId = idForPath.getId(args.path);
                 return addToCache(key, {
                     watchFiles: [args.path, ...deepDependencies],
                     resolveDir: dirname(args.path),
-                    contents: wrapWithDepthMarkers(res.meta.targetAst!.toString(), cssDepth),
+                    contents: wrapWithDepthMarkers(
+                        res.meta.targetAst!.toString(),
+                        cssDepth,
+                        pathId
+                    ),
                     loader: 'css',
                 });
             })
@@ -295,9 +303,10 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             wrapDebug('onLoad css output', (args) => {
                 const { meta } = args.pluginData.stylableResults as StylableResults;
                 const { cssDepth = 0 } = meta.transformCssDepth!;
+                const pathId = idForPath.getId(args.path);
                 return {
                     resolveDir: dirname(args.path),
-                    contents: wrapWithDepthMarkers(meta.targetAst!.toString(), cssDepth),
+                    contents: wrapWithDepthMarkers(meta.targetAst!.toString(), cssDepth, pathId),
                     loader: 'css',
                 };
             })
@@ -361,6 +370,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                             sortMarkersByDepth(
                                 readFileSync(distFilePath, 'utf8'),
                                 stylable,
+                                idForPath,
                                 optimize.removeUnusedComponents ? mapping : {}
                             )
                         );

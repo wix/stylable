@@ -193,8 +193,8 @@ export function createDecacheRequire(build: PluginBuild) {
         return require(id);
     };
 }
-export function wrapWithDepthMarkers(css: string, depth: number | string) {
-    return `[stylable-depth]{--depth:${depth}}${css}[stylable-depth]{--end:${depth}}`;
+export function wrapWithDepthMarkers(css: string, depth: number | string, pathId: number) {
+    return `[stylable-start]{--depth:${depth}; --path: ${pathId};}${css}[stylable-end]{--path:${pathId}}`;
 }
 export interface OptimizationMapping {
     usageMapping?: Record<string, boolean>;
@@ -210,17 +210,18 @@ export interface OptimizationMapping {
 export function sortMarkersByDepth(
     css: string,
     stylable: Stylable,
+    idForMap: IdForPath,
     { usageMapping, globalMappings }: OptimizationMapping
 ) {
     const extracted: { depth: number; css: string; path: string }[] = [];
     const leftOverCss = css.replace(
-        /(\/\* stylable-?\w*?-css:[\s\S]*?\*\/[\s\S]*?)?\[stylable-depth\][\s\S]*?\{[\s\S]*?--depth:[\s\S]*?(\d+)[\s\S]*?\}([\s\S]*?)\[stylable-depth\][\s\S]*?\{[\s\S]*?--end:[\s\S]*?\d+[\s\S]*?\}/g,
+        /(\/\* stylable-?\w*?-css:[\s\S]*?\*\/[\s\S]*?)?\[stylable-start\][\s\S]*?\{[\s\S]*?--depth:[\s\S]*?(\d+)[\s]*;[\s\S]*?--path:[\s\S]*?(\d+)[\s\S]*?;?\}([\s\S]*?)\[stylable-end\][\s\S]*?\{[\s\S]*?--path:[\s\S]*?\d+[\s\S]*?\}/g,
         (...args) => {
-            const { 1: esbuildComment, 2: depth, 3: css } = args;
+            const { 1: esbuildComment, 2: depth, 3: pathId, 4: css } = args;
             extracted.push({
                 depth: parseInt(depth, 10),
                 css: (esbuildComment || '') + css,
-                path: esbuildComment.match(/\/\* stylable-?\w*?-css:([\s\S]*?)\s*\*\//)?.[1] || '',
+                path: idForMap.getPath(parseInt(pathId, 10)) || '',
             });
             return '';
         }
@@ -244,6 +245,23 @@ export function sortMarkersByDepth(
             .join('')
     );
 }
+
+export class IdForPath {
+    private idToPath = new Map<number, string>();
+    private pathToId = new Map<string, number>();
+    getId(path: string) {
+        if (!this.pathToId.has(path)) {
+            const id = this.pathToId.size;
+            this.pathToId.set(path, id);
+            this.idToPath.set(id, path);
+        }
+        return this.pathToId.get(path)!;
+    }
+    getPath(id: number) {
+        return this.idToPath.get(id);
+    }
+}
+
 const stubExports = {
     classes: {},
     containers: {},
