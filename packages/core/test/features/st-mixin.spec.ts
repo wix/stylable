@@ -574,6 +574,87 @@ describe(`features/st-mixin`, () => {
             `)
             );
         });
+        it('should nest any declaration following nested mixed-in rules', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    .inner {
+                        color: green;
+                    }
+                }
+
+                .into {
+                    declA: 1;
+                    declB: 2;
+                    -st-mixin: mix;
+                    declC: 3;
+                    declD: 4;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    .entry__inner {
+                        color: green;
+                    }
+                }
+
+                .entry__into {
+                    declA: 1;
+                    declB: 2;
+                    .entry__inner {
+                        color: green;
+                    }
+                    & {
+                        declC: 3;
+                        declD: 4;
+                    }
+                }
+            `)
+            );
+        });
+        it('should nest mixin decls that follow another mixin with nested nodes', () => {
+            const { sheets } = testStylableCore(`
+                .mixNested {
+                    .inner {
+                        color: green;
+                    }
+                }
+                .mixDecl {
+                    color: blue;
+                }
+
+                .into {
+                    -st-mixin: mixNested, mixDecl;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mixNested {
+                    .entry__inner {
+                        color: green;
+                    }
+                }
+                .entry__mixDecl {
+                    color: blue;
+                }
+
+                .entry__into {
+                    .entry__inner {
+                        color: green;
+                    }
+                    & {
+                        color: blue;
+                    }
+                }
+            `)
+            );
+        });
     });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {

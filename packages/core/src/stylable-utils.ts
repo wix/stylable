@@ -1,5 +1,5 @@
 import { isAbsolute } from 'path';
-import type * as postcss from 'postcss';
+import * as postcss from 'postcss';
 import { createDiagnosticReporter, Diagnostics } from './diagnostics';
 import type { ImportSymbol, StylableSymbol } from './features';
 import { isChildOfAtRule, stMixinMarker, isStMixinMarker } from './helpers/rule';
@@ -72,13 +72,31 @@ export function mergeRules(
     if (mixinAst.nodes) {
         let nextRule: postcss.Rule | postcss.AtRule = rule;
         // TODO: handle rules before and after decl on entry
+        const inlineMixin = !hasNonDeclsBeforeDecl(mixinDecl);
+        const mixInto = inlineMixin ? rule : postcss.rule({ selector: '&' });
+        const mixIntoRule = (node: postcss.AnyNode) => {
+            // mix node into rule
+            if (inlineMixin) {
+                mixInto.insertBefore(mixinDecl, node);
+            } else {
+                // indent first level - doesn't change deep nested
+                node.raws.before = (node.raws.before || '') + '    ';
+                mixInto.append(node);
+            }
+            // mark following decls for nesting
+            if (!nestFollowingDecls && node.type !== 'decl' && hasAnyDeclsAfter(mixinDecl)) {
+                nestFollowingDecls = true;
+            }
+        };
+        let nestFollowingDecls = false;
         mixinAst.nodes.slice().forEach((node) => {
             if (node === mixinRoot) {
                 for (const nested of [...node.nodes]) {
-                    rule.insertBefore(mixinDecl, nested);
+                    mixIntoRule(nested);
                 }
             } else if (node.type === 'decl') {
-                rule.insertBefore(mixinDecl, node);
+                // stand alone decl - most likely from js mixin
+                mixIntoRule(node);
             } else if (node.type === 'rule' || node.type === 'atrule') {
                 const valid = !nestedInKeyframes;
                 if (valid) {
@@ -95,9 +113,44 @@ export function mergeRules(
                 }
             }
         });
+        // add nested mixin to rule body
+        if (mixInto !== rule && mixInto.nodes.length) {
+            mixinDecl.before(mixInto);
+        }
+        // nest following decls if needed
+        if (nestFollowingDecls) {
+            const nestFollowingDecls = postcss.rule({ selector: '&' });
+            while (mixinDecl.next()) {
+                const nextNode = mixinDecl.next()!;
+                nextNode.raws.before = (nextNode.raws.before || '') + '    ';
+                nestFollowingDecls.append(nextNode);
+            }
+            mixinDecl.after(nestFollowingDecls);
+        }
     }
 
     return rule;
+}
+
+function hasNonDeclsBeforeDecl(decl: postcss.Declaration) {
+    let current: postcss.AnyNode | undefined = decl.prev();
+    while (current) {
+        if (current.type !== 'decl' && current.type !== 'comment') {
+            return true;
+        }
+        current = current.prev();
+    }
+    return false;
+}
+function hasAnyDeclsAfter(decl: postcss.Declaration) {
+    let current: postcss.AnyNode | undefined = decl.next();
+    while (current) {
+        if (current.type === 'decl') {
+            return true;
+        }
+        current = current.prev();
+    }
+    return false;
 }
 
 const isChildOfMixinRoot = (rule: postcss.Rule, mixinRoot: postcss.Rule | null | 'NoRoot') => {
