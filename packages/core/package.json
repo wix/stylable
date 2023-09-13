@@ -10,8 +10,8 @@
     "module": "./dist/module-with-extensions.js"
   },
   "dependencies": {
-    "@tokey/css-selector-parser": "^0.6.1",
-    "@tokey/css-value-parser": "^0.1.3",
+    "@tokey/css-selector-parser": "^0.6.2",
+    "@tokey/css-value-parser": "^0.1.4",
     "@tokey/imports-parser": "^1.0.0",
     "balanced-match": "^2.0.0",
     "css-selector-tokenizer": "^0.8.0",
