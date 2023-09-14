@@ -106,7 +106,6 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
                 node.name === 'container'
             ) {
                 let scopeSelector = node.name === 'st-scope' ? node.params : '';
-                let isNestedInMixin = false;
                 if (scopeSelector) {
                     const ast = parseSelectorWithCache(scopeSelector, { clone: true });
                     const matchesSelectors = isRoot
