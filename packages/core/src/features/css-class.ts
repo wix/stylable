@@ -145,7 +145,7 @@ const dataKey = plugableRecord.key<{
 export const hooks = createFeature<{
     SELECTOR: Class;
     IMMUTABLE_SELECTOR: ImmutableClass;
-    RESOLVED: Record<string, string>;
+    RESOLVED: Record<string, { classes: string; isLocal: boolean }>;
 }>({
     metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, {
@@ -172,7 +172,7 @@ export const hooks = createFeature<{
     },
     transformResolve({ context }) {
         const resolvedSymbols = context.getResolvedSymbols(context.meta);
-        const locals: Record<string, string> = {};
+        const locals: Record<string, { classes: string; isLocal: boolean }> = {};
         for (const [localName, resolved] of Object.entries(resolvedSymbols.class)) {
             const exportedClasses = [];
             let first = true;
@@ -213,7 +213,9 @@ export const hooks = createFeature<{
             }
             const classNames = unescapeCSS(exportedClasses.join(' '));
             if (classNames) {
-                locals[localName] = classNames;
+                const directResolve = resolved[0];
+                const isLocal = directResolve.meta === context.meta && !directResolve.symbol.alias;
+                locals[localName] = { classes: classNames, isLocal };
             }
         }
         return locals;
@@ -244,7 +246,11 @@ export const hooks = createFeature<{
         }
     },
     transformJSExports({ exports, resolved }) {
-        Object.assign(exports.classes, resolved);
+        for (const [localName, { classes, isLocal }] of Object.entries(resolved)) {
+            if (isLocal) {
+                exports.classes[localName] = classes;
+            }
+        }
     },
 });
 

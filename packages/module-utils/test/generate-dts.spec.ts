@@ -2,6 +2,7 @@ import { DTSKit } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 
 const propUnknownNotOnType = "Property 'unknown' does not exist on type";
+const propNotOnType = (name: string) => `Property '${name}' does not exist on type`;
 
 describe('Generate DTS', function () {
     this.timeout(25000);
@@ -213,6 +214,61 @@ describe('Generate DTS', function () {
         });
 
         expect(tk.typecheck('test.ts')).to.include(propUnknownNotOnType);
+    });
+
+    it('should not expose imported symbols', () => {
+        tk.populate({
+            'origin.st.css': `
+                .cls {
+                    container-name: cont;
+                }
+                @property --customProp;
+                :vars {
+                    buildVar: red;
+                }
+                @keyframes anim {}
+                @layer layer1 {}
+            `,
+            'test.st.css': `
+                @st-import CompRoot, [
+                    cls,
+                    --customProp,
+                    buildVar,
+                    keyframes(anim),
+                    container(cont),
+                    layer(layer1),
+                ] from './origin.st.css';
+                .cls { color: value(buildVar); }
+                .CompRoot { 
+                    color: green;
+                    --customProp: green;
+                    animation: anim;
+                }
+                @container cont (inline-size > 1px) {}
+                @layer layer1 {}
+            `,
+            'test.ts': `
+                import { eq } from "./test-kit";
+                import { classes, vars, stVars, keyframes, containers, layers } from "./test.st.css";
+                
+                eq<string>(classes.cls);
+                eq<string>(classes.CompRoot);
+                eq<string>(vars.customProp);
+                eq<string>(vars.customProp);
+                eq<string>(stVars.buildVar);
+                eq<string>(keyframes.anim);
+                eq<string>(containers.cont);
+                eq<string>(layers.layer1);
+            `,
+        });
+
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('cls'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('CompRoot'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('customProp'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('buildVar'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('anim'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('cont'));
+        expect(tk.typecheck('test.ts')).to.include(propNotOnType('layer1'));
     });
 
     describe('st function', () => {

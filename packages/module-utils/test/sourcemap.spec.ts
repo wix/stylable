@@ -163,14 +163,9 @@ describe('.d.ts source-maps', () => {
         const res = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
-                '/another.st.css': {
-                    namespace: 'another',
-                    content: `@layer L0`,
-                },
                 '/entry.st.css': {
                     namespace: 'entry',
                     content: deindent(`
-                        @st-import [layer(L0 as imported-layer)] from "./another.st.css";
                         @layer L1 {}
                     `),
                 },
@@ -186,12 +181,6 @@ describe('.d.ts source-maps', () => {
             sourceMapConsumer.originalPositionFor(
                 getPosition(dtsText, 'L1":') // source mapping starts after the first double quote
             )
-        ).to.eql({ line: 2, column: 0, source: 'entry.st.css', name: null });
-        // imported layer
-        expect(
-            sourceMapConsumer.originalPositionFor(
-                getPosition(dtsText, 'imported-layer":') // source mapping starts after the first double quote
-            )
         ).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
     });
 
@@ -199,14 +188,9 @@ describe('.d.ts source-maps', () => {
         const res = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
-                '/another.st.css': {
-                    namespace: 'another',
-                    content: `.a { container: C1; }`,
-                },
                 '/entry.st.css': {
                     namespace: 'entry',
                     content: deindent(`
-                        @st-import [container(C1 as imported-container)] from "./another.st.css";
                         .a {
                             container: C2;
                         }
@@ -224,13 +208,7 @@ describe('.d.ts source-maps', () => {
             sourceMapConsumer.originalPositionFor(
                 getPosition(dtsText, 'C2":') // source mapping starts after the first double quote
             )
-        ).to.eql({ line: 3, column: 4, source: 'entry.st.css', name: null });
-        // imported container
-        expect(
-            sourceMapConsumer.originalPositionFor(
-                getPosition(dtsText, 'imported-container":') // source mapping starts after the first double quote
-            )
-        ).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
+        ).to.eql({ line: 2, column: 4, source: 'entry.st.css', name: null });
     });
 
     it('maps states in the ".d.ts" to their positions in the original ".st.css" file', async () => {

@@ -80,8 +80,13 @@ STImport.ImportTypeHook.set(`layer`, (context, localName, importName, importDef)
     });
 });
 
+interface ResolvedSymbols {
+    record: Record<string, ResolvedLayer>;
+    locals: Set<string>;
+}
+
 export const hooks = createFeature<{
-    RESOLVED: Record<string, ResolvedLayer>;
+    RESOLVED: ResolvedSymbols;
 }>({
     metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, { analyzedParams: {}, layerDefs: {} });
@@ -123,12 +128,18 @@ export const hooks = createFeature<{
     },
     transformResolve({ context }) {
         const symbols = STSymbol.getAllByType(context.meta, `layer`);
-        const resolved: Record<string, ResolvedLayer> = {};
+        const resolved: ResolvedSymbols = {
+            record: {},
+            locals: new Set(),
+        };
         const resolvedSymbols = context.getResolvedSymbols(context.meta);
         for (const [name, symbol] of Object.entries(symbols)) {
             const res = resolvedSymbols.layer[name];
             if (res) {
-                resolved[name] = res;
+                resolved.record[name] = res;
+                if (res.meta === context.meta) {
+                    resolved.locals.add(name);
+                }
             } else if (symbol.import) {
                 context.diagnostics.report(
                     diagnostics.UNKNOWN_IMPORTED_LAYER(symbol.name, symbol.import.request),
@@ -147,22 +158,22 @@ export const hooks = createFeature<{
         }
         if (atRule.name === 'import') {
             // native css import
-            transformCSSImportLayer(context, atRule, resolved);
+            transformCSSImportLayer(context, atRule, resolved.record);
         } else if (atRule.name === 'layer') {
             // layer atrule
             const { analyzedParams } = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const analyzed = analyzedParams[atRule.params];
             if (analyzed) {
                 atRule.params = analyzed.transformNames((name) => {
-                    const resolve = resolved[name];
-                    return resolve ? getTransformedName(resolved[name]) : name;
+                    const resolve = resolved.record[name];
+                    return resolve ? getTransformedName(resolved.record[name]) : name;
                 });
             }
         }
     },
     transformJSExports({ exports, resolved }) {
-        for (const [name, resolve] of Object.entries(resolved)) {
-            exports.layers[name] = getTransformedName(resolve);
+        for (const name of resolved.locals) {
+            exports.layers[name] = getTransformedName(resolved.record[name]);
         }
     },
 });

@@ -401,10 +401,29 @@ describe('features/css-contains', () => {
             });
 
             // JS exports
-            expect(exports.containers, `JS exports`).to.eql({
-                c1: `imported__c1`,
-                'local-container': `imported__c2`,
+            expect(exports.containers, `JS exports only locals`).to.eql({});
+        });
+        it(`should NOT expose imported symbols properties to runtime`, () => {
+            const { sheets } = testStylableCore({
+                '/containers.st.css': `
+                    .root {
+                        container-name: x y;
+                    }
+                `,
+                '/entry.st.css': `
+                    @st-import [container(x, y as localY)] from './containers.st.css';
+                    
+                    @container x (inline-size > 1px) {}
+                    @container localY (inline-size > 1px) {}
+                `,
             });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // JS exports
+            expect(exports.containers).to.eql({});
         });
         it('should report unknown container name', () => {
             testStylableCore({
@@ -458,9 +477,7 @@ describe('features/css-contains', () => {
             });
 
             // JS exports
-            expect(exports.containers, `JS exports`).to.eql({
-                x: `b__x`,
-            });
+            expect(exports.containers, `JS exports only locals`).to.eql({});
         });
         it('should resolve imported global container name', () => {
             const { sheets } = testStylableCore({
@@ -505,7 +522,7 @@ describe('features/css-contains', () => {
                 `,
             });
 
-            const { meta, exports } = sheets['/entry.st.css'];
+            const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
 
@@ -523,12 +540,6 @@ describe('features/css-contains', () => {
                 name: 'after',
                 global: false,
                 import: meta.getImportStatements()[0],
-            });
-
-            // JS exports
-            expect(exports.containers, `JS exports`).to.eql({
-                before: `imported__before`,
-                after: `imported__after`,
             });
         });
     });
@@ -603,9 +614,7 @@ describe('features/css-contains', () => {
             );
 
             // JS exports
-            expect(exports.containers, `JS export`).to.eql({
-                a: 'a',
-            });
+            expect(exports.containers, `JS export only locals`).to.eql({});
         });
     });
 });

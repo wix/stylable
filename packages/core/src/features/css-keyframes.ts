@@ -102,8 +102,13 @@ STImport.ImportTypeHook.set(`keyframes`, (context, localName, importName, import
     });
 });
 
+interface ResolvedSymbols {
+    record: Record<string, KeyframesResolve>;
+    locals: Set<string>;
+}
+
 export const hooks = createFeature<{
-    RESOLVED: Record<string, KeyframesResolve>;
+    RESOLVED: ResolvedSymbols;
 }>({
     metaInit({ meta }) {
         plugableRecord.set(meta.data, dataKey, { statements: [], paths: {}, imports: [] });
@@ -153,12 +158,18 @@ export const hooks = createFeature<{
     },
     transformResolve({ context }) {
         const symbols = STSymbol.getAllByType(context.meta, `keyframes`);
-        const resolved: Record<string, KeyframesResolve> = {};
+        const resolved: ResolvedSymbols = {
+            record: {},
+            locals: new Set(),
+        };
         const resolvedSymbols = context.getResolvedSymbols(context.meta);
         for (const [name, symbol] of Object.entries(symbols)) {
             const res = resolvedSymbols.keyframes[name];
             if (res) {
-                resolved[name] = res;
+                resolved.record[name] = res;
+                if (res.meta === context.meta) {
+                    resolved.locals.add(name);
+                }
             } else if (symbol.import) {
                 context.diagnostics.report(
                     diagnostics.UNKNOWN_IMPORTED_KEYFRAMES(symbol.name, symbol.import.request),
@@ -178,7 +189,7 @@ export const hooks = createFeature<{
         if (!name) {
             return;
         }
-        const resolve = resolved[name];
+        const resolve = resolved.record[name];
         /* js keyframes mixins won't have resolved keyframes */
         atRule.params = resolve
             ? getTransformedName(resolve)
@@ -189,7 +200,7 @@ export const hooks = createFeature<{
         // ToDo: improve by correctly parse & identify `animation-name`
         // ToDo: handle symbols from js mixin
         parsed.nodes.forEach((node) => {
-            const resolve = resolved[node.value];
+            const resolve = resolved.record[node.value];
             const scoped = resolve && getTransformedName(resolve);
             if (scoped) {
                 node.value = scoped;
@@ -198,8 +209,8 @@ export const hooks = createFeature<{
         decl.value = parsed.toString();
     },
     transformJSExports({ exports, resolved }) {
-        for (const [name, resolve] of Object.entries(resolved)) {
-            exports.keyframes[name] = getTransformedName(resolve);
+        for (const name of resolved.locals) {
+            exports.keyframes[name] = getTransformedName(resolved.record[name]);
         }
     },
 });

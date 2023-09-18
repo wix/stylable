@@ -314,10 +314,7 @@ describe(`features/css-keyframes`, () => {
             });
 
             // JS exports
-            expect(exports.keyframes, `JS exports`).to.eql({
-                anim1: `imported__anim1`,
-                'local-anim': `imported__anim2`,
-            });
+            expect(exports.keyframes, `expose only locals to runtime`).to.eql({});
         });
         it(`should resolve imported global @keyframes`, () => {
             const { sheets } = testStylableCore({
@@ -359,10 +356,7 @@ describe(`features/css-keyframes`, () => {
             });
 
             // JS exports
-            expect(exports.keyframes, `JS exports`).to.eql({
-                anim1: `anim1`,
-                'local-anim': `anim2`,
-            });
+            expect(exports.keyframes, `expose only locals to runtime`).to.eql({});
         });
         it(`should override imported with local @keyframes`, () => {
             const { sheets } = testStylableCore({
@@ -654,9 +648,7 @@ describe(`features/css-keyframes`, () => {
             );
 
             // JS exports
-            expect(exports.keyframes, `JS export`).to.eql({
-                jump: 'jump',
-            });
+            expect(exports.keyframes, `expose only locals to runtime`).to.eql({});
         });
         it('should ignore stylable specific transformations', () => {
             const { stylable } = testStylableCore({

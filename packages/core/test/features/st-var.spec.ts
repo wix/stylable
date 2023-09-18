@@ -826,7 +826,7 @@ describe(`features/st-var`, () => {
                 text: `value(before)`,
             });
 
-            // exports
+            // exports only local vars
             expect(exports.stVars, `JS export not contains imported`).to.eql({
                 localBefore: `before-val`,
                 localAfter: `after-val`,

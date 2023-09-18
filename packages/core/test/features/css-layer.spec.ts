@@ -283,10 +283,28 @@ describe('features/css-layer', () => {
             });
 
             // JS exports
-            expect(exports.layers, `JS exports`).to.eql({
-                layer1: `imported__layer1`,
-                'local-layer': `imported__layer2`,
+            expect(exports.layers, `JS exports only locals`).to.eql({});
+        });
+        it(`should NOT expose imported symbols properties to runtime`, () => {
+            const { sheets } = testStylableCore({
+                '/layers.st.css': `
+                    @layer x {}
+                    @layer y {}
+                `,
+                '/entry.st.css': `
+                    @st-import [layer(x, y as localY)] from './layers.st.css';
+                    
+                    @layer x {}
+                    @layer localY {}
+                `,
             });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // JS exports
+            expect(exports.layers).to.eql({});
         });
         it('should resolve imported global @layer', () => {
             const { sheets } = testStylableCore({
@@ -326,10 +344,7 @@ describe('features/css-layer', () => {
             });
 
             // JS exports
-            expect(exports.layers, `JS exports`).to.eql({
-                layer1: `layer1`,
-                'local-layer': `layer2`,
-            });
+            expect(exports.layers, `JS exports only locals`).to.eql({});
         });
         it('should report unknown @layer import', () => {
             const { sheets } = testStylableCore({
@@ -404,9 +419,7 @@ describe('features/css-layer', () => {
             });
 
             // JS exports
-            expect(exports.layers, `JS exports`).to.eql({
-                L1: `imported__L1`,
-            });
+            expect(exports.layers, `JS exports only locals`).to.eql({});
         });
     });
     describe('st-mixin', () => {
@@ -531,7 +544,6 @@ describe('features/css-layer', () => {
                 L2: 'entry__L2',
                 'L3\\.X': 'entry__L3\\.X',
                 'global-layer': 'global-layer',
-                imported: 'other__imported',
             });
         });
         it.skip('should not allow between @import rules', () => {
@@ -572,11 +584,7 @@ describe('features/css-layer', () => {
             );
 
             // JS exports
-            expect(exports.layers, 'JS export').to.eql({
-                a: 'a',
-                b: 'b',
-                c: 'c',
-            });
+            expect(exports.layers, 'JS export only locals').to.eql({});
         });
         it('should ignore stylable specific transformations', () => {
             const { stylable } = testStylableCore({
