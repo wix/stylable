@@ -1,15 +1,19 @@
+// in browser build this gets remapped to an empty object via our package.json->"browser"
+import nodeModule from 'module';
 // importing the factory directly, as we feed it our own fs, and don't want graceful-fs to be implicitly imported
 // this allows @stylable/core to be bundled for browser usage without special custom configuration
 import ResolverFactory from 'enhanced-resolve/lib/ResolverFactory.js';
-
 import type { ModuleResolver } from './types';
 import type { MinimalFS } from './cached-process-file';
 
 function bundleSafeRequireExtensions(): string[] {
     let extensions: string[];
     try {
-        // we use eval here to avoid bundling warnings about require.extensions we always has fallback for browsers
-        extensions = Object.keys(require('module')._extensions);
+        // we use nodeModule here to avoid bundling warnings about require.extensions we always has fallback for browsers
+        extensions = Object.keys(
+            (nodeModule as typeof nodeModule & { _extensions?: Record<string, unknown> })
+                ._extensions ?? {}
+        );
     } catch (e) {
         extensions = [];
     }

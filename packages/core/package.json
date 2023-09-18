@@ -7,7 +7,7 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "browser": {
-    "module": "./dist/module-with-extensions.js"
+    "module": false
   },
   "dependencies": {
     "@tokey/css-selector-parser": "^0.6.2",
