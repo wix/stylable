@@ -1,3 +1,4 @@
+@test-marker b.st.css|b;
 @st-import Deep from "./deep.st.css";
 @st-import "./side-effects.st.css";
 @st-import themeColor from "./theme-color.js";

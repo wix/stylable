@@ -1,3 +1,5 @@
+@test-marker internal-dir.st.css|internaldir;
+
 .root {
     background: url('./internal-dir.png');
 }

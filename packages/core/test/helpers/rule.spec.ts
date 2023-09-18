@@ -52,6 +52,9 @@ describe(`helpers/rule`, () => {
 
                 /*nesting*/
                 .i[out] { .i[in] {} }
+
+                /*nesting at-rule*/
+                .i[out] { @media (x) { [in] {} } }
             `),
                 '.i'
             );
@@ -80,6 +83,16 @@ describe(`helpers/rule`, () => {
                 {
                     selector: '[st-mixin-marker][out]',
                     nodes: [{ selector: '[st-mixin-marker][in]' }],
+                },
+                {
+                    selector: '[st-mixin-marker][out]',
+                    nodes: [
+                        {
+                            name: 'media',
+                            params: '(x)',
+                            nodes: [{ selector: '[in]' }],
+                        },
+                    ],
                 },
             ];
 

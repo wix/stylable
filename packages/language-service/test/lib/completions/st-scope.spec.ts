@@ -130,7 +130,7 @@ describe('completion inside @st-scope', () => {
                     title: 'Suggest',
                     command: 'editor.action.triggerSuggest',
                 },
-                sortText: 'd_a0',
+                sortText: 'd_a1',
             });
         });
 

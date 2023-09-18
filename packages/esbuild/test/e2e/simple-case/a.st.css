@@ -1,3 +1,4 @@
+@test-marker a.st.css|a;
 @st-import Imported from './imported-only-from-css.st.css';
 
 .root {

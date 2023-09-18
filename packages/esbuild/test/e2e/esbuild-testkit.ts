@@ -20,10 +20,12 @@ export class ESBuildTestKit {
         project,
         buildExport,
         tmp = true,
+        overrideOptions = {},
     }: {
         project: string;
         buildExport?: string;
         tmp?: boolean;
+        overrideOptions?: BuildOptions;
     }) {
         let openServerUrl: string | undefined;
         let buildFile = require.resolve(`@stylable/esbuild/test/e2e/${project}/build.js`);
@@ -62,6 +64,7 @@ export class ESBuildTestKit {
             format: 'esm',
             target: ['es2020'],
             bundle: true,
+            ...overrideOptions,
         }));
         this.disposables.push(() => buildContext.dispose());
 

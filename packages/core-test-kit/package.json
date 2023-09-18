@@ -1,17 +1,17 @@
 {
   "name": "@stylable/core-test-kit",
-  "version": "5.15.1",
+  "version": "5.16.0",
   "description": "Stylable core test-kit",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/memory": "^8.1.1",
-    "@stylable/core": "^5.15.1",
-    "chai": "^4.3.7",
+    "@file-services/memory": "^8.2.0",
+    "@stylable/core": "^5.16.0",
+    "chai": "^4.3.8",
     "flat": "^5.0.2",
-    "postcss": "^8.4.27"
+    "postcss": "^8.4.29"
   },
   "files": [
     "dist",

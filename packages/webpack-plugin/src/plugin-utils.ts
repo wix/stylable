@@ -49,7 +49,7 @@ export function isSameResourceModule(moduleA: any, moduleB: any) {
 }
 
 export function isStylableModule(module: any): module is NormalModule {
-    return module.resource?.endsWith('.st.css');
+    return module?.resource?.endsWith('.st.css');
 }
 export function isLoadedNativeCSSModule(
     module: any,

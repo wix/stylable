@@ -378,7 +378,7 @@ function isPostcssNodeInRange(node: postcss.AnyNode | postcss.Container, target:
     if (node.source?.start && node.source?.end) {
         const beforeSize = node.type === 'rule' ? node.raws.before.length : 0;
         result.nodeStartBeforeCaret = node.source.start.offset - beforeSize <= target;
-        result.nodeEndsAfterCaret = node.source.end.offset + 1 >= target;
+        result.nodeEndsAfterCaret = node.source.end.offset >= target;
         result.isInRange = result.nodeStartBeforeCaret && result.nodeEndsAfterCaret;
     }
     return result;
