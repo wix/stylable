@@ -1,3 +1,0 @@
-export = {
-    _extensions: {},
-};

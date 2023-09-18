@@ -2,7 +2,7 @@ import path from 'path';
 import yargs from 'yargs';
 import { createProjectFromTemplate } from './create-project';
 
-const argv = yargs
+const argv = yargs()
     .usage('npm init stylable-app <project-name>')
     .demand(1, 'missing project-name')
     .option('template', {
