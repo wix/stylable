@@ -338,7 +338,21 @@ function defineTemplateState(
     const template = stripQuotation(postcssValueParser.stringify(templateDef));
     if (argsFullValue.length === 1) {
         // simple template with no params
-        mappedStates[stateName] = template.trim().replace(/\\["']/g, '"');
+        const selectorStr = template.trim().replace(/\\["']/g, '"');
+        const selectorAst = parseSelectorWithCache(selectorStr, { clone: true });
+        if (
+            !validateTemplateSelector({
+                stateName,
+                selectorStr,
+                selectorAst,
+                cssNode: decl,
+                diagnostics,
+            })
+        ) {
+            return;
+        } else {
+            mappedStates[stateName] = selectorStr;
+        }
     } else if (argsFullValue.length === 2) {
         // single parameter template
         if (!template.includes('$0')) {
