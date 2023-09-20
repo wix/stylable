@@ -90,7 +90,8 @@ export class Stylable {
     protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
     private experimentalSelectorInference: boolean;
     constructor(config: StylableConfig) {
-        this.experimentalSelectorInference = !!config.experimentalSelectorInference;
+        this.experimentalSelectorInference =
+            config.experimentalSelectorInference === false ? false : true;
         this.projectRoot = config.projectRoot;
         this.fileSystem = config.fileSystem;
         this.requireModule =
