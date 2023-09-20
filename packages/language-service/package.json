@@ -19,10 +19,10 @@
     "@tokey/css-selector-parser": "^0.6.2",
     "@tokey/css-value-parser": "^0.1.4",
     "css-selector-tokenizer": "^0.8.0",
-    "postcss": "^8.4.29",
+    "postcss": "^8.4.30",
     "postcss-value-parser": "^4.2.0",
     "vscode-css-languageservice": "^6.2.7",
-    "vscode-languageserver": "^8.1.0",
+    "vscode-languageserver": "^9.0.0",
     "vscode-languageserver-textdocument": "^1.0.8",
     "vscode-uri": "^3.0.7"
   },

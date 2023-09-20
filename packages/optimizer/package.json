@@ -10,7 +10,7 @@
     "@stylable/core": "^5.16.0",
     "@tokey/css-selector-parser": "^0.6.2",
     "csso": "^5.0.5",
-    "postcss": "^8.4.29"
+    "postcss": "^8.4.30"
   },
   "files": [
     "dist",
