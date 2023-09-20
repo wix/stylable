@@ -250,79 +250,63 @@ describe('features/css-pseudo-element', () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        describe('experimentalSelectorInference', () => {
-            it('should transform multiple selector intersection', () => {
-                const { sheets } = testStylableCore(
-                    {
-                        'base.st.css': `
-                        .shared {}
-                        @custom-selector :--sharedMulti .x, .y;
-                    `,
-                        'a.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                    `,
-                        'b.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                    `,
-                        'entry.st.css': `
-                            @st-import A from './a.st.css';
-                            @st-import B from './b.st.css';
-                            @custom-selector :--multi A, B;
-                
-                            /* @rule(shared) .entry__root .a__root .base__shared,.entry__root .b__root .base__shared */
-                            .root::multi::shared {}
+        it('should transform multiple selector intersection', () => {
+            const { sheets } = testStylableCore({
+                'base.st.css': `
+                    .shared {}
+                    @custom-selector :--sharedMulti .x, .y;
+                `,
+                'a.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                'b.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                'entry.st.css': `
+                    @st-import A from './a.st.css';
+                    @st-import B from './b.st.css';
+                    @custom-selector :--multi A, B;
+        
+                    /* @rule(shared) .entry__root .a__root .base__shared,.entry__root .b__root .base__shared */
+                    .root::multi::shared {}
 
-                            /* @rule(shared-multi) .entry__root .a__root .base__x,.entry__root .b__root .base__x,.entry__root .a__root .base__y,.entry__root .b__root .base__y */
-                            .root::multi::sharedMulti {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
-
-                const { meta } = sheets['/entry.st.css'];
-
-                shouldReportNoDiagnostics(meta);
+                    /* @rule(shared-multi) .entry__root .a__root .base__x,.entry__root .b__root .base__x,.entry__root .a__root .base__y,.entry__root .b__root .base__y */
+                    .root::multi::sharedMulti {}
+                `,
             });
-            it('should filter out elements that do not exist or match', () => {
-                testStylableCore(
-                    {
-                        'base.st.css': `
-                    `,
-                        'a.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                        .onlyInA {}
-                    `,
-                        'b.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                    `,
-                        'entry.st.css': `
-                            @st-import A from './a.st.css';
-                            @st-import B from './b.st.css';
-                            @custom-selector :--multi A, B;
-                
-                            /* 
-                                @transform-error(exist in 1) word(onlyInA) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                                    `onlyInA`
-                                )}
-                                @rule(exist in 1) .entry__root .a__root::onlyInA,.entry__root .b__root::onlyInA 
-                            */
-                            .root::multi::onlyInA {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should filter out elements that do not exist or match', () => {
+            testStylableCore({
+                'base.st.css': `
+                `,
+                'a.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                    .onlyInA {}
+                `,
+                'b.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                'entry.st.css': `
+                    @st-import A from './a.st.css';
+                    @st-import B from './b.st.css';
+                    @custom-selector :--multi A, B;
+        
+                    /* 
+                        @transform-error(exist in 1) word(onlyInA) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                            `onlyInA`
+                        )}
+                        @rule(exist in 1) .entry__root .a__root::onlyInA,.entry__root .b__root::onlyInA 
+                    */
+                    .root::multi::onlyInA {}
+                `,
             });
         });
     });

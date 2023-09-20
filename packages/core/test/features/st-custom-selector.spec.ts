@@ -1,5 +1,5 @@
 import chaiSubset from 'chai-subset';
-import { STCustomSelector, CSSType } from '@stylable/core/dist/features';
+import { STCustomSelector, CSSType, CSSPseudoClass } from '@stylable/core/dist/features';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
@@ -11,6 +11,7 @@ chai.use(chaiSubset);
 
 const customSelectorDiagnostics = diagnosticBankReportToStrings(STCustomSelector.diagnostics);
 const cssTypeDiagnostics = diagnosticBankReportToStrings(CSSType.diagnostics);
+const pseudoClassDiagnostics = diagnosticBankReportToStrings(CSSPseudoClass.diagnostics);
 
 describe('features/st-custom-selector', () => {
     // ToDo: migrate to @st-part
@@ -59,8 +60,6 @@ describe('features/st-custom-selector', () => {
         shouldReportNoDiagnostics(meta);
     });
     it('should handle unknown custom selector', () => {
-        // ToDo: remove diagnostic once experimentalSelectorInference is the default
-        // it will fallback to pseudo-class transform and then to unknown pseudo-class
         testStylableCore(`
             /* @analyze-error(in custom) word(:--unknown) ${customSelectorDiagnostics.UNKNOWN_CUSTOM_SELECTOR(
                 ':--unknown'
@@ -68,8 +67,8 @@ describe('features/st-custom-selector', () => {
             @custom-selector :--x .before:--unknown.after;
 
             /* 
-                @transform-error(in selector) word(:--unknown)  ${customSelectorDiagnostics.UNKNOWN_CUSTOM_SELECTOR(
-                    ':--unknown'
+                @transform-error(in selector) word(--unknown)  ${pseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                    '--unknown'
                 )} 
                 @rule .entry__before:--unknown.entry__after {}
             */
@@ -100,71 +99,55 @@ describe('features/st-custom-selector', () => {
             'only a single unscoped diagnostic for span'
         ).to.eql(1);
     });
-    describe('experimentalSelectorInference', () => {
-        it('should transform multiple selector intersection', () => {
-            const { sheets } = testStylableCore(
-                {
-                    'base.st.css': `
-                    .shared {}
-                    @custom-selector :--xy .x, .y;
-                `,
-                    'a.st.css': `
-                    @st-import Base from './base.st.css';
-                    .root { -st-extends: Base }
-                `,
-                    'b.st.css': `
-                    @st-import Base from './base.st.css';
-                    .root { -st-extends: Base }
-                `,
-                    'entry.st.css': `
-                        @st-import A from './a.st.css';
-                        @st-import B from './b.st.css';
-                        @custom-selector :--ab A, B;
+    it('should transform multiple selector intersection', () => {
+        const { sheets } = testStylableCore({
+            'base.st.css': `
+                .shared {}
+                @custom-selector :--xy .x, .y;
+            `,
+            'a.st.css': `
+                @st-import Base from './base.st.css';
+                .root { -st-extends: Base }
+            `,
+            'b.st.css': `
+                @st-import Base from './base.st.css';
+                .root { -st-extends: Base }
+            `,
+            'entry.st.css': `
+                @st-import A from './a.st.css';
+                @st-import B from './b.st.css';
+                @custom-selector :--ab A, B;
 
-                        /* @rule(shared-multi) .a__root .base__x, .b__root .base__x,.a__root .base__y, .b__root .base__y */
-                        :--ab::xy {}
-                `,
-                },
-                {
-                    stylableConfig: {
-                        experimentalSelectorInference: true,
-                    },
-                }
-            );
-
-            const { meta } = sheets['/entry.st.css'];
-
-            shouldReportNoDiagnostics(meta);
+                /* @rule(shared-multi) .a__root .base__x, .b__root .base__x,.a__root .base__y, .b__root .base__y */
+                :--ab::xy {}
+            `,
         });
-        it('should filter out elements that do not exist or match', () => {
-            testStylableCore(
-                {
-                    'base.st.css': `
-                `,
-                    'a.st.css': `
-                    @st-import Base from './base.st.css';
-                    .root { -st-extends: Base }
-                    .onlyInA {}
-                `,
-                    'b.st.css': `
-                    @st-import Base from './base.st.css';
-                    .root { -st-extends: Base }
-                `,
-                    'entry.st.css': `
-                        @st-import A from './a.st.css';
-                        @st-import B from './b.st.css';
-                        @custom-selector :--ab A, B;
-            
-                        /* @rule(exist in 1) .a__root::onlyInA, .b__root::onlyInA */
-                        :--ab::onlyInA {}
-                `,
-                },
-                {
-                    stylableConfig: {
-                        experimentalSelectorInference: true,
-                    },
-                }
-            );
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it('should filter out elements that do not exist or match', () => {
+        testStylableCore({
+            'base.st.css': `
+            `,
+            'a.st.css': `
+                @st-import Base from './base.st.css';
+                .root { -st-extends: Base }
+                .onlyInA {}
+            `,
+            'b.st.css': `
+                @st-import Base from './base.st.css';
+                .root { -st-extends: Base }
+            `,
+            'entry.st.css': `
+                @st-import A from './a.st.css';
+                @st-import B from './b.st.css';
+                @custom-selector :--ab A, B;
+    
+                /* @rule(exist in 1) .a__root::onlyInA, .b__root::onlyInA */
+                :--ab::onlyInA {}
+            `,
         });
     });
 });

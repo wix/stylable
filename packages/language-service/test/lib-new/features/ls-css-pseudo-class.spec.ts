@@ -538,7 +538,6 @@ describe('LS: css-pseudo-class', () => {
                     }
                 }
 
-                /* currently nesting in non-& reset to root - this behavior might change */
                 .part {
                     :hover {
                         &^nestUnderNonAmp^
@@ -561,8 +560,8 @@ describe('LS: css-pseudo-class', () => {
             assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'nestUnderNonAmp',
                 actualList: service.onCompletion(filePath, carets.nestUnderNonAmp),
-                expectedList: [{ label: ':root-state' }],
-                unexpectedList: [{ label: ':part-state' }],
+                expectedList: [],
+                unexpectedList: [{ label: ':part-state' }, { label: ':root-state' }],
             }));
         });
     });
