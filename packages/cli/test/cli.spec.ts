@@ -564,7 +564,7 @@ describe('Stylable Cli', function () {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'stylable.config.js': `
                     const { resolve } = require('node:path');
-                    const { createLegacyResolver } = require('@stylable/webpack-plugin');
+                    const { @stylable/webpack-plugin } = require('@stylable/webpack-plugin');
 
                     module.exports = {
                         defaultConfig(fs) {

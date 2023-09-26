@@ -1,6 +1,6 @@
 import type { RollupWatcher, RollupWatcherEvent } from 'rollup';
 import { dirname, join } from 'path';
-import { nodeFs } from '@file-services/node';
+import fs from '@file-services/node';
 import { createTempDirectorySync } from '@stylable/e2e-test-kit';
 import { deferred } from 'promise-assist';
 
@@ -50,8 +50,8 @@ export async function actAndWaitForBuild(
 export function createTempProject(projectToCopy: string, nodeModulesToLink: string, entry: string) {
     const tempDir = createTempDirectorySync('local-rollup-test');
     const projectPath = join(tempDir.path, 'project');
-    nodeFs.copyDirectorySync(projectToCopy, projectPath);
-    nodeFs.symlinkSync(nodeModulesToLink, join(tempDir.path, 'node_modules'), 'junction');
+    fs.copyDirectorySync(projectToCopy, projectPath);
+    fs.symlinkSync(nodeModulesToLink, join(tempDir.path, 'node_modules'), 'junction');
     return {
         context: tempDir.path,
         input: join(tempDir.path, 'project', entry),

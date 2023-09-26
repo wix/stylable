@@ -1,4 +1,4 @@
-import { nodeFs as fs } from '@file-services/node';
+import fs from '@file-services/node';
 import path from 'path';
 import { Stylable, StylableMeta, createDefaultResolver } from '@stylable/core';
 import { safeParse, StylableExports } from '@stylable/core/dist/index-internal';

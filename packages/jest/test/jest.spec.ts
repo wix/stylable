@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { nodeFs as fs } from '@file-services/node';
+import fs from '@file-services/node';
 import nodeEval from 'node-eval';
 import stylableTransformer from '@stylable/jest';
 import type { RuntimeStylesheet } from '@stylable/runtime';

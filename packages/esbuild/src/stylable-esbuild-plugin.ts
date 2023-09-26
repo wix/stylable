@@ -1,4 +1,4 @@
-import { nodeFs as fs } from '@file-services/node';
+import fs from '@file-services/node';
 import { relative, join, isAbsolute, dirname } from 'path';
 import type { Plugin, PluginBuild } from 'esbuild';
 import {

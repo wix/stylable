@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path';
 import { readFileSync, symlinkSync, writeFileSync } from 'node:fs';
-import { nodeFs } from '@file-services/node';
+import fs from '@file-services/node';
 import { BuildContext, BuildOptions, context } from 'esbuild';
 import { createTempDirectorySync, runServer } from '@stylable/e2e-test-kit';
 
@@ -34,7 +34,7 @@ export class ESBuildTestKit {
         if (tmp) {
             const t = createTempDirectorySync('esbuild-testkit');
             this.disposables.push(() => t.remove());
-            nodeFs.copyDirectorySync(projectDir, t.path);
+            fs.copyDirectorySync(projectDir, t.path);
             buildFile = join(t.path, 'build.js');
             projectDir = t.path;
 
