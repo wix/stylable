@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import fs, { readFileSync } from 'fs';
+import { nodeFs as fs } from '@file-services/node';
 import nodeEval from 'node-eval';
 import stylableTransformer from '@stylable/jest';
 import type { RuntimeStylesheet } from '@stylable/runtime';
@@ -9,7 +9,7 @@ import { createDefaultResolver } from '@stylable/core';
 describe('jest process', () => {
     it('should process stylable sources using createTransformer API', () => {
         const filename = require.resolve('@stylable/jest/test/fixtures/test.st.css');
-        const content = readFileSync(filename, 'utf8');
+        const content = fs.readFileSync(filename, 'utf8');
         const transformer = stylableTransformer.createTransformer();
 
         const module = nodeEval(
@@ -23,7 +23,7 @@ describe('jest process', () => {
 
     it('should process stylable sources with a custom namespace resolver', () => {
         const filename = require.resolve('@stylable/jest/test/fixtures/test.st.css');
-        const content = readFileSync(filename, 'utf8');
+        const content = fs.readFileSync(filename, 'utf8');
         const transformer = stylableTransformer.createTransformer({
             stylable: { resolveNamespace: (ns, _srcPath) => `${ns}-custom` },
         });
@@ -41,7 +41,7 @@ describe('jest process', () => {
         const filename = require.resolve(
             '@stylable/jest/test/fixtures/default-config/index.st.css'
         );
-        const content = readFileSync(filename, 'utf8');
+        const content = fs.readFileSync(filename, 'utf8');
         const transformer = stylableTransformer.createTransformer({
             stylable: { resolveNamespace: (ns, _srcPath) => `${ns}-custom` },
             configPath: join(dirname(filename), 'stylable.config.js'),
@@ -59,13 +59,14 @@ describe('jest process', () => {
         const filename = require.resolve(
             '@stylable/jest/test/fixtures/default-config/index.st.css'
         );
-        const content = readFileSync(filename, 'utf8');
+        const content = fs.readFileSync(filename, 'utf8');
         const transformer = stylableTransformer.createTransformer({
             stylable: {
                 resolveNamespace: (ns, _srcPath) => `${ns}-custom`,
-                resolveModule: createDefaultResolver(fs, {
+                resolveModule: createDefaultResolver({
+                    fs,
                     alias: {
-                        'wp-alias': join(dirname(filename), 'webpack-alias2'),
+                        'wp-alias/*': join(dirname(filename), 'webpack-alias2') + '/*',
                     },
                 }),
             },
@@ -84,7 +85,7 @@ describe('jest process', () => {
         const filename = require.resolve(
             '@stylable/jest/test/fixtures/default-config/index.st.css'
         );
-        const content = readFileSync(filename, 'utf8');
+        const content = fs.readFileSync(filename, 'utf8');
         let foundError = false;
 
         try {

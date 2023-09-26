@@ -1,4 +1,4 @@
-import { MinimalFS, Stylable, StylableConfig } from '@stylable/core';
+import { MinimalFS, Stylable, StylableConfig, createLegacyResolver } from '@stylable/core';
 import {
     OptimizeConfig,
     DiagnosticsMode,
@@ -369,7 +369,10 @@ export class StylableWebpackPlugin {
         const stylableConfig = this.getStylableConfig(compiler)?.config;
 
         validateDefaultConfig(stylableConfig?.defaultConfig);
-
+        const resolveModule = createLegacyResolver(topLevelFs, {
+            ...resolverOptions,
+            extensions: [], // use Stylable's default extensions
+        });
         this.stylable = new Stylable(
             this.options.stylableConfig(
                 {
@@ -380,16 +383,13 @@ export class StylableWebpackPlugin {
                      */
                     fileSystem: topLevelFs,
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
-                    resolveOptions: {
-                        ...resolverOptions,
-                        extensions: [], // use Stylable's default extensions
-                    },
                     resolveNamespace: createNamespaceStrategyNode({
                         hashSalt: compiler.options.output.hashSalt || '',
                     }),
                     requireModule: createDecacheRequire(compiler),
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
+                    resolveModule,
                     /**
                      * config order is user determined
                      * each configuration points receives the default options,

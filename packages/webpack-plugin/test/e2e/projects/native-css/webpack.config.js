@@ -1,4 +1,4 @@
-const { createDefaultResolver } = require('@stylable/core');
+const { createLegacyResolver } = require('@stylable/core');
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -12,7 +12,8 @@ module.exports = {
         new StylableWebpackPlugin({
             stylableConfig(config, compiler) {
                 // set custom resolve for test
-                const resolve = createDefaultResolver(compiler.inputFileSystem, {});
+
+                const resolve = createLegacyResolver(compiler.inputFileSystem, {});
                 config.resolveModule = (path, request) => {
                     if (request === './resolve-me') {
                         return resolve(path, './custom-resolved.css');

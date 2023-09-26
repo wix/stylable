@@ -1,11 +1,11 @@
 //@ts-check
 const { join } = require('path');
-const { createDefaultResolver } = require('@stylable/core');
+const { createLegacyResolver } = require('@stylable/core');
 
 module.exports = {
     defaultConfig(fs) {
         return {
-            resolveModule: createDefaultResolver(fs, {
+            resolveModule: createLegacyResolver(fs, {
                 alias: {
                     'wp-alias': join(__dirname, 'src/wrong'),
                 },

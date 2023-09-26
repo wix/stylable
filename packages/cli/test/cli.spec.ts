@@ -558,18 +558,18 @@ describe('Stylable Cli', function () {
         });
     });
 
-    describe('resolver', () => {
+    describe('resolver (cli)', () => {
         it('should be able to build with enhanced-resolver alias configured', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'stylable.config.js': `
                     const { resolve } = require('node:path');
-                    const { createDefaultResolver } = require('@stylable/core');
+                    const { createLegacyResolver } = require('@stylable/core');
 
                     module.exports = {
                         defaultConfig(fs) {
                             return {
-                                resolveModule: createDefaultResolver(fs, {
+                                resolveModule: createLegacyResolver(fs, {
                                     alias: {
                                         '@colors': resolve(__dirname, './colors')
                                     }
@@ -618,12 +618,12 @@ describe('Stylable Cli', function () {
                 'stylable.config.js': `
                     const { join } = require('path');
                     const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
-                    const { createDefaultResolver } = require('@stylable/core');
+                    const { createLegacyResolver } = require('@stylable/core');
 
                     module.exports = {
                         defaultConfig(fs) {
                             return {
-                                resolveModule: createDefaultResolver(fs, {
+                                resolveModule: createLegacyResolver(fs, {
                                     plugins: [new TsconfigPathsPlugin({ configFile: join(${JSON.stringify(
                                         tempDir.path
                                     )},'tsconfig.json') })],

@@ -1021,7 +1021,7 @@ describe('inline-expectations', () => {
             );
         });
         it(`should throw on possible location mismatch`, () => {
-            const resolveErrorMessage = `resolve './unknown.st.css' in '/'\n  No description file found in / or above\n  No description file found in / or above\n  no extension\n    /unknown.st.css doesn't exist\n  .js\n    /unknown.st.css.js doesn't exist\n  .json\n    /unknown.st.css.json doesn't exist\n  .node\n    /unknown.st.css.node doesn't exist\n  as directory\n    /unknown.st.css doesn't exist`;
+            const resolveErrorMessage = 'Stylable could not resolve "./unknown.st.css" from "/"';
             const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {

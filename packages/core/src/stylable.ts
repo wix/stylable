@@ -24,6 +24,7 @@ export interface StylableConfig {
     requireModule?: (path: string) => any;
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
     hooks?: TransformHooks;
+    /** @deprecated provide a `resolveModule` instead */
     resolveOptions?: {
         alias?: any;
         symlinks?: boolean;
@@ -105,7 +106,8 @@ export class Stylable {
         this.mode = config.mode || `production`;
         this.resolveNamespace = config.resolveNamespace;
         this.moduleResolver =
-            config.resolveModule || createDefaultResolver(this.fileSystem, this.resolveOptions);
+            config.resolveModule ||
+            createDefaultResolver({ fs: this.fileSystem, ...this.resolveOptions });
         this.cssParser = config.cssParser || cssParse;
         this.resolverCache = config.resolverCache; // ToDo: v5 default to `new Map()`
         this.fileProcessorCache = config.fileProcessorCache;

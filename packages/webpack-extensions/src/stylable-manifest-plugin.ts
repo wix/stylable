@@ -1,4 +1,4 @@
-import { Stylable, StylableMeta } from '@stylable/core';
+import { Stylable, StylableMeta, createLegacyResolver } from '@stylable/core';
 import { STSymbol } from '@stylable/core/dist/index-internal';
 import { resolveNamespace } from '@stylable/node';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
@@ -55,6 +55,17 @@ export class StylableManifestPlugin {
         this.options = Object.assign({}, defaultOptions, options);
     }
     public apply(compiler: Compiler) {
+        const fs = {
+            readlinkSync: (filePath: string) =>
+                (compiler.inputFileSystem as any).readlinkSync(filePath),
+            statSync: (filePath: string) => (compiler.inputFileSystem as any).statSync(filePath),
+            readFileSync: (filePath: string) =>
+                (compiler.inputFileSystem as any).readFileSync(filePath).toString(),
+        };
+        const resolveModule = createLegacyResolver(fs, {
+            ...compiler.options.resolve,
+            extensions: [],
+        });
         const stylable = new Stylable({
             projectRoot: compiler.context,
             fileSystem: {
@@ -65,10 +76,7 @@ export class StylableManifestPlugin {
                     (compiler.inputFileSystem as any).readFileSync(filePath).toString(),
             },
             mode: compiler.options.mode === 'development' ? 'development' : 'production',
-            resolveOptions: {
-                ...compiler.options.resolve,
-                extensions: [],
-            },
+            resolveModule,
             resolverCache: new Map(),
             resolveNamespace: this.options.resolveNamespace,
         });

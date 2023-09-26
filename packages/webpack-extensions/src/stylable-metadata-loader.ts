@@ -1,4 +1,4 @@
-import { Stylable, processNamespace, MinimalFS } from '@stylable/core';
+import { Stylable, processNamespace, MinimalFS, createLegacyResolver } from '@stylable/core';
 import { createStylableResolverCacheMap } from '@stylable/webpack-plugin';
 import findConfig from 'find-config';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
@@ -49,14 +49,15 @@ function createStylable(
     if (!loader._compiler) {
         throw new Error('Stylable metadata loader requires a compiler instance');
     }
+    const resolveModule = createLegacyResolver(loader.fs as unknown as MinimalFS, {
+        ...loader._compiler.options.resolve,
+        extensions: [],
+    });
     return new Stylable({
         projectRoot: loader.rootContext,
         fileSystem: loader.fs as unknown as MinimalFS,
         mode: loader._compiler.options.mode === 'development' ? 'development' : 'production',
-        resolveOptions: {
-            ...loader._compiler.options.resolve,
-            extensions: [],
-        },
+        resolveModule,
         resolveNamespace,
         resolverCache: createStylableResolverCacheMap(loader._compiler),
     });

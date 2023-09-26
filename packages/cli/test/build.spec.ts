@@ -682,7 +682,7 @@ describe('build stand alone', () => {
         expect(dtsSourceMapContent).to.contain(`"main.st.css"`);
     });
 
-    describe('resolver', () => {
+    describe('resolver (build)', () => {
         it('should be able to build with enhanced-resolver alias configured', async () => {
             const identifier = 'build-identifier';
             const fs = createMemoryFs({
@@ -701,7 +701,7 @@ describe('build stand alone', () => {
                 requireModule: () => ({}),
                 resolveOptions: {
                     alias: {
-                        '@colors': '/colors',
+                        '@colors/*': '/colors/*',
                     },
                 },
             });

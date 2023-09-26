@@ -4,7 +4,7 @@
   "description": "Stylable plugin for esbuild",
   "main": "dist/index.js",
   "scripts": {
-    "test": "mocha \"dist/test/**/*.spec.js\""
+    "test": "mocha \"dist/test/**/*.spec.js\" --timeout 10000"
   },
   "peerDependencies": {
     "esbuild": ">=0.17.18"

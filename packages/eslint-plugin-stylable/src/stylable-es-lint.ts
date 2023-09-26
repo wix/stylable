@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { nodeFs as fs } from '@file-services/node';
 import path from 'path';
 import { Stylable, StylableMeta, createDefaultResolver } from '@stylable/core';
 import { safeParse, StylableExports } from '@stylable/core/dist/index-internal';
@@ -22,7 +22,7 @@ export default createRule({
     defaultOptions: [{ exposeDiagnosticsReports: false, resolveOptions: {} }], // TODO: allow to pass resolve config
     create(context, options) {
         const [{ exposeDiagnosticsReports, resolveOptions }] = options as Options;
-        const moduleResolver = createDefaultResolver(fs, resolveOptions);
+        const moduleResolver = createDefaultResolver({ fs, ...resolveOptions });
 
         const stylable = new Stylable({
             fileSystem: fs,

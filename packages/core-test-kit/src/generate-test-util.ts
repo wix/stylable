@@ -62,7 +62,7 @@ export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = ne
         createDiagnostics: () => diagnostics,
     });
 
-    const resolveModule = createDefaultResolver(fs, {});
+    const resolveModule = createDefaultResolver({ fs });
     const resolvePath = (context: string | undefined = '/', moduleId: string) =>
         resolveModule(context, moduleId);
 
