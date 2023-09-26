@@ -564,7 +564,7 @@ describe('Stylable Cli', function () {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'stylable.config.js': `
                     const { resolve } = require('node:path');
-                    const { createLegacyResolver } = require('@stylable/core');
+                    const { createLegacyResolver } = require('@stylable/webpack-plugin');
 
                     module.exports = {
                         defaultConfig(fs) {
@@ -618,7 +618,7 @@ describe('Stylable Cli', function () {
                 'stylable.config.js': `
                     const { join } = require('path');
                     const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
-                    const { createLegacyResolver } = require('@stylable/core');
+                    const { createLegacyResolver } = require('@stylable/webpack-plugin');
 
                     module.exports = {
                         defaultConfig(fs) {
