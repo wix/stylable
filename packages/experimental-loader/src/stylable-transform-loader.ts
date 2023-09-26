@@ -1,5 +1,5 @@
 import postcss from 'postcss';
-import { processNamespace, MinimalFS, createLegacyResolver } from '@stylable/core';
+import { processNamespace, MinimalFS } from '@stylable/core';
 import {
     emitDiagnostics,
     DiagnosticsMode,
@@ -9,6 +9,7 @@ import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 import { addBuildInfo } from './add-build-info';
+import { createLegacyResolver } from '@stylable/webpack-plugin';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 
 // TODO: maybe adopt the code

@@ -32,7 +32,6 @@ export {
 } from './helpers/namespace';
 export { processNamespace } from './stylable-processor';
 export { CustomValueStrategy, createCustomValue } from './custom-values';
-export { createLegacyResolver } from './legacy-module-resolver';
 export { createDefaultResolver } from './module-resolver';
 
 // low-level api

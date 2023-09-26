@@ -1,5 +1,4 @@
-const { createLegacyResolver } = require('@stylable/core');
-const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
+const { StylableWebpackPlugin, createLegacyResolver } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 /** @type {import('webpack').Configuration} */

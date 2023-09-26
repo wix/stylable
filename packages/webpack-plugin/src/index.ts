@@ -54,3 +54,4 @@ export {
     WebpackCreateHash,
     WebpackOutputOptions,
 } from './types';
+export { createLegacyResolver } from './legacy-module-resolver';

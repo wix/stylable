@@ -1,7 +1,7 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { join } = require('path');
-const { createLegacyResolver } = require('@stylable/core');
+const { createLegacyResolver } = require('@stylable/webpack-plugin');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {

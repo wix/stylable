@@ -1,6 +1,6 @@
 //@ts-check
 const { join } = require('path');
-const { createLegacyResolver } = require('@stylable/core');
+const { createLegacyResolver } = require('@stylable/webpack-plugin');
 
 module.exports = {
     defaultConfig(fs) {

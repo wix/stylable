@@ -1,5 +1,5 @@
-import { Stylable, processNamespace, MinimalFS, createLegacyResolver } from '@stylable/core';
-import { createStylableResolverCacheMap } from '@stylable/webpack-plugin';
+import { Stylable, processNamespace, MinimalFS } from '@stylable/core';
+import { createStylableResolverCacheMap, createLegacyResolver } from '@stylable/webpack-plugin';
 import findConfig from 'find-config';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';

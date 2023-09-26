@@ -1,4 +1,5 @@
-import { Stylable, StylableMeta, createLegacyResolver } from '@stylable/core';
+import { Stylable, StylableMeta } from '@stylable/core';
+import { createLegacyResolver } from '@stylable/webpack-plugin';
 import { STSymbol } from '@stylable/core/dist/index-internal';
 import { resolveNamespace } from '@stylable/node';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
