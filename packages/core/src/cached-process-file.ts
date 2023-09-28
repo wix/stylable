@@ -6,9 +6,7 @@ export interface CacheItem<T> {
 }
 
 export interface MinimalFS {
-    statSync: (filePath: string) => { mtime: Date };
     readFileSync: (filePath: string, encoding: 'utf8') => string;
-    readlinkSync: (filePath: string) => string;
 }
 
 export interface FileProcessor<T> {

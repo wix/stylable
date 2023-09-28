@@ -1,5 +1,5 @@
 import postcss from 'postcss';
-import { processNamespace, MinimalFS } from '@stylable/core';
+import { processNamespace } from '@stylable/core';
 import {
     emitDiagnostics,
     DiagnosticsMode,
@@ -66,12 +66,12 @@ const stylableLoader: LoaderDefinition = function (content) {
     const mode = this._compiler!.options.mode === 'development' ? 'development' : 'production';
 
     const resolveModule = createLegacyResolver(
-        this.fs as unknown as MinimalFS,
-        this._compiler!.options.resolve
+        this.fs as any,
+        this._compiler!.options.resolve as any
     );
     const stylable = getStylable(this._compiler!, {
         projectRoot: this.rootContext,
-        fileSystem: this.fs as unknown as MinimalFS,
+        fileSystem: this.fs as any,
         mode,
         resolveModule,
         resolveNamespace,

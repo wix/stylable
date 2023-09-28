@@ -30,12 +30,12 @@ function getCacheKey(
 }
 
 export interface StylableJestConfig {
-    stylable?: Partial<StylableConfig>;
+    stylable?: Partial<Omit<StylableConfig, 'fileSystem'>>;
     configPath?: string;
 }
 
 export const createTransformer = (options?: StylableJestConfig) => {
-    let config: Partial<StylableConfig> = {
+    let config = {
         ...options?.stylable,
     };
 

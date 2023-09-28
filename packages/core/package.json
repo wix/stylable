@@ -6,9 +6,6 @@
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
-  "browser": {
-    "module": false
-  },
   "dependencies": {
     "@file-services/resolve": "^8.2.0",
     "@tokey/css-selector-parser": "^0.6.2",

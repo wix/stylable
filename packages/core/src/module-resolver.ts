@@ -1,24 +1,33 @@
-// in browser build this gets remapped to an empty object via our package.json->"browser"
-
-import { IRequestResolverOptions, createRequestResolver } from '@file-services/resolve';
+import {
+    IRequestResolverOptions,
+    IResolutionFileSystem,
+    createRequestResolver,
+} from '@file-services/resolve';
 import type { ModuleResolver } from './types';
+
+export type { IRequestResolverOptions, IResolutionFileSystem };
 
 export function createDefaultResolver(options: IRequestResolverOptions): ModuleResolver {
     const resolver = createRequestResolver({
-        extensions: ['.js', '.json', '.mjs', '.cjs', '.ts', '.mts', '.cts'],
+        extensions: ['.js', '.mjs', '.cjs', '.ts', '.mts', '.cts', '.json'],
         ...options,
     });
 
     return (directoryPath, request): string => {
-        const res = resolver(directoryPath, request);
-        if (res.resolvedFile === false) {
+        const { resolvedFile, visitedPaths } = resolver(directoryPath, request);
+
+        if (resolvedFile === false) {
             throw new Error(
                 `Stylable does not support browser field 'false' values. ${request} resolved to 'false' from ${directoryPath}`
             );
         }
-        if (typeof res.resolvedFile !== 'string') {
-            throw new Error(`Stylable could not resolve ${JSON.stringify(request)} from ${JSON.stringify(directoryPath)}`);
+        if (typeof resolvedFile !== 'string') {
+            throw new Error(
+                `Stylable could not resolve ${JSON.stringify(request)} from ${JSON.stringify(
+                    directoryPath
+                )}` + (visitedPaths.size ? `\nVisited paths:\n${[...visitedPaths].join('\n')}` : '')
+            );
         }
-        return res.resolvedFile;
+        return resolvedFile;
     };
 }

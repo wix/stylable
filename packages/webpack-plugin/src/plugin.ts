@@ -1,4 +1,4 @@
-import { MinimalFS, Stylable, StylableConfig } from '@stylable/core';
+import { Stylable, StylableConfig } from '@stylable/core';
 import {
     OptimizeConfig,
     DiagnosticsMode,
@@ -359,7 +359,7 @@ export class StylableWebpackPlugin {
             return;
         }
 
-        const resolverOptions: ResolveOptionsWebpackOptions = {
+        const resolverOptions: Omit<ResolveOptionsWebpackOptions, 'fileSystem' | 'resolver' | 'plugins'> = {
             ...compiler.options.resolve,
             aliasFields:
                 compiler.options.resolve.byDependency?.esm?.aliasFields ||
@@ -796,7 +796,7 @@ function isWebpackConfigProcessor(config: any): config is {
     webpackPlugin: (
         options: Required<StylableWebpackPluginOptions>,
         compiler: Compiler,
-        fs: MinimalFS
+        fs: unknown
     ) => Required<StylableWebpackPluginOptions>;
 } {
     return typeof config === 'object' && typeof config.webpackPlugin === 'function';

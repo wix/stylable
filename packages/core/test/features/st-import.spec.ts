@@ -211,9 +211,10 @@ describe(`features/st-import`, () => {
         `);
     });
     it(`should error on unresolved file`, () => {
-        const resolveErrorMessage = `Stylable could not resolve "./missing.st.css" from "/"`;
-        const resolveErrorMessagePackage = `Stylable could not resolve "missing-package/index.st.css" from "/"`;
-
+        const resolveErrorMessage =
+            'Stylable could not resolve "./missing.st.css" from "/"\nVisited paths:\n/missing.st.css\n/missing.st.css.js\n/missing.st.css.mjs\n/missing.st.css.cjs\n/missing.st.css.ts\n/missing.st.css.mts\n/missing.st.css.cts\n/missing.st.css.json';
+        const resolveErrorMessagePackage =
+            'Stylable could not resolve "missing-package/index.st.css" from "/"';
         testStylableCore(`
             /* @transform-error(relative) word(./missing.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                 `./missing.st.css`,
@@ -532,10 +533,11 @@ describe(`features/st-import`, () => {
                 }
             `);
         });
-        it(`should error on unresolved file`, () => {
-            const resolveErrorMessage = `Stylable could not resolve "./missing.st.css" from "/"`;
-            const resolveErrorMessagePackage = `Stylable could not resolve "missing-package/index.st.css" from "/"`;
-    
+        it(`should error on unresolved file (:import)`, () => {
+            const resolveErrorMessage =
+                'Stylable could not resolve "./missing.st.css" from "/"\nVisited paths:\n/missing.st.css\n/missing.st.css.js\n/missing.st.css.mjs\n/missing.st.css.cjs\n/missing.st.css.ts\n/missing.st.css.mts\n/missing.st.css.cts\n/missing.st.css.json';
+            const resolveErrorMessagePackage =
+                'Stylable could not resolve "missing-package/index.st.css" from "/"';
             testStylableCore(`
                 :import{
                     /* @transform-error(relative) word(./missing.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(

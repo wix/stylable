@@ -3,7 +3,7 @@ import nodeModule from 'module';
 // importing the factory directly, as we feed it our own fs, and don't want graceful-fs to be implicitly imported
 // this allows @stylable/core to be bundled for browser usage without special custom configuration
 import ResolverFactory from 'enhanced-resolve/lib/ResolverFactory.js';
-import type { MinimalFS } from '@stylable/core';
+import type { ResolveOptions } from 'enhanced-resolve';
 
 function bundleSafeRequireExtensions(): string[] {
     let extensions: string[];
@@ -21,7 +21,7 @@ function bundleSafeRequireExtensions(): string[] {
 
 const resolverContext = {};
 
-export function createLegacyResolver(fileSystem: MinimalFS, resolveOptions: any) {
+export function createLegacyResolver(fileSystem: ResolveOptions['fileSystem'], resolveOptions: Partial<ResolveOptions>) {
     const extensions =
         resolveOptions.extensions && resolveOptions.extensions.length
             ? resolveOptions.extensions
@@ -30,7 +30,6 @@ export function createLegacyResolver(fileSystem: MinimalFS, resolveOptions: any)
         ...resolveOptions,
         extensions,
         useSyncFileSystemCalls: true,
-        cache: false,
         fileSystem,
     });
 

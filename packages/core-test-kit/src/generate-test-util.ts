@@ -19,6 +19,7 @@ import {
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
 import { createMemoryFs } from '@file-services/memory';
+import type { IFileSystem } from '@file-services/types';
 import type { IDirectoryContents } from '@file-services/types';
 
 export interface File {
@@ -118,6 +119,24 @@ export function createProcess(
     return (path: string) => fileProcessor.process(path);
 }
 
+export function createResolveExtendsResults(
+    fileSystem: IFileSystem,
+    fileToProcess: string,
+    classNameToLookup: string,
+    isElement = false
+) {
+    const stylable = new Stylable({
+        fileSystem,
+        projectRoot: '/',
+    });
+
+    return stylable.resolver.resolveExtends(
+        stylable.analyze(fileToProcess),
+        classNameToLookup,
+        isElement
+    );
+}
+
 export function generateStylableResult(
     config: Config,
     diagnostics: Diagnostics = new Diagnostics()
@@ -140,7 +159,7 @@ export function generateStylableExports(config: Config) {
 
 export function generateStylableEnvironment(
     content: IDirectoryContents,
-    stylableConfig: Partial<StylableConfig> = {}
+    stylableConfig: Partial<Omit<StylableConfig, 'fileSystem'>> = {}
 ) {
     const fs = createMemoryFs(content);
 

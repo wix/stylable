@@ -1021,7 +1021,7 @@ describe('inline-expectations', () => {
             );
         });
         it(`should throw on possible location mismatch`, () => {
-            const resolveErrorMessage = 'Stylable could not resolve "./unknown.st.css" from "/"';
+            const resolveErrorMessage = "Stylable could not resolve \"./unknown.st.css\" from \"/\"\nVisited paths:\n/unknown.st.css\n/unknown.st.css.js\n/unknown.st.css.mjs\n/unknown.st.css.cjs\n/unknown.st.css.ts\n/unknown.st.css.mts\n/unknown.st.css.cts\n/unknown.st.css.json"
             const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
