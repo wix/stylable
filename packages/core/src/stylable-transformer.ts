@@ -208,6 +208,7 @@ export class StylableTransformer {
             evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
             passedThrough: path.slice(),
+            inferredSelectorMixin,
         };
         const transformResolveOptions = {
             context: transformContext,
