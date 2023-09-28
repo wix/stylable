@@ -668,6 +668,7 @@ function parseStGlobal(
         context.diagnostics.report(diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL(), {
             node: decl,
         });
+        return;
     } else {
         for (const node of selector[0].nodes) {
             if (node.type === 'combinator') {

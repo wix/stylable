@@ -198,7 +198,7 @@ describe(`features/css-class`, () => {
                 -st-global: "";
             }
 
-            /* @rule(empty) .y */
+            /* @rule(multi) .entry__b */
             .b {
                 /* @analyze-error(multi) ${classDiagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL()} */
                 -st-global: ".y , .z";
@@ -214,13 +214,11 @@ describe(`features/css-class`, () => {
         const { meta, exports } = sheets['/entry.st.css'];
 
         // meta.globals
-        expect(meta.globals).to.eql({
-            y: true,
-        });
+        expect(meta.globals).to.eql({});
 
         // JS exports
         expect(exports.classes.a, `a (empty) JS export`).to.eql(`entry__a`);
-        expect(exports.classes.b, `b (multi) JS export`).to.eql(`y`);
+        expect(exports.classes.b, `b (multi) JS export`).to.eql(`entry__b`);
         expect(exports.classes.c, `c (complex) JS export`).to.eql(`entry__c`);
     });
     it(`should escape`, () => {
