@@ -99,6 +99,11 @@ export const diagnostics = {
         'error',
         () => `unsupported multi selector in -st-global`
     ),
+    UNSUPPORTED_COMPLEX_SELECTOR: createDiagnosticReporter(
+        '00010',
+        'error',
+        () => `unsupported complex selector`
+    ),
     IMPORT_ISNT_EXTENDABLE: createDiagnosticReporter(
         '00005',
         'error',
@@ -663,6 +668,15 @@ function parseStGlobal(
         context.diagnostics.report(diagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL(), {
             node: decl,
         });
+    } else {
+        for (const node of selector[0].nodes) {
+            if (node.type === 'combinator') {
+                context.diagnostics.report(diagnostics.UNSUPPORTED_COMPLEX_SELECTOR(), {
+                    node: decl,
+                });
+                return;
+            }
+        }
     }
     return selector[0].nodes;
 }
