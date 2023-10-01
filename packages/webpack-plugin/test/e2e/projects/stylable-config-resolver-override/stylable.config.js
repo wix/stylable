@@ -1,11 +1,11 @@
 //@ts-check
 const { join } = require('path');
-const { createDefaultResolver } = require('@stylable/core');
+const { createWebpackResolver } = require('@stylable/webpack-plugin');
 
 module.exports = {
     defaultConfig(fs) {
         return {
-            resolveModule: createDefaultResolver(fs, {
+            resolveModule: createWebpackResolver(fs, {
                 alias: {
                     'wp-alias': join(__dirname, 'src/wrong'),
                 },
@@ -18,7 +18,7 @@ module.exports = {
             stylableConfig(defaultStylableConfig) {
                 return {
                     ...defaultStylableConfig,
-                    resolveModule: createDefaultResolver(fs, {
+                    resolveModule: createWebpackResolver(fs, {
                         alias: {
                             'wp-alias': join(__dirname, 'src/webpack-alias'),
                         },

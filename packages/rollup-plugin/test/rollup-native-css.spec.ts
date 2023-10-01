@@ -2,14 +2,14 @@ import { expect } from 'chai';
 import { rollupRunner } from './test-kit/rollup-runner';
 import { getProjectPath } from './test-kit/test-helpers';
 import { createDefaultResolver } from '@stylable/core';
-import { nodeFs } from '@file-services/node';
+import fs from '@file-services/node';
 
 describe('StylableRollupPlugin - import native CSS', function () {
     this.timeout(30000);
 
     const project = 'native-css';
 
-    const resolve = createDefaultResolver(nodeFs, {});
+    const resolve = createDefaultResolver({ fs });
     const runner = rollupRunner({
         projectPath: getProjectPath(project),
         entry: './src/index.js',

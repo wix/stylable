@@ -14,7 +14,8 @@ import { processProjects } from './process-projects';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 import { resolveNpmRequests } from './resolve-requests';
 import type { ModuleResolver } from '@stylable/core/dist/index-internal';
-import type { MinimalFS, processNamespace } from '@stylable/core';
+import type { processNamespace } from '@stylable/core';
+import type { IFileSystem } from '@file-services/types';
 
 interface StylableRuntimeConfigs {
     stcConfig?: Configuration<string> | undefined;
@@ -64,21 +65,21 @@ export async function projectsConfig(
 }
 
 // todo: make fs not optional next major version
-export function resolveConfig(context: string, request?: string, fs?: MinimalFS) {
+export function resolveConfig(context: string, request?: string, fs?: IFileSystem) {
     return request ? requireConfigFile(request, context, fs) : resolveConfigFile(context, fs);
 }
 
-function requireConfigFile(request: string, context: string, fs?: MinimalFS) {
+function requireConfigFile(request: string, context: string, fs?: IFileSystem) {
     const path = require.resolve(request, { paths: [context] });
     const config = resolveConfigValue(require(path), fs);
     return config ? { config, path } : undefined;
 }
 
-function resolveConfigFile(context: string, fs?: MinimalFS) {
+function resolveConfigFile(context: string, fs?: IFileSystem) {
     return loadStylableConfig(context, (config) => resolveConfigValue(config, fs));
 }
 
-function resolveConfigValue(config: any, fs?: MinimalFS) {
+function resolveConfigValue(config: any, fs?: IFileSystem) {
     return tryRun(
         (): StylableRuntimeConfigs => ({
             stcConfig: isSTCConfig(config)

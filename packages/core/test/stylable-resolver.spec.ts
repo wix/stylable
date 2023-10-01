@@ -1,25 +1,10 @@
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
-import { testStylableCore, generateStylableResult } from '@stylable/core-test-kit';
-import { Stylable, MinimalFS } from '@stylable/core';
-
-function createResolveExtendsResults(
-    fileSystem: MinimalFS,
-    fileToProcess: string,
-    classNameToLookup: string,
-    isElement = false
-) {
-    const stylable = new Stylable({
-        fileSystem,
-        projectRoot: '/',
-    });
-
-    return stylable.resolver.resolveExtends(
-        stylable.analyze(fileToProcess),
-        classNameToLookup,
-        isElement
-    );
-}
+import {
+    testStylableCore,
+    generateStylableResult,
+    createResolveExtendsResults,
+} from '@stylable/core-test-kit';
 
 describe('stylable-resolver', () => {
     it('should resolve extend classes', () => {

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
+import fs from '@file-services/node';
 import { resolve } from 'path';
 import yargs from 'yargs';
 import { codeMods } from './code-mods/code-mods';

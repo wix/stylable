@@ -8,7 +8,7 @@ import { CompletionItem, TextEdit } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-css-languageservice';
 import { URI } from 'vscode-uri';
 import { expect } from 'chai';
-import nodeFs from '@file-services/node';
+import fs from '@file-services/node';
 
 export interface TestOptions {
     testOnNativeFileSystem: string;
@@ -112,10 +112,10 @@ function setupFileSystem(input: string | IDirectoryContents, options: Partial<Te
     const content = typeof input === `string` ? { '/entry.st.css': input } : input;
     if (options.testOnNativeFileSystem) {
         options.stylableConfig ||= {};
-        options.stylableConfig.filesystem = nodeFs;
+        options.stylableConfig.filesystem = fs;
         options.stylableConfig.projectRoot = options.testOnNativeFileSystem;
-        copyDirectory(nodeFs, options.testOnNativeFileSystem, content);
-        return nodeFs;
+        copyDirectory(fs, options.testOnNativeFileSystem, content);
+        return fs;
     } else {
         return createMemoryFs(content);
     }

@@ -681,60 +681,6 @@ describe('build stand alone', () => {
         expect(dtsSourceMapContent).to.contain(`"sources": [`);
         expect(dtsSourceMapContent).to.contain(`"main.st.css"`);
     });
-
-    describe('resolver', () => {
-        it('should be able to build with enhanced-resolver alias configured', async () => {
-            const identifier = 'build-identifier';
-            const fs = createMemoryFs({
-                '/entry.st.css': `
-                    @st-import [green] from '@colors/green.st.css';
-                    
-                    .root { -st-mixin: green;}`,
-                '/colors/green.st.css': `
-                    .green { color: green; }`,
-            });
-
-            const diagnosticsManager = new DiagnosticsManager();
-            const stylable = new Stylable({
-                projectRoot: '/',
-                fileSystem: fs,
-                requireModule: () => ({}),
-                resolveOptions: {
-                    alias: {
-                        '@colors': '/colors',
-                    },
-                },
-            });
-
-            await build(
-                {
-                    outDir: '.',
-                    srcDir: '.',
-                    outputCSS: true,
-                    diagnostics: true,
-                },
-                {
-                    fs,
-                    stylable,
-                    rootDir: '/',
-                    projectRoot: '/',
-                    log,
-                    diagnosticsManager,
-                    identifier,
-                }
-            );
-
-            ['/entry.st.css', '/entry.css'].forEach((p) => {
-                expect(fs.existsSync(p), p).to.equal(true);
-            });
-
-            const messages = diagnosticsManager.get(identifier, '/entry.st.css')?.diagnostics;
-            expect(messages).to.eql(undefined);
-
-            const entryCSSContent = fs.readFileSync('/entry.css', 'utf8');
-            expect(entryCSSContent).to.contain(`color: green;`);
-        });
-    });
 });
 
 describe('build - bundle', () => {

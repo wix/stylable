@@ -1,6 +1,6 @@
 import type { IFileSystem } from '@file-services/types';
 
-export type FileSystem = any;
+export type FileSystem = IFileSystem;
 
 export function findFiles(
     fs: Pick<IFileSystem, 'readdirSync' | 'statSync'>,

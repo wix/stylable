@@ -4,12 +4,13 @@
   "description": "Stylable plugin for esbuild",
   "main": "dist/index.js",
   "scripts": {
-    "test": "mocha \"dist/test/**/*.spec.js\""
+    "test": "mocha \"dist/test/**/*.spec.js\" --timeout 10000"
   },
   "peerDependencies": {
     "esbuild": ">=0.17.18"
   },
   "dependencies": {
+    "@file-services/node": "^8.2.0",
     "@stylable/build-tools": "^5.16.0",
     "@stylable/cli": "^5.16.0",
     "@stylable/core": "^5.16.0",

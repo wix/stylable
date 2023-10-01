@@ -1,4 +1,4 @@
-import fs, { readFileSync, writeFileSync } from 'fs';
+import fs from '@file-services/node';
 import { relative, join, isAbsolute, dirname } from 'path';
 import type { Plugin, PluginBuild } from 'esbuild';
 import {
@@ -365,10 +365,10 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                         }
                         const distFilePath = join(stylable.projectRoot, distFile);
 
-                        writeFileSync(
+                        fs.writeFileSync(
                             distFilePath,
                             sortMarkersByDepth(
-                                readFileSync(distFilePath, 'utf8'),
+                                fs.readFileSync(distFilePath, 'utf8'),
                                 stylable,
                                 idForPath,
                                 optimize.removeUnusedComponents ? mapping : {}
