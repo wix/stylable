@@ -1,4 +1,5 @@
-import type { CSSResolve, Imported, JSResolve, StylableMeta } from '@stylable/core';
+import type { Imported, JSResolve, StylableMeta } from '@stylable/core';
+import type { CSSResolveMaybe } from '@stylable/core/dist/index-internal';
 
 export interface Metadata {
     entry: string;
@@ -24,5 +25,5 @@ export type MetadataList = Array<{
 
 export type ResolvedImport = {
     stImport: Imported;
-    resolved: CSSResolve | JSResolve | null;
+    resolved: CSSResolveMaybe | JSResolve | null;
 };

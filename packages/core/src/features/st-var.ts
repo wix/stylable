@@ -480,7 +480,7 @@ export function resolveReferencedVarNames(
                     break;
                 case 'import': {
                     const resolved = context.resolver.deepResolve(symbol);
-                    if (resolved?._kind === 'css' && resolved.symbol._kind === 'var') {
+                    if (resolved?._kind === 'css' && resolved.symbol?._kind === 'var') {
                         varsToCheck.push({ meta: resolved.meta, name: resolved.symbol.name });
                     }
                     break;
