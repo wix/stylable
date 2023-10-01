@@ -64,8 +64,7 @@ export async function projectsConfig(
     return projects;
 }
 
-// todo: make fs not optional next major version
-export function resolveConfig(context: string, request?: string, fs?: IFileSystem) {
+export function resolveConfig(context: string, fs: IFileSystem, request?: string) {
     return request ? requireConfigFile(request, context, fs) : resolveConfigFile(context, fs);
 }
 
