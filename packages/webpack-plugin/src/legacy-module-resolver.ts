@@ -21,7 +21,7 @@ function bundleSafeRequireExtensions(): string[] {
 
 const resolverContext = {};
 
-export function createLegacyResolver(fileSystem: ResolveOptions['fileSystem'], resolveOptions: Partial<ResolveOptions>) {
+export function createWebpackResolver(fileSystem: ResolveOptions['fileSystem'], resolveOptions: Partial<ResolveOptions>) {
     const extensions =
         resolveOptions.extensions && resolveOptions.extensions.length
             ? resolveOptions.extensions

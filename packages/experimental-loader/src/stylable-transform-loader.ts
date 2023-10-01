@@ -9,7 +9,7 @@ import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 import { addBuildInfo } from './add-build-info';
-import { createLegacyResolver } from '@stylable/webpack-plugin';
+import { createWebpackResolver } from '@stylable/webpack-plugin';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 
 // TODO: maybe adopt the code
@@ -65,7 +65,7 @@ const stylableLoader: LoaderDefinition = function (content) {
     };
     const mode = this._compiler!.options.mode === 'development' ? 'development' : 'production';
 
-    const resolveModule = createLegacyResolver(
+    const resolveModule = createWebpackResolver(
         this.fs as any,
         this._compiler!.options.resolve as any
     );

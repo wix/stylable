@@ -1,12 +1,12 @@
 //@ts-check
 const { join } = require('path');
-const { createLegacyResolver } = require('@stylable/webpack-plugin');
+const { createWebpackResolver } = require('@stylable/webpack-plugin');
 const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
     defaultConfig(fs) {
         return {
-            resolveModule: createLegacyResolver(fs, {
+            resolveModule: createWebpackResolver(fs, {
                 alias: {
                     'wp-alias': join(__dirname, 'src/webpack-alias'),
                 },

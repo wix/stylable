@@ -49,7 +49,7 @@ import type {
 import { parse } from 'postcss';
 import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
-import { createLegacyResolver } from './legacy-module-resolver';
+import { createWebpackResolver } from './legacy-module-resolver';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -370,7 +370,7 @@ export class StylableWebpackPlugin {
         const stylableConfig = this.getStylableConfig(compiler)?.config;
 
         validateDefaultConfig(stylableConfig?.defaultConfig);
-        const resolveModule = createLegacyResolver(topLevelFs, {
+        const resolveModule = createWebpackResolver(topLevelFs, {
             ...resolverOptions,
             extensions: [], // use Stylable's default extensions
         });

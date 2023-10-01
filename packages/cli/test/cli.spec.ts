@@ -564,12 +564,12 @@ describe('Stylable Cli', function () {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'stylable.config.js': `
                     const { resolve } = require('node:path');
-                    const { createLegacyResolver } = require('@stylable/webpack-plugin');
+                    const { createWebpackResolver } = require('@stylable/webpack-plugin');
 
                     module.exports = {
                         defaultConfig(fs) {
                             return {
-                                resolveModule: createLegacyResolver(fs, {
+                                resolveModule: createWebpackResolver(fs, {
                                     alias: {
                                         '@colors': resolve(__dirname, './colors')
                                     }
@@ -618,12 +618,12 @@ describe('Stylable Cli', function () {
                 'stylable.config.js': `
                     const { join } = require('path');
                     const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
-                    const { createLegacyResolver } = require('@stylable/webpack-plugin');
+                    const { createWebpackResolver } = require('@stylable/webpack-plugin');
 
                     module.exports = {
                         defaultConfig(fs) {
                             return {
-                                resolveModule: createLegacyResolver(fs, {
+                                resolveModule: createWebpackResolver(fs, {
                                     plugins: [new TsconfigPathsPlugin({ configFile: join(${JSON.stringify(
                                         tempDir.path
                                     )},'tsconfig.json') })],

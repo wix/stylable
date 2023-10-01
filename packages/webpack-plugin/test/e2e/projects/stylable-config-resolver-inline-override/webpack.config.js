@@ -1,7 +1,7 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { join } = require('path');
-const { createLegacyResolver } = require('@stylable/webpack-plugin');
+const { createWebpackResolver } = require('@stylable/webpack-plugin');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
         new StylableWebpackPlugin({
             stylableConfig: (config) => ({
                 ...config,
-                resolveModule: createLegacyResolver(config.fileSystem, {
+                resolveModule: createWebpackResolver(config.fileSystem, {
                     alias: {
                         'wp-alias': join(__dirname, 'src/webpack-alias'),
                     },

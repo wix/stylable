@@ -1,5 +1,5 @@
 import { Stylable, processNamespace } from '@stylable/core';
-import { createStylableResolverCacheMap, createLegacyResolver } from '@stylable/webpack-plugin';
+import { createStylableResolverCacheMap, createWebpackResolver } from '@stylable/webpack-plugin';
 import findConfig from 'find-config';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
@@ -49,7 +49,7 @@ function createStylable(
     if (!loader._compiler) {
         throw new Error('Stylable metadata loader requires a compiler instance');
     }
-    const resolveModule = createLegacyResolver(loader.fs as any, {
+    const resolveModule = createWebpackResolver(loader.fs as any, {
         ...(loader._compiler.options.resolve as any),
         extensions: [],
     });

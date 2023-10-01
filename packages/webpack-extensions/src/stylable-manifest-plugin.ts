@@ -1,5 +1,5 @@
 import { Stylable, StylableMeta } from '@stylable/core';
-import { createLegacyResolver } from '@stylable/webpack-plugin';
+import { createWebpackResolver } from '@stylable/webpack-plugin';
 import { STSymbol } from '@stylable/core/dist/index-internal';
 import { resolveNamespace } from '@stylable/node';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
@@ -56,7 +56,7 @@ export class StylableManifestPlugin {
         this.options = Object.assign({}, defaultOptions, options);
     }
     public apply(compiler: Compiler) {
-        const resolveModule = createLegacyResolver(compiler.inputFileSystem as any, {
+        const resolveModule = createWebpackResolver(compiler.inputFileSystem as any, {
             ...compiler.options.resolve as any,
             extensions: [],
         });
