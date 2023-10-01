@@ -400,21 +400,16 @@ function evaluateValueCall(
             const type = resolvedSymbols.mainNamespace[varName];
             if (type === `js`) {
                 const deepResolve = resolvedSymbols.js[varName];
-                const importedType = typeof deepResolve.symbol;
-                if (importedType === 'string') {
+                const jsValue = deepResolve.symbol;
+                if (typeof jsValue === 'string') {
                     parsedNode.resolvedValue = context.evaluator.valueHook
-                        ? context.evaluator.valueHook(
-                              deepResolve.symbol,
-                              varName,
-                              false,
-                              passedThrough
-                          )
-                        : deepResolve.symbol;
+                        ? context.evaluator.valueHook(jsValue, varName, false, passedThrough)
+                        : jsValue;
                 } else if (node) {
                     // unsupported Javascript value
                     // ToDo: provide actual exported id (default/named as x)
                     context.diagnostics.report(
-                        diagnostics.CANNOT_USE_JS_AS_VALUE(importedType, varName),
+                        diagnostics.CANNOT_USE_JS_AS_VALUE(typeof jsValue, varName),
                         {
                             node,
                             word: varName,

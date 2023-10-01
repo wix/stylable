@@ -84,7 +84,7 @@ export type CSSResolvePath = Array<CSSResolve<ClassSymbol | ElementSymbol>>;
 
 export interface JSResolve {
     _kind: 'js';
-    symbol: any;
+    symbol: unknown;
     meta: null;
 }
 
@@ -390,7 +390,7 @@ export class StylableResolver {
                             meta,
                             name,
                             diagnostics,
-                            deepResolved as CSSResolve
+                            deepResolved as CSSResolve<ClassSymbol>
                         )
                     );
                     break;
@@ -534,7 +534,7 @@ function validateClassResolveExtends(
     meta: StylableMeta,
     name: string,
     diagnostics: Diagnostics,
-    deepResolved: CSSResolve<StylableSymbol> | JSResolve | null
+    deepResolved: CSSResolve<ClassSymbol>
 ): ReportError | undefined {
     return (res, extend) => {
         const decl = findRule(meta.sourceAst, '.' + name);
@@ -557,7 +557,7 @@ function validateClassResolveExtends(
                 });
             }
         } else {
-            if (deepResolved?.symbol.alias) {
+            if (deepResolved.symbol.alias) {
                 meta.sourceAst.walkRules(new RegExp('\\.' + name), (rule) => {
                     diagnostics.report(CSSClass.diagnostics.UNKNOWN_IMPORT_ALIAS(name), {
                         node: rule,
