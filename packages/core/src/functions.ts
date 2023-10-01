@@ -187,7 +187,9 @@ export function processDeclarationValue(
                 const formatterArgs = getFormatterArgs(parsedNode);
                 try {
                     // ToDo: check if function instead of calling on a non function
-                    parsedNode.resolvedValue = (formatter.symbol as Function)(...formatterArgs);
+                    parsedNode.resolvedValue = (formatter.symbol as (...args: any[]) => any)(
+                        ...formatterArgs
+                    );
                     if (evaluator.valueHook && typeof parsedNode.resolvedValue === 'string') {
                         parsedNode.resolvedValue = evaluator.valueHook(
                             parsedNode.resolvedValue,
