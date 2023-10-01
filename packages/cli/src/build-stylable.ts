@@ -56,7 +56,7 @@ export async function buildStylable(
         watchOptions = {},
     }: BuildStylableContext = {}
 ) {
-    const { config } = resolveConfig(rootDir, configFilePath, fs) || {};
+    const { config } = resolveConfig(rootDir, fs, configFilePath) || {};
     validateDefaultConfig(config?.defaultConfig);
 
     const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions, config);
