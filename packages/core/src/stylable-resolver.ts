@@ -65,10 +65,20 @@ export type CachedModuleEntity =
 
 export type StylableResolverCache = Map<string, CachedModuleEntity>;
 
+export interface CSSResolveMaybe<
+    T extends StylableSymbol | STStructure.PartSymbol = StylableSymbol
+> {
+    _kind: 'css';
+    symbol: T | undefined;
+    meta: StylableMeta;
+}
 export interface CSSResolve<T extends StylableSymbol | STStructure.PartSymbol = StylableSymbol> {
     _kind: 'css';
     symbol: T;
     meta: StylableMeta;
+}
+export function isValidCSSResolve(resolved: CSSResolveMaybe): resolved is CSSResolve {
+    return resolved.symbol !== undefined;
 }
 export type CSSResolvePath = Array<CSSResolve<ClassSymbol | ElementSymbol>>;
 
@@ -93,7 +103,7 @@ export interface MetaResolvedSymbols {
 }
 
 export type ReportError = (
-    res: CSSResolve | JSResolve | null,
+    res: CSSResolveMaybe | JSResolve | null,
     extend: ImportSymbol | ClassSymbol | ElementSymbol,
     extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
     meta: StylableMeta,
@@ -194,7 +204,7 @@ export class StylableResolver {
         imported: Imported,
         name: string,
         subtype: 'mappedSymbols' | 'mappedKeyframes' | STSymbol.Namespaces = 'mappedSymbols'
-    ): CSSResolve | JSResolve | null {
+    ): CSSResolveMaybe | JSResolve | null {
         const res = this.getModule(imported);
         if (res.value === null) {
             return null;
@@ -228,7 +238,7 @@ export class StylableResolver {
         const name = importSymbol.type === 'named' ? importSymbol.name : '';
         return this.resolveImported(importSymbol.import, name);
     }
-    public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
+    public resolve(maybeImport: StylableSymbol | undefined): CSSResolveMaybe | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
             if (
                 maybeImport &&
@@ -263,7 +273,7 @@ export class StylableResolver {
     public deepResolve(
         maybeImport: StylableSymbol | undefined,
         path: StylableSymbol[] = []
-    ): CSSResolve | JSResolve | null {
+    ): CSSResolveMaybe | JSResolve | null {
         let resolved = this.resolve(maybeImport);
         while (
             resolved &&
@@ -336,7 +346,7 @@ export class StylableResolver {
         };
         // resolve main namespace
         for (const [name, symbol] of Object.entries(meta.getAllSymbols())) {
-            let deepResolved: CSSResolve | JSResolve | null;
+            let deepResolved: CSSResolveMaybe | JSResolve | null;
             if (symbol._kind === `import` || (symbol._kind === `cssVar` && symbol.alias)) {
                 deepResolved = this.deepResolve(symbol);
                 if (!deepResolved || !deepResolved.symbol) {
@@ -368,14 +378,20 @@ export class StylableResolver {
             } else {
                 deepResolved = { _kind: `css`, meta, symbol };
             }
-            switch (deepResolved.symbol._kind) {
+            // deepResolved symbol is resolved by this point
+            switch (deepResolved.symbol!._kind) {
                 case `class`:
                     resolvedSymbols.class[name] = this.resolveExtends(
                         meta,
-                        deepResolved.symbol,
+                        deepResolved.symbol!,
                         false,
                         undefined,
-                        validateClassResolveExtends(meta, name, diagnostics, deepResolved)
+                        validateClassResolveExtends(
+                            meta,
+                            name,
+                            diagnostics,
+                            deepResolved as CSSResolve
+                        )
                     );
                     break;
                 case `element`:
@@ -388,7 +404,7 @@ export class StylableResolver {
                     resolvedSymbols.cssVar[name] = deepResolved as CSSResolve<CSSVarSymbol>;
                     break;
             }
-            resolvedSymbols.mainNamespace[name] = deepResolved.symbol._kind;
+            resolvedSymbols.mainNamespace[name] = deepResolved.symbol!._kind;
         }
         // resolve keyframes
         for (const [name, symbol] of Object.entries(CSSKeyframes.getAll(meta))) {
