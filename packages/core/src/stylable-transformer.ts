@@ -505,7 +505,7 @@ export class StylableTransformer {
                 // reset current anchor for all except last selector
                 context.inferredSelector = new InferredSelector(
                     this,
-                    context.inferredSelectorContext
+                    context.inferredSelectorStart
                 );
             }
         }
@@ -680,7 +680,10 @@ export class InferredSelector {
     constructor(
         private api: Pick<
             StylableTransformer,
-            'getResolvedSymbols' | 'createSelectorContext' | 'scopeSelectorAst'
+            | 'getResolvedSymbols'
+            | 'createSelectorContext'
+            | 'scopeSelectorAst'
+            | 'createInferredSelector'
         >,
         resolve?: InferredResolve[] | InferredSelector
     ) {
@@ -886,6 +889,17 @@ export class InferredSelector {
                             selectorStr
                         );
                         internalContext.isStandaloneSelector = isFirstInSelector;
+                        if (!structureMode && experimentalSelectorInference) {
+                            internalContext.inferredSelectorStart.set(
+                                this.api.createInferredSelector(meta, {
+                                    name: 'root',
+                                    type: 'class',
+                                })
+                            );
+                            internalContext.inferredSelector.set(
+                                internalContext.inferredSelectorStart
+                            );
+                        }
                         const customAstSelectors = this.api.scopeSelectorAst(internalContext);
                         const inferred =
                             customAstSelectors.length === 1 || experimentalSelectorInference
@@ -1020,6 +1034,8 @@ export class ScopeContext {
     public lastInferredSelectorNode: SelectorNode | undefined;
     // selector is not a continuation of another selector
     public isStandaloneSelector = true;
+    // used as initial selector
+    public inferredSelectorStart: InferredSelector;
     // used as initial selector or after combinators
     public inferredSelectorContext: InferredSelector;
     // used for nesting selector
@@ -1072,6 +1088,7 @@ export class ScopeContext {
         // set selector data
         this.selectorStr = selectorStr || stringifySelector(selectorAst);
         this.inferredSelectorContext = new InferredSelector(this.transformer, inferredContext);
+        this.inferredSelectorStart = new InferredSelector(this.transformer, inferredContext);
         this.inferredSelectorNest = inferredSelectorNest || this.inferredSelectorContext.clone();
         this.inferredSelector = new InferredSelector(
             this.transformer,
