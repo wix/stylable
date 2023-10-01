@@ -1,7 +1,5 @@
-// in browser build this gets remapped to an empty object via our package.json->"browser"
 import nodeModule from 'module';
 // importing the factory directly, as we feed it our own fs, and don't want graceful-fs to be implicitly imported
-// this allows @stylable/core to be bundled for browser usage without special custom configuration
 import ResolverFactory from 'enhanced-resolve/lib/ResolverFactory.js';
 import type { ResolveOptions } from 'enhanced-resolve';
 
@@ -20,7 +18,9 @@ function bundleSafeRequireExtensions(): string[] {
 }
 
 const resolverContext = {};
-
+/**
+ * @deprecated this resolve is slow as hell and not recommended.
+ */
 export function createWebpackResolver(fileSystem: ResolveOptions['fileSystem'], resolveOptions: Partial<ResolveOptions>) {
     const extensions =
         resolveOptions.extensions && resolveOptions.extensions.length
