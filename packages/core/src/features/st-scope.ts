@@ -42,12 +42,14 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
             toRemove.push(() => node.replaceWith(node.nodes || []));
         }
     },
-    transformAtRuleNode({ context: { meta }, atRule, transformer }) {
+    transformAtRuleNode({ context: { meta, inferredSelectorMixin }, atRule, transformer }) {
         if (isStScopeStatement(atRule)) {
             const { selector, inferredSelector } = transformer.scopeSelector(
                 meta,
                 atRule.params,
-                atRule
+                atRule,
+                undefined,
+                inferredSelectorMixin
             );
             // transform selector in params
             atRule.params = selector;
