@@ -10,7 +10,6 @@ import {
     ImportSymbol,
     Stylable,
     StylableMeta,
-    JSResolve,
     Diagnostics,
 } from '@stylable/core';
 import {
@@ -18,6 +17,8 @@ import {
     StylableProcessor,
     STCustomSelector,
     MappedStates,
+    type StylableResolver,
+    isValidCSSResolve,
 } from '@stylable/core/dist/index-internal';
 import type {
     Location,
@@ -202,7 +203,7 @@ export class Provider {
                     break;
                 }
                 case 'import': {
-                    let resolved: CSSResolve | JSResolve | null = null;
+                    let resolved: ReturnType<StylableResolver['resolve']> = null;
                     try {
                         resolved = this.stylable.resolver.resolve(symbol);
                     } catch {
@@ -321,29 +322,24 @@ export class Provider {
         state: string
     ): CSSResolve | null {
         const importedSymbol = origMeta.getClass(elementName)![`-st-extends`];
-        let res: CSSResolve | JSResolve | null = null;
+        let res: ReturnType<StylableResolver['resolveImport']> = null;
 
         if (importedSymbol && importedSymbol._kind === 'import') {
             res = this.stylable.resolver.resolveImport(importedSymbol);
         }
 
         const localSymbol = origMeta.getSymbol(elementName)!;
-        if (
-            res &&
-            res._kind === 'css' &&
-            Object.keys((res.symbol as ClassSymbol)[`-st-states`]!).includes(state)
-        ) {
-            return res;
-        } else if (
-            res &&
-            res._kind === 'css' &&
-            (localSymbol._kind === 'class' || localSymbol._kind === 'element') &&
-            localSymbol[`-st-extends`]
-        ) {
-            return this.findMyState(res.meta, res.symbol.name, state);
-        } else {
-            return null;
+        if (res && res._kind === 'css' && isValidCSSResolve(res)) {
+            if (Object.keys((res.symbol as ClassSymbol)[`-st-states`]!).includes(state)) {
+                return res;
+            } else if (
+                (localSymbol._kind === 'class' || localSymbol._kind === 'element') &&
+                localSymbol[`-st-extends`]
+            ) {
+                return this.findMyState(res.meta, res.symbol.name, state);
+            }
         }
+        return null;
     }
 
     public getSignatureHelp(

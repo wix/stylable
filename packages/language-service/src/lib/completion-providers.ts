@@ -565,6 +565,7 @@ export const ExtendCompletionPlugin: LangServicePlugin = {
                             return (
                                 res &&
                                 res._kind === 'css' &&
+                                res.symbol &&
                                 (res.symbol._kind === 'class' || res.symbol._kind === 'element')
                             );
                         })

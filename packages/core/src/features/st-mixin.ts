@@ -183,7 +183,7 @@ export class StylablePublicApi {
                     name,
                     kind: 'js-func',
                     args: [],
-                    func: resolvedSymbols.js[name].symbol,
+                    func: resolvedSymbols.js[name].symbol as (...args: any[]) => any,
                 };
                 for (const arg of Object.values(data.options)) {
                     mixRef.args.push(arg.value);
@@ -374,10 +374,10 @@ function appendMixin(context: FeatureTransformContext, config: ApplyMixinContext
         handleCSSMixin(context, config, resolveChain);
         return;
     } else if (resolvedType === `js`) {
-        const resolvedMixin = resolvedSymbols.js[symbolName];
-        if (typeof resolvedMixin.symbol === 'function') {
+        const jsValue = resolvedSymbols.js[symbolName].symbol;
+        if (typeof jsValue === 'function') {
             try {
-                handleJSMixin(context, config, resolvedMixin.symbol);
+                handleJSMixin(context, config, jsValue as (...args: any[]) => any);
             } catch (e) {
                 context.diagnostics.report(diagnostics.FAILED_TO_APPLY_MIXIN(String(e)), {
                     node: config.rule,
