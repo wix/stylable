@@ -9,7 +9,6 @@ import {
     StylableSymbol,
     CSSClass,
     STSymbol,
-    STCustomSelector,
     VarSymbol,
     CSSVarSymbol,
     KeyframesSymbol,
@@ -20,7 +19,6 @@ import {
     CSSContains,
     STStructure,
 } from './features';
-import type { StylableTransformer } from './stylable-transformer';
 import { findRule } from './helpers/rule';
 import type { ModuleResolver } from './types';
 import { CustomValueExtension, isCustomValue, stTypes } from './custom-values';
@@ -374,7 +372,6 @@ export class StylableResolver {
                         meta,
                         deepResolved.symbol,
                         false,
-                        undefined,
                         validateClassResolveExtends(meta, name, diagnostics, deepResolved)
                     );
                     break;
@@ -429,7 +426,6 @@ export class StylableResolver {
         meta: StylableMeta,
         nameOrSymbol: string | ClassSymbol | ElementSymbol,
         isElement = false,
-        transformer?: StylableTransformer,
         reportError?: ReportError
     ): CSSResolvePath {
         const name = typeof nameOrSymbol === `string` ? nameOrSymbol : nameOrSymbol.name;
@@ -439,23 +435,6 @@ export class StylableResolver {
                     ? meta.getTypeElement(nameOrSymbol)
                     : meta.getClass(nameOrSymbol)
                 : nameOrSymbol;
-
-        const customSelector = isElement
-            ? null
-            : STCustomSelector.getCustomSelectorExpended(meta, name);
-
-        if (!symbol && !customSelector) {
-            return [];
-        }
-
-        if (customSelector && transformer) {
-            const parsed = transformer.resolveSelectorElements(meta, customSelector);
-            if (parsed.length === 1) {
-                return parsed[0][parsed[0].length - 1].resolved;
-            } else {
-                return [];
-            }
-        }
 
         if (!symbol) {
             return [];
