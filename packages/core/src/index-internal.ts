@@ -47,7 +47,12 @@ export {
     EmitDiagnosticsContext,
     reportDiagnostic,
 } from './report-diagnostic';
-export { StylableResolver, StylableResolverCache } from './stylable-resolver';
+export {
+    StylableResolver,
+    StylableResolverCache,
+    isValidCSSResolve,
+    CSSResolveMaybe,
+} from './stylable-resolver';
 export { CacheItem, FileProcessor, cachedProcessFile, processFn } from './cached-process-file';
 export { createStylableFileProcessor } from './create-stylable-processor';
 export { packageNamespaceFactory } from './resolve-namespace-factories';
