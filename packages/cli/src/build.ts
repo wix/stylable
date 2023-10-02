@@ -40,8 +40,8 @@ export async function build(
         diagnostics,
         diagnosticsMode,
         inlineRuntime,
-        runtimeCjsRequest = '@stylable/runtime/dist/pure.js',
-        runtimeEsmRequest = '@stylable/runtime/esm/pure.js',
+        runtimeCjsRequest = '@stylable/runtime/dist/index.js',
+        runtimeEsmRequest = '@stylable/runtime/dist/index.mjs',
     }: BuildOptions,
     {
         projectRoot: _projectRoot,

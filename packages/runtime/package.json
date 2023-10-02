@@ -8,6 +8,15 @@
     "test:unit": "mocha \"dist/test/unit/**/*.spec.js\"",
     "test:e2e": "mocha \"dist/test/e2e/**/*.spec.js\" --timeout 20000"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/index.js": "./dist/index.js",
+    "./dist/index.mjs": "./dist/index.mjs"
+  },
   "files": [
     "dist",
     "esm",
