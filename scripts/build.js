@@ -14,10 +14,14 @@ buildCoreLib();
 function buildPureEsmRuntime() {
     const projectRoot = path.join(packagesRoot, 'runtime');
 
-    const pureJs = path.join(projectRoot, 'dist', 'pure.js');
-    const pureMjs = path.join(projectRoot, 'dist', 'pure.mjs');
+    const pureJs = path.join(projectRoot, 'esm', 'index.js');
+    const pureMjs = path.join(projectRoot, 'dist', 'index.mjs');
+
+    const pureDts = path.join(projectRoot, 'esm', 'index.d.ts');
+    const pureDMts = path.join(projectRoot, 'dist', 'index.d.mts');
 
     fs.copyFileSync(pureJs, pureMjs);
+    fs.copyFileSync(pureDts, pureDMts);
 }
 
 function buildCoreLib() {

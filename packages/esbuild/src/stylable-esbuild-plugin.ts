@@ -231,7 +231,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                         namespace: res.meta.namespace,
                         jsExports: res.exports,
                         moduleType: 'esm',
-                        runtimeRequest: '@stylable/runtime/esm/pure',
+                        runtimeRequest: '@stylable/runtime',
                     },
                     cssInjection === 'js'
                         ? {

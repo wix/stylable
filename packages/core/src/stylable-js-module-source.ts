@@ -128,8 +128,8 @@ function runtimeImport(
         runtimeRequest ??
             // TODO: we use direct requests here since we don't know how this will be resolved
             (moduleType === 'esm'
-                ? '@stylable/runtime/esm/runtime.js'
-                : '@stylable/runtime/dist/runtime.js')
+                ? '@stylable/runtime/dist/index.mjs'
+                : '@stylable/runtime/dist/index.js')
     );
     return moduleType === 'esm'
         ? `import { classesRuntime, statesRuntime${importInjectCSS} } from ${request};`
