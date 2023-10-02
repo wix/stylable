@@ -459,6 +459,50 @@ describe('features/css-pseudo-class', () => {
                     .root:static(unknown-param) {}
                 `);
             });
+            it('should report invalid template selector', () => {
+                testStylableCore(`
+                    .a {
+                        /* 
+                            @analyze-error(not-compound) ${stCustomStateDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR(
+                                'notCompound',
+                                '.x .y'
+                            )}
+                        */
+                        -st-states: notCompound(".x .y");
+                    }
+                    .b {
+                        /* 
+                            @analyze-error(multi) ${stCustomStateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(
+                                'multi',
+                                '.x, .y'
+                            )}
+                        */
+                        -st-states: multi(".x, .y");
+                    }
+                    .c {
+                        /* 
+                            @analyze-error(invalid) ${stCustomStateDiagnostics.INVALID_SELECTOR(
+                                'invalid',
+                                ':unclosed('
+                            )}
+                        */
+                        -st-states: invalid(":unclosed(");
+                    }
+                    .d {
+                        /* 
+                            @analyze-error(invalidStart) ${stCustomStateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(
+                                'invalidStartElement',
+                                'div.x'
+                            )}
+                            @analyze-error(invalidStart) ${stCustomStateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(
+                                'invalidStartWildcard',
+                                '*.x'
+                            )}
+                        */
+                        -st-states: invalidStartElement("div.x"), invalidStartWildcard("*.x");
+                    }
+                `);
+            });
         });
         describe('custom mapped parameter', () => {
             it('should transform mapped state (quoted)', () => {
@@ -517,12 +561,6 @@ describe('features/css-pseudo-class', () => {
                 shouldReportNoDiagnostics(meta);
             });
             it('should report invalid template selector', () => {
-                /**
-                 * currently only checks template with parameter
-                 * for backwards compatibility standalone template can accept
-                 * any kind of selector - we might want to limit this in a future
-                 * major version.
-                 */
                 testStylableCore(`
                     .root {
                         -st-states: classAndThenParam(".x$0", string),

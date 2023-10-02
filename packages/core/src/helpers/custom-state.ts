@@ -4,7 +4,7 @@ import postcssValueParser, {
     type FunctionNode,
 } from 'postcss-value-parser';
 import cssesc from 'cssesc';
-import type { PseudoClass, SelectorNode } from '@tokey/css-selector-parser';
+import type { PseudoClass, SelectorList, SelectorNode } from '@tokey/css-selector-parser';
 import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import {
     parseSelectorWithCache,
@@ -338,7 +338,21 @@ function defineTemplateState(
     const template = stripQuotation(postcssValueParser.stringify(templateDef));
     if (argsFullValue.length === 1) {
         // simple template with no params
-        mappedStates[stateName] = template.trim().replace(/\\["']/g, '"');
+        const selectorStr = template.trim().replace(/\\["']/g, '"');
+        const selectorAst = parseSelectorWithCache(selectorStr, { clone: true });
+        if (
+            !validateTemplateSelector({
+                stateName,
+                selectorStr,
+                selectorAst,
+                cssNode: decl,
+                diagnostics,
+            })
+        ) {
+            return;
+        } else {
+            mappedStates[stateName] = selectorStr;
+        }
     } else if (argsFullValue.length === 2) {
         // single parameter template
         if (!template.includes('$0')) {
@@ -1075,30 +1089,57 @@ function transformMappedStateWithParam({
     selectorNode?: postcss.Node;
     diagnostics: Diagnostics;
 }) {
-    const targetSelectorStr = template.replace(/\$0/g, param);
-    const selectorAst = parseSelectorWithCache(targetSelectorStr, { clone: true });
+    const selectorStr = template.replace(/\$0/g, param);
+    const selectorAst = parseSelectorWithCache(selectorStr, { clone: true });
+    if (
+        !validateTemplateSelector({
+            stateName,
+            selectorStr,
+            selectorAst,
+            cssNode: selectorNode,
+            diagnostics,
+        })
+    ) {
+        return;
+    }
+    convertToSelector(node).nodes = selectorAst[0].nodes;
+}
+
+function validateTemplateSelector({
+    stateName,
+    selectorStr,
+    selectorAst,
+    cssNode,
+    diagnostics,
+}: {
+    stateName: string;
+    selectorStr: string;
+    selectorAst: SelectorList;
+    cssNode?: postcss.Node;
+    diagnostics: Diagnostics;
+}): boolean {
     if (selectorAst.length > 1) {
-        if (selectorNode) {
+        if (cssNode) {
             diagnostics.report(
-                stateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(stateName, targetSelectorStr),
+                stateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(stateName, selectorStr),
                 {
-                    node: selectorNode,
+                    node: cssNode,
                 }
             );
         }
-        return;
+        return false;
     } else {
         const firstSelector = selectorAst[0].nodes.find(({ type }) => type !== 'comment');
         if (firstSelector?.type === 'type' || firstSelector?.type === 'universal') {
-            if (selectorNode) {
+            if (cssNode) {
                 diagnostics.report(
-                    stateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(stateName, targetSelectorStr),
+                    stateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(stateName, selectorStr),
                     {
-                        node: selectorNode,
+                        node: cssNode,
                     }
                 );
             }
-            return;
+            return false;
         }
         let unexpectedSelector: undefined | SelectorNode = undefined;
         for (const node of selectorAst[0].nodes) {
@@ -1108,33 +1149,30 @@ function transformMappedStateWithParam({
             }
         }
         if (unexpectedSelector) {
-            if (selectorNode) {
+            if (cssNode) {
                 switch (unexpectedSelector.type) {
                     case 'combinator':
                         diagnostics.report(
-                            stateDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR(
-                                stateName,
-                                targetSelectorStr
-                            ),
+                            stateDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR(stateName, selectorStr),
                             {
-                                node: selectorNode,
+                                node: cssNode,
                             }
                         );
                         break;
                     case 'invalid':
                         diagnostics.report(
-                            stateDiagnostics.INVALID_SELECTOR(stateName, targetSelectorStr),
+                            stateDiagnostics.INVALID_SELECTOR(stateName, selectorStr),
                             {
-                                node: selectorNode,
+                                node: cssNode,
                             }
                         );
                         break;
                 }
             }
-            return;
+            return false;
         }
     }
-    convertToSelector(node).nodes = selectorAst[0].nodes;
+    return true;
 }
 
 function resolveParam(
