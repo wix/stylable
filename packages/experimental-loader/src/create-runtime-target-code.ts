@@ -1,12 +1,15 @@
 import type { StylableExports } from '@stylable/core/dist/index-internal';
-import { generateStylableJSModuleSource } from '@stylable/core';
 
-export function createRuntimeTargetCode(namespace: string, jsExports: StylableExports) {
-    const code = generateStylableJSModuleSource({
-        jsExports,
-        moduleType: 'cjs',
-        namespace,
-        varType: 'var',
-    });
-    return code;
+export function createRuntimeTargetCode(namespace: string, mapping: StylableExports) {
+    return `
+  var rt = require("@stylable/runtime/dist/css-runtime-stylesheet.js");
+
+  module.exports = rt.create(
+      ${JSON.stringify(namespace)},
+      ${JSON.stringify(mapping)},
+      "",
+      -1,
+      module.id
+  );
+  `;
 }

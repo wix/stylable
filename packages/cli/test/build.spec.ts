@@ -423,7 +423,7 @@ describe('build stand alone', () => {
                 esm: true,
                 inlineRuntime: true,
                 runtimeCjsRequest: '/node_modules/@stylable/runtime/dist/index.js',
-                runtimeEsmRequest: '/node_modules/@stylable/runtime/dist/index.mjs',
+                runtimeEsmRequest: '/node_modules/@stylable/runtime/esm/index.js',
             },
             {
                 fs,
@@ -440,18 +440,18 @@ describe('build stand alone', () => {
 
         // this makes sure that we actually copied the runtime
         const runtimeCjs = fs.readFileSync('/dist/stylable-cjs-runtime.js', 'utf8');
-        const runtimeMjs = fs.readFileSync('/dist/stylable-esm-runtime.mjs', 'utf8');
+        const runtimeMjs = fs.readFileSync('/dist/stylable-esm-runtime.js', 'utf8');
 
         expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
             `./stylable-cjs-runtime.js`
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
-            `./stylable-esm-runtime.mjs`
+            `./stylable-esm-runtime.js`
         );
         expect(
             innerPathBuiltFileEsm,
             'imports the esm runtime with full extension with relative path'
-        ).to.contain(`./../stylable-esm-runtime.mjs`);
+        ).to.contain(`./../stylable-esm-runtime.js`);
         expect(runtimeCjs).to.eql(`// runtime cjs`);
         expect(runtimeMjs).to.eql(`// runtime esm`);
     });
@@ -495,10 +495,10 @@ describe('build stand alone', () => {
         const builtFileEsm = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
 
         expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
-            `"@stylable/runtime/dist/index.js"`
+            `"@stylable/runtime/dist/pure.js"`
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
-            `"@stylable/runtime/dist/index.mjs"`
+            `"@stylable/runtime/esm/pure.js"`
         );
     });
 

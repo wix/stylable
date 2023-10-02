@@ -14,7 +14,6 @@
     "@stylable/build-tools": "^5.16.0",
     "@stylable/cli": "^5.16.0",
     "@stylable/core": "^5.16.0",
-    "@stylable/module-utils": "^5.16.0",
     "@stylable/node": "^5.16.0",
     "@stylable/optimizer": "^5.16.0",
     "@stylable/runtime": "^5.16.0",

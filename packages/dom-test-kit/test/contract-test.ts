@@ -1,23 +1,30 @@
-import { statesRuntime, type StateValue } from '@stylable/runtime';
-import type { PartialElement, StylesheetHost } from '@stylable/dom-test-kit';
-
+import { create } from '@stylable/runtime';
+import type { PartialElement } from '@stylable/dom-test-kit';
 import { expect } from 'chai';
 
 export const contractTest =
     <T extends PartialElement>(
-        StylableUtilClass: new (
-            host: StylesheetHost & { cssStates(states: Record<string, StateValue>): string }
-        ) => any,
+        StylableUtilClass: any,
         options: { scopeSelectorTest?: boolean; createElement: () => T }
     ) =>
     () => {
-        const namespace = 'ns';
-        const classes = { root: 'ns-root', x: 'ns__x', y: 'ns__y', z: 'ns__z ns__y' };
-        const util = new StylableUtilClass({
-            classes,
-            namespace,
-            cssStates: statesRuntime.bind(null, namespace),
-        });
+        const s = create(
+            'ns',
+            {
+                classes: { root: 'ns-root', x: 'ns__x', y: 'ns__y', z: 'ns__z ns__y' },
+                keyframes: {},
+                layers: {},
+                containers: {},
+                vars: {},
+                stVars: {},
+            },
+            '',
+            0,
+            '0',
+            null
+        );
+
+        const util = new StylableUtilClass(s);
 
         if (options.scopeSelectorTest) {
             it('scopeSelector defaults to root', () => {
@@ -60,17 +67,17 @@ export const contractTest =
         describe('Style state', () => {
             it('hasStyleState returns true if the requested style state exists', async () => {
                 const elem = options.createElement();
-                elem.classList.add(statesRuntime(namespace, { loading: true }));
+                elem.classList.add(s.cssStates({ loading: true }));
                 expect(await util.hasStyleState(elem, 'loading')).to.equal(true);
             });
             it('getStyleState returns the requested boolean style state value', async () => {
                 const elem = options.createElement();
-                elem.classList.add(statesRuntime(namespace, { loading: true }));
+                elem.classList.add(s.cssStates({ loading: true }));
                 expect(await util.getStyleState(elem, 'loading')).to.equal(true);
             });
             it('getStyleState returns the requested string style state value', async () => {
                 const elem = options.createElement();
-                elem.classList.add(statesRuntime(namespace, { loading: 'value' }));
+                elem.classList.add(s.cssStates({ loading: 'value' }));
                 expect(await util.getStyleState(elem, 'loading')).to.equal('value');
             });
         });

@@ -30,7 +30,6 @@ export interface StylableLoaderContext extends LoaderContext<{}> {
     stylable: Stylable;
     assetsMode: 'loader' | 'url';
     diagnosticsMode: DiagnosticsMode;
-    cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
     target: 'oldie' | 'modern';
     assetFilter: (url: string, context: string) => boolean;
     flagStylableModule: (loaderData: LoaderData) => void;

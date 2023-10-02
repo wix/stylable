@@ -1,4 +1,4 @@
-import * as runtime from '@stylable/runtime';
+import { RuntimeRenderer } from '@stylable/runtime';
 import * as stylesheet from '@stylable/runtime';
 
 export interface MinimalModule {
@@ -48,7 +48,7 @@ export function evalStylableModule(
     const moduleFactory = new Function('module', 'exports', '__webpack_require__', code);
     const customRequire = (id: string) => {
         if (id.match(/@stylable\/runtime$/)) {
-            return runtime;
+            return new RuntimeRenderer();
         }
         if (id.match(/css-runtime-stylesheet.js$/)) {
             return stylesheet;

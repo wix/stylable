@@ -23,7 +23,12 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
  */
 export function evalStylableModule<T = unknown>(source: string, fullPath: string): T {
     return evalModule(fullPath, source, (id) => {
-        if (id === '@stylable/runtime' || id === '@stylable/runtime/dist/index.js' || id === '@stylable/runtime/dist/index.mjs') {
+        if (
+            id === '@stylable/runtime' ||
+            id === '@stylable/runtime/dist/runtime' ||
+            id === '@stylable/runtime/dist/runtime.js' ||
+            id === '@stylable/runtime/dist/pure.js'
+        ) {
             return runtime;
         }
         throw new Error(`Could not find module: ${id}`);

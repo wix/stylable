@@ -1,7 +1,6 @@
-import { getImports, getReplacementToken as rt } from './loader-utils';
+import { getImports, getReplacementToken } from './loader-utils';
 import type { StylableLoaderContext } from './types';
 import { emitDiagnostics } from '@stylable/core/dist/index-internal';
-import { generateStylableJSModuleSource } from '@stylable/core';
 
 export default function StylableWebpackLoader(this: StylableLoaderContext, source: string) {
     const { meta, exports } = this.stylable.transform(
@@ -34,30 +33,23 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         cssDepth,
         type: meta.type,
     });
-
-    return generateStylableJSModuleSource(
-        {
-            namespace: rt('namespace'),
-            jsExports: {
-                containers: rt('containers'),
-                classes: rt('classes'),
-                keyframes: rt('keyframes'),
-                layers: rt('layers'),
-                stVars: rt('stVars'),
-                vars: rt('vars'),
-            },
-            header: imports.join('\n'),
-            footer: `if(import.meta.webpackHot /* HMR */) { import.meta.webpackHot.accept();}`,
-            moduleType: 'esm',
-            varType,
-        },
-        this.cssInjection === 'js'
-            ? {
-                  css: rt('css'),
-                  depth: rt('depth'),
-                  runtimeId: rt('runtimeId'),
-                  id: rt('id'),
-              }
-            : undefined
-    );
+    /**
+     * NOTICE: order of replacements is coupled with "webpack-entities.ts"
+     * replacement is done from bottom->top.
+     */
+    return `
+${imports.join('\n')}
+export ${varType} namespace = ${getReplacementToken('namespace')};
+export ${varType} classes = ${getReplacementToken('classes')};
+export ${varType} keyframes = ${getReplacementToken('keyframes')}; 
+export ${varType} layers = ${getReplacementToken('layers')};
+export ${varType} containers = ${getReplacementToken('containers')};
+export ${varType} stVars = ${getReplacementToken('stVars')}; 
+export ${varType} vars = ${getReplacementToken('vars')}; 
+export ${varType} cssStates = ${getReplacementToken('stc')};
+export ${varType} style = ${getReplacementToken('sts')};
+export ${varType} st = ${getReplacementToken('st')};
+/* JS_INJECT */
+if(import.meta.webpackHot /* HMR */) { import.meta.webpackHot.accept();}
+`;
 }
