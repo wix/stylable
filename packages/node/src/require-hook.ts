@@ -1,13 +1,13 @@
 import type { StylableConfig } from '@stylable/core';
 import { validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { stylableModuleFactory } from '@stylable/module-utils';
-import fs from 'fs';
+import fs from '@file-services/node';
 import { defaultStylableMatcher } from './common';
 import { resolveNamespace } from './resolve-namespace';
 
 export interface Options {
     matcher: (filename: string) => boolean;
-    stylableConfig: Partial<StylableConfig>;
+    stylableConfig: Partial<Omit<StylableConfig, 'fileSystem'>>;
     afterCompile?: (code: string, filename: string) => string;
     runtimePath?: string;
     ignoreJSModules?: boolean;
@@ -24,7 +24,7 @@ export function attachHook({
     ignoreJSModules,
     configPath,
 }: Partial<Options> = {}) {
-    let options: Partial<StylableConfig> = {
+    let options = {
         ...stylableConfig,
     };
 

@@ -1,5 +1,5 @@
-import fs, { readFileSync, symlinkSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { nodeFs as fs } from '@file-services/node';
+import { join } from 'node:path';
 import { Stylable } from '@stylable/core';
 import { generateDTSContent } from '@stylable/module-utils';
 import { createTempDirectorySync, ITempDirectorySync } from './file-system-helpers';
@@ -27,18 +27,19 @@ export class DTSKit {
             resolveNamespace(ns) {
                 return ns;
             },
+
         });
     }
 
     public populate(files: Record<string, string>, generateDts = true) {
         for (const filePath in files) {
-            writeFileSync(this.sourcePath(filePath), files[filePath]);
+            fs.writeFileSync(this.sourcePath(filePath), files[filePath]);
             if (generateDts && filePath.endsWith('.st.css')) {
                 this.genDTS(filePath);
             }
         }
         for (const filePath in this.testKit) {
-            writeFileSync(this.sourcePath(filePath), this.testKit[filePath]);
+            fs.writeFileSync(this.sourcePath(filePath), this.testKit[filePath]);
         }
     }
 
@@ -81,11 +82,11 @@ export class DTSKit {
     }
 
     public write(internalPath: string, content: string) {
-        writeFileSync(this.sourcePath(internalPath), content);
+        fs.writeFileSync(this.sourcePath(internalPath), content);
     }
 
     public read(internalPath: string) {
-        return readFileSync(this.sourcePath(internalPath), { encoding: 'utf8' });
+        return fs.readFileSync(this.sourcePath(internalPath), { encoding: 'utf8' });
     }
 
     public dispose() {
@@ -93,7 +94,7 @@ export class DTSKit {
     }
 
     public linkNodeModules() {
-        symlinkSync(
+        fs.symlinkSync(
             join(__dirname, '../../../node_modules'),
             join(this.tmp.path, 'node_modules'),
             'junction'

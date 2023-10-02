@@ -18,7 +18,7 @@ describe('assets', function () {
             '/src/other.st.css': '.other {}',
             '/node_modules/styles/3rd-party.css': '.third-party {}',
         });
-        const resolve = createDefaultResolver(fs, {});
+        const resolve = createDefaultResolver({ fs });
         const stylable = new Stylable({
             projectRoot: '/',
             fileSystem: fs,

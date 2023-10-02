@@ -219,7 +219,7 @@ describe('Generate DTS', function () {
     it('should not expose imported symbols', () => {
         tk.populate({
             'origin.st.css': `
-                .cls {
+                .cls { 
                     container-name: cont;
                 }
                 @property --customProp;
@@ -253,7 +253,6 @@ describe('Generate DTS', function () {
                 
                 eq<string>(classes.cls);
                 eq<string>(classes.CompRoot);
-                eq<string>(vars.customProp);
                 eq<string>(vars.customProp);
                 eq<string>(stVars.buildVar);
                 eq<string>(keyframes.anim);

@@ -147,12 +147,6 @@ describe(`features/css-class`, () => {
                 /* @transform-remove */
                 -st-global: "[attr=val]";
             }
-            
-            /* @rule(complex) .y .z */
-            .d {
-                /* @transform-remove */
-                -st-global: ".y .z";
-            }
 
             /* @rule(not only classes compound) .yy[attr] */
             .e {
@@ -176,9 +170,6 @@ describe(`features/css-class`, () => {
         expect(CSSClass.get(meta, `c`), `c symbol`).to.contain({
             name: 'c',
         });
-        expect(CSSClass.get(meta, `d`), `d symbol`).to.contain({
-            name: 'd',
-        });
         expect(CSSClass.get(meta, `e`), `e symbol`).to.contain({
             name: 'e',
         });
@@ -188,7 +179,6 @@ describe(`features/css-class`, () => {
             x: true,
             z: true,
             zz: true,
-            y: true,
             yy: true,
         });
 
@@ -208,23 +198,28 @@ describe(`features/css-class`, () => {
                 -st-global: "";
             }
 
-            /* @rule(empty) .y */
+            /* @rule(multi) .entry__b */
             .b {
                 /* @analyze-error(multi) ${classDiagnostics.UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL()} */
                 -st-global: ".y , .z";
+            }
+
+            /* @rule(complex) .entry__c */
+            .c {
+                /* @analyze-error(complex) ${classDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR()} */
+                -st-global: ".y .z";
             }
         `);
 
         const { meta, exports } = sheets['/entry.st.css'];
 
         // meta.globals
-        expect(meta.globals).to.eql({
-            y: true,
-        });
+        expect(meta.globals).to.eql({});
 
         // JS exports
         expect(exports.classes.a, `a (empty) JS export`).to.eql(`entry__a`);
-        expect(exports.classes.b, `b (multi) JS export`).to.eql(`y`);
+        expect(exports.classes.b, `b (multi) JS export`).to.eql(`entry__b`);
+        expect(exports.classes.c, `c (complex) JS export`).to.eql(`entry__c`);
     });
     it(`should escape`, () => {
         const { sheets } = testStylableCore(

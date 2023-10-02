@@ -13,7 +13,7 @@ describe('Stylable postcss transform (Global)', () => {
                         @st-import [test] from './imported.st.css';
                         .root {}
                         .test {}
-                        .x { -st-global: '.a .b'; }
+                        .x { -st-global: '.a.b'; }
                         :global(.c .d) {}
                         :global(.e) {}
                     `,
@@ -38,7 +38,7 @@ describe('Stylable postcss transform (Global)', () => {
             e: true,
         });
         expect((meta.targetAst!.nodes[1] as postcss.Rule).selector).to.equal('.global-test');
-        expect((meta.targetAst!.nodes[2] as postcss.Rule).selector).to.equal('.a .b');
+        expect((meta.targetAst!.nodes[2] as postcss.Rule).selector).to.equal('.a.b');
         expect((meta.targetAst!.nodes[3] as postcss.Rule).selector).to.equal('.c .d');
         expect((meta.targetAst!.nodes[4] as postcss.Rule).selector).to.equal('.e');
     });

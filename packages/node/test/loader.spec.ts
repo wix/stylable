@@ -69,7 +69,7 @@ describeIf(nodeMajorVersion > 14)('node loader', () => {
                 console.log(classes);
             `,
             'stylable.config.js': `
-                export function defaultConfig(fs) {
+                export function defaultConfig() {
                     return {
                         resolveNamespace(namespace, path) {
                             return 'x-' + namespace;
@@ -107,7 +107,7 @@ describeIf(nodeMajorVersion > 14)('node loader', () => {
             `,
             'stylable.config.js': `
                 module.exports = {
-                    defaultConfig(fs) {
+                    defaultConfig() {
                         return {
                             resolveNamespace(namespace, path) {
                                 return 'x-' + namespace;

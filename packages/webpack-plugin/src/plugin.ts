@@ -1,4 +1,4 @@
-import { MinimalFS, Stylable, StylableConfig } from '@stylable/core';
+import { Stylable, StylableConfig } from '@stylable/core';
 import {
     OptimizeConfig,
     DiagnosticsMode,
@@ -49,6 +49,7 @@ import type {
 import { parse } from 'postcss';
 import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
+import { createWebpackResolver } from './legacy-module-resolver';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -329,8 +330,8 @@ export class StylableWebpackPlugin {
     private getStylableConfig(compiler: Compiler) {
         const configuration = resolveStcConfig(
             compiler.context,
-            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined,
-            getTopLevelInputFilesystem(compiler)
+            getTopLevelInputFilesystem(compiler),
+            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined
         );
 
         return configuration;
@@ -358,7 +359,10 @@ export class StylableWebpackPlugin {
             return;
         }
 
-        const resolverOptions: ResolveOptionsWebpackOptions = {
+        const resolverOptions: Omit<
+            ResolveOptionsWebpackOptions,
+            'fileSystem' | 'resolver' | 'plugins'
+        > = {
             ...compiler.options.resolve,
             aliasFields:
                 compiler.options.resolve.byDependency?.esm?.aliasFields ||
@@ -369,7 +373,10 @@ export class StylableWebpackPlugin {
         const stylableConfig = this.getStylableConfig(compiler)?.config;
 
         validateDefaultConfig(stylableConfig?.defaultConfig);
-
+        const resolveModule = createWebpackResolver(topLevelFs, {
+            ...resolverOptions,
+            extensions: [], // use Stylable's default extensions
+        });
         this.stylable = new Stylable(
             this.options.stylableConfig(
                 {
@@ -380,16 +387,13 @@ export class StylableWebpackPlugin {
                      */
                     fileSystem: topLevelFs,
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
-                    resolveOptions: {
-                        ...resolverOptions,
-                        extensions: [], // use Stylable's default extensions
-                    },
                     resolveNamespace: createNamespaceStrategyNode({
                         hashSalt: compiler.options.output.hashSalt || '',
                     }),
                     requireModule: createDecacheRequire(compiler),
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
+                    resolveModule,
                     /**
                      * config order is user determined
                      * each configuration points receives the default options,
@@ -795,7 +799,7 @@ function isWebpackConfigProcessor(config: any): config is {
     webpackPlugin: (
         options: Required<StylableWebpackPluginOptions>,
         compiler: Compiler,
-        fs: MinimalFS
+        fs: unknown
     ) => Required<StylableWebpackPluginOptions>;
 } {
     return typeof config === 'object' && typeof config.webpackPlugin === 'function';

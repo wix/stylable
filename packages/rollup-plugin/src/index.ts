@@ -1,5 +1,5 @@
 import type { Plugin } from 'rollup';
-import fs from 'fs';
+import fs from '@file-services/node';
 import { join, parse } from 'path';
 import { Stylable, StylableConfig } from '@stylable/core';
 import {
@@ -123,8 +123,8 @@ export function stylableRollupPlugin({
                 });
                 configFromFile = resolveStcConfig(
                     stConfig.projectRoot,
-                    typeof stcConfig === 'string' ? stcConfig : undefined,
-                    fs
+                    fs,
+                    typeof stcConfig === 'string' ? stcConfig : undefined
                 );
 
                 stylable = new Stylable({

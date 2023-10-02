@@ -43,6 +43,23 @@ describe('Stylable', () => {
             expect(fsMetaAfter, `meta cached`).to.equal(fsMetaBefore);
         });
     });
+
+    describe('resolveModule option', () => {
+        it('should accept resolve options', () => {
+            const { stylable } = testStylableCore(
+                {
+                    '/abc.js': ``,
+                },
+                {
+                    stylableConfig: {
+                        resolveModule: { alias: { '@abc': '/abc.js' } },
+                    },
+                }
+            );
+
+            expect(stylable.resolvePath('/', '@abc')).to.equal('/abc.js');
+        });
+    });
     describe(`transformation`, () => {
         it(`should transform a stylesheet from meta`, () => {
             const src = `

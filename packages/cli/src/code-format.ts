@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import { nodeFs } from '@file-services/node';
+import fs from '@file-services/node';
 import { getDocumentFormatting, formatCSS } from '@stylable/code-formatter';
 import { createLogger } from './logger';
-import { writeFileSync } from 'fs';
 
-const { join } = nodeFs;
+const { join, writeFileSync } = fs;
 
 const argv = yargs
     .usage('$0 [options]')
@@ -134,7 +133,7 @@ for (const request of requires) {
 }
 
 function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css', res = new Set<string>()) {
-    const items = nodeFs.readdirSync(dirPath, { withFileTypes: true });
+    const items = fs.readdirSync(dirPath, { withFileTypes: true });
 
     for (const item of items) {
         const path = join(dirPath, item.name);
@@ -150,7 +149,7 @@ function readDirectoryDeep(dirPath: string, fileSuffixFilter = '.st.css', res = 
 }
 
 function formatStylesheet(filePath: string) {
-    const fileContent = nodeFs.readFileSync(filePath, 'utf-8');
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
 
     const newText = experimental
         ? formatCSS(fileContent, {
@@ -188,7 +187,7 @@ if (debug) {
     log('Starting code formatting');
 }
 
-const formatPathStats = nodeFs.statSync(target);
+const formatPathStats = fs.statSync(target);
 
 if (formatPathStats.isFile()) {
     if (target.endsWith('.st.css')) {

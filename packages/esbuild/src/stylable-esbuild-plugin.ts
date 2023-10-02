@@ -1,4 +1,4 @@
-import fs, { readFileSync, writeFileSync } from 'fs';
+import fs from '@file-services/node';
 import { relative, join, isAbsolute, dirname } from 'path';
 import type { Plugin, PluginBuild } from 'esbuild';
 import {
@@ -110,8 +110,8 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
         const projectRoot = build.initialOptions.absWorkingDir || process.cwd();
         const configFromFile = resolveConfig(
             projectRoot,
-            typeof configFile === 'string' ? configFile : undefined,
-            fs
+            fs,
+            typeof configFile === 'string' ? configFile : undefined
         );
         const stConfig = stylableConfig(
             {
@@ -365,10 +365,10 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                         }
                         const distFilePath = join(stylable.projectRoot, distFile);
 
-                        writeFileSync(
+                        fs.writeFileSync(
                             distFilePath,
                             sortMarkersByDepth(
-                                readFileSync(distFilePath, 'utf8'),
+                                fs.readFileSync(distFilePath, 'utf8'),
                                 stylable,
                                 idForPath,
                                 optimize.removeUnusedComponents ? mapping : {}

@@ -1,5 +1,5 @@
 import { defaultStylableMatcher } from './common';
-import nodeFs from '@file-services/node';
+import fs from '@file-services/node';
 import { stylableModuleFactory } from '@stylable/module-utils';
 import { loadStylableConfigEsm } from '@stylable/build-tools';
 import { resolveNamespace } from './resolve-namespace';
@@ -14,14 +14,14 @@ async function generateJsModule(sheetSource: string, filePath: string) {
 }
 async function initiateModuleFactory() {
     const defaultConfig = await loadStylableConfigEsm(process.cwd(), (potentialConfigModule: any) =>
-        potentialConfigModule.defaultConfig?.(nodeFs)
+        potentialConfigModule.defaultConfig?.(fs)
     );
     return stylableModuleFactory(
         {
             resolveNamespace,
             ...(defaultConfig?.config || {}),
             projectRoot: '/',
-            fileSystem: nodeFs,
+            fileSystem: fs,
             resolverCache: new Map(),
         },
         {
@@ -53,7 +53,7 @@ export async function load(
 ): Promise<LoaderResult> {
     if (defaultStylableMatcher(url)) {
         const filePath = fileURLToPath(url);
-        const sheetSource = nodeFs.readFileSync(filePath, { encoding: 'utf-8' });
+        const sheetSource = fs.readFileSync(filePath, { encoding: 'utf-8' });
         const moduleSource = await generateJsModule(sheetSource, filePath);
         return {
             shortCircuit: true,

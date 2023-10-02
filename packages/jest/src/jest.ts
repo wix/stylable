@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from '@file-services/node';
 import type { StylableConfig } from '@stylable/core';
 import { validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { stylableModuleFactory } from '@stylable/module-utils';
@@ -30,12 +30,12 @@ function getCacheKey(
 }
 
 export interface StylableJestConfig {
-    stylable?: Partial<StylableConfig>;
+    stylable?: Partial<Omit<StylableConfig, 'fileSystem'>>;
     configPath?: string;
 }
 
 export const createTransformer = (options?: StylableJestConfig) => {
-    let config: Partial<StylableConfig> = {
+    let config = {
         ...options?.stylable,
     };
 

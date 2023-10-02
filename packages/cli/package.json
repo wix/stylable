@@ -12,15 +12,15 @@
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 25000"
   },
   "dependencies": {
-    "@file-services/node": "^8.2.0",
-    "@file-services/types": "^8.2.0",
+    "@file-services/node": "^8.3.1",
+    "@file-services/types": "^8.3.1",
     "@stylable/build-tools": "^5.16.0",
     "@stylable/code-formatter": "^5.16.0",
     "@stylable/core": "^5.16.0",
     "@stylable/module-utils": "^5.16.0",
     "@stylable/node": "^5.16.0",
     "@stylable/optimizer": "^5.16.0",
-    "@wixc3/resolve-directory-context": "^3.0.5",
+    "@wixc3/resolve-directory-context": "^4.0.0",
     "decache": "^4.6.2",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",

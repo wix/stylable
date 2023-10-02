@@ -1,5 +1,5 @@
 import postcss from 'postcss';
-import { processNamespace, MinimalFS } from '@stylable/core';
+import { processNamespace } from '@stylable/core';
 import {
     emitDiagnostics,
     DiagnosticsMode,
@@ -9,6 +9,7 @@ import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 import { addBuildInfo } from './add-build-info';
+import { createWebpackResolver } from '@stylable/webpack-plugin';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 
 // TODO: maybe adopt the code
@@ -64,11 +65,15 @@ const stylableLoader: LoaderDefinition = function (content) {
     };
     const mode = this._compiler!.options.mode === 'development' ? 'development' : 'production';
 
+    const resolveModule = createWebpackResolver(
+        this.fs as any,
+        this._compiler!.options.resolve as any
+    );
     const stylable = getStylable(this._compiler!, {
         projectRoot: this.rootContext,
-        fileSystem: this.fs as unknown as MinimalFS,
+        fileSystem: this.fs as any,
         mode,
-        resolveOptions: this._compiler!.options.resolve,
+        resolveModule,
         resolveNamespace,
     });
 

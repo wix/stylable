@@ -13,31 +13,40 @@ import {
     TransformHooks,
 } from './stylable-transformer';
 import type { IStylableOptimizer, ModuleResolver } from './types';
-import { createDefaultResolver } from './module-resolver';
+import {
+    createDefaultResolver,
+    IRequestResolverOptions,
+    IResolutionFileSystem,
+} from './module-resolver';
 import { STImport, STScope, STVar, STMixin, CSSClass, CSSCustomProperty } from './features';
 import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
 import * as postcss from 'postcss';
 
-export interface StylableConfig {
+export interface StylableConfigBase {
     projectRoot: string;
-    fileSystem: MinimalFS;
     requireModule?: (path: string) => any;
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
     hooks?: TransformHooks;
-    resolveOptions?: {
-        alias?: any;
-        symlinks?: boolean;
-        [key: string]: any;
-    };
     optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
-    resolveModule?: ModuleResolver;
     cssParser?: CssParser;
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
     experimentalSelectorInference?: boolean;
 }
+
+export type StylableConfig = StylableConfigBase &
+    (
+        | {
+              fileSystem: MinimalFS;
+              resolveModule: ModuleResolver;
+          }
+        | {
+              fileSystem: IResolutionFileSystem;
+              resolveModule?: ModuleResolver | Omit<IRequestResolverOptions, 'fs'>;
+          }
+    );
 
 // This defines and validates known configs for the defaultConfig in 'stylable.config.js
 const globalDefaultSupportedConfigs = new Set([
@@ -74,12 +83,11 @@ export class Stylable {
     public cssClass = new CSSClass.StylablePublicApi(this);
     //
     public projectRoot: string;
-    protected fileSystem: MinimalFS;
+    protected fileSystem: IResolutionFileSystem | MinimalFS;
     protected requireModule: (path: string) => any;
     protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
     protected diagnostics = new Diagnostics();
     protected hooks: TransformHooks;
-    protected resolveOptions: any;
     public optimizer?: IStylableOptimizer;
     protected mode: 'production' | 'development';
     public resolveNamespace?: typeof processNamespace;
@@ -97,16 +105,16 @@ export class Stylable {
         this.requireModule =
             config.requireModule ||
             (() => {
-                throw new Error('Javascript files are not supported without requireModule options');
+                throw new Error(
+                    'Javascript files are not supported without Stylable `requireModule` option'
+                );
             });
         this.onProcess = config.onProcess;
         this.hooks = config.hooks || {};
-        this.resolveOptions = config.resolveOptions || {};
         this.optimizer = config.optimizer;
         this.mode = config.mode || `production`;
         this.resolveNamespace = config.resolveNamespace;
-        this.moduleResolver =
-            config.resolveModule || createDefaultResolver(this.fileSystem, this.resolveOptions);
+        this.moduleResolver = this.initModuleResolver(config);
         this.cssParser = config.cssParser || cssParse;
         this.resolverCache = config.resolverCache; // ToDo: v5 default to `new Map()`
         this.fileProcessorCache = config.fileProcessorCache;
@@ -120,6 +128,16 @@ export class Stylable {
 
         this.resolver = this.createResolver();
     }
+    private initModuleResolver(config: StylableConfig): ModuleResolver {
+        return typeof config.resolveModule === 'function'
+            ? config.resolveModule
+            : createDefaultResolver({
+                  fs: this
+                      .fileSystem as IResolutionFileSystem /* we force to provide resolveModule when using MinimalFS */,
+                  ...config.resolveModule,
+              });
+    }
+
     public getDependencies(meta: StylableMeta) {
         const dependencies: Dependency[] = [];
 

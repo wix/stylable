@@ -19,6 +19,7 @@ export {
     generateStylableRoot,
     processSource,
     generateStylableEnvironment,
+    createResolveExtendsResults,
 } from './generate-test-util';
 export { flatMatch } from './matchers/flat-match';
 export { matchCSSMatchers } from './matchers/match-css';

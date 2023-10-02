@@ -259,7 +259,7 @@ describe('Stylable JSON Schema Extractor', () => {
 
         it('schema with mapped states', () => {
             const css = `.root{
-                -st-states: state("custom");
+                -st-states: state(".custom");
             }`;
 
             const res = extractSchema(css, '/entry.st.css', '/', path);

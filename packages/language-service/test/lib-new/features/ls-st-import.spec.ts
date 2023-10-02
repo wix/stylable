@@ -1287,7 +1287,7 @@ describe('LS: st-import', () => {
                         },
                     }
                 );
-                const defaultResolveModule = createDefaultResolver(fs, {});
+                const defaultResolveModule = createDefaultResolver({ fs });
                 const entryPath = fs.join(tempDir.path, 'src', 'entry.st.css');
                 /**
                  * mapping like this cannot override the original resolved package
