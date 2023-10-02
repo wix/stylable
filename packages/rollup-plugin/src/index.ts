@@ -123,8 +123,8 @@ export function stylableRollupPlugin({
                 });
                 configFromFile = resolveStcConfig(
                     stConfig.projectRoot,
-                    typeof stcConfig === 'string' ? stcConfig : undefined,
-                    fs
+                    fs,
+                    typeof stcConfig === 'string' ? stcConfig : undefined
                 );
 
                 stylable = new Stylable({

@@ -330,8 +330,8 @@ export class StylableWebpackPlugin {
     private getStylableConfig(compiler: Compiler) {
         const configuration = resolveStcConfig(
             compiler.context,
-            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined,
-            getTopLevelInputFilesystem(compiler)
+            getTopLevelInputFilesystem(compiler),
+            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined
         );
 
         return configuration;
@@ -359,7 +359,10 @@ export class StylableWebpackPlugin {
             return;
         }
 
-        const resolverOptions: Omit<ResolveOptionsWebpackOptions, 'fileSystem' | 'resolver' | 'plugins'> = {
+        const resolverOptions: Omit<
+            ResolveOptionsWebpackOptions,
+            'fileSystem' | 'resolver' | 'plugins'
+        > = {
             ...compiler.options.resolve,
             aliasFields:
                 compiler.options.resolve.byDependency?.esm?.aliasFields ||
