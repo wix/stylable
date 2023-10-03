@@ -77,7 +77,7 @@ export const hooks = createFeature({
         }
     },
     prepareAST({ context, node, toRemove }) {
-        // called without experimentalSelectorInference
+        // called with experimentalSelectorInference=false
         // split selectors & remove definitions
         if (node.type === 'rule' && node.selector.match(CUSTOM_SELECTOR_RE)) {
             node.selector = transformCustomSelectorInline(context.meta, node.selector, {
