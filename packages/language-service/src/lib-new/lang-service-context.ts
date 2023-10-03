@@ -8,6 +8,7 @@ import {
     StylableProcessor,
     StylableTransformer,
     InferredSelector,
+    CSSType,
 } from '@stylable/core/dist/index-internal';
 import { URI } from 'vscode-uri';
 import {
@@ -101,7 +102,15 @@ export class LangServiceContext {
         }
         const inferredSelectorContext = new InferredSelector(
             transformer,
-            this.stylable.resolver.resolveExtends(this.meta, 'root')
+            transformer.experimentalSelectorInference
+                ? new InferredSelector(transformer, [
+                      {
+                          _kind: 'css',
+                          meta: this.meta,
+                          symbol: CSSType.createSymbol({ name: '*' }),
+                      },
+                  ])
+                : this.stylable.resolver.resolveExtends(this.meta, 'root')
         );
         // reference interest points
         const locationSelector = this.location.selector;

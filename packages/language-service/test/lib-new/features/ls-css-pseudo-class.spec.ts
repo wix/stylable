@@ -58,21 +58,35 @@ describe('LS: css-pseudo-class', () => {
         }));
     });
     it('should suggest root custom states in empty selector', () => {
-        // ToDo: once experimentalSelectorInference is on this should not behave like this
-        const { service, assertCompletions } = testLangService(`
+        const source = `
             .root {
                 -st-states: aaa, bbb;
             }
 
             ^empty^ {}
-        `);
+        `;
+        const { service, assertCompletions } = testLangService(source);
         const entryPath = '/entry.st.css';
 
         assertCompletions(entryPath, ({ filePath, carets }) => ({
             message: 'empty',
             actualList: service.onCompletion(filePath, carets.empty),
-            expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+            unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
         }));
+
+        {
+            // with experimentalSelectorInference=false
+            const { service, assertCompletions } = testLangService(source, {
+                stylableConfig: { experimentalSelectorInference: false },
+            });
+            const entryPath = '/entry.st.css';
+
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
+                message: 'empty',
+                actualList: service.onCompletion(filePath, carets.empty),
+                expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+            }));
+        }
     });
     it('should NOT suggest used states', () => {
         const { service, assertCompletions } = testLangService(`
@@ -285,7 +299,7 @@ describe('LS: css-pseudo-class', () => {
     });
     describe('st-scope', () => {
         it('should suggest class custom states (in st-scope params)', () => {
-            const { service, assertCompletions } = testLangService(`
+            const source = `
                 .root {
                     -st-states: aaa,bbb;
                 }
@@ -294,7 +308,8 @@ describe('LS: css-pseudo-class', () => {
                 @st-scope .root^afterRoot^ {}
                 @st-scope ^empty^ {}
 
-            `);
+            `;
+            const { service, assertCompletions } = testLangService(source);
 
             assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 actualList: service.onCompletion(filePath, carets.afterRoot),
@@ -303,8 +318,25 @@ describe('LS: css-pseudo-class', () => {
 
             assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 actualList: service.onCompletion(filePath, carets.empty),
-                expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
             }));
+
+            {
+                // with experimentalSelectorInference=false
+                const { service, assertCompletions } = testLangService(source, {
+                    stylableConfig: { experimentalSelectorInference: false },
+                });
+
+                assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
+                    actualList: service.onCompletion(filePath, carets.afterRoot),
+                    expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                }));
+
+                assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
+                    actualList: service.onCompletion(filePath, carets.empty),
+                    expectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                }));
+            }
         });
         it('should suggest class custom states with nesting selector', () => {
             const { service, assertCompletions } = testLangService(`
@@ -378,8 +410,8 @@ describe('LS: css-pseudo-class', () => {
                 })
             );
         });
-        it('should suggest root custom states an empty nested selector', () => {
-            const { service, assertCompletions } = testLangService(`
+        it('should NOT suggest root custom states after empty nested selector', () => {
+            const source = `
                 .root {
                     -st-states: root-state;
                 }
@@ -399,66 +431,97 @@ describe('LS: css-pseudo-class', () => {
                         :^colonInMedia^
                     }
                 }
-            `);
+            `;
+            const { service, assertCompletions } = testLangService(source);
 
             assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'empty',
                 actualList: service.onCompletion(filePath, carets.empty),
-                expectedList: [{ label: ':root-state' }],
-                unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                unexpectedList: [{ label: ':root-state' }, { label: ':aaa' }, { label: ':bbb' }],
             }));
 
             assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
                 message: 'empty in media',
                 actualList: service.onCompletion(filePath, carets.emptyInMedia),
-                expectedList: [{ label: ':root-state' }],
-                unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                unexpectedList: [{ label: ':root-state' }, { label: ':aaa' }, { label: ':bbb' }],
             }));
 
-            assertCompletions(
-                '/entry.st.css',
-                ({ filePath, carets, textEdit: { replaceText } }) => ({
-                    message: 'colon',
-                    actualList: service.onCompletion(filePath, carets.colon),
-                    expectedList: [
-                        {
-                            label: ':root-state',
-                            textEdit: replaceText(carets.colon, ':root-state', {
-                                deltaStart: -1,
-                            }),
-                        },
-                    ],
-                    unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-                })
-            );
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
+                message: 'colon',
+                actualList: service.onCompletion(filePath, carets.colon),
+                unexpectedList: [{ label: ':root-state' }, { label: ':aaa' }, { label: ':bbb' }],
+            }));
 
-            assertCompletions(
-                '/entry.st.css',
-                ({ filePath, carets, textEdit: { replaceText } }) => ({
-                    message: 'colonInMedia',
-                    actualList: service.onCompletion(filePath, carets.colonInMedia),
-                    expectedList: [
-                        {
-                            label: ':root-state',
-                            textEdit: replaceText(carets.colonInMedia, ':root-state', {
-                                deltaStart: -1,
-                            }),
-                        },
-                    ],
+            assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
+                message: 'colonInMedia',
+                actualList: service.onCompletion(filePath, carets.colonInMedia),
+                unexpectedList: [{ label: ':root-state' }, { label: ':aaa' }, { label: ':bbb' }],
+            }));
+
+            {
+                // with experimentalSelectorInference=false
+                const { service, assertCompletions } = testLangService(source, {
+                    stylableConfig: { experimentalSelectorInference: false },
+                });
+
+                assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
+                    message: 'empty',
+                    actualList: service.onCompletion(filePath, carets.empty),
+                    expectedList: [],
                     unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-                })
-            );
+                }));
+
+                assertCompletions('/entry.st.css', ({ filePath, carets }) => ({
+                    message: 'empty in media',
+                    actualList: service.onCompletion(filePath, carets.emptyInMedia),
+                    expectedList: [{ label: ':root-state' }],
+                    unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                }));
+
+                assertCompletions(
+                    '/entry.st.css',
+                    ({ filePath, carets, textEdit: { replaceText } }) => ({
+                        message: 'colon',
+                        actualList: service.onCompletion(filePath, carets.colon),
+                        expectedList: [
+                            {
+                                label: ':root-state',
+                                textEdit: replaceText(carets.colon, ':root-state', {
+                                    deltaStart: -1,
+                                }),
+                            },
+                        ],
+                        unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                    })
+                );
+
+                assertCompletions(
+                    '/entry.st.css',
+                    ({ filePath, carets, textEdit: { replaceText } }) => ({
+                        message: 'colonInMedia',
+                        actualList: service.onCompletion(filePath, carets.colonInMedia),
+                        expectedList: [
+                            {
+                                label: ':root-state',
+                                textEdit: replaceText(carets.colonInMedia, ':root-state', {
+                                    deltaStart: -1,
+                                }),
+                            },
+                        ],
+                        unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
+                    })
+                );
+            }
         });
         it('should suggest matching intersection states', () => {
             const tempDir = createTempDirectorySync('lps-import-test-');
-            const { service, assertCompletions, fs } = testLangService(
-                {
-                    'comp.st.css': `
+            const sources = {
+                'comp.st.css': `
                     .root {
                         -st-states: comp-state;
                     }
                 `,
-                    'entry.st.css': `
+                'entry.st.css': `
                     @st-import Comp from './comp.st.css';
                     .root {
                         -st-extends: Comp;
@@ -471,23 +534,27 @@ describe('LS: css-pseudo-class', () => {
                         -st-states: shared, onlyB;
                     }
 
-
                     @st-scope .a, .b {
                         ^inScope^
                         &^nest^
                         &:^nestColon^
                     }
-
                 `,
-                },
-                { testOnNativeFileSystem: tempDir.path }
-            );
+            };
+            const { service, assertCompletions, fs } = testLangService(sources, {
+                testOnNativeFileSystem: tempDir.path,
+            });
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
             assertCompletions(entryPath, ({ filePath, carets }) => ({
                 actualList: service.onCompletion(filePath, carets.inScope),
-                expectedList: [{ label: ':root-state' }, { label: ':comp-state' }],
-                unexpectedList: [{ label: ':shared' }, { label: ':onlyA' }, { label: ':onlyB' }],
+                unexpectedList: [
+                    { label: ':root-state' },
+                    { label: ':comp-state' },
+                    { label: ':shared' },
+                    { label: ':onlyA' },
+                    { label: ':onlyB' },
+                ],
             }));
 
             assertCompletions(entryPath, ({ filePath, carets }) => ({
@@ -516,6 +583,52 @@ describe('LS: css-pseudo-class', () => {
                     { label: ':root-state' },
                 ],
             }));
+
+            {
+                // with experimentalSelectorInference=false
+                const { service, assertCompletions, fs } = testLangService(sources, {
+                    testOnNativeFileSystem: tempDir.path,
+                    stylableConfig: { experimentalSelectorInference: false },
+                });
+                const entryPath = fs.join(tempDir.path, 'entry.st.css');
+
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
+                    actualList: service.onCompletion(filePath, carets.inScope),
+                    expectedList: [{ label: ':root-state' }, { label: ':comp-state' }],
+                    unexpectedList: [
+                        { label: ':shared' },
+                        { label: ':onlyA' },
+                        { label: ':onlyB' },
+                    ],
+                }));
+
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
+                    actualList: service.onCompletion(filePath, carets.nest),
+                    expectedList: [{ label: ':shared' }],
+                    unexpectedList: [
+                        { label: ':onlyA' },
+                        { label: ':onlyB' },
+                        { label: ':root-state' },
+                    ],
+                }));
+
+                assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
+                    actualList: service.onCompletion(filePath, carets.nestColon),
+                    expectedList: [
+                        {
+                            label: ':shared',
+                            textEdit: replaceText(carets.nestColon, ':shared', {
+                                deltaStart: -1,
+                            }),
+                        },
+                    ],
+                    unexpectedList: [
+                        { label: ':onlyA' },
+                        { label: ':onlyB' },
+                        { label: ':root-state' },
+                    ],
+                }));
+            }
         });
     });
     describe('nesting', () => {
