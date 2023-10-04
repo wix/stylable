@@ -9,9 +9,9 @@
   "dependencies": {
     "@file-services/memory": "^8.3.1",
     "@stylable/core": "^5.16.0",
-    "chai": "^4.3.9",
+    "chai": "^4.3.10",
     "flat": "^5.0.2",
-    "postcss": "^8.4.30"
+    "postcss": "^8.4.31"
   },
   "files": [
     "dist",
