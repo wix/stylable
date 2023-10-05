@@ -16,5 +16,13 @@ export default {
       name: '@wixc3/resolve-directory-context',
       reason: 'drop node 14',
     },
+    {
+      name: 'balanced-match',
+      reason: 'esm only',
+    },
+    {
+      name: 'flat',
+      reason: 'esm only',
+    },
   ],
 };
