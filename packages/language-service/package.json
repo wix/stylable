@@ -11,20 +11,20 @@
     "typescript": ">=3.8"
   },
   "dependencies": {
-    "@file-services/types": "^8.2.0",
-    "@file-services/typescript": "^8.2.0",
+    "@file-services/types": "^8.3.1",
+    "@file-services/typescript": "^8.3.1",
     "@stylable/code-formatter": "^5.16.0",
     "@stylable/core": "^5.16.0",
     "@tokey/core": "^1.4.0",
     "@tokey/css-selector-parser": "^0.6.2",
     "@tokey/css-value-parser": "^0.1.4",
     "css-selector-tokenizer": "^0.8.0",
-    "postcss": "^8.4.29",
+    "postcss": "^8.4.31",
     "postcss-value-parser": "^4.2.0",
-    "vscode-css-languageservice": "^6.2.7",
-    "vscode-languageserver": "^8.1.0",
-    "vscode-languageserver-textdocument": "^1.0.8",
-    "vscode-uri": "^3.0.7"
+    "vscode-css-languageservice": "^6.2.9",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.11",
+    "vscode-uri": "^3.0.8"
   },
   "author": "Wix.com",
   "files": [
