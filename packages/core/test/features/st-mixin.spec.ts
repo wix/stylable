@@ -2066,6 +2066,33 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
+        it('should collect only st-scope nested rules', () => {
+            const { sheets } = testStylableCore({
+                '/mix.st.css': `
+                    .before { color: RED; }
+                    @st-scope .mix {
+                        .inside { color: green; }
+                    }
+                    .after { color: RED; }
+                `,
+                '/entry.st.css': `
+                    @st-import [mix] from './mix.st.css';
+                    
+                    .into {-st-mixin: mix;}
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                    .entry__into {}
+                        .entry__into .mix__inside { color: green; }
+                `)
+            );
+        });
     });
     describe(`higher-level feature integrations`, () => {
         // ToDo: move to their higher level feature spec when created
