@@ -106,13 +106,14 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
                 node.name === 'container'
             ) {
                 let scopeSelector = node.name === 'st-scope' ? node.params : '';
+                let atruleHasMixin = isNestedInMixin || false;
                 if (scopeSelector) {
                     const ast = parseSelectorWithCache(scopeSelector, { clone: true });
                     const matchesSelectors = isRoot
                         ? ast
                         : ast.filter((node) => containsPrefix(node));
                     if (matchesSelectors.length) {
-                        isNestedInMixin = true;
+                        atruleHasMixin = true;
                         scopeSelector = stringifySelector(
                             matchesSelectors.map((selectorNode) => {
                                 if (!isRoot) {
@@ -133,7 +134,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
                     }),
                     isRoot,
                     getCustomSelector,
-                    isNestedInMixin
+                    atruleHasMixin
                 );
                 if (atRuleSubset.nodes) {
                     mixinRoot.append(atRuleSubset);
