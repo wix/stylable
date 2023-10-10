@@ -63,12 +63,12 @@ describe(`(${project})`, () => {
         expect(vanillaStylesNoRuntime).to.eql(stylableStylesNoRuntime);
 
         expect(normalizeNamespace(vanillaStyles)).to.eql([
-            { id: 'designsystem', depth: '0' },
-            { id: 'label', depth: '0' },
-            { id: 'button', depth: '1' },
-            { id: 'basictheme', depth: '2' },
-            { id: 'labeltheme', depth: '3' },
-            { id: 'buttontheme', depth: '3' },
+            { id: 'designsystem', depth: '1' },
+            { id: 'label', depth: '1' },
+            { id: 'button', depth: '2' },
+            { id: 'basictheme', depth: '3' },
+            { id: 'labeltheme', depth: '4' },
+            { id: 'buttontheme', depth: '4' },
         ]);
     });
 });
