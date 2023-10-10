@@ -197,7 +197,7 @@ export class StylablePublicApi {
 }
 
 function calcCssDepth(context: FeatureTransformContext) {
-    let cssDepth = 0;
+    let cssDepth = 1;
     const deepDependencies = tryCollectImportsDeep(
         context.resolver,
         context.meta,
@@ -205,7 +205,7 @@ function calcCssDepth(context: FeatureTransformContext) {
         ({ depth }) => {
             cssDepth = Math.max(cssDepth, depth);
         },
-        1
+        2
     );
     context.meta.transformCssDepth = { cssDepth, deepDependencies };
 }

@@ -79,7 +79,7 @@ export function getImports(
     /**
      * Get the transformed css depth
      */
-    const cssDepth = meta.transformCssDepth?.cssDepth ?? 0;
+    const cssDepth = meta.transformCssDepth?.cssDepth ?? 1;
     /**
      * Take all deep dependencies since they can affect the output
      */

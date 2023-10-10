@@ -153,7 +153,7 @@ export function buildSingleFile({
         outputLogs.push(`${format} module`);
 
         const moduleCssImports = collectImportsWithSideEffects(res, stylable, ext);
-        const cssDepth = res.meta.transformCssDepth?.cssDepth ?? 0;
+        const cssDepth = res.meta.transformCssDepth?.cssDepth ?? 1;
         if (injectCSSRequest) {
             moduleCssImports.push({ from: './' + cssAssetFilename });
         }

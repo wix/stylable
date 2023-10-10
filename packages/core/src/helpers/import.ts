@@ -598,7 +598,7 @@ export function tryCollectImportsDeep(
     meta: StylableMeta,
     imports = new Set<string>(),
     onImport: undefined | ((e: ImportEvent) => void) = undefined,
-    depth = 0
+    depth = 1
 ) {
     for (const { context, request } of meta.getImportStatements()) {
         try {
