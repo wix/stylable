@@ -262,6 +262,7 @@ describe(`features/st-import`, () => {
             `,
             'depth2.st.css': `
                 @st-import "./depth1.st.css";
+                @st-import CIRCULAR from "./depth2.st.css";
             `,
             'depth3.st.css': `
                 @st-import "./depth2.st.css";
