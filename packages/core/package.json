@@ -19,7 +19,7 @@
     "postcss": "^8.4.31",
     "postcss-js": "^4.0.1",
     "postcss-nested": "^6.0.1",
-    "postcss-safe-parser": "^6.0.0",
+    "postcss-safe-parser": "^7.0.0",
     "postcss-value-parser": "^4.2.0"
   },
   "files": [
