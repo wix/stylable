@@ -247,6 +247,36 @@ describe(`features/st-import`, () => {
             `,
         });
     });
+    it('should calculate meta depth', () => {
+        const { sheets } = testStylableCore({
+            'code.js': `
+                module.exports.add = (a, b) => {
+                    return Number(a) + Number(b);
+                };            
+            `,
+            'depth1.st.css': `
+                @st-import [add] from "./code.js";
+                .root {
+                    content: add(1, 2);
+                }
+            `,
+            'depth2.st.css': `
+                @st-import "./depth1.st.css";
+                @st-import CIRCULAR from "./depth2.st.css";
+            `,
+            'depth3.st.css': `
+                @st-import "./depth2.st.css";
+            `,
+            'entry.st.css': `
+                @st-import "./depth3.st.css";
+            `,
+        });
+
+        expect(sheets['/entry.st.css'].meta.transformCssDepth?.cssDepth, 'entry').to.eql(4);
+        expect(sheets['/depth3.st.css'].meta.transformCssDepth?.cssDepth, 'depth3').to.eql(3);
+        expect(sheets['/depth2.st.css'].meta.transformCssDepth?.cssDepth, 'depth2').to.eql(2);
+        expect(sheets['/depth1.st.css'].meta.transformCssDepth?.cssDepth, 'depth1').to.eql(1);
+    });
     describe(`st-symbol`, () => {
         it(`should warn on redeclare between multiple import statements`, () => {
             testStylableCore({
