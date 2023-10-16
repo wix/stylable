@@ -3,7 +3,6 @@ import { shouldReportNoDiagnostics, testStylableCore } from '@stylable/core-test
 describe('features/css-general', () => {
     describe('svg', () => {
         it('should preserve path value function quotes', () => {
-            // ToDo: remove once experimentalSelectorInference is the default
             const { sheets } = testStylableCore(`
                 
                 .path { 

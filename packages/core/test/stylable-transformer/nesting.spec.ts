@@ -89,40 +89,48 @@ describe('transformer/nesting', () => {
                     */
                     &:onlyX {}
                 }
-            `,
-            { stylableConfig: { experimentalSelectorInference: true } }
+            `
         );
     });
-    it('should infer to universal selector without nesting selector', () => {
-        testStylableCore(`
-            .root {
-                -st-states: x;
-            }
-            .part {
-                -st-states: x;
-            }
+    describe('experimentalSelectorInference=false', () => {
+        it('should infer to universal selector without nesting selector', () => {
+            testStylableCore(
+                `
+                .root {
+                    -st-states: x;
+                }
+                .part {
+                    -st-states: x;
+                }
 
-            .part {
-                /* 
-                    @transform-error(first) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE('x')}
-                    @rule(first) :x 
-                */
-                :x {}
+                .part {
+                    /* 
+                        @transform-error(first) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                            'x'
+                        )}
+                        @rule(first) :x 
+                    */
+                    :x {}
+
+                    /* 
+                        @transform-error(after combinator) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                            'x'
+                        )}
+                        @rule(after combinator) .entry__root :x 
+                    */
+                    .root :x {}
+                }
 
                 /* 
-                    @transform-error(after combinator) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                        'x'
-                    )}
-                    @rule(after combinator) .entry__root :x 
+                    legacy behavior without "experimentalSelectorInference"
+                    @rule(after combinator) .entry__root .entry--x  
                 */
                 .root :x {}
-            }
-
-            /* 
-                legacy behavior without "experimentalSelectorInference"
-                @rule(after combinator) .entry__root .entry--x  
-            */
-            .root :x {}
-        `);
+            `,
+                {
+                    stylableConfig: { experimentalSelectorInference: false },
+                }
+            );
+        });
     });
 });

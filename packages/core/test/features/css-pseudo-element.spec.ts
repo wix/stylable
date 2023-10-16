@@ -146,7 +146,6 @@ describe('features/css-pseudo-element', () => {
             shouldReportNoDiagnostics(meta);
         });
         it('should transform custom element with multiple selector inside nested pseudo-classes', () => {
-            // ToDo: with experimentalSelectorInference=true, the nested selector will be transformed inlined
             testStylableCore(`
                 @custom-selector :--part .partA, .partB;
                 @custom-selector :--nestedPart ::part, .partC;
@@ -163,7 +162,7 @@ describe('features/css-pseudo-element', () => {
                 .root:not(::nestedPart) {}
 
                 /* @rule(custom-selector syntax) 
-                        .entry__root:not(.entry__partA),.entry__root:not(.entry__partB)
+                        .entry__root:not(.entry__partA, .entry__partB)
                 */
                 .root:not(:--part) {}
             `);
@@ -250,106 +249,89 @@ describe('features/css-pseudo-element', () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        describe('experimentalSelectorInference', () => {
-            it('should transform multiple selector intersection', () => {
-                const { sheets } = testStylableCore(
-                    {
-                        'base.st.css': `
-                        .shared {}
-                        @custom-selector :--sharedMulti .x, .y;
-                    `,
-                        'a.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                    `,
-                        'b.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                    `,
-                        'entry.st.css': `
-                            @st-import A from './a.st.css';
-                            @st-import B from './b.st.css';
-                            @custom-selector :--multi A, B;
-                
-                            /* @rule(shared) .entry__root .a__root .base__shared,.entry__root .b__root .base__shared */
-                            .root::multi::shared {}
-
-                            /* @rule(shared-multi) .entry__root .a__root .base__x,.entry__root .b__root .base__x,.entry__root .a__root .base__y,.entry__root .b__root .base__y */
-                            .root::multi::sharedMulti {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
-
-                const { meta } = sheets['/entry.st.css'];
-
-                shouldReportNoDiagnostics(meta);
-            });
-            it('should filter out elements that do not exist or match', () => {
-                testStylableCore(
-                    {
-                        'base.st.css': `
-                    `,
-                        'a.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                        .onlyInA {}
-                    `,
-                        'b.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                    `,
-                        'entry.st.css': `
-                            @st-import A from './a.st.css';
-                            @st-import B from './b.st.css';
-                            @custom-selector :--multi A, B;
-                
-                            /* 
-                                @transform-error(exist in 1) word(onlyInA) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                                    `onlyInA`
-                                )}
-                                @rule(exist in 1) .entry__root .a__root::onlyInA,.entry__root .b__root::onlyInA 
-                            */
-                            .root::multi::onlyInA {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
-            });
-            it('should transform custom element with multiple selector inside nested pseudo-classes', () => {
-                // ToDo: with experimentalSelectorInference=true, the nested selector will be transformed inlined
-                testStylableCore(
-                    `
-                    @custom-selector :--part .partA, .partB;
-                    @custom-selector :--nestedPart ::part, .partC;
-    
-                    /* @rule(1 level) .entry__root:not(.entry__partA,.entry__partB) */
-                    .root:not(::part) {}
-    
-                    /*
-                        notice: partB is pushed at the end because of how custom selectors are
-                        processed atm.
-    
-                        @rule(2 levels) .entry__root:not(.entry__partA,.entry__partC,.entry__partB)
-                    */
-                    .root:not(::nestedPart) {}
-    
-                    /* @rule(custom-selector syntax)
-                            .entry__root:not(.entry__partA, .entry__partB)
-                    */
-                    .root:not(:--part) {}
+        it('should transform multiple selector intersection', () => {
+            const { sheets } = testStylableCore({
+                'base.st.css': `
+                    .shared {}
+                    @custom-selector :--sharedMulti .x, .y;
                 `,
-                    { stylableConfig: { experimentalSelectorInference: true } }
-                );
+                'a.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                'b.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                'entry.st.css': `
+                    @st-import A from './a.st.css';
+                    @st-import B from './b.st.css';
+                    @custom-selector :--multi A, B;
+        
+                    /* @rule(shared) .entry__root .a__root .base__shared,.entry__root .b__root .base__shared */
+                    .root::multi::shared {}
+
+                    /* @rule(shared-multi) .entry__root .a__root .base__x,.entry__root .b__root .base__x,.entry__root .a__root .base__y,.entry__root .b__root .base__y */
+                    .root::multi::sharedMulti {}
+                `,
             });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should filter out elements that do not exist or match', () => {
+            testStylableCore({
+                'base.st.css': `
+                `,
+                'a.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                    .onlyInA {}
+                `,
+                'b.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                'entry.st.css': `
+                    @st-import A from './a.st.css';
+                    @st-import B from './b.st.css';
+                    @custom-selector :--multi A, B;
+        
+                    /* 
+                        @transform-error(exist in 1) word(onlyInA) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                            `onlyInA`
+                        )}
+                        @rule(exist in 1) .entry__root .a__root::onlyInA,.entry__root .b__root::onlyInA 
+                    */
+                    .root::multi::onlyInA {}
+                `,
+            });
+        });
+        it('should transform custom element with multiple selector inside nested pseudo-classes (experimentalSelectorInference=false)', () => {
+            testStylableCore(
+                `
+                @custom-selector :--part .partA, .partB;
+                @custom-selector :--nestedPart ::part, .partC;
+
+                /* @rule(1 level) .entry__root:not(.entry__partA,.entry__partB) */
+                .root:not(::part) {}
+
+                /*
+                    notice: partB is pushed at the end because of how custom selectors are
+                    processed atm.
+
+                    @rule(2 levels) .entry__root:not(.entry__partA,.entry__partC,.entry__partB)
+                */
+                .root:not(::nestedPart) {}
+
+                /* @rule(custom-selector syntax)
+                        .entry__root:not(.entry__partA),.entry__root:not(.entry__partB)
+                */
+                .root:not(:--part) {}
+            `,
+                { stylableConfig: { experimentalSelectorInference: false } }
+            );
         });
     });
     describe('st-import', () => {

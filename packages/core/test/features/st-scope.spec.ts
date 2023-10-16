@@ -129,45 +129,37 @@ describe(`features/st-scope`, () => {
             expect(STGlobal.getGlobalRules(meta)).to.eql(actualGlobalRules['global']);
         });
     });
-    describe('experimentalSelectorInference', () => {
-        it('should infer nested selector', () => {
-            const { sheets } = testStylableCore(
-                `
-                    .a {
-                        -st-states: shared;
-                    }
-                    .b {
-                        -st-states: shared;
-                    }
-                    @st-scope .a, .b {
-                        /* @rule(nest) .entry__a.entry--shared, .entry__b.entry--shared */
-                        &:shared {}
-                    }
-                `,
-                { stylableConfig: { experimentalSelectorInference: true } }
-            );
+    it('should infer nested selector', () => {
+        const { sheets } = testStylableCore(`
+            .a {
+                -st-states: shared;
+            }
+            .b {
+                -st-states: shared;
+            }
+            @st-scope .a, .b {
+                /* @rule(nest) .entry__a.entry--shared, .entry__b.entry--shared */
+                &:shared {}
+            }
+        `);
 
-            const { meta } = sheets['/entry.st.css'];
+        const { meta } = sheets['/entry.st.css'];
 
-            shouldReportNoDiagnostics(meta);
-        });
-        it('should infer default context as universal selector', () => {
-            testStylableCore(
-                `
-                    .a {
-                        -st-states: shared;
-                    }
-                    .b {
-                        -st-states: shared;
-                    }
-                    @st-scope .a, .b {
-                        /* @rule(universal context) .entry__a ::b, .entry__b ::b */
-                        ::b {}
-                    }
-                `,
-                { stylableConfig: { experimentalSelectorInference: true } }
-            );
-        });
+        shouldReportNoDiagnostics(meta);
+    });
+    it('should infer default context as universal selector', () => {
+        testStylableCore(`
+            .a {
+                -st-states: shared;
+            }
+            .b {
+                -st-states: shared;
+            }
+            @st-scope .a, .b {
+                /* @rule(universal context) .entry__a ::b, .entry__b ::b */
+                ::b {}
+            }
+        `);
     });
     describe('stylable API', () => {
         it(`should get @st-scope for rule`, () => {

@@ -2021,7 +2021,7 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        it('should collect mixin from st-sope selector (experimentalSelectorInference)', () => {
+        it('should collect mixin from st-sope selector (experimentalSelectorInference=false)', () => {
             const { sheets } = testStylableCore(
                 {
                     '/mix.st.css': `
@@ -2059,7 +2059,7 @@ describe(`features/st-mixin`, () => {
                     }
                 `,
                 },
-                { stylableConfig: { experimentalSelectorInference: true } }
+                { stylableConfig: { experimentalSelectorInference: false } }
             );
 
             const { meta } = sheets['/entry.st.css'];
