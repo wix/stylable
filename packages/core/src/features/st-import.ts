@@ -203,7 +203,7 @@ function calcCssDepth(context: FeatureTransformContext) {
         context.meta,
         new Set(),
         ({ depth, request }) => {
-            if (request.endsWith('.st.css')) {
+            if (request.endsWith('.css')) {
                 cssDepth = Math.max(cssDepth, depth);
             }
         },
