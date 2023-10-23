@@ -122,7 +122,7 @@ export class Stylable {
         this.resolveNamespace = config.resolveNamespace;
         this.moduleResolver = this.initModuleResolver(config);
         this.cssParser = config.cssParser || cssParse;
-        this.resolverCache = config.resolverCache; // ToDo: v5 default to `new Map()`
+        this.resolverCache = config.resolverCache || new Map();
         this.fileProcessorCache = config.fileProcessorCache;
         this.fileProcessor = createStylableFileProcessor({
             fileSystem: this.fileSystem,
