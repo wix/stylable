@@ -47,7 +47,6 @@ export function attachHook({
             fileSystem: fs,
             requireModule: require,
             resolveNamespace,
-            resolverCache: new Map(),
             ...options,
         },
         { runtimePath }

@@ -115,7 +115,6 @@ export function stylableRollupPlugin({
                 const stConfig = stylableConfig({
                     fileSystem: fs,
                     optimizer: new StylableOptimizer(),
-                    resolverCache: new Map(),
                     requireModule,
                     mode: mode || getDefaultMode(),
                     projectRoot: projectRoot || process.cwd(),

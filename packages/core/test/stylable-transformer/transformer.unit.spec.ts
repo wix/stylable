@@ -36,7 +36,6 @@ describe('Transformer', () => {
             {
                 stylableConfig: {
                     resolveModule: onResolve,
-                    resolverCache: new Map(), // ToDo: v5 this should be default : remove
                 },
             }
         );
