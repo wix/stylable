@@ -96,6 +96,13 @@ export const diagnostics = {
         'error',
         (name: string) => `unknown var "${name}"`
     ),
+    UNKNOWN_CUSTOM_PROP: createDiagnosticReporter('07011', 'info', (names: string[]) => {
+        const msgStart =
+            names.length > 1
+                ? `Unknown custom-properties "${names.join(', ')}"`
+                : `Unknown custom-property "${names[0]}"`;
+        return `${msgStart} are currently not namespaced, but will be namespaced to stylesheet in Stylable 6. To retain current behavior either enclose value in quotes or define a global custom-property for the used properties.`;
+    }),
 };
 
 // HOOKS
@@ -124,6 +131,33 @@ export const hooks = createFeature<{
             });
         }
         return;
+    },
+    transformInit({ context }) {
+        const { cssVar } = context.getResolvedSymbols(context.meta);
+        for (const [_localName, localSymbol] of Object.entries(
+            STSymbol.getAllByType(context.meta, 'var')
+        )) {
+            const value = postcssValueParser(stripQuotation(localSymbol.text));
+            const unknownUsedProps: string[] = [];
+            value.walk((node) => {
+                if (node.type === 'function' && node.value.toLowerCase() === 'var') {
+                    for (const argNode of node.nodes) {
+                        if (
+                            argNode.type === 'word' &&
+                            argNode.value.startsWith('--') &&
+                            !cssVar[argNode.value]
+                        ) {
+                            unknownUsedProps.push(argNode.value);
+                        }
+                    }
+                }
+            });
+            if (unknownUsedProps.length) {
+                context.diagnostics.report(diagnostics.UNKNOWN_CUSTOM_PROP(unknownUsedProps), {
+                    node: localSymbol.node,
+                });
+            }
+        }
     },
     prepareAST({ node, toRemove }) {
         if (node.type === 'rule' && node.selector === ':vars') {
