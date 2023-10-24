@@ -772,6 +772,8 @@ describe(`features/css-custom-property`, () => {
                     }
 
                     .root {
+                        --x: context property does not override property from origin;
+
                         /* @decl(local) prop: var(--entry-y) */
                         prop: value(y);
 
@@ -797,7 +799,7 @@ describe(`features/css-custom-property`, () => {
             });
 
             // JS exports
-            expect(exports.vars, `JS export`).to.eql({ y: `--entry-y` });
+            expect(exports.vars, `JS export`).to.eql({ y: `--entry-y`, x: `--entry-x` });
         });
         it(`should preserve string value with custom property`, () => {
             const { sheets } = testStylableCore({
