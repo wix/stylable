@@ -51,15 +51,7 @@ export class StylableProcessor implements FeatureContext {
             }
         });
 
-        const isStylable = this.meta.type === 'stylable';
         root.walkDecls((decl) => {
-            const parent = decl.parent as postcss.ChildNode;
-            if (parent.type === 'rule' && parent.selector === ':vars' && isStylable) {
-                // ToDo: remove once
-                // - custom property definition is allowed in var value
-                // - url collection is removed from st-var
-                return;
-            }
             CSSClass.hooks.analyzeDeclaration({ context: this, decl });
             CSSCustomProperty.hooks.analyzeDeclaration({ context: this, decl });
             CSSContains.hooks.analyzeDeclaration({ context: this, decl });
