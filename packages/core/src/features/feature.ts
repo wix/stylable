@@ -98,7 +98,6 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         context: FeatureTransformContext;
         ast: postcss.Root;
         transformer: StylableTransformer;
-        cssVarsMapping: Record<string, string>;
         path: string[];
     }) => void;
 }
