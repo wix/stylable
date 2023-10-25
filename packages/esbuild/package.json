@@ -10,7 +10,7 @@
     "esbuild": ">=0.17.18"
   },
   "dependencies": {
-    "@file-services/node": "^8.3.1",
+    "@file-services/node": "^8.3.2",
     "@stylable/build-tools": "^5.16.0",
     "@stylable/cli": "^5.16.0",
     "@stylable/core": "^5.16.0",
