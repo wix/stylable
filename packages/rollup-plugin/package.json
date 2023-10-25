@@ -7,7 +7,7 @@
     "test": "mocha \"dist/test/**/*.spec.js\""
   },
   "peerDependencies": {
-    "rollup": "^2.70.0 || ^3.0.0"
+    "rollup": "^2.70.0 || ^3.0.0 || ^4.0.0"
   },
   "dependencies": {
     "@file-services/node": "^8.3.1",
