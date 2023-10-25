@@ -178,6 +178,7 @@ export function stylableRollupPlugin({
             const { isStFile, isLoadableCssFile, path } = getLoadableModuleData(id);
             if (isLoadableCssFile || isStFile) {
                 const code = fs.readFileSync(path, 'utf8');
+                this.addWatchFile(path);
                 return { code, moduleSideEffects: isLoadableCssFile };
             }
             return null;
