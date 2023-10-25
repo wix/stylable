@@ -99,9 +99,9 @@ export const diagnostics = {
     UNKNOWN_CUSTOM_PROP: createDiagnosticReporter('07011', 'info', (names: string[]) => {
         const msgStart =
             names.length > 1
-                ? `Unknown custom-properties "${names.join(', ')}"`
-                : `Unknown custom-property "${names[0]}"`;
-        return `${msgStart} are currently not namespaced, but will be namespaced to stylesheet in Stylable 6. To retain current behavior either enclose value in quotes or define a global custom-property for the used properties.`;
+                ? `Unknown custom-properties "${names.join(', ')}" are`
+                : `Unknown custom-property "${names[0]}" is`;
+        return `${msgStart} currently not namespaced. However, in Stylable 6, it will be namespaced to the stylesheet. To maintain the current behavior, either wrap the value in quotes or establish a global custom property. If you intend for the custom property to be namespaced based on a different stylesheet context where the variable may be utilized, please reconsider your approach, as this will not be supported in future versions.`;
     }),
 };
 
