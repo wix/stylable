@@ -119,7 +119,6 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 projectRoot,
                 fileSystem: fs,
                 optimizer: new StylableOptimizer(),
-                resolverCache: new Map(),
                 requireModule,
                 resolveNamespace:
                     configFromFile?.config?.defaultConfig?.resolveNamespace ?? resolveNamespaceNode,
