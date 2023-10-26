@@ -175,6 +175,7 @@ export class StylableTransformer {
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
+        STVar.hooks.transformInit({ context });
         if (!this.experimentalSelectorInference) {
             meta.transformedScopes = validateScopes(this, meta);
         }
