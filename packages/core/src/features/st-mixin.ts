@@ -122,8 +122,8 @@ export const hooks = createFeature({
         }
         return isMarker;
     },
-    transformLastPass({ context, ast, transformer, cssVarsMapping, path }) {
-        ast.walkRules((rule) => appendMixins(context, transformer, rule, cssVarsMapping, path));
+    transformLastPass({ context, ast, transformer, path }) {
+        ast.walkRules((rule) => appendMixins(context, transformer, rule, path));
     },
 });
 
@@ -212,7 +212,6 @@ function appendMixins(
     context: FeatureTransformContext,
     transformer: StylableTransformer,
     rule: postcss.Rule,
-    cssPropertyMapping: Record<string, string>,
     path: string[] = []
 ) {
     const [decls, mixins] = collectRuleMixins(context, rule);
@@ -221,7 +220,7 @@ function appendMixins(
     }
     for (const mixin of mixins) {
         if (mixin.valid) {
-            appendMixin(context, { transformer, mixDef: mixin, rule, path, cssPropertyMapping });
+            appendMixin(context, { transformer, mixDef: mixin, rule, path });
         }
     }
     for (const mixinDecl of decls) {
@@ -359,7 +358,6 @@ interface ApplyMixinContext {
     mixDef: AnalyzedMixin & { valid: true };
     rule: postcss.Rule;
     path: string[];
-    cssPropertyMapping: Record<string, string>;
 }
 
 function appendMixin(context: FeatureTransformContext, config: ApplyMixinContext) {
@@ -475,8 +473,7 @@ function handleCSSMixin(
                 context.diagnostics,
                 mixDef.data.originDecl,
                 stVarOverride,
-                config.path,
-                config.cssPropertyMapping
+                config.path
             );
             collectOptionalArgs(
                 { meta: resolved.meta, resolver: context.resolver },

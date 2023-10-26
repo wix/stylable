@@ -271,7 +271,6 @@ export function parseVarsFromExpr(expr: string) {
 
 function collectVarSymbols(context: FeatureContext, rule: postcss.Rule) {
     rule.walkDecls((decl) => {
-        collectUrls(context.meta, decl); // ToDo: remove
         warnOnDeprecatedCustomValues(context, decl);
 
         // check type annotation
@@ -313,20 +312,6 @@ function warnOnDeprecatedCustomValues(context: FeatureContext, decl: postcss.Dec
                         word: node.name,
                     }
                 );
-            }
-        },
-        false
-    );
-}
-
-// ToDo: remove after moving :vars removal to end of analyze.
-// url collection should pickup vars value during general decls walk
-function collectUrls(meta: StylableMeta, decl: postcss.Declaration) {
-    processDeclarationFunctions(
-        decl,
-        (node) => {
-            if (node.type === 'url') {
-                meta.urls.push(node.url);
             }
         },
         false

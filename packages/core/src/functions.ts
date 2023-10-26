@@ -23,7 +23,6 @@ export interface EvalValueData {
     node?: postcss.Node;
     meta: StylableMeta;
     stVarOverride?: Record<string, string> | null;
-    cssVarsMapping?: Record<string, string>;
     args?: string[];
     rootArgument?: string;
     initialNode?: postcss.Node;
@@ -63,7 +62,6 @@ export class StylableEvaluator {
             this.valueHook,
             context.diagnostics,
             context.passedThrough,
-            data.cssVarsMapping,
             data.args,
             data.rootArgument,
             data.initialNode
@@ -94,8 +92,7 @@ export function resolveArgumentsValue(
     diagnostics: Diagnostics,
     node: postcss.Node,
     variableOverride?: Record<string, string>,
-    path?: string[],
-    cssVarsMapping?: Record<string, string>
+    path?: string[]
 ) {
     const resolvedArgs = {} as Record<string, string>;
     for (const k in options) {
@@ -108,7 +105,6 @@ export function resolveArgumentsValue(
             transformer.replaceValueHook,
             diagnostics,
             path,
-            cssVarsMapping,
             undefined
         );
     }
@@ -125,7 +121,6 @@ export function processDeclarationValue(
     valueHook?: replaceValueHook,
     diagnostics: Diagnostics = new Diagnostics(),
     passedThrough: string[] = [],
-    cssVarsMapping: Record<string, string> = {},
     args: string[] = [],
     rootArgument?: string,
     initialNode?: postcss.Node
@@ -155,7 +150,6 @@ export function processDeclarationValue(
                         node,
                         meta,
                         stVarOverride: variableOverride,
-                        cssVarsMapping,
                         args,
                         rootArgument,
                         initialNode,
@@ -228,7 +222,6 @@ export function processDeclarationValue(
                         node,
                         meta,
                         stVarOverride: variableOverride,
-                        cssVarsMapping,
                         args,
                         rootArgument,
                         initialNode,
@@ -312,7 +305,6 @@ export function evalDeclarationValue(
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
-    cssVarsMapping?: Record<string, string>,
     args: string[] = [],
     getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols = createSymbolResolverWithCache(
         resolver,
@@ -329,7 +321,6 @@ export function evalDeclarationValue(
         valueHook,
         diagnostics,
         passedThrough,
-        cssVarsMapping,
         args
     ).outputValue;
 }

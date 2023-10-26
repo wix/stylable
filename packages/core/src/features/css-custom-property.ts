@@ -1,4 +1,4 @@
-import { createFeature, FeatureContext } from './feature';
+import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
 import * as STSymbol from './st-symbol';
 import type { ImportSymbol } from './st-import';
 import {
@@ -177,12 +177,7 @@ export const hooks = createFeature<{
         for (const [localVarName, localSymbol] of Object.entries(
             STSymbol.getAllByType(meta, `cssVar`)
         )) {
-            const resolve = resolvedSymbols.cssVar[localVarName] || {
-                // fallback to local namespace
-                _kind: `css`,
-                symbol: localSymbol,
-                meta,
-            };
+            const resolve = resolveFinalSymbol(meta, localSymbol, resolvedSymbols);
             customPropsMapping.localToGlobal[localVarName] = getTransformedName(resolve);
             if (resolve.meta === meta) {
                 customPropsMapping.locals.add(localVarName);
@@ -209,12 +204,16 @@ export const hooks = createFeature<{
     transformDeclaration({ decl, resolved }) {
         decl.prop = resolved.localToGlobal[decl.prop] || decl.prop;
     },
-    transformValue({ node, data: { cssVarsMapping } }) {
+    transformValue({ node, data: { meta }, context: { getResolvedSymbols } }) {
         const { value } = node;
         const varWithPrefix = node.nodes[0]?.value || ``;
         if (validateCustomPropertyName(varWithPrefix)) {
-            if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
-                node.nodes[0].value = cssVarsMapping[varWithPrefix];
+            const resolvedSymbols = getResolvedSymbols(meta);
+            const localSymbol = STSymbol.get(meta, varWithPrefix, `cssVar`);
+            if (localSymbol) {
+                node.nodes[0].value = getTransformedName(
+                    resolveFinalSymbol(meta, localSymbol, resolvedSymbols)
+                );
             }
         }
         // handle default values - ToDo: check if required
@@ -233,6 +232,21 @@ export const hooks = createFeature<{
 
 export function get(meta: StylableMeta, name: string): CSSVarSymbol | undefined {
     return STSymbol.get(meta, name, `cssVar`);
+}
+
+function resolveFinalSymbol(
+    meta: StylableMeta,
+    localSymbol: CSSVarSymbol,
+    resolvedSymbols: ReturnType<FeatureTransformContext['getResolvedSymbols']>
+) {
+    return (
+        resolvedSymbols.cssVar[localSymbol.name] || {
+            // fallback to local namespace
+            _kind: `css`,
+            symbol: localSymbol,
+            meta,
+        }
+    );
 }
 
 function addCSSProperty({
