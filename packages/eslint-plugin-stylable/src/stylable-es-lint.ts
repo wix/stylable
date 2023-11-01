@@ -29,7 +29,6 @@ export default createRule({
             projectRoot: process.cwd(),
             resolveModule: moduleResolver,
             requireModule: require,
-            resolverCache: new Map(),
             cssParser: safeParse,
         });
 

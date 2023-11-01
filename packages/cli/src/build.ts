@@ -407,7 +407,7 @@ function bundleFiles({
             if (!meta.transformCssDepth) {
                 stylable.transform(meta);
             }
-            return meta.transformCssDepth?.cssDepth ?? 0;
+            return meta.transformCssDepth?.cssDepth ?? 1;
         },
         (m) => {
             return m;

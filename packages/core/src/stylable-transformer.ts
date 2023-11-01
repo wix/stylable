@@ -314,7 +314,6 @@ export class StylableTransformer {
                 value: decl.value,
                 meta,
                 node: decl,
-                cssVarsMapping: cssVarsMapping.localToGlobal,
             }).outputValue;
         };
 
@@ -354,7 +353,6 @@ export class StylableTransformer {
             context: transformContext,
             ast,
             transformer: this,
-            cssVarsMapping: cssVarsMapping.localToGlobal,
             path,
         };
         if (this.experimentalSelectorInference) {

@@ -52,99 +52,97 @@ describe('Stylable postcss transform (General)', () => {
         expect(rule2.nodes[0].toString(), 'color1').to.equal('color: red');
         expect(rule2.nodes[1].toString(), 'color1').to.equal('color: blue');
     });
-    it('should continue inferred selector after combinator', () => {
-        // ToDo: remove once experimentalSelectorInference is the default
-        testStylableCore({
-            'comp.st.css': `.part {} `,
-            'entry.st.css': `
-                @st-import Comp from './comp.st.css';
+    it('should set default inferred selector context to universal selector', () => {
+        testStylableCore(
+            `
+                .root { -st-states: state; }
                 .class { -st-states: state; }
-
-                /* @rule(state) .entry__class .entry--state */
-                .class :state {}
-                
-                /* @rule(pseudo-element) .comp__root  .comp__part */
-                Comp ::part {}
-        
-                /* @rule(unknown pseudo-element) .comp__root ::class */
-                Comp ::class {}
-            `,
-        });
-    });
-    it('should continue inferred selector after universal', () => {
-        // ToDo: remove once experimentalSelectorInference is the default
-        testStylableCore(`
-            .root { -st-states: state; }
-            .part {}
-
-            /* @rule(state) *.entry--state */
-            *:state {}
             
-            /* @rule(element) * .entry__part */
-            *::part {}
-        `);
+                /* 
+                    @transform-error(unknown state) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                        'state'
+                    )}
+                    @rule(unknown state) :state 
+                */
+                :state {}
+    
+                /* 
+                    @transform-error(unknown pseudo-element) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                        `class`
+                    )}
+                    @rule(unknown pseudo-element) ::class 
+                */
+                ::class {}
+            `
+        );
     });
-
-    describe('experimentalSelectorInference', () => {
-        it('should set default inferred selector context to universal selector', () => {
-            testStylableCore(
-                `
-                    .root { -st-states: state; }
+    it('should reset inferred selector after combinator', () => {
+        testStylableCore({
+            'comp.st.css': ` .part {} `,
+            'entry.st.css': `
+                    @st-import Comp from './comp.st.css';
                     .class { -st-states: state; }
                 
-                    /* 
-                        @transform-error(unknown state) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                            'state'
-                        )}
-                        @rule(unknown state) :state 
-                    */
-                    :state {}
+                    /* @rule(unknown state) .entry__class :state */
+                    .class :state {}
         
-                    /* 
-                        @transform-error(unknown pseudo-element) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                            `class`
-                        )}
-                        @rule(unknown pseudo-element) ::class 
-                    */
-                    ::class {}
+                    /* @rule(unknown pseudo-element) .comp__root ::part */
+                    Comp ::part {}
+        
+                    /* @rule(standalone pseudo-element) .comp__root ::class */
+                    Comp ::class {}
                 `,
-                { stylableConfig: { experimentalSelectorInference: true } }
-            );
         });
-        it('should reset inferred selector after combinator', () => {
+    });
+    it('should set inferred selector after universal (to universal)', () => {
+        testStylableCore(
+            `
+                .root { -st-states: state; }
+                .part {}
+    
+                /* @rule(state) *:state */
+                *:state {}
+                
+                /* @rule(element) *::part */
+                *::part {}
+            `
+        );
+    });
+    describe('experimentalSelectorInference=false', () => {
+        it('should continue inferred selector after combinator', () => {
             testStylableCore(
                 {
-                    'comp.st.css': ` .part {} `,
+                    'comp.st.css': `.part {} `,
                     'entry.st.css': `
-                        @st-import Comp from './comp.st.css';
-                        .class { -st-states: state; }
+                    @st-import Comp from './comp.st.css';
+                    .class { -st-states: state; }
+
+                    /* @rule(state) .entry__class .entry--state */
+                    .class :state {}
                     
-                        /* @rule(unknown state) .entry__class :state */
-                        .class :state {}
+                    /* @rule(pseudo-element) .comp__root  .comp__part */
+                    Comp ::part {}
             
-                        /* @rule(unknown pseudo-element) .comp__root ::part */
-                        Comp ::part {}
-            
-                        /* @rule(standalone pseudo-element) .comp__root ::class */
-                        Comp ::class {}
-                    `,
+                    /* @rule(unknown pseudo-element) .comp__root ::class */
+                    Comp ::class {}
+                `,
                 },
-                { stylableConfig: { experimentalSelectorInference: true } }
+                { stylableConfig: { experimentalSelectorInference: false } }
             );
         });
-        it('should set inferred selector after universal (to universal)', () => {
+        it('should continue inferred selector after universal', () => {
             testStylableCore(
                 `
-                    .root { -st-states: state; }
-                    .part {}
-        
-                    /* @rule(state) *:state */
-                    *:state {}
-                    
-                    /* @rule(element) *::part */
-                    *::part {}
-                `,
-                { stylableConfig: { experimentalSelectorInference: true } }
+                .root { -st-states: state; }
+                .part {}
+
+                /* @rule(state) *.entry--state */
+                *:state {}
+                
+                /* @rule(element) * .entry__part */
+                *::part {}
+            `,
+                { stylableConfig: { experimentalSelectorInference: false } }
             );
         });
     });

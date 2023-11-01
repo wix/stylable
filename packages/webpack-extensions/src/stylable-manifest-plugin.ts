@@ -57,7 +57,7 @@ export class StylableManifestPlugin {
     }
     public apply(compiler: Compiler) {
         const resolveModule = createWebpackResolver(compiler.inputFileSystem as any, {
-            ...compiler.options.resolve as any,
+            ...(compiler.options.resolve as any),
             extensions: [],
         });
         const stylable = new Stylable({
@@ -68,7 +68,6 @@ export class StylableManifestPlugin {
             },
             mode: compiler.options.mode === 'development' ? 'development' : 'production',
             resolveModule,
-            resolverCache: new Map(),
             resolveNamespace: this.options.resolveNamespace,
         });
 

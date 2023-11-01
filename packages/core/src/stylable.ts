@@ -21,6 +21,7 @@ import {
 import { STImport, STScope, STVar, STMixin, CSSClass, CSSCustomProperty } from './features';
 import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
 import * as postcss from 'postcss';
+import { warnOnce } from './helpers/deprecation';
 
 export interface StylableConfigBase {
     projectRoot: string;
@@ -98,7 +99,13 @@ export class Stylable {
     protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
     private experimentalSelectorInference: boolean;
     constructor(config: StylableConfig) {
-        this.experimentalSelectorInference = !!config.experimentalSelectorInference;
+        this.experimentalSelectorInference =
+            config.experimentalSelectorInference === false ? false : true;
+        if (this.experimentalSelectorInference === false) {
+            warnOnce(
+                'Stylable is running in a deprecated mode that will be removed in a future 6.x.x release. Please set experimentalSelectorInference=true to avoid this warning.'
+            );
+        }
         this.projectRoot = config.projectRoot;
         this.fileSystem = config.fileSystem;
         this.requireModule =
@@ -115,7 +122,7 @@ export class Stylable {
         this.resolveNamespace = config.resolveNamespace;
         this.moduleResolver = this.initModuleResolver(config);
         this.cssParser = config.cssParser || cssParse;
-        this.resolverCache = config.resolverCache; // ToDo: v5 default to `new Map()`
+        this.resolverCache = config.resolverCache || new Map();
         this.fileProcessorCache = config.fileProcessorCache;
         this.fileProcessor = createStylableFileProcessor({
             fileSystem: this.fileSystem,

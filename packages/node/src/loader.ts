@@ -22,7 +22,6 @@ async function initiateModuleFactory() {
             ...(defaultConfig?.config || {}),
             projectRoot: '/',
             fileSystem: fs,
-            resolverCache: new Map(),
         },
         {
             moduleType: 'esm',

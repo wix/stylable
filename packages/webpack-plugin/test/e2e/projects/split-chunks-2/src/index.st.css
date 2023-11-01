@@ -1,4 +1,5 @@
+@st-import 'lib/index.st.css';
 
 .root {
-    background-color: red; 
+    background-color: red;
 }

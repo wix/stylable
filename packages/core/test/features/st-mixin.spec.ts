@@ -2021,7 +2021,7 @@ describe(`features/st-mixin`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        it('should collect mixin from st-sope selector (experimentalSelectorInference)', () => {
+        it('should collect mixin from st-sope selector (experimentalSelectorInference=false)', () => {
             const { sheets } = testStylableCore(
                 {
                     '/mix.st.css': `
@@ -2059,12 +2059,39 @@ describe(`features/st-mixin`, () => {
                     }
                 `,
                 },
-                { stylableConfig: { experimentalSelectorInference: true } }
+                { stylableConfig: { experimentalSelectorInference: false } }
             );
 
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        it('should collect only st-scope nested rules', () => {
+            const { sheets } = testStylableCore({
+                '/mix.st.css': `
+                    .before { color: RED; }
+                    @st-scope .mix {
+                        .inside { color: green; }
+                    }
+                    .after { color: RED; }
+                `,
+                '/entry.st.css': `
+                    @st-import [mix] from './mix.st.css';
+                    
+                    .into {-st-mixin: mix;}
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                    .entry__into {}
+                        .entry__into .mix__inside { color: green; }
+                `)
+            );
         });
     });
     describe(`higher-level feature integrations`, () => {

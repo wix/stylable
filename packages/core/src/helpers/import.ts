@@ -598,11 +598,15 @@ export function tryCollectImportsDeep(
     meta: StylableMeta,
     imports = new Set<string>(),
     onImport: undefined | ((e: ImportEvent) => void) = undefined,
-    depth = 0
+    depth = 1,
+    origin = meta.source
 ) {
     for (const { context, request } of meta.getImportStatements()) {
         try {
             const resolved = resolver.resolvePath(context, request);
+            if (resolved === origin) {
+                continue;
+            }
             onImport?.({ context, request, resolved, depth });
 
             if (!imports.has(resolved)) {
@@ -613,7 +617,8 @@ export function tryCollectImportsDeep(
                         resolver.analyze(resolved),
                         imports,
                         onImport,
-                        depth + 1
+                        depth + 1,
+                        origin
                     );
                 }
             }

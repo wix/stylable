@@ -757,22 +757,86 @@ describe(`features/css-custom-property`, () => {
 
             shouldReportNoDiagnostics(meta);
         });
-        it(`should NOT define property as var value (change in v5)`, () => {
-            // ToDo: in the future property should be able to be defined in var value
-            const { sheets } = testStylableCore(`
-                :vars {
-                    myVar: var(--color);
-                }
+        it(`should define property as var value`, () => {
+            const { sheets } = testStylableCore({
+                './origin.st.css': `
+                    :vars {
+                        x: var(--x);
+                    }
+                `,
+                './entry.st.css': `
+                    @st-import [x as importedVar] from './origin.st.css';
+                    :vars {
+                        y: var(--y);
+                        z: value(y) value(importedVar);
+                    }
 
-                .root {
-                    /* @decl prop: var(--color) */
-                    prop: value(myVar);
-                }
-            `);
+                    .root {
+                        --x: context property does not override property from origin;
+
+                        /* @decl(local) prop: var(--entry-y) */
+                        prop: value(y);
+
+                        /* @decl(imported) prop: var(--origin-x) */
+                        prop: value(importedVar);
+
+                        /* @decl(mix) prop: var(--entry-y) var(--origin-x) */
+                        prop: value(z);
+                    }
+                `,
+            });
+
+            const { meta, exports } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            // symbols
+            expect(CSSCustomProperty.get(meta, `--y`), `--y symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--y`,
+                global: false,
+                alias: undefined,
+            });
+
+            // JS exports
+            expect(exports.vars, `JS export`).to.eql({ y: `--entry-y`, x: `--entry-x` });
+        });
+        it(`should preserve string value with custom property`, () => {
+            const { sheets } = testStylableCore({
+                './origin.st.css': `
+                    :vars {
+                        x: 'var(--x)';
+                    }
+                `,
+                './entry.st.css': `
+                    @st-import [x as importedVar] from './origin.st.css';
+                    :vars {
+                        y: "var(--y)";
+                        z: value(y) value(importedVar);
+                    }
+
+                    .root {
+                        /* @decl(local) prop: var(--y) */
+                        prop: value(y);
+
+                        /* @decl(imported) prop: var(--x) */
+                        prop: value(importedVar);
+
+                        /* @decl(mix) prop: var(--y) var(--x) */
+                        prop: value(z);
+                    }
+                `,
+            });
 
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+
+            // symbols
+            expect(CSSCustomProperty.get(meta, `--y`), `--y symbol`).to.eql(undefined);
+
+            // JS exports
+            expect(exports.vars, `JS export`).to.eql(undefined);
         });
     });
     describe(`st-formatter`, () => {
@@ -883,6 +947,46 @@ describe(`features/css-custom-property`, () => {
                     );
                 }
             `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should namespace custom-props within build vars', () => {
+            const { sheets } = testStylableCore({
+                './mix.st.css': `
+                    :vars {
+                        x: var(--x);
+                    }
+                    .mix {
+                        val: value(x);
+                    }
+                `,
+                './entry.st.css': `
+                    @st-import [mix as importedMix] from './mix.st.css';
+                    :vars {
+                        x: var(--y);
+                    }
+                    .localMix {
+                        val: value(x);
+                    }
+
+                    /* @rule(local) .entry__root { val: var(--entry-y); } */
+                    .root {
+                        -st-mixin: localMix;
+                    }
+
+                    /* @rule(imported) .entry__root { val: var(--mix-x); } */
+                    .root {
+                        -st-mixin: importedMix;
+                    }
+
+                    /* @rule(with local override) .entry__root { val: var(--entry-y); } */
+                    .root {
+                        -st-mixin: importedMix(x value(x));
+                    }
+                `,
+            });
 
             const { meta } = sheets['/entry.st.css'];
 

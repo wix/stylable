@@ -141,7 +141,7 @@ export interface StylableWebpackPluginOptions {
      * 'css+js' - use css and js files to calculate depth
      * 'css' - use only css files to calculate depth
      */
-    depthStrategy?: 'css+js' | 'css';
+    depthStrategy?: 'css' | 'css+js';
     /**
      * Improved side-effect detection to include stylesheets with deep global side-effects.
      * Defaults to true.
@@ -183,7 +183,7 @@ const defaultOptions = (
     assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
     stcConfig: userOptions.stcConfig ?? false,
-    depthStrategy: userOptions.depthStrategy ?? 'css+js',
+    depthStrategy: userOptions.depthStrategy ?? 'css',
     includeGlobalSideEffects: userOptions.includeGlobalSideEffects ?? true,
     experimentalAttachCssToContainingChunks:
         userOptions.experimentalAttachCssToContainingChunks ?? false,

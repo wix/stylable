@@ -110,7 +110,6 @@ export function stylableRollupPlugin({
                 const stConfig = stylableConfig({
                     fileSystem: fs,
                     optimizer: new StylableOptimizer(),
-                    resolverCache: new Map(),
                     requireModule,
                     mode: mode || getDefaultMode(),
                     projectRoot: projectRoot || process.cwd(),
@@ -173,6 +172,7 @@ export function stylableRollupPlugin({
             const { isStFile, isLoadableCssFile, path } = getLoadableModuleData(id);
             if (isLoadableCssFile || isStFile) {
                 const code = fs.readFileSync(path, 'utf8');
+                this.addWatchFile(path);
                 return { code, moduleSideEffects: isLoadableCssFile };
             }
             return null;

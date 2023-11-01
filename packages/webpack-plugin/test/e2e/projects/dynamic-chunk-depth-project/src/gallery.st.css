@@ -1,5 +1,15 @@
+@st-import Button from './button.st.css';
+
 .root {
-    background-color: red; 
+    background-color: red;
 }
-.btn1{background: green}
-.btn2{background: fuchsia}
+
+.btn1 {
+    -st-extends: Button;
+    background: green;
+}
+
+.btn2 {
+    -st-extends: Button;
+    background: fuchsia;
+}

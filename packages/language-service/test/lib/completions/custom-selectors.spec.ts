@@ -300,9 +300,8 @@ describe('Custom Selectors', () => {
                     asserter.suggested(exp);
                     asserter.notSuggested(notExp);
                 });
-
                 it(
-                    'should not have states when custom selector is grouped, with prefix ' +
+                    'should have states when custom selector is grouped with the same inferred selector, with prefix ' +
                         prefix +
                         ' ',
                     () => {
@@ -311,10 +310,20 @@ describe('Custom Selectors', () => {
                             'custom-selectors/imported-selector-grouped.st.css',
                             prefix
                         );
+                        const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
-                        notExp.push(createCompletion(str3, rng, './top-import.st.css'));
-                        notExp.push(createCompletion(str4, rng, './top-import.st.css'));
-                        asserter.notSuggested(notExp);
+                        if (!prefix || str3.indexOf(prefix) === 0) {
+                            exp.push(createCompletion(str3, rng, './top-import.st.css'));
+                        } else {
+                            notExp.push(createCompletion(str3, rng, './top-import.st.css'));
+                        }
+                        if (!prefix || str4.indexOf(prefix) === 0) {
+                            exp.push(createCompletion(str4, rng, './top-import.st.css'));
+                        } else {
+                            notExp.push(createCompletion(str4, rng, './top-import.st.css'));
+                        }
+
+                        asserter.suggested(exp);
                     }
                 );
             });
@@ -366,7 +375,7 @@ describe('Custom Selectors', () => {
                 );
 
                 it(
-                    'should not have pseudo-elements when custom selector is grouped, with prefix ' +
+                    'should have pseudo-elements when custom selector is grouped with the same inferred selector, with prefix ' +
                         prefix +
                         ' ',
                     () => {
@@ -375,9 +384,19 @@ describe('Custom Selectors', () => {
                             'custom-selectors/imported-selector-grouped.st.css',
                             prefix
                         );
+                        const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
-                        notExp.push(createCompletion(str5, rng, './top-import.st.css'));
-                        notExp.push(createCompletion(str6, rng, './top-import.st.css'));
+                        if (!prefix || str5.indexOf(prefix) === 0) {
+                            exp.push(createCompletion(str5, rng, './top-import.st.css'));
+                        } else {
+                            notExp.push(createCompletion(str5, rng, './top-import.st.css'));
+                        }
+                        if (!prefix || str6.indexOf(prefix) === 0) {
+                            exp.push(createCompletion(str6, rng, './top-import.st.css'));
+                        } else {
+                            notExp.push(createCompletion(str6, rng, './top-import.st.css'));
+                        }
+                        asserter.suggested(exp);
                         asserter.notSuggested(notExp);
                     }
                 );

@@ -381,7 +381,6 @@ describe('stylable-resolver', () => {
             {},
             {
                 stylableConfig: {
-                    resolverCache: new Map(),
                     resolveModule: () => {
                         resolverHits++;
                         return '';

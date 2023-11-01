@@ -7,20 +7,19 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/resolve": "^8.2.0",
+    "@file-services/resolve": "^8.3.2",
     "@tokey/css-selector-parser": "^0.6.2",
     "@tokey/css-value-parser": "^0.1.4",
     "@tokey/imports-parser": "^1.0.0",
-    "balanced-match": "^2.0.0",
     "css-selector-tokenizer": "^0.8.0",
     "cssesc": "^3.0.0",
     "is-vendor-prefixed": "^4.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.clonedeepwith": "^4.5.0",
-    "postcss": "^8.4.30",
+    "postcss": "^8.4.31",
     "postcss-js": "^4.0.1",
     "postcss-nested": "^6.0.1",
-    "postcss-safe-parser": "^6.0.0",
+    "postcss-safe-parser": "^7.0.0",
     "postcss-value-parser": "^4.2.0"
   },
   "files": [

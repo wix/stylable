@@ -119,7 +119,6 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 projectRoot,
                 fileSystem: fs,
                 optimizer: new StylableOptimizer(),
-                resolverCache: new Map(),
                 requireModule,
                 resolveNamespace:
                     configFromFile?.config?.defaultConfig?.resolveNamespace ?? resolveNamespaceNode,
@@ -197,7 +196,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 const res = stylable.transform(args.path);
                 const { errors, warnings } = esbuildEmitDiagnostics(res, diagnosticsMode);
                 const { imports, collector } = importsCollector(res);
-                const { cssDepth = 0, deepDependencies } = res.meta.transformCssDepth!;
+                const { cssDepth = 1, deepDependencies } = res.meta.transformCssDepth!;
                 const getModuleId = () => {
                     switch (runtimeStylesheetId) {
                         case 'module':
@@ -302,7 +301,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             { filter: /.*/, namespace: namespaces.css },
             wrapDebug('onLoad css output', (args) => {
                 const { meta } = args.pluginData.stylableResults as StylableResults;
-                const { cssDepth = 0 } = meta.transformCssDepth!;
+                const { cssDepth = 1 } = meta.transformCssDepth!;
                 const pathId = idForPath.getId(args.path);
                 return {
                     resolveDir: dirname(args.path),

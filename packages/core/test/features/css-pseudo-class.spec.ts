@@ -669,173 +669,143 @@ describe('features/css-pseudo-class', () => {
         });
     });
     describe('native selector nesting classes', () => {
-        describe('experimentalSelectorInference', () => {
-            it('should infer native selector nesting classes', () => {
-                const { sheets } = testStylableCore(
-                    {
-                        'entry.st.css': `
-                            .x {/*no states*/}
-                            .a { -st-states: shared }
-                            .b { -st-states: shared }
-                            .c { -st-states: shared }
+        it('should infer native selector nesting classes', () => {
+            const { sheets } = testStylableCore({
+                'entry.st.css': `
+                        .x {/*no states*/}
+                        .a { -st-states: shared }
+                        .b { -st-states: shared }
+                        .c { -st-states: shared }
 
-                            /* @rule(compound+nested) .entry__a:is(.entry__b).entry--shared */
-                            .a:is(.b):shared {}
+                        /* @rule(compound+nested) .entry__a:is(.entry__b).entry--shared */
+                        .a:is(.b):shared {}
 
-                            /* @rule(compound+nested) .entry__a:is(.entry__b, .entry__c).entry--shared */
-                            .a:is(.b, .c):shared {}
+                        /* @rule(compound+nested) .entry__a:is(.entry__b, .entry__c).entry--shared */
+                        .a:is(.b, .c):shared {}
 
-                            /* @compound+nested+comment- tested outside because of comment*/
-                            .a/**/:is(.b, .c):shared {}
+                        /* @compound+nested+comment- tested outside because of comment*/
+                        .a/**/:is(.b, .c):shared {}
 
-                            /* @rule(just nested) .entry__x :is(.entry__a, .entry__b).entry--shared */
-                            .x :is(.a, .b):shared {}
+                        /* @rule(just nested) .entry__x :is(.entry__a, .entry__b).entry--shared */
+                        .x :is(.a, .b):shared {}
 
-                            /* @rule(where) :where(.entry__a,.entry__b).entry--shared */
-                            :where(.a,.b):shared {}
+                        /* @rule(where) :where(.entry__a,.entry__b).entry--shared */
+                        :where(.a,.b):shared {}
 
-                            /* @rule(nth) :nth-child(2n + 1 of .entry__a,.entry__b).entry--shared */
-                            :nth-child(2n + 1 of .a,.b):shared {}
+                        /* @rule(nth) :nth-child(2n + 1 of .entry__a,.entry__b).entry--shared */
+                        :nth-child(2n + 1 of .a,.b):shared {}
 
-                            /* @rule(has - no infer) .entry__a:has(.entry__x).entry--shared */
-                            .a:has(.x):shared {}
+                        /* @rule(has - no infer) .entry__a:has(.entry__x).entry--shared */
+                        .a:has(.x):shared {}
 
-                            /* @rule(not - no infer) .entry__a:not(.entry__x).entry--shared */
-                            .a:not(.x):shared {}
+                        /* @rule(not - no infer) .entry__a:not(.entry__x).entry--shared */
+                        .a:not(.x):shared {}
 
-                            /* @rule(not - no infer 2) .entry__a:not(.entry__b).entry--shared */
-                            .a:not(.b):shared {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
-
-                const { meta } = sheets['/entry.st.css'];
-
-                const ruleWithComment = meta.targetAst?.nodes[9] as postcss.Rule;
-                expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
-                    '.entry__a/**/:is(.entry__b, .entry__c).entry--shared'
-                );
-
-                shouldReportNoDiagnostics(meta);
+                        /* @rule(not - no infer 2) .entry__a:not(.entry__b).entry--shared */
+                        .a:not(.b):shared {}
+                `,
             });
-            it('should filter out states after native selector nesting classes', () => {
-                const { sheets } = testStylableCore(
-                    {
-                        'entry.st.css': `
-                            .x {}
-                            .y { -st-states: shared(string) }
-                            .a { -st-states: shared }
-                            .b { -st-states: shared }
 
-                            /* 
-                                @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                    'shared'
-                                )} 
-                                @rule(compound missing) .entry__x:is(.entry__a, .entry__b):shared 
-                            */
-                            .x:is(.a, .b):shared {}
+            const { meta } = sheets['/entry.st.css'];
 
-                            /* 
-                                @transform-error(compound+nested+comment) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                    'shared'
-                                )} 
-                            */
-                            .x/**/:is(.a, .b):shared {}
+            const ruleWithComment = meta.targetAst?.nodes[9] as postcss.Rule;
+            expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
+                '.entry__a/**/:is(.entry__b, .entry__c).entry--shared'
+            );
 
-                            /* 
-                                @transform-error(state type differ) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                    'shared'
-                                )} 
-                                @rule(compound missing) .entry__y:is(.entry__a, .entry__b):shared 
-                            */
-                            .y:is(.a, .b):shared {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should filter out states after native selector nesting classes', () => {
+            const { sheets } = testStylableCore({
+                'entry.st.css': `
+                        .x {}
+                        .y { -st-states: shared(string) }
+                        .a { -st-states: shared }
+                        .b { -st-states: shared }
 
-                const { meta } = sheets['/entry.st.css'];
+                        /* 
+                            @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                'shared'
+                            )} 
+                            @rule(compound missing) .entry__x:is(.entry__a, .entry__b):shared 
+                        */
+                        .x:is(.a, .b):shared {}
 
-                const ruleWithComment = meta.targetAst?.nodes[7] as postcss.Rule;
-                expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
-                    '.entry__x/**/:is(.entry__a, .entry__b):shared'
-                );
+                        /* 
+                            @transform-error(compound+nested+comment) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                'shared'
+                            )} 
+                        */
+                        .x/**/:is(.a, .b):shared {}
+
+                        /* 
+                            @transform-error(state type differ) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                'shared'
+                            )} 
+                            @rule(compound missing) .entry__y:is(.entry__a, .entry__b):shared 
+                        */
+                        .y:is(.a, .b):shared {}
+                `,
             });
-            it('should infer complex states', () => {
-                testStylableCore(
-                    {
-                        'entry.st.css': `
-                            .a { -st-states: shared(string(contains(123))) }
-                            .b { -st-states: shared(string(contains(123))) }
-                            .cx { -st-states: shared(string(contains(456))) }
 
-                            /* @rule(match) .entry__a:is(.entry__b).entry---shared-5-x123x */
-                            .a:is(.b):shared(x123x) {}
+            const { meta } = sheets['/entry.st.css'];
 
-                            /* 
-                                @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                    'shared'
-                                )} 
-                                @rule(match) .entry__a:is(.entry__x):shared(x123x)
-                            */
-                            .a:is(.x):shared(x123x) {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
+            const ruleWithComment = meta.targetAst?.nodes[7] as postcss.Rule;
+            expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
+                '.entry__x/**/:is(.entry__a, .entry__b):shared'
+            );
+        });
+        it('should infer complex states', () => {
+            testStylableCore({
+                'entry.st.css': `
+                        .a { -st-states: shared(string(contains(123))) }
+                        .b { -st-states: shared(string(contains(123))) }
+                        .cx { -st-states: shared(string(contains(456))) }
+
+                        /* @rule(match) .entry__a:is(.entry__b).entry---shared-5-x123x */
+                        .a:is(.b):shared(x123x) {}
+
+                        /* 
+                            @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                                'shared'
+                            )} 
+                            @rule(match) .entry__a:is(.entry__x):shared(x123x)
+                        */
+                        .a:is(.x):shared(x123x) {}
+                `,
             });
-            it('should infer identical global states', () => {
-                const { sheets } = testStylableCore(
-                    {
-                        'a.st.css': `
-                            .root {
-                                -st-states: 
-                                    same('[shared]'),
-                                    sameWithParam('[$0]', enum(one, two));
-                            }
-                        `,
-                        'b.st.css': `
-                            .root {
-                                -st-states: 
-                                    same('[shared]'),
-                                    sameWithParam('[$0]', enum(one, two));
-                            }
-                        `,
-                        'entry.st.css': `
-                            @st-import A from './a.st.css';
-                            @st-import B from './b.st.css';
-
-                            /* @rule(global template) .entry__root :is(.a__root, .b__root)[shared] */
-                            .root :is(A, B):same {}
-
-                            /* @rule(global template+param) .entry__root :is(.a__root, .b__root)[two] */
-                            .root :is(A, B):sameWithParam(two) {}
+        });
+        it('should infer identical global states', () => {
+            const { sheets } = testStylableCore({
+                'a.st.css': `
+                        .root {
+                            -st-states: 
+                                same('[shared]'),
+                                sameWithParam('[$0]', enum(one, two));
+                        }
                     `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
-                    }
-                );
+                'b.st.css': `
+                        .root {
+                            -st-states: 
+                                same('[shared]'),
+                                sameWithParam('[$0]', enum(one, two));
+                        }
+                    `,
+                'entry.st.css': `
+                        @st-import A from './a.st.css';
+                        @st-import B from './b.st.css';
 
-                const { meta } = sheets['/entry.st.css'];
+                        /* @rule(global template) .entry__root :is(.a__root, .b__root)[shared] */
+                        .root :is(A, B):same {}
 
-                shouldReportNoDiagnostics(meta);
+                        /* @rule(global template+param) .entry__root :is(.a__root, .b__root)[two] */
+                        .root :is(A, B):sameWithParam(two) {}
+                `,
             });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
         });
     });
     describe(`st-var`, () => {
@@ -911,99 +881,83 @@ describe('features/css-pseudo-class', () => {
         });
     });
     describe('st-custom-selector', () => {
-        describe('experimentalSelectorInference', () => {
-            it('should transform shared state', () => {
-                const { sheets } = testStylableCore(
-                    {
-                        'base.st.css': `
-                        .root {
-                            -st-states: shared;
-                        }
-                        .x { -st-extends: root; }
-                        .y { -st-extends: root; }
-                        @custom-selector :--innerMulti .x, .y;
-                    `,
-                        'a.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                    `,
-                        'b.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { -st-extends: Base }
-                    `,
-                        'entry.st.css': `
-                            @st-import A from './a.st.css';
-                            @st-import B from './b.st.css';
-                            @custom-selector :--multi A, B;
-                
-                            /* @rule(shared) .entry__root .a__root.base--shared,.entry__root .b__root.base--shared */
-                            .root::multi:shared {}
-
-                            /* @rule(2 levels) .entry__root .a__root .base__x.base--shared,.entry__root .b__root .base__x.base--shared,.entry__root .a__root .base__y.base--shared,.entry__root .b__root .base__y.base--shared */
-                            .root::multi::innerMulti:shared {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
+        it('should transform shared state', () => {
+            const { sheets } = testStylableCore({
+                'base.st.css': `
+                    .root {
+                        -st-states: shared;
                     }
-                );
+                    .x { -st-extends: root; }
+                    .y { -st-extends: root; }
+                    @custom-selector :--innerMulti .x, .y;
+                `,
+                'a.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                'b.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { -st-extends: Base }
+                `,
+                'entry.st.css': `
+                    @st-import A from './a.st.css';
+                    @st-import B from './b.st.css';
+                    @custom-selector :--multi A, B;
+        
+                    /* @rule(shared) .entry__root .a__root.base--shared,.entry__root .b__root.base--shared */
+                    .root::multi:shared {}
 
-                const { meta } = sheets['/entry.st.css'];
-
-                shouldReportNoDiagnostics(meta);
+                    /* @rule(2 levels) .entry__root .a__root .base__x.base--shared,.entry__root .b__root .base__x.base--shared,.entry__root .a__root .base__y.base--shared,.entry__root .b__root .base__y.base--shared */
+                    .root::multi::innerMulti:shared {}
+                `,
             });
-            it('should filter out states that do not exist or match', () => {
-                testStylableCore(
-                    {
-                        'base.st.css': `
-                        .root {
-                            -st-states: shared;
-                        }
-                    `,
-                        'a.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { 
-                            -st-extends: Base;
-                            -st-states: unique, onlyInA;
-                        }
-                    `,
-                        'b.st.css': `
-                        @st-import Base from './base.st.css';
-                        .root { 
-                            -st-extends: Base;
-                            -st-states: unique;
-                        }
-                    `,
-                        'entry.st.css': `
-                            @st-import A from './a.st.css';
-                            @st-import B from './b.st.css';
-                            @custom-selector :--multi A, B;
-                
-                            /* 
-                                @transform-error(unique) word(unique) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                    'unique'
-                                )} 
-                                @rule(unique) .entry__root .a__root:unique,.entry__root .b__root:unique 
-                            */
-                            .root::multi:unique {}
 
-                            /* 
-                                @transform-error(only in 1) word(onlyInA) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                    'onlyInA'
-                                )} 
-                                @rule(only in 1) .entry__root .a__root:onlyInA,.entry__root .b__root:onlyInA 
-                            */
-                            .root::multi:onlyInA {}
-                    `,
-                    },
-                    {
-                        stylableConfig: {
-                            experimentalSelectorInference: true,
-                        },
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should filter out states that do not exist or match', () => {
+            testStylableCore({
+                'base.st.css': `
+                    .root {
+                        -st-states: shared;
                     }
-                );
+                `,
+                'a.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { 
+                        -st-extends: Base;
+                        -st-states: unique, onlyInA;
+                    }
+                `,
+                'b.st.css': `
+                    @st-import Base from './base.st.css';
+                    .root { 
+                        -st-extends: Base;
+                        -st-states: unique;
+                    }
+                `,
+                'entry.st.css': `
+                    @st-import A from './a.st.css';
+                    @st-import B from './b.st.css';
+                    @custom-selector :--multi A, B;
+        
+                    /* 
+                        @transform-error(unique) word(unique) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                            'unique'
+                        )} 
+                        @rule(unique) .entry__root .a__root:unique,.entry__root .b__root:unique 
+                    */
+                    .root::multi:unique {}
+
+                    /* 
+                        @transform-error(only in 1) word(onlyInA) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
+                            'onlyInA'
+                        )} 
+                        @rule(only in 1) .entry__root .a__root:onlyInA,.entry__root .b__root:onlyInA 
+                    */
+                    .root::multi:onlyInA {}
+                `,
             });
         });
     });

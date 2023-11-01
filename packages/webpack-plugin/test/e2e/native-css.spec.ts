@@ -60,10 +60,10 @@ describe(`(${project})`, () => {
         expect(customResolveColor, 'custom resolve import prop').to.eql('rgb(128, 0, 128)');
 
         expect(styleElements).to.eql([
-            { id: './node_modules/test-components/lib.css', depth: '0' },
-            { id: './src/local.css', depth: '0' },
-            { id: './src/custom-resolved.css', depth: '0' },
-            { id: './src/index.st.css', depth: '1' },
+            { id: './node_modules/test-components/lib.css', depth: '1' },
+            { id: './src/local.css', depth: '1' },
+            { id: './src/custom-resolved.css', depth: '1' },
+            { id: './src/index.st.css', depth: '2' },
         ]);
     });
 });

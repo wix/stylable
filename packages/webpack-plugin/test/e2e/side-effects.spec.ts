@@ -28,12 +28,12 @@ describe(`(${project})`, () => {
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
 
         expect(styleElements).to.eql([
-            { id: './src/native.css', depth: '0' } /* ToDo: should probably have depth 1 */,
             { id: './src/global-selector.st.css', depth: '1' },
             { id: './src/global-keyframes.st.css', depth: '1' },
             { id: './src/global-layer.st.css', depth: '1' },
             { id: './src/global-custom-property.st.css', depth: '1' },
             // { id: './src/circular.st.css', depth: '2' },
+            { id: './src/native.css', depth: '1' },
             // { id: './src/no-side-effects-proxy.st.css', depth: '3' },
             { id: './src/index.st.css', depth: '4' },
         ]);
