@@ -404,7 +404,7 @@ describe('build stand alone', () => {
                 .root {}
             `,
             '/node_modules/@stylable/runtime/dist/index.js': `// runtime cjs`,
-            '/node_modules/@stylable/runtime/esm/index.js': `// runtime esm`,
+            '/node_modules/@stylable/runtime/dist/index.mjs': `// runtime esm`,
         });
 
         const stylable = new Stylable({
@@ -495,10 +495,10 @@ describe('build stand alone', () => {
         const builtFileEsm = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
 
         expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
-            `"@stylable/runtime/dist/index.js"`
+            `"@stylable/runtime"`
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
-            `"@stylable/runtime/dist/index.mjs"`
+            `"@stylable/runtime"`
         );
     });
 

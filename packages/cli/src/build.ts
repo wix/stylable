@@ -40,8 +40,8 @@ export async function build(
         diagnostics,
         diagnosticsMode,
         inlineRuntime,
-        runtimeCjsRequest = '@stylable/runtime/dist/index.js',
-        runtimeEsmRequest = '@stylable/runtime/dist/index.mjs',
+        runtimeCjsRequest = '@stylable/runtime',
+        runtimeEsmRequest = '@stylable/runtime',
     }: BuildOptions,
     {
         projectRoot: _projectRoot,
@@ -456,7 +456,7 @@ function copyRuntime(
         }
         if (esm) {
             fs.ensureDirectorySync(fullOutDir);
-            runtimeEsmOutPath = fs.join(fullOutDir, 'stylable-esm-runtime.js');
+            runtimeEsmOutPath = fs.join(fullOutDir, 'stylable-esm-runtime.mjs');
             fs.writeFileSync(runtimeEsmOutPath, fs.readFileSync(runtimeEsmPath, 'utf8'));
         }
     }

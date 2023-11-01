@@ -11,7 +11,7 @@ module.exports = {
     // mode: 'production',
     context: __dirname,
     devtool: 'source-map',
-    plugins: [new StylableWebpackPlugin({ useWeakDeps: true }), new HtmlWebpackPlugin()],
+    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin()],
     optimization: {
         splitChunks: {
             chunks: 'all',
