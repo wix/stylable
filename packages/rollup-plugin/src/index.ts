@@ -1,7 +1,7 @@
 import type { Plugin } from 'rollup';
 import fs from '@file-services/node';
 import { join, parse } from 'path';
-import { Stylable, StylableConfig } from '@stylable/core';
+import { Stylable, StylableConfig, generateStylableJSModuleSource } from '@stylable/core';
 import {
     emitDiagnostics,
     DiagnosticsMode,
@@ -17,12 +17,7 @@ import {
 import { packageJsonLookupCache, resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import decache from 'decache';
-import {
-    emitAssets,
-    generateCssString,
-    generateStylableModuleCode,
-    getDefaultMode,
-} from './plugin-utils';
+import { emitAssets, generateCssString, getDefaultMode } from './plugin-utils';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
 export interface StylableRollupPluginOptions {
@@ -190,18 +185,20 @@ export function stylableRollupPlugin({
             const { meta, exports } = stylable.transform(stylable.analyze(path, source));
             const assetsIds = emitAssets(this, stylable, meta, emittedAssets, inlineAssets);
             const css = generateCssString(meta, minify, stylable, assetsIds);
-            const moduleImports: string[] = [];
+            const moduleImports: { from: string }[] = [];
 
             if (includeGlobalSideEffects) {
                 // new mode that collect deep side effects
                 collectImportsWithSideEffects(stylable, meta, (_contextMeta, absPath, isUsed) => {
                     if (isUsed) {
                         if (!absPath.endsWith(ST_CSS)) {
-                            moduleImports.push(
-                                `import ${JSON.stringify(absPath + LOADABLE_CSS_QUERY)};`
-                            );
+                            moduleImports.push({
+                                from: absPath + LOADABLE_CSS_QUERY,
+                            });
                         } else {
-                            moduleImports.push(`import ${JSON.stringify(absPath)};`);
+                            moduleImports.push({
+                                from: absPath,
+                            });
                         }
                     }
                 });
@@ -220,11 +217,13 @@ export function stylableRollupPlugin({
                     }
                     // include Stylable and native css files that have effects on other files as regular imports
                     if (resolved.endsWith('.css') && !resolved.endsWith(ST_CSS)) {
-                        moduleImports.push(
-                            `import ${JSON.stringify(resolved + LOADABLE_CSS_QUERY)};`
-                        );
+                        moduleImports.push({
+                            from: resolved + LOADABLE_CSS_QUERY,
+                        });
                     } else if (hasImportedSideEffects(stylable, meta, imported)) {
-                        moduleImports.push(`import ${JSON.stringify(imported.request)};`);
+                        moduleImports.push({
+                            from: imported.request,
+                        });
                     }
                 }
             }
@@ -249,8 +248,16 @@ export function stylableRollupPlugin({
                 );
             }
 
+            const code = generateStylableJSModuleSource({
+                jsExports: exports,
+                moduleType: 'esm',
+                namespace: meta.namespace,
+                varType: 'var',
+                imports: moduleImports,
+            });
+
             return {
-                code: generateStylableModuleCode(meta, exports, moduleImports),
+                code,
                 map: { mappings: '' },
             };
         },

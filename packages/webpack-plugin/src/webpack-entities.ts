@@ -1,12 +1,10 @@
 import type {
     Compiler,
-    Compilation,
     Module,
     ModuleGraph,
     NormalModule,
     ChunkGraph,
     sources,
-    RuntimeModule,
     Dependency,
     dependencies,
 } from 'webpack';
@@ -17,11 +15,9 @@ import type {
     StringSortableSet,
     StylableBuildMeta,
 } from './types';
-import { stylesheet } from '@stylable/runtime';
-import { injectStyles } from '@stylable/runtime/dist/index-internal';
 
 import { getStylableBuildData, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
-import { getReplacementToken } from './loader-utils';
+import { getReplacementTokenJSON as rtJSON } from './loader-utils';
 
 const entitiesCache = new WeakMap<Compiler['webpack'], StylableWebpackEntities>();
 
@@ -35,7 +31,7 @@ export interface DependencyTemplateContext {
     dependencyTemplates: DependencyTemplates;
 }
 
-type DependencyTemplate = InstanceType<(typeof dependencies.ModuleDependency)['Template']>;
+type DependencyTemplate = InstanceType<typeof dependencies.ModuleDependency['Template']>;
 
 interface InjectDependencyTemplate {
     new (
@@ -53,14 +49,12 @@ interface StylableRuntimeDependency {
 }
 
 export interface StylableWebpackEntities {
-    injectRuntimeModules: (name: string, compilation: Compilation) => void;
-    StylableRuntimeInject: typeof RuntimeModule;
     InjectDependencyTemplate: InjectDependencyTemplate;
     StylableRuntimeDependency: StylableRuntimeDependency;
-    StylableRuntimeStylesheet: typeof RuntimeModule;
     CSSURLDependency: typeof dependencies.ModuleDependency;
     NoopTemplate: typeof dependencies.ModuleDependency.Template;
     UnusedDependency: typeof dependencies.HarmonyImportDependency;
+    ModuleDependency: typeof dependencies.ModuleDependency;
 }
 
 export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpackEntities {
@@ -68,10 +62,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
         dependencies: { ModuleDependency, HarmonyImportDependency },
         Dependency,
         NormalModule,
-        RuntimeModule,
-        RuntimeGlobals,
     } = webpack;
-
     let entities = entitiesCache.get(webpack);
     if (entities) {
         return entities;
@@ -102,15 +93,6 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
         }
     }
 
-    class StylableRuntimeStylesheet extends RuntimeModule {
-        constructor() {
-            super('stylable stylesheet', RuntimeModule.STAGE_NORMAL);
-        }
-        generate() {
-            return `(${stylesheet})(__webpack_require__)`;
-        }
-    }
-
     class StylableRuntimeDependency extends Dependency {
         constructor(private stylableBuildMeta: StylableBuildMeta) {
             super();
@@ -138,7 +120,6 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
             source: sources.ReplaceSource,
             {
                 module,
-                runtimeRequirements,
                 runtimeTemplate,
                 moduleGraph,
                 runtime,
@@ -146,15 +127,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
                 dependencyTemplates,
             }: DependencyTemplateContext
         ) {
-            /**
-             * NOTICE: replace assumes changes are done from bottom->top
-             * replace out of order might cause issues!
-             * the order is coupled with "loader.ts".
-             */
             const stylableBuildData = getStylableBuildData(this.stylableModules, module);
             if (!stylableBuildData.isUsed) {
                 return;
             }
+            const { exports, namespace, depth } = stylableBuildData;
             if (this.cssInjection === 'js') {
                 const css = replaceMappedCSSAssetPlaceholders({
                     assetsModules: this.assetsModules,
@@ -178,121 +155,22 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
                         ? JSON.stringify(
                               runtimeTemplate.requestShortener.contextify(module.resource)
                           )
-                        : 'namespace';
+                        : JSON.stringify(namespace);
 
-                replacePlaceholder(
-                    source,
-                    '/* JS_INJECT */',
-                    `__webpack_require__.sti(${id}, ${JSON.stringify(css)}, ${
-                        stylableBuildData.depth
-                    }, ${JSON.stringify(this.runtimeId)});`
-                );
-                runtimeRequirements.add(StylableRuntimeInject.name);
+                replacePlaceholder(source, rtJSON('id'), id);
+                replacePlaceholder(source, rtJSON('css'), JSON.stringify(css));
+                replacePlaceholder(source, rtJSON('depth'), String(depth));
+                replacePlaceholder(source, rtJSON('runtimeId'), JSON.stringify(this.runtimeId));
             }
 
-            const usedExports = moduleGraph.getUsedExports(module, runtime);
-            if (typeof usedExports === 'boolean') {
-                if (usedExports) {
-                    runtimeRequirements.add(StylableRuntimeStylesheet.name);
-                }
-            } else if (!usedExports) {
-                runtimeRequirements.add(StylableRuntimeStylesheet.name);
-            } else if (
-                usedExports.has('st') ||
-                usedExports.has('style') ||
-                usedExports.has('cssStates')
-            ) {
-                runtimeRequirements.add(StylableRuntimeStylesheet.name);
-            }
-
-            if (runtimeRequirements.has(StylableRuntimeStylesheet.name)) {
-                /* st */
-                replacePlaceholder(source, getReplacementToken('st'), `/*#__PURE__*/ style`);
-                /* style */
-                replacePlaceholder(
-                    source,
-                    getReplacementToken('sts'),
-                    `/*#__PURE__*/ __webpack_require__.sts.bind(null, namespace)`
-                );
-                /* cssStates */
-                replacePlaceholder(
-                    source,
-                    getReplacementToken('stc'),
-                    `/*#__PURE__*/ __webpack_require__.stc.bind(null, namespace)`
-                );
-            }
-
-            replacePlaceholder(
-                source,
-                getReplacementToken('vars'),
-                JSON.stringify(stylableBuildData.exports.vars)
-            );
-            replacePlaceholder(
-                source,
-                getReplacementToken('stVars'),
-                JSON.stringify(stylableBuildData.exports.stVars)
-            );
-            replacePlaceholder(
-                source,
-                getReplacementToken('containers'),
-                JSON.stringify(stylableBuildData.exports.containers)
-            );
-            replacePlaceholder(
-                source,
-                getReplacementToken('layers'),
-                JSON.stringify(stylableBuildData.exports.layers)
-            );
-            replacePlaceholder(
-                source,
-                getReplacementToken('keyframes'),
-                JSON.stringify(stylableBuildData.exports.keyframes)
-            );
-            replacePlaceholder(
-                source,
-                getReplacementToken('classes'),
-                JSON.stringify(stylableBuildData.exports.classes)
-            );
-            replacePlaceholder(
-                source,
-                getReplacementToken('namespace'),
-                JSON.stringify(stylableBuildData.namespace)
-            );
+            replacePlaceholder(source, rtJSON('containers'), JSON.stringify(exports.containers));
+            replacePlaceholder(source, rtJSON('vars'), JSON.stringify(exports.vars));
+            replacePlaceholder(source, rtJSON('stVars'), JSON.stringify(exports.stVars));
+            replacePlaceholder(source, rtJSON('layers'), JSON.stringify(exports.layers));
+            replacePlaceholder(source, rtJSON('keyframes'), JSON.stringify(exports.keyframes));
+            replacePlaceholder(source, rtJSON('classes'), JSON.stringify(exports.classes));
+            replacePlaceholder(source, rtJSON('namespace'), JSON.stringify(namespace));
         }
-    }
-
-    class StylableRuntimeInject extends RuntimeModule {
-        constructor() {
-            super('stylable inject', RuntimeModule.STAGE_NORMAL);
-        }
-        generate() {
-            return `(${injectStyles})(__webpack_require__)`;
-        }
-    }
-
-    function injectRuntimeModules(name: string, compilation: Compilation) {
-        compilation.hooks.runtimeRequirementInModule
-            .for(StylableRuntimeInject.name)
-            .tap(name, (_module, set) => {
-                set.add(RuntimeGlobals.require);
-            });
-
-        compilation.hooks.runtimeRequirementInModule
-            .for(StylableRuntimeStylesheet.name)
-            .tap(name, (_module, set) => {
-                set.add(RuntimeGlobals.require);
-            });
-
-        compilation.hooks.runtimeRequirementInTree
-            .for(StylableRuntimeInject.name)
-            .tap(name, (chunk, _set) => {
-                compilation.addRuntimeModule(chunk, new StylableRuntimeInject());
-            });
-
-        compilation.hooks.runtimeRequirementInTree
-            .for(StylableRuntimeStylesheet.name)
-            .tap(name, (chunk, _set) => {
-                compilation.addRuntimeModule(chunk, new StylableRuntimeStylesheet());
-            });
     }
 
     registerSerialization(
@@ -302,22 +180,16 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
     );
 
     /* The request is empty for both dependencies and it will be overridden by the de-serialization process */
-    registerSerialization(
-        webpack,
-        UnusedDependency,
-        () => ['', 0, undefined] as [string, number, undefined]
-    );
+    registerSerialization(webpack, UnusedDependency, () => ['', 0 , undefined] as ['', 0 , undefined]);
     registerSerialization(webpack, CSSURLDependency, () => [''] as [string]);
 
     entities = {
-        injectRuntimeModules,
-        StylableRuntimeInject,
         InjectDependencyTemplate,
         StylableRuntimeDependency,
-        StylableRuntimeStylesheet,
         CSSURLDependency,
         NoopTemplate,
         UnusedDependency,
+        ModuleDependency,
     };
 
     entitiesCache.set(webpack, entities);
@@ -330,7 +202,10 @@ function replacePlaceholder(
     replacementPoint: string,
     value: string
 ) {
-    const i = source.source().indexOf(replacementPoint);
+    // we calculate the replacement from the original source. this way order does not matter 
+    const t: any = source.original();
+    const t1 = t.source ? t.source() : String(t);
+    const i = t1.indexOf(replacementPoint);
     if (!i) {
         throw new Error(`missing ${replacementPoint} from stylable loader source`);
     }

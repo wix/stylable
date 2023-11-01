@@ -7,6 +7,10 @@ import {
 import { LOADER_NAME } from './plugin-utils';
 import { isAbsolute, join } from 'path';
 
+export function getReplacementTokenJSON(token: string) {
+    return JSON.stringify(getReplacementToken(token));
+}
+
 export function getReplacementToken(token: string) {
     return `/* INJECT */ {__${token}__:true}`;
 }

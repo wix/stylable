@@ -25,9 +25,8 @@ export function evalStylableModule<T = unknown>(source: string, fullPath: string
     return evalModule(fullPath, source, (id) => {
         if (
             id === '@stylable/runtime' ||
-            id === '@stylable/runtime/dist/runtime' ||
-            id === '@stylable/runtime/dist/runtime.js' ||
-            id === '@stylable/runtime/dist/pure.js'
+            id === '@stylable/runtime/dist/index.js' ||
+            id === '@stylable/runtime/dist/index.mjs'
         ) {
             return runtime;
         }

@@ -404,7 +404,7 @@ describe('build stand alone', () => {
                 .root {}
             `,
             '/node_modules/@stylable/runtime/dist/index.js': `// runtime cjs`,
-            '/node_modules/@stylable/runtime/esm/index.js': `// runtime esm`,
+            '/node_modules/@stylable/runtime/dist/index.mjs': `// runtime esm`,
         });
 
         const stylable = new Stylable({
@@ -423,7 +423,7 @@ describe('build stand alone', () => {
                 esm: true,
                 inlineRuntime: true,
                 runtimeCjsRequest: '/node_modules/@stylable/runtime/dist/index.js',
-                runtimeEsmRequest: '/node_modules/@stylable/runtime/esm/index.js',
+                runtimeEsmRequest: '/node_modules/@stylable/runtime/dist/index.mjs',
             },
             {
                 fs,
@@ -440,18 +440,18 @@ describe('build stand alone', () => {
 
         // this makes sure that we actually copied the runtime
         const runtimeCjs = fs.readFileSync('/dist/stylable-cjs-runtime.js', 'utf8');
-        const runtimeMjs = fs.readFileSync('/dist/stylable-esm-runtime.js', 'utf8');
+        const runtimeMjs = fs.readFileSync('/dist/stylable-esm-runtime.mjs', 'utf8');
 
         expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
             `./stylable-cjs-runtime.js`
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
-            `./stylable-esm-runtime.js`
+            `./stylable-esm-runtime.mjs`
         );
         expect(
             innerPathBuiltFileEsm,
             'imports the esm runtime with full extension with relative path'
-        ).to.contain(`./../stylable-esm-runtime.js`);
+        ).to.contain(`./../stylable-esm-runtime.mjs`);
         expect(runtimeCjs).to.eql(`// runtime cjs`);
         expect(runtimeMjs).to.eql(`// runtime esm`);
     });
@@ -495,10 +495,10 @@ describe('build stand alone', () => {
         const builtFileEsm = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
 
         expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
-            `"@stylable/runtime/dist/pure.js"`
+            `"@stylable/runtime"`
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
-            `"@stylable/runtime/esm/pure.js"`
+            `"@stylable/runtime"`
         );
     });
 

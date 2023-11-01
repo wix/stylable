@@ -41,6 +41,6 @@ describe(`(${project})`, () => {
             ],
             'Gallery'
         );
-        expect(chunkByName.main).to.eql(['src/index.js'], 'main');
+        expect(chunkByName.main).to.eql(['src/index.js', 'dist/index.mjs'], 'main');
     });
 });
