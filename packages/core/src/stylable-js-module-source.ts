@@ -124,13 +124,7 @@ function runtimeImport(
     injectOptions: InjectCSSOptions | undefined
 ) {
     const importInjectCSS = injectOptions?.css ? `, injectCSS` : '';
-    const request = JSON.stringify(
-        runtimeRequest ??
-            // TODO: we use direct requests here since we don't know how this will be resolved
-            (moduleType === 'esm'
-                ? '@stylable/runtime/dist/index.mjs'
-                : '@stylable/runtime/dist/index.js')
-    );
+    const request = JSON.stringify(runtimeRequest ?? '@stylable/runtime');
     return moduleType === 'esm'
         ? `import { classesRuntime, statesRuntime${importInjectCSS} } from ${request};`
         : `const { classesRuntime, statesRuntime${importInjectCSS} } = require(${request});`;

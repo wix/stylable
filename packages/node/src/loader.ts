@@ -26,10 +26,6 @@ async function initiateModuleFactory() {
         },
         {
             moduleType: 'esm',
-            // point to cjs - the esm runtime isn't published with mjs
-            // and causes issues. currently it's problematic for direct esm
-            // usage and only works for bundlers.
-            runtimePath: '@stylable/runtime',
         }
     );
 }
