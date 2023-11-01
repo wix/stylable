@@ -26,7 +26,7 @@ describe('css-runtime-renderer', () => {
 
         expect(document.head.stylableIds()).to.equal('test');
     });
-    it('inset two in same depth', () => {
+    it('insert two in same depth', () => {
         const document = new MicroDocument();
 
         testInjectCSS(document, 'test-1', '* { --pos: 1; }', 0, 'test');
