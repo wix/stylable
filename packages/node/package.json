@@ -1,6 +1,6 @@
 {
   "name": "@stylable/node",
-  "version": "5.16.0",
+  "version": "6.0.0-rc.1",
   "description": "Integrate Stylable into your node application",
   "main": "dist/index.js",
   "scripts": {

@@ -1,6 +1,6 @@
 {
   "name": "@stylable/schema-extract",
-  "version": "5.16.0",
+  "version": "6.0.0-rc.1",
   "description": "A utility for extracting JSON schema objects from a Stylable stylesheet",
   "main": "dist/index.js",
   "scripts": {

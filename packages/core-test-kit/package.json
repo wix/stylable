@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core-test-kit",
-  "version": "5.16.0",
+  "version": "6.0.0-rc.1",
   "description": "Stylable core test-kit",
   "main": "dist/index.js",
   "scripts": {

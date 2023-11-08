@@ -1,6 +1,6 @@
 {
   "name": "@stylable/e2e-test-kit",
-  "version": "5.16.0",
+  "version": "6.0.0-rc.1",
   "description": "A collection of tools to help test Stylable components and applications from end-to-end",
   "main": "dist/index.js",
   "peerDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-stylable",
-  "version": "5.16.0",
+  "version": "6.0.0-rc.1",
   "description": "eslint plugin for Stylable usages",
   "main": "dist/index.js",
   "scripts": {

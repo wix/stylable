@@ -1,6 +1,6 @@
 {
   "name": "@stylable/custom-value",
-  "version": "5.16.0",
+  "version": "6.0.0-rc.1",
   "description": "Custom values (variables) for Stylable",
   "main": "dist/index.js",
   "scripts": {
