@@ -1,6 +1,6 @@
 {
   "name": "@stylable/jest",
-  "version": "6.0.0-rc.1",
+  "version": "6.0.0-rc.2",
   "description": "Test your Stylable React components using Jest",
   "main": "dist/index.js",
   "scripts": {
@@ -8,10 +8,10 @@
   },
   "dependencies": {
     "@file-services/node": "^8.3.2",
-    "@stylable/core": "^5.16.0",
-    "@stylable/module-utils": "^5.16.0",
-    "@stylable/node": "^5.16.0",
-    "@stylable/runtime": "^5.16.0"
+    "@stylable/core": "^6.0.0-rc.2",
+    "@stylable/module-utils": "^6.0.0-rc.2",
+    "@stylable/node": "^6.0.0-rc.2",
+    "@stylable/runtime": "^6.0.0-rc.2"
   },
   "files": [
     "dist",
