@@ -7,7 +7,7 @@
     "test": "mocha \"dist/test/**/*.spec.js\" --timeout 5000"
   },
   "dependencies": {
-    "@file-services/node": "^8.3.2",
+    "@file-services/node": "^8.3.3",
     "@stylable/core": "^5.16.0",
     "@typescript-eslint/utils": "^5.61.0"
   },
