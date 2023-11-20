@@ -156,6 +156,70 @@ describe('Stylable Cli', function () {
         ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
     });
 
+    it('should use the default to stylable.config resolveNamespace', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'stylable.config.js': `
+                let c = 0;
+                module.exports = {
+                    defaultConfig(fs) {
+                        return {
+                            resolveNamespace: () => 'config-ns-' + c++
+                        };
+                    },
+                };
+              
+            `,
+            'style.st.css': `.root{color:red}`,
+        });
+
+        runCliSync(['--rootDir', tempDir.path, '--cjs']);
+
+        const dirContent = loadDirSync(tempDir.path);
+
+        expect(
+            evalStylableModule<{ namespace: string }>(
+                dirContent['style.st.css.js'],
+                'style.st.css.js'
+            ).namespace
+        ).equal('config-ns-0');
+    });
+
+    it('should use explicit namespaceResolver argument over stylable.config resolveNamespace', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'stylable.config.js': `
+                let c = 0;
+                module.exports = {
+                    defaultConfig(fs) {
+                        return {
+                            resolveNamespace: () => 'config-ns-' + c++
+                        };
+                    },
+                };
+              
+            `,
+            'custom-ns-resolver.js': `
+                let c = 0;
+                module.exports.resolveNamespace = function resolveNamespace() {
+                    return 'custom-ns-' + c++;
+                }
+            `,
+            'style.st.css': `.root{color:red}`,
+        });
+
+        runCliSync(['--rootDir', tempDir.path, '--nsr', './custom-ns-resolver.js', '--cjs']);
+
+        const dirContent = loadDirSync(tempDir.path);
+
+        expect(
+            evalStylableModule<{ namespace: string }>(
+                dirContent['style.st.css.js'],
+                'style.st.css.js'
+            ).namespace
+        ).equal('custom-ns-0');
+    });
+
     it('build .st.css source files with namespace reference', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
