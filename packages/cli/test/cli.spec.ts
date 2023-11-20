@@ -9,6 +9,7 @@ import {
     createTempDirectory,
     ITempDirectory,
 } from '@stylable/e2e-test-kit';
+import { nodeFs } from '@file-services/node';
 import { STImport, STVar } from '@stylable/core/dist/features';
 import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
 
@@ -137,87 +138,72 @@ describe('Stylable Cli', function () {
         ]);
     });
 
-    it('single file build with default ns-resolver', () => {
+    it('should resolve resolveNamespace with defaults:  cli-arg -> stylable.config -> default', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `.root{color:red}`,
         });
 
-        const nsr = require.resolve('@stylable/node');
-        runCliSync(['--rootDir', tempDir.path, '--nsr', nsr, '--cjs']);
+        {
+            // default
+            runCliSync(['--rootDir', tempDir.path, '--cjs']);
 
-        const dirContent = loadDirSync(tempDir.path);
+            expect(
+                evalStylableModule<{ namespace: string }>(
+                    loadDirSync(tempDir.path)['style.st.css.js'],
+                    'style.st.css.js'
+                ).namespace,
+                'default'
+            ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
+        }
+        {
+            // stylable.config
+            nodeFs.writeFileSync(
+                join(tempDir.path, 'stylable.config.js'),
+                `
+                    let c = 0;
+                    module.exports = {
+                        defaultConfig(fs) {
+                            return {
+                                resolveNamespace: () => 'config-ns-' + c++
+                            };
+                        },
+                    };
+                `
+            );
 
-        expect(
-            evalStylableModule<{ namespace: string }>(
-                dirContent['style.st.css.js'],
-                'style.st.css.js'
-            ).namespace
-        ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
-    });
+            runCliSync(['--rootDir', tempDir.path, '--cjs']);
 
-    it('should use the default to stylable.config resolveNamespace', () => {
-        populateDirectorySync(tempDir.path, {
-            'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'stylable.config.js': `
-                let c = 0;
-                module.exports = {
-                    defaultConfig(fs) {
-                        return {
-                            resolveNamespace: () => 'config-ns-' + c++
-                        };
-                    },
-                };
-              
-            `,
-            'style.st.css': `.root{color:red}`,
-        });
+            expect(
+                evalStylableModule<{ namespace: string }>(
+                    loadDirSync(tempDir.path)['style.st.css.js'],
+                    'style.st.css.js'
+                ).namespace,
+                'stylable.config'
+            ).equal('config-ns-0');
+        }
+        {
+            // cli argument
+            nodeFs.writeFileSync(
+                join(tempDir.path, 'custom-ns-resolver.js'),
+                `
+                    let c = 0;
+                    module.exports.resolveNamespace = function resolveNamespace() {
+                        return 'custom-ns-' + c++;
+                    }
+                `
+            );
 
-        runCliSync(['--rootDir', tempDir.path, '--cjs']);
+            runCliSync(['--rootDir', tempDir.path, '--nsr', './custom-ns-resolver.js', '--cjs']);
 
-        const dirContent = loadDirSync(tempDir.path);
-
-        expect(
-            evalStylableModule<{ namespace: string }>(
-                dirContent['style.st.css.js'],
-                'style.st.css.js'
-            ).namespace
-        ).equal('config-ns-0');
-    });
-
-    it('should use explicit namespaceResolver argument over stylable.config resolveNamespace', () => {
-        populateDirectorySync(tempDir.path, {
-            'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'stylable.config.js': `
-                let c = 0;
-                module.exports = {
-                    defaultConfig(fs) {
-                        return {
-                            resolveNamespace: () => 'config-ns-' + c++
-                        };
-                    },
-                };
-              
-            `,
-            'custom-ns-resolver.js': `
-                let c = 0;
-                module.exports.resolveNamespace = function resolveNamespace() {
-                    return 'custom-ns-' + c++;
-                }
-            `,
-            'style.st.css': `.root{color:red}`,
-        });
-
-        runCliSync(['--rootDir', tempDir.path, '--nsr', './custom-ns-resolver.js', '--cjs']);
-
-        const dirContent = loadDirSync(tempDir.path);
-
-        expect(
-            evalStylableModule<{ namespace: string }>(
-                dirContent['style.st.css.js'],
-                'style.st.css.js'
-            ).namespace
-        ).equal('custom-ns-0');
+            expect(
+                evalStylableModule<{ namespace: string }>(
+                    loadDirSync(tempDir.path)['style.st.css.js'],
+                    'style.st.css.js'
+                ).namespace,
+                'cli argument'
+            ).equal('custom-ns-0');
+        }
     });
 
     it('build .st.css source files with namespace reference', () => {
