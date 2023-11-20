@@ -13,6 +13,9 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
+    "./stylesheet": {
+      "types": "./stylesheet.d.ts"
+    },
     "./package.json": "./package.json",
     "./dist/index.js": "./dist/index.js",
     "./dist/index.mjs": "./dist/index.mjs"
