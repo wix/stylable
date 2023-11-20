@@ -197,17 +197,19 @@ export function scopeNestedSelector(
                 },
                 { ignoreList: [`selector`] }
             );
-            const parentRef = first.type === `nesting`;
-            const globalSelector = first.type === `pseudo_class` && first.value === `global`;
-            const startWithScoping = rootScopeLevel
-                ? scopeAst.nodes.every((node, i) => {
-                      return matchTypeAndValue(node, outputAst.nodes[i]);
-                  })
-                : false;
-            let nestedMixRoot = false;
+            // merge scope flags
+            const nestStartWithNesting = first.type === `nesting`;
+            const nestedStartWithGlobal = first.type === `pseudo_class` && first.value === `global`;
+            const nestStartWithScope =
+                rootScopeLevel &&
+                scopeAst.nodes.every((node, i) => {
+                    return matchTypeAndValue(node, outputAst.nodes[i]);
+                });
+            let scopeAlreadyMerged = false;
+            // merge scope into selector
             walkSelector(outputAst, (node, i, nodes) => {
                 if (isAnchor(node)) {
-                    nestedMixRoot = true;
+                    scopeAlreadyMerged = true;
                     nodes.splice(i, 1, {
                         type: `selector`,
                         nodes: cloneDeep(scopeAst.nodes as SelectorNode[]),
@@ -218,7 +220,14 @@ export function scopeNestedSelector(
                     });
                 }
             });
-            if (first && !parentRef && !startWithScoping && !globalSelector && !nestedMixRoot) {
+            // merge scope at the beginning of selector
+            if (
+                first &&
+                !nestStartWithNesting &&
+                !nestStartWithScope &&
+                !nestedStartWithGlobal &&
+                !scopeAlreadyMerged
+            ) {
                 outputAst.nodes.unshift(...cloneDeep(scopeAst.nodes as SelectorNode[]), {
                     type: `combinator`,
                     combinator: `space`,
