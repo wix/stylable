@@ -7,7 +7,6 @@ import {
     createBuildIdentifier,
     createDefaultOptions,
     hasStylableCSSOutput,
-    NAMESPACE_RESOLVER_MODULE_REQUEST,
 } from './config/resolve-options';
 import { DiagnosticsManager } from './diagnostics-manager';
 import { createDefaultLogger, levels } from './logger';
@@ -51,7 +50,7 @@ export async function buildStylable(
         }),
         outputFiles = new Map(),
         requireModule = require,
-        resolveNamespace = requireModule(NAMESPACE_RESOLVER_MODULE_REQUEST).resolveNamespace,
+        resolveNamespace,
         configFilePath,
         watchOptions = {},
     }: BuildStylableContext = {}
@@ -92,10 +91,13 @@ export async function buildStylable(
                 fileSystem,
                 requireModule,
                 projectRoot,
-                resolveNamespace,
                 resolverCache,
                 fileProcessorCache,
                 ...config?.defaultConfig,
+                resolveNamespace:
+                    resolveNamespace ||
+                    config?.defaultConfig?.resolveNamespace ||
+                    requireModule('@stylable/node').resolveNamespace,
             });
 
             const { service, generatedFiles } = await build(buildOptions, {

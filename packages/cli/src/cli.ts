@@ -16,9 +16,11 @@ async function main() {
         config,
     } = argv;
     const rootDir = resolve(argv.rootDir);
-    const { resolveNamespace } = require(require.resolve(namespaceResolver, {
-        paths: [rootDir],
-    }));
+    const explicitResolveNs =
+        namespaceResolver &&
+        require(require.resolve(namespaceResolver, {
+            paths: [rootDir],
+        }));
 
     //
     const log = createLogger(
@@ -42,7 +44,7 @@ async function main() {
         overrideBuildOptions,
         defaultOptions,
         fs,
-        resolveNamespace,
+        resolveNamespace: explicitResolveNs?.resolveNamespace,
         watch,
         log,
         configFilePath: config,
