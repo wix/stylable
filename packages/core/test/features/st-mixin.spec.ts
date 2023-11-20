@@ -1271,7 +1271,6 @@ describe(`features/st-mixin`, () => {
             shouldReportNoDiagnostics(meta);
         });
         it(`should append mixin rules`, () => {
-            // ToDo: fix ":global(.part)" to transform with mixin root
             const { sheets } = testStylableCore({
                 '/mixin.js': `
                     module.exports = function() {
@@ -1302,7 +1301,7 @@ describe(`features/st-mixin`, () => {
                         @rule[1] .entry__root Element { d: Capital element } 
                         @rule[2] .entry__root element { d: lowercase element } 
                         @rule[3] .entry__root .entry__part { d: class namespaced in context } 
-                        @rule[4] .part { d: global class } 
+                        @rule[4] .entry__root .part { d: global class } 
                         @rule[5] .entry__root .entry__x, .entry__root .entry__y { d: multiple selectors } 
                     */
                     .root {

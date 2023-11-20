@@ -199,7 +199,8 @@ export function scopeNestedSelector(
             );
             // merge scope flags
             const nestStartWithNesting = first.type === `nesting`;
-            const nestedStartWithGlobal = first.type === `pseudo_class` && first.value === `global`;
+            const nestedStartWithGlobal =
+                rootScopeLevel && first.type === `pseudo_class` && first.value === `global`;
             const nestStartWithScope =
                 rootScopeLevel &&
                 scopeAst.nodes.every((node, i) => {

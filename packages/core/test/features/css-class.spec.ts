@@ -3,6 +3,7 @@ import {
     testStylableCore,
     shouldReportNoDiagnostics,
     diagnosticBankReportToStrings,
+    deindent,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import type * as postcss from 'postcss';
@@ -1018,6 +1019,26 @@ describe(`features/css-class`, () => {
             const { meta } = sheets['/valid.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        it('should nest -st-global classes', () => {
+            const { sheets } = testStylableCore(`
+                .global {
+                    -st-global: "body";
+                }
+                @st-scope html {
+                    .global {}
+                }
+            `);
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                body {
+                }
+                html body {}
+            `)
+            );
         });
     });
     describe(`css-pseudo-element`, () => {
