@@ -102,7 +102,7 @@ export interface CliArguments {
     bundle: string | undefined;
     dtsSourceMap: boolean | undefined;
     useNamespaceReference: boolean | undefined;
-    namespaceResolver: string;
+    namespaceResolver?: string | undefined;
     injectCSSRequest: boolean | undefined;
     cssFilename: string | undefined;
     cssInJs: boolean | undefined;
