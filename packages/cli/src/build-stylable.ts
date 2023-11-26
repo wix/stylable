@@ -15,7 +15,7 @@ import { WatchHandler } from './watch-handler';
 
 export interface BuildStylableContext
     extends Partial<Pick<BuildContext, 'fs' | 'watch' | 'log'>>,
-        Partial<Pick<StylableConfig, 'resolveNamespace' | 'requireModule'>> {
+        Partial<Pick<StylableConfig, 'resolveNamespace' | 'requireModule' | 'resolveModule'>> {
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: StylableConfig['fileProcessorCache'];
     diagnosticsManager?: DiagnosticsManager;
@@ -51,6 +51,7 @@ export async function buildStylable(
         outputFiles = new Map(),
         requireModule = require,
         resolveNamespace,
+        resolveModule,
         configFilePath,
         watchOptions = {},
     }: BuildStylableContext = {}
@@ -94,6 +95,7 @@ export async function buildStylable(
                 resolverCache,
                 fileProcessorCache,
                 ...config?.defaultConfig,
+                resolveModule: resolveModule || config?.defaultConfig?.resolveModule,
                 resolveNamespace:
                     resolveNamespace ||
                     config?.defaultConfig?.resolveNamespace ||
