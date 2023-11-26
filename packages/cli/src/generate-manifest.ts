@@ -1,39 +1,53 @@
 import type { Stylable } from '@stylable/core';
-import { dirname, relative } from 'path';
 import { ensureDirectory, tryRun } from './build-tools';
 import type { Log } from './logger';
+import type { IFileSystem } from '@file-services/types';
+import { isAbsolute } from 'path';
 
 export function generateManifest(
-    rootDir: string,
+    remapPath: (absPath: string) => string,
     filesToBuild: Set<string>,
     manifestOutputPath: string,
     stylable: Stylable,
     mode: string,
     log: Log,
-    fs: any
+    fs: IFileSystem
 ) {
-    function getBuildNamespace(stylable: Stylable, filePath: string): string {
-        return stylable.fileProcessor.process(filePath).namespace;
+    function getExistingMeta(stylable: Stylable, filePath: string) {
+        // skip fs check since we should not introduce new files
+        return (
+            stylable.fileProcessor.cache[filePath]?.value ||
+            stylable.fileProcessor.process(filePath)
+        );
     }
-    const manifest = [...filesToBuild].reduce<{
+    const manifest: {
         namespaceMapping: {
             [key: string]: string;
         };
-    }>(
-        (manifest, filePath) => {
-            manifest.namespaceMapping[relative(rootDir, filePath)] = getBuildNamespace(
-                stylable,
-                filePath
-            );
-            return manifest;
-        },
-        {
-            namespaceMapping: {},
-        }
-    );
-    log(mode, 'creating manifest file: ');
+        cssDependencies: {
+            [key: string]: string[];
+        };
+    } = {
+        namespaceMapping: {},
+        cssDependencies: {},
+    };
+
+    for (const filePath of filesToBuild) {
+        const meta = getExistingMeta(stylable, filePath);
+
+        const relativePath = remapPath(filePath);
+        manifest.namespaceMapping[relativePath] = meta.namespace;
+        const shallowDeps = meta.getImportStatements().map(({ from }) => {
+            if (isAbsolute(from)) {
+                return remapPath(from);
+            }
+            return from;
+        });
+        manifest.cssDependencies[relativePath] = shallowDeps;
+    }
+    log(mode, `Creating manifest file at ${manifestOutputPath}`);
     tryRun(
-        () => ensureDirectory(dirname(manifestOutputPath), fs),
+        () => ensureDirectory(fs.dirname(manifestOutputPath), fs),
         `Ensure directory for manifest: ${manifestOutputPath}`
     );
     tryRun(

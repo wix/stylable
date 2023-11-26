@@ -139,10 +139,14 @@ export interface BuildOptions {
     cjs?: boolean;
     /** commonjs module extension */
     cjsExt?: '.cjs' | '.js';
+    /** cjs with inline css injection */
+    cjsCss?: boolean;
     /** output esm module (.mjs) */
     esm?: boolean;
     /** esm module extension */
     esmExt?: '.mjs' | '.js';
+    /** esm with inline css injection */
+    esmCss?: boolean;
     /** template of the css file emitted when using outputCSS */
     outputCSSNameTemplate?: string;
     /** should include the css in the generated JS module */
@@ -151,6 +155,8 @@ export interface BuildOptions {
     outputCSS?: boolean;
     /** should output source .st.css file to dist */
     outputSources?: boolean;
+    /** should copy assets to dist */
+    copyAssets?: boolean;
     /** should add namespace reference to the .st.css copy  */
     useNamespaceReference?: boolean;
     /** should inject css import in the JS module for the generated css from outputCSS */
@@ -196,4 +202,9 @@ export interface BuildContext {
     diagnosticsManager?: DiagnosticsManager;
 }
 
-export type ModuleFormats = Array<['esm', '.js' | '.mjs'] | ['cjs', '.js' | '.cjs']>;
+export type ModuleFormats = Array<
+    | ['esm', '.js' | '.mjs']
+    | ['esm+css', '.js' | '.mjs']
+    | ['cjs', '.js' | '.cjs']
+    | ['cjs+css', '.js' | '.cjs']
+>;

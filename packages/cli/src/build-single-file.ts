@@ -16,6 +16,7 @@ import type { CLIDiagnostic } from './report-diagnostics';
 import { errorMessages } from './messages';
 import type { ModuleFormats } from './types';
 import { fileToDataUri } from './file-to-data-uri';
+import type { Root } from 'postcss';
 
 export interface BuildCommonOptions {
     fullOutDir: string;
@@ -142,15 +143,21 @@ export function buildSingleFile({
         );
     }
     // st.css.js
-    const ast = includeCSSInJS
-        ? tryRun(
-              () => inlineAssetsForJsModule(res, stylable, fs),
-              `Inline assets failed for: ${filePath}`
-          )
-        : res.meta.targetAst!;
+    const hasCssInJsFormat = moduleFormats.find(
+        ([format]) => format === 'cjs+css' || format === 'esm+css'
+    );
+
+    let astForCssInJs: Root;
+    if (includeCSSInJS || hasCssInJsFormat) {
+        astForCssInJs = tryRun(
+            () => inlineAssetsForJsModule(res, stylable, fs),
+            `Inline assets failed for: ${filePath}`
+        );
+    }
 
     moduleFormats.forEach(([format, ext]) => {
         outputLogs.push(`${format} module`);
+        const { moduleType, injectCssInJs } = parseFormat(format);
 
         const moduleCssImports = collectImportsWithSideEffects(res, stylable, ext);
         const cssDepth = res.meta.transformCssDepth?.cssDepth ?? 1;
@@ -161,22 +168,22 @@ export function buildSingleFile({
         const code = generateStylableJSModuleSource(
             {
                 jsExports: res.exports,
-                moduleType: format,
+                moduleType,
                 namespace: res.meta.namespace,
                 varType: 'var',
                 imports: moduleCssImports,
-                runtimeRequest: resolveRuntimeRequest(targetFilePath, format),
+                runtimeRequest: resolveRuntimeRequest(targetFilePath, moduleType),
             },
-            includeCSSInJS
+            includeCSSInJS || injectCssInJs
                 ? {
-                      css: ast.toString(),
+                      css: astForCssInJs.toString(),
                       depth: cssDepth,
                       id: res.meta.namespace,
                       runtimeId: format,
                   }
                 : undefined
         );
-        const outFilePath = targetFilePath + ext;
+        const outFilePath = targetFilePath + (injectCssInJs ? '.inject' : '') + ext;
         generated.add(outFilePath);
         tryRun(() => fs.writeFileSync(outFilePath, code), `Write File Error: ${outFilePath}`);
     });
@@ -206,6 +213,7 @@ export function buildSingleFile({
             relative,
             dirname,
             isAbsolute,
+            ensureDirectorySync: (path) => ensureDirectory(path, fs),
         });
     }
 
@@ -268,6 +276,7 @@ export function buildDTS({
     relative,
     dirname,
     isAbsolute,
+    ensureDirectorySync,
 }: {
     res: StylableResults;
     targetFilePath: string;
@@ -279,22 +288,22 @@ export function buildDTS({
     relative: (from: string, to: string) => string;
     dirname: (p: string) => string;
     isAbsolute: (p: string) => boolean;
+    ensureDirectorySync?: (path: string) => void;
 }) {
     const dtsContent = generateDTSContent(res);
     const dtsPath = targetFilePath + '.d.ts';
-
+    const targetDir = dirname(targetFilePath);
     generated.add(dtsPath);
     outputLogs.push('output .d.ts');
-
+    if (ensureDirectorySync) {
+        tryRun(() => ensureDirectorySync(targetDir), `Write directory File Error: ${targetDir}`);
+    }
     tryRun(() => writeFileSync(dtsPath, dtsContent), `Write File Error: ${dtsPath}`);
 
     // .d.ts.map
     // if not explicitly defined, assumed true with "--dts" parent scope
     if (dtsSourceMap !== false) {
-        const relativeTargetFilePath = relative(
-            dirname(targetFilePath),
-            sourceFilePath || targetFilePath
-        );
+        const relativeTargetFilePath = relative(targetDir, sourceFilePath || targetFilePath);
 
         const dtsMappingContent = generateDTSSourceMap(
             dtsContent,
@@ -396,8 +405,9 @@ export function removeBuildProducts({
     }
     // st.css.js
     moduleFormats.forEach(([format, ext]) => {
+        const { injectCssInJs } = parseFormat(format);
         outputLogs.push(`${format} module`);
-        const outFilePath = targetFilePath + ext;
+        const outFilePath = targetFilePath + (injectCssInJs ? '.inject' : '') + ext;
         generated.delete(outFilePath);
         tryRun(() => fs.unlinkSync(outFilePath), `Unlink File Error: ${outFilePath}`);
     });
@@ -446,4 +456,10 @@ export function getAllDiagnostics(res: StylableResults): CLIDiagnostic[] {
 
         return diagnostic;
     });
+}
+
+function parseFormat(format: ModuleFormats[0][0]) {
+    const injectCssInJs = format.includes('+css');
+    const moduleType = format.replace('+css', '') as 'esm' | 'cjs';
+    return { moduleType, injectCssInJs };
 }

@@ -34,10 +34,25 @@ export function getCliArguments(): Arguments<CliArguments> {
             description: 'output esm module (.mjs)',
             defaultDescription: String(defaults.esm),
         })
+        .option('esmCss', {
+            type: 'boolean',
+            description: 'output esm module (.inject.mjs) with inline css injection',
+            defaultDescription: String(defaults.esmCss),
+        })
         .option('cjs', {
             type: 'boolean',
             description: 'output commonjs module (.js)',
             defaultDescription: String(defaults.cjs),
+        })
+        .option('cjsCss', {
+            type: 'boolean',
+            description: 'output commonjs module (.inject.js) with inline css injection',
+            defaultDescription: String(defaults.cjsCss),
+        })
+        .option('copyAssets', {
+            type: 'boolean',
+            description: 'emit assets found in css files',
+            defaultDescription: String(defaults.copyAssets),
         })
         .option('css', {
             type: 'boolean',
@@ -235,6 +250,9 @@ export function createDefaultOptions(): BuildOptions {
         cjs: false,
         esm: false,
         dts: false,
+        esmCss: false,
+        cjsCss: false,
+        copyAssets: true,
         esmExt: '.mjs',
         cjsExt: '.js',
         injectCSSRequest: false,
