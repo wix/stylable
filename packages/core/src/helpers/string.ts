@@ -3,9 +3,21 @@ export function stripQuotation(str: string) {
 }
 
 export function filename2varname(filename: string) {
-    return string2varname(filename.replace(/(?=.*)\.\w+$/, '').replace(/\.st$/, ''));
+    return string2varname(
+        filename
+            // remove extension (eg. .css)
+            .replace(/(?=.*)\.\w+$/, '')
+            // remove potential .st extension prefix
+            .replace(/\.st$/, '')
+    );
 }
 
 function string2varname(str: string) {
-    return str.replace(/[^0-9a-zA-Z_]/gm, '').replace(/^[^a-zA-Z_]+/gm, '');
+    return (
+        str
+            // allow only letters, numbers and underscores
+            .replace(/[^0-9a-zA-Z_]/gm, '')
+            // remove leading if not letters or underscores
+            .replace(/^[^a-zA-Z_]+/gm, '')
+    );
 }
