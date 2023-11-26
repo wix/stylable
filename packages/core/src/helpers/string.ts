@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 export function stripQuotation(str: string) {
     return str.replace(/^['"](.*?)['"]$/g, '$1');
 }
@@ -12,16 +13,20 @@ export function filename2varname(filename: string) {
     );
 }
 
-function string2varname(str: string) {
+export function string2varname(str: string) {
     return (
         str
-            // allow only letters, numbers, dashes and underscores
-            .replace(/[^0-9a-zA-Z_-]/gm, '')
+            // allow only letters, numbers, dashes, underscores, and non-ascii
+            .replace(/[\x00-\x7F]+/gm, (matchAscii) => {
+                return matchAscii.replace(/[^0-9a-zA-Z_-]/gm, '');
+            })
             // replace multiple dashes with single dash
             .replace(/--+/gm, '-')
             // replace multiple underscores with single underscore
             .replace(/__+/gm, '_')
-            // remove leading if not letters, dashes or underscores
-            .replace(/^[^a-zA-Z_-]+/gm, '')
+            // remove leading if not letters, dashes, underscores or non-ascii
+            .replace(/[\x00-\x7F]+/gm, (matchAscii) => {
+                return matchAscii.replace(/^[^a-zA-Z_-]+/gm, '');
+            })
     );
 }

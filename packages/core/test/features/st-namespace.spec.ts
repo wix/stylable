@@ -21,6 +21,7 @@ describe('features/st-namespace', () => {
             '/_underscore.st.css': ``,
             '/--multi---dash.st.css': ``,
             '/__multi___underscore.st.css': ``,
+            '/🤡emoji🤷‍♀️.st.css': ``,
         });
 
         const AMeta = sheets['/a.st.css'].meta;
@@ -29,6 +30,7 @@ describe('features/st-namespace', () => {
         const underscoreMeta = sheets['/_underscore.st.css'].meta;
         const multiDashMeta = sheets['/--multi---dash.st.css'].meta;
         const multiUnderscoreMeta = sheets['/__multi___underscore.st.css'].meta;
+        const emojiMeta = sheets['/🤡emoji🤷‍♀️.st.css'].meta;
 
         expect(AMeta.namespace, 'a meta.namespace').to.eql('a');
         expect(BMeta.namespace, 'b meta.namespace').to.eql('B');
@@ -38,6 +40,7 @@ describe('features/st-namespace', () => {
         expect(multiUnderscoreMeta.namespace, '_multi_underscore meta.namespace').to.eql(
             '_multi_underscore'
         );
+        expect(emojiMeta.namespace, 'emoji meta.namespace').to.eql('🤡emoji🤷‍♀️');
     });
     it('should override default namespace with @st-namespace', () => {
         const { sheets } = testStylableCore({
