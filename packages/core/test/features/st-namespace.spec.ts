@@ -17,18 +17,24 @@ describe('features/st-namespace', () => {
         const { sheets } = testStylableCore({
             '/a.st.css': ``,
             '/B.st.css': ``,
+            '/-dash.st.css': ``,
             '/_underscore.st.css': ``,
+            '/--multi---dash.st.css': ``,
             '/__multi___underscore.st.css': ``,
         });
 
         const AMeta = sheets['/a.st.css'].meta;
         const BMeta = sheets['/B.st.css'].meta;
+        const dashMeta = sheets['/-dash.st.css'].meta;
         const underscoreMeta = sheets['/_underscore.st.css'].meta;
+        const multiDashMeta = sheets['/--multi---dash.st.css'].meta;
         const multiUnderscoreMeta = sheets['/__multi___underscore.st.css'].meta;
 
         expect(AMeta.namespace, 'a meta.namespace').to.eql('a');
         expect(BMeta.namespace, 'b meta.namespace').to.eql('B');
+        expect(dashMeta.namespace, '-dash meta.namespace').to.eql('-dash');
         expect(underscoreMeta.namespace, '_underscore meta.namespace').to.eql('_underscore');
+        expect(multiDashMeta.namespace, '-multi-dash meta.namespace').to.eql('-multi-dash');
         expect(multiUnderscoreMeta.namespace, '_multi_underscore meta.namespace').to.eql(
             '_multi_underscore'
         );

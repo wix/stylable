@@ -43,7 +43,7 @@ describe('StylableRollupPlugin - include all stylesheets with side-effects', fun
         @layer globalLayer;
         
         html {
-            --globalselector-x: green;
+            --global-selector-x: green;
         }
         .index__root {}
         `);
