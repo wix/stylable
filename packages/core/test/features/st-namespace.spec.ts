@@ -151,9 +151,9 @@ describe('features/st-namespace', () => {
                 .x {}
             `,
             '/dash.st.css': `
-                @st-namespace "---";
+                @st-namespace "-";
 
-                /* x-@rule .\\---__x */
+                /* @rule .-__x */
                 .x {}
             `,
         });
@@ -172,7 +172,7 @@ describe('features/st-namespace', () => {
         expect(underscoreMeta.namespace, 'underscore namespace').to.eql('_x123_');
 
         shouldReportNoDiagnostics(dashMeta);
-        expect(dashMeta.namespace, 'dash namespace').to.eql('---');
+        expect(dashMeta.namespace, 'dash namespace').to.eql('-');
     });
     it('should report non string namespace', () => {
         const { sheets } = testStylableCore({
@@ -242,6 +242,18 @@ describe('features/st-namespace', () => {
                     @analyze-error(start with number) word(5abc) ${diagnostics.INVALID_NAMESPACE_VALUE()}
                 */
                 @st-namespace "5abc";
+
+                /* 
+                    @transform-remove
+                    @analyze-error(dash sequence) word(a--b) ${diagnostics.INVALID_NAMESPACE_VALUE()}
+                */
+                @st-namespace "a--b";
+
+                /* 
+                    @transform-remove
+                    @analyze-error(underscore sequence) word(a__b) ${diagnostics.INVALID_NAMESPACE_VALUE()}
+                */
+                @st-namespace "a__b";
             `,
         });
 
