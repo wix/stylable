@@ -17,6 +17,8 @@ function string2varname(str: string) {
         str
             // allow only letters, numbers and underscores
             .replace(/[^0-9a-zA-Z_]/gm, '')
+            // replace multiple underscores with single underscore
+            .replace(/__+/gm, '_')
             // remove leading if not letters or underscores
             .replace(/^[^a-zA-Z_]+/gm, '')
     );

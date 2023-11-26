@@ -16,14 +16,22 @@ describe('features/st-namespace', () => {
     it('should use filename as default namespace', () => {
         const { sheets } = testStylableCore({
             '/a.st.css': ``,
-            '/b.st.css': ``,
+            '/B.st.css': ``,
+            '/_underscore.st.css': ``,
+            '/__multi___underscore.st.css': ``,
         });
 
         const AMeta = sheets['/a.st.css'].meta;
-        const BMeta = sheets['/b.st.css'].meta;
+        const BMeta = sheets['/B.st.css'].meta;
+        const underscoreMeta = sheets['/_underscore.st.css'].meta;
+        const multiUnderscoreMeta = sheets['/__multi___underscore.st.css'].meta;
 
         expect(AMeta.namespace, 'a meta.namespace').to.eql('a');
-        expect(BMeta.namespace, 'b meta.namespace').to.eql('b');
+        expect(BMeta.namespace, 'b meta.namespace').to.eql('B');
+        expect(underscoreMeta.namespace, '_underscore meta.namespace').to.eql('_underscore');
+        expect(multiUnderscoreMeta.namespace, '_multi_underscore meta.namespace').to.eql(
+            '_multi_underscore'
+        );
     });
     it('should override default namespace with @st-namespace', () => {
         const { sheets } = testStylableCore({
