@@ -24,9 +24,7 @@ export function string2varname(str: string) {
             .replace(/--+/gm, '-')
             // replace multiple underscores with single underscore
             .replace(/__+/gm, '_')
-            // remove leading if not letters, dashes, underscores or non-ascii
-            .replace(/[\x00-\x7F]+/gm, (matchAscii) => {
-                return matchAscii.replace(/^[^a-zA-Z_-]+/gm, '');
-            })
+            // remove leading digits from start
+            .replace(/^\d+/gm, '')
     );
 }
