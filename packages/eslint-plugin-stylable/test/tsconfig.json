@@ -2,6 +2,8 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../dist/test",
+    "module": "Node16" /* Specify what module code is generated. */,
+    "moduleResolution": "Node16",
     "types": ["node", "externals", "mocha"]
   },
   "references": [{ "path": "../src" }, { "path": "../../e2e-test-kit/src" }]

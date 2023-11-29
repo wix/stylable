@@ -1,13 +1,15 @@
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import path from 'path';
 import { Stylable, StylableMeta, createDefaultResolver } from '@stylable/core';
-import { safeParse, StylableExports } from '@stylable/core/dist/index-internal';
+import safeParser from 'postcss-safe-parser';
 import {
     ESLintUtils,
     AST_NODE_TYPES,
     ASTUtils,
     TSESTree as esTree,
 } from '@typescript-eslint/utils';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 
 const { isIdentifier } = ASTUtils;
 
@@ -28,8 +30,8 @@ export default createRule({
             fileSystem: fs,
             projectRoot: process.cwd(),
             resolveModule: moduleResolver,
-            requireModule: require,
-            cssParser: safeParse,
+            requireModule: createRequire(pathToFileURL(process.cwd())),
+            cssParser: safeParser,
         });
 
         function reportDiagnostics(meta: StylableMeta, node: esTree.ImportDeclaration) {
@@ -68,7 +70,7 @@ export default createRule({
                 ) as esTree.ImportSpecifier[];
 
                 namedImports.forEach(({ imported, local }) => {
-                    const exportName = imported.name as keyof StylableExports;
+                    const exportName = imported.name as keyof typeof exports;
 
                     if (exportName in exports) {
                         const variable = context.getScope().variables.find((varDefs) => {
@@ -127,7 +129,7 @@ export default createRule({
         ],
         docs: {
             description: '',
-            recommended: 'error',
+            recommended: 'recommended',
         },
     },
 });
@@ -141,6 +143,7 @@ function getStylableRequest(importStatement: esTree.ImportDeclaration) {
 }
 
 function getMemberAccessor(
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     property: esTree.PrivateIdentifier | esTree.Expression,
     isComputed: boolean
 ) {

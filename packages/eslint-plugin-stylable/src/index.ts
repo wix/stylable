@@ -1,8 +1,8 @@
-import unknownLocals from './stylable-es-lint';
+import unknownLocals from './stylable-es-lint.js';
 
-export = {
+export default {
     rules: {
-        'unknown-locals': unknownLocals,
+        'unknown-locals': unknownLocals as unknown,
     },
     configs: {
         recommended: {

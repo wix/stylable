@@ -1,7 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../dist"
+    "outDir": "../dist",
+    "module": "Node16" /* Specify what module code is generated. */,
+    "moduleResolution": "Node16"
   },
   "references": [{ "path": "../../core/src" }]
 }
