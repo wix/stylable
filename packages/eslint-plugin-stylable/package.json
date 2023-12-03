@@ -1,13 +1,13 @@
 {
   "name": "eslint-plugin-stylable",
-  "version": "5.16.1",
+  "version": "5.17.0",
   "description": "eslint plugin for Stylable usages",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"dist/test/**/*.spec.js\" --timeout 5000"
   },
   "dependencies": {
-    "@stylable/core": "^5.16.1",
+    "@stylable/core": "^5.17.0",
     "@typescript-eslint/utils": "^5.61.0"
   },
   "keywords": [
