@@ -63,7 +63,8 @@ export const diagnostics = {
     UNDEFINED_CSS_CUSTOM_PROP: createDiagnosticReporter(
         '01011',
         'error',
-        (name) => `custom property "${name}" is not defined`
+        (name) =>
+            `Undefined "${name}" custom property. Please define the property using '@property' or import it with '@st-import' when 'strictCustomProperty' is enabled.`
     ),
 };
 
