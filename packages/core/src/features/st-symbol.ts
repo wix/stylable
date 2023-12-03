@@ -167,7 +167,7 @@ export function addSymbol({
     safeRedeclare = false,
     localName,
 }: {
-    context: Omit<FeatureContext, 'flags'>;
+    context: FeatureContext;
     symbol: StylableSymbol;
     node?: postcss.Node;
     safeRedeclare?: boolean;
@@ -190,7 +190,7 @@ export function addSymbol({
     return symbol;
 }
 
-export function reportRedeclare(context: Omit<FeatureContext, 'flags'>) {
+export function reportRedeclare(context: FeatureContext) {
     const { byNS } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     for (const symbols of Object.values(byNS)) {
         const flat: Record<string, SymbolDeclaration[]> = {};

@@ -101,7 +101,6 @@ export function createTransformer(
         replaceValueHook,
         postProcessor,
         mode: config.mode,
-        flags: { ...defaultFeatureFlags },
     });
 }
 

@@ -188,7 +188,6 @@ export class StylablePublicApi {
             const diagnostics = new Diagnostics();
             const { outputValue, topLevelType, runtimeValue } = evaluator.evaluateValue(
                 {
-                    flags: this.stylable.flags,
                     resolver: this.stylable.resolver,
                     evaluator,
                     meta,

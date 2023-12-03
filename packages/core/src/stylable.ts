@@ -202,7 +202,6 @@ export class Stylable {
             resolverCache: this.resolverCache,
             mode: this.mode,
             experimentalSelectorInference: this.experimentalSelectorInference,
-            flags: this.flags,
             ...options,
         });
     }

@@ -54,7 +54,6 @@ import { validateCustomPropertyName } from './helpers/css-custom-property';
 import type { ModuleResolver } from './types';
 import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
 import type { MappedStates } from './helpers/custom-state';
-import type { FeatureFlags } from './features/feature';
 
 export interface ResolvedElement {
     name: string;
@@ -109,7 +108,6 @@ export interface TransformerOptions {
     resolverCache?: StylableResolverCache;
     stVarOverride?: Record<string, string>;
     experimentalSelectorInference?: boolean;
-    flags: FeatureFlags;
 }
 
 export const transformerDiagnostics = {
@@ -136,7 +134,6 @@ export class StylableTransformer {
     private directiveNodes: postcss.Declaration[] = [];
     public experimentalSelectorInference: boolean;
     public containerInferredSelectorMap = new Map<PostcssContainer, InferredSelector>();
-    public flags: FeatureFlags;
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.keepValues = options.keepValues || false;
@@ -152,7 +149,6 @@ export class StylableTransformer {
         );
         this.mode = options.mode || 'production';
         this.defaultStVarOverride = options.stVarOverride || {};
-        this.flags = options.flags;
         this.getResolvedSymbols = createSymbolResolverWithCache(this.resolver, this.diagnostics);
         this.evaluator = new StylableEvaluator({
             valueHook: this.replaceValueHook,
@@ -176,7 +172,6 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
-            flags: this.flags,
         };
         STImport.hooks.transformInit({ context });
         STGlobal.hooks.transformInit({ context });
@@ -214,7 +209,6 @@ export class StylableTransformer {
             getResolvedSymbols: this.getResolvedSymbols,
             passedThrough: path.slice(),
             inferredSelectorMixin,
-            flags: this.flags,
         };
         const transformResolveOptions = {
             context: transformContext,
@@ -533,7 +527,6 @@ export class StylableTransformer {
             resolver: this.resolver,
             evaluator: this.evaluator,
             getResolvedSymbols: this.getResolvedSymbols,
-            flags: this.flags,
         };
         if (node.type === 'class') {
             CSSClass.hooks.transformSelectorNode({

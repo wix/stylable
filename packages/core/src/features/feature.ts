@@ -28,7 +28,6 @@ export type SelectorNodeContext = [
 export interface FeatureContext {
     meta: StylableMeta;
     diagnostics: Diagnostics;
-    flags: FeatureFlags;
 }
 export interface FeatureTransformContext extends FeatureContext {
     resolver: StylableResolver;

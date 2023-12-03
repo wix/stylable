@@ -14,7 +14,7 @@ import type { replaceValueHook, RuntimeStVar, StylableTransformer } from './styl
 import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
 import { unescapeCSS } from './helpers/escape';
 import type { ParsedValue } from './types';
-import type { FeatureFlags, FeatureTransformContext } from './features/feature';
+import type { FeatureTransformContext } from './features/feature';
 import { CSSCustomProperty, STVar } from './features';
 import { unbox, CustomValueError } from './custom-values';
 
@@ -54,7 +54,6 @@ export class StylableEvaluator {
     ) {
         return processDeclarationValue(
             context.resolver,
-            context.flags,
             this.getResolvedSymbols,
             data.value,
             data.meta,
@@ -99,7 +98,6 @@ export function resolveArgumentsValue(
     for (const k in options) {
         resolvedArgs[k] = evalDeclarationValue(
             transformer.resolver,
-            transformer.flags,
             unescapeCSS(options[k]),
             meta,
             node,
@@ -115,7 +113,6 @@ export function resolveArgumentsValue(
 
 export function processDeclarationValue(
     resolver: StylableResolver,
-    flags: FeatureFlags,
     getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols,
     value: string,
     meta: StylableMeta,
@@ -147,7 +144,6 @@ export function processDeclarationValue(
                         evaluator,
                         getResolvedSymbols,
                         passedThrough,
-                        flags,
                     },
                     data: {
                         value,
@@ -220,7 +216,6 @@ export function processDeclarationValue(
                         evaluator,
                         getResolvedSymbols,
                         passedThrough,
-                        flags,
                     },
                     data: {
                         value,
@@ -303,7 +298,6 @@ export function processDeclarationValue(
 
 export function evalDeclarationValue(
     resolver: StylableResolver,
-    flags: FeatureFlags,
     value: string,
     meta: StylableMeta,
     node?: postcss.Node,
@@ -319,7 +313,6 @@ export function evalDeclarationValue(
 ): string {
     return processDeclarationValue(
         resolver,
-        flags,
         getResolvedSymbols,
         value,
         meta,
