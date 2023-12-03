@@ -50,6 +50,6 @@ describe(`(${project})`, () => {
 
         expect(metadata.namespaceMapping[`/${index.hash}.st.css`]).to.match(/index\d+/);
         expect(metadata.namespaceMapping[`/${comp.hash}.st.css`]).to.match(/comp\d+/);
-        expect(metadata.namespaceMapping[`/${compX.hash}.st.css`]).to.match(/compx\d+/);
+        expect(metadata.namespaceMapping[`/${compX.hash}.st.css`]).to.match(/comp-x\d+/);
     });
 });
