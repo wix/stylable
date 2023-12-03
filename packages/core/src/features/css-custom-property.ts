@@ -285,11 +285,7 @@ function addCSSProperty({
             // already defined
             return;
             // eslint-disable-next-line no-constant-condition
-        } else if (
-            context.meta.type === 'stylable' &&
-            context.flags.strictCustomProperty &&
-            !context.meta.source.includes('node_modules')
-        ) {
+        } else if (context.meta.type === 'stylable' && context.flags.strictCustomProperty) {
             // strict mode
             context.diagnostics.report(diagnostics.UNDEFINED_CSS_CUSTOM_PROP(name), {
                 node,
