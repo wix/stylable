@@ -3,6 +3,7 @@ import { cssParse, CssParser } from './parser';
 import { processNamespace, StylableProcessor } from './stylable-processor';
 import type { StylableMeta } from './stylable-meta';
 import type { Diagnostics } from './diagnostics';
+import { defaultFeatureFlags, type FeatureFlags } from './features/feature';
 
 export function createStylableFileProcessor({
     fileSystem,
@@ -11,8 +12,10 @@ export function createStylableFileProcessor({
     cssParser = cssParse,
     cache,
     createDiagnostics,
+    flags = { ...defaultFeatureFlags },
 }: {
     fileSystem: MinimalFS;
+    flags?: FeatureFlags;
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
     resolveNamespace?: typeof processNamespace;
     cssParser?: CssParser;
@@ -21,9 +24,11 @@ export function createStylableFileProcessor({
 }) {
     return cachedProcessFile<StylableMeta>(
         (from, content) => {
-            return new StylableProcessor(createDiagnostics?.(from), resolveNamespace).process(
-                cssParser(content, { from })
-            );
+            return new StylableProcessor(
+                createDiagnostics?.(from),
+                resolveNamespace,
+                flags
+            ).process(cssParser(content, { from }));
         },
         (resolvedPath: string) => {
             return fileSystem.readFileSync(resolvedPath, 'utf8');
