@@ -25,6 +25,7 @@ export {
     CSSCustomProperty,
     STStructure,
 } from './features';
+export { defaultFeatureFlags } from './features/feature';
 export type {
     MappedStates,
     StateParsedValue,

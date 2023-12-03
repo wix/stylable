@@ -291,6 +291,44 @@ describe(`features/css-custom-property`, () => {
 
         expect(CSSCustomProperty.getRuntimeTypedDefinitionNames(meta)).to.eql(['--c', '--d']);
     });
+    it('should warn on undefined property in strict mode', () => {
+        testStylableCore(
+            {
+                '/invalid.st.css': `
+                    .root {
+                        /* 
+                            @analyze-error word(--prop) ${customPropertyDiagnostics.UNDEFINED_CSS_CUSTOM_PROP(
+                                '--prop'
+                            )}
+                            @decl --invalid-prop: green 
+                        */
+                        --prop: green;
+
+                        /* 
+                            @analyze-error word(--prop2) ${customPropertyDiagnostics.UNDEFINED_CSS_CUSTOM_PROP(
+                                '--prop2'
+                            )}
+                            @decl color: var(--invalid-prop2) 
+                        */
+                        color: var(--prop2);
+                    }
+                `,
+                '/valid.st.css': `
+                    @st-import [--prop] from './invalid.st.css';
+                    @property --prop2;
+
+                    .root {
+                        /* @decl --invalid-prop: green */
+                        --prop: green;
+
+                        /* @decl color: var(--valid-prop2) */
+                        color: var(--prop2);
+                    }
+                `,
+            },
+            { stylableConfig: { flags: { strictCustomProperty: true } } }
+        );
+    });
     it.skip(`should escape`, () => {
         const { sheets } = testStylableCore(`
             .root {
@@ -966,8 +1004,9 @@ describe(`features/css-custom-property`, () => {
     });
     describe('native css', () => {
         it('should not namespace', () => {
-            const { stylable } = testStylableCore({
-                '/native.css': deindent(`
+            const { stylable } = testStylableCore(
+                {
+                    '/native.css': deindent(`
                     @property --a {
                         syntax: '<color>';
                         initial-value: green;
@@ -977,7 +1016,7 @@ describe(`features/css-custom-property`, () => {
                         --b: var(--c);
                     }
                 `),
-                '/entry.st.css': `
+                    '/entry.st.css': `
                     @st-import [--a, --b, --c] from './native.css';
 
                     .root {
@@ -991,7 +1030,9 @@ describe(`features/css-custom-property`, () => {
                         --c: var(--c);
                     }
                 `,
-            });
+                },
+                { stylableConfig: { flags: { strictCustomProperty: true } } }
+            );
 
             const { meta: nativeMeta } = stylable.transform('/native.css');
             const { meta, exports } = stylable.transform('/entry.st.css');
@@ -1018,6 +1059,23 @@ describe(`features/css-custom-property`, () => {
                 b: '--b',
                 c: '--c',
             });
+        });
+        it('should ignore strictCustomProperty', () => {
+            const { stylable } = testStylableCore(
+                {
+                    '/entry.css': `
+                        .root {
+                            /* @decl --a: var(--z) */
+                            --a: var(--z);
+                        }
+                    `,
+                },
+                { stylableConfig: { flags: { strictCustomProperty: true } } }
+            );
+
+            const { meta } = stylable.transform('/entry.css');
+
+            shouldReportNoDiagnostics(meta);
         });
         it('should ignore stylable specific transformations', () => {
             const { stylable } = testStylableCore({

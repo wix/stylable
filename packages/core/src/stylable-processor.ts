@@ -26,15 +26,17 @@ import {
     stringifySelector,
 } from './helpers/selector';
 import { isChildOfAtRule } from './helpers/rule';
+import { defaultFeatureFlags, type FeatureFlags } from './features/feature';
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;
     constructor(
         public diagnostics = new Diagnostics(),
-        private resolveNamespace = STNamespace.defaultProcessNamespace
+        private resolveNamespace = STNamespace.defaultProcessNamespace,
+        public flags: FeatureFlags = { ...defaultFeatureFlags }
     ) {}
     public process(root: postcss.Root): StylableMeta {
-        this.meta = new StylableMeta(root, this.diagnostics);
+        this.meta = new StylableMeta(root, this.diagnostics, this.flags);
 
         STStructure.hooks.analyzeInit(this);
         STImport.hooks.analyzeInit(this);

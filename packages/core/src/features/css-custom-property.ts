@@ -60,6 +60,12 @@ export const diagnostics = {
         'error',
         () => `missing custom property name for "var(--[PROP NAME])"`
     ),
+    UNDEFINED_CSS_CUSTOM_PROP: createDiagnosticReporter(
+        '01011',
+        'error',
+        (name) =>
+            `Undefined "${name}" custom property. Please define the property using '@property' or import it with '@st-import' when 'strictCustomProperty' is enabled.`
+    ),
 };
 
 const dataKey = plugableRecord.key<{
@@ -248,8 +254,19 @@ function addCSSProperty({
         return;
     }
     // usages bailout: addition of weak definition reference `--x: var(--x)`
-    if (!final && !!STSymbol.get(context.meta, name, `cssVar`)) {
-        return;
+    if (!final) {
+        const existing = STSymbol.get(context.meta, name, `cssVar`);
+        if (existing) {
+            // already defined
+            return;
+            // eslint-disable-next-line no-constant-condition
+        } else if (context.meta.type === 'stylable' && context.meta.flags.strictCustomProperty) {
+            // strict mode
+            context.diagnostics.report(diagnostics.UNDEFINED_CSS_CUSTOM_PROP(name), {
+                node,
+                word: name,
+            });
+        }
     }
 
     // define symbol
