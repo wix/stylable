@@ -55,6 +55,8 @@ export type StylableConfig = StylableConfigBase &
 const globalDefaultSupportedConfigs = new Set([
     'resolveModule',
     'resolveNamespace',
+    'requireModule',
+    'flags',
     'experimentalSelectorInference',
 ]);
 export function validateDefaultConfig(defaultConfigObj: any) {
