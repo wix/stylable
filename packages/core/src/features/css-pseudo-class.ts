@@ -29,6 +29,7 @@ export const hooks = createFeature({
         if (inferredState) {
             if (selectorContext.transform) {
                 STCustomState.transformPseudoClassToCustomState(
+                    context.flags,
                     inferredState.state,
                     inferredState.meta,
                     node.value,

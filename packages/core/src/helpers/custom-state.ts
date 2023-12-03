@@ -23,6 +23,7 @@ import { CSSClass } from '../features';
 import { reservedFunctionalPseudoClasses } from '../native-reserved-lists';
 import { BaseAstNode, stringifyCSSValue } from '@tokey/css-value-parser';
 import { findCustomIdent, findNextCallNode } from './css-value-seeker';
+import type { FeatureFlags } from '../features/feature';
 
 export interface MappedStates {
     [s: string]: StateParsedValue | string | TemplateStateParsedValue | null;
@@ -763,6 +764,7 @@ export const systemValidators: Record<string, StateParamType> = {
 };
 
 export function validateRuleStateDefinition(
+    flags: FeatureFlags,
     selector: string,
     selectorNode: postcss.Rule | postcss.AtRule,
     meta: StylableMeta,
@@ -785,6 +787,7 @@ export function validateRuleStateDefinition(
                     if (state && typeof state === 'object') {
                         const stateParam = isTemplateState(state) ? state.params[0] : state;
                         const { errors } = validateStateArgument(
+                            flags,
                             stateParam,
                             meta,
                             stateParam.defaultValue || '',
@@ -822,6 +825,7 @@ export function validateRuleStateDefinition(
 }
 
 export function validateStateArgument(
+    flags: FeatureFlags,
     stateAst: StateParsedValue,
     meta: StylableMeta,
     value: string,
@@ -833,6 +837,7 @@ export function validateStateArgument(
 ) {
     const resolvedValidations: StateResult = {
         res: resolveParam(
+            flags,
             meta,
             resolver,
             diagnostics,
@@ -850,7 +855,7 @@ export function validateStateArgument(
             const { errors } = validator.validate(
                 resolvedValidations.res,
                 stateAst.arguments,
-                resolveParam.bind(null, meta, resolver, diagnostics, selectorNode),
+                resolveParam.bind(null, flags, meta, resolver, diagnostics, selectorNode),
                 !!validateDefinition,
                 validateValue
             );
@@ -866,6 +871,7 @@ export function validateStateArgument(
 // transform
 
 export function transformPseudoClassToCustomState(
+    flags: FeatureFlags,
     stateDef: MappedStates[string],
     meta: StylableMeta,
     name: string,
@@ -897,6 +903,7 @@ export function transformPseudoClassToCustomState(
     } else if (typeof stateDef === 'object') {
         if (isTemplateState(stateDef)) {
             convertTemplateState(
+                flags,
                 meta,
                 resolver,
                 diagnostics,
@@ -907,6 +914,7 @@ export function transformPseudoClassToCustomState(
             );
         } else {
             resolveStateValue(
+                flags,
                 meta,
                 resolver,
                 diagnostics,
@@ -945,6 +953,7 @@ export function resolveStateParam(param: string, escape = false) {
     return escape ? cssesc(`s` + result, { isIdentifier: true }).slice(1) : result;
 }
 function convertTemplateState(
+    flags: FeatureFlags,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -955,6 +964,7 @@ function convertTemplateState(
 ) {
     const paramStateDef = stateParamDef.params[0];
     const resolvedParam = getParamInput(
+        flags,
         meta,
         resolver,
         diagnostics,
@@ -964,7 +974,16 @@ function convertTemplateState(
         name
     );
 
-    validateParam(meta, resolver, diagnostics, selectorNode, paramStateDef, resolvedParam, name);
+    validateParam(
+        flags,
+        meta,
+        resolver,
+        diagnostics,
+        selectorNode,
+        paramStateDef,
+        resolvedParam,
+        name
+    );
 
     const strippedParam = stripQuotation(resolvedParam);
     transformMappedStateWithParam({
@@ -977,6 +996,7 @@ function convertTemplateState(
     });
 }
 function getParamInput(
+    flags: FeatureFlags,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -988,6 +1008,7 @@ function getParamInput(
     const inputValue =
         stateNode.nodes && stateNode.nodes.length ? stringifySelector(stateNode.nodes) : ``;
     const resolvedParam = resolveParam(
+        flags,
         meta,
         resolver,
         diagnostics,
@@ -1004,6 +1025,7 @@ function getParamInput(
     return resolvedParam;
 }
 function validateParam(
+    flags: FeatureFlags,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -1019,7 +1041,7 @@ function validateParam(
         stateParamOutput = validator.validate(
             resolvedParam,
             stateParamDef.arguments,
-            resolveParam.bind(null, meta, resolver, diagnostics, selectorNode),
+            resolveParam.bind(null, flags, meta, resolver, diagnostics, selectorNode),
             false,
             true
         );
@@ -1048,6 +1070,7 @@ function validateParam(
     }
 }
 function resolveStateValue(
+    flags: FeatureFlags,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -1058,6 +1081,7 @@ function resolveStateValue(
     namespace: string
 ) {
     const resolvedParam = getParamInput(
+        flags,
         meta,
         resolver,
         diagnostics,
@@ -1067,7 +1091,16 @@ function resolveStateValue(
         name
     );
 
-    validateParam(meta, resolver, diagnostics, selectorNode, stateParamDef, resolvedParam, name);
+    validateParam(
+        flags,
+        meta,
+        resolver,
+        diagnostics,
+        selectorNode,
+        stateParamDef,
+        resolvedParam,
+        name
+    );
 
     const strippedParam = stripQuotation(resolvedParam);
     convertToClass(stateNode).value = createStateWithParamClassName(name, namespace, strippedParam);
@@ -1176,6 +1209,7 @@ function validateTemplateSelector({
 }
 
 function resolveParam(
+    flags: FeatureFlags,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -1184,5 +1218,14 @@ function resolveParam(
 ) {
     const defaultStringValue = '';
     const param = nodeContent || defaultStringValue;
-    return evalDeclarationValue(resolver, param, meta, node, undefined, undefined, diagnostics);
+    return evalDeclarationValue(
+        resolver,
+        flags,
+        param,
+        meta,
+        node,
+        undefined,
+        undefined,
+        diagnostics
+    );
 }

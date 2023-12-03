@@ -12,6 +12,9 @@ import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type { Diagnostics } from '../diagnostics';
 import type { ParsedValue } from '../types';
 
+export interface FeatureFlags {}
+export const defaultFeatureFlags: FeatureFlags = {};
+
 export type SelectorNodeContext = [
     index: number,
     nodes: ImmutableSelectorNode[],
@@ -21,6 +24,7 @@ export type SelectorNodeContext = [
 export interface FeatureContext {
     meta: StylableMeta;
     diagnostics: Diagnostics;
+    flags: FeatureFlags;
 }
 export interface FeatureTransformContext extends FeatureContext {
     resolver: StylableResolver;

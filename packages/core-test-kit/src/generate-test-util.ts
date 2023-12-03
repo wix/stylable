@@ -15,6 +15,7 @@ import {
     createStylableFileProcessor,
     postProcessor,
     replaceValueHook,
+    defaultFeatureFlags,
 } from '@stylable/core/dist/index-internal';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
@@ -100,6 +101,7 @@ export function createTransformer(
         replaceValueHook,
         postProcessor,
         mode: config.mode,
+        flags: { ...defaultFeatureFlags },
     });
 }
 
@@ -108,9 +110,9 @@ export function processSource(
     options: { from?: string } = {},
     resolveNamespace?: typeof processNamespace
 ) {
-    return new StylableProcessor(new Diagnostics(), resolveNamespace).process(
-        postcss.parse(source, options)
-    );
+    return new StylableProcessor(new Diagnostics(), resolveNamespace, {
+        ...defaultFeatureFlags,
+    }).process(postcss.parse(source, options));
 }
 
 export function createProcess(
