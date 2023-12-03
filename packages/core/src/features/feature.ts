@@ -12,8 +12,12 @@ import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type { Diagnostics } from '../diagnostics';
 import type { ParsedValue } from '../types';
 
-export interface FeatureFlags {}
-export const defaultFeatureFlags: FeatureFlags = {};
+export interface FeatureFlags {
+    strictCustomProperty: boolean;
+}
+export const defaultFeatureFlags: FeatureFlags = {
+    strictCustomProperty: false,
+};
 
 export type SelectorNodeContext = [
     index: number,

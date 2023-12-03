@@ -290,6 +290,44 @@ describe(`features/css-custom-property`, () => {
 
         expect(CSSCustomProperty.getRuntimeTypedDefinitionNames(meta)).to.eql(['--c', '--d']);
     });
+    it('should warn on undefined property in strict mode', () => {
+        testStylableCore(
+            {
+                '/invalid.st.css': `
+                    .root {
+                        /* 
+                            @analyze-error word(--prop) ${customPropertyDiagnostics.UNDEFINED_CSS_CUSTOM_PROP(
+                                '--prop'
+                            )}
+                            @decl --invalid-prop: green 
+                        */
+                        --prop: green;
+
+                        /* 
+                            @analyze-error word(--prop2) ${customPropertyDiagnostics.UNDEFINED_CSS_CUSTOM_PROP(
+                                '--prop2'
+                            )}
+                            @decl color: var(--invalid-prop2) 
+                        */
+                        color: var(--prop2);
+                    }
+                `,
+                '/valid.st.css': `
+                    @st-import [--prop] from './invalid.st.css';
+                    @property --prop2;
+
+                    .root {
+                        /* @decl --invalid-prop: green */
+                        --prop: green;
+
+                        /* @decl color: var(--valid-prop2) */
+                        color: var(--prop2);
+                    }
+                `,
+            },
+            { stylableConfig: { flags: { strictCustomProperty: true } } }
+        );
+    });
     it.skip(`should escape`, () => {
         const { sheets } = testStylableCore(`
             .root {
