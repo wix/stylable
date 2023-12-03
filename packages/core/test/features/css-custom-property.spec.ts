@@ -1076,8 +1076,9 @@ describe(`features/css-custom-property`, () => {
     });
     describe('native css', () => {
         it('should not namespace', () => {
-            const { stylable } = testStylableCore({
-                '/native.css': deindent(`
+            const { stylable } = testStylableCore(
+                {
+                    '/native.css': deindent(`
                     @property --a {
                         syntax: '<color>';
                         initial-value: green;
@@ -1087,7 +1088,7 @@ describe(`features/css-custom-property`, () => {
                         --b: var(--c);
                     }
                 `),
-                '/entry.st.css': `
+                    '/entry.st.css': `
                     @st-import [--a, --b, --c] from './native.css';
 
                     .root {
@@ -1101,7 +1102,9 @@ describe(`features/css-custom-property`, () => {
                         --c: var(--c);
                     }
                 `,
-            });
+                },
+                { stylableConfig: { flags: { strictCustomProperty: true } } }
+            );
 
             const { meta: nativeMeta } = stylable.transform('/native.css');
             const { meta } = stylable.transform('/entry.st.css');
@@ -1121,6 +1124,23 @@ describe(`features/css-custom-property`, () => {
                     }
                 `)
             );
+        });
+        it('should ignore strictCustomProperty', () => {
+            const { stylable } = testStylableCore(
+                {
+                    '/entry.css': `
+                        .root {
+                            /* @decl --a: var(--z) */
+                            --a: var(--z);
+                        }
+                    `,
+                },
+                { stylableConfig: { flags: { strictCustomProperty: true } } }
+            );
+
+            const { meta } = stylable.transform('/entry.css');
+
+            shouldReportNoDiagnostics(meta);
         });
         it('should ignore stylable specific transformations', () => {
             const { stylable } = testStylableCore({

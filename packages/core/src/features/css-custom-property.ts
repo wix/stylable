@@ -285,6 +285,7 @@ function addCSSProperty({
             return;
             // eslint-disable-next-line no-constant-condition
         } else if (
+            context.meta.type === 'stylable' &&
             context.flags.strictCustomProperty &&
             !context.meta.source.includes('node_modules')
         ) {
