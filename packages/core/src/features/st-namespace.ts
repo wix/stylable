@@ -1,7 +1,7 @@
 import path from 'path';
 import { createFeature, FeatureContext } from './feature';
 import { plugableRecord } from '../helpers/plugable-record';
-import { filename2varname } from '../helpers/string';
+import { filename2varname, string2varname } from '../helpers/string';
 import { stripQuotation } from '../helpers/string';
 import valueParser from 'postcss-value-parser';
 import { murmurhash3_32_gc } from '../murmurhash';
@@ -166,10 +166,10 @@ export function parseNamespace(node: AtRule, diag?: Diagnostics): string | undef
         });
         return;
     }
-    // ident like - without escapes
-    // eslint-disable-next-line no-control-regex
-    if (!namespace.match(/^([a-zA-Z-_]|[^\x00-\x7F]+)([a-zA-Z-_0-9]|[^\x00-\x7F])*$/)) {
-        // empty namespace found
+    // check namespace is a valid ident start with no conflicts with stylable namespacing
+    const transformedNamespace = string2varname(namespace);
+    if (namespace !== transformedNamespace) {
+        // invalid namespace found
         diag?.report(diagnostics.INVALID_NAMESPACE_VALUE(), {
             node,
             word: namespace,

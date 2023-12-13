@@ -5,7 +5,7 @@ import { processUrlDependencies } from '@stylable/build-tools';
 import fs from 'fs';
 import { basename, extname, isAbsolute, join } from 'path';
 import { createHash } from 'crypto';
-import { getType } from 'mime';
+import mime from 'mime';
 
 export function generateCssString(
     meta: StylableMeta,
@@ -45,7 +45,7 @@ export function emitAssets(
             typeof inlineAssets === 'function' ? inlineAssets(asset, fileBuffer) : inlineAssets;
 
         if (shouldInline) {
-            const mimeType = getType(extname(asset));
+            const mimeType = mime.getType(extname(asset));
             assetsIds.push(`data:${mimeType};base64,${fileBuffer.toString('base64')}`);
         } else {
             const name = basename(asset);

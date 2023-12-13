@@ -24,6 +24,7 @@ import {
     CSSContains,
     STStructure,
 } from './features';
+import type { FeatureFlags } from './features/feature';
 
 const features = [
     STSymbol,
@@ -61,7 +62,11 @@ export class StylableMeta {
     // Generated during transform
     public targetAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
-    constructor(public sourceAst: postcss.Root, public diagnostics: Diagnostics) {
+    constructor(
+        public sourceAst: postcss.Root,
+        public diagnostics: Diagnostics,
+        public flags: FeatureFlags
+    ) {
         // initiate features
         const context: FeatureContext = { meta: this, diagnostics };
         for (const { hooks } of features) {

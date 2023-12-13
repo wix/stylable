@@ -13,16 +13,19 @@ import type {
 import { processProjects } from './process-projects';
 import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
 import { resolveNpmRequests } from './resolve-requests';
-import type { ModuleResolver } from '@stylable/core/dist/index-internal';
-import type { processNamespace } from '@stylable/core';
+import type { StylableConfig } from '@stylable/core';
 import type { IFileSystem } from '@file-services/types';
 
 interface StylableRuntimeConfigs {
     stcConfig?: Configuration<string> | undefined;
-    defaultConfig?: {
-        resolveModule?: ModuleResolver;
-        resolveNamespace?: typeof processNamespace;
-    };
+    defaultConfig?: Pick<
+        StylableConfig,
+        | 'resolveNamespace'
+        | 'requireModule'
+        | 'resolveModule'
+        | 'flags'
+        | 'experimentalSelectorInference'
+    >;
 }
 
 export async function projectsConfig(
