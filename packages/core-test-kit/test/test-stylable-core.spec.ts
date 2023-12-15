@@ -70,8 +70,9 @@ describe(`testStylableCore()`, () => {
                     entries: [`/a.st.css`, `/b.st.css`],
                 }
             );
-
-            const entryNotProcessed = (sheets as any)[`/entry.st.css`];
+            
+            // @ts-expect-error entry is not processed
+            const entryNotProcessed = sheets[`/entry.st.css`];
             const a = sheets[`/a.st.css`];
             const b = sheets[`/b.st.css`];
 
