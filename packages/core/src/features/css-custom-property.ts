@@ -15,7 +15,7 @@ import type { StylableMeta } from '../stylable-meta';
 import type { StylableResolver, CSSResolve } from '../stylable-resolver';
 import type * as postcss from 'postcss';
 // ToDo: refactor out - parse once and pass to hooks
-import postcssValueParser from 'postcss-value-parser';
+import postcssValueParser, { WordNode } from 'postcss-value-parser';
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
@@ -214,13 +214,7 @@ export const hooks = createFeature<{
         const { value } = node;
         const varWithPrefix = node.nodes[0]?.value || ``;
         if (validateCustomPropertyName(varWithPrefix)) {
-            const resolvedSymbols = getResolvedSymbols(meta);
-            const localSymbol = STSymbol.get(meta, varWithPrefix, `cssVar`);
-            if (localSymbol) {
-                node.nodes[0].value = getTransformedName(
-                    resolveFinalSymbol(meta, localSymbol, resolvedSymbols)
-                );
-            }
+            transformPropertyIdent(meta, node.nodes[0], getResolvedSymbols);
         }
         // handle default values - ToDo: check if required
         if (node.nodes.length > 2) {
@@ -235,6 +229,19 @@ export const hooks = createFeature<{
 });
 
 // API
+
+export function transformPropertyIdent(
+    meta: StylableMeta,
+    node: WordNode,
+    getResolvedSymbols: FeatureTransformContext['getResolvedSymbols']
+) {
+    const varWithPrefix = node.value || '';
+    const resolvedSymbols = getResolvedSymbols(meta);
+    const localSymbol = STSymbol.get(meta, varWithPrefix, `cssVar`);
+    if (localSymbol) {
+        node.value = getTransformedName(resolveFinalSymbol(meta, localSymbol, resolvedSymbols));
+    }
+}
 
 export function get(meta: StylableMeta, name: string): CSSVarSymbol | undefined {
     return STSymbol.get(meta, name, `cssVar`);
@@ -255,7 +262,7 @@ function resolveFinalSymbol(
     );
 }
 
-function addCSSProperty({
+export function addCSSProperty({
     context,
     node,
     name,
