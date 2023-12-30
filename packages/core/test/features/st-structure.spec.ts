@@ -58,13 +58,15 @@ describe('@st structure', () => {
         it('should prevent automatic .class=>::part definition', () => {
             testStylableCore(`
                 @st .root;
-                .part {}
+                .customPart {}
     
                 /* 
-                    @transform-error ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`part`)}
-                    @rule .entry__root::part
+                    @transform-error ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
+                        `customPart`
+                    )}
+                    @rule .entry__root::customPart
                 */
-                .root::part {}
+                .root::customPart {}
             `);
         });
         it('should register css class', () => {
