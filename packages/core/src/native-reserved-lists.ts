@@ -4,6 +4,7 @@ export const nativePseudoClasses = [
     'any',
     'any-link',
     'checked',
+    'indeterminate',
     'default',
     'defined',
     'dir',
@@ -48,6 +49,14 @@ export const nativePseudoClasses = [
     'valid',
     'visited',
     'where',
+    'user-valid',
+    'user-invalid',
+    'autofill',
+    'modal',
+    'popover-open',
+    'future',
+    'past',
+    'picture-in-picture',
 ];
 
 export const CSSWideKeywords = ['initial', 'inherit', 'unset'];
@@ -100,6 +109,15 @@ export const nativePseudoElements = [
     'selection',
     'slotted',
     'spelling-error',
+    'file-selector-button',
+    'highlight',
+    'part',
+    'target-text',
+    'view-transition',
+    'view-transition-group',
+    'view-transition-image-pair',
+    'view-transition-new',
+    'view-transition-old',
 ];
 
 export const nativeFunctionsDic: Record<string, { preserveQuotes: boolean }> = {
@@ -188,6 +206,7 @@ export const nativeFunctionsDic: Record<string, { preserveQuotes: boolean }> = {
     oklch: { preserveQuotes: true },
     supports: { preserveQuotes: true },
     anchor: { preserveQuotes: true },
+    'anchor-size': { preserveQuotes: true },
     selector: { preserveQuotes: true /* TODO:transform the nested selector */ },
     style: { preserveQuotes: true /* TODO: transform the dashed ident property */ },
     'image-set': { preserveQuotes: true },
