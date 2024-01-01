@@ -29,27 +29,26 @@ import type {
 import { URI } from 'vscode-uri';
 
 import {
-    CodeMixinCompletionProvider,
-    CompletionProvider,
+    CodeMixinCompletionPlugin,
+    LangServicePlugin,
     createRange,
-    CssMixinCompletionProvider,
-    ExtendCompletionProvider,
-    FormatterCompletionProvider,
-    GlobalCompletionProvider,
-    ImportInternalDirectivesProvider,
-    NamedCompletionProvider,
-    ProviderOptions,
+    CssMixinCompletionPlugin,
+    ExtendCompletionPlugin,
+    FormatterCompletionPlugin,
+    GlobalCompletionPlugin,
+    ImportInternalDirectivesPlugin,
+    NamedCompletionPlugin,
+    PluginCompletionOptions,
     ProviderPosition,
     ProviderRange,
-    PseudoElementCompletionProvider,
-    RulesetInternalDirectivesProvider,
-    SelectorCompletionProvider,
-    StateSelectorCompletionProvider,
-    StateTypeCompletionProvider,
-    TopLevelDirectiveProvider,
-    ValueCompletionProvider,
-    ValueDirectiveProvider,
-    newStImportCompletionProvider,
+    PseudoElementCompletionPlugin,
+    RulesetInternalDirectivesPlugin,
+    SelectorCompletionPlugin,
+    StateSelectorCompletionPlugin,
+    StateTypeCompletionPlugin,
+    TopLevelDirectivePlugin,
+    ValueCompletionPlugin,
+    ValueDirectivePlugin,
 } from './completion-providers';
 import { topLevelDirectives } from './completion-types';
 import type { Completion } from './completion-types';
@@ -68,6 +67,7 @@ import {
     SelectorQuery,
 } from './utils/selector-analyzer';
 import type { LangServiceContext } from '../lib-new/lang-service-context';
+import { StImportPlugin } from '../lib-new/features/ls-st-import';
 
 function findLast<T>(
     arr: T[],
@@ -85,26 +85,31 @@ function findLast<T>(
 }
 
 export class Provider {
-    private providers: CompletionProvider[] = [
-        newStImportCompletionProvider,
-        RulesetInternalDirectivesProvider,
-        ImportInternalDirectivesProvider,
-        TopLevelDirectiveProvider,
-        ValueDirectiveProvider,
-        GlobalCompletionProvider,
-        SelectorCompletionProvider,
-        ExtendCompletionProvider,
-        CssMixinCompletionProvider,
-        CodeMixinCompletionProvider,
-        FormatterCompletionProvider,
-        NamedCompletionProvider,
-        StateTypeCompletionProvider,
-        StateSelectorCompletionProvider,
-        PseudoElementCompletionProvider,
-        ValueCompletionProvider,
+    private plugins: LangServicePlugin[] = [
+        StImportPlugin,
+        RulesetInternalDirectivesPlugin,
+        ImportInternalDirectivesPlugin,
+        TopLevelDirectivePlugin,
+        ValueDirectivePlugin,
+        GlobalCompletionPlugin,
+        SelectorCompletionPlugin,
+        ExtendCompletionPlugin,
+        CssMixinCompletionPlugin,
+        CodeMixinCompletionPlugin,
+        FormatterCompletionPlugin,
+        NamedCompletionPlugin,
+        StateTypeCompletionPlugin,
+        StateSelectorCompletionPlugin,
+        PseudoElementCompletionPlugin,
+        ValueCompletionPlugin,
     ];
     constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
 
+    public analyzeCaretContext(context: LangServiceContext) {
+        for (const plugin of this.plugins) {
+            plugin.analyzeCaretLocation?.(context);
+        }
+    }
     public provideCompletionItemsFromSrc(
         context: LangServiceContext,
         fs: IFileSystem
@@ -119,7 +124,7 @@ export class Provider {
             return [];
         }
 
-        const options = this.createProviderOptions(
+        const options = this.createPluginCompletionOptions(
             context,
             src,
             pos,
@@ -129,8 +134,8 @@ export class Provider {
             res.cursorLineIndex,
             fs
         );
-        for (const provider of this.providers) {
-            completions.push(...provider.provide(options));
+        for (const provider of this.plugins) {
+            completions.push(...provider.onCompletion(options));
         }
 
         return this.dedupeComps(completions);
@@ -395,7 +400,7 @@ export class Provider {
 
         let mixin = '';
         const rev = parsed.nodes[parsed.nodes.length - 1];
-        if (rev.type === 'function' && !!rev.unclosed) {
+        if (rev?.type === 'function' && !!rev.unclosed) {
             mixin = rev.value;
         } else {
             return null;
@@ -722,7 +727,7 @@ export class Provider {
         }
     }
 
-    private createProviderOptions(
+    private createPluginCompletionOptions(
         context: LangServiceContext,
         src: string,
         position: ProviderPosition,
@@ -731,7 +736,7 @@ export class Provider {
         fullLineText: string,
         cursorPosInLine: number,
         fs: IFileSystem
-    ): ProviderOptions {
+    ): PluginCompletionOptions {
         const path = pathFromPosition(meta.sourceAst, {
             line: position.line + 1,
             character: position.character,

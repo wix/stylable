@@ -1,3 +1,5 @@
+@test-marker reset.css|reset;
+
 body {
   --reset: true;
   margin: 0;

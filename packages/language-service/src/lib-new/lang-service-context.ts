@@ -33,6 +33,9 @@ export class LangServiceContext {
     public ambiguousNodes: Map<any, ParseReport[]>;
     public location: ReturnType<typeof getAstNodeAt>;
     public document: TextDocument;
+    public flags = {
+        runNativeCSSService: true,
+    };
     constructor(
         public fs: IFileSystem,
         public stylable: Stylable,

@@ -145,6 +145,7 @@ export class CssService {
             atRule.name = mq;
 
             const replacementDiff = `${stScope} ${atRule.params}`.length - `${mq} all`.length;
+            atRule.raws.afterName = ' ';
             atRule.params = 'all' + ' '.repeat(replacementDiff);
         });
 
@@ -174,6 +175,7 @@ export class CssService {
                 } else if (
                     diag.code === 'unknownAtRules' &&
                     (atRuleName === '@custom-selector' ||
+                        atRuleName === '@st' ||
                         atRuleName === '@st-scope' ||
                         atRuleName === '@st-namespace' ||
                         atRuleName === '@st-import' ||
@@ -198,7 +200,12 @@ export class CssService {
                 } else if (diag.code === 'unknownProperties') {
                     const prop = diag.message.match(/'(.*)'/)![1];
 
-                    if (meta.getStVar(prop) || prop === 'container' || prop === 'container-name') {
+                    if (
+                        meta.getStVar(prop) ||
+                        prop === 'container' ||
+                        prop === 'container-name' ||
+                        prop === 'd'
+                    ) {
                         return false;
                     }
                 }

@@ -1,4 +1,4 @@
-import type { StylableExports } from '@stylable/core/dist/index-internal';
+import type { StylableExports } from './stylable-transformer';
 
 interface InjectCSSOptions {
     /**

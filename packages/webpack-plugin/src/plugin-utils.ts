@@ -49,7 +49,7 @@ export function isSameResourceModule(moduleA: any, moduleB: any) {
 }
 
 export function isStylableModule(module: any): module is NormalModule {
-    return module.resource?.endsWith('.st.css');
+    return module?.resource?.endsWith('.st.css');
 }
 export function isLoadedNativeCSSModule(
     module: any,
@@ -127,6 +127,10 @@ export function replaceMappedCSSAssetPlaceholders({
                     type: 'asset/resource',
                     getData: () => data,
                 });
+
+                if (!assetModule.buildInfo) {
+                    throw new Error('Missing asset module build info for ' + resourcePath);
+                }
 
                 if (assetModule.buildInfo.dataUrl) {
                     // Investigate using the data map from getData currently there is an unknown in term from escaping keeping extractDataUrlFromAssetModuleSource
@@ -308,8 +312,16 @@ export function createStaticCSS(
     return cssChunks;
 }
 
+export function getWebpackBuildMeta(module: Module): NonNullable<Module['buildMeta']> {
+    const buildMeta = module.buildMeta;
+    if (!buildMeta) {
+        throw new Error(`Stylable module ${module.identifier()} does not contains build meta`);
+    }
+    return buildMeta;
+}
+
 export function getStylableBuildMeta(module: Module): StylableBuildMeta {
-    const meta = module.buildMeta.stylable;
+    const meta = module.buildMeta?.stylable;
     if (!meta) {
         throw new Error(`Stylable module ${module.identifier()} does not contains build meta`);
     }
@@ -344,7 +356,7 @@ export function findIfStylableModuleUsed(
 
     let isInUse = false;
     for (const connectionModule of inConnections) {
-        if (connectionModule.buildMeta.sideEffectFree) {
+        if (connectionModule.buildMeta?.sideEffectFree) {
             const info = moduleGraph.getExportsInfo(connectionModule);
             const usedExports = (
                 info.getUsedExports as any
@@ -458,7 +470,7 @@ function getModuleRequestPath(
 export interface OptimizationMapping {
     usageMapping: Record<string, boolean>;
     namespaceMapping: Record<string, string>;
-    namespaceToFileMapping: Map<string, Set<NormalModule>>;
+    potentialNamespaceCollision: Map<string, Set<NormalModule>>;
 }
 
 export function createOptimizationMapping(
@@ -473,17 +485,21 @@ export function createOptimizationMapping(
                 acc.usageMapping[namespace] = isUsed ?? true;
             }
             acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
-            if (acc.namespaceToFileMapping.has(namespace)) {
-                acc.namespaceToFileMapping.get(namespace)!.add(module);
+            if (!isUsed) {
+                // skip collision map for unused stylesheets
+                return acc;
+            }
+            if (acc.potentialNamespaceCollision.has(namespace)) {
+                acc.potentialNamespaceCollision.get(namespace)!.add(module);
             } else {
-                acc.namespaceToFileMapping.set(namespace, new Set([module]));
+                acc.potentialNamespaceCollision.set(namespace, new Set([module]));
             }
             return acc;
         },
         {
             usageMapping: {},
             namespaceMapping: {},
-            namespaceToFileMapping: new Map<string, Set<NormalModule>>(),
+            potentialNamespaceCollision: new Map<string, Set<NormalModule>>(),
         }
     );
 }

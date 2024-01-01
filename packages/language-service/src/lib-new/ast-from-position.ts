@@ -39,7 +39,6 @@ export type AstLocation =
               | 'atRuleBody'
               | 'declProp'
               | 'declBetweenPropAndColon'
-              | 'declBetweenColonAndValue'
               | 'declValue'
               | 'invalid';
       }
@@ -56,7 +55,6 @@ export type AstLocation =
           node: CSSValue.BaseAstNode | CSSValue.BaseAstNode[];
           offsetInNode: number;
           parents: NodeType[];
-          afterValue: boolean;
       }
     | {
           type: 'atRuleParams';
@@ -64,7 +62,6 @@ export type AstLocation =
           node: CSSValue.BaseAstNode | CSSValue.BaseAstNode[];
           offsetInNode: number;
           parents: NodeType[];
-          afterValue: boolean;
       };
 export interface AstLocationResult {
     base: AstLocation & { type: 'base' };
@@ -74,7 +71,7 @@ export interface AstLocationResult {
 }
 function isClosed(node: postcss.AnyNode) {
     const isLast = node.parent && node.parent.nodes[node.parent.nodes.length - 1] === node;
-    if (node.type === 'decl') {
+    if (node.type === 'decl' || (node.type === 'atrule' && !node.nodes)) {
         return isLast ? node.parent?.raws.semicolon : true;
     }
     return true;
@@ -237,30 +234,38 @@ function checkRuleSelector(
 }
 function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
     if (isDeclaration(node)) {
-        const between = node.raws.between!;
-        const valueStart = checkContext.baseNodeOffset + node.prop.length + between.length;
-        const valueEnd = valueStart + node.value.length;
+        const { between = '', value: rawsValue } = node.raws;
+        const colon = between.slice(0, between.indexOf(':') + 1);
+        const afterColon = between.slice(colon.length);
+        const valueStart = checkContext.baseNodeOffset + node.prop.length + colon.length;
+        // ToDo: "where=declImportant"
+        const parentNode = node.parent;
+        const unclosedDeclExtraSpace =
+            parentNode?.nodes[parentNode.nodes.length - 1] === node && !parentNode.raws.semicolon
+                ? node.parent?.raws.after
+                : '';
+        const valueAfterColon =
+            afterColon + (rawsValue?.raw ? rawsValue.raw : node.value + unclosedDeclExtraSpace);
+        const valueEnd = valueStart + valueAfterColon.length;
+        const ast = CSSValue.parseCSSValue(valueAfterColon);
         const isInValue = checkValue({
             type: 'declValue',
-            value: node.value,
+            ast,
             node,
             valueStart,
             valueEnd,
-            afterSpace: 0,
             checkContext,
         });
-        let where: typeof base['where'] = 'declValue';
+        let where: (typeof base)['where'] = 'declValue';
         const base = checkContext.result.base;
         if (isInValue) {
+            // prop:| value |
             where = 'declValue';
         } else if (base.offsetInNode > node.prop.length) {
-            const spaceAfterColon = between.length - between.indexOf(':');
-            if (valueStart - spaceAfterColon >= checkContext.targetOffset) {
-                where = 'declBetweenPropAndColon';
-            } else {
-                where = 'declBetweenColonAndValue';
-            }
+            // prop | |: value
+            where = 'declBetweenPropAndColon';
         } else {
+            // |prop|: value
             where = 'declProp';
         }
         base.where = where;
@@ -268,88 +273,99 @@ function checkDeclValue(node: postcss.AnyNode, checkContext: CheckContext) {
 }
 function checkAtRuleParams(node: postcss.AnyNode, checkContext: CheckContext) {
     if (isAtRule(node)) {
-        const valueStart =
-            checkContext.baseNodeOffset + 1 + node.name.length + node.raws.afterName!.length;
-        const valueEnd = valueStart + node.params.length;
+        const AtPrefixLength = 1;
+        const { afterName = '', between = '' } = node.raws;
+        const parentNode = node.parent;
+        const unclosedExtraSpace =
+            parentNode?.nodes[parentNode.nodes.length - 1] === node && !parentNode.raws.semicolon
+                ? node.parent?.raws.after
+                : '';
+        const prelude = afterName + node.params + between + unclosedExtraSpace;
+        const valueStart = checkContext.baseNodeOffset + AtPrefixLength + node.name.length;
+        const valueEnd = valueStart + prelude.length;
+
+        const ast = CSSValue.parseCSSValue(prelude);
+
         const isInParams = checkValue({
             type: 'atRuleParams',
-            value: node.params,
+            ast,
             node,
             valueStart,
             valueEnd,
-            afterSpace: node.raws.between!.length,
             checkContext,
         });
-        let where: typeof base['where'] = 'declValue';
+        let where: (typeof base)['where'] = 'atRuleParams';
         const base = checkContext.result.base;
         if (isInParams) {
-            where = 'atRuleParams';
+            if (checkContext.result.atRuleParams!.offsetInNode === 0) {
+                // @name| params
+                where = 'atRuleName';
+            } else {
+                // @name |params|
+                where = 'atRuleParams';
+            }
         } else if (
             checkContext.baseNodeOffset + node.name.length + 1 >=
             checkContext.targetOffset
         ) {
+            // @|nam|e params
             where = 'atRuleName';
         } else {
+            // @name params { | }
             where = 'atRuleBody';
         }
         base.where = where;
     }
 }
 function checkValue({
-    value,
+    ast,
     node,
     type,
     valueStart,
     valueEnd,
-    afterSpace,
-    checkContext: { targetOffset, result, afterNodeContent },
+    checkContext: { targetOffset, result },
 }: {
-    value: string;
+    ast: CSSValue.BaseAstNode[];
     node: postcss.AnyNode;
     type: 'atRuleParams' | 'declValue';
     valueStart: number;
     valueEnd: number;
-    afterSpace: number;
     checkContext: CheckContext;
 }) {
+    /* value | */
     const isAfterValue = valueEnd < targetOffset;
-    const isInIncludedSpace =
-        afterNodeContent || (isAfterValue && valueEnd + afterSpace >= targetOffset);
-    if (valueStart > targetOffset || (isAfterValue && !isInIncludedSpace)) {
+    const isBeforeValue = valueStart > targetOffset;
+    if (isBeforeValue || isAfterValue) {
         // not in value
         return false;
     }
-    const ast = CSSValue.parseCSSValue(value);
     const valueLocation: Extract<AstLocation, { type: 'atRuleParams' | 'declValue' }> = {
         type,
         ast,
         node: ast,
-        offsetInNode: !isInIncludedSpace ? 0 : value.length + targetOffset - valueEnd,
+        offsetInNode: 0,
         parents: [node],
-        afterValue: isInIncludedSpace,
     };
-    if (!isInIncludedSpace) {
-        walkValue(ast, (node) => {
-            const isTargetAfterStart =
-                valueStart + node.start < targetOffset ||
-                (valueStart === targetOffset && node.start === 0);
-            const isTargetBeforeEnd = valueStart + node.end >= targetOffset;
-            if (!isTargetAfterStart) {
-                // value is after the target offset
-                return walk.stopAll;
-            } else if (!isTargetBeforeEnd) {
-                // value ends before target offset
-                return walk.skipNested;
-            }
-            // update
-            if (!Array.isArray(valueLocation.node)) {
-                valueLocation.parents.push(valueLocation.node);
-            }
-            valueLocation.node = node;
-            valueLocation.offsetInNode = targetOffset - valueStart - node.start;
-            return;
-        });
-    }
+    walkValue(ast, (node) => {
+        const isTargetAfterStart =
+            valueStart + node.start < targetOffset ||
+            (valueStart === targetOffset && node.start === 0);
+        const isTargetBeforeEnd = valueStart + node.end >= targetOffset;
+        if (!isTargetAfterStart) {
+            // value is after the target offset
+            return walk.stopAll;
+        } else if (!isTargetBeforeEnd) {
+            // value ends before target offset
+            return walk.skipNested;
+        }
+        // update
+        if (!Array.isArray(valueLocation.node)) {
+            valueLocation.parents.push(valueLocation.node);
+        }
+        valueLocation.node = node;
+        valueLocation.offsetInNode = targetOffset - valueStart - node.start;
+        return;
+    });
     result[type] = valueLocation as any; // ToDo: figure out type issue
     return true;
 }
@@ -362,7 +378,7 @@ function isPostcssNodeInRange(node: postcss.AnyNode | postcss.Container, target:
     if (node.source?.start && node.source?.end) {
         const beforeSize = node.type === 'rule' ? node.raws.before.length : 0;
         result.nodeStartBeforeCaret = node.source.start.offset - beforeSize <= target;
-        result.nodeEndsAfterCaret = node.source.end.offset + 1 >= target;
+        result.nodeEndsAfterCaret = node.source.end.offset >= target;
         result.isInRange = result.nodeStartBeforeCaret && result.nodeEndsAfterCaret;
     }
     return result;

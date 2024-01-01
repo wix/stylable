@@ -1,4 +1,4 @@
-import { STImport, CSSCustomProperty, STSymbol } from '@stylable/core/dist/features';
+import { STImport, STVar, CSSCustomProperty, STSymbol } from '@stylable/core/dist/features';
 import { generateScopedCSSVar } from '@stylable/core/dist/helpers/css-custom-property';
 import {
     testStylableCore,
@@ -10,6 +10,7 @@ import { expect } from 'chai';
 
 const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
+const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
 const customPropertyDiagnostics = diagnosticBankReportToStrings(CSSCustomProperty.diagnostics);
 
 describe(`features/css-custom-property`, () => {
@@ -289,6 +290,44 @@ describe(`features/css-custom-property`, () => {
         const { meta } = sheets['/entry.st.css'];
 
         expect(CSSCustomProperty.getRuntimeTypedDefinitionNames(meta)).to.eql(['--c', '--d']);
+    });
+    it('should warn on undefined property in strict mode', () => {
+        testStylableCore(
+            {
+                '/invalid.st.css': `
+                    .root {
+                        /* 
+                            @analyze-error word(--prop) ${customPropertyDiagnostics.UNDEFINED_CSS_CUSTOM_PROP(
+                                '--prop'
+                            )}
+                            @decl --invalid-prop: green 
+                        */
+                        --prop: green;
+
+                        /* 
+                            @analyze-error word(--prop2) ${customPropertyDiagnostics.UNDEFINED_CSS_CUSTOM_PROP(
+                                '--prop2'
+                            )}
+                            @decl color: var(--invalid-prop2) 
+                        */
+                        color: var(--prop2);
+                    }
+                `,
+                '/valid.st.css': `
+                    @st-import [--prop] from './invalid.st.css';
+                    @property --prop2;
+
+                    .root {
+                        /* @decl --invalid-prop: green */
+                        --prop: green;
+
+                        /* @decl color: var(--valid-prop2) */
+                        color: var(--prop2);
+                    }
+                `,
+            },
+            { stylableConfig: { flags: { strictCustomProperty: true } } }
+        );
     });
     it.skip(`should escape`, () => {
         const { sheets } = testStylableCore(`
@@ -748,7 +787,7 @@ describe(`features/css-custom-property`, () => {
         });
         it(`should NOT define property as var value (change in v5)`, () => {
             // ToDo: in the future property should be able to be defined in var value
-            const { sheets } = testStylableCore(`
+            testStylableCore(`
                 :vars {
                     myVar: var(--color);
                 }
@@ -758,8 +797,50 @@ describe(`features/css-custom-property`, () => {
                     prop: value(myVar);
                 }
             `);
+        });
+        it(`should report deprecation info on unknown custom properties`, () => {
+            const { sheets } = testStylableCore({
+                './other.st.css': `
+                    @property --knownA;
+                `,
+                './invalid.st.css': `
+                    :vars {
+                        /* @transform-info(single) ${stVarDiagnostics.UNKNOWN_CUSTOM_PROP([
+                            '--unknown1',
+                        ])} */
+                        single: var(--unknown1);
 
-            const { meta } = sheets['/entry.st.css'];
+                        /* @transform-info(between) ${stVarDiagnostics.UNKNOWN_CUSTOM_PROP([
+                            '--unknown2',
+                        ])} */
+                        betweenValue: before var(--unknown2) after;
+
+                        /* @transform-info(multiple) ${stVarDiagnostics.UNKNOWN_CUSTOM_PROP([
+                            '--unknownY',
+                            '--unknownX',
+                            '--unknownZ',
+                        ])} */
+                        multiple: var(--unknownY) var(--unknownX, var(--unknownZ));
+                    }
+                `,
+                './valid.st.css': `
+                    @st-import [--knownA] from './other.st.css';
+                    @property --knownB;
+                    .root {
+                        --knownC: green;
+                    }
+
+                    :vars {
+                        single: var(--knownA);
+
+                        betweenValue: before var(--knownB) after;
+
+                        multiple: var(--knownC) var(--knownB, var(--knownA));
+                    }
+                `,
+            });
+
+            const { meta } = sheets['/valid.st.css'];
 
             shouldReportNoDiagnostics(meta);
         });
@@ -923,8 +1004,9 @@ describe(`features/css-custom-property`, () => {
     });
     describe('native css', () => {
         it('should not namespace', () => {
-            const { stylable } = testStylableCore({
-                '/native.css': deindent(`
+            const { stylable } = testStylableCore(
+                {
+                    '/native.css': deindent(`
                     @property --a {
                         syntax: '<color>';
                         initial-value: green;
@@ -934,7 +1016,7 @@ describe(`features/css-custom-property`, () => {
                         --b: var(--c);
                     }
                 `),
-                '/entry.st.css': `
+                    '/entry.st.css': `
                     @st-import [--a, --b, --c] from './native.css';
 
                     .root {
@@ -948,7 +1030,9 @@ describe(`features/css-custom-property`, () => {
                         --c: var(--c);
                     }
                 `,
-            });
+                },
+                { stylableConfig: { flags: { strictCustomProperty: true } } }
+            );
 
             const { meta: nativeMeta } = stylable.transform('/native.css');
             const { meta, exports } = stylable.transform('/entry.st.css');
@@ -975,6 +1059,23 @@ describe(`features/css-custom-property`, () => {
                 b: '--b',
                 c: '--c',
             });
+        });
+        it('should ignore strictCustomProperty', () => {
+            const { stylable } = testStylableCore(
+                {
+                    '/entry.css': `
+                        .root {
+                            /* @decl --a: var(--z) */
+                            --a: var(--z);
+                        }
+                    `,
+                },
+                { stylableConfig: { flags: { strictCustomProperty: true } } }
+            );
+
+            const { meta } = stylable.transform('/entry.css');
+
+            shouldReportNoDiagnostics(meta);
         });
         it('should ignore stylable specific transformations', () => {
             const { stylable } = testStylableCore({

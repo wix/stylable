@@ -14,7 +14,7 @@ import {
     hasImportedSideEffects,
     collectImportsWithSideEffects,
 } from '@stylable/build-tools';
-import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
+import { packageJsonLookupCache, resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import decache from 'decache';
 import {
@@ -110,6 +110,7 @@ export function stylableRollupPlugin({
             if (stylable) {
                 clearRequireCache();
                 stylable.initCache();
+                packageJsonLookupCache.clear();
             } else {
                 const stConfig = stylableConfig({
                     fileSystem: fs,
@@ -177,6 +178,7 @@ export function stylableRollupPlugin({
             const { isStFile, isLoadableCssFile, path } = getLoadableModuleData(id);
             if (isLoadableCssFile || isStFile) {
                 const code = fs.readFileSync(path, 'utf8');
+                this.addWatchFile(path);
                 return { code, moduleSideEffects: isLoadableCssFile };
             }
             return null;

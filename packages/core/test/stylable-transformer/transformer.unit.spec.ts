@@ -1,24 +1,9 @@
 import { expect } from 'chai';
-import { testStylableCore } from '@stylable/core-test-kit';
-
-function createSpy<T extends (...args: any[]) => any>(fn?: T) {
-    const spy = (...args: any[]) => {
-        spy.calls.push(args);
-        spy.callCount++;
-        return fn?.(...args);
-    };
-    spy.calls = [] as unknown[][];
-    spy.callCount = 0;
-    spy.resetHistory = () => {
-        spy.calls.length = 0;
-        spy.callCount = 0;
-    };
-    return spy;
-}
+import { testStylableCore, logCalls } from '@stylable/core-test-kit';
 
 describe('Transformer', () => {
     it('should not resolve path more then once', () => {
-        const onResolve = createSpy((resolved) => resolved);
+        const onResolve = logCalls((resolved: any) => resolved);
         testStylableCore(
             {
                 '/base.st.css': `

@@ -4,7 +4,7 @@ import {
     defaultNoMatchHandler,
 } from '@stylable/core';
 import { dirname, relative } from 'path';
-import findConfig from 'find-config';
+import { findPackageJson } from './find-package-json';
 
 export function resolveNamespaceFactory(
     hashSalt = '',
@@ -14,13 +14,18 @@ export function resolveNamespaceFactory(
     return createNamespaceStrategyNode({ hashSalt, prefix, ...options });
 }
 
+export const packageJsonLookupCache = new Map<string, string>();
+
 export function createNamespaceStrategyNode(options: Partial<CreateNamespaceOptions> = {}) {
     return createNamespaceStrategy({
         normalizePath(packageRoot: string, stylesheetPath: string) {
             return relative(packageRoot, stylesheetPath).replace(/\\/g, '/');
         },
         getPackageInfo: (stylesheetPath) => {
-            const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
+            const configPath = findPackageJson(
+                dirname(stylesheetPath),
+                packageJsonLookupCache
+            )?.packageJsonPath;
             if (!configPath) {
                 throw new Error(`Could not find package.json for ${stylesheetPath}`);
             }

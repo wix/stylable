@@ -9,9 +9,7 @@ import {
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
 import { transformerDiagnostics } from '@stylable/core/dist/index-internal';
-import { STScope } from '@stylable/core/dist/features';
 
-const stScopeDiagnostics = diagnosticBankReportToStrings(STScope.diagnostics);
 const transformerStringDiagnostics = diagnosticBankReportToStrings(transformerDiagnostics);
 
 use(flatMatch);
@@ -515,30 +513,6 @@ describe('@st-scope', () => {
             expect((meta.targetAst!.first as Rule).selector).to.equal(
                 '.entry__root::unknownPart .entry__part::unknownPart'
             );
-        });
-        it('should warn about a missing scoping parameter', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        |@st-scope {
-                            .part {}
-                        }|
-                        `,
-                    },
-                },
-            };
-
-            const { meta } = expectTransformDiagnostics(config, [
-                {
-                    message: stScopeDiagnostics.MISSING_SCOPING_PARAM(),
-                    file: '/entry.st.css',
-                    severity: 'error',
-                },
-            ]);
-            expect((meta.targetAst!.first as Rule).selector).to.equal('.entry__part');
         });
     });
 });

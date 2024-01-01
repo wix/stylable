@@ -1,6 +1,7 @@
 import { createFeature } from './feature';
 import { nativePseudoClasses } from '../native-reserved-lists';
 import * as STCustomState from './st-custom-state';
+import * as CSSType from './css-type';
 import { createDiagnosticReporter } from '../diagnostics';
 import type { Selector } from '@tokey/css-selector-parser';
 import isVendorPrefixed from 'is-vendor-prefixed';
@@ -50,7 +51,7 @@ export const hooks = createFeature({
                             {
                                 _kind: 'css',
                                 meta: context.meta,
-                                symbol: { _kind: 'element', name: '*' },
+                                symbol: CSSType.createSymbol({ name: '*' }),
                             },
                         ],
                         node

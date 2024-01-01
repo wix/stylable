@@ -16,6 +16,7 @@ export {
     getOnlyChunk,
     getSortedModules,
     getStaticPublicPath,
+    getWebpackBuildMeta,
     getStylableBuildData,
     getStylableBuildMeta,
     getStylableModules,

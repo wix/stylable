@@ -1,13 +1,13 @@
 {
   "name": "@stylable/build-tools",
-  "version": "5.11.0",
+  "version": "5.17.0",
   "description": "Collection of helper functions for Stylable based tooling.",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "dependencies": {
-    "@stylable/core": "^5.11.0",
+    "@stylable/core": "^5.17.0",
     "find-config": "^1.0.0"
   },
   "files": [

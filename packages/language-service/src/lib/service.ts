@@ -32,6 +32,7 @@ import { getRefs, getRenameRefs } from './provider';
 import { typescriptSupport } from './typescript-support';
 import type { ExtendedTsLanguageService } from './types';
 import { LangServiceContext } from '../lib-new/lang-service-context';
+import { wrapAndCatchErrors } from './utils/wrap-and-log';
 
 export interface StylableLanguageServiceOptions {
     fs: IFileSystem;
@@ -67,6 +68,7 @@ export class StylableLanguageService {
 
         if (stylableFile && stylableFile.stat.isFile()) {
             const context = new LangServiceContext(this.fs, this.stylable, stylableFile, offset);
+            this.provider.analyzeCaretContext(context);
             return this.getCompletions(context);
         } else {
             return [];
@@ -326,17 +328,17 @@ export class StylableLanguageService {
                 );
             }
         }
-
-        const cssCompletions = this.cssService.getCompletions(cleanDocument, position);
-
-        for (const cssComp of cssCompletions) {
-            const label = cssComp.label;
-
-            if (!groupedCompletions.has(label)) {
-                // CSS declaration property names have built in sorting
-                // at-rules, rules and declaration values do not
-                cssComp.sortText = cssComp.sortText || 'z';
-                groupedCompletions.set(label, cssComp);
+        // native CSS service
+        if (context.flags.runNativeCSSService) {
+            const cssCompletions = this.cssService.getCompletions(cleanDocument, position);
+            for (const cssComp of cssCompletions) {
+                const label = cssComp.label;
+                if (!groupedCompletions.has(label)) {
+                    // CSS declaration property names have built in sorting
+                    // at-rules, rules and declaration values do not
+                    cssComp.sortText = cssComp.sortText || 'z';
+                    groupedCompletions.set(label, cssComp);
+                }
             }
         }
 
@@ -416,6 +418,22 @@ export class StylableLanguageService {
         return null;
     }
 }
+
+wrapAndCatchErrors(
+    {
+        onDefinition: () => [],
+        onCompletion: () => [],
+        onSignatureHelp: () => null,
+        onReferences: () => [],
+        onHover: () => null,
+        onColorPresentation: () => [],
+        onDocumentColor: () => [],
+        onDocumentFormatting: () => [],
+        onDocumentRangeFormatting: () => [],
+        onRenameRequest: () => ({ changes: {} }),
+    },
+    StylableLanguageService
+);
 
 export interface StylableFile {
     path: string;

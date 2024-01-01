@@ -12,5 +12,7 @@ Creates a factory for creating multiple Stylable modules in a shared context, us
 
 Creates a single Stylable module source code.
 
+> This function moved to `@stylable/core` and will be removed in the next major version.
+
 ## License
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [MIT license](./LICENSE).

@@ -289,7 +289,9 @@ export class ProjectRunner {
                     names.push(module.identifier().split(/[\\/]/).slice(-2).join('/'));
                 }
             }
-            chunkByName[chunk.name] = names;
+            if (chunk.name) {
+                chunkByName[chunk.name] = names;
+            }
         });
         return chunkByName;
     }

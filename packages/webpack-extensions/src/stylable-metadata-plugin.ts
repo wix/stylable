@@ -6,6 +6,8 @@ import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-
 
 import {
     getCSSViewModuleWebpack,
+    getWebpackBuildMeta,
+    getStylableBuildMeta,
     getStylableModules,
     isStylableModule,
     uniqueFilterMap,
@@ -69,9 +71,11 @@ export class StylableMetadataPlugin {
         const getViewModule = getCSSViewModuleWebpack(compilation.moduleGraph);
         const stylableModulesWithData = getStylableModules(compilation);
         for (const module of stylableModules) {
+            const buildMeta = getWebpackBuildMeta(module);
+            const stylableBuildMeta = getStylableBuildMeta(module);
             const namespace =
-                stylableModulesWithData?.get(module)?.namespace ?? module.buildMeta.namespace;
-            const depth = module.buildMeta.stylable.depth;
+                stylableModulesWithData?.get(module)?.namespace ?? buildMeta.namespace;
+            const depth = stylableBuildMeta.depth;
             const resource = this.options.normalizeModulePath
                 ? this.options.normalizeModulePath(module.resource, builder)
                 : module.resource;

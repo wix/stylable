@@ -15,7 +15,6 @@ export {
     STImport,
     STGlobal,
     STNamespace,
-    STPart,
     STCustomSelector,
     STCustomState,
     CSSClass,
@@ -24,7 +23,9 @@ export {
     CSSLayer,
     CSSContains,
     CSSCustomProperty,
+    STStructure,
 } from './features';
+export { defaultFeatureFlags } from './features/feature';
 export type {
     MappedStates,
     StateParsedValue,

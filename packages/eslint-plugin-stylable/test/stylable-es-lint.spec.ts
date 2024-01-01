@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { ESLintUtils } from '@typescript-eslint/experimental-utils';
+import { ESLintUtils } from '@typescript-eslint/utils';
 import StylableLint from 'eslint-plugin-stylable/dist/stylable-es-lint';
 import { createTempDirectorySync } from '@stylable/e2e-test-kit';
 

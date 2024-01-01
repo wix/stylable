@@ -2,7 +2,7 @@ import type { LoaderContext } from 'webpack';
 
 export function addBuildInfo(ctx: LoaderContext<any>, namespace: string) {
     try {
-        ctx._module!.buildInfo.stylableNamespace = namespace;
+        (ctx._module!.buildInfo as any).stylableNamespace = namespace;
     } catch (error) {
         ctx.emitWarning(
             new Error(

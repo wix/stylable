@@ -63,6 +63,7 @@ export const diagnostics = {
     VALUE_CANNOT_BE_STRING: mixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
     INVALID_NAMED_PARAMS: mixinHelperDiagnostics.INVALID_NAMED_PARAMS,
     INVALID_MERGE_OF: utilDiagnostics.INVALID_MERGE_OF,
+    INVALID_RECURSIVE_MIXIN: utilDiagnostics.INVALID_RECURSIVE_MIXIN,
     PARTIAL_MIXIN_MISSING_ARGUMENTS: createDiagnosticReporter(
         '10001',
         'error',
@@ -236,20 +237,23 @@ function collectRuleMixins(
     const resolvedSymbols = context.getResolvedSymbols(context.meta);
     const { mainNamespace } = resolvedSymbols;
     const decls: postcss.Declaration[] = [];
-    rule.walkDecls((decl) => {
-        if (decl.prop === `-st-mixin` || decl.prop === `-st-partial-mixin`) {
-            decls.push(decl);
+    for (const node of rule.nodes) {
+        if (
+            node.type === 'decl' &&
+            (node.prop === `-st-mixin` || node.prop === `-st-partial-mixin`)
+        ) {
+            decls.push(node);
             mixins = collectDeclMixins(
                 context,
                 resolvedSymbols,
-                decl,
+                node,
                 (mixinSymbolName) => {
                     return mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named';
                 },
                 mixins
             );
         }
-    });
+    }
     return [decls, mixins];
 }
 
@@ -417,7 +421,7 @@ function handleJSMixin(
     const meta = context.meta;
     const mixDef = config.mixDef;
     const res = mixinFunction((mixDef.data.options as any[]).map((v) => v.value));
-    const mixinRoot = cssObjectToAst(res).root;
+    const mixinRoot = cssObjectToAst(res);
 
     mixinRoot.walkDecls((decl) => {
         if (!isValidDeclaration(decl)) {
@@ -534,8 +538,9 @@ function collectOptionalArgs(
     mixinRoot: postcss.Root,
     optionalArgs: Set<string> = new Set()
 ) {
-    mixinRoot.walkDecls((decl) => {
-        const varNames = STVar.parseVarsFromExpr(decl.value);
+    mixinRoot.walk((node) => {
+        const value = node.type === 'decl' ? node.value : node.type === 'atrule' ? node.params : '';
+        const varNames = STVar.parseVarsFromExpr(value);
         for (const name of varNames) {
             for (const refName of STVar.resolveReferencedVarNames(context, name)) {
                 optionalArgs.add(refName);

@@ -1,4 +1,5 @@
 import { createDefaultResolver } from '@stylable/core';
+import { CSSClass } from '@stylable/core/dist/index-internal';
 import { createTempDirectorySync } from '@stylable/core-test-kit';
 import { testLangService } from '../../test-kit/test-lang-service';
 import { stImportNamedCompletion } from '@stylable/language-service/dist/lib/completion-types';
@@ -18,7 +19,7 @@ describe('LS: st-import', () => {
     it('should suggest @st-import at top level', () => {
         // ToDo: refactor code to be handled as part of the st-import feature
         // and use new ls-context instead of TopLevelDirectiveProvider
-        const { service, carets, assertCompletions, fs, textEditContext } = testLangService(
+        const { service, assertCompletions, fs } = testLangService(
             {
                 'a.st.css': `
                     ^topLevel^
@@ -47,53 +48,97 @@ describe('LS: st-import', () => {
         const aPath = fs.join(tempDir.path, 'a.st.css');
         const bPath = fs.join(tempDir.path, 'b.st.css');
         const cPath = fs.join(tempDir.path, 'c.st.css');
-        const aCarets = carets[aPath];
-        const bCarets = carets[bPath];
-        const cCarets = carets[cPath];
-        const { replaceText: bReplaceText } = textEditContext(bPath);
 
-        assertCompletions({
+        assertCompletions(aPath, ({ filePath, carets }) => ({
             message: 'top-level',
-            actualList: service.onCompletion(aPath, aCarets.topLevel),
+            actualList: service.onCompletion(filePath, carets.topLevel),
             expectedList: [{ label: '@st-import' }],
-        });
-        assertCompletions({
+        }));
+        assertCompletions(bPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
             message: 'partial',
-            actualList: service.onCompletion(bPath, bCarets.partial),
+            actualList: service.onCompletion(filePath, carets.partial),
             expectedList: [
                 {
                     label: '@st-import',
-                    textEdit: bReplaceText(bCarets.partial, `@st-import $2 from "$1";`, {
+                    textEdit: replaceText(carets.partial, `@st-import $2 from "$1";`, {
                         deltaStart: -3,
                     }),
                 },
             ],
-        });
-        assertCompletions({
+        }));
+        assertCompletions(cPath, ({ filePath, carets }) => ({
             message: 'nested-in-rule',
-            actualList: service.onCompletion(cPath, cCarets.nestedInRule),
+            actualList: service.onCompletion(filePath, carets.nestedInRule),
             unexpectedList: [{ label: '@st-import' }],
-        });
+        }));
         // ToDo: remove specific at-rules handling - @st-import should only be top level
-        assertCompletions({
+        assertCompletions(cPath, ({ filePath, carets }) => ({
             message: 'nested-in-media',
-            actualList: service.onCompletion(cPath, cCarets.nestedInMedia),
+            actualList: service.onCompletion(filePath, carets.nestedInMedia),
             unexpectedList: [{ label: '@st-import' }],
-        });
-        assertCompletions({
+        }));
+        assertCompletions(cPath, ({ filePath, carets }) => ({
             message: 'nested-in-st-scope',
-            actualList: service.onCompletion(cPath, cCarets.nestedInStScope),
+            actualList: service.onCompletion(filePath, carets.nestedInStScope),
             unexpectedList: [{ label: '@st-import' }],
-        });
-        assertCompletions({
+        }));
+        assertCompletions(cPath, ({ filePath, carets }) => ({
             message: 'before-selector',
-            actualList: service.onCompletion(cPath, cCarets.beforeSelector),
+            actualList: service.onCompletion(filePath, carets.beforeSelector),
             unexpectedList: [{ label: '@st-import' }],
-        });
+        }));
+    });
+    it('should not suggest native css or selectors', () => {
+        const { service, assertCompletions, fs } = testLangService(
+            {
+                'other.st.css': ``,
+                'entry.st.css': `
+                    @st-import ^default^ from '.^specifierEmpty^';
+                    @st-import [^named^, keyframes(^namedTyped^)] from '.^specifierWithDot^';
+                    
+                    .xxx {}
+                `,
+            },
+            { testOnNativeFileSystem: tempDir.path }
+        );
+
+        const entryPath = fs.join(tempDir.path, 'entry.st.css');
+
+        const unexpectedList = [
+            { label: '.xxx' },
+            { label: 'input' },
+            { label: '@media' },
+            { label: ':global()' },
+        ];
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'specifierEmpty',
+            actualList: service.onCompletion(filePath, carets.specifierEmpty),
+            unexpectedList,
+        }));
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'specifierWithDot',
+            actualList: service.onCompletion(filePath, carets.specifierWithDot),
+            unexpectedList,
+        }));
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'default',
+            actualList: service.onCompletion(filePath, carets.default),
+            unexpectedList,
+        }));
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'named',
+            actualList: service.onCompletion(filePath, carets.named),
+            unexpectedList,
+        }));
+        assertCompletions(entryPath, ({ filePath, carets }) => ({
+            message: 'namedTyped',
+            actualList: service.onCompletion(filePath, carets.namedTyped),
+            unexpectedList,
+        }));
     });
     describe('named imports', () => {
         it('should suggest named imports', () => {
-            const { service, carets, assertCompletions, fs, textEditContext } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'source.st.css': `
                         .classA {}
@@ -116,25 +161,23 @@ describe('LS: st-import', () => {
                 { testOnNativeFileSystem: tempDir.path }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
-            const { replaceText } = textEditContext(entryPath);
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'top',
-                actualList: service.onCompletion(entryPath, entryCarets.topEmpty),
+                actualList: service.onCompletion(filePath, carets.topEmpty),
                 expectedList: [
                     {
                         label: 'root',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './source.st.css',
-                            symbol: { _kind: 'class', name: 'root' },
+                            symbol: CSSClass.createSymbol({ name: 'root' }),
                         }),
                     },
                     {
                         label: 'classA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './source.st.css',
-                            symbol: { _kind: 'class', name: 'classA' },
+                            symbol: CSSClass.createSymbol({ name: 'classA' }),
                         }),
                     },
                     {
@@ -165,19 +208,19 @@ describe('LS: st-import', () => {
                     { label: 'jump' },
                     { label: 'comp' },
                 ],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                 message: 'partial',
-                actualList: service.onCompletion(entryPath, entryCarets.partial),
+                actualList: service.onCompletion(filePath, carets.partial),
                 expectedList: [
                     {
                         label: '--propA',
-                        textEdit: replaceText(entryCarets.partial, '--propA', { deltaStart: -5 }),
+                        textEdit: replaceText(carets.partial, '--propA', { deltaStart: -5 }),
                     },
                     {
                         label: '--propB',
-                        textEdit: replaceText(entryCarets.partial, '--propB', { deltaStart: -5 }),
+                        textEdit: replaceText(carets.partial, '--propB', { deltaStart: -5 }),
                     },
                 ],
                 unexpectedList: [
@@ -189,13 +232,12 @@ describe('LS: st-import', () => {
                     { label: 'jump' },
                     { label: 'comp' },
                 ],
-            });
+            }));
         });
         it('should suggest typed named imports', () => {
-            const { service, carets, assertCompletions, fs, textEditContext, completion } =
-                testLangService(
-                    {
-                        'source.st.css': `
+            const { service, assertCompletions, fs, completion } = testLangService(
+                {
+                    'source.st.css': `
                         .aClass {
                             --aProp: 1;
                             container-name: aContainer;
@@ -209,7 +251,7 @@ describe('LS: st-import', () => {
                         @layer aLayer {}
                         @layer bLayer {}
                     `,
-                        'entry.st.css': `
+                    'entry.st.css': `
                         @st-import [
                             keyframes(^keyframesEmpty^)
                             layer(^layerEmpty^)
@@ -221,21 +263,19 @@ describe('LS: st-import', () => {
                             container(a^containerPartial^)
                         ] from './source.st.css';
                     `,
-                    },
-                    { testOnNativeFileSystem: tempDir.path }
-                );
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
-            const { replaceText } = textEditContext(entryPath);
 
             const capitalize = (value: string) => value[0].toUpperCase() + value.slice(1);
             const supportedTypes = ['keyframes', 'layer', 'container'] as const;
             const allTypes = ['class', 'prop', 'buildVar', ...supportedTypes] as const;
             for (const type of supportedTypes) {
                 const capitalizedType = capitalize(type);
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: `empty ${type}`,
-                    actualList: service.onCompletion(entryPath, entryCarets[type + 'Empty']),
+                    actualList: service.onCompletion(filePath, carets[type + 'Empty']),
                     expectedList: [
                         // a&b param from type
                         ...completion(['a' + capitalizedType, 'b' + capitalizedType], (name) => ({
@@ -261,19 +301,17 @@ describe('LS: st-import', () => {
                             })
                         ),
                     ],
-                });
-                assertCompletions({
+                }));
+                assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                     message: `partial ${type}`,
-                    actualList: service.onCompletion(entryPath, entryCarets[type + 'Partial']),
+                    actualList: service.onCompletion(filePath, carets[type + 'Partial']),
                     expectedList: [
                         // a param from type (without b)
                         {
                             label: 'a' + capitalizedType,
-                            textEdit: replaceText(
-                                entryCarets[type + 'Partial'],
-                                'a' + capitalizedType,
-                                { deltaStart: -1 }
-                            ),
+                            textEdit: replaceText(carets[type + 'Partial'], 'a' + capitalizedType, {
+                                deltaStart: -1,
+                            }),
                             detail: stImportNamedCompletion.detail({
                                 relativePath: './source.st.css',
                                 symbol: { _kind: type, name: 'a' + capitalizedType },
@@ -296,16 +334,15 @@ describe('LS: st-import', () => {
                             })
                         ),
                     ],
-                });
+                }));
             }
         });
         it('should suggest typed import asserters', () => {
-            const { service, carets, assertCompletions, fs, completion, textEditContext } =
-                testLangService(
-                    {
-                        'source.st.css': ``,
-                        'code.js': ``,
-                        'entry.st.css': `
+            const { service, assertCompletions, fs, completion } = testLangService(
+                {
+                    'source.st.css': ``,
+                    'code.js': ``,
+                    'entry.st.css': `
                         @st-import [
                             ^topLevelEmpty^
                         ] from './source.st.css';
@@ -324,32 +361,30 @@ describe('LS: st-import', () => {
                             keyframes(^onlyInCSS^)
                         ] from './code.js';
                     `,
-                    },
-                    { testOnNativeFileSystem: tempDir.path }
-                );
+                },
+                { testOnNativeFileSystem: tempDir.path }
+            );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
-            const { replaceText } = textEditContext(entryPath);
 
             const supportedTypes = ['keyframes', 'layer', 'container'] as const;
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: `all`,
-                actualList: service.onCompletion(entryPath, entryCarets['topLevelEmpty']),
+                actualList: service.onCompletion(filePath, carets['topLevelEmpty']),
                 expectedList: [
                     ...completion([...supportedTypes], (type) => ({
                         label: type + '()',
                         detail: stImportNamedCompletion.typeAssertCallDetail(type),
                     })),
                 ],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                 message: `partial`,
-                actualList: service.onCompletion(entryPath, entryCarets['topPartial']),
+                actualList: service.onCompletion(filePath, carets['topPartial']),
                 expectedList: [
                     // partial "lay" - only layer()
                     {
                         label: 'layer()',
-                        textEdit: replaceText(entryCarets['topPartial'], 'layer($1)', {
+                        textEdit: replaceText(carets['topPartial'], 'layer($1)', {
                             deltaStart: -3,
                         }),
                         detail: stImportNamedCompletion.typeAssertCallDetail('layer'),
@@ -363,15 +398,15 @@ describe('LS: st-import', () => {
                         (type) => ({ label: type + '()' })
                     ),
                 ],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                 message: `with existing`,
-                actualList: service.onCompletion(entryPath, entryCarets['topWithExisting']),
+                actualList: service.onCompletion(filePath, carets['topWithExisting']),
                 expectedList: [
                     //  keyframes&layer already exist - only container
                     {
                         label: 'container()',
-                        textEdit: replaceText(entryCarets['topWithExisting'], 'container($1)'),
+                        textEdit: replaceText(carets['topWithExisting'], 'container($1)'),
                         detail: stImportNamedCompletion.typeAssertCallDetail('container'),
                         command: triggerCompletion,
                     },
@@ -383,26 +418,26 @@ describe('LS: st-import', () => {
                         (type) => ({ label: type + '()' })
                     ),
                 ],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: `only at top of params`,
-                actualList: service.onCompletion(entryPath, entryCarets['notTop']),
+                actualList: service.onCompletion(filePath, carets['notTop']),
                 unexpectedList: [
                     // all
                     ...completion([...supportedTypes], (type) => ({ label: type + '()' })),
                 ],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: `only in CSS`,
-                actualList: service.onCompletion(entryPath, entryCarets['onlyInCSS']),
+                actualList: service.onCompletion(filePath, carets['onlyInCSS']),
                 unexpectedList: [
                     // all
                     ...completion([...supportedTypes], (type) => ({ label: type + '()' })),
                 ],
-            });
+            }));
         });
         it('should suggest re-exports', () => {
-            const { service, carets, assertCompletions, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'origin.st.css': `
                         .originClassA {
@@ -442,24 +477,23 @@ describe('LS: st-import', () => {
                 { testOnNativeFileSystem: tempDir.path }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'top',
-                actualList: service.onCompletion(entryPath, entryCarets.topEmpty),
+                actualList: service.onCompletion(filePath, carets.topEmpty),
                 expectedList: [
                     {
                         label: 'root',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './proxy.st.css',
-                            symbol: { _kind: 'class', name: 'root' },
+                            symbol: CSSClass.createSymbol({ name: 'root' }),
                         }),
                     },
                     {
                         label: 'proxyClassA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './extend.st.css',
-                            symbol: { _kind: 'class', name: 'classA' },
+                            symbol: CSSClass.createSymbol({ name: 'classA' }),
                         }),
                     },
                     {
@@ -485,10 +519,10 @@ describe('LS: st-import', () => {
                     },
                 ],
                 unexpectedList: [{ label: 'proxyJump' }, { label: 'proxyComp' }],
-            });
+            }));
         });
         it('should show global information as part of detail', () => {
-            const { service, carets, assertCompletions, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'source.st.css': `
                         .classA {
@@ -508,21 +542,19 @@ describe('LS: st-import', () => {
                 { testOnNativeFileSystem: tempDir.path }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'top',
-                actualList: service.onCompletion(entryPath, entryCarets.top),
+                actualList: service.onCompletion(filePath, carets.top),
                 expectedList: [
                     {
                         label: 'classA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './source.st.css',
-                            symbol: {
-                                _kind: 'class',
+                            symbol: CSSClass.createSymbol({
                                 name: 'classA',
                                 '-st-global': parseCssSelector('.globalA'),
-                            },
+                            }),
                         }),
                     },
                     {
@@ -533,10 +565,10 @@ describe('LS: st-import', () => {
                         }),
                     },
                 ],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'keyframes',
-                actualList: service.onCompletion(entryPath, entryCarets.keyframes),
+                actualList: service.onCompletion(filePath, carets.keyframes),
                 expectedList: [
                     {
                         label: 'jump',
@@ -546,10 +578,10 @@ describe('LS: st-import', () => {
                         }),
                     },
                 ],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'layer',
-                actualList: service.onCompletion(entryPath, entryCarets.layer),
+                actualList: service.onCompletion(filePath, carets.layer),
                 expectedList: [
                     {
                         label: 'comps',
@@ -559,10 +591,10 @@ describe('LS: st-import', () => {
                         }),
                     },
                 ],
-            });
-            assertCompletions({
+            }));
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'container',
-                actualList: service.onCompletion(entryPath, entryCarets.container),
+                actualList: service.onCompletion(filePath, carets.container),
                 expectedList: [
                     {
                         label: 'box',
@@ -572,10 +604,10 @@ describe('LS: st-import', () => {
                         }),
                     },
                 ],
-            });
+            }));
         });
         it('should suggest symbols from native css', () => {
-            const { service, carets, assertCompletions, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'native.css': `
                         .classA {}
@@ -596,32 +628,29 @@ describe('LS: st-import', () => {
                 }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'top',
-                actualList: service.onCompletion(entryPath, entryCarets.top),
+                actualList: service.onCompletion(filePath, carets.top),
                 expectedList: [
                     {
                         label: 'classA',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './native.css',
-                            symbol: {
-                                _kind: 'class',
+                            symbol: CSSClass.createSymbol({
                                 name: 'classA',
                                 '-st-global': parseCssSelector('.classA'),
-                            },
+                            }),
                         }),
                     },
                     {
                         label: 'classB',
                         detail: stImportNamedCompletion.detail({
                             relativePath: './native.css',
-                            symbol: {
-                                _kind: 'class',
+                            symbol: CSSClass.createSymbol({
                                 name: 'classB',
                                 '-st-global': parseCssSelector('.classB'),
-                            },
+                            }),
                         }),
                     },
                     {
@@ -632,10 +661,10 @@ describe('LS: st-import', () => {
                         }),
                     },
                 ],
-            });
+            }));
         });
         it('should suggest symbols from js', () => {
-            const { service, carets, assertCompletions, fs, textEditContext } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'code.js': `
                         exports.mixinA = function mixinA(){}
@@ -653,12 +682,10 @@ describe('LS: st-import', () => {
                 { testOnNativeFileSystem: tempDir.path }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
-            const { replaceText } = textEditContext(entryPath);
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'top',
-                actualList: service.onCompletion(entryPath, entryCarets.top),
+                actualList: service.onCompletion(filePath, carets.top),
                 expectedList: [
                     {
                         label: 'mixinA',
@@ -709,11 +736,11 @@ describe('LS: st-import', () => {
                         }),
                     },
                 ],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                 message: 'partial',
-                actualList: service.onCompletion(entryPath, entryCarets.partial),
+                actualList: service.onCompletion(filePath, carets.partial),
                 expectedList: [
                     {
                         label: 'mixinA',
@@ -723,7 +750,7 @@ describe('LS: st-import', () => {
                                 /**/
                             },
                         }),
-                        textEdit: replaceText(entryCarets.partial, 'mixinA', { deltaStart: -3 }),
+                        textEdit: replaceText(carets.partial, 'mixinA', { deltaStart: -3 }),
                     },
                     {
                         label: 'mixinB',
@@ -733,16 +760,16 @@ describe('LS: st-import', () => {
                                 /**/
                             },
                         }),
-                        textEdit: replaceText(entryCarets.partial, 'mixinB', { deltaStart: -3 }),
+                        textEdit: replaceText(carets.partial, 'mixinB', { deltaStart: -3 }),
                     },
                 ],
                 unexpectedList: [{ label: 'formatterA' }, { label: 'strA' }, { label: 'boolA' }],
-            });
+            }));
         });
     });
     describe('specifier completion', () => {
         it('should suggest relative paths', () => {
-            const { service, carets, assertCompletions, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'a.st.css': ``,
                     'b.js': ``,
@@ -765,11 +792,10 @@ describe('LS: st-import', () => {
                 }
             );
             const entryPath = fs.join(tempDir.path, 'src', 'entry.st.css');
-            const entryCarets = carets[entryPath];
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'same dir',
-                actualList: service.onCompletion(entryPath, entryCarets.sameDir),
+                actualList: service.onCompletion(filePath, carets.sameDir),
                 expectedList: [
                     { label: 'c.st.css', command: undefined },
                     {
@@ -778,33 +804,33 @@ describe('LS: st-import', () => {
                     },
                 ],
                 unexpectedList: [{ label: 'entry.st.css' }],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'up dir',
-                actualList: service.onCompletion(entryPath, entryCarets.upDir),
+                actualList: service.onCompletion(filePath, carets.upDir),
                 expectedList: [{ label: 'a.st.css' }, { label: 'b.js' }, { label: 'src/' }],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'nested dir',
-                actualList: service.onCompletion(entryPath, entryCarets.nestedDir),
+                actualList: service.onCompletion(filePath, carets.nestedDir),
                 expectedList: [{ label: 'd.st.css' }],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'just dot without slash',
-                actualList: service.onCompletion(entryPath, entryCarets.justDot),
+                actualList: service.onCompletion(filePath, carets.justDot),
                 unexpectedList: [
                     { label: '/c.st.css' },
                     { label: '/inner/' },
                     { label: '/entry.st.css' },
                 ],
-            });
+            }));
 
-            assertCompletions({
+            assertCompletions(entryPath, ({ filePath, carets }) => ({
                 message: 'up dir without slash',
-                actualList: service.onCompletion(entryPath, entryCarets.upDirNoSlash),
+                actualList: service.onCompletion(filePath, carets.upDirNoSlash),
                 unexpectedList: [
                     { label: '/a.st.css' },
                     { label: '/b.js' },
@@ -812,10 +838,10 @@ describe('LS: st-import', () => {
                     { label: '/inner/' },
                     { label: '/entry.st.css' },
                 ],
-            });
+            }));
         });
         it('should suggest from both relative directory and base', () => {
-            const { service, carets, assertCompletions, textEditContext, fs } = testLangService(
+            const { service, assertCompletions, fs } = testLangService(
                 {
                     'file.st.css': ``,
                     files: {
@@ -834,32 +860,30 @@ describe('LS: st-import', () => {
                 }
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
-            const entryCarets = carets[entryPath];
-            const { replaceText } = textEditContext(entryPath);
 
-            assertCompletions({
-                actualList: service.onCompletion(entryPath, entryCarets[0]),
+            assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
+                actualList: service.onCompletion(filePath, carets[0]),
                 expectedList: [
                     {
                         label: 'file.st.css',
-                        textEdit: replaceText(entryCarets[0], 'file.st.css', { deltaStart: -3 }),
+                        textEdit: replaceText(carets[0], 'file.st.css', { deltaStart: -3 }),
                     },
                     {
                         label: 'files/',
-                        textEdit: replaceText(entryCarets[0], 'files/', { deltaStart: -3 }),
+                        textEdit: replaceText(carets[0], 'files/', { deltaStart: -3 }),
                     },
                     {
                         label: 'fil/',
-                        textEdit: replaceText(entryCarets[0], 'fil/', { deltaStart: -3 }),
+                        textEdit: replaceText(carets[0], 'fil/', { deltaStart: -3 }),
                     },
                     { label: '/b.st.css' },
                 ],
                 unexpectedList: [{ label: 'entry.st.css' }, { label: 'not-start-with-fil.st.css' }],
-            });
+            }));
         });
         describe('node_modules', () => {
             it('should suggest picked up node_modules package names', () => {
-                const { service, carets, assertCompletions, textEditContext, fs } = testLangService(
+                const { service, assertCompletions, fs } = testLangService(
                     {
                         node_modules: {
                             '@scoped-a': {
@@ -884,27 +908,25 @@ describe('LS: st-import', () => {
                     { testOnNativeFileSystem: tempDir.path }
                 );
                 const entryPath = fs.join(tempDir.path, 'src/entry.st.css');
-                const entryCarets = carets[entryPath];
-                const { replaceText } = textEditContext(entryPath);
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'empty',
-                    actualList: service.onCompletion(entryPath, entryCarets.empty),
+                    actualList: service.onCompletion(filePath, carets.empty),
                     expectedList: [
                         { label: '@scoped-a/pack1' },
                         { label: '@scoped-a/pack2' },
                         { label: '@scoped-a/pack3' },
                         { label: 'package-a' },
                     ],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                     message: 'start with p',
-                    actualList: service.onCompletion(entryPath, entryCarets.startWithP),
+                    actualList: service.onCompletion(filePath, carets.startWithP),
                     expectedList: [
                         {
                             label: 'package-a',
-                            textEdit: replaceText(entryCarets.startWithP, 'package-a', {
+                            textEdit: replaceText(carets.startWithP, 'package-a', {
                                 deltaStart: -1,
                             }),
                         },
@@ -914,36 +936,36 @@ describe('LS: st-import', () => {
                         { label: '@scoped-a/pack2' },
                         { label: '@scoped-a/pack3' },
                     ],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                     message: 'start with @',
-                    actualList: service.onCompletion(entryPath, entryCarets.startWithAt),
+                    actualList: service.onCompletion(filePath, carets.startWithAt),
                     expectedList: [
                         {
                             label: '@scoped-a/pack1',
-                            textEdit: replaceText(entryCarets.startWithAt, '@scoped-a/pack1', {
+                            textEdit: replaceText(carets.startWithAt, '@scoped-a/pack1', {
                                 deltaStart: -1,
                             }),
                         },
                         {
                             label: '@scoped-a/pack2',
-                            textEdit: replaceText(entryCarets.startWithAt, '@scoped-a/pack2', {
+                            textEdit: replaceText(carets.startWithAt, '@scoped-a/pack2', {
                                 deltaStart: -1,
                             }),
                         },
                         {
                             label: '@scoped-a/pack3',
-                            textEdit: replaceText(entryCarets.startWithAt, '@scoped-a/pack3', {
+                            textEdit: replaceText(carets.startWithAt, '@scoped-a/pack3', {
                                 deltaStart: -1,
                             }),
                         },
                     ],
                     unexpectedList: [{ label: 'package-a' }],
-                });
+                }));
             });
             it('should suggest package relative content (no exports field)', () => {
-                const { service, carets, assertCompletions, textEditContext, fs } = testLangService(
+                const { service, assertCompletions, fs } = testLangService(
                     {
                         node_modules: {
                             '@scoped': {
@@ -973,53 +995,51 @@ describe('LS: st-import', () => {
                     { testOnNativeFileSystem: tempDir.path }
                 );
                 const entryPath = fs.join(tempDir.path, 'entry.st.css');
-                const entryCarets = carets[entryPath];
-                const { replaceText } = textEditContext(entryPath);
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'scoped root',
-                    actualList: service.onCompletion(entryPath, entryCarets.scopedRoot),
+                    actualList: service.onCompletion(filePath, carets.scopedRoot),
                     expectedList: [
                         { label: 'dist/' },
                         { label: 'src/' },
                         { label: 'package.json' },
                     ],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'flat root',
-                    actualList: service.onCompletion(entryPath, entryCarets.flatRoot),
+                    actualList: service.onCompletion(filePath, carets.flatRoot),
                     expectedList: [{ label: 'esm/' }, { label: 'lib/' }, { label: 'package.json' }],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                     message: 'scoped internal',
-                    actualList: service.onCompletion(entryPath, entryCarets.scopedInternal),
+                    actualList: service.onCompletion(filePath, carets.scopedInternal),
                     expectedList: [
                         {
                             label: 'file.js',
-                            textEdit: replaceText(entryCarets.scopedInternal, 'file.js', {
+                            textEdit: replaceText(carets.scopedInternal, 'file.js', {
                                 deltaStart: -2,
                             }),
                         },
                     ],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets, textEdit: { replaceText } }) => ({
                     message: 'flat internal',
-                    actualList: service.onCompletion(entryPath, entryCarets.flatInternal),
+                    actualList: service.onCompletion(filePath, carets.flatInternal),
                     expectedList: [
                         {
                             label: 'file.js',
-                            textEdit: replaceText(entryCarets.flatInternal, 'file.js', {
+                            textEdit: replaceText(carets.flatInternal, 'file.js', {
                                 deltaStart: -2,
                             }),
                         },
                     ],
-                });
+                }));
             });
             it('should suggest closer resolved package', () => {
-                const { service, carets, assertCompletions, fs } = testLangService(
+                const { service, assertCompletions, fs } = testLangService(
                     {
                         node_modules: {
                             x: {
@@ -1042,17 +1062,16 @@ describe('LS: st-import', () => {
                     { testOnNativeFileSystem: tempDir.path }
                 );
                 const entryPath = fs.join(tempDir.path, 'src', 'entry.st.css');
-                const entryCarets = carets[entryPath];
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'empty',
-                    actualList: service.onCompletion(entryPath, entryCarets[0]),
+                    actualList: service.onCompletion(filePath, carets[0]),
                     expectedList: [{ label: 'green.js' }, { label: 'package.json' }],
                     unexpectedList: [{ label: 'red.js' }],
-                });
+                }));
             });
             it('should suggest package exports', () => {
-                const { service, carets, assertCompletions, fs } = testLangService(
+                const { service, assertCompletions, fs } = testLangService(
                     {
                         node_modules: {
                             x: {
@@ -1092,11 +1111,10 @@ describe('LS: st-import', () => {
                     { testOnNativeFileSystem: tempDir.path }
                 );
                 const entryPath = fs.join(tempDir.path, 'entry.st.css');
-                const entryCarets = carets[entryPath];
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'package root',
-                    actualList: service.onCompletion(entryPath, entryCarets.packageRoot),
+                    actualList: service.onCompletion(filePath, carets.packageRoot),
                     expectedList: [{ label: 'inner-a' }, { label: 'inner-b' }, { label: 'wild/' }],
                     unexpectedList: [
                         { label: 'private.js' },
@@ -1108,11 +1126,11 @@ describe('LS: st-import', () => {
                         },
                         { label: 'invalid-2/' },
                     ],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'wild card at end',
-                    actualList: service.onCompletion(entryPath, entryCarets.wildCardAtEnd),
+                    actualList: service.onCompletion(filePath, carets.wildCardAtEnd),
                     expectedList: [
                         { label: 'c-file.js', command: undefined },
                         { label: 'd-file.js', command: undefined },
@@ -1125,11 +1143,11 @@ describe('LS: st-import', () => {
                         { label: 'private.js' },
                         { label: 'package.json' },
                     ],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'wild card at end with partial file name',
-                    actualList: service.onCompletion(entryPath, entryCarets.wildCardAtEndPartial),
+                    actualList: service.onCompletion(filePath, carets.wildCardAtEndPartial),
                     expectedList: [{ label: 'c-file.js' }],
                     unexpectedList: [
                         { label: 'd-file.js' },
@@ -1140,13 +1158,13 @@ describe('LS: st-import', () => {
                         { label: 'private.js' },
                         { label: 'package.json' },
                     ],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'internal',
-                    actualList: service.onCompletion('/entry.st.css', entryCarets.internal),
+                    actualList: service.onCompletion(filePath, carets.internal),
                     unexpectedList: [{ label: 'x-file.js' }],
-                });
+                }));
             });
             it('should handle conditional exports', () => {
                 /**
@@ -1154,7 +1172,7 @@ describe('LS: st-import', () => {
                  * will only get hard-coded known conditions:
                  * node, import, require, default, browse
                  */
-                const { service, carets, assertCompletions, fs } = testLangService(
+                const { service, assertCompletions, fs } = testLangService(
                     {
                         node_modules: {
                             topLevelConditions: {
@@ -1206,36 +1224,32 @@ describe('LS: st-import', () => {
                     { testOnNativeFileSystem: tempDir.path }
                 );
                 const entryPath = fs.join(tempDir.path, 'entry.st.css');
-                const entryCarets = carets[entryPath];
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'known conditions',
-                    actualList: service.onCompletion(entryPath, entryCarets.topLevelConditions),
+                    actualList: service.onCompletion(filePath, carets.topLevelConditions),
                     expectedList: [{ label: 'import.js' }],
                     unexpectedList: [{ label: 'require.js' }, { label: 'default.js' }],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'nested conditions',
-                    actualList: service.onCompletion(entryPath, entryCarets.nestedConditions),
+                    actualList: service.onCompletion(filePath, carets.nestedConditions),
                     expectedList: [{ label: 'give-me/' }],
                     unexpectedList: [{ label: 'import.js' }],
-                });
+                }));
 
-                assertCompletions({
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
                     message: 'nested subpath conditions',
-                    actualList: service.onCompletion(
-                        entryPath,
-                        entryCarets.nestedSubpathConditions
-                    ),
+                    actualList: service.onCompletion(filePath, carets.nestedSubpathConditions),
                     expectedList: [{ label: 'a.js' }, { label: 'b.js' }],
                     unexpectedList: [{ label: 'x.js' }],
-                });
+                }));
             });
         });
         describe('custom resolve', () => {
             it('should suggest from custom mapped', () => {
-                const { service, carets, assertCompletions, fs } = testLangService(
+                const { service, assertCompletions, fs } = testLangService(
                     {
                         node_modules: {
                             x: {
@@ -1275,19 +1289,18 @@ describe('LS: st-import', () => {
                 );
                 const defaultResolveModule = createDefaultResolver(fs, {});
                 const entryPath = fs.join(tempDir.path, 'src', 'entry.st.css');
-                const entryCarets = carets[entryPath];
                 /**
                  * mapping like this cannot override the original resolved package
                  * and combine suggestions from both locations.
                  */
-                assertCompletions({
-                    actualList: service.onCompletion(entryPath, entryCarets[0]),
+                assertCompletions(entryPath, ({ filePath, carets }) => ({
+                    actualList: service.onCompletion(filePath, carets[0]),
                     expectedList: [
                         { label: 'green.js' },
                         { label: 'yellow.js' },
                         { label: 'package.json' },
                     ],
-                });
+                }));
             });
         });
     });

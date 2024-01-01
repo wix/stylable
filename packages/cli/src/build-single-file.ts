@@ -1,10 +1,10 @@
-import type { Stylable, StylableResults } from '@stylable/core';
-import { isAsset, isRelativeNativeCss } from '@stylable/core/dist/index-internal';
 import {
-    generateDTSContent,
-    generateDTSSourceMap,
+    type Stylable,
+    type StylableResults,
     generateStylableJSModuleSource,
-} from '@stylable/module-utils';
+} from '@stylable/core';
+import { isAsset, isRelativeNativeCss } from '@stylable/core/dist/index-internal';
+import { generateDTSContent, generateDTSSourceMap } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
 import type { IFileSystem } from '@file-services/types';
 import { hasImportedSideEffects, processUrlDependencies } from '@stylable/build-tools';
@@ -86,7 +86,6 @@ export function buildSingleFile({
     const outputLogs: string[] = [];
     log(mode, filePath);
 
-    tryRun(() => ensureDirectory(outDirPath, fs), `Ensure directory: ${outDirPath}`);
     let content: string = tryRun(
         () => fs.readFileSync(filePath).toString(),
         `Read File Error: ${filePath}`
@@ -95,6 +94,7 @@ export function buildSingleFile({
         () => stylable.transform(stylable.analyze(filePath)),
         errorMessages.STYLABLE_PROCESS(filePath)
     );
+
     const optimizer = new StylableOptimizer();
     if (optimize) {
         optimizer.optimize(
@@ -115,6 +115,10 @@ export function buildSingleFile({
             diagnosticsMode,
             diagnostics,
         });
+    }
+
+    if (outputSources || outputCSS || dts || moduleFormats.length) {
+        tryRun(() => ensureDirectory(outDirPath, fs), `Ensure directory: ${outDirPath}`);
     }
 
     // st.css

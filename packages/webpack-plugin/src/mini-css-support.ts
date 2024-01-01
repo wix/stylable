@@ -1,5 +1,9 @@
 import type { Compilation, Compiler, NormalModule } from 'webpack';
-import { replaceMappedCSSAssetPlaceholders, getStylableBuildData } from './plugin-utils';
+import {
+    replaceMappedCSSAssetPlaceholders,
+    getStylableBuildData,
+    getStylableBuildMeta,
+} from './plugin-utils';
 import { StylableWebpackPlugin } from './plugin';
 import type { BuildData } from './types';
 
@@ -11,7 +15,7 @@ export function injectCssModules(
     assetsModules: Map<string, NormalModule>
 ) {
     const MiniCssExtractPlugin = compilation.options.plugins.find(
-        (plugin) => plugin.constructor?.name === 'MiniCssExtractPlugin'
+        (plugin) => plugin?.constructor?.name === 'MiniCssExtractPlugin'
     );
 
     if (!MiniCssExtractPlugin) {
@@ -70,7 +74,7 @@ export function injectCssModules(
             for (const chunk of chunkGraph.getModuleChunksIterable(module)) {
                 const [chunkGroup] = chunk.groupsIterable;
                 chunkGraph.connectChunkAndModule(chunk, cssModule);
-                chunkGroup.setModulePostOrderIndex(cssModule, module.buildMeta.stylable.depth);
+                chunkGroup.setModulePostOrderIndex(cssModule, getStylableBuildMeta(module).depth);
             }
         }
     });

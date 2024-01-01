@@ -6,7 +6,6 @@ import {
     CustomSelectorMap,
 } from '../helpers/custom-selector';
 import { parseSelectorWithCache } from '../helpers/selector';
-import * as STPart from './st-part';
 import * as postcss from 'postcss';
 import { SelectorList, stringifySelectorAst } from '@tokey/css-selector-parser';
 import type { StylableMeta } from '../stylable-meta';
@@ -20,13 +19,14 @@ export const diagnostics = {
     ),
 };
 
-const dataKey =
-    plugableRecord.key<
-        Record<
-            string,
-            { selector: string; ast: SelectorList; isScoped: boolean; def: postcss.AtRule }
-        >
-    >('st-custom-selector');
+interface AnalyzedCustomSelector {
+    selector: string;
+    ast: SelectorList;
+    isScoped: boolean;
+    def: postcss.AtRule;
+}
+
+const dataKey = plugableRecord.key<Record<string, AnalyzedCustomSelector>>('st-custom-selector');
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -49,7 +49,6 @@ export const hooks = createFeature({
             const analyzed = plugableRecord.getUnsafe(context.meta.data, dataKey);
             const name = customSelector.slice(3);
             analyzed[name] = { selector, ast, isScoped, def: atRule };
-            STPart.registerLegacyPart(context.meta, name, { mapTo: ast });
         } else {
             // TODO: add warn there are two types one is not valid name and the other is empty name.
         }
@@ -122,8 +121,14 @@ export function isScoped(meta: StylableMeta, name: string) {
 }
 
 export function getCustomSelector(meta: StylableMeta, name: string): SelectorList | undefined {
+    return plugableRecord.getUnsafe(meta.data, dataKey)[name]?.ast;
+}
+export function getCustomSelectors(meta: StylableMeta) {
     const analyzed = plugableRecord.getUnsafe(meta.data, dataKey);
-    return analyzed[name]?.ast;
+    return Object.entries(analyzed).reduce((acc, [name, { ast }]) => {
+        acc[name] = ast;
+        return acc;
+    }, {} as Record<string, AnalyzedCustomSelector['ast']>);
 }
 
 export function getCustomSelectorExpended(meta: StylableMeta, name: string): string | undefined {

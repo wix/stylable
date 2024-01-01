@@ -18,6 +18,7 @@ import {
     CSSKeyframes,
     CSSLayer,
     CSSContains,
+    STStructure,
 } from './features';
 import type { StylableTransformer } from './stylable-transformer';
 import { findRule } from './helpers/rule';
@@ -64,7 +65,7 @@ export type CachedModuleEntity =
 
 export type StylableResolverCache = Map<string, CachedModuleEntity>;
 
-export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
+export interface CSSResolve<T extends StylableSymbol | STStructure.PartSymbol = StylableSymbol> {
     _kind: 'css';
     symbol: T;
     meta: StylableMeta;
@@ -361,11 +362,7 @@ export class StylableResolver {
                     deepResolved = {
                         _kind: `css`,
                         meta,
-                        symbol: {
-                            _kind: 'class',
-                            name,
-                            alias: symbol,
-                        },
+                        symbol: CSSClass.createSymbol({ name, alias: symbol }),
                     };
                 }
             } else {
@@ -502,7 +499,7 @@ export class StylableResolver {
                         break;
                     }
                 } else {
-                    current = { _kind: 'css', symbol: parent, meta };
+                    current = { _kind: 'css', symbol: parent, meta: current.meta };
                 }
             } else {
                 break;

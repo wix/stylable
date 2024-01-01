@@ -21,6 +21,8 @@ import type { StylableResolver } from '../stylable-resolver';
 import type { ParsedValue } from '../types';
 import { CSSClass } from '../features';
 import { reservedFunctionalPseudoClasses } from '../native-reserved-lists';
+import { BaseAstNode, stringifyCSSValue } from '@tokey/css-value-parser';
+import { findCustomIdent, findNextCallNode } from './css-value-seeker';
 
 export interface MappedStates {
     [s: string]: StateParsedValue | string | TemplateStateParsedValue | null;
@@ -152,6 +154,12 @@ export const stateDiagnostics = {
         (state: string, finalSelector: string) =>
             `pseudo-state "${state}" result cannot start with a type or universal selector "${finalSelector}"`
     ),
+    NO_PARAM_REQUIRED: createDiagnosticReporter(
+        '08018',
+        'error',
+        (name: string, param: string) =>
+            `pseudo-state "${name}" accepts no parameter, but received "${param}"`
+    ),
 };
 
 // parse
@@ -167,17 +175,8 @@ export function parsePseudoStates(
 
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
         const [stateDefinition, ...stateDefault] = workingState;
-
-        if (stateDefinition.value.startsWith('-')) {
-            diagnostics.report(stateDiagnostics.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
-                node: decl,
-                word: stateDefinition.value,
-            });
-        } else if (reservedFunctionalPseudoClasses.includes(stateDefinition.value)) {
-            diagnostics.report(stateDiagnostics.RESERVED_NATIVE_STATE(stateDefinition.value), {
-                node: decl,
-                word: stateDefinition.value,
-            });
+        const stateName = stateDefinition.value;
+        if (!validateStateName(stateName, diagnostics, decl)) {
             return;
         }
 
@@ -197,6 +196,64 @@ export function parsePseudoStates(
     });
 
     return mappedStates;
+}
+function validateStateName(name: string, diagnostics: Diagnostics, node: postcss.Node) {
+    if (name.startsWith('-')) {
+        diagnostics.report(stateDiagnostics.STATE_STARTS_WITH_HYPHEN(name), {
+            node: node,
+            word: name,
+        });
+    } else if (reservedFunctionalPseudoClasses.includes(name)) {
+        diagnostics.report(stateDiagnostics.RESERVED_NATIVE_STATE(name), {
+            node: node,
+            word: name,
+        });
+        return false;
+    }
+    return true;
+}
+export function parseStateValue(
+    value: BaseAstNode[],
+    node: postcss.Node,
+    diagnostics: Diagnostics
+): [amountTaken: number, stateDef: MappedStates[string] | undefined] {
+    let stateName = '';
+    let stateDef: MappedStates[string] = null; /*boolean*/
+    let amountTaken = 0;
+    const customIdentResult = findCustomIdent(value, 0);
+    const [amountToName, nameNode] = customIdentResult[0]
+        ? customIdentResult
+        : findNextCallNode(value, 0);
+    if (nameNode && validateStateName(nameNode.value, diagnostics, node)) {
+        amountTaken += amountToName;
+        stateName = nameNode.value;
+        // state with parameter
+        if (nameNode.type === 'call') {
+            // take all of the definition since default value takes the rest
+            amountTaken = value.length;
+            // ToDo: translate resolveStateType to tokey and remove the double parsing
+            const postcssStateValue = postcssValueParser(
+                stringifyCSSValue(value.slice(amountToName - 1))
+            );
+            // get state definition
+            const [stateDefinition, ...stateDefault] = postcssStateValue.nodes;
+            const stateMap: MappedStates = {};
+            resolveStateType(
+                stateDefinition as FunctionNode,
+                stateMap,
+                stateDefault,
+                diagnostics,
+                node as postcss.Declaration // ToDo: change to accept any postcss node
+            );
+            if (stateMap[stateName]) {
+                stateDef = stateMap[stateName];
+            }
+        }
+    }
+    if (stateName) {
+        return [amountTaken, stateDef];
+    }
+    return [0, undefined];
 }
 function resolveBooleanState(mappedStates: MappedStates, stateDefinition: ParsedValue) {
     const currentState = mappedStates[stateDefinition.value];
@@ -724,8 +781,8 @@ export function validateRuleStateDefinition(
                             !!stateParam.defaultValue
                         );
                         if (errors) {
-                            selectorNode.walkDecls((decl) => {
-                                if (decl.prop === `-st-states`) {
+                            for (const node of selectorNode.nodes) {
+                                if (node.type === 'decl' && node.prop === `-st-states`) {
                                     diagnostics.report(
                                         stateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
                                             stateName,
@@ -733,14 +790,13 @@ export function validateRuleStateDefinition(
                                             errors
                                         ),
                                         {
-                                            node: decl,
-                                            word: decl.value,
+                                            node: node,
+                                            word: node.value,
                                         }
                                     );
-                                    return false;
+                                    break;
                                 }
-                                return;
-                            });
+                            }
                         }
                     }
                 }
@@ -805,12 +861,24 @@ export function transformPseudoClassToCustomState(
     diagnostics: Diagnostics,
     selectorNode?: postcss.Node
 ) {
-    if (stateDef === null) {
-        convertToClass(stateNode).value = createBooleanStateClassName(name, namespace);
-        delete stateNode.nodes;
-    } else if (typeof stateDef === 'string') {
-        // simply concat global mapped selector - ToDo: maybe change to 'selector'
-        convertToInvalid(stateNode).value = stateDef;
+    if (stateDef === null || typeof stateDef === 'string') {
+        if (stateNode.nodes && selectorNode) {
+            diagnostics.report(
+                stateDiagnostics.NO_PARAM_REQUIRED(name, stringifySelector(stateNode.nodes)),
+                {
+                    node: selectorNode,
+                    word: stringifySelector(stateNode),
+                }
+            );
+        }
+        if (stateDef === null) {
+            // boolean
+            convertToClass(stateNode).value = createBooleanStateClassName(name, namespace);
+        } else {
+            // static template selector
+            // simply concat global mapped selector - ToDo: maybe change to 'selector'
+            convertToInvalid(stateNode).value = stateDef;
+        }
         delete stateNode.nodes;
     } else if (typeof stateDef === 'object') {
         if (isTemplateState(stateDef)) {

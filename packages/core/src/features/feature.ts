@@ -1,11 +1,23 @@
 import type { StylableMeta } from '../stylable-meta';
-import type { ScopeContext, StylableExports, StylableTransformer } from '../stylable-transformer';
+import type {
+    InferredSelector,
+    ScopeContext,
+    StylableExports,
+    StylableTransformer,
+} from '../stylable-transformer';
 import type { StylableResolver, MetaResolvedSymbols } from '../stylable-resolver';
 import type { StylableEvaluator, EvalValueData } from '../functions';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type { Diagnostics } from '../diagnostics';
 import type { ParsedValue } from '../types';
+
+export interface FeatureFlags {
+    strictCustomProperty: boolean;
+}
+export const defaultFeatureFlags: FeatureFlags = {
+    strictCustomProperty: false,
+};
 
 export type SelectorNodeContext = [
     index: number,
@@ -22,6 +34,7 @@ export interface FeatureTransformContext extends FeatureContext {
     evaluator: StylableEvaluator;
     getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols;
     passedThrough?: string[];
+    inferredSelectorMixin?: InferredSelector;
 }
 
 export interface NodeTypes {

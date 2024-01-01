@@ -3,5 +3,6 @@ export {
     resolveNamespace,
     resolveNamespaceFactory,
     createNamespaceStrategyNode,
+    packageJsonLookupCache,
 } from './resolve-namespace';
 export { FileSystem, findFiles } from './find-files';

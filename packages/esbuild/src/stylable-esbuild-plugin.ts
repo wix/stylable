@@ -1,26 +1,37 @@
 import fs, { readFileSync, writeFileSync } from 'fs';
 import { relative, join, isAbsolute, dirname } from 'path';
-import decache from 'decache';
-import type { Plugin, PluginBuild, Metafile } from 'esbuild';
-import { Stylable, StylableConfig, StylableMeta, StylableResults } from '@stylable/core';
+import type { Plugin, PluginBuild } from 'esbuild';
+import {
+    Stylable,
+    StylableConfig,
+    StylableResults,
+    generateStylableJSModuleSource,
+} from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
-import { generateStylableJSModuleSource } from '@stylable/module-utils';
-import {
-    sortModulesByDepth,
-    collectImportsWithSideEffects,
-    processUrlDependencies,
-} from '@stylable/build-tools';
+import { collectImportsWithSideEffects } from '@stylable/build-tools';
 import { resolveConfig, buildDTS } from '@stylable/cli';
-import { DiagnosticsMode, emitDiagnostics } from '@stylable/core/dist/index-internal';
-import { parse } from 'postcss';
-
-const namespaces = {
-    unused: 'stylable-unused',
-    jsModule: 'stylable-js-module',
-    css: 'stylable-css',
-    nativeCss: 'stylable-native-css',
-};
+import type { DiagnosticsMode } from '@stylable/core/dist/index-internal';
+import { buildCache } from './build-cache';
+import { wrapDebug } from './debug';
+import {
+    applyDefaultOptions,
+    debounce,
+    clearCaches,
+    enableEsbuildMetafile,
+    createDecacheRequire,
+    namespaces,
+    esbuildEmitDiagnostics,
+    importsCollector,
+    processAssetsAndApplyStubs,
+    processAssetsStubs,
+    wrapWithDepthMarkers,
+    lazyDebugPrint,
+    OptimizationMapping,
+    buildUsageMapping,
+    sortMarkersByDepth,
+    IdForPath,
+} from './plugin-utils';
 
 export interface ESBuildOptions {
     /**
@@ -88,6 +99,10 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             optimize,
             devTypes,
         } = applyDefaultOptions(initialPluginOptions);
+        // we need a cache instance per stylable config.
+        const { checkCache, addToCache, transferBuildInfo } = buildCache();
+
+        const lazyClearCaches = debounce(clearCaches, 1000);
 
         enableEsbuildMetafile(build, cssInjection);
 
@@ -112,465 +127,258 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
             },
             build
         );
-
+        let onLoadCalled = false;
         const stylable = new Stylable(stConfig);
 
-        // Order of onResolve hooks matters
-
-        build.onStart(() => {
-            stylable.initCache();
-        });
+        const idForPath = new IdForPath();
 
         /**
          * make all unused imports resolve to a special empty js module
          */
-        build.onResolve({ filter: /^stylable-unused:/, namespace: namespaces.jsModule }, (args) => {
-            return {
-                path: stylable.resolvePath(
-                    args.resolveDir,
-                    args.path.replace(namespaces.unused + `:`, '')
-                ),
-                namespace: namespaces.unused,
-            };
-        });
+        build.onResolve(
+            { filter: /^stylable-unused:/, namespace: namespaces.jsModule },
+            wrapDebug('onResolve unused', (args) => {
+                return {
+                    path: args.path.replace(namespaces.unused + `:`, ''),
+                    namespace: namespaces.unused,
+                };
+            })
+        );
 
         /**
          * handle css/stylable files imported via other stylable files
          */
-        build.onResolve({ filter: /\.css$/, namespace: namespaces.jsModule }, (args) => {
-            // stylable file generated JavaScript module import self CSS source
-            if (args.path === args.importer) {
+        build.onResolve(
+            { filter: /\.css$/, namespace: namespaces.jsModule },
+            wrapDebug('onResolve from stylable js module', (args) => {
+                // stylable file generated JavaScript module import self CSS source
+                if (args.path === args.importer) {
+                    return {
+                        path: args.path,
+                        pluginData: args.pluginData,
+                        namespace: namespaces.css,
+                    };
+                }
+                // dependency import of stylable files js module
                 return {
-                    path: args.path,
+                    path: args.path.replace(namespaces.nativeCss + `:`, ''),
+                    namespace: cssInjection === 'css' ? namespaces.nativeCss : namespaces.jsModule,
                     pluginData: args.pluginData,
-                    namespace: namespaces.css,
                 };
-            }
-            // dependency import of stylable files js module
-            return {
-                path: stylable.resolvePath(
-                    args.resolveDir,
-                    args.path.replace(namespaces.nativeCss + `:`, '')
-                ),
-                namespace: cssInjection === 'css' ? namespaces.nativeCss : namespaces.jsModule,
-                pluginData: args.pluginData,
-            };
-        });
+            })
+        );
 
         /**
          * handle all initial stylable requests from javascript
          */
-        build.onResolve({ filter: /\.st\.css$/ }, (args) => {
-            return {
-                path: stylable.resolvePath(args.resolveDir, args.path),
-                namespace: namespaces.jsModule,
-            };
-        });
+        build.onResolve(
+            { filter: /\.st\.css$/ },
+            wrapDebug('onResolve initial requests from js', (args) => {
+                return {
+                    path: stylable.resolvePath(args.resolveDir, args.path),
+                    namespace: namespaces.jsModule,
+                };
+            })
+        );
 
         /**
          * main loader for stylable files
          * this flow will create the Stylable JS modules
          */
-        build.onLoad({ filter: /.*/, namespace: namespaces.jsModule }, (args) => {
-            const res = stylable.transform(args.path);
-            const { errors, warnings } = esbuildEmitDiagnostics(res, diagnosticsMode);
-            const { imports, collector } = importsCollector(res);
-            const { cssDepth = 0, deepDependencies } = res.meta.transformCssDepth!;
-            const getModuleId = () => {
-                switch (runtimeStylesheetId) {
-                    case 'module':
-                        return relative(stylable.projectRoot, args.path);
-                    case 'namespace':
-                        return res.meta.namespace;
-                    case 'module+namespace':
-                        return `${relative(stylable.projectRoot, args.path)}|${res.meta.namespace}`;
-                    default:
-                        throw new Error(`Unknown runtimeStylesheetId: ${runtimeStylesheetId}`);
+        build.onLoad(
+            { filter: /.*/, namespace: namespaces.jsModule },
+            wrapDebug('onLoad stylable module', (args) => {
+                const cacheResults = checkCache(args.path);
+                if (cacheResults) {
+                    return cacheResults;
                 }
-            };
+                onLoadCalled = true;
 
-            collectImportsWithSideEffects(stylable, res.meta, collector);
+                const res = stylable.transform(args.path);
+                const { errors, warnings } = esbuildEmitDiagnostics(res, diagnosticsMode);
+                const { imports, collector } = importsCollector(res);
+                const { cssDepth = 0, deepDependencies } = res.meta.transformCssDepth!;
+                const getModuleId = () => {
+                    switch (runtimeStylesheetId) {
+                        case 'module':
+                            return relative(stylable.projectRoot, args.path);
+                        case 'namespace':
+                            return res.meta.namespace;
+                        case 'module+namespace':
+                            return `${relative(stylable.projectRoot, args.path)}|${
+                                res.meta.namespace
+                            }`;
+                        default:
+                            throw new Error(`Unknown runtimeStylesheetId: ${runtimeStylesheetId}`);
+                    }
+                };
 
-            if (cssInjection === 'js') {
-                processAssetsAndApplyStubs(imports, res, stylable);
-            }
+                collectImportsWithSideEffects(stylable, res.meta, collector);
 
-            if (cssInjection === 'css') {
-                imports.push({
-                    from: args.path,
+                if (cssInjection === 'js') {
+                    processAssetsAndApplyStubs(imports, res, stylable);
+                }
+
+                if (cssInjection === 'css') {
+                    imports.push({
+                        from: args.path,
+                    });
+                }
+
+                const moduleCode = generateStylableJSModuleSource(
+                    {
+                        imports,
+                        namespace: res.meta.namespace,
+                        jsExports: res.exports,
+                        moduleType: 'esm',
+                        runtimeRequest: '@stylable/runtime/esm/pure',
+                    },
+                    cssInjection === 'js'
+                        ? {
+                              css: res.meta.targetAst!.toString(),
+                              depth: cssDepth,
+                              runtimeId: 'esbuild',
+                              id: getModuleId(),
+                          }
+                        : undefined
+                );
+                return addToCache(args.path, {
+                    errors,
+                    warnings,
+                    watchFiles: [args.path, ...deepDependencies],
+                    resolveDir: dirname(args.path),
+                    contents: cssInjection === 'js' ? processAssetsStubs(moduleCode) : moduleCode,
+                    pluginData: { stylableResults: res },
                 });
-            }
-
-            const moduleCode = generateStylableJSModuleSource(
-                {
-                    imports,
-                    namespace: res.meta.namespace,
-                    jsExports: res.exports,
-                    moduleType: 'esm',
-                    runtimeRequest: '@stylable/runtime/esm/pure',
-                },
-                cssInjection === 'js'
-                    ? {
-                          css: res.meta.targetAst!.toString(),
-                          depth: cssDepth,
-                          runtimeId: 'esbuild',
-                          id: getModuleId(),
-                      }
-                    : undefined
-            );
-
-            return {
-                errors,
-                warnings,
-                watchFiles: [args.path, ...deepDependencies],
-                resolveDir: '.',
-                contents: cssInjection === 'js' ? processStubs(moduleCode) : moduleCode,
-                pluginData: { stylableResults: res },
-            };
-        });
+            })
+        );
 
         /**
          * unused stylable imports results in an empty js module
          */
-        build.onLoad({ filter: /.*/, namespace: namespaces.unused }, (args) => {
-            return {
-                contents: `/* unused ${JSON.stringify(args.path)} */`,
-            };
-        });
+        build.onLoad(
+            { filter: /.*/, namespace: namespaces.unused },
+            wrapDebug('onLoad unused module', (args) => {
+                return {
+                    contents: `/* unused ${JSON.stringify(args.path)} */`,
+                };
+            })
+        );
 
         /**
          * load css via esbuild native css loader
          * we need to explicit transform here. the pluginData is for the requester module.
          * this is the final step for the css content so no pluginData is passed
          */
-        build.onLoad({ filter: /.*/, namespace: namespaces.nativeCss }, (args) => {
-            const res = stylable.transform(args.path);
-            const cssDepth = res.meta.transformCssDepth!.cssDepth;
-            return {
-                resolveDir: '.',
-                contents: wrapWithDepthMarkers(res.meta.targetAst!.toString(), cssDepth),
-                loader: 'css',
-            };
-        });
+        build.onLoad(
+            { filter: /.*/, namespace: namespaces.nativeCss },
+            wrapDebug('onLoad native css', (args) => {
+                const key = namespaces.nativeCss + ':' + args.path;
+                const cacheResults = checkCache(key);
+                if (cacheResults) {
+                    return cacheResults;
+                }
+                onLoadCalled = true;
+                const res = stylable.transform(args.path);
+                const { cssDepth, deepDependencies } = res.meta.transformCssDepth!;
+                const pathId = idForPath.getId(args.path);
+                return addToCache(key, {
+                    watchFiles: [args.path, ...deepDependencies],
+                    resolveDir: dirname(args.path),
+                    contents: wrapWithDepthMarkers(
+                        res.meta.targetAst!.toString(),
+                        cssDepth,
+                        pathId
+                    ),
+                    loader: 'css',
+                });
+            })
+        );
 
         /**
          * handle css output of stylable files
          */
-        build.onLoad({ filter: /.*/, namespace: namespaces.css }, (args) => {
-            const { meta } = args.pluginData.stylableResults as StylableResults;
-            const { cssDepth = 0 } = meta.transformCssDepth!;
-            return {
-                resolveDir: '.',
-                contents: wrapWithDepthMarkers(meta.targetAst!.toString(), cssDepth),
-                loader: 'css',
-            };
-        });
+        build.onLoad(
+            { filter: /.*/, namespace: namespaces.css },
+            wrapDebug('onLoad css output', (args) => {
+                const { meta } = args.pluginData.stylableResults as StylableResults;
+                const { cssDepth = 0 } = meta.transformCssDepth!;
+                const pathId = idForPath.getId(args.path);
+                return {
+                    resolveDir: dirname(args.path),
+                    contents: wrapWithDepthMarkers(meta.targetAst!.toString(), cssDepth, pathId),
+                    loader: 'css',
+                };
+            })
+        );
 
         /**
          * process the generated bundle and optimize the css output
          */
-        build.onEnd(({ metafile }) => {
-            let mapping: OptimizationMapping;
-
-            if (devTypes.enabled) {
-                if (!metafile) {
-                    throw new Error('metafile is required for css injection');
+        build.onEnd(
+            wrapDebug(`onEnd generate cssInjection: ${cssInjection}`, ({ metafile }) => {
+                transferBuildInfo();
+                if (!onLoadCalled) {
+                    lazyDebugPrint();
+                    return;
                 }
-                const absSrcDir = join(projectRoot, devTypes.srcDir);
-                const absOutDir = join(projectRoot, devTypes.outDir);
+                onLoadCalled = false;
+                let mapping: OptimizationMapping;
+                if (devTypes.enabled) {
+                    if (!metafile) {
+                        throw new Error('metafile is required for css injection');
+                    }
+                    const absSrcDir = join(projectRoot, devTypes.srcDir);
+                    const absOutDir = join(projectRoot, devTypes.outDir);
 
-                mapping ??= buildUsageMapping(metafile, stylable);
+                    mapping ??= buildUsageMapping(metafile, stylable);
 
-                for (const metaSet of Object.values(mapping.usagesByNamespace!)) {
-                    for (const { meta, path } of metaSet) {
-                        if (path.startsWith(absSrcDir)) {
-                            buildDTS({
-                                res: { meta, exports: meta.exports! },
-                                targetFilePath: join(absOutDir, relative(absSrcDir, path)),
-                                outputLogs: [],
-                                sourceFilePath: undefined,
-                                generated: new Set(),
-                                dtsSourceMap: devTypes.dtsSourceMap,
-                                writeFileSync: fs.writeFileSync,
-                                relative,
-                                dirname,
-                                isAbsolute,
-                            });
+                    for (const metaSet of Object.values(mapping.usagesByNamespace!)) {
+                        for (const { meta, path } of metaSet) {
+                            if (path.startsWith(absSrcDir)) {
+                                buildDTS({
+                                    res: { meta, exports: meta.exports! },
+                                    targetFilePath: join(absOutDir, relative(absSrcDir, path)),
+                                    outputLogs: [],
+                                    sourceFilePath: undefined,
+                                    generated: new Set(),
+                                    dtsSourceMap: devTypes.dtsSourceMap,
+                                    writeFileSync: fs.writeFileSync,
+                                    relative,
+                                    dirname,
+                                    isAbsolute,
+                                });
+                            }
                         }
                     }
                 }
-            }
 
-            if (cssInjection === 'css') {
-                if (!metafile) {
-                    throw new Error('metafile is required for css injection');
-                }
-                mapping ??= buildUsageMapping(metafile, stylable);
-
-                for (const distFile of Object.keys(metafile.outputs)) {
-                    if (!distFile.endsWith('.css')) {
-                        continue;
+                if (cssInjection === 'css') {
+                    if (!metafile) {
+                        throw new Error('metafile is required for css injection');
                     }
-                    const distFilePath = join(stylable.projectRoot, distFile);
+                    mapping ??= buildUsageMapping(metafile, stylable);
 
-                    writeFileSync(
-                        distFilePath,
-                        sortMarkersByDepth(
-                            readFileSync(distFilePath, 'utf8'),
-                            stylable,
-                            optimize.removeUnusedComponents ? mapping : {}
-                        )
-                    );
+                    for (const distFile of Object.keys(metafile.outputs)) {
+                        if (!distFile.endsWith('.css')) {
+                            continue;
+                        }
+                        const distFilePath = join(stylable.projectRoot, distFile);
+
+                        writeFileSync(
+                            distFilePath,
+                            sortMarkersByDepth(
+                                readFileSync(distFilePath, 'utf8'),
+                                stylable,
+                                idForPath,
+                                optimize.removeUnusedComponents ? mapping : {}
+                            )
+                        );
+                    }
                 }
-            }
-        });
+                lazyClearCaches(stylable);
+                lazyDebugPrint();
+            })
+        );
     },
 });
-
-function processStubs(moduleCode: string) {
-    return moduleCode.replace(
-        /\\"http:\/\/__stylable_url_asset_(.*?)__\\"/g,
-        (_$0, $1) => `" + JSON.stringify(__css_asset_${Number($1)}__) + "`
-    );
-}
-
-function processAssetsAndApplyStubs(
-    imports: { from: string; defaultImport?: string }[],
-    res: StylableResults,
-    stylable: Stylable
-) {
-    processUrlDependencies({
-        meta: res.meta,
-        rootContext: stylable.projectRoot,
-        host: {
-            isAbsolute,
-            join,
-        },
-        getReplacement: ({ index }) => `http://__stylable_url_asset_${index}__`,
-    }).forEach((url, i) => {
-        imports.push({
-            from: url,
-            defaultImport: `__css_asset_${i}__`,
-        });
-    });
-}
-
-function importsCollector(res: StylableResults) {
-    const imports: { from: string }[] = [];
-    const collector = (contextMeta: StylableMeta, absPath: string, hasSideEffects: boolean) => {
-        if (hasSideEffects) {
-            if (!absPath.endsWith('.st.css')) {
-                // pass to the native css loader hook
-                imports.push({ from: namespaces.nativeCss + `:` + absPath });
-            } else {
-                imports.push({ from: absPath });
-            }
-        } else if (contextMeta === res.meta) {
-            imports.push({ from: namespaces.unused + `:` + absPath });
-        }
-    };
-    return { imports, collector };
-}
-
-function enableEsbuildMetafile(build: PluginBuild, cssInjection: string) {
-    if (cssInjection === 'css') {
-        if (build.initialOptions.metafile === false) {
-            console.warn(
-                "'stylable-esbuild-plugin' requires the 'metafile' configuration option to be enabled for CSS injection. Since it appears to be disabled, we will automatically enable it for you. Please note that this is necessary for proper plugin functionality."
-            );
-        }
-        build.initialOptions.metafile = true;
-    }
-}
-
-function buildUsageMapping(metafile: Metafile, stylable: Stylable): OptimizationMapping {
-    const usageMapping: Record<string, boolean> = {};
-    const globalMappings: Record<string, Record<string, boolean>> = {};
-    const usagesByNamespace: Record<
-        string,
-        Set<{
-            path: string;
-            meta: StylableMeta;
-        }>
-    > = {};
-    for (const [key] of Object.entries(metafile.inputs)) {
-        if (key.startsWith(namespaces.jsModule)) {
-            const path = key.replace(namespaces.jsModule + ':', '');
-            const meta = stylable.fileProcessor.cache[path]?.value;
-            if (!meta) {
-                throw new Error(`build usage mapping failed: meta not found for ${key}`);
-            }
-            globalMappings[path] ||= {};
-            Object.assign(globalMappings[path], meta.globals);
-            usagesByNamespace[meta.namespace] ||= new Set();
-            usagesByNamespace[meta.namespace].add({ path, meta });
-            usageMapping[meta.namespace] = true;
-        } else if (key.startsWith(namespaces.unused)) {
-            const meta =
-                stylable.fileProcessor.cache[key.replace(namespaces.unused + ':', '')].value;
-            if (!meta) {
-                throw new Error(`build usage mapping failed: meta not found for ${key}`);
-            }
-            // mark unused as false if not already marked as used
-            usageMapping[meta.namespace] ||= false;
-        }
-    }
-
-    for (const [namespace, usage] of Object.entries(usagesByNamespace)) {
-        if (usage.size > 1) {
-            throw new Error(
-                `The namespace '${namespace}' is being used in multiple files. Please review the following file(s) and update them to use a unique namespace:\n${[
-                    ...usage,
-                ]
-                    .map((e) => e.path)
-                    .join('\n')}`
-            );
-        }
-    }
-    return { usagesByNamespace, usageMapping, globalMappings };
-}
-
-function esbuildEmitDiagnostics(res: StylableResults, diagnosticsMode: DiagnosticsMode) {
-    const errors: { pluginName: string; text: string }[] = [];
-    const warnings: { pluginName: string; text: string }[] = [];
-
-    emitDiagnostics(
-        {
-            emitError(e) {
-                errors.push({
-                    pluginName: 'stylable',
-                    text: e.message,
-                });
-            },
-            emitWarning(e) {
-                warnings.push({
-                    pluginName: 'stylable',
-                    text: e.message,
-                });
-            },
-        },
-        res.meta,
-        diagnosticsMode,
-        res.meta.source
-    );
-    return { errors, warnings };
-}
-
-function applyDefaultOptions(options: ESBuildOptions, prod = true) {
-    const mode = options.mode ?? (prod ? 'production' : 'development');
-    return {
-        mode,
-        cssInjection: mode === 'development' ? 'js' : 'css',
-        diagnosticsMode: 'auto',
-        stylableConfig: (config: StylableConfig) => config,
-        configFile: true,
-        runtimeStylesheetId: mode === 'production' ? 'namespace' : 'module+namespace',
-        ...options,
-        devTypes: {
-            enabled: !!options.devTypes,
-            srcDir: 'src',
-            outDir: 'st-types',
-            dtsSourceMap: true,
-            ...options.devTypes,
-        },
-        optimize: {
-            removeUnusedComponents: prod,
-            ...options.optimize,
-        },
-    } satisfies ESBuildOptions;
-}
-
-function createDecacheRequire(build: PluginBuild) {
-    const cacheIds = new Set<string>();
-    build.onStart(() => {
-        for (const id of cacheIds) {
-            decache(id);
-        }
-        cacheIds.clear();
-    });
-    return (id: string) => {
-        cacheIds.add(id);
-        return require(id);
-    };
-}
-
-function wrapWithDepthMarkers(css: string, depth: number | string) {
-    return `[stylable-depth]{--depth:${depth}}${css}[stylable-depth]{--end:${depth}}`;
-}
-
-interface OptimizationMapping {
-    usageMapping?: Record<string, boolean>;
-    globalMappings?: Record<string, Record<string, boolean>>;
-    usagesByNamespace?: Record<
-        string,
-        Set<{
-            path: string;
-            meta: StylableMeta;
-        }>
-    >;
-}
-
-function sortMarkersByDepth(
-    css: string,
-    stylable: Stylable,
-    { usageMapping, globalMappings }: OptimizationMapping
-) {
-    const extracted: { depth: number; css: string; path: string }[] = [];
-    const leftOverCss = css.replace(
-        /(\/\* stylable-?\w*?-css:[\s\S]*?\*\/[\s\S]*?)?\[stylable-depth\][\s\S]*?\{[\s\S]*?--depth:[\s\S]*?(\d+)[\s\S]*?\}([\s\S]*?)\[stylable-depth\][\s\S]*?\{[\s\S]*?--end:[\s\S]*?\d+[\s\S]*?\}/g,
-        (...args) => {
-            const { 1: esbuildComment, 2: depth, 3: css } = args;
-            extracted.push({
-                depth: parseInt(depth, 10),
-                css: (esbuildComment || '') + css,
-                path: esbuildComment.match(/\/\* stylable-?\w*?-css:([\s\S]*?)\s*\*\//)?.[1] || '',
-            });
-            return '';
-        }
-    );
-
-    const sorted = sortModulesByDepth(
-        extracted,
-        (m) => m.depth,
-        (m) => m.path,
-        -1
-    );
-
-    return (
-        leftOverCss.trimStart() +
-        sorted
-            .map((m) =>
-                usageMapping && globalMappings
-                    ? removeUnusedComponents(m.css, stylable, usageMapping, globalMappings[m.path])
-                    : m.css
-            )
-            .join('')
-    );
-}
-
-const stubExports = {
-    classes: {},
-    containers: {},
-    keyframes: {},
-    vars: {},
-    layers: {},
-    stVars: {},
-};
-
-function removeUnusedComponents(
-    css: string,
-    stylable: Stylable,
-    usageMapping: Record<string, boolean>,
-    // global mapping per stylable meta
-    globalMappings: Record<string, boolean>
-) {
-    const ast = parse(css);
-    stylable.optimizer?.optimizeAst(
-        { removeUnusedComponents: true },
-        ast,
-        usageMapping,
-        stubExports,
-        globalMappings
-    );
-    return ast.toString();
-}

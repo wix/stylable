@@ -6,9 +6,7 @@ import {
     shouldReportNoDiagnostics,
     matchRuleAndDeclaration,
     diagnosticBankReportToStrings,
-    assertRule,
-    assertDecl,
-    assertAtRule,
+    deindent,
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import type * as postcss from 'postcss';
@@ -34,6 +32,62 @@ describe(`features/st-mixin`, () => {
                 before: 1;
                 -st-mixin: mix;
                 after: 2;
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it(`should append mixin declarations (within nesting)`, () => {
+        const { sheets } = testStylableCore(`
+            .mix {
+                propA: blue;
+                propB: green;
+            }
+
+            /* @rule .entry__empty {propA: blue; propB: green;} */
+            .empty {
+                -st-mixin: mix;
+            }
+
+            .insert {
+                /* @rule .entry__child {before:1; propA:blue; propB:green; after: 2} */
+                .child {
+                    before: 1;
+                    -st-mixin: mix;
+                    after: 2;
+                }
+            }
+        `);
+
+        const { meta } = sheets['/entry.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+    });
+    it.skip(`should keep other nested rules`, () => {
+        const { sheets } = testStylableCore(`
+            .mix {
+                propA: blue;
+                propB: green;
+            }
+
+            /* @rule .entry__empty {propA: blue; propB: green;} */
+            .empty {
+                -st-mixin: mix;
+            }
+
+            .insert {
+                /* @rule .entry__child {.entry__grandchild-1 { z-index: 1; }; before: 1; .entry__grandchild-2 { z-index: 2; }; propA: blue; propB: green; .entry__grandchild-3 { z-index: 3; }; after: 2; .entry__grandchild-4 { z-index: 4; }} */
+                .child {
+                    .grandchild-1 { z-index: 1; }
+                    before: 1;
+                    .grandchild-2 { z-index: 2; }
+                    -st-mixin: mix;
+                    .grandchild-3 { z-index: 3; }
+                    after: 2;
+                    .grandchild-4 { z-index: 4; }
+                }
             }
         `);
 
@@ -218,6 +272,48 @@ describe(`features/st-mixin`, () => {
 
         shouldReportNoDiagnostics(meta);
     });
+    it(`should accept used build-vars from mixin and replace them`, () => {
+        const deindentAndRemoveSpaces = (str: string) => deindent(str).replace(/\s/g, '');
+        const { sheets } = testStylableCore({
+            '/mix.st.css': `
+                :vars {
+                    a: red;
+                    point_to_a: value(a);
+                    media-val: 123px
+                }
+                .mix {
+                    color: value(point_to_a);
+                }
+                @media (min-width: value(media-val)) {
+                    .mix { color: purple; }
+                }
+            `,
+            '/valid.st.css': `
+                @st-import [mix] from "./mix.st.css";
+
+                .root {
+                    -st-mixin: mix(
+                        a green, 
+                        media-val 789px
+                    );
+                }
+            `,
+        });
+
+        const { meta } = sheets['/valid.st.css'];
+
+        shouldReportNoDiagnostics(meta);
+        expect(deindentAndRemoveSpaces(meta.targetAst!.toString())).to.equal(
+            deindentAndRemoveSpaces(`
+                .valid__root {
+                    color: green;
+                }
+                @media (min-width: 789px) {
+                    .valid__root { color: purple; }
+                }
+            `)
+        );
+    });
     it(`should report unknown args`, () => {
         testStylableCore(`
             :vars {
@@ -310,37 +406,255 @@ describe(`features/st-mixin`, () => {
             }
         );
     });
-    it('should support CSS nesting as part of a mixin', () => {
-        const { sheets } = testStylableCore(`
-            .mix {
-                id: mix;
-                &:hover.mix {
-                    id: hover;
+    describe('css nesting', () => {
+        it('should support CSS nesting as part of a mixin', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    .inner {
+                        color: green;
+                    }
                 }
-                @media {
-                    id: atrule;
+
+                .into {
+                    -st-mixin: mix;
                 }
-            }
+            `);
 
-            .root {
-                -st-mixin: mix;
-            }
-        `);
+            const { meta } = sheets['/entry.st.css'];
 
-        const { meta } = sheets['/entry.st.css'];
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    .entry__inner {
+                        color: green;
+                    }
+                }
 
-        shouldReportNoDiagnostics(meta);
-        const mixedIntoRule = assertRule(meta.targetAst!.nodes[1], 'mixed into');
-        expect(mixedIntoRule.selector).to.eql('.entry__root');
-        const firstMixedDecl = assertDecl(mixedIntoRule.nodes[0], 'id: mix');
-        expect(firstMixedDecl.prop).to.eql('id');
-        expect(firstMixedDecl.value).to.eql('mix');
-        const nestHoverRule = assertRule(mixedIntoRule.nodes[1], '&:hover.mix');
-        expect(nestHoverRule.selector).to.eql('.entry__root&:hover');
-        const nestAtRule = assertAtRule(mixedIntoRule.nodes[2], '@media');
-        const nestInAtRule = assertDecl(nestAtRule.nodes[0], 'id: atrule');
-        expect(nestInAtRule.prop).to.eql('id');
-        expect(nestInAtRule.value).to.eql('atrule');
+                .entry__into {
+                    .entry__inner {
+                        color: green;
+                    }
+                }
+            `)
+            );
+        });
+        it('should preserve nesting selector', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    &.inner {
+                        color: green;
+                    }
+                }
+
+                .into {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    &.entry__inner {
+                        color: green;
+                    }
+                }
+
+                .entry__into {
+                    &.entry__inner {
+                        color: green;
+                    }
+                }
+            `)
+            );
+        });
+        it('should mix into nesting context', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    &.inner {
+                        color: green;
+                    }
+                }
+
+                .intoTop {
+                    &.intoNested {
+                        -st-mixin: mix;
+                    }
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    &.entry__inner {
+                        color: green;
+                    }
+                }
+
+                .entry__intoTop {
+                    &.entry__intoNested {
+                    &.entry__inner {
+                        color: green;
+                    }
+                    }
+                }
+            `)
+            );
+        });
+        it('should report recursive mixin ', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    &.inner.mix {
+                        color: green;
+                    }
+                }
+
+                /* @transform-error ${mixinDiagnostics.INVALID_RECURSIVE_MIXIN()}*/
+                .into {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    &.entry__inner.entry__mix {
+                        color: green;
+                    }
+                }
+
+                /* @transform-error ${mixinDiagnostics.INVALID_RECURSIVE_MIXIN()}*/
+                .entry__into {
+                    &&.entry__inner {
+                        color: green;
+                    }
+                }
+            `)
+            );
+        });
+        it('should mix nested at-rules with content', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    @media (x>y) {
+                        .inner {
+                            color: green;
+                        }
+                    }
+                }
+
+                .into {
+                    -st-mixin: mix;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    @media (x>y) {
+                        .entry__inner {
+                            color: green;
+                        }
+                    }
+                }
+
+                .entry__into {
+                    @media (x>y) {
+                        .entry__inner {
+                            color: green;
+                        }
+                    }
+                }
+            `)
+            );
+        });
+        it('should nest any declaration following nested mixed-in rules', () => {
+            const { sheets } = testStylableCore(`
+                .mix {
+                    .inner {
+                        color: green;
+                    }
+                }
+
+                .into {
+                    declA: 1;
+                    declB: 2;
+                    -st-mixin: mix;
+                    declC: 3;
+                    declD: 4;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mix {
+                    .entry__inner {
+                        color: green;
+                    }
+                }
+
+                .entry__into {
+                    declA: 1;
+                    declB: 2;
+                    .entry__inner {
+                        color: green;
+                    }
+                    & {
+                        declC: 3;
+                        declD: 4;
+                    }
+                }
+            `)
+            );
+        });
+        it('should nest mixin decls that follow another mixin with nested nodes', () => {
+            const { sheets } = testStylableCore(`
+                .mixNested {
+                    .inner {
+                        color: green;
+                    }
+                }
+                .mixDecl {
+                    color: blue;
+                }
+
+                .into {
+                    -st-mixin: mixNested, mixDecl;
+                }
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                .entry__mixNested {
+                    .entry__inner {
+                        color: green;
+                    }
+                }
+                .entry__mixDecl {
+                    color: blue;
+                }
+
+                .entry__into {
+                    .entry__inner {
+                        color: green;
+                    }
+                    & {
+                        color: blue;
+                    }
+                }
+            `)
+            );
+        });
     });
     describe(`st-import`, () => {
         it(`should mix imported class`, () => {
@@ -1706,6 +2020,78 @@ describe(`features/st-mixin`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             shouldReportNoDiagnostics(meta);
+        });
+        it('should collect mixin from st-sope selector (experimentalSelectorInference)', () => {
+            const { sheets } = testStylableCore(
+                {
+                    '/mix.st.css': `
+                    @st-scope .mix {
+                        .part { color: green; }
+                        .part2 { color: purple; }
+                        &:state { color: gold; }
+                    }
+                    @st-scope .mix.compoundAfter {
+                        .part { color: blue; }
+                    }
+                    @st-scope .compoundBefore.mix {
+                        .part { color: pink; }
+                    }
+                    @st-scope .mix, .notMix, .mix[extra] {
+                        .part { color: white; }
+                    }
+                    .mix {
+                        -st-states: state;
+                    }
+                `,
+                    '/entry.st.css': `
+                    @st-import [mix] from './mix.st.css';
+
+                    /* 
+                        @rule(descendant)[1] .entry__into .mix__part {color: green;} 
+                        @rule(descendant2)[2] .entry__into .mix__part2 {color: purple;} 
+                        @rule(state)[3] .entry__into.mix--state {color: gold;} 
+                        @rule(+after)[4] .entry__into.mix__compoundAfter .mix__part {color: blue;} 
+                        @rule(+before)[5] .entry__into.mix__compoundBefore .mix__part {color: pink;} 
+                        @rule(multi selector)[6] .entry__into .mix__part, .entry__into[extra] .mix__part {color: white;}
+                    */
+                    .into {
+                        -st-mixin: mix;
+                    }
+                `,
+                },
+                { stylableConfig: { experimentalSelectorInference: true } }
+            );
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+        it('should collect only st-scope nested rules', () => {
+            const { sheets } = testStylableCore({
+                '/mix.st.css': `
+                    .before { color: RED; }
+                    @st-scope .mix {
+                        .inside { color: green; }
+                    }
+                    .after { color: RED; }
+                `,
+                '/entry.st.css': `
+                    @st-import [mix] from './mix.st.css';
+                    
+                    .into {-st-mixin: mix;}
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(deindent(meta.targetAst!.toString())).to.eql(
+                deindent(`
+                    .entry__into {}
+                        .entry__into .mix__inside { color: green; }
+                `)
+            );
         });
     });
     describe(`higher-level feature integrations`, () => {

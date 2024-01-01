@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-extensions",
-  "version": "5.11.0",
+  "version": "5.17.0",
   "description": "Experimental Stylable webpack plugins",
   "main": "dist/index.js",
   "scripts": {
@@ -10,10 +10,10 @@
     "webpack": "^5.30.0"
   },
   "dependencies": {
-    "@stylable/core": "^5.11.0",
-    "@stylable/node": "^5.11.0",
-    "@stylable/webpack-plugin": "^5.11.0",
-    "@tokey/css-selector-parser": "^0.6.1",
+    "@stylable/core": "^5.17.0",
+    "@stylable/node": "^5.17.0",
+    "@stylable/webpack-plugin": "^5.17.0",
+    "@tokey/css-selector-parser": "^0.6.2",
     "find-config": "^1.0.0",
     "lodash.clonedeep": "^4.5.0"
   },

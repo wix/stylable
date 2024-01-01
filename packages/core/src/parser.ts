@@ -8,7 +8,8 @@ export type CSSObject = any & object;
 const processor = postcss([postcssNested()]);
 
 export function cssObjectToAst(cssObject: CSSObject, sourceFile = '') {
-    return processor.process(cssObject, { from: sourceFile, parser: postcssJS });
+    const r = processor.process(cssObject, { from: sourceFile, parser: postcssJS });
+    return r.root.type === 'document' ? r.root.nodes[0] : r.root;
 }
 
 export type CssParser = typeof safeParse;
