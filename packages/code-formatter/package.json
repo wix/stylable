@@ -9,8 +9,8 @@
   "dependencies": {
     "@stylable/core": "^5.17.0",
     "@tokey/css-value-parser": "^0.1.4",
-    "js-beautify": "^1.14.9",
-    "postcss": "^8.4.31"
+    "js-beautify": "^1.14.11",
+    "postcss": "^8.4.32"
   },
   "files": [
     "dist",
