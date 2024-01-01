@@ -26,6 +26,7 @@ module.exports = {
         'rollup-plugin-copy',
         'rollup-plugin-serve',
         'serve',
+        'tslib',
         'typescript',
     ],
     packageJson: {
