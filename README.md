@@ -63,6 +63,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 | [webpack-plugin](./packages/webpack-plugin)           | `@stylable/webpack-plugin`      |      [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)      | `webpack` (`^5.30.0`) integration plugin                              |
 | [experimental-loader](./packages/experimental-loader) | `@stylable/experimental-loader` | [![npm version](https://img.shields.io/npm/v/@stylable/experimental-loader.svg)](https://www.npmjs.com/package/@stylable/experimental-loader) | experimental `webpack` loader - not recommended for production use |
 | [rollup-plugin](./packages/rollup-plugin) | `@stylable/rollup-plugin` | [![npm version](https://img.shields.io/npm/v/@stylable/rollup-plugin.svg)](https://www.npmjs.com/package/@stylable/rollup-plugin) | Rollup (`v2.x`) integration plugin |
+| [vite-plugin](./packages/vite-plugin) | `@stylable/vite-plugin` | [![npm version](https://img.shields.io/npm/v/@stylable/vite-plugin.svg)](https://www.npmjs.com/package/@stylable/vite-plugin) | Vite (`v4.x`) integration plugin |
 | [esbuild](./packages/esbuild) | `@stylable/esbuild` | [![npm version](https://img.shields.io/npm/v/@stylable/rollup-plugin.svg)](https://www.npmjs.com/package/@stylable/esbuild) | esbuild integration plugin |
 
 ### Test-kits
