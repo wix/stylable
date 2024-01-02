@@ -1,5 +1,5 @@
 {
-  "name": "@stylable/vite",
+  "name": "@stylable/vite-plugin",
   "version": "5.17.0",
   "description": "Stylable plugin for Vite",
   "main": "dist/index.js",
@@ -39,7 +39,7 @@
     "vite-plugin",
     "Stylable"
   ],
-  "repository": "https://github.com/wix/stylable/tree/master/packages/vite",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/vite-plugin",
   "author": "Wix.com",
   "license": "MIT"
 }

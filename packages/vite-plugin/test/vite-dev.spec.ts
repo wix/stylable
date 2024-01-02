@@ -1,11 +1,14 @@
 import { dirname } from 'path';
 import { expect } from 'chai';
-import { type UserConfig as ViteConfig, build, preview } from 'vite';
-import { viteStylable } from '@stylable/vite';
+import type { UserConfig as ViteConfig } from 'vite';
+import { createServer } from 'vite';
+import { viteStylable } from '@stylable/vite-plugin';
 import playwright from 'playwright-core';
 
 const project = 'vite-app';
-const projectDir = dirname(require.resolve(`@stylable/vite/test/fixtures/${project}/index.html`));
+const projectDir = dirname(
+    require.resolve(`@stylable/vite-plugin/test/fixtures/${project}/index.html`)
+);
 
 const viteConfig: ViteConfig = {
     root: projectDir,
@@ -14,49 +17,44 @@ const viteConfig: ViteConfig = {
     clearScreen: false,
 };
 
-async function viteBuildAndPreview() {
-    await build({
+async function viteDev() {
+    const viteServer = await createServer({
         configFile: false,
         ...viteConfig,
     });
-    const vitePreviewServer = await preview({
-        configFile: false,
-        ...viteConfig,
-    });
-
-    const viteAddress = vitePreviewServer.httpServer?.address();
+    await viteServer.listen();
+    const viteAddress = viteServer.httpServer?.address();
 
     if (!viteAddress) {
-        throw new Error('no preview server url for some reason');
+        throw new Error('no dev server url for some reason');
     }
     const url =
         typeof viteAddress === 'string' ? viteAddress : `http://localhost:${viteAddress.port}/`;
 
     return {
-        stop() {
-            vitePreviewServer.httpServer.close();
-            return Promise.resolve();
+        async stop() {
+            await viteServer.close();
         },
         url,
     };
 }
 
-describe('vite build', () => {
-    let vitePreviewServer: Awaited<ReturnType<typeof viteBuildAndPreview>> | undefined;
+describe('vite dev', () => {
+    let viteDevServer: Awaited<ReturnType<typeof viteDev>> | undefined;
     const disposable = new Set<() => Promise<void> | void>();
     before(async () => {
-        vitePreviewServer = await viteBuildAndPreview();
+        viteDevServer = await viteDev();
     });
 
     after(async () => {
         for (const dispose of disposable) {
             await dispose();
         }
-        await vitePreviewServer?.stop();
+        await viteDevServer?.stop();
     });
 
-    it('should render stylable-styled content in `vite build && vite preview`', async () => {
-        const page = await open(vitePreviewServer!.url, disposable);
+    it('should render stylable-styled content in `vite dev`', async () => {
+        const page = await open(viteDevServer!.url, disposable);
 
         const bg = await page.evaluate(() => {
             const elm = document.querySelector('[data-hook="target"]')!;
