@@ -8,5 +8,9 @@ export default {
       name: 'mime',
       reason: 'esm only',
     },
+    {
+      name: 'chai',
+      reason: 'esm only from v5',
+    },
   ],
 };
