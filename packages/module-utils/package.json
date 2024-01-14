@@ -1,13 +1,13 @@
 {
   "name": "@stylable/module-utils",
-  "version": "5.17.0",
+  "version": "5.18.0",
   "description": "Stylable module creation utilities",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "^5.17.0",
+    "@stylable/core": "^5.18.0",
     "@tokey/core": "^1.4.0",
     "vlq": "^2.0.4"
   },

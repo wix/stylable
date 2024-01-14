@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "5.17.0",
+  "version": "5.18.0",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "dist/index.js",
   "bin": {
@@ -14,12 +14,12 @@
   "dependencies": {
     "@file-services/node": "^8.3.3",
     "@file-services/types": "^8.3.3",
-    "@stylable/build-tools": "^5.17.0",
-    "@stylable/code-formatter": "^5.17.0",
-    "@stylable/core": "^5.17.0",
-    "@stylable/module-utils": "^5.17.0",
-    "@stylable/node": "^5.17.0",
-    "@stylable/optimizer": "^5.17.0",
+    "@stylable/build-tools": "^5.18.0",
+    "@stylable/code-formatter": "^5.18.0",
+    "@stylable/core": "^5.18.0",
+    "@stylable/module-utils": "^5.18.0",
+    "@stylable/node": "^5.18.0",
+    "@stylable/optimizer": "^5.18.0",
     "@wixc3/resolve-directory-context": "^3.0.5",
     "decache": "^4.6.2",
     "lodash.camelcase": "^4.3.0",
