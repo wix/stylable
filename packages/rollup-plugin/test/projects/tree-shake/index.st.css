@@ -1,0 +1,27 @@
+.aaa {}
+
+.bbb {}
+
+.ccc {
+    -st-states: stateX;
+    container-name: containerX;
+}
+
+@property --propX;
+
+@keyframes keyframesX {
+    0% {
+        color: red;
+    }
+
+    100% {
+        color: blue;
+    }
+}
+
+:vars {
+    varX: 1px;
+}
+
+@layer layerX;
+
