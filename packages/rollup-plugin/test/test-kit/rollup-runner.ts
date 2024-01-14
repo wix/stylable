@@ -1,5 +1,5 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
-import { RollupWatcherEvent, watch } from 'rollup';
+import { RollupWatchOptions, RollupWatcherEvent, watch } from 'rollup';
 import { loadDirSync, runServer } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
 import { stylableRollupPlugin, StylableRollupPluginOptions } from '@stylable/rollup-plugin';
@@ -17,6 +17,7 @@ export interface RollupRunnerOptions {
     nodeModulesPath?: string;
     entry?: string;
     pluginOptions?: StylableRollupPluginOptions;
+    rollupOptions?: RollupWatchOptions;
 }
 const rootNodeModulesFromHere = join(
     dirname(require.resolve('../../../../../package.json')),
@@ -27,6 +28,7 @@ export function rollupRunner({
     nodeModulesPath = rootNodeModulesFromHere,
     entry = 'index.js',
     pluginOptions,
+    rollupOptions,
 }: RollupRunnerOptions) {
     const {
         context,
@@ -58,6 +60,7 @@ export function rollupRunner({
             }),
             html({}),
         ],
+        ...(rollupOptions || {}),
     });
     const ready = waitForWatcherFinish(watcher);
 

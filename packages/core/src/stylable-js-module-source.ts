@@ -86,11 +86,11 @@ ${runtimeImport(moduleType, runtimeRequest, injectOptions)}
 ${header}
 
 ${varType} _namespace_ = ${JSON.stringify(namespace)};
-${varType} _style_ = /*#__PURE__*/ classesRuntime.bind(null, _namespace_);
+${varType} _style_ = classesRuntime.bind(null, _namespace_);
 
-${exportKind}cssStates = /*#__PURE__*/ statesRuntime.bind(null, _namespace_);
-${exportKind}style = /*#__PURE__*/ _style_;
-${exportKind}st = /*#__PURE__*/ _style_;
+${exportKind}cssStates = statesRuntime.bind(null, _namespace_);
+${exportKind}style = _style_;
+${exportKind}st = _style_;
 
 ${exportKind}namespace = _namespace_;
 ${exportKind}classes = ${JSON.stringify(classes)};
