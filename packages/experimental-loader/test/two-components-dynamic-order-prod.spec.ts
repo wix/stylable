@@ -42,7 +42,7 @@ describe(`(${project}) (production)`, () => {
     it('css applied correctly', async () => {
         const { page } = await projectRunner.openInBrowser();
         const styles = await page.evaluate(() => {
-            const compA = getComputedStyle(document.querySelectorAll('.a__root')[0]!);
+            const compA = getComputedStyle(document.querySelectorAll('.a__root')[0]);
             const compB = getComputedStyle(document.querySelector('.b__root')!);
 
             return {

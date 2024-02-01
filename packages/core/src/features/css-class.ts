@@ -337,7 +337,7 @@ export function namespaceClass(
     if (`-st-global` in symbol && symbol[`-st-global`]) {
         // change node to `-st-global` value
         if (wrapInGlobal) {
-            const globalMappedNodes = symbol[`-st-global`]!;
+            const globalMappedNodes = symbol[`-st-global`];
             convertToPseudoClass(node, 'global', [
                 {
                     type: 'selector',
@@ -350,7 +350,7 @@ export function namespaceClass(
             ]);
         } else {
             const flatNode = convertToSelector(node);
-            const globalMappedNodes = symbol[`-st-global`]!;
+            const globalMappedNodes = symbol[`-st-global`];
             flatNode.nodes = globalMappedNodes;
         }
     } else {

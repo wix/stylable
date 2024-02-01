@@ -921,7 +921,7 @@ function findRefs(
                         selector.slice(0, selector.indexOf(word) + word.length)
                     ).resolved[0];
                     const resolvedSelectorElement =
-                        selectorElement[selectorElement.length - 1]!.resolved;
+                        selectorElement[selectorElement.length - 1].resolved;
                     const lastResolvedSelector =
                         resolvedSelectorElement[resolvedSelectorElement.length - 1];
                     if (
@@ -1014,7 +1014,7 @@ function findRefs(
         );
         const blargh = stylable.transformSelector(
             callingMeta,
-            (pfp[pfp.length - 1] as postcss.Rule)!.selector
+            (pfp[pfp.length - 1] as postcss.Rule).selector
         ).resolved;
         if (
             directiveRegex.test(decl.prop) &&
