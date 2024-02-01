@@ -9,7 +9,7 @@
     "@stylable/core": "^5.16.0",
     "@stylable/runtime": "^5.16.0",
     "@stylable/webpack-plugin": "^5.16.0",
-    "css-loader": "^6.9.0",
+    "css-loader": "^6.10.0",
     "decache": "^4.6.2",
     "loader-utils": "^3.2.1"
   },
