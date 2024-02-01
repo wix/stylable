@@ -1,7 +1,7 @@
 name: next
 on:
   push:
-    branches: ['next']
+    branches: ['ido/version-6-rc']
 jobs:
   npm:
     runs-on: ubuntu-latest
