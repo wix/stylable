@@ -86,9 +86,9 @@ ${runtimeImport(moduleType, runtimeRequest, injectOptions)}
 ${header}
 
 ${varType} _namespace_ = ${JSON.stringify(namespace)};
-${varType} _style_ = classesRuntime.bind(null, _namespace_);
+${varType} _style_ = (...args) => classesRuntime(_namespace_, ...args);
 
-${exportKind}cssStates = statesRuntime.bind(null, _namespace_);
+${exportKind}cssStates = (stateMapping) => statesRuntime(_namespace_, stateMapping);
 ${exportKind}style = _style_;
 ${exportKind}st = _style_;
 
