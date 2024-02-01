@@ -7,8 +7,6 @@ import type { CliArguments, BuildOptions, PartialBuildOptions } from '../types';
 
 const { join } = nodeFs;
 
-export const NAMESPACE_RESOLVER_MODULE_REQUEST = '@stylable/node';
-
 export function getCliArguments(): Arguments<CliArguments> {
     const defaults = createDefaultOptions();
     return yargs
@@ -85,10 +83,12 @@ export function getCliArguments(): Arguments<CliArguments> {
             alias: 'unsr',
         })
         .option('namespaceResolver', {
+            type: 'string',
             description:
                 'node request to a module that exports a stylable resolveNamespace function',
             alias: 'nsr',
-            default: NAMESPACE_RESOLVER_MODULE_REQUEST,
+            defaultDescription:
+                'default to @stylable/node, if stylable.config resolveNamespace is undefined',
         })
         .option('injectCSSRequest', {
             type: 'boolean',

@@ -1,6 +1,7 @@
 import { createFeature, FeatureContext } from './feature';
 import * as STSymbol from './st-symbol';
 import * as STImport from './st-import';
+import * as CSSCustomProperty from './css-custom-property';
 import type { StylableMeta } from '../stylable-meta';
 import { createDiagnosticReporter } from '../diagnostics';
 import { plugableRecord } from '../helpers/plugable-record';
@@ -130,47 +131,71 @@ export const hooks = createFeature<{
         }
     },
     analyzeAtRule({ context, atRule }) {
-        if (!atRule.nodes) {
-            // treat @container with no body as definition
-            const ast = valueParser(atRule.params).nodes;
-            let searching = true;
-            let name = '';
-            let global = false;
-            for (const node of ast) {
-                if (node.type === 'comment' || node.type === 'space') {
-                    // do nothing
-                    continue;
-                } else if (searching && node.type === 'word') {
-                    name = node.value;
-                } else if (searching && node.type === 'function' && node.value === GLOBAL_FUNC) {
-                    name = globalValueFromFunctionNode(node) || '';
-                    global = true;
-                } else {
-                    const def = valueParser.stringify(node);
-                    context.diagnostics.report(diagnostics.UNEXPECTED_DEFINITION(def), {
-                        node: atRule,
-                        word: def,
-                    });
-                    break;
+        const ast = valueParser(atRule.params).nodes;
+        let name = '';
+        let global = false;
+        let searchForContainerName = true;
+        let searchForLogicalOp = false;
+        for (const node of ast) {
+            if (node.type === 'comment' || node.type === 'space') {
+                // do nothing
+                continue;
+            } else if (searchForContainerName && node.type === 'word') {
+                searchForContainerName = false;
+                searchForLogicalOp = true;
+                name = node.value;
+            } else if (
+                searchForContainerName &&
+                node.type === 'function' &&
+                node.value === GLOBAL_FUNC
+            ) {
+                searchForContainerName = false;
+                searchForLogicalOp = true;
+                name = globalValueFromFunctionNode(node) || '';
+                global = true;
+            } else if (node.type === 'function' && node.value === 'style') {
+                searchForContainerName = false;
+                searchForLogicalOp = true;
+                // check for custom properties
+                for (const queryNode of node.nodes) {
+                    if (queryNode.type === 'word' && queryNode.value.startsWith('--')) {
+                        CSSCustomProperty.addCSSProperty({
+                            context,
+                            node: atRule,
+                            name: queryNode.value,
+                            global: context.meta.type === 'css',
+                            final: false,
+                        });
+                    }
                 }
-                searching = false;
+            } else if (
+                node.type !== 'function' &&
+                (!searchForLogicalOp || (node.type === 'word' && !logicalOpNames[node.value]))
+            ) {
+                const def = valueParser.stringify(node);
+                context.diagnostics.report(diagnostics.UNEXPECTED_DEFINITION(def), {
+                    node: atRule,
+                    word: def,
+                });
+                break;
             }
-            if (name) {
-                if (invalidContainerNames[name]) {
-                    context.diagnostics.report(diagnostics.INVALID_CONTAINER_NAME(name), {
-                        node: atRule,
-                        word: name,
-                    });
-                }
-                addContainer({
-                    context,
-                    ast: atRule,
-                    name,
-                    importName: name,
-                    global,
-                    forceDefinition: true,
+        }
+        if (name && !atRule.nodes) {
+            // treat @container with no body as definition
+            if (invalidContainerNames[name]) {
+                context.diagnostics.report(diagnostics.INVALID_CONTAINER_NAME(name), {
+                    node: atRule,
+                    word: name,
                 });
             }
+            addContainer({
+                context,
+                ast: atRule,
+                name,
+                importName: name,
+                global,
+                forceDefinition: true,
+            });
         }
     },
     transformResolve({ context }) {
@@ -220,10 +245,11 @@ export const hooks = createFeature<{
         }
         const ast = valueParser(atRule.params).nodes;
         let changed = false;
+        let searchForContainerName = true;
         search: for (const node of ast) {
             if (node.type === 'comment' || node.type === 'space') {
                 // do nothing
-            } else if (node.type === 'word') {
+            } else if (node.type === 'word' && searchForContainerName) {
                 const resolve = resolved.record[node.value];
                 if (resolve) {
                     node.value = getTransformedName(resolve);
@@ -235,7 +261,11 @@ export const hooks = createFeature<{
                     });
                 }
                 break search;
-            } else if (node.type === 'function' && node.value === GLOBAL_FUNC) {
+            } else if (
+                node.type === 'function' &&
+                node.value === GLOBAL_FUNC &&
+                searchForContainerName
+            ) {
                 const globalName = globalValueFromFunctionNode(node) || '';
                 if (globalName) {
                     changed = true;
@@ -243,8 +273,19 @@ export const hooks = createFeature<{
                     wordNode.type = 'word';
                     wordNode.value = globalName;
                 }
-            } else {
-                break search;
+            } else if (node.type === 'function' && node.value === 'style') {
+                // check for custom properties
+                searchForContainerName = false;
+                for (const queryNode of node.nodes) {
+                    if (queryNode.type === 'word' && queryNode.value.startsWith('--')) {
+                        changed = true;
+                        CSSCustomProperty.transformPropertyIdent(
+                            context.meta,
+                            queryNode,
+                            context.getResolvedSymbols
+                        );
+                    }
+                }
             }
         }
         if (changed) {
@@ -265,6 +306,12 @@ export const hooks = createFeature<{
 });
 
 const invalidContainerNames: Record<string, true> = {
+    none: true,
+    and: true,
+    not: true,
+    or: true,
+};
+const logicalOpNames: Record<string, true> = {
     and: true,
     not: true,
     or: true,

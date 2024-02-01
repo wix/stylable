@@ -274,7 +274,7 @@ export const hooks = createFeature({
             //  classes and custom-selectors are registered as .root pseudo-elements
             const customSelectors = STCustomSelector.getCustomSelectors(meta);
             const classes = CSSClass.getAll(meta);
-            const rootClass = classes['root']!;
+            const rootClass = classes['root'];
             const rootId = getSymbolId(rootClass);
             // custom-selector definition precedence over class definition
             for (const [partName, mapTo] of Object.entries(customSelectors)) {

@@ -65,7 +65,7 @@ describe('require hook', () => {
         attachHook({ ignoreJSModules: true });
         const m = require(join(fixturesPath, 'has-js.st.css'));
         expect(m.test).equal(undefined);
-        expect(m.namespace).to.match(/^hasjs/);
+        expect(m.namespace).to.match(/^has-js/);
     });
 
     it('should throw on missing config file', () => {

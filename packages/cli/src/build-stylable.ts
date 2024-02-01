@@ -7,7 +7,6 @@ import {
     createBuildIdentifier,
     createDefaultOptions,
     hasStylableCSSOutput,
-    NAMESPACE_RESOLVER_MODULE_REQUEST,
 } from './config/resolve-options';
 import { DiagnosticsManager } from './diagnostics-manager';
 import { createDefaultLogger, levels } from './logger';
@@ -16,7 +15,7 @@ import { WatchHandler } from './watch-handler';
 
 export interface BuildStylableContext
     extends Partial<Pick<BuildContext, 'fs' | 'watch' | 'log'>>,
-        Partial<Pick<StylableConfig, 'resolveNamespace' | 'requireModule'>> {
+        Partial<Pick<StylableConfig, 'resolveNamespace' | 'requireModule' | 'resolveModule'>> {
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: StylableConfig['fileProcessorCache'];
     diagnosticsManager?: DiagnosticsManager;
@@ -51,7 +50,8 @@ export async function buildStylable(
         }),
         outputFiles = new Map(),
         requireModule = require,
-        resolveNamespace = requireModule(NAMESPACE_RESOLVER_MODULE_REQUEST).resolveNamespace,
+        resolveNamespace,
+        resolveModule,
         configFilePath,
         watchOptions = {},
     }: BuildStylableContext = {}
@@ -92,10 +92,14 @@ export async function buildStylable(
                 fileSystem,
                 requireModule,
                 projectRoot,
-                resolveNamespace,
                 resolverCache,
                 fileProcessorCache,
                 ...config?.defaultConfig,
+                resolveModule: resolveModule || config?.defaultConfig?.resolveModule,
+                resolveNamespace:
+                    resolveNamespace ||
+                    config?.defaultConfig?.resolveNamespace ||
+                    requireModule('@stylable/node').resolveNamespace,
             });
 
             const { service, generatedFiles } = await build(buildOptions, {

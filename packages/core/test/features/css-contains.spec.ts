@@ -1,4 +1,4 @@
-import { STSymbol, CSSContains } from '@stylable/core/dist/features';
+import { STSymbol, CSSContains, CSSCustomProperty } from '@stylable/core/dist/features';
 import {
     testStylableCore,
     shouldReportNoDiagnostics,
@@ -543,6 +543,61 @@ describe('features/css-contains', () => {
             });
         });
     });
+    describe('custom-property', () => {
+        it('should register and transform style query custom properties', () => {
+            const { sheets } = testStylableCore(`
+                /* @atrule(single-standalone) style(--entry-x) */
+                @container style(--x) {}
+
+                /* @atrule(multi) style(--entry-y) and style(--entry-z) */
+                @container style(--y) and style(--z) {}
+
+                /* @atrule(value) style(--entry-y: green) or style(--entry-z > 50px) */
+                @container style(--y: green) or style(--z > 50px) {}
+            `);
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(CSSCustomProperty.get(meta, `--x`), `--x symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--x`,
+                global: false,
+                alias: undefined,
+            });
+            expect(CSSCustomProperty.get(meta, `--y`), `--y symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--y`,
+                global: false,
+                alias: undefined,
+            });
+            expect(CSSCustomProperty.get(meta, `--z`), `--z symbol`).to.eql({
+                _kind: `cssVar`,
+                name: `--z`,
+                global: false,
+                alias: undefined,
+            });
+        });
+        it('should reference imported custom properties', () => {
+            const { sheets } = testStylableCore({
+                '/imported.st.css': `
+                    @property --x;
+                    @property st-global(--g);
+                `,
+                '/entry.st.css': `
+                    @st-import [--x, --g] from './imported.st.css';
+
+                    /* @atrule(single-standalone) style(--imported-x) or style(--g) */
+                    @container style(--x) or style(--g) {}
+                `,
+            });
+
+            const { meta } = sheets['/entry.st.css'];
+
+            shouldReportNoDiagnostics(meta);
+        });
+    });
     describe('st-mixin', () => {
         it('should mix @container for nested mixin', () => {
             const { sheets } = testStylableCore(
@@ -582,7 +637,7 @@ describe('features/css-contains', () => {
         });
     });
     describe('native css', () => {
-        it('should not namespace', () => {
+        it('should not namespace container name', () => {
             const { stylable } = testStylableCore({
                 '/native.css': deindent(`
                     .x {
@@ -615,6 +670,26 @@ describe('features/css-contains', () => {
 
             // JS exports
             expect(exports.containers, `JS export only locals`).to.eql({});
+        });
+        it('should not namespace style query custom properties', () => {
+            const { stylable } = testStylableCore({
+                '/native.css': deindent(`
+                    /* @atrule style(--x) */
+                    @container style(--x) {}
+                `),
+                '/entry.st.css': `
+                    @st-import [--x] from './native.css';
+
+                    /* @atrule style(--x) */
+                    @container style(--x) {}
+                `,
+            });
+
+            const { meta: nativeMeta } = stylable.transform('/native.css');
+            const { meta } = stylable.transform('/entry.st.css');
+
+            shouldReportNoDiagnostics(nativeMeta);
+            shouldReportNoDiagnostics(meta);
         });
     });
 });

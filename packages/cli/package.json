@@ -12,8 +12,8 @@
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 25000"
   },
   "dependencies": {
-    "@file-services/node": "^8.3.2",
-    "@file-services/types": "^8.3.2",
+    "@file-services/node": "^8.3.3",
+    "@file-services/types": "^8.3.3",
     "@stylable/build-tools": "^6.0.0-rc.2",
     "@stylable/code-formatter": "^6.0.0-rc.2",
     "@stylable/core": "^6.0.0-rc.2",

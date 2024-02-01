@@ -16,14 +16,34 @@ describe('features/st-namespace', () => {
     it('should use filename as default namespace', () => {
         const { sheets } = testStylableCore({
             '/a.st.css': ``,
-            '/b.st.css': ``,
+            '/B.st.css': ``,
+            '/-dash.st.css': ``,
+            '/_underscore.st.css': ``,
+            '/--multi---dash.st.css': ``,
+            '/__multi___underscore.st.css': ``,
+            '/🤡emoji🤷‍♀️why.st.css': ``,
+            '/123numbers-not-at-start789.st.css': ``,
         });
 
         const AMeta = sheets['/a.st.css'].meta;
-        const BMeta = sheets['/b.st.css'].meta;
+        const BMeta = sheets['/B.st.css'].meta;
+        const dashMeta = sheets['/-dash.st.css'].meta;
+        const underscoreMeta = sheets['/_underscore.st.css'].meta;
+        const multiDashMeta = sheets['/--multi---dash.st.css'].meta;
+        const multiUnderscoreMeta = sheets['/__multi___underscore.st.css'].meta;
+        const emojiMeta = sheets['/🤡emoji🤷‍♀️why.st.css'].meta;
+        const numbersMeta = sheets['/123numbers-not-at-start789.st.css'].meta;
 
         expect(AMeta.namespace, 'a meta.namespace').to.eql('a');
-        expect(BMeta.namespace, 'b meta.namespace').to.eql('b');
+        expect(BMeta.namespace, 'b meta.namespace').to.eql('B');
+        expect(dashMeta.namespace, '-dash meta.namespace').to.eql('-dash');
+        expect(underscoreMeta.namespace, '_underscore meta.namespace').to.eql('_underscore');
+        expect(multiDashMeta.namespace, '-multi-dash meta.namespace').to.eql('-multi-dash');
+        expect(multiUnderscoreMeta.namespace, '_multi_underscore meta.namespace').to.eql(
+            '_multi_underscore'
+        );
+        expect(emojiMeta.namespace, 'emoji meta.namespace').to.eql('🤡emoji🤷‍♀️why');
+        expect(numbersMeta.namespace, 'numbers meta.namespace').to.eql('numbers-not-at-start789');
     });
     it('should override default namespace with @st-namespace', () => {
         const { sheets } = testStylableCore({
@@ -134,9 +154,9 @@ describe('features/st-namespace', () => {
                 .x {}
             `,
             '/dash.st.css': `
-                @st-namespace "---";
+                @st-namespace "-";
 
-                /* x-@rule .\\---__x */
+                /* @rule .-__x */
                 .x {}
             `,
         });
@@ -155,7 +175,7 @@ describe('features/st-namespace', () => {
         expect(underscoreMeta.namespace, 'underscore namespace').to.eql('_x123_');
 
         shouldReportNoDiagnostics(dashMeta);
-        expect(dashMeta.namespace, 'dash namespace').to.eql('---');
+        expect(dashMeta.namespace, 'dash namespace').to.eql('-');
     });
     it('should report non string namespace', () => {
         const { sheets } = testStylableCore({
@@ -225,6 +245,18 @@ describe('features/st-namespace', () => {
                     @analyze-error(start with number) word(5abc) ${diagnostics.INVALID_NAMESPACE_VALUE()}
                 */
                 @st-namespace "5abc";
+
+                /* 
+                    @transform-remove
+                    @analyze-error(dash sequence) word(a--b) ${diagnostics.INVALID_NAMESPACE_VALUE()}
+                */
+                @st-namespace "a--b";
+
+                /* 
+                    @transform-remove
+                    @analyze-error(underscore sequence) word(a__b) ${diagnostics.INVALID_NAMESPACE_VALUE()}
+                */
+                @st-namespace "a__b";
             `,
         });
 

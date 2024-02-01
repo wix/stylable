@@ -22,6 +22,7 @@ import { STImport, STScope, STVar, STMixin, CSSClass, CSSCustomProperty } from '
 import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
 import * as postcss from 'postcss';
 import { warnOnce } from './helpers/deprecation';
+import { defaultFeatureFlags, type FeatureFlags } from './features/feature';
 
 export interface StylableConfigBase {
     projectRoot: string;
@@ -35,6 +36,7 @@ export interface StylableConfigBase {
     resolverCache?: StylableResolverCache;
     fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
     experimentalSelectorInference?: boolean;
+    flags?: Partial<FeatureFlags>;
 }
 
 export type StylableConfig = StylableConfigBase &
@@ -53,6 +55,8 @@ export type StylableConfig = StylableConfigBase &
 const globalDefaultSupportedConfigs = new Set([
     'resolveModule',
     'resolveNamespace',
+    'requireModule',
+    'flags',
     'experimentalSelectorInference',
 ]);
 export function validateDefaultConfig(defaultConfigObj: any) {
@@ -98,6 +102,7 @@ export class Stylable {
     // This cache is fragile and should be fresh if onProcess/resolveNamespace/cssParser is different
     protected fileProcessorCache?: Record<string, CacheItem<StylableMeta>>;
     private experimentalSelectorInference: boolean;
+    public flags: FeatureFlags;
     constructor(config: StylableConfig) {
         this.experimentalSelectorInference =
             config.experimentalSelectorInference === false ? false : true;
@@ -124,12 +129,17 @@ export class Stylable {
         this.cssParser = config.cssParser || cssParse;
         this.resolverCache = config.resolverCache || new Map();
         this.fileProcessorCache = config.fileProcessorCache;
+        this.flags = {
+            ...defaultFeatureFlags,
+            ...config.flags,
+        };
         this.fileProcessor = createStylableFileProcessor({
             fileSystem: this.fileSystem,
             onProcess: this.onProcess,
             resolveNamespace: this.resolveNamespace,
             cssParser: this.cssParser,
             cache: this.fileProcessorCache,
+            flags: this.flags,
         });
 
         this.resolver = this.createResolver();
@@ -179,7 +189,7 @@ export class Stylable {
     public createProcessor({
         resolveNamespace = this.resolveNamespace,
     }: CreateProcessorOptions = {}) {
-        return new StylableProcessor(new Diagnostics(), resolveNamespace);
+        return new StylableProcessor(new Diagnostics(), resolveNamespace, this.flags);
     }
     private createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({

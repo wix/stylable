@@ -16,12 +16,12 @@ const stylesInOrder = [
     {
         path: 'side-effects.st.css',
         fileName: 'side-effects.st.css',
-        namespace: 'sideeffects',
+        namespace: 'side-effects',
     },
     {
         path: `internal-dir${sep}internal-dir.st.css`,
         fileName: 'internal-dir.st.css',
-        namespace: 'internaldir',
+        namespace: 'internal-dir',
     },
     {
         path: 'a.st.css',
@@ -115,9 +115,11 @@ async function contract(
                 ).getPropertyValue('--unused-deep'),
             };
         });
-        
+
     const assetLoaded = Boolean(responses?.find((r) => r.url().match(/asset-.*?\.png$/)));
-    const internalDirAsset = Boolean(responses?.find((r) => r.url().match(/internal-dir-.*?\.png$/)));
+    const internalDirAsset = Boolean(
+        responses?.find((r) => r.url().match(/internal-dir-.*?\.png$/))
+    );
 
     expect(internalDirAsset, 'asset loaded from internal dir').to.eql(true);
     expect(assetLoaded, 'asset loaded').to.eql(true);

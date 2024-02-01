@@ -70,7 +70,8 @@ describe(`testStylableCore()`, () => {
                     entries: [`/a.st.css`, `/b.st.css`],
                 }
             );
-
+            
+            // @ts-expect-error entry is not processed
             const entryNotProcessed = sheets[`/entry.st.css`];
             const a = sheets[`/a.st.css`];
             const b = sheets[`/b.st.css`];
@@ -86,6 +87,7 @@ describe(`testStylableCore()`, () => {
                         '/a.st.css': ``,
                     },
                     {
+                        // @ts-expect-error paths must start with "/"
                         entries: [`a.st.css`],
                     }
                 )
