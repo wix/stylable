@@ -21,4 +21,21 @@ describe('Stylable ESBuild plugin rebuild on change', function () {
         const css2 = read('dist/index.js');
         expect(css2, 'color after change').to.includes('color: green');
     });
+
+    it('should stay alive after error', async function () {
+        const { context, read, write } = await tk.build({
+            project: 'rebuild',
+            tmp: true,
+        });
+        const css1 = read('dist/index.js');
+        expect(css1, 'initial color').to.includes('color: red');
+        await context.watch();
+        await sleep(2222);
+        write('a.st.css', `.root{}}}}}`);
+        await sleep(2222);
+        write('a.st.css', `.root{color: green}`);
+        await sleep(2222);
+        const css2 = read('dist/index.js');
+        expect(css2, 'color after change').to.includes('color: green');
+    });
 });

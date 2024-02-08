@@ -1,7 +1,7 @@
 import { dirname, join } from 'node:path';
 import { readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import fs from '@file-services/node';
-import { BuildContext, BuildOptions, context } from 'esbuild';
+import { BuildContext, BuildOptions, context, Plugin } from 'esbuild';
 import { createTempDirectorySync, runServer } from '@stylable/e2e-test-kit';
 
 import playwright from 'playwright-core';
@@ -21,11 +21,13 @@ export class ESBuildTestKit {
         buildExport,
         tmp = true,
         overrideOptions = {},
+        extraPlugins = [],
     }: {
         project: string;
         buildExport?: string;
         tmp?: boolean;
         overrideOptions?: BuildOptions;
+        extraPlugins?: Array<Plugin>;
     }) {
         let openServerUrl: string | undefined;
         let buildFile = require.resolve(`@stylable/esbuild/test/e2e/${project}/build.js`);
@@ -54,7 +56,7 @@ export class ESBuildTestKit {
 
         const buildContext = await run(context, (options: BuildOptions) => ({
             ...options,
-            plugins: [...(options.plugins ?? [])],
+            plugins: [...(options.plugins ?? []), ...extraPlugins],
             absWorkingDir: projectDir,
             loader: {
                 '.png': 'file',
