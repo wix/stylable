@@ -53,10 +53,41 @@ export class ESBuildTestKit {
         if (!run) {
             throw new Error(`could not find ${buildExport || 'run'} export in ${buildFile}`);
         }
+        const onEnd = new Set<() => void>();
+        function act<T>(fn: () => T, timeout = 3000) {
+            return new Promise<T>((resolve, reject) => {
+                let results = undefined as T | Promise<T>;
+                const tm = setTimeout(reject, timeout);
+                const handler = () => {
+                    clearTimeout(tm);
+                    onEnd.delete(handler);
+                    if (results instanceof Promise) {
+                        results.then(resolve, reject);
+                    } else {
+                        resolve(results);
+                    }
+                };
+                onEnd.add(handler);
+                results = fn();
+            });
+        }
 
         const buildContext = await run(context, (options: BuildOptions) => ({
             ...options,
-            plugins: [...(options.plugins ?? []), ...extraPlugins],
+            plugins: [
+                ...(options.plugins ?? []),
+                ...extraPlugins,
+                {
+                    name: 'build-end',
+                    setup(build) {
+                        build.onEnd(() => {
+                            for (const fn of onEnd) {
+                                fn();
+                            }
+                        });
+                    },
+                },
+            ],
             absWorkingDir: projectDir,
             loader: {
                 '.png': 'file',
@@ -126,6 +157,7 @@ export class ESBuildTestKit {
             context: buildContext,
             serve,
             open,
+            act,
             write(pathInCwd: string, content: string) {
                 writeFileSync(join(projectDir, pathInCwd), content, 'utf8');
             },
