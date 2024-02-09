@@ -346,6 +346,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                                     relative,
                                     dirname,
                                     isAbsolute,
+                                    ensureDirectorySync: fs.ensureDirectorySync,
                                 });
                             }
                         }

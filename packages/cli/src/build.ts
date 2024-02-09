@@ -23,8 +23,11 @@ export async function build(
         IndexGenerator = BaseIndexGenerator,
         cjs,
         cjsExt,
+        cjsCss,
         esm,
         esmExt,
+        esmCss,
+        copyAssets,
         includeCSSInJS,
         outputCSS,
         outputCSSNameTemplate,
@@ -74,7 +77,7 @@ export async function build(
     const buildGeneratedFiles = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
-    const moduleFormats = getModuleFormats({ cjs, esm, esmExt, cjsExt });
+    const moduleFormats = getModuleFormats({ cjs, esm, cjsCss, esmCss, esmExt, cjsExt });
 
     const { runtimeCjsOutPath, runtimeEsmOutPath } = copyRuntime(
         inlineRuntime,
@@ -365,19 +368,30 @@ export async function build(
     async function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
         if (indexFileGenerator) {
             await indexFileGenerator.generateIndexFile(fs);
-
             generated.add(indexFileGenerator.indexFileTargetPath);
             outputFiles.set(indexFileGenerator.indexFileTargetPath, affectedFiles);
-        } else {
+        }
+        if (copyAssets) {
             const generatedAssets = handleAssets(assets, projectRoot, srcDir, outDir, fs);
             for (const generatedAsset of generatedAssets) {
                 generated.add(generatedAsset);
             }
-
-            if (manifest) {
-                generateManifest(projectRoot, sourceFiles, manifest, stylable, mode, log, fs);
-                generated.add(manifest);
-            }
+        }
+        if (manifest) {
+            generateManifest(
+                (absSourcePath) =>
+                    relative(
+                        rootDir,
+                        join(fullOutDir, relative(fullSrcDir, absSourcePath))
+                    ).replace(/\\/g, '/'),
+                sourceFiles,
+                manifest,
+                stylable,
+                mode,
+                log,
+                fs
+            );
+            generated.add(manifest);
         }
     }
 }
@@ -494,11 +508,15 @@ export function createGenerator(
 function getModuleFormats({
     esm,
     cjs,
+    cjsCss,
+    esmCss,
     cjsExt,
     esmExt,
 }: {
     esm: boolean | undefined;
     cjs: boolean | undefined;
+    cjsCss: boolean | undefined;
+    esmCss: boolean | undefined;
     cjsExt: '.cjs' | '.js' | undefined;
     esmExt: '.mjs' | '.js' | undefined;
 }): ModuleFormats {
@@ -508,6 +526,12 @@ function getModuleFormats({
     }
     if (cjs) {
         formats.push(['cjs', cjsExt || '.js']);
+    }
+    if (esmCss) {
+        formats.push(['esm+css', esmExt || '.mjs']);
+    }
+    if (cjsCss) {
+        formats.push(['cjs+css', cjsExt || '.js']);
     }
     return formats;
 }
