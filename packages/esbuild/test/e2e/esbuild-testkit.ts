@@ -1,8 +1,8 @@
 import { dirname, join } from 'node:path';
-import { readFileSync, symlinkSync, writeFileSync, cpSync } from 'node:fs';
+import { readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { BuildContext, BuildOptions, context, Plugin } from 'esbuild';
 import { createTempDirectorySync, runServer } from '@stylable/e2e-test-kit';
-
+import { nodeFs } from '@file-services/node';
 import playwright from 'playwright-core';
 
 type BuildFn = (
@@ -35,7 +35,7 @@ export class ESBuildTestKit {
         if (tmp) {
             const t = createTempDirectorySync('esbuild-testkit');
             this.disposables.push(() => t.remove());
-            cpSync(projectDir, t.path, { recursive: true });
+            nodeFs.copyDirectorySync(projectDir, t.path);
             buildFile = join(t.path, 'build.js');
             projectDir = t.path;
 
