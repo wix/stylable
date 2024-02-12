@@ -360,6 +360,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                                     relative,
                                     dirname,
                                     isAbsolute,
+                                    mkdirSync: fs.mkdirSync,
                                 });
                             }
                         }
