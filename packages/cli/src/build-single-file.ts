@@ -268,6 +268,7 @@ export function buildDTS({
     relative,
     dirname,
     isAbsolute,
+    mkdirSync,
 }: {
     res: StylableResults;
     targetFilePath: string;
@@ -279,13 +280,17 @@ export function buildDTS({
     relative: (from: string, to: string) => string;
     dirname: (p: string) => string;
     isAbsolute: (p: string) => boolean;
+    mkdirSync?: (path: string, { recursive }: { recursive: boolean }) => void;
 }) {
     const dtsContent = generateDTSContent(res);
     const dtsPath = targetFilePath + '.d.ts';
 
     generated.add(dtsPath);
     outputLogs.push('output .d.ts');
-
+    tryRun(
+        () => mkdirSync?.(dirname(dtsPath), { recursive: true }),
+        `Ensure directory: ${dirname(dtsPath)}`
+    );
     tryRun(() => writeFileSync(dtsPath, dtsContent), `Write File Error: ${dtsPath}`);
 
     // .d.ts.map
