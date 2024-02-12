@@ -188,13 +188,24 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
         build.onLoad(
             { filter: /.*/, namespace: namespaces.jsModule },
             wrapDebug('onLoad stylable module', (args) => {
+                let res: StylableResults;
                 const cacheResults = checkCache(args.path);
                 if (cacheResults) {
                     return cacheResults;
                 }
                 onLoadCalled = true;
-
-                const res = stylable.transform(args.path);
+                try {
+                    res = stylable.transform(args.path);
+                } catch (e) {
+                    return {
+                        errors: [
+                            {
+                                text: String(e),
+                            },
+                        ],
+                        watchFiles: [args.path],
+                    };
+                }
                 const { errors, warnings } = esbuildEmitDiagnostics(res, diagnosticsMode);
                 const { imports, collector } = importsCollector(res);
                 const { cssDepth = 0, deepDependencies } = res.meta.transformCssDepth!;
@@ -316,7 +327,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
          * process the generated bundle and optimize the css output
          */
         build.onEnd(
-            wrapDebug(`onEnd generate cssInjection: ${cssInjection}`, ({ metafile }) => {
+            wrapDebug(`onEnd generate cssInjection: ${cssInjection}`, ({ metafile, errors }) => {
                 transferBuildInfo();
                 if (!onLoadCalled) {
                     lazyDebugPrint();
@@ -326,6 +337,9 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 let mapping: OptimizationMapping;
                 if (devTypes.enabled) {
                     if (!metafile) {
+                        if (errors.length) {
+                            return;
+                        }
                         throw new Error('metafile is required for css injection');
                     }
                     const absSrcDir = join(projectRoot, devTypes.srcDir);
@@ -355,6 +369,9 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
 
                 if (cssInjection === 'css') {
                     if (!metafile) {
+                        if (errors.length) {
+                            return;
+                        }
                         throw new Error('metafile is required for css injection');
                     }
                     mapping ??= buildUsageMapping(metafile, stylable);
