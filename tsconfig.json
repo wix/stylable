@@ -45,6 +45,8 @@
     { "path": "./packages/webpack-plugin/src" },
     { "path": "./packages/webpack-plugin/test" },
     { "path": "./packages/esbuild/src" },
-    { "path": "./packages/esbuild/test" }
+    { "path": "./packages/esbuild/test" },
+    { "path": "./packages/vite-plugin/src" },
+    { "path": "./packages/vite-plugin/test" }
   ]
 }
