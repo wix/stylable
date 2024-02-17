@@ -70,7 +70,7 @@ export interface AstLocationResult {
     atRuleParams: (AstLocation & { type: 'atRuleParams' }) | undefined;
 }
 function isClosed(node: postcss.AnyNode) {
-    const isLast = node.parent && node.parent.nodes[node.parent.nodes.length - 1] === node;
+    const isLast = node.parent && node.parent.nodes![node.parent.nodes!.length - 1] === node;
     if (node.type === 'decl' || (node.type === 'atrule' && !node.nodes)) {
         return isLast ? node.parent?.raws.semicolon : true;
     }

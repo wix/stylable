@@ -7,7 +7,7 @@ export function matchRuleAndDeclaration(
     decl: string,
     msg?: string
 ) {
-    const rule = parent.nodes[selectorIndex] as postcss.Rule;
+    const rule = parent.nodes![selectorIndex] as postcss.Rule;
     if (rule.selector !== selector) {
         throw new Error(
             `${msg ? msg + ' ' : ''}selector ${selectorIndex}\nactual: ${

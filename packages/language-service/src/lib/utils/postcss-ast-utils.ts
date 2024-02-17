@@ -25,7 +25,7 @@ export function isInNode(
         return (
             !isBeforeRuleset(position, node) ||
             (!!(node as postcss.Container).nodes &&
-                !!((node as postcss.Container).nodes.length > 0))
+                !!((node as postcss.Container).nodes!.length > 0))
         );
     }
     if (nodeEnd.line < position.line) {

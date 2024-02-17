@@ -54,7 +54,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
     const prefixType = prefixSelectorList[0].nodes[0];
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
-    root.nodes.forEach((node) => {
+    root.nodes!.forEach((node) => {
         if (node.type === 'decl') {
             mixinTarget?.append(node.clone());
         } else if (

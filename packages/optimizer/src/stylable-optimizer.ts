@@ -8,7 +8,7 @@ import {
 } from '@stylable/core/dist/index-internal';
 import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
 import csso from 'csso';
-import postcss, { Root, Rule, Node, Comment, Container } from 'postcss';
+import postcss, { Root, Rule, Node, Comment } from 'postcss';
 import { NameMapper } from './name-mapper';
 
 const { booleanStateDelimiter } = STCustomState.delimiters;
@@ -313,7 +313,7 @@ export function replaceRecursiveUpIfEmpty(label: string, node: Node) {
         parent &&
         parent.type !== 'document' &&
         parent.nodes &&
-        (parent as Container).nodes.filter((node) => node.type !== 'comment').length === 0
+        parent.nodes.filter((node) => node.type !== 'comment').length === 0
     ) {
         replaceRecursiveUpIfEmpty('EMPTY_NODE', parent);
     }

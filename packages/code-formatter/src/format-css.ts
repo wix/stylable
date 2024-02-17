@@ -206,8 +206,8 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         }
     }
     if ('nodes' in ast) {
-        for (let i = 0; i < ast.nodes.length; i++) {
-            formatAst(ast.nodes[i], i, {
+        for (let i = 0; i < ast.nodes!.length; i++) {
+            formatAst(ast.nodes![i], i, {
                 endOfLine: NL,
                 indent,
                 indentLevel: indentLevel + 1,

@@ -78,6 +78,7 @@ export default createRule({
                                 return;
                             }
                             const { type } = varDefs.defs[varDefs.defs.length - 1];
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                             return local.name === varDefs.name && type === 'ImportBinding';
                         });
 
