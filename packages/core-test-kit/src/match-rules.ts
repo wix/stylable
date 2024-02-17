@@ -7,7 +7,10 @@ export function matchRuleAndDeclaration(
     decl: string,
     msg?: string
 ) {
-    const rule = parent.nodes![selectorIndex] as postcss.Rule;
+    if (!parent.nodes) {
+        throw new Error(`${msg ? msg + ' ' : ''}expected nested nodes`);
+    }
+    const rule = parent.nodes[selectorIndex] as postcss.Rule;
     if (rule.selector !== selector) {
         throw new Error(
             `${msg ? msg + ' ' : ''}selector ${selectorIndex}\nactual: ${
