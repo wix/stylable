@@ -36,11 +36,17 @@ export interface ComputedStVar {
     value: RuntimeStVar;
     diagnostics: Diagnostics;
     input: CustomValueInput;
+    source: {
+        meta: StylableMeta;
+        start: postcss.Position;
+        end: postcss.Position;
+    };
 }
 
 export interface FlatComputedStVar {
     value: string;
     path: string[];
+    source: ComputedStVar['source'];
 }
 
 export const diagnostics = {
@@ -203,6 +209,11 @@ export function get(meta: StylableMeta, name: string): VarSymbol | undefined {
 
 // Stylable StVar Public APIs
 
+const UNKNOWN_LOCATION = {
+    offset: -1,
+    line: -1,
+    column: -1,
+} as const;
 export class StylablePublicApi {
     constructor(private stylable: Stylable) {}
 
@@ -238,6 +249,11 @@ export class StylablePublicApi {
                 value: runtimeValue ?? outputValue,
                 input: topLevelType ?? unbox(outputValue, false),
                 diagnostics,
+                source: {
+                    meta: resolvedVar.meta,
+                    start: resolvedVar.symbol.node.source?.start || UNKNOWN_LOCATION,
+                    end: resolvedVar.symbol.node.source?.end || UNKNOWN_LOCATION,
+                },
             };
 
             computed[localName] = computedStVar;
@@ -252,19 +268,20 @@ export class StylablePublicApi {
         const flatStVars: FlatComputedStVar[] = [];
 
         for (const [symbol, stVar] of Object.entries(computed)) {
-            flatStVars.push(...this.flatSingle(stVar.input, [symbol]));
+            flatStVars.push(...this.flatSingle(stVar.input, [symbol], stVar.source));
         }
 
         return flatStVars;
     }
 
-    private flatSingle(input: CustomValueInput, path: string[]) {
+    private flatSingle(input: CustomValueInput, path: string[], source: ComputedStVar['source']) {
         const currentVars: FlatComputedStVar[] = [];
 
         if (input.flatValue) {
             currentVars.push({
                 value: input.flatValue,
                 path,
+                source,
             });
         }
 
@@ -273,7 +290,8 @@ export class StylablePublicApi {
                 currentVars.push(
                     ...this.flatSingle(
                         typeof innerInput === 'string' ? boxString(innerInput) : innerInput,
-                        [...path, key]
+                        [...path, key],
+                        source
                     )
                 );
             }
