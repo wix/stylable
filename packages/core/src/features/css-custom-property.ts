@@ -7,6 +7,7 @@ import {
     generateScopedCSSVar,
     atPropertyValidationWarnings,
 } from '../helpers/css-custom-property';
+import type { Stylable } from '../stylable';
 import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import { plugableRecord } from '../helpers/plugable-record';
@@ -281,6 +282,16 @@ function addCSSProperty({
         safeRedeclare: !final || !!alias,
         node,
     });
+}
+
+const UNKNOWN_LOCATION = {
+    offset: -1,
+    line: -1,
+    column: -1,
+} as const;
+
+export class StylablePublicApi {
+    constructor(private stylable: Stylable) {}
 }
 
 function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declaration) {
