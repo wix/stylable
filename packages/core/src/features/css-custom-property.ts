@@ -11,9 +11,13 @@ import type { Stylable } from '../stylable';
 import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
 import { globalValue, GLOBAL_FUNC } from '../helpers/global';
 import { plugableRecord } from '../helpers/plugable-record';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
 import type { StylableMeta } from '../stylable-meta';
-import type { StylableResolver, CSSResolve } from '../stylable-resolver';
+import {
+    type StylableResolver,
+    type CSSResolve,
+    createSymbolResolverWithCache,
+} from '../stylable-resolver';
 import type * as postcss from 'postcss';
 // ToDo: refactor out - parse once and pass to hooks
 import postcssValueParser from 'postcss-value-parser';
@@ -292,6 +296,44 @@ const UNKNOWN_LOCATION = {
 
 export class StylablePublicApi {
     constructor(private stylable: Stylable) {}
+
+    public getProperties(meta: StylableMeta) {
+        const results: Record<
+            string,
+            {
+                meta: StylableMeta;
+                localName: string;
+                targetName: string;
+                source: {
+                    meta: StylableMeta;
+                    start: postcss.Position;
+                    end: postcss.Position;
+                };
+            }
+        > = {};
+
+        const topLevelDiagnostics = new Diagnostics();
+        const getResolvedSymbols = createSymbolResolverWithCache(
+            this.stylable.resolver,
+            topLevelDiagnostics
+        );
+        const { cssVar } = getResolvedSymbols(meta);
+        for (const [name, symbol] of Object.entries(cssVar)) {
+            const defAst = STSymbol.getSymbolAstNode(symbol.meta, symbol.symbol);
+            results[name] = {
+                meta: symbol.meta,
+                localName: symbol.symbol.name,
+                targetName: getTransformedName(symbol),
+                source: {
+                    meta: symbol.meta,
+                    start: defAst?.source?.start || UNKNOWN_LOCATION,
+                    end: defAst?.source?.end || UNKNOWN_LOCATION,
+                },
+            };
+        }
+
+        return results;
+    }
 }
 
 function analyzeDeclValueVarCalls(context: FeatureContext, decl: postcss.Declaration) {
