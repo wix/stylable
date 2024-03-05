@@ -288,11 +288,11 @@ function addCSSProperty({
     });
 }
 
-const UNKNOWN_LOCATION = {
+const UNKNOWN_LOCATION = Object.freeze({
     offset: -1,
     line: -1,
     column: -1,
-} as const;
+});
 
 export class StylablePublicApi {
     constructor(private stylable: Stylable) {}
