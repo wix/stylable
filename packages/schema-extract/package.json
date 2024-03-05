@@ -1,13 +1,13 @@
 {
   "name": "@stylable/schema-extract",
-  "version": "5.18.1",
+  "version": "5.19.0",
   "description": "A utility for extracting JSON schema objects from a Stylable stylesheet",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "^5.18.1",
+    "@stylable/core": "^5.19.0",
     "jest-docblock": "^29.7.0"
   },
   "files": [
