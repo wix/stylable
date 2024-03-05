@@ -96,7 +96,7 @@ describe(`helpers/rule`, () => {
                 },
             ];
 
-            testMatcher(expected, res.nodes);
+            testMatcher(expected, res.nodes!);
         });
 
         it('should extract global when creating root chunk', () => {
@@ -115,7 +115,7 @@ describe(`helpers/rule`, () => {
                 { selector: ':global(.x) [st-mixin-marker]' },
             ];
 
-            testMatcher(expected, res.nodes);
+            testMatcher(expected, res.nodes!);
         });
 
         it('should parts under @media', () => {
@@ -144,7 +144,7 @@ describe(`helpers/rule`, () => {
                 },
             ];
 
-            testMatcher(expected, res.nodes);
+            testMatcher(expected, res.nodes!);
         });
 
         it('should not append empty media', () => {
@@ -160,7 +160,7 @@ describe(`helpers/rule`, () => {
 
             const expected = [{ selector: '[st-mixin-marker]' }];
 
-            testMatcher(expected, res.nodes);
+            testMatcher(expected, res.nodes!);
         });
     });
 });
