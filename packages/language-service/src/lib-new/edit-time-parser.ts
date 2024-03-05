@@ -257,7 +257,8 @@ class EditTimeParser extends Parser {
                 tokens.splice(colonIndex, 0, ['word', '', colonToken[2], colonToken[2]]);
             }
             this.decl(tokens, customProperty);
-            node = this.current.nodes[this.current.nodes.length - 1] as postcss.Declaration;
+            const nodes = this.current.nodes;
+            node = nodes?.[nodes.length - 1] as postcss.Declaration;
             this.reportNode(node, 'ambiguity', AMBIGUITY.POSSIBLE_UNOPENED_RULE);
         } else {
             // ambiguity: might be a rule or a declaration

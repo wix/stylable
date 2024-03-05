@@ -780,7 +780,7 @@ export function validateRuleStateDefinition(
                             true,
                             !!stateParam.defaultValue
                         );
-                        if (errors) {
+                        if (errors && selectorNode.nodes) {
                             for (const node of selectorNode.nodes) {
                                 if (node.type === 'decl' && node.prop === `-st-states`) {
                                     diagnostics.report(

@@ -22,11 +22,11 @@ export function isInNode(
         return false;
     }
     if (!nodeEnd) {
-        return (
-            !isBeforeRuleset(position, node) ||
-            (!!(node as postcss.Container).nodes &&
-                !!((node as postcss.Container).nodes.length > 0))
-        );
+        if (!isBeforeRuleset(position, node)) {
+            return true;
+        }
+        const nodes = (node as postcss.Container).nodes;
+        return nodes ? nodes.length > 0 : false;
     }
     if (nodeEnd.line < position.line) {
         return false;
