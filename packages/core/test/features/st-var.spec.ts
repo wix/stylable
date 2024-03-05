@@ -9,6 +9,7 @@ import {
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import postcssValueParser from 'postcss-value-parser';
+import type { StylableMeta } from '@stylable/core';
 
 chai.use(chaiSubset);
 
@@ -1308,6 +1309,16 @@ describe(`features/st-var`, () => {
         });
     });
     describe('introspection', () => {
+        function expectSourceLocation({
+            source: { meta, start, end },
+            expected,
+        }: {
+            source: { meta: StylableMeta; start: { offset: number }; end: { offset: number } };
+            expected: string;
+        }) {
+            const actualSrc = meta.sourceAst.toString().slice(start.offset, end.offset);
+            expect(actualSrc).to.eql(expected);
+        }
         describe('getComputed', () => {
             it('should get computed st-vars', () => {
                 const { stylable, sheets } = testStylableCore(`
@@ -1332,6 +1343,10 @@ describe(`features/st-var`, () => {
                     },
                     diagnostics: { reports: [] },
                 });
+                expectSourceLocation({
+                    source: computedVars.a.source,
+                    expected: 'a: red;',
+                });
                 expect(computedVars.b).to.containSubset({
                     value: 'blue',
                     input: {
@@ -1340,6 +1355,10 @@ describe(`features/st-var`, () => {
                         value: 'blue',
                     },
                     diagnostics: { reports: [] },
+                });
+                expectSourceLocation({
+                    source: computedVars.b.source,
+                    expected: 'b: blue;',
                 });
                 expect(computedVars.c).to.containSubset({
                     value: ['red', 'gold'],
@@ -1359,6 +1378,15 @@ describe(`features/st-var`, () => {
                         ],
                     },
                     diagnostics: { reports: [] },
+                    source: {
+                        meta,
+                        start: { column: 21, line: 5, offset: 102 },
+                        end: { column: 48, line: 5, offset: 130 },
+                    },
+                });
+                expectSourceLocation({
+                    source: computedVars.c.source,
+                    expected: 'c: st-array(value(a), gold);',
                 });
                 expect(computedVars.d).to.containSubset({
                     value: { x: 'blue', y: 'silver' },
@@ -1378,6 +1406,10 @@ describe(`features/st-var`, () => {
                         },
                     },
                     diagnostics: { reports: [] },
+                });
+                expectSourceLocation({
+                    source: computedVars.d.source,
+                    expected: 'd: st-map(x value(b), y silver);',
                 });
             });
 
@@ -1415,6 +1447,10 @@ describe(`features/st-var`, () => {
                         },
                     },
                 });
+                expectSourceLocation({
+                    source: computedVars.map.source,
+                    expected: 'map: st-map(a st-map(b red));',
+                });
             });
 
             it('should get computed custom value st-var', () => {
@@ -1446,6 +1482,15 @@ describe(`features/st-var`, () => {
                         },
                     },
                     diagnostics: { reports: [] },
+                    source: {
+                        meta,
+                        start: { column: 25, line: 5, offset: 139 },
+                        end: { column: 62, line: 5, offset: 177 },
+                    },
+                });
+                expectSourceLocation({
+                    source: computedVars.border.source,
+                    expected: 'border: createBorder(1px, solid, red);',
                 });
             });
 
@@ -1497,6 +1542,10 @@ describe(`features/st-var`, () => {
                     },
                     diagnostics: { reports: [] },
                 });
+                expectSourceLocation({
+                    source: computedVars.array.source,
+                    expected: 'array: st-array(blue, stBorder(1px, solid, blue));',
+                });
                 expect(computedVars.map).to.containSubset({
                     value: {
                         border: '1px solid blue',
@@ -1517,6 +1566,11 @@ describe(`features/st-var`, () => {
                         },
                     },
                     diagnostics: { reports: [] },
+                });
+                expectSourceLocation({
+                    source: computedVars.map.source,
+                    expected:
+                        'map: st-map(\n                                border stBorder(\n                                    value(array, 1, size), \n                                    solid, \n                                    value(array, 0)\n                                )\n                            );',
                 });
             });
 
@@ -1551,6 +1605,10 @@ describe(`features/st-var`, () => {
                     },
                     diagnostics: { reports: [] },
                 });
+                expectSourceLocation({
+                    source: computedVars.imported.source,
+                    expected: 'imported-var: red;',
+                });
                 expect(computedVars.a).to.containSubset({
                     value: 'red',
                     input: {
@@ -1559,6 +1617,10 @@ describe(`features/st-var`, () => {
                         value: 'red',
                     },
                     diagnostics: { reports: [] },
+                });
+                expectSourceLocation({
+                    source: computedVars.a.source,
+                    expected: 'a: value(imported);',
                 });
                 expect(computedVars.b).to.containSubset({
                     value: { a: 'red' },
@@ -1574,6 +1636,10 @@ describe(`features/st-var`, () => {
                     },
                     diagnostics: { reports: [] },
                 });
+                expectSourceLocation({
+                    source: computedVars.b.source,
+                    expected: 'b: st-map(a value(imported));',
+                });
                 expect(computedVars.c).to.containSubset({
                     value: ['red'],
                     input: {
@@ -1587,6 +1653,10 @@ describe(`features/st-var`, () => {
                         ],
                     },
                     diagnostics: { reports: [] },
+                });
+                expectSourceLocation({
+                    source: computedVars.c.source,
+                    expected: 'c: st-array(value(imported));',
                 });
             });
 
@@ -1691,16 +1761,16 @@ describe(`features/st-var`, () => {
                 const meta = sheets['/entry.st.css'].meta;
                 const flattenStVars = stylable.stVar.flatten(meta);
 
-                expect(flattenStVars).to.eql([
-                    {
-                        value: 'red',
-                        path: ['a'],
-                    },
-                    {
-                        value: 'blue',
-                        path: ['b'],
-                    },
-                ]);
+                expect(flattenStVars[0]).to.containSubset({
+                    value: 'red',
+                    path: ['a'],
+                });
+                expectSourceLocation({ source: flattenStVars[0].source, expected: 'a: red;' });
+                expect(flattenStVars[1]).to.containSubset({
+                    value: 'blue',
+                    path: ['b'],
+                });
+                expectSourceLocation({ source: flattenStVars[1].source, expected: 'b: blue;' });
             });
             it('should not flat native css function inside st vars', () => {
                 const { stylable, sheets } = testStylableCore(`
@@ -1712,12 +1782,16 @@ describe(`features/st-var`, () => {
                 const meta = sheets['/entry.st.css'].meta;
                 const flattenStVars = stylable.stVar.flatten(meta);
 
-                expect(flattenStVars).to.eql([
+                expect(flattenStVars).to.containSubset([
                     {
                         path: ['a'],
                         value: 'linear-gradient(to right, red, blue)',
                     },
                 ]);
+                expectSourceLocation({
+                    source: flattenStVars[0].source,
+                    expected: 'a: linear-gradient(to right, red, blue);',
+                });
             });
             it('should flat imported simple st vars', () => {
                 const { stylable, sheets } = testStylableCore({
@@ -1735,12 +1809,16 @@ describe(`features/st-var`, () => {
                 const meta = sheets['/entry.st.css'].meta;
                 const flattenStVars = stylable.stVar.flatten(meta);
 
-                expect(flattenStVars).to.eql([
+                expect(flattenStVars).to.containSubset([
                     {
                         value: 'red',
                         path: ['myColor'],
                     },
                 ]);
+                expectSourceLocation({
+                    source: flattenStVars[0].source,
+                    expected: 'color: red;',
+                });
             });
 
             it('should flat st-array st vars', () => {
@@ -1756,7 +1834,7 @@ describe(`features/st-var`, () => {
                 const meta = sheets['/entry.st.css'].meta;
                 const flattenStVars = stylable.stVar.flatten(meta);
 
-                expect(flattenStVars).to.eql([
+                expect(flattenStVars).to.containSubset([
                     {
                         value: '1px',
                         path: ['array', '0'],
@@ -1766,6 +1844,14 @@ describe(`features/st-var`, () => {
                         path: ['array', '1'],
                     },
                 ]);
+                expectSourceLocation({
+                    source: flattenStVars[0].source,
+                    expected: 'array: st-array(1px, 2px);',
+                });
+                expectSourceLocation({
+                    source: flattenStVars[1].source,
+                    expected: 'array: st-array(1px, 2px);',
+                });
             });
 
             it('should flat st-map st vars', () => {
@@ -1781,7 +1867,7 @@ describe(`features/st-var`, () => {
                 const meta = sheets['/entry.st.css'].meta;
                 const flattenStVars = stylable.stVar.flatten(meta);
 
-                expect(flattenStVars).to.eql([
+                expect(flattenStVars).to.containSubset([
                     {
                         value: '1px',
                         path: ['map', 'first'],
@@ -1791,6 +1877,14 @@ describe(`features/st-var`, () => {
                         path: ['map', 'second'],
                     },
                 ]);
+                expectSourceLocation({
+                    source: flattenStVars[0].source,
+                    expected: 'map: st-map(first 1px,second 2px);',
+                });
+                expectSourceLocation({
+                    source: flattenStVars[1].source,
+                    expected: 'map: st-map(first 1px,second 2px);',
+                });
             });
 
             it('should flat custom value st vars', () => {
@@ -1808,7 +1902,7 @@ describe(`features/st-var`, () => {
                 const meta = sheets['/entry.st.css'].meta;
                 const flattenStVars = stylable.stVar.flatten(meta);
 
-                expect(flattenStVars).to.eql([
+                expect(flattenStVars).to.containSubset([
                     {
                         value: '1px solid red',
                         path: ['border'],
@@ -1826,6 +1920,22 @@ describe(`features/st-var`, () => {
                         path: ['border', 'color'],
                     },
                 ]);
+                expectSourceLocation({
+                    source: flattenStVars[0].source,
+                    expected: 'border: stBorder(1px, solid, red);',
+                });
+                expectSourceLocation({
+                    source: flattenStVars[1].source,
+                    expected: 'border: stBorder(1px, solid, red);',
+                });
+                expectSourceLocation({
+                    source: flattenStVars[2].source,
+                    expected: 'border: stBorder(1px, solid, red);',
+                });
+                expectSourceLocation({
+                    source: flattenStVars[3].source,
+                    expected: 'border: stBorder(1px, solid, red);',
+                });
             });
             it('should flat nested st-array st vars', () => {
                 const { stylable, sheets } = testStylableCore(
@@ -1844,7 +1954,7 @@ describe(`features/st-var`, () => {
                 const meta = sheets['/entry.st.css'].meta;
                 const flattenStVars = stylable.stVar.flatten(meta);
 
-                expect(flattenStVars).to.eql([
+                expect(flattenStVars).to.containSubset([
                     {
                         value: 'red',
                         path: ['nestedArray', '0'],
@@ -1884,7 +1994,7 @@ describe(`features/st-var`, () => {
                 const meta = sheets['/entry.st.css'].meta;
                 const flattenStVars = stylable.stVar.flatten(meta);
 
-                expect(flattenStVars).to.eql([
+                expect(flattenStVars).to.containSubset([
                     {
                         value: 'red',
                         path: ['nestedMap', 'simple'],
