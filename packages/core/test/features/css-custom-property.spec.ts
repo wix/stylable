@@ -6,7 +6,11 @@ import {
     diagnosticBankReportToStrings,
     deindent,
 } from '@stylable/core-test-kit';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiSubset from 'chai-subset';
+import type { StylableMeta } from '../../src';
+
+chai.use(chaiSubset);
 
 const stImportDiagnostics = diagnosticBankReportToStrings(STImport.diagnostics);
 const stSymbolDiagnostics = diagnosticBankReportToStrings(STSymbol.diagnostics);
@@ -1168,6 +1172,129 @@ describe(`features/css-custom-property`, () => {
                     @property --no-body;
                 `)
             );
+        });
+    });
+    describe('introspection', () => {
+        function expectSourceLocation({
+            source: { meta, start, end },
+            expected,
+        }: {
+            source: { meta: StylableMeta; start: { offset: number }; end: { offset: number } };
+            expected: string;
+        }) {
+            const actualSrc = meta.sourceAst.toString().slice(start.offset, end.offset);
+            expect(actualSrc).to.eql(expected);
+        }
+        describe('getProperties', () => {
+            it('should resolve all local properties', () => {
+                const { stylable, sheets } = testStylableCore(
+                    deindent(`
+                        @property --defInAtRule {
+                            syntax: '<color>';
+                            initial-value: green;
+                            inherits: false;
+                        }
+
+                        .root {
+                            --defineInPropName: green;
+
+                            color: var(--defineInDeclValue);
+                        }
+                    `)
+                );
+
+                const { meta } = sheets['/entry.st.css'];
+
+                const properties = stylable.cssCustomProperty.getProperties(meta);
+
+                expect(properties).to.containSubset({
+                    '--defInAtRule': {
+                        meta,
+                        localName: '--defInAtRule',
+                        targetName: '--entry-defInAtRule',
+                    },
+                    '--defineInPropName': {
+                        meta,
+                        localName: '--defineInPropName',
+                        targetName: '--entry-defineInPropName',
+                    },
+                    '--defineInDeclValue': {
+                        meta,
+                        localName: '--defineInDeclValue',
+                        targetName: '--entry-defineInDeclValue',
+                    },
+                });
+                expectSourceLocation({
+                    source: properties['--defInAtRule'].source,
+                    expected: `@property --defInAtRule {\n    syntax: '<color>';\n    initial-value: green;\n    inherits: false;\n}`,
+                });
+                expectSourceLocation({
+                    source: properties['--defineInPropName'].source,
+                    expected: `--defineInPropName: green;`,
+                });
+                expectSourceLocation({
+                    source: properties['--defineInDeclValue'].source,
+                    expected: `color: var(--defineInDeclValue);`,
+                });
+            });
+            it('should resolve imported properties', () => {
+                const { stylable, sheets } = testStylableCore({
+                    'deep.st.css': `
+                        .x {
+                            --deep: red;
+                        }
+                    `,
+                    'proxy.st.css': `
+                        @st-import [--deep as --deepReassign1] from './deep.st.css';
+                        .x {
+                            --proxy: var(--deepReassign1);
+                        }
+                    `,
+                    'entry.st.css': deindent(`
+                        @st-import [--proxy as --proxyReassign, --deepReassign1 as --deepReassign2] from './proxy.st.css';
+
+                        .x {
+                            --local: green;
+                        }
+                    `),
+                });
+
+                const { meta } = sheets['/entry.st.css'];
+                const { meta: proxyMeta } = sheets['/proxy.st.css'];
+                const { meta: deepMeta } = sheets['/deep.st.css'];
+
+                const properties = stylable.cssCustomProperty.getProperties(meta);
+
+                expect(properties).to.containSubset({
+                    '--local': {
+                        meta,
+                        localName: '--local',
+                        targetName: '--entry-local',
+                    },
+                    '--proxyReassign': {
+                        meta: proxyMeta,
+                        localName: '--proxy',
+                        targetName: '--proxy-proxy',
+                    },
+                    '--deepReassign2': {
+                        meta: deepMeta,
+                        localName: '--deep',
+                        targetName: '--deep-deep',
+                    },
+                });
+                expectSourceLocation({
+                    source: properties['--local'].source,
+                    expected: `--local: green;`,
+                });
+                expectSourceLocation({
+                    source: properties['--proxyReassign'].source,
+                    expected: `--proxy: var(--deepReassign1);`,
+                });
+                expectSourceLocation({
+                    source: properties['--deepReassign2'].source,
+                    expected: `--deep: red;`,
+                });
+            });
         });
     });
 });

@@ -83,6 +83,7 @@ export class Stylable {
     public resolver: StylableResolver;
     public stModule = new STImport.StylablePublicApi(this);
     public stScope = new STScope.StylablePublicApi(this);
+    public cssCustomProperty = new CSSCustomProperty.StylablePublicApi(this);
     public stVar = new STVar.StylablePublicApi(this);
     public stMixin = new STMixin.StylablePublicApi(this);
     public cssClass = new CSSClass.StylablePublicApi(this);
