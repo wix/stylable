@@ -209,11 +209,11 @@ export function get(meta: StylableMeta, name: string): VarSymbol | undefined {
 
 // Stylable StVar Public APIs
 
-const UNKNOWN_LOCATION = {
+const UNKNOWN_LOCATION = Object.freeze({
     offset: -1,
     line: -1,
     column: -1,
-} as const;
+} as const);
 export class StylablePublicApi {
     constructor(private stylable: Stylable) {}
 
