@@ -70,6 +70,7 @@ function createState(clone?: State): State {
             container: clone ? { ...clone.byType.container } : {},
             var: clone ? { ...clone.byType.var } : {},
         },
+        symbolToAst: new WeakMap(),
     };
 }
 
@@ -113,6 +114,7 @@ interface State {
     byType: {
         [T in keyof SymbolMap]: Record<string, SymbolMap[T]>;
     };
+    symbolToAst: WeakMap<StylableSymbol, postcss.Node>;
 }
 
 const dataKey = plugableRecord.key<State>('mappedSymbols');
@@ -173,7 +175,10 @@ export function addSymbol({
     safeRedeclare?: boolean;
     localName?: string;
 }) {
-    const { byNS, byNSFlat, byType } = plugableRecord.getUnsafe(context.meta.data, dataKey);
+    const { byNS, byNSFlat, byType, symbolToAst } = plugableRecord.getUnsafe(
+        context.meta.data,
+        dataKey
+    );
     const name = localName || symbol.name;
     const typeTable = byType[symbol._kind];
     const nsName = NAMESPACES[symbol._kind];
@@ -187,7 +192,16 @@ export function addSymbol({
     byNS[nsName].push({ name, symbol, ast: node, safeRedeclare });
     byNSFlat[nsName][name] = symbol;
     typeTable[name] = symbol;
+    node && symbolToAst.set(symbol, node);
     return symbol;
+}
+
+export function getSymbolAstNode(
+    meta: StylableMeta,
+    symbol: StylableSymbol
+): postcss.Node | undefined {
+    const { symbolToAst } = plugableRecord.getUnsafe(meta.data, dataKey);
+    return symbolToAst.get(symbol);
 }
 
 export function reportRedeclare(context: FeatureContext) {
