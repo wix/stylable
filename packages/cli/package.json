@@ -12,8 +12,8 @@
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 25000"
   },
   "dependencies": {
-    "@file-services/node": "^8.3.3",
-    "@file-services/types": "^8.3.3",
+    "@file-services/node": "^9.0.0",
+    "@file-services/types": "^9.0.0",
     "@stylable/build-tools": "^5.16.0",
     "@stylable/code-formatter": "^5.16.0",
     "@stylable/core": "^5.16.0",
@@ -22,6 +22,7 @@
     "@stylable/optimizer": "^5.16.0",
     "@wixc3/resolve-directory-context": "^4.0.0",
     "decache": "^4.6.2",
+    "js-base64": "^3.7.7",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
     "mime": "^3.0.0",

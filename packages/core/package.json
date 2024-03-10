@@ -7,7 +7,7 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/resolve": "^8.3.3",
+    "@file-services/resolve": "^9.0.0",
     "@tokey/css-selector-parser": "^0.6.2",
     "@tokey/css-value-parser": "^0.1.4",
     "@tokey/imports-parser": "^1.0.0",

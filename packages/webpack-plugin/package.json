@@ -18,7 +18,7 @@
     "@stylable/optimizer": "^5.16.0",
     "@stylable/runtime": "^5.16.0",
     "decache": "^4.6.2",
-    "enhanced-resolve": "^5.15.0",
+    "enhanced-resolve": "^5.15.1",
     "lodash.clonedeep": "^4.5.0",
     "postcss": "^8.4.35"
   },

@@ -117,7 +117,7 @@ export function replaceMappedCSSAssetPlaceholders({
                 return extractFilenameFromAssetModule(assetModule, publicPath);
             } else {
                 const data = new Map<string, unknown>();
-                const assetModuleSource = assetModule.generator.generate(assetModule, {
+                const assetModuleSource = assetModule.generator!.generate(assetModule, {
                     chunkGraph,
                     moduleGraph,
                     runtime,

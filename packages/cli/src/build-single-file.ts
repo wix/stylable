@@ -87,7 +87,7 @@ export function buildSingleFile({
     log(mode, filePath);
 
     let content: string = tryRun(
-        () => fs.readFileSync(filePath).toString(),
+        () => fs.readFileSync(filePath, 'utf8'),
         `Read File Error: ${filePath}`
     );
     const res = tryRun(
@@ -351,16 +351,8 @@ function inlineAssetsForJsModule(res: StylableResults, stylable: Stylable, fs: I
     processUrlDependencies({
         meta: { targetAst: ast, source: res.meta.source },
         rootContext: stylable.projectRoot,
-        getReplacement: ({ absoluteRequest, url }) => {
-            if (isAsset(url)) {
-                let content = fs.readFileSync(absoluteRequest);
-                if (typeof content === 'string') {
-                    content = Buffer.from(content);
-                }
-                return fileToDataUri(absoluteRequest, content);
-            }
-            return url;
-        },
+        getReplacement: ({ absoluteRequest, url }) =>
+            isAsset(url) ? fileToDataUri(absoluteRequest, fs.readFileSync(absoluteRequest)) : url,
         host: fs,
     });
     return ast;
