@@ -12,10 +12,10 @@
     "test": "mocha \"dist/test/**/*.spec.js\" --timeout 5000"
   },
   "dependencies": {
-    "@file-services/node": "^8.3.3",
+    "@file-services/node": "^9.0.0",
     "@stylable/core": "^5.16.0",
-    "@typescript-eslint/utils": "^7.0.1",
-    "@typescript-eslint/scope-manager": "^7.0.1",
+    "@typescript-eslint/utils": "^7.1.1",
+    "@typescript-eslint/scope-manager": "^7.1.1",
     "postcss-safe-parser": "^7.0.0"
   },
   "keywords": [
