@@ -7,9 +7,9 @@ import {
     namespaceDelimiter as delimiter,
 } from '@stylable/core/dist/index-internal';
 import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
-import csso from 'csso';
 import postcss, { Root, Rule, Node, Comment, Container } from 'postcss';
 import { NameMapper } from './name-mapper';
+import { transform } from 'lightningcss';
 
 const { booleanStateDelimiter } = STCustomState.delimiters;
 const stateRegexp = new RegExp(`^(.*?)${booleanStateDelimiter}`);
@@ -19,8 +19,12 @@ export class StylableOptimizer implements IStylableOptimizer {
     public classPrefix = 's';
     public namespacePrefix = 'o';
     public minifyCSS(css: string): string {
-        // disabling restructuring as it breaks production mode by disappearing classes
-        return csso.minify(css, { restructure: false }).css;
+        const u8arr = transform({
+            filename: 'in-memory-minify-stylable.css',
+            code: Buffer.from(css),
+            minify: true,
+        }).code;
+        return u8arr.toString();
     }
 
     public optimize(
