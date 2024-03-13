@@ -1,6 +1,6 @@
 {
   "name": "@stylable/esbuild",
-  "version": "5.16.0",
+  "version": "6.0.0",
   "description": "Stylable plugin for esbuild",
   "main": "dist/index.js",
   "scripts": {
@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@file-services/node": "^9.0.0",
-    "@stylable/build-tools": "^5.16.0",
-    "@stylable/cli": "^5.16.0",
-    "@stylable/core": "^5.16.0",
-    "@stylable/node": "^5.16.0",
-    "@stylable/optimizer": "^5.16.0",
-    "@stylable/runtime": "^5.16.0",
+    "@stylable/build-tools": "^6.0.0",
+    "@stylable/cli": "^6.0.0",
+    "@stylable/core": "^6.0.0",
+    "@stylable/node": "^6.0.0",
+    "@stylable/optimizer": "^6.0.0",
+    "@stylable/runtime": "^6.0.0",
     "decache": "^4.6.2"
   },
   "files": [
