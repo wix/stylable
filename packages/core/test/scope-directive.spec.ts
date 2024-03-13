@@ -450,7 +450,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             const atRule = meta.targetAst!.nodes[0] as AtRule;
-            const rule = atRule.nodes[0] as Rule;
+            const rule = atRule.nodes![0] as Rule;
             expect(rule.selector).to.equal('.entry__root .entry__part');
         });
     });

@@ -8,6 +8,7 @@ import {
     ASTUtils,
     TSESTree as esTree,
 } from '@typescript-eslint/utils';
+import { DefinitionType } from '@typescript-eslint/scope-manager';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
@@ -78,7 +79,9 @@ export default createRule({
                                 return;
                             }
                             const { type } = varDefs.defs[varDefs.defs.length - 1];
-                            return local.name === varDefs.name && type === 'ImportBinding';
+                            return (
+                                local.name === varDefs.name && type === DefinitionType.ImportBinding
+                            );
                         });
 
                         if (!variable) {

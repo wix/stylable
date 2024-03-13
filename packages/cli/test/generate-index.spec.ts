@@ -40,7 +40,7 @@ describe('build index', () => {
             }
         );
 
-        const res = fs.readFileSync('/index.st.css').toString();
+        const res = fs.readFileSync('/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             [
@@ -85,7 +85,7 @@ describe('build index', () => {
             }
         );
 
-        const res = fs.readFileSync('./dist/index.st.css').toString();
+        const res = fs.readFileSync('./dist/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             [
@@ -131,7 +131,7 @@ describe('build index', () => {
             }
         );
 
-        const res = fs.readFileSync('/dist/index.st.css').toString();
+        const res = fs.readFileSync('/dist/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             [
@@ -173,7 +173,7 @@ describe('build index', () => {
             }
         );
 
-        const res = fs.readFileSync('/index.st.css').toString();
+        const res = fs.readFileSync('/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             [
@@ -216,7 +216,7 @@ describe('build index', () => {
             }
         );
 
-        const res = fs.readFileSync('/index.st.css').toString();
+        const res = fs.readFileSync('/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             [
@@ -262,7 +262,7 @@ describe('build index', () => {
 
         expect(fs.existsSync('/index.st.css'), 'index is not generated').to.eql(true);
 
-        const res = fs.readFileSync('/index.st.css').toString();
+        const res = fs.readFileSync('/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             [
@@ -305,7 +305,7 @@ describe('build index', () => {
             }
         );
 
-        const res = fs.readFileSync('/index.st.css').toString();
+        const res = fs.readFileSync('/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}\n.root Style0{}'
@@ -349,7 +349,7 @@ describe('build index', () => {
             }
         );
 
-        const res = fs.readFileSync('/index.st.css').toString();
+        const res = fs.readFileSync('/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             [
@@ -390,7 +390,7 @@ describe('build index', () => {
             }
         );
 
-        const res = fs.readFileSync('/some-dir/other-dir/index.st.css').toString();
+        const res = fs.readFileSync('/some-dir/other-dir/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
             [':import {-st-from: "../../comp.st.css";-st-default:Comp;}', '.root Comp{}'].join('\n')

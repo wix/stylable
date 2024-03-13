@@ -38,7 +38,7 @@ export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions)
     const finished: ApplyCodeModsSuccess[] = [];
 
     for (const filePath of files) {
-        const source = fs.readFileSync(filePath).toString();
+        const source = fs.readFileSync(filePath, 'utf8');
         const result = applyCodeMods(filePath, source, mods);
 
         if (result.type === 'failure') {
