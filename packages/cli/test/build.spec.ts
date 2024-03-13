@@ -778,7 +778,7 @@ describe('build - bundle', () => {
         );
 
         expect(fs.readFileSync('/lib/bundle.css', 'utf8')).to.equal(
-            '.label__part{background-image:url(./components/label/image.png)}.button__root{background-image:url(./components/label/image.png)}'
+            '.label__part,.button__root{background-image:url(./components/label/image.png)}'
         );
     });
 });

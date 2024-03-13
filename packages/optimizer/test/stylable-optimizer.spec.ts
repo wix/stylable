@@ -56,11 +56,17 @@ describe('StylableOptimizer', () => {
                     @media screen {
                         .x{/* empty */}
                     }
+                    .y {
+                        .z{color:green;}
+                        @media screen {
+                            &::before {}
+                        }
+                    }
                 `,
             },
         };
         const { meta } = generateStylableResult({ entry: index, files });
         const output = new StylableOptimizer().minifyCSS(meta.targetAst!.toString());
-        expect(output).to.equal(`.${meta.namespace}__x{color:red}`);
+        expect(output).to.equal(`.${meta.namespace}__x{color:red}.${meta.namespace}__y{& .${meta.namespace}__z{color:green}}`);
     }).timeout(25000);
 });
