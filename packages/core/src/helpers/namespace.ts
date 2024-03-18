@@ -42,7 +42,7 @@ export interface CreateNamespaceOptions {
         strict: boolean,
         namespace: string,
         filePath: string,
-        usedBy?: string
+        usedByMap: Map<string, string>
     ) => string;
     hashSeparator?: string;
     strict?: boolean;
@@ -75,8 +75,9 @@ export function defaultNoMatchHandler(
     strict: boolean,
     ns: string,
     stylesheetPath: string,
-    usedBy?: string
+    usedByMap: Map<string, string>
 ): string {
+    const usedBy = usedByMap.get(ns);
     throw new Error(
         `Could not create namespace for:\n${stylesheetPath}\nthe last valid namespace tried was ${JSON.stringify(
             ns
@@ -146,16 +147,11 @@ export function createNamespaceStrategy(options: CreateNamespaceOptions) {
             if (usedBy === stylesheetPath) {
                 return finalNamespace;
             } else if (strict) {
-                return handleNoMatch(strict, finalNamespace, stylesheetPath, usedBy);
+                return handleNoMatch(strict, finalNamespace, stylesheetPath, usedNamespaces);
             }
             i++;
         }
 
-        return handleNoMatch(
-            strict,
-            finalNamespace,
-            stylesheetPath,
-            usedNamespaces.get(finalNamespace)
-        );
+        return handleNoMatch(strict, finalNamespace, stylesheetPath, usedNamespaces);
     };
 }
