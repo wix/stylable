@@ -119,7 +119,12 @@ describe('createNamespaceStrategy', () => {
     it('should throw when no unique namespace can be generated and hash slice size is larger then hash length', () => {
         function getErrorMessage() {
             try {
-                defaultNoMatchHandler(false, 'x-1', '/package/x2.st.css', '/package/x1.st.css');
+                defaultNoMatchHandler(
+                    false,
+                    'x-1',
+                    '/package/x2.st.css',
+                    new Map([['x-1', '/package/x1.st.css']])
+                );
             } catch (e) {
                 return (e as Error).message;
             }
@@ -140,7 +145,12 @@ describe('createNamespaceStrategy', () => {
     it('should throw when no unique namespace can be generated in strict mode', () => {
         function getErrorMessage() {
             try {
-                defaultNoMatchHandler(true, 'x', '/package/x1.st.css', '/package/x.st.css');
+                defaultNoMatchHandler(
+                    true,
+                    'x',
+                    '/package/x1.st.css',
+                    new Map([['x', '/package/x.st.css']])
+                );
             } catch (e) {
                 return (e as Error).message;
             }

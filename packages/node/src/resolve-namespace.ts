@@ -4,6 +4,7 @@ import {
     defaultNoMatchHandler,
 } from '@stylable/core';
 import { dirname, relative } from 'path';
+import { existsSync } from 'node:fs';
 import { findPackageJson } from './find-package-json';
 
 export function resolveNamespaceFactory(
@@ -16,7 +17,10 @@ export function resolveNamespaceFactory(
 
 export const packageJsonLookupCache = new Map<string, string>();
 
-export function createNamespaceStrategyNode(options: Partial<CreateNamespaceOptions> = {}) {
+export function createNamespaceStrategyNode(
+    options: Partial<CreateNamespaceOptions> = {},
+    devMode?: boolean
+) {
     return createNamespaceStrategy({
         normalizePath(packageRoot: string, stylesheetPath: string) {
             return relative(packageRoot, stylesheetPath).replace(/\\/g, '/');
@@ -36,8 +40,17 @@ export function createNamespaceStrategyNode(options: Partial<CreateNamespaceOpti
                 dirPath: dirname(configPath),
             };
         },
-        handleNoMatch(strict, ns, stylesheetPath, usedBy) {
-            return strict ? defaultNoMatchHandler(strict, ns, stylesheetPath, usedBy) : ns;
+        handleNoMatch(strict, ns, stylesheetPath, usedByMap) {
+            if (strict && devMode) {
+                const usedBy = usedByMap.get(ns);
+                if (usedBy) {
+                    if (!existsSync(usedBy)) {
+                        usedByMap.set(ns, stylesheetPath);
+                        return ns;
+                    }
+                }
+            }
+            return strict ? defaultNoMatchHandler(strict, ns, stylesheetPath, usedByMap) : ns;
         },
         hashSalt: '',
         hashFragment: 'full',
