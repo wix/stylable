@@ -505,7 +505,7 @@ function validateTopLevelClass({
             // report missing selector
             const arrowEnd = def.ranges.mapArrow[def.ranges.mapArrow.length - 1];
             for (let i = def.params.length - 1; i >= 0; i--) {
-                const node = def.params[i];
+                const node: BaseAstNode = def.params[i];
                 if (node === arrowEnd) {
                     break;
                 } else if (isExactLiteral(node, ',')) {

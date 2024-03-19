@@ -58,7 +58,7 @@ export function attachHook({
 
     const prevHook = require.extensions[HOOK_EXTENSION];
     require.extensions[HOOK_EXTENSION] = function cssModulesHook(m: any, filename: string) {
-        if (matcher!(filename) || !prevHook) {
+        if (matcher(filename) || !prevHook) {
             const useJSModule = !ignoreJSModules && fs.existsSync(filename + '.js');
             const source = fs.readFileSync(useJSModule ? filename + '.js' : filename).toString();
             const code = useJSModule ? source : stylableToModule(source, filename);
