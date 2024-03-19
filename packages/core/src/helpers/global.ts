@@ -1,7 +1,7 @@
 import type { FunctionNode } from 'postcss-value-parser';
 
-export const PROPERTY = `-st-global` as const;
-export const GLOBAL_FUNC = 'st-global' as const;
+export const PROPERTY = `-st-global`;
+export const GLOBAL_FUNC = 'st-global';
 
 const globalValueRegExp = new RegExp(`^${GLOBAL_FUNC}\\((.*?)\\)$`);
 
