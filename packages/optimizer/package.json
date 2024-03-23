@@ -10,7 +10,7 @@
     "@stylable/core": "^6.0.1",
     "@tokey/css-selector-parser": "^0.6.2",
     "lightningcss": "^1.24.1",
-    "postcss": "^8.4.37"
+    "postcss": "^8.4.38"
   },
   "files": [
     "dist",

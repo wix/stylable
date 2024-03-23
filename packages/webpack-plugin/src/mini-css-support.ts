@@ -57,7 +57,7 @@ export function injectCssModules(
                     compilation.options,
                     compilation,
                     compilation.resolverFactory.get('normal'),
-                    compilation.compiler.inputFileSystem,
+                    compilation.compiler.inputFileSystem ?? compilation.inputFileSystem,
                     () => (syncCheck = true)
                 );
                 if (!syncCheck) {

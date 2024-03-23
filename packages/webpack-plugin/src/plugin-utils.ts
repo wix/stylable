@@ -453,7 +453,7 @@ function getModuleRequestPath(
 ) {
     const visited = new Set<Module>();
     const path = [];
-    let current: Module | null = module;
+    let current: Module | null | undefined = module;
     while (current) {
         if (visited.has(current)) {
             path.unshift(current.readableIdentifier(requestShortener) + '<-- Circular');
