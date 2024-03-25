@@ -26,6 +26,9 @@
     "vscode-languageserver-textdocument": "^1.0.11",
     "vscode-uri": "^3.0.8"
   },
+  "devDependencies": {
+    "vscode-languageserver-protocol": "^3.17.5"
+  },
   "author": "Wix.com",
   "files": [
     "dist",
