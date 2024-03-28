@@ -48,10 +48,10 @@ export interface Imported {
 
 export const PseudoImport = `:import`;
 export const PseudoImportDecl = {
-    DEFAULT: `-st-default` as const,
-    NAMED: `-st-named` as const,
-    FROM: `-st-from` as const,
-};
+    DEFAULT: `-st-default`,
+    NAMED: `-st-named`,
+    FROM: `-st-from`,
+} as const;
 
 /**
  * ImportTypeHook is used as a way to cast imported symbols before resolving their actual type.
