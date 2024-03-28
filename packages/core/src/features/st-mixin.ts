@@ -55,9 +55,9 @@ export type MixinReflection =
     | { name: string; kind: 'invalid'; args: string };
 
 export const MixinType = {
-    ALL: `-st-mixin` as const,
-    PARTIAL: `-st-partial-mixin` as const,
-};
+    ALL: `-st-mixin`,
+    PARTIAL: `-st-partial-mixin`,
+} as const;
 
 export const diagnostics = {
     VALUE_CANNOT_BE_STRING: mixinHelperDiagnostics.VALUE_CANNOT_BE_STRING,
