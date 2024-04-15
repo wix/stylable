@@ -1,6 +1,6 @@
 {
   "name": "@stylable/rollup-plugin",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Stylable plugin for Rollup",
   "main": "dist/index.js",
   "scripts": {
@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@file-services/node": "^9.2.0",
-    "@stylable/build-tools": "^6.0.1",
-    "@stylable/cli": "^6.0.1",
-    "@stylable/core": "^6.0.1",
-    "@stylable/node": "^6.0.1",
-    "@stylable/optimizer": "^6.0.1",
-    "@stylable/runtime": "^6.0.1",
+    "@stylable/build-tools": "^6.0.2",
+    "@stylable/cli": "^6.0.2",
+    "@stylable/core": "^6.0.2",
+    "@stylable/node": "^6.0.2",
+    "@stylable/optimizer": "^6.0.2",
+    "@stylable/runtime": "^6.0.2",
     "decache": "^4.6.2",
     "mime": "^3.0.0"
   },

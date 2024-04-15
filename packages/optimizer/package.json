@@ -1,13 +1,13 @@
 {
   "name": "@stylable/optimizer",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Stylable core optimizer",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "^6.0.1",
+    "@stylable/core": "^6.0.2",
     "@tokey/css-selector-parser": "^0.6.2",
     "lightningcss": "^1.24.1",
     "postcss": "^8.4.38"
