@@ -9,7 +9,7 @@
   "dependencies": {
     "@stylable/runtime": "^6.0.2",
     "node-eval": "^2.0.0",
-    "playwright-core": "^1.43.0",
+    "playwright-core": "^1.43.1",
     "rimraf": "^5.0.5"
   },
   "files": [
