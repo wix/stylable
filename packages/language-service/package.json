@@ -11,8 +11,8 @@
     "typescript": ">=3.8"
   },
   "dependencies": {
-    "@file-services/types": "^9.2.0",
-    "@file-services/typescript": "^9.2.0",
+    "@file-services/types": "^9.2.1",
+    "@file-services/typescript": "^9.2.1",
     "@stylable/code-formatter": "^6.0.2",
     "@stylable/core": "^6.0.2",
     "@tokey/core": "^1.4.0",
