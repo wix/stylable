@@ -15,7 +15,9 @@
     {
       "files": ["*.ts", "*.tsx"],
       "parserOptions": {
-        "EXPERIMENTAL_useProjectService": true
+        "EXPERIMENTAL_useProjectService": {
+          "maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING": 10000
+        }
       },
       "extends": [
         "plugin:@typescript-eslint/recommended",
