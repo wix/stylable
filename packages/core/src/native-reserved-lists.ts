@@ -149,6 +149,7 @@ export const nativeFunctionsDic: Record<string, { preserveQuotes: boolean }> = {
     inset: { preserveQuotes: false },
     invert: { preserveQuotes: false },
     leader: { preserveQuotes: false },
+    'light-dark': { preserveQuotes: false },
     'linear-gradient': { preserveQuotes: false },
     local: { preserveQuotes: false },
     matrix: { preserveQuotes: false },
