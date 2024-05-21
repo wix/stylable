@@ -1,6 +1,6 @@
 {
   "name": "@stylable/node",
-  "version": "6.0.2",
+  "version": "6.1.0",
   "description": "Integrate Stylable into your node application",
   "main": "dist/index.js",
   "scripts": {
@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "@file-services/node": "^9.2.1",
-    "@stylable/build-tools": "^6.0.2",
-    "@stylable/core": "^6.0.2",
-    "@stylable/module-utils": "^6.0.2",
+    "@stylable/build-tools": "^6.1.0",
+    "@stylable/core": "^6.1.0",
+    "@stylable/module-utils": "^6.1.0",
     "find-config": "^1.0.0"
   },
   "files": [
