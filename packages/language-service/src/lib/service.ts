@@ -176,7 +176,12 @@ export class StylableLanguageService {
                 end: doc.positionAt(offset.end),
             };
 
-            return getColorPresentation(this.cssService, doc, { color, range, textDocument: doc });
+            return getColorPresentation(
+                this.cssService,
+                doc,
+                { color, range, textDocument: doc },
+                this.fs
+            );
         }
 
         return [];
@@ -373,7 +378,7 @@ export class StylableLanguageService {
     }
 
     public getColorPresentation(document: TextDocument, params: ColorPresentationParams) {
-        return getColorPresentation(this.cssService, document, params);
+        return getColorPresentation(this.cssService, document, params, this.fs);
     }
 
     public diagnose(filePath: string): Diagnostic[] {
