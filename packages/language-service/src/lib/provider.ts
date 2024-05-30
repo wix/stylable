@@ -1455,13 +1455,11 @@ export function getRefs(
         return [];
     }
 
-    const stylesheets: string[] = fs
-        .findFilesSync(stylable.projectRoot, {
-            filterFile: (fileDesc: IFileSystemDescriptor) => {
-                return fileDesc.name.endsWith('.st.css');
-            },
-        })
-        .map((stylesheetPath) => fs.realpathSync.native(stylesheetPath));
+    const stylesheets: string[] = fs.findFilesSync(stylable.projectRoot, {
+        filterFile: (fileDesc: IFileSystemDescriptor) => {
+            return fileDesc.name.endsWith('.st.css');
+        },
+    });
 
     return newFindRefs(symb.word, symb.meta, callingMeta, stylesheets, stylable, position);
 }
