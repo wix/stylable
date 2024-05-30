@@ -1,14 +1,14 @@
 {
   "name": "@stylable/dom-test-kit",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "description": "Stylable DOM testing utilities",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "^6.1.0",
-    "@stylable/runtime": "^6.1.0",
+    "@stylable/core": "^6.1.1",
+    "@stylable/runtime": "^6.1.1",
     "@tokey/css-selector-parser": "^0.6.2"
   },
   "files": [
