@@ -89,7 +89,7 @@ export class StylableLanguageService {
             const res = this.provider.getDefinitionLocation(
                 stylableFile.content,
                 doc.positionAt(offset),
-                filePath,
+                stylableFile.path,
                 this.fs
             );
 
@@ -176,7 +176,12 @@ export class StylableLanguageService {
                 end: doc.positionAt(offset.end),
             };
 
-            return getColorPresentation(this.cssService, doc, { color, range, textDocument: doc });
+            return getColorPresentation(
+                this.cssService,
+                doc,
+                { color, range, textDocument: doc },
+                this.fs
+            );
         }
 
         return [];
@@ -194,7 +199,7 @@ export class StylableLanguageService {
                 stylableFile.content
             );
 
-            getRenameRefs(filePath, doc.positionAt(offset), this.fs, this.stylable).forEach(
+            getRenameRefs(stylableFile.path, doc.positionAt(offset), this.fs, this.stylable).forEach(
                 (ref) => {
                     if (edit.changes![ref.uri]) {
                         edit.changes![ref.uri].push({ range: ref.range, newText: newName });
@@ -346,10 +351,11 @@ export class StylableLanguageService {
     }
 
     public getDefinitionLocation(src: string, position: ProviderPosition, filePath: string) {
+        const realFilePath = this.fs.realpathSync.native(filePath);
         const defs = this.provider.getDefinitionLocation(
             src,
             position,
-            URI.file(filePath).fsPath,
+            realFilePath,
             this.fs
         );
         return defs.map((loc) => Location.create(URI.file(loc.uri).fsPath, loc.range));
@@ -373,7 +379,7 @@ export class StylableLanguageService {
     }
 
     public getColorPresentation(document: TextDocument, params: ColorPresentationParams) {
-        return getColorPresentation(this.cssService, document, params);
+        return getColorPresentation(this.cssService, document, params, this.fs);
     }
 
     public diagnose(filePath: string): Diagnostic[] {
@@ -383,7 +389,7 @@ export class StylableLanguageService {
             return createDiagnosis(
                 stylableFile.content,
                 stylableFile.stat.mtime.getTime(),
-                filePath,
+                stylableFile.path,
                 this.stylable,
                 this.cssService
             );
@@ -404,9 +410,10 @@ export class StylableLanguageService {
             const stat = this.fs.statSync(filePath);
 
             if (stat.isFile()) {
-                const content = this.fs.readFileSync(filePath, 'utf8');
+                const realFilePath = this.fs.realpathSync.native(filePath);
+                const content = this.fs.readFileSync(realFilePath, 'utf8');
                 return {
-                    path: filePath,
+                    path: realFilePath,
                     content,
                     stat,
                 };

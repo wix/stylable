@@ -118,7 +118,7 @@ export class Provider {
         const src = context.document.getText();
         const filePath = context.meta.source;
         const pos = context.getPosition();
-        const res = fixAndProcess(src, pos, filePath);
+        const res = fixAndProcess(src, pos, filePath, fs);
         const completions: Completion[] = [];
 
         if (!res.processed.meta) {
@@ -153,7 +153,7 @@ export class Provider {
         }
 
         const callingMeta = this.stylable.analyze(filePath);
-        const { word, meta } = getDefSymbol(src, position, filePath, this.stylable);
+        const { word, meta } = getDefSymbol(src, position, filePath, this.stylable, fs);
         if (!meta || !word) {
             return [];
         }
@@ -354,7 +354,7 @@ export class Provider {
         }
         const {
             processed: { meta },
-        } = fixAndProcess(src, pos, filePath);
+        } = fixAndProcess(src, pos, filePath, fs);
         if (!meta) {
             return null;
         }
@@ -1443,19 +1443,23 @@ export function getRefs(
 ): Location[] {
     const callingMeta = stylable.analyze(filePath);
 
-    const symb = getDefSymbol(fs.readFileSync(filePath, 'utf8'), position, filePath, stylable);
+    const symb = getDefSymbol(
+        fs.readFileSync(filePath, 'utf8'),
+        position,
+        fs.realpathSync.native(filePath),
+        stylable,
+        fs
+    );
 
     if (!symb.meta) {
         return [];
     }
 
-    const stylesheets: string[] = fs
-        .findFilesSync(stylable.projectRoot, {
-            filterFile: (fileDesc: IFileSystemDescriptor) => {
-                return fileDesc.name.endsWith('.st.css');
-            },
-        })
-        .map((stylesheetPath) => URI.file(stylesheetPath).fsPath);
+    const stylesheets: string[] = fs.findFilesSync(stylable.projectRoot, {
+        filterFile: (fileDesc: IFileSystemDescriptor) => {
+            return fileDesc.name.endsWith('.st.css');
+        },
+    });
 
     return newFindRefs(symb.word, symb.meta, callingMeta, stylesheets, stylable, position);
 }
@@ -1464,7 +1468,7 @@ export function createMeta(src: string, path: string) {
     let meta: StylableMeta;
     const fakes: postcss.Rule[] = [];
     try {
-        const ast: postcss.Root = safeParse(src, { from: URI.file(path).fsPath });
+        const ast: postcss.Root = safeParse(src, { from: path });
         if (ast.nodes) {
             for (const node of ast.nodes) {
                 if (node.type === 'decl') {
@@ -1491,7 +1495,12 @@ export function createMeta(src: string, path: string) {
     };
 }
 
-export function fixAndProcess(src: string, position: ProviderPosition, filePath: string) {
+export function fixAndProcess(
+    src: string,
+    position: ProviderPosition,
+    filePath: string,
+    fs: IFileSystem
+) {
     let cursorLineIndex: number = position.character;
     const lines = src.replace(/\r\n/g, '\n').split('\n');
     let currentLine = lines[position.line];
@@ -1518,7 +1527,7 @@ export function fixAndProcess(src: string, position: ProviderPosition, filePath:
         fixedSrc = lines.join('\n');
     }
 
-    const processed = createMeta(fixedSrc, filePath);
+    const processed = createMeta(fixedSrc, fs.realpathSync.native(filePath));
     return {
         processed,
         currentLine,
@@ -1688,9 +1697,10 @@ export function getDefSymbol(
     src: string,
     position: ProviderPosition,
     filePath: string,
-    stylable: Stylable
+    stylable: Stylable,
+    fs: IFileSystem
 ) {
-    const res = fixAndProcess(src, position, filePath);
+    const res = fixAndProcess(src, position, filePath, fs);
     let meta = res.processed.meta;
     if (!meta) {
         return { word: '', meta: null };

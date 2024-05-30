@@ -68,7 +68,7 @@ export function getDefFromLoc({ filePath, pos }: { filePath: string; pos: Provid
 
 export function getReferences(fileName: string, pos: ProviderPosition): Location[] {
     const fullPath = path.join(CASES_PATH, fileName);
-    return stylableLSP.getRefs(URI.file(fullPath).fsPath, pos);
+    return stylableLSP.getRefs(fullPath, pos);
 }
 
 export function getSignatureHelp(fileName: string, prefix: string): SignatureHelp | null {

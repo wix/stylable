@@ -21,7 +21,8 @@ export function resolveDocumentColors(
     const res = fixAndProcess(
         src,
         new ProviderPosition(0, 0),
-        fs.sep === '/' ? filePath.replace(/\\/g, '/') : filePath
+        fs.sep === '/' ? filePath.replace(/\\/g, '/') : filePath, // TODO: this is very suspicious
+        fs
     );
     const meta = res.processed.meta;
 
@@ -107,10 +108,16 @@ export function resolveDocumentColors(
 export function getColorPresentation(
     cssService: CssService,
     document: TextDocument,
-    params: ColorPresentationParams
+    params: ColorPresentationParams,
+    fs: IFileSystem
 ): ColorPresentation[] {
     const src = document.getText();
-    const res = fixAndProcess(src, new ProviderPosition(0, 0), params.textDocument.uri);
+    const res = fixAndProcess(
+        src,
+        new ProviderPosition(0, 0),
+        URI.parse(params.textDocument.uri).fsPath,
+        fs
+    );
     const meta = res.processed.meta;
 
     const wordStart = new ProviderPosition(

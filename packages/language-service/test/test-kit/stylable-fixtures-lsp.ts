@@ -4,11 +4,11 @@ import { Stylable } from '@stylable/core';
 import { safeParse } from '@stylable/core/dist/index-internal';
 import { StylableLanguageService } from '@stylable/language-service';
 
-export const CASES_PATH = path.join(
-    path.dirname(require.resolve('@stylable/language-service/package.json')),
-    'test',
-    'fixtures',
-    'server-cases'
+export const CASES_PATH = fs.realpathSync.native(
+    path.join(
+        path.dirname(require.resolve('@stylable/language-service/package.json')),
+        'test/fixtures/server-cases'
+    )
 );
 
 function requireModule(request: string) {
