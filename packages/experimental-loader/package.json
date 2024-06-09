@@ -11,7 +11,7 @@
     "@stylable/webpack-plugin": "^6.1.1",
     "css-loader": "^7.1.2",
     "decache": "^4.6.2",
-    "loader-utils": "^3.2.1"
+    "loader-utils": "^3.3.1"
   },
   "files": [
     "dist",
