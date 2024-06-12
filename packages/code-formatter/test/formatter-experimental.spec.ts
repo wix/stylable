@@ -666,13 +666,21 @@ describe('formatter - experimental', () => {
                 source: `
                     .root {
                         prop1: 
+
                     /*start standalone line*/
+
                                 AAA,
+
                     /*inline before*/ BBB /*inline after*/
+
                         CCC
+
                                 /*middle standalone line*/
+
                                 DDD
+
                         /*end standalone line*/
+                        
                         ;
                     }
                 `,
