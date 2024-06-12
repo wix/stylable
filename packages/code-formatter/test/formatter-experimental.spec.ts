@@ -660,8 +660,9 @@ describe('formatter - experimental', () => {
                 `,
             });
         });
-        it('should respect newlines for comments', () => {
+        it('should respect newlines for comments (multiline decl)', () => {
             testFormatCss({
+                message: 'standalone initial comment',
                 deindent: true,
                 source: `
                     .root {
@@ -694,6 +695,27 @@ describe('formatter - experimental', () => {
                             /*middle standalone line*/
                             DDD
                             /*end standalone line*/;
+                    }
+
+                `,
+            });
+            testFormatCss({
+                message: 'inline initial comment',
+                deindent: true,
+                source: `
+                    .root {
+                        prop1:   /*start standalone line*/
+
+                                AAA
+                                BBB
+                        ;
+                    }
+                `,
+                expect: `
+                    .root {
+                        prop1: /*start standalone line*/
+                            AAA
+                            BBB;
                     }
 
                 `,
