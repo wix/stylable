@@ -178,9 +178,12 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
         const hasNestedChildren = childrenLen === -1;
         const hasCommentBefore = prevType === 'comment';
         const hasRuleBefore = prevType === 'rule';
+        const isSameTypeAsPrev = prevType === 'atrule' && prevNode?.name === ast.name;
 
         const separation =
-            hasCommentBefore || (hasNestedChildren && !hasRuleBefore) ? 0 : linesBetween;
+            hasCommentBefore || (hasNestedChildren && !hasRuleBefore && isSameTypeAsPrev)
+                ? 0
+                : linesBetween;
 
         ast.raws.before =
             index !== 0 || indentLevel > 0
