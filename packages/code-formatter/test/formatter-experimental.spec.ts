@@ -660,6 +660,37 @@ describe('formatter - experimental', () => {
                 `,
             });
         });
+        it('should respect newlines for comments', () => {
+            testFormatCss({
+                deindent: true,
+                source: `
+                    .root {
+                        prop1: 
+                    /*start standalone line*/
+                                AAA,
+                    /*inline before*/ BBB /*inline after*/
+                        CCC
+                                /*middle standalone line*/
+                                DDD
+                        /*end standalone line*/
+                        ;
+                    }
+                `,
+                expect: `
+                    .root {
+                        prop1:
+                            /*start standalone line*/
+                            AAA,
+                            /*inline before*/ BBB /*inline after*/
+                            CCC
+                            /*middle standalone line*/
+                            DDD
+                            /*end standalone line*/;
+                    }
+
+                `,
+            });
+        });
         it('should respect newline', () => {
             testFormatCss({
                 deindent: true,

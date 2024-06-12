@@ -112,7 +112,10 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             } else if (betweenNode.postSpace.includes('\n' /* don't use NL */) && valueHasNewline) {
                 newBetween += betweenNode.preComments.join(``);
                 hasNewLineBeforeValue = true;
-                newBetween += ':' + afterComments + NL;
+                const independentCommentSpace = afterComments
+                    ? NL + indent.repeat(indentLevel + 1)
+                    : '';
+                newBetween += ':' + independentCommentSpace + afterComments + NL;
             } else {
                 newBetween += betweenNode.preComments.join(``);
                 newBetween += ': ' + afterComments;
