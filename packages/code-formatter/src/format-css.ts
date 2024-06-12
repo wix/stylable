@@ -172,19 +172,21 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             ast.value ||= ' '; // minimal space
         }
     } else if (ast.type === 'atrule') {
-        const prevType = ast.prev()?.type;
+        const prevNode = ast.prev();
+        const prevType = prevNode?.type;
+        const childrenLen = ast.nodes?.length ?? -1;
+        const hasNestedChildren = childrenLen === -1;
         const hasCommentBefore = prevType === 'comment';
         const hasRuleBefore = prevType === 'rule';
 
-        /* The postcss type does not represent the reality there are atRules without nodes */
-        const childrenLen = ast.nodes?.length ?? -1;
         const separation =
-            (childrenLen === -1 && !hasRuleBefore) || hasCommentBefore ? 0 : linesBetween;
+            hasCommentBefore || (hasNestedChildren && !hasRuleBefore) ? 0 : linesBetween;
 
         ast.raws.before =
             index !== 0 || indentLevel > 0
                 ? NL.repeat(index !== 0 ? separation + 1 : 1) + indent.repeat(indentLevel)
                 : '';
+
         ast.raws.after = childrenLen ? NL + indent.repeat(indentLevel) : '';
         ast.raws.afterName = ast.params.length
             ? enforceOneSpaceAround(ast.raws.afterName || '')
