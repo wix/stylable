@@ -109,10 +109,19 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
                     ':' +
                     afterComments +
                     betweenNode.postSpace.replace(/\s+/gu, ' ');
-            } else if (betweenNode.postSpace.includes('\n' /* don't use NL */) && valueHasNewline) {
+            } else if (
+                valueHasNewline &&
+                (betweenNode.postSpace.includes('\n' /* don't use NL */) ||
+                    betweenNode.postCommentsSpace.includes('\n' /* don't use NL */))
+            ) {
                 newBetween += betweenNode.preComments.join(``);
                 hasNewLineBeforeValue = true;
-                newBetween += ':' + afterComments + NL;
+                const independentCommentSpace = afterComments
+                    ? betweenNode.postSpace.includes('\n')
+                        ? NL + indent.repeat(indentLevel + 1)
+                        : ' '
+                    : '';
+                newBetween += ':' + independentCommentSpace + afterComments + NL;
             } else {
                 newBetween += betweenNode.preComments.join(``);
                 newBetween += ': ' + afterComments;
@@ -669,13 +678,18 @@ function parseDeclBetweenRaws(between: string) {
         preSpace: '',
         preComments: [] as string[],
         postSpace: '',
+        postCommentsSpace: '',
         postComments: [] as string[],
         colon: false,
     };
     for (const node of beforeAst) {
         if (node.type === 'space') {
             if (beforeNode.colon) {
-                beforeNode.postSpace += stringifyCSSValue(node);
+                if (!beforeNode.postComments.length) {
+                    beforeNode.postSpace += stringifyCSSValue(node);
+                } else {
+                    beforeNode.postCommentsSpace += stringifyCSSValue(node);
+                }
             } else {
                 beforeNode.preSpace += stringifyCSSValue(node);
             }

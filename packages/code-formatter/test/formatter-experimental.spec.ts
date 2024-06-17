@@ -660,6 +660,67 @@ describe('formatter - experimental', () => {
                 `,
             });
         });
+        it('should respect newlines for comments (multiline decl)', () => {
+            testFormatCss({
+                message: 'standalone initial comment',
+                deindent: true,
+                source: `
+                    .root {
+                        prop1: 
+
+                    /*start standalone line*/
+
+                                AAA,
+
+                    /*inline before*/ BBB /*inline after*/
+
+                        CCC
+
+                                /*middle standalone line*/
+
+                                DDD
+
+                        /*end standalone line*/
+                        
+                        ;
+                    }
+                `,
+                expect: `
+                    .root {
+                        prop1:
+                            /*start standalone line*/
+                            AAA,
+                            /*inline before*/ BBB /*inline after*/
+                            CCC
+                            /*middle standalone line*/
+                            DDD
+                            /*end standalone line*/;
+                    }
+
+                `,
+            });
+            testFormatCss({
+                message: 'inline initial comment',
+                deindent: true,
+                source: `
+                    .root {
+                        prop1:   /*start standalone line*/
+
+                                AAA
+                                BBB
+                        ;
+                    }
+                `,
+                expect: `
+                    .root {
+                        prop1: /*start standalone line*/
+                            AAA
+                            BBB;
+                    }
+
+                `,
+            });
+        });
         it('should respect newline', () => {
             testFormatCss({
                 deindent: true,
