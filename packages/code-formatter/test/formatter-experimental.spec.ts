@@ -1032,6 +1032,18 @@ describe('formatter - experimental', () => {
                 `,
             });
         });
+        it('should group similar named atRules with no body', () => {
+            testFormatCss({
+                message: 'top-level',
+                source: `@aaa 1;@aaa 2;@bbb 1;@bbb 2;@aaa 3`,
+                expect: `@aaa 1;\n@aaa 2;\n\n@bbb 1;\n@bbb 2;\n\n@aaa 3\n`,
+            });
+            testFormatCss({
+                message: 'nested',
+                source: `@top {@aaa 1;@aaa 2;@bbb 1;@bbb 2;@aaa 3}`,
+                expect: `@top {\n    @aaa 1;\n    @aaa 2;\n\n    @bbb 1;\n    @bbb 2;\n\n    @aaa 3\n}\n`,
+            });
+        });
         it('should set body into lines and indent accordingly', () => {
             testFormatCss({
                 deindent: true,
@@ -1126,6 +1138,7 @@ describe('formatter - experimental', () => {
                         @parens (a1: 1px, (a2: 2px) (a3: 3px)) {}
         
                         @function f(b1, b2, f-nest(b3)) {}
+
                         @square [c1, c2, c3[c4]) {}
         
                     `,
