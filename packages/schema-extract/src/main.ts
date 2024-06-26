@@ -54,7 +54,7 @@ export function generateSchema(
         } else {
             if (symbol._kind === 'class' || symbol._kind === 'element') {
                 schema.properties[entry] = {};
-                const schemaEntry = schema.properties[entry] as StylableSymbolSchema;
+                const schemaEntry = schema.properties[entry];
                 const { [`-st-states`]: states, [`-st-extends`]: extended } = symbol;
 
                 if (symbol.alias && symbol.alias.import) {
@@ -82,7 +82,7 @@ export function generateSchema(
                     $ref: stylableVar,
                 };
 
-                generateCssDocs(meta, symbol, schema.properties[entry] as StylableSymbolSchema);
+                generateCssDocs(meta, symbol, schema.properties[entry]);
             } else if (symbol._kind === 'cssVar') {
                 schema.properties[entry] = {
                     $ref: stylableCssVar,
