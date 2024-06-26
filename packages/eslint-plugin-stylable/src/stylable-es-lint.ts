@@ -68,7 +68,7 @@ export default createRule({
 
                 const namedImports = node.specifiers.filter(
                     (sp) => sp.type === AST_NODE_TYPES.ImportSpecifier
-                ) as esTree.ImportSpecifier[];
+                );
 
                 namedImports.forEach(({ imported, local }) => {
                     const exportName = imported.name as keyof typeof exports;

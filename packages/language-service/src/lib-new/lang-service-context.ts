@@ -12,7 +12,6 @@ import {
 } from '@stylable/core/dist/index-internal';
 import { URI } from 'vscode-uri';
 import {
-    ImmutableSelector,
     ImmutableSelectorList,
     ImmutableSelectorNode,
     SelectorList,
@@ -215,7 +214,7 @@ export class LangServiceContext {
             // caret is on an existing selector
             let selectorWithCaret = this.location.selector.parents.find(
                 (node) => node.type === 'selector'
-            ) as ImmutableSelector | undefined;
+            );
             if (!selectorWithCaret && this.location.selector.node.type === 'selector') {
                 selectorWithCaret = this.location.selector.node;
             }
