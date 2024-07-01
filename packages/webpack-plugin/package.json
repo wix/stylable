@@ -20,7 +20,7 @@
     "decache": "^4.6.2",
     "enhanced-resolve": "^5.17.0",
     "lodash.clonedeep": "^4.5.0",
-    "postcss": "^8.4.38"
+    "postcss": "^8.4.39"
   },
   "files": [
     "dist",
