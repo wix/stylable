@@ -7,7 +7,7 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/node": "^9.3.1",
+    "@file-services/node": "^9.4.0",
     "@stylable/core": "^6.1.1",
     "@stylable/module-utils": "^6.1.1",
     "@stylable/node": "^6.1.1",
