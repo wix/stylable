@@ -5,5 +5,6 @@ export default {
     { name: '@types/mime', reason: 'v4 has built-in types, but is esm only' },
     { name: 'chai', reason: 'esm only from v5' },
     { name: 'eslint', reason: 'plugins are not yet compatible with v9' },
+    { name: 'rimraf', reason: 'v6 drops node 18 support' },
   ],
 };
