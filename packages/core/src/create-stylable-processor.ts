@@ -1,6 +1,6 @@
 import { cachedProcessFile, CacheItem, MinimalFS } from './cached-process-file';
 import { cssParse, CssParser } from './parser';
-import { processNamespace, StylableProcessor } from './stylable-processor';
+import { type processNamespace, StylableProcessor } from './stylable-processor';
 import type { StylableMeta } from './stylable-meta';
 import type { Diagnostics } from './diagnostics';
 import { defaultFeatureFlags, type FeatureFlags } from './features/feature';

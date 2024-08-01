@@ -247,7 +247,7 @@ export function buildSingleFile({
                     resolveRuntimeRequest,
                 });
             }
-        } catch (_e) {
+        } catch {
             // resolve diagnostics reported by core
         }
     }

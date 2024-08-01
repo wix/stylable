@@ -72,7 +72,7 @@ function loadLocalConfigLoader() {
         let config: Partial<LoaderOptions>;
         try {
             config = findConfig.require('stylable.config', { cwd }).metadataLoader;
-        } catch (e) {
+        } catch {
             config = {};
         }
         localConfig.set(cwd, config);

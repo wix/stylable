@@ -204,7 +204,7 @@ export function createJavascriptRequireModule(fs: IFileSystem) {
                 fs.readFileSync(id, { encoding: 'utf8', flag: 'r' })
             );
             fn(_module, _module.exports, requireModule);
-        } catch (e) {
+        } catch {
             throw new Error('Cannot require file: ' + id);
         }
         return _module.exports;

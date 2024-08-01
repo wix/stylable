@@ -813,7 +813,7 @@ export const NamedCompletionPlugin: LangServicePlugin & {
                     req = (stylable as any).requireModule(
                         path.join(path.dirname(meta.source), importName)
                     );
-                } catch (e) {
+                } catch {
                     return [];
                 }
 
@@ -1257,7 +1257,7 @@ export const ValueCompletionPlugin: LangServicePlugin = {
                             node: v.node,
                         })
                     );
-                } catch (e) {
+                } catch {
                     /**/
                 }
             });

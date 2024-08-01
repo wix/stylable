@@ -1,6 +1,6 @@
 import {
     Diagnostics,
-    processNamespace,
+    type processNamespace,
     StylableMeta,
     Stylable,
     StylableConfig,

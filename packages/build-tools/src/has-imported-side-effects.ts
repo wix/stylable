@@ -21,7 +21,7 @@ export function collectImportsWithSideEffects(
                 importData.context,
                 importData.request
             );
-        } catch (e) {
+        } catch {
             // fallback to request // TODO: check if this is correct
         }
         if (visited.has(resolvedImportPath)) {

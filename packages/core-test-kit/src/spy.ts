@@ -20,6 +20,7 @@ export const spyCalls = <T, N extends keyof T>(target: T, funcName: N) => {
     };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function logCalls<T extends Function>(fn?: T) {
     const spy = (...args: any[]) => {
         spy.calls.push(args);

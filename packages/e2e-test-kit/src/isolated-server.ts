@@ -35,7 +35,7 @@ safeListeningHttpServer(parseInt(port, 10), (req, res) => {
             }
             filePath += 'index.html';
         }
-    } catch (e) {
+    } catch {
         // do nothing: will return 404
     }
     const extension = req.url ? path.extname(req.url).slice(1) : '';

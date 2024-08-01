@@ -132,7 +132,6 @@ export default createRule({
         ],
         docs: {
             description: '',
-            recommended: 'recommended',
         },
     },
 });

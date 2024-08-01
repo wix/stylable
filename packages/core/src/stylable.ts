@@ -2,7 +2,7 @@ import type { CacheItem, FileProcessor, MinimalFS } from './cached-process-file'
 import { createStylableFileProcessor } from './create-stylable-processor';
 import { Diagnostics } from './diagnostics';
 import { CssParser, cssParse } from './parser';
-import { processNamespace, StylableProcessor } from './stylable-processor';
+import { type processNamespace, StylableProcessor } from './stylable-processor';
 import type { StylableMeta } from './stylable-meta';
 import { StylableResolverCache, StylableResolver, CachedModuleEntity } from './stylable-resolver';
 import {

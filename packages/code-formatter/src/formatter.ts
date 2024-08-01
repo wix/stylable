@@ -10,7 +10,7 @@ export function formatDocumentExperimental(source: string, options: Partial<Form
     let targetCss = source;
     try {
         targetCss = formatCSS(source, options);
-    } catch (e) {
+    } catch {
         // return unchanged source on error
     }
 

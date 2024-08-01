@@ -11,7 +11,7 @@ function bundleSafeRequireExtensions(): string[] {
             (nodeModule as typeof nodeModule & { _extensions?: Record<string, unknown> })
                 ._extensions ?? {}
         );
-    } catch (e) {
+    } catch {
         extensions = [];
     }
     return extensions.length ? extensions : ['.js', '.json'];
@@ -21,7 +21,10 @@ const resolverContext = {};
 /**
  * @deprecated this resolve is slow as hell and not recommended.
  */
-export function createWebpackResolver(fileSystem: ResolveOptions['fileSystem'], resolveOptions: Partial<ResolveOptions>) {
+export function createWebpackResolver(
+    fileSystem: ResolveOptions['fileSystem'],
+    resolveOptions: Partial<ResolveOptions>
+) {
     const extensions =
         resolveOptions.extensions && resolveOptions.extensions.length
             ? resolveOptions.extensions
