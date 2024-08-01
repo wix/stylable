@@ -285,7 +285,7 @@ stImportNamedCompletion.detail = ({
     } else if (jsValue) {
         const type = typeof jsValue;
         if (type === 'function') {
-            const originName = (jsValue as Function).name || '';
+            const originName = (jsValue as () => unknown).name || '';
             if (originName) {
                 return `${originName}() from '${relativePath}'`;
             }

@@ -18,7 +18,7 @@ export function buildCache() {
                         try {
                             stat = statSync(path).mtimeMs;
                             fileInfoDuringBuild.set(path, stat);
-                        } catch (e) {
+                        } catch {
                             fileInfo.delete(path);
                             return true;
                         }

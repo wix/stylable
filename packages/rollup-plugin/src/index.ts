@@ -212,7 +212,7 @@ export function stylableRollupPlugin({
                             imported.context,
                             imported.request
                         );
-                    } catch (e) {
+                    } catch {
                         // fallback to request
                     }
                     // include Stylable and native css files that have effects on other files as regular imports

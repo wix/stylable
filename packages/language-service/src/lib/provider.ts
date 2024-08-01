@@ -1486,7 +1486,7 @@ export function createMeta(src: string, path: string) {
         }
 
         meta = new StylableProcessor(new Diagnostics()).process(ast);
-    } catch (error) {
+    } catch {
         return { meta: null, fakes };
     }
     return {

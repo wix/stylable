@@ -20,7 +20,7 @@ export function ensureDirectory(dir: string, fs: FileSystem) {
     }
     try {
         fs.mkdirSync(dir);
-    } catch (e) {
+    } catch {
         const parentDir = dirname(dir);
         if (parentDir !== dir) {
             ensureDirectory(parentDir, fs);

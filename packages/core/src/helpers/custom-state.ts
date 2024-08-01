@@ -856,7 +856,7 @@ export function validateStateArgument(
             );
             resolvedValidations.errors = errors;
         }
-    } catch (error) {
+    } catch {
         // TODO: warn about validation throwing exception
     }
 
@@ -1023,7 +1023,7 @@ function validateParam(
             false,
             true
         );
-    } catch (e) {
+    } catch {
         // TODO: warn about validation throwing exception
     }
 

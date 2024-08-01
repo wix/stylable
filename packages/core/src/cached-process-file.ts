@@ -46,7 +46,7 @@ export function cachedProcessFile<T = any>(
         let content;
         try {
             content = readFileSync(filePath, 'utf8');
-        } catch (e) {
+        } catch {
             content = '';
         }
         cache[filePath] = {

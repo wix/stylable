@@ -1,15 +1,15 @@
 import path from 'path';
 import fs from 'fs';
+import eslintParser from '@typescript-eslint/parser';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import StylableLint from 'eslint-plugin-stylable/rule';
 import { createTempDirectorySync } from '@stylable/e2e-test-kit';
-
 // mock afterAll for RuleTester (should be fixed in next version)
 (globalThis as any).afterAll = (globalThis as any).after;
 
 const tester = new RuleTester({
-    parser: '@typescript-eslint/parser',
-    parserOptions: {
+    languageOptions: {
+        parser: eslintParser,
         sourceType: 'module',
     },
 });

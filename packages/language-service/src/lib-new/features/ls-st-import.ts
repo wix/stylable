@@ -66,7 +66,7 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                         pathBeforeCaret: resolvedPath,
                     });
                 }
-            } catch (e) {
+            } catch {
                 // mapping failed - cannot get mapped completions
             }
         } else {

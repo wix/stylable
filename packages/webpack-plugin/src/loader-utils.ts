@@ -61,7 +61,7 @@ export function getImports(
             let resolved = imported.request;
             try {
                 resolved = stylable.resolver.resolvePath(imported.context, imported.request);
-            } catch (e) {
+            } catch {
                 // fallback to request
             }
             if (resolved.endsWith('.css')) {
